@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateNewSecurityButton render correctly 1`] = `
+<DocumentFragment>
+  <a
+    class="chakra-button css-1145i8e"
+    data-testid="create-new-security-button"
+    href="/"
+  >
+    Create new digital security
+  </a>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

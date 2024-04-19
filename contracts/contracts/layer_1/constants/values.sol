@@ -1,0 +1,19 @@
+pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+uint256 constant _ISIN_LENGTH = 12;
+
+bytes32 constant _DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
+
+bytes1 constant _IS_PAUSED_ERROR_ID = 0x40;
+bytes1 constant _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
+bytes1 constant _FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
+bytes1 constant _TO_ACCOUNT_BLOCKED_ERROR_ID = 0x43;
+bytes1 constant _FROM_ACCOUNT_NULL_ERROR_ID = 0x44;
+bytes1 constant _TO_ACCOUNT_NULL_ERROR_ID = 0x45;
+bytes1 constant _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = 0x46;
+bytes1 constant _IS_NOT_OPERATOR_ERROR_ID = 0x47;
+bytes1 constant _WRONG_PARTITION_ERROR_ID = 0x48;
+bytes1 constant _ALLOWANCE_REACHED_ERROR_ID = 0x49;
+
+bytes1 constant _SUCCESS = 0x00;

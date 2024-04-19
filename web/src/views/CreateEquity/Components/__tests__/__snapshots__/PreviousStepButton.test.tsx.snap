@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PreviousStepButton render correctly 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-r8hqod"
+    data-testid="previous-step-button"
+    type="button"
+  >
+    Previous step
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

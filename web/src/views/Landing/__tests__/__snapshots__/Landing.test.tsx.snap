@@ -1,0 +1,149 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Landing if metamask is not installed then should open popup with button to install: uninstalled 1`] = `
+<DocumentFragment>
+  <div
+    class="css-l84sf8"
+    data-testid="install-metamask"
+  />
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`Landing if user connect to metamask then should redirect to dashboard: connecting 1`] = `
+<DocumentFragment>
+  <div
+    class="css-l84sf8"
+    data-testid="install-metamask"
+  />
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`Landing should render correctly: disconnected 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-dd1ej"
+    data-testid="landing-page"
+  >
+    <div
+      class="chakra-stack css-1pze2lt"
+    >
+      <p
+        class="css-hwd6mb"
+        data-testid="title"
+      >
+        Connect your 
+        <span
+          class="css-qa8l2m"
+        >
+          Wallet
+        </span>
+      </p>
+      <p
+        class="css-b26fyd"
+        data-testid="subtitle"
+      >
+        Please, connect your wallet to start operating.
+      </p>
+      <div
+        class="css-1dzcm9s"
+      >
+        <p
+          class="css-0"
+        >
+          Instructions to set up your Hedera account and your Metamask wallet:
+        </p>
+         
+        <ol
+          class="css-1dg6mvm"
+          role="list"
+        >
+          <li
+            class="css-0"
+          >
+            Configure the Hedera Testnet Network in Metamask and connect Metamask to it. Recommendation: 
+            <a
+              class="chakra-link css-1j7tat"
+              href="https://chainlist.org/chain/296"
+              rel="noopener"
+              target="_blank"
+            >
+              use Chainlist
+            </a>
+            .
+          </li>
+          <li
+            class="css-0"
+          >
+             Create an ECDSA account in the 
+            <a
+              class="chakra-link css-1j7tat"
+              href="https://portal.hedera.com/"
+              rel="noopener"
+              target="_blank"
+            >
+              Hedera Portal
+            </a>
+            .
+          </li>
+          <li
+            class="css-0"
+          >
+            Import the Private Key in Metamask (
+            <a
+              class="chakra-link css-1j7tat"
+              href="https://support.metamask.io/hc/en-us/articles/360015489331-How-to-import-an-account"
+              rel="noopener"
+              target="_blank"
+            >
+              instructions
+            </a>
+            ). 
+          </li>
+          <li
+            class="css-0"
+          >
+            Switch to that new account in Metamask (
+            <a
+              class="chakra-link css-1j7tat"
+              href="https://support.metamask.io/hc/en-us/articles/360061346311-Switching-accounts-in-MetaMask"
+              rel="noopener"
+              target="_blank"
+            >
+              instructions
+            </a>
+            ). 
+          </li>
+          <li
+            class="css-0"
+          >
+            Authorize the Token Studio site to use the account.
+          </li>
+        </ol>
+      </div>
+      <button
+        class="chakra-button css-efdeym"
+        data-testid="connect-to-metamask-landing-button"
+        type="button"
+      >
+        <p
+          class="css-i0u7lf"
+        >
+          Connect Metamask
+        </p>
+      </button>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
