@@ -24,4 +24,4 @@ async function prependContentToFiles(directory, contentFile, fileExtension) {
 }
 
 // Usage example (adjust the paths as needed)
-prependContentToFiles('./sdk/__tests__/**', './LICENSE', 'ts');
+prependContentToFiles('./contracts/test/**', './LICENSE', 'ts');
