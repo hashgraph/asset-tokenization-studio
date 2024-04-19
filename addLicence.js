@@ -3,14 +3,14 @@ const path = require('path');
 const glob = require('glob');
 
 // Function to prepend content to each TypeScript file
-async function prependContentToFiles(directory, contentFile) {
+async function prependContentToFiles(directory, contentFile, fileExtension) {
     try {
         // Read the content to be prepended
         const content = await fs.readFile(contentFile, 'utf8');
         const comment = `/*\n${content}\n*/\n\n`;
 
         // Find all TypeScript files in the specified directory
-        const files = glob.sync(`${directory}/**/*.ts`);
+        const files = glob.sync(`${directory}/**/*.${fileExtension}`);
 
         // Prepend the comment to each file
         for (const file of files) {
@@ -24,4 +24,4 @@ async function prependContentToFiles(directory, contentFile) {
 }
 
 // Usage example (adjust the paths as needed)
-prependContentToFiles('./sdk/src/*', './LICENSE');
+prependContentToFiles('./sdk/src/*', './LICENSE', 'ts');
