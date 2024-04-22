@@ -2,7 +2,7 @@
 
 # Security Token Studio - Contracts
 
-[![License](https://img.shields.io/badge/license-apache2-blue.svg)](../LICENSE.md)
+[![License](https://img.shields.io/badge/license-apache2-blue.svg)](../LICENSE)
 
 </div>
 
