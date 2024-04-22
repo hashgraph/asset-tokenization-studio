@@ -1,14 +1,25 @@
-# Red Swan
+<div align="center">
 
-## Description
+# Security Token Studio - Web
+
+[![License](https://img.shields.io/badge/license-apache2-blue.svg)](../LICENSE.md)
+
+</div>
+
+### Table of Contents
+
+- **[Description](#description)**<br>
+- **[Private dependencies](#private-dependencies)**<br>
+- **[Yarn Version Compatibility](#yarn-version-compatibility)**<br>
+- **[Installation](#installation)**<br>
+
+
+# Description
 
 Backoffice for Red Swan - Phase1a.
 
-## Project status
 
-Development
-
-## Gitlab - Private dependencies
+# Private dependencies
 
 This project has some private dependencies, so in order to install you would need to add a gitlab private token.
 
@@ -27,7 +38,7 @@ npm config set '//gitlab.com/api/v4/projects/50254845/packages/npm/:_authToken' 
 
 Now everything is ready to work, and `yarn install` could be run.
 
-## Yarn Version Compatibility
+# Yarn Version Compatibility
 
 This project is compatible with Yarn version 1.22.19. Please ensure you have this version installed before running any yarn commands. If you need to install this version, you can run:
 
@@ -35,7 +46,7 @@ This project is compatible with Yarn version 1.22.19. Please ensure you have thi
 npm install -g yarn@1.22.19
 ```
 
-## Installation
+# Installation
 
 First, verify that you have the correct version of Yarn installed by running `yarn --version`. You should see `1.22.19` as the output.
 
