@@ -1,0 +1,50 @@
+import {
+  Story,
+  Meta,
+  Title,
+  ArgTypes,
+  Primary,
+  Stories,
+  Source,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as BarChartStories from "./BarChart.stories";
+
+<Meta of={BarChartStories} />
+
+<Title />
+
+<Primary />
+
+## How to set up
+
+### Config theme
+
+Add the following configurations to the `theme.tsx` and `BarChart.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    BarChart: ConfigBarChart,
+  },
+};
+```
+
+```tsx dark
+const ConfigBarChart: BarChartThemeConfiguration = {
+  parts: barChartPartsList,
+  baseStyle: {},
+};
+```
+
+### Component parts
+
+You have these parts available: `"label" | "track" | "filledTrack"` (`barChartPartsList`)
+
+## Props
+
+<ArgTypes of={BarChartStories} />
+
+## Stories
+
+<Stories title="" />

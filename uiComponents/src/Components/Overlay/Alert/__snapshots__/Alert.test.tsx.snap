@@ -1,0 +1,649 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Alert /> renders correctly error alert for variant leftAccent: Alert-leftAccent-error 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-alert css-lj16js"
+    data-status="error"
+    description="Description"
+    role="alert"
+    title="Title"
+  >
+    <div
+      class="css-v4b4ni"
+    >
+      <svg
+        class="chakra-icon css-1wjr3o"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"
+        />
+      </svg>
+      <div
+        class="css-17fo2je"
+        data-testid="alert-content"
+      >
+        <div
+          class="chakra-alert__desc css-1vw6a5w"
+          data-status="error"
+        >
+          <span
+            class="css-0"
+          >
+            <span
+              class="css-140t2uq"
+            >
+              Title
+            </span>
+            Description
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Alert /> renders correctly error alert for variant solid: Alert-solid-error 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-alert css-xuzb86"
+    data-status="error"
+    description="Description"
+    role="alert"
+    title="Title"
+  >
+    <div
+      class="css-v4b4ni"
+    >
+      <svg
+        class="chakra-icon css-1wjr3o"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"
+        />
+      </svg>
+      <div
+        class="css-17fo2je"
+        data-testid="alert-content"
+      >
+        <div
+          class="chakra-alert__desc css-hxe6q3"
+          data-status="error"
+        >
+          <span
+            class="css-0"
+          >
+            <span
+              class="css-1zbvwl"
+            >
+              Title
+            </span>
+            Description
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Alert /> renders correctly error alert for variant subtle: Alert-subtle-error 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-alert css-1bfsa0s"
+    data-status="error"
+    description="Description"
+    role="alert"
+    title="Title"
+  >
+    <div
+      class="css-v4b4ni"
+    >
+      <svg
+        class="chakra-icon css-1wjr3o"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-8,56a8,8,0,0,1,16,0v56a8,8,0,0,1-16,0Zm8,104a12,12,0,1,1,12-12A12,12,0,0,1,128,184Z"
+        />
+      </svg>
+      <div
+        class="css-17fo2je"
+        data-testid="alert-content"
+      >
+        <div
+          class="chakra-alert__desc css-hxe6q3"
+          data-status="error"
+        >
+          <span
+            class="css-0"
+          >
+            <span
+              class="css-1zbvwl"
+            >
+              Title
+            </span>
+            Description
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Alert /> renders correctly info alert for variant leftAccent: Alert-leftAccent-info 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-alert css-d1atnv"
+    data-status="info"
+    description="Description"
+    role="alert"
+    title="Title"
+  >
+    <div
+      class="css-v4b4ni"
+    >
+      <svg
+        class="chakra-icon css-1wjr3o"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,48a12,12,0,1,1-12,12A12,12,0,0,1,124,72Zm12,112a16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40a8,8,0,0,1,0,16Z"
+        />
+      </svg>
+      <div
+        class="css-17fo2je"
+        data-testid="alert-content"
+      >
+        <div
+          class="chakra-alert__desc css-1vw6a5w"
+          data-status="info"
+        >
+          <span
+            class="css-0"
+          >
+            <span
+              class="css-140t2uq"
+            >
+              Title
+            </span>
+            Description
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Alert /> renders correctly info alert for variant solid: Alert-solid-info 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-alert css-1e0we6r"
+    data-status="info"
+    description="Description"
+    role="alert"
+    title="Title"
+  >
+    <div
+      class="css-v4b4ni"
+    >
+      <svg
+        class="chakra-icon css-1wjr3o"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,48a12,12,0,1,1-12,12A12,12,0,0,1,124,72Zm12,112a16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40a8,8,0,0,1,0,16Z"
+        />
+      </svg>
+      <div
+        class="css-17fo2je"
+        data-testid="alert-content"
+      >
+        <div
+          class="chakra-alert__desc css-hxe6q3"
+          data-status="info"
+        >
+          <span
+            class="css-0"
+          >
+            <span
+              class="css-1zbvwl"
+            >
+              Title
+            </span>
+            Description
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Alert /> renders correctly info alert for variant subtle: Alert-subtle-info 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-alert css-mmdfrd"
+    data-status="info"
+    description="Description"
+    role="alert"
+    title="Title"
+  >
+    <div
+      class="css-v4b4ni"
+    >
+      <svg
+        class="chakra-icon css-1wjr3o"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm-4,48a12,12,0,1,1-12,12A12,12,0,0,1,124,72Zm12,112a16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40a8,8,0,0,1,0,16Z"
+        />
+      </svg>
+      <div
+        class="css-17fo2je"
+        data-testid="alert-content"
+      >
+        <div
+          class="chakra-alert__desc css-hxe6q3"
+          data-status="info"
+        >
+          <span
+            class="css-0"
+          >
+            <span
+              class="css-1zbvwl"
+            >
+              Title
+            </span>
+            Description
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Alert /> renders correctly success alert for variant leftAccent: Alert-leftAccent-success 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-alert css-b1zacp"
+    data-status="success"
+    description="Description"
+    role="alert"
+    title="Title"
+  >
+    <div
+      class="css-v4b4ni"
+    >
+      <svg
+        class="chakra-icon css-1wjr3o"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"
+        />
+      </svg>
+      <div
+        class="css-17fo2je"
+        data-testid="alert-content"
+      >
+        <div
+          class="chakra-alert__desc css-1vw6a5w"
+          data-status="success"
+        >
+          <span
+            class="css-0"
+          >
+            <span
+              class="css-140t2uq"
+            >
+              Title
+            </span>
+            Description
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Alert /> renders correctly success alert for variant solid: Alert-solid-success 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-alert css-6rxtqw"
+    data-status="success"
+    description="Description"
+    role="alert"
+    title="Title"
+  >
+    <div
+      class="css-v4b4ni"
+    >
+      <svg
+        class="chakra-icon css-1wjr3o"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"
+        />
+      </svg>
+      <div
+        class="css-17fo2je"
+        data-testid="alert-content"
+      >
+        <div
+          class="chakra-alert__desc css-hxe6q3"
+          data-status="success"
+        >
+          <span
+            class="css-0"
+          >
+            <span
+              class="css-1zbvwl"
+            >
+              Title
+            </span>
+            Description
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Alert /> renders correctly success alert for variant subtle: Alert-subtle-success 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-alert css-91ivpr"
+    data-status="success"
+    description="Description"
+    role="alert"
+    title="Title"
+  >
+    <div
+      class="css-v4b4ni"
+    >
+      <svg
+        class="chakra-icon css-1wjr3o"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"
+        />
+      </svg>
+      <div
+        class="css-17fo2je"
+        data-testid="alert-content"
+      >
+        <div
+          class="chakra-alert__desc css-hxe6q3"
+          data-status="success"
+        >
+          <span
+            class="css-0"
+          >
+            <span
+              class="css-1zbvwl"
+            >
+              Title
+            </span>
+            Description
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Alert /> renders correctly warning alert for variant leftAccent: Alert-leftAccent-warning 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-alert css-rnpyu8"
+    data-status="warning"
+    description="Description"
+    role="alert"
+    title="Title"
+  >
+    <div
+      class="css-v4b4ni"
+    >
+      <svg
+        class="chakra-icon css-1wjr3o"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"
+        />
+      </svg>
+      <div
+        class="css-17fo2je"
+        data-testid="alert-content"
+      >
+        <div
+          class="chakra-alert__desc css-1vw6a5w"
+          data-status="warning"
+        >
+          <span
+            class="css-0"
+          >
+            <span
+              class="css-140t2uq"
+            >
+              Title
+            </span>
+            Description
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Alert /> renders correctly warning alert for variant solid: Alert-solid-warning 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-alert css-1midt2v"
+    data-status="warning"
+    description="Description"
+    role="alert"
+    title="Title"
+  >
+    <div
+      class="css-v4b4ni"
+    >
+      <svg
+        class="chakra-icon css-1wjr3o"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"
+        />
+      </svg>
+      <div
+        class="css-17fo2je"
+        data-testid="alert-content"
+      >
+        <div
+          class="chakra-alert__desc css-hxe6q3"
+          data-status="warning"
+        >
+          <span
+            class="css-0"
+          >
+            <span
+              class="css-1zbvwl"
+            >
+              Title
+            </span>
+            Description
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Alert /> renders correctly warning alert for variant subtle: Alert-subtle-warning 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-alert css-t03byx"
+    data-status="warning"
+    description="Description"
+    role="alert"
+    title="Title"
+  >
+    <div
+      class="css-v4b4ni"
+    >
+      <svg
+        class="chakra-icon css-1wjr3o"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M236.8,188.09,149.35,36.22h0a24.76,24.76,0,0,0-42.7,0L19.2,188.09a23.51,23.51,0,0,0,0,23.72A24.35,24.35,0,0,0,40.55,224h174.9a24.35,24.35,0,0,0,21.33-12.19A23.51,23.51,0,0,0,236.8,188.09ZM120,104a8,8,0,0,1,16,0v40a8,8,0,0,1-16,0Zm8,88a12,12,0,1,1,12-12A12,12,0,0,1,128,192Z"
+        />
+      </svg>
+      <div
+        class="css-17fo2je"
+        data-testid="alert-content"
+      >
+        <div
+          class="chakra-alert__desc css-hxe6q3"
+          data-status="warning"
+        >
+          <span
+            class="css-0"
+          >
+            <span
+              class="css-1zbvwl"
+            >
+              Title
+            </span>
+            Description
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

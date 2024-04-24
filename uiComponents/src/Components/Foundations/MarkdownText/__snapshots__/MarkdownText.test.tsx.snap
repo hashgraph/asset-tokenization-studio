@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<MarkdownText /> renders correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="css-0"
+  >
+    <h1
+      class="css-1ftzwd4"
+    >
+      h1 Heading 8-)
+    </h1>
+    
+
+    <h2
+      class="css-6rvmc6"
+    >
+      h2 Heading
+    </h2>
+    
+
+    <h3
+      class="css-127uure"
+    >
+      h3 Heading
+    </h3>
+    
+
+    <h4
+      class="css-k61gls"
+    >
+      h4 Heading
+    </h4>
+    
+
+    <h5
+      class="css-1rc0ucf"
+    >
+      h5 Heading
+    </h5>
+    
+
+    <h6
+      class="css-xgxc3b"
+    >
+      h6 Heading
+    </h6>
+    
+
+    <p
+      class="css-14ksm7b"
+    >
+      Simple paragraph
+    </p>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

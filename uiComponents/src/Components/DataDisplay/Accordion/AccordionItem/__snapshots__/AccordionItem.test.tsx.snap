@@ -1,0 +1,363 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<AccordionItem /> should render correctly 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body
+    class="chakra-ui-light"
+  >
+    <div>
+      <div
+        class="chakra-accordion css-1wbdjbz"
+      >
+        <div
+          class="css-0"
+        >
+          <p
+            class="css-0"
+          >
+            Accordion Test
+          </p>
+        </div>
+        <hr
+          aria-orientation="horizontal"
+          class="chakra-divider css-svjswr"
+        />
+        <div
+          class="css-0"
+        >
+          <div
+            class="chakra-accordion__item css-17mg6aq"
+          >
+            <h2>
+              <button
+                aria-controls="accordion-panel-:r0:"
+                aria-expanded="false"
+                class="chakra-accordion__button css-uttm9k"
+                data-index="0"
+                id="accordion-button-:r0:"
+                type="button"
+              >
+                <div
+                  class="css-0"
+                >
+                  Accordion Item Title
+                </div>
+                <svg
+                  aria-hidden="true"
+                  class="chakra-icon chakra-accordion__icon css-186l2rg"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </button>
+            </h2>
+            <div
+              class="chakra-collapse"
+              style="overflow: hidden; display: none; opacity: 0; height: 0px;"
+            >
+              <div
+                aria-labelledby="accordion-button-:r0:"
+                class="chakra-accordion__panel css-mxa4qn"
+                id="accordion-panel-:r0:"
+                role="region"
+              >
+                <p
+                  class="chakra-text css-0"
+                >
+                  Example children
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <span
+        hidden=""
+        id="__chakra_env"
+      />
+    </div>
+    <div
+      class="chakra-portal"
+    >
+      <div
+        aria-live="polite"
+        id="chakra-toast-manager-top"
+        role="region"
+        style="position: fixed; z-index: var(--toast-z-index, 5500); pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
+      />
+      <div
+        aria-live="polite"
+        id="chakra-toast-manager-top-left"
+        role="region"
+        style="position: fixed; z-index: var(--toast-z-index, 5500); pointer-events: none; display: flex; flex-direction: column;"
+      />
+      <div
+        aria-live="polite"
+        id="chakra-toast-manager-top-right"
+        role="region"
+        style="position: fixed; z-index: var(--toast-z-index, 5500); pointer-events: none; display: flex; flex-direction: column;"
+      />
+      <div
+        aria-live="polite"
+        id="chakra-toast-manager-bottom-left"
+        role="region"
+        style="position: fixed; z-index: var(--toast-z-index, 5500); pointer-events: none; display: flex; flex-direction: column;"
+      />
+      <div
+        aria-live="polite"
+        id="chakra-toast-manager-bottom"
+        role="region"
+        style="position: fixed; z-index: var(--toast-z-index, 5500); pointer-events: none; display: flex; flex-direction: column; margin: 0px auto;"
+      />
+      <div
+        aria-live="polite"
+        id="chakra-toast-manager-bottom-right"
+        role="region"
+        style="position: fixed; z-index: var(--toast-z-index, 5500); pointer-events: none; display: flex; flex-direction: column;"
+      />
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="chakra-accordion css-1wbdjbz"
+    >
+      <div
+        class="css-0"
+      >
+        <p
+          class="css-0"
+        >
+          Accordion Test
+        </p>
+      </div>
+      <hr
+        aria-orientation="horizontal"
+        class="chakra-divider css-svjswr"
+      />
+      <div
+        class="css-0"
+      >
+        <div
+          class="chakra-accordion__item css-17mg6aq"
+        >
+          <h2>
+            <button
+              aria-controls="accordion-panel-:r0:"
+              aria-expanded="false"
+              class="chakra-accordion__button css-uttm9k"
+              data-index="0"
+              id="accordion-button-:r0:"
+              type="button"
+            >
+              <div
+                class="css-0"
+              >
+                Accordion Item Title
+              </div>
+              <svg
+                aria-hidden="true"
+                class="chakra-icon chakra-accordion__icon css-186l2rg"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"
+                  fill="currentColor"
+                />
+              </svg>
+            </button>
+          </h2>
+          <div
+            class="chakra-collapse"
+            style="overflow: hidden; display: none; opacity: 0; height: 0px;"
+          >
+            <div
+              aria-labelledby="accordion-button-:r0:"
+              class="chakra-accordion__panel css-mxa4qn"
+              id="accordion-panel-:r0:"
+              role="region"
+            >
+              <p
+                class="chakra-text css-0"
+              >
+                Example children
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span
+      hidden=""
+      id="__chakra_env"
+    />
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`<AccordionItem /> should render custom title: customTitle 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-accordion css-1wbdjbz"
+  >
+    <div
+      class="css-0"
+    >
+      <p
+        class="css-0"
+      >
+        Accordion Test
+      </p>
+    </div>
+    <hr
+      aria-orientation="horizontal"
+      class="chakra-divider css-svjswr"
+    />
+    <div
+      class="css-0"
+    >
+      <div
+        class="chakra-accordion__item css-17mg6aq"
+      >
+        <div
+          class="css-1ki54i"
+        >
+          <div
+            class="chakra-stack css-lxnwxr"
+            data-testid="custom-title"
+          >
+            <div
+              class="chakra-stack css-84zodg"
+            >
+              <button
+                aria-controls="accordion-panel-:r2:"
+                aria-expanded="false"
+                class="chakra-accordion__button css-uttm9k"
+                data-index="0"
+                data-testid="custom-title-button"
+                id="accordion-button-:r2:"
+                type="button"
+              >
+                <h2>
+                  Admin
+                </h2>
+                <svg
+                  aria-hidden="true"
+                  class="chakra-icon chakra-accordion__icon css-186l2rg"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </button>
+              <div
+                class="chakra-stack css-u0xykq"
+              >
+                <button
+                  class="css-xtw3c9"
+                >
+                  <span
+                    class="css-14ftdz1"
+                  >
+                    Complement
+                  </span>
+                </button>
+              </div>
+            </div>
+            <div
+              class="chakra-stack css-84zodg"
+            >
+              <button
+                class="chakra-button css-de9zzv"
+                type="button"
+              >
+                Click
+              </button>
+            </div>
+          </div>
+        </div>
+        <div
+          class="chakra-collapse"
+          style="overflow: hidden; display: none; opacity: 0; height: 0px;"
+        >
+          <div
+            aria-labelledby="accordion-button-:r2:"
+            class="chakra-accordion__panel css-mxa4qn"
+            id="accordion-panel-:r2:"
+            role="region"
+          >
+            <p
+              class="chakra-text css-0"
+            >
+              Example children
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Heading /> renders correctly 1`] = `
+<DocumentFragment>
+  <h2
+    class="css-idm3bz"
+    data-testid="heading"
+  >
+    Title
+  </h2>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Heading /> renders correctly with custom heading tag: WithCustomTag 1`] = `
+<DocumentFragment>
+  <h1
+    class="css-0"
+    data-testid="heading"
+  >
+    Title
+  </h1>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Heading /> renders correctly with text style: WithTextStyle 1`] = `
+<DocumentFragment>
+  <h2
+    class="css-tokvmb"
+    data-testid="heading"
+  >
+    Title
+  </h2>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Heading /> renders correctly with variant: WithVariant 1`] = `
+<DocumentFragment>
+  <h2
+    class="css-0"
+    data-testid="heading"
+  >
+    Title
+  </h2>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

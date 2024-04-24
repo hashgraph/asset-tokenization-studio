@@ -1,0 +1,37 @@
+import {
+  Meta,
+  ColorPalette,
+  ColorItem,
+  Story,
+  Preview,
+  Canvas,
+} from "@storybook/addon-docs";
+
+import { Box, Grid, GridItem, Link, Flex } from "@chakra-ui/react";
+import { Heading } from "@Components/Foundations/Heading";
+import { Text } from "@Components/Foundations/Text";
+
+import * as IconsStories from "./icons.stories";
+
+<Meta title="Design System/Foundations/Icons" />
+
+# Icons
+
+This icons are taken from [Phosphor Icons](https://phosphoricons.com/) (2.0 version).
+
+## Sizes
+
+<Story of={IconsStories.Icons} />
+
+<br />
+## Usage
+
+<div>
+
+```tsx dark
+import { Bluetooth } from "@phosphor-icons/react";
+
+<PhosphorIcon as={Bluetooth} size={size} variant={variant} />;
+```
+
+</div>

@@ -1,0 +1,57 @@
+import {
+  Story,
+  Meta,
+  Title,
+  ArgTypes,
+  Primary,
+  Stories,
+  Source,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as TabsStories from "./Tabs.stories";
+
+<Meta of={TabsStories} />
+
+<Title />
+
+<a
+  href="https://www.figma.com/file/YF8AvIq0MclfhGDvKgzypp/ioBricks-Design-System?type=design&node-id=2922%3A35786&mode=design&t=k4jSCm0Q182mRyVn-1"
+  target="\_blank"
+>
+  View figma design
+</a>
+
+<Primary />
+
+## How to set up
+
+### Config theme
+
+Add the following configurations to the `theme.tsx` and `Tabs.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    Tabs: ConfigTabs,
+  },
+};
+```
+
+```tsx dark
+const ConfigTabs: TabsThemeConfiguration = {
+  parts: tabsPartsList,
+  baseStyle: {},
+};
+```
+
+### Component parts
+
+You have these parts available: `"root" | "tab" | "tablist" | "tabpanel" | "tabpanels" | "indicator"` (`tabsPartsList`)
+
+## Props
+
+<ArgTypes of={TabsStories} />
+
+## Stories
+
+<Stories title="" />

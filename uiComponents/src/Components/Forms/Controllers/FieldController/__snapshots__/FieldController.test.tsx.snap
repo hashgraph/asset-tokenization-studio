@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<FieldController /> Component renders correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-form-control css-1kxonj9"
+    role="group"
+  >
+    <input
+      data-testid="input"
+      type="text"
+    />
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<FieldController /> Should hide errors when showErrors=false: WithInvalidNoFormErrorMessage 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-form-control css-1kxonj9"
+    role="group"
+  >
+    <input
+      data-testid="input"
+      type="text"
+    />
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<FieldController /> Should show errors when showErrors=true: WithInvalidMessage 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-form-control css-1kxonj9"
+    role="group"
+  >
+    <input
+      data-testid="input"
+      type="text"
+    />
+    <div
+      aria-live="polite"
+      class="chakra-form__error-message css-jm4k09"
+      data-testid="form-error-message"
+      id="field-:r1:-feedback"
+    >
+      This field is required
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

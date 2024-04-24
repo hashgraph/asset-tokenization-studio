@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<BreadcrumbMobile /> renders correctly default: default 1`] = `
+<DocumentFragment>
+  <nav
+    aria-label="breadcrumb"
+    class="chakra-breadcrumb css-1y2eexs"
+    data-testid="breadcrumb-mobile"
+  >
+    <ol
+      class="chakra-breadcrumb__list css-70qvj9"
+    >
+      <li
+        class="chakra-breadcrumb__list-item css-brt312"
+      >
+        <span
+          class="css-1cdzm5y"
+          role="presentation"
+        >
+          <svg
+            class="chakra-icon css-kpbtv0"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="0 0 256 256"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"
+            />
+          </svg>
+        </span>
+        <a
+          class="chakra-breadcrumb__link css-2y15zy"
+          data-testid="breadcrumb-link"
+          href="/level1/level2/level3/level4/level5/level6/level7"
+        >
+          Level 7
+        </a>
+      </li>
+    </ol>
+  </nav>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
