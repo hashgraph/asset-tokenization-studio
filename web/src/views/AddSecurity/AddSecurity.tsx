@@ -1,8 +1,8 @@
 import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { Heading, Text } from "@iob/io-bricks-ui/Foundations";
+import { Heading, Text } from "@hashgraph/uiComponents/Foundations";
 import { useTranslation } from "react-i18next";
 import { RouteName } from "../../router/RouteName";
-import { InputController } from "@iob/io-bricks-ui/Forms/Controllers";
+import { InputController } from "@hashgraph/uiComponents/Forms/Controllers";
 import { History } from "../../components/History";
 import { CancelButton } from "../../components/CancelButton";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -11,15 +11,15 @@ import { useAddDigitalSecurity } from "../../hooks/queries/useAddDigitalSecurity
 import {
   GetRoleCountForRequest,
   GetSecurityDetailsRequest,
-} from "@iob/securitytoken-sdk";
+} from "@hashgraph/securitytoken-sdk";
 import { isHederaValidAddress, required } from "../../utils/rules";
-import { Button } from "@iob/io-bricks-ui/Interaction";
+import { Button } from "@hashgraph/uiComponents/Interaction";
 import { RouterManager } from "../../router/RouterManager";
 import { useEffect, useState } from "react";
 import { useWalletStore } from "../../store/walletStore";
 import { useGetSecurityRoleCountFor } from "../../hooks/queries/useGetSecurityDetails";
 import { useAccountStore } from "../../store/accountStore";
-import { useToast } from "@iob/io-bricks-ui/Overlay/Toast";
+import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
 
 export const AddSecurity = () => {
   const {

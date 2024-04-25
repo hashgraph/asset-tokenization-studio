@@ -8,17 +8,17 @@ import {
   VStack,
   Box,
 } from "@chakra-ui/react";
-import { PhosphorIcon, Text } from "@iob/io-bricks-ui/Foundations";
-import { Button } from "@iob/io-bricks-ui/Interaction";
+import { PhosphorIcon, Text } from "@hashgraph/uiComponents/Foundations";
+import { Button } from "@hashgraph/uiComponents/Interaction";
 import landingBackground from "../../assets/layer.png";
 import { useWalletStore } from "../../store/walletStore";
 import _capitalize from "lodash/capitalize";
 import { Trans, useTranslation } from "react-i18next";
 import { RouterManager } from "../../router/RouterManager";
 import { RouteName } from "../../router/RouteName";
-import { PopUp } from "@iob/io-bricks-ui";
+import { PopUp } from "@hashgraph/uiComponents";
 import { Wallet } from "@phosphor-icons/react";
-import { Weight } from "@iob/io-bricks-ui/Foundations";
+import { Weight } from "@hashgraph/uiComponents/Foundations";
 import { MetamaskStatus, METAMASK_URL, User } from "../../utils/constants";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
 import { useUserStore } from "../../store/userStore";

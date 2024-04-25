@@ -20,7 +20,7 @@ import {
   BondDetailsViewModel,
   GetRegulationDetailsRequest,
   RegulationViewModel,
-} from "@iob/securitytoken-sdk";
+} from "@hashgraph/securitytoken-sdk";
 import { useSecurityStore } from "../../store/securityStore";
 import { SecurityRole } from "../../utils/SecurityRole";
 

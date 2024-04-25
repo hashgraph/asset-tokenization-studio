@@ -1,6 +1,6 @@
 import { Box, Center, HStack, VStack } from "@chakra-ui/react";
-import { Text } from "@iob/io-bricks-ui/Foundations";
-import { DefinitionList } from "@iob/io-bricks-ui/DataDisplay";
+import { Text } from "@hashgraph/uiComponents/Foundations";
+import { DefinitionList } from "@hashgraph/uiComponents/DataDisplay";
 import { Panel } from "../../../components/Panel";
 import { useTranslation } from "react-i18next";
 import { ActionsButtons } from "./ActionsButtons";
@@ -11,7 +11,7 @@ import {
   GetAllCouponsRequest,
   GetAllDividendsRequest,
   SecurityViewModel,
-} from "@iob/securitytoken-sdk";
+} from "@hashgraph/securitytoken-sdk";
 import { formatNumberLocale, toNumber } from "../../../utils/format";
 import { useUserStore } from "../../../store/userStore";
 import { COUPONS_FACTOR, User } from "../../../utils/constants";

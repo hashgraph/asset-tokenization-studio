@@ -1,7 +1,7 @@
 import {
   DetailReviewThemeConfiguration,
   detailReviewPartsList,
-} from "@iob/io-bricks-ui/DataDisplay";
+} from "@hashgraph/uiComponents/DataDisplay";
 
 export const DetailReview: DetailReviewThemeConfiguration = {
   parts: detailReviewPartsList,

@@ -1,7 +1,7 @@
 import {
   AvatarThemeConfiguration,
   avatarPartsList,
-} from "@iob/io-bricks-ui/Basic";
+} from "@hashgraph/uiComponents/Basic";
 
 export const Avatar: AvatarThemeConfiguration = {
   parts: avatarPartsList,

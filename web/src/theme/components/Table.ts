@@ -1,8 +1,8 @@
 import {
   tablePartsList,
   TableThemeConfiguration,
-} from "@iob/io-bricks-ui/DataDisplay";
-import { BasePlatformTheme } from "@iob/io-bricks-ui/Theme";
+} from "@hashgraph/uiComponents/DataDisplay";
+import { BasePlatformTheme } from "@hashgraph/uiComponents/Theme";
 
 const row = {
   bg: "neutral.400",

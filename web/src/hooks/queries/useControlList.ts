@@ -10,8 +10,8 @@ import {
   ControlListRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,
-} from "@iob/securitytoken-sdk";
-import { useToast } from "@iob/io-bricks-ui/Overlay/Toast";
+} from "@hashgraph/securitytoken-sdk";
+import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
 
 export const GET_CONTROL_LIST_COUNT = (securityId: string) =>
   `GET_CONTROL_LIST_COUNT${securityId}`;

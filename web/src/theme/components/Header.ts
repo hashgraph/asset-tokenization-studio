@@ -1,7 +1,7 @@
 import {
   HeaderThemeConfiguration,
   headerPartsList,
-} from "@iob/io-bricks-ui/Navigation";
+} from "@hashgraph/uiComponents/Navigation";
 
 export const Header: HeaderThemeConfiguration = {
   parts: headerPartsList,

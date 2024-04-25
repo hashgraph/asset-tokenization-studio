@@ -1,16 +1,16 @@
 import { HStack, Stack, VStack } from "@chakra-ui/react";
 import { History } from "../../components/History";
 import { useTranslation } from "react-i18next";
-import { Text } from "@iob/io-bricks-ui/Foundations";
+import { Text } from "@hashgraph/uiComponents/Foundations";
 import {
   InputController,
   InputNumberController,
-} from "@iob/io-bricks-ui/Forms/Controllers";
+} from "@hashgraph/uiComponents/Forms/Controllers";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { required, min } from "../../utils/rules";
-import { Button } from "@iob/io-bricks-ui";
+import { Button } from "@hashgraph/uiComponents";
 import { CancelButton } from "../../components/CancelButton";
-import { ForceTransferRequest } from "@iob/securitytoken-sdk";
+import { ForceTransferRequest } from "@hashgraph/securitytoken-sdk";
 import { useParams } from "react-router";
 import { useForceTransferSecurity } from "../../hooks/queries/useForceTransferSecurity";
 import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";

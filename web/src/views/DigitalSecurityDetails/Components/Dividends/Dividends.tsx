@@ -1,5 +1,5 @@
 import { Stack } from "@chakra-ui/react";
-import { Tabs } from "@iob/io-bricks-ui/DataDisplay/Tabs";
+import { Tabs } from "@hashgraph/uiComponents/DataDisplay/Tabs";
 import { useTranslation } from "react-i18next";
 import { ProgramDividend } from "./ProgramDividend";
 import { SeeDividend } from "./SeeDividend";

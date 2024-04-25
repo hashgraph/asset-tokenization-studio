@@ -1,16 +1,16 @@
 import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { Button } from "@iob/io-bricks-ui/Interaction";
-import { SearchInputController } from "@iob/io-bricks-ui/Forms/Controllers";
-import { Heading, Text } from "@iob/io-bricks-ui/Foundations";
+import { Button } from "@hashgraph/uiComponents/Interaction";
+import { SearchInputController } from "@hashgraph/uiComponents/Forms/Controllers";
+import { Heading, Text } from "@hashgraph/uiComponents/Foundations";
 import { useForm } from "react-hook-form";
-import { DefinitionList } from "@iob/io-bricks-ui";
+import { DefinitionList } from "@hashgraph/uiComponents";
 import { useTranslation } from "react-i18next";
 import { isHederaValidAddress, required } from "../../../utils/rules";
-import { useToast } from "@iob/io-bricks-ui/Overlay/Toast";
+import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
 import {
   GetAccountBalanceRequest,
   SecurityViewModel,
-} from "@iob/securitytoken-sdk";
+} from "@hashgraph/securitytoken-sdk";
 import { useGetBalanceOf } from "../../../hooks/queries/useGetSecurityDetails";
 import { useEffect, useState } from "react";
 

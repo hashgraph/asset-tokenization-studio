@@ -2,8 +2,8 @@ import { NextStepButton } from "../NextStepButton";
 import { render } from "../../../../test-utils";
 
 const goToNext = jest.fn();
-jest.mock("@iob/io-bricks-ui/Indicators", () => ({
-  ...jest.requireActual("@iob/io-bricks-ui/Indicators"),
+jest.mock("@hashgraph/uiComponents/Indicators", () => ({
+  ...jest.requireActual("@hashgraph/uiComponents/Indicators"),
   useStepContext: () => ({ goToNext }),
 }));
 

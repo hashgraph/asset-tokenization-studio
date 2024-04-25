@@ -1,10 +1,10 @@
-import { IconButton } from "@iob/io-bricks-ui/Interaction";
+import { IconButton } from "@hashgraph/uiComponents/Interaction";
 import { Flex, FlexProps } from "@chakra-ui/react";
-import { Text } from "@iob/io-bricks-ui/Foundations";
+import { Text } from "@hashgraph/uiComponents/Foundations";
 import { ArrowLeft } from "@phosphor-icons/react";
 import { Link as RouterLink } from "react-router-dom";
 import type { To } from "react-router-dom";
-import { PhosphorIcon } from "@iob/io-bricks-ui";
+import { PhosphorIcon } from "@hashgraph/uiComponents";
 import { RouterManager } from "../router/RouterManager";
 import { useLocationStore } from "../store/locationStore";
 import { RoutePath } from "../router/RoutePath";

@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { MetamaskStatus } from "../utils/constants";
-import type { InitializationData } from "@iob/securitytoken-sdk";
-import { NetworkData } from "@iob/securitytoken-sdk";
+import type { InitializationData } from "@hashgraph/securitytoken-sdk";
+import { NetworkData } from "@hashgraph/securitytoken-sdk";
 
 type WalletStoreStatus =
   | MetamaskStatus.disconnected

@@ -1885,9 +1885,9 @@
     "@types/istanbul-lib-report" "*"
 
 "@types/jest@^29.5.7":
-  version "29.5.7"
-  resolved "https://registry.npmjs.org/@types/jest/-/jest-29.5.7.tgz"
-  integrity sha512-HLyetab6KVPSiF+7pFcUyMeLsx25LDNDemw9mGsJBkai/oouwrjTycocSDYopMEwFhN2Y4s9oPyOCZNofgSt2g==
+  version "29.5.12"
+  resolved "https://registry.npmjs.org/@types/jest/-/jest-29.5.12.tgz"
+  integrity sha512-eDC8bTvT/QhYdxJAulQikueigY5AsdBRH2yDKW3yveW7svY3+DzN84/2NUgkw10RTiJbWqZrTtoGVdYlvFJdLw==
   dependencies:
     expect "^29.0.0"
     pretty-format "^29.0.0"
@@ -2041,9 +2041,9 @@
   integrity sha512-mQkU2jY8jJEF7YHjHvsQO8+3ughTL1mcnn96igfhONmR+fUPSKIkefQYpSe8bsly2Ep7oQbn/6VG5/9/0qcArQ==
 
 "@types/stack-utils@^2.0.0":
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/@types/stack-utils/-/stack-utils-2.0.2.tgz"
-  integrity sha512-g7CK9nHdwjK2n0ymT2CW698FuWJRIx+RP6embAzZ2Qi8/ilIrA1Imt2LVSeHUzKvpoi7BhmmQcXz95eS0f2JXw==
+  version "2.0.3"
+  resolved "https://registry.npmjs.org/@types/stack-utils/-/stack-utils-2.0.3.tgz"
+  integrity sha512-9aEbYZ3TbYMznPdcdr3SmIrLXwC/AKZXQeCf9Pgao5CKb8CyHuEX5jzWPTkvregvhRJHcpRO6BFoGW9ycaOkYw==
 
 "@types/ws@8.5.3":
   version "8.5.3"
@@ -2053,14 +2053,14 @@
     "@types/node" "*"
 
 "@types/yargs-parser@*":
-  version "21.0.2"
-  resolved "https://registry.npmjs.org/@types/yargs-parser/-/yargs-parser-21.0.2.tgz"
-  integrity sha512-5qcvofLPbfjmBfKaLfj/+f+Sbd6pN4zl7w7VSVI5uz7m9QZTuB2aZAa2uo1wHFBNN2x6g/SoTkXmd8mQnQF2Cw==
+  version "21.0.3"
+  resolved "https://registry.npmjs.org/@types/yargs-parser/-/yargs-parser-21.0.3.tgz"
+  integrity sha512-I4q9QU9MQv4oEOz4tAHJtNz1cwuLxn2F3xcc2iV5WdqLPpUnj30aUuxt1mAxYTG+oe8CZMV/+6rU4S4gRDzqtQ==
 
 "@types/yargs@^17.0.8":
-  version "17.0.30"
-  resolved "https://registry.npmjs.org/@types/yargs/-/yargs-17.0.30.tgz"
-  integrity sha512-3SJLzYk3yz3EgI9I8OLoH06B3PdXIoU2imrBZzaGqUtUXf5iUNDtmAfCGuQrny1bnmyjh/GM/YNts6WK5jR5Rw==
+  version "17.0.32"
+  resolved "https://registry.npmjs.org/@types/yargs/-/yargs-17.0.32.tgz"
+  integrity sha512-xQ67Yc/laOG5uMfX/093MRlGGCIBzZMarVa+gfNKJxWAIgykYpVGkBdbqEzGDDfCrVUj6Hiff4mTZ5BA6TmAog==
   dependencies:
     "@types/yargs-parser" "*"
 

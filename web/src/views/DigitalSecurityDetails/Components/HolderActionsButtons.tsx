@@ -1,11 +1,11 @@
 import { Link as RouterLink, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { HStack } from "@chakra-ui/react";
-import { Button } from "@iob/io-bricks-ui/Interaction";
+import { Button } from "@hashgraph/uiComponents/Interaction";
 import { RouteName } from "../../../router/RouteName";
 import { RouterManager } from "../../../router/RouterManager";
 import { useGetIsPaused } from "../../../hooks/queries/useGetSecurityDetails";
-import { PauseRequest } from "@iob/securitytoken-sdk";
+import { PauseRequest } from "@hashgraph/securitytoken-sdk";
 
 export const HolderActionsButtons = () => {
   const { t: tButtons } = useTranslation("security", {

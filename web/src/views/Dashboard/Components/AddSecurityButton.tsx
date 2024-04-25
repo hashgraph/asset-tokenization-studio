@@ -1,6 +1,6 @@
-import { PhosphorIcon } from "@iob/io-bricks-ui/Foundations";
-import { Button } from "@iob/io-bricks-ui/Interaction";
-import type { ButtonProps } from "@iob/io-bricks-ui/Interaction";
+import { PhosphorIcon } from "@hashgraph/uiComponents/Foundations";
+import { Button } from "@hashgraph/uiComponents/Interaction";
+import type { ButtonProps } from "@hashgraph/uiComponents/Interaction";
 import { useTranslation } from "react-i18next";
 import { RouterManager } from "../../../router/RouterManager";
 import { RouteName } from "../../../router/RouteName";

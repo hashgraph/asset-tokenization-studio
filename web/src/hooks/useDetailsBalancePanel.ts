@@ -1,7 +1,7 @@
 import {
   GetAccountBalanceRequest,
   GetSecurityDetailsRequest,
-} from "@iob/securitytoken-sdk";
+} from "@hashgraph/securitytoken-sdk";
 import {
   useGetBalanceOf,
   useGetSecurityDetails,

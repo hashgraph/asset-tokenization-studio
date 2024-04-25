@@ -2,7 +2,7 @@ import {
   CalendarConfigProps,
   CalendarThemeConfiguration,
   calendarPartsList,
-} from "@iob/io-bricks-ui/DataDisplay";
+} from "@hashgraph/uiComponents/DataDisplay";
 
 export const Calendar: CalendarThemeConfiguration = {
   parts: calendarPartsList,

@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { SDKService } from "../../services/SDKService";
-import { IssueRequest } from "@iob/securitytoken-sdk";
-import { useToast } from "@iob/io-bricks-ui/Overlay/Toast";
+import { IssueRequest } from "@hashgraph/securitytoken-sdk";
+import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
 import { useTranslation } from "react-i18next";
 import { checkError, KnownErrors } from "../../utils/helpers";
 

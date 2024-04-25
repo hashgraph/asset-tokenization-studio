@@ -1,5 +1,5 @@
-import { Button } from "@iob/io-bricks-ui/Interaction";
-import type { ButtonProps } from "@iob/io-bricks-ui/Interaction";
+import { Button } from "@hashgraph/uiComponents/Interaction";
+import type { ButtonProps } from "@hashgraph/uiComponents/Interaction";
 import { useTranslation } from "react-i18next";
 
 export const CreateTokenButton = (props: ButtonProps) => {

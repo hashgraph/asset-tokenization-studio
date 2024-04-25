@@ -2,7 +2,7 @@ import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import {
   CalendarInputController,
   InputNumberController,
-} from "@iob/io-bricks-ui/Forms/Controllers";
+} from "@hashgraph/uiComponents/Forms/Controllers";
 import { Info } from "@phosphor-icons/react";
 import { isAfterDate, min, required } from "../../../../utils/rules";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -10,13 +10,13 @@ import { useTranslation } from "react-i18next";
 import {
   GetBondDetailsRequest,
   SetCouponRequest,
-} from "@iob/securitytoken-sdk";
+} from "@hashgraph/securitytoken-sdk";
 import { useParams } from "react-router-dom";
 import { useCoupons } from "../../../../hooks/queries/useCoupons";
 import { useGetBondDetails } from "../../../../hooks/queries/useGetSecurityDetails";
 import { dateToUnixTimestamp } from "../../../../utils/format";
 import { COUPONS_FACTOR } from "../../../../utils/constants";
-import { PhosphorIcon, Text, Tooltip } from "@iob/io-bricks-ui";
+import { PhosphorIcon, Text, Tooltip } from "@hashgraph/uiComponents";
 import { isBeforeDate } from "../../../../utils/helpers";
 
 interface ProgramCouponFormValues {

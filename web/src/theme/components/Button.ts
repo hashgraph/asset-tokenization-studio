@@ -1,7 +1,7 @@
 import {
   ButtonProps,
   ButtonThemeConfiguration,
-} from "@iob/io-bricks-ui/Interaction";
+} from "@hashgraph/uiComponents/Interaction";
 
 export const sizes: ButtonThemeConfiguration["sizes"] = {
   sm: {

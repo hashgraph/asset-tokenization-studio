@@ -1,14 +1,14 @@
 import { Button, HStack, VStack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
-import { CheckboxGroupController } from "@iob/io-bricks-ui";
+import { CheckboxGroupController } from "@hashgraph/uiComponents";
 import { required } from "../../../../utils/rules";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ApplyRolesRequest } from "@iob/securitytoken-sdk";
+import { ApplyRolesRequest } from "@hashgraph/securitytoken-sdk";
 import { useParams } from "react-router-dom";
 import { useApplyRoles } from "../../../../hooks/queries/useApplyRoles";
 import { rolesList } from "./rolesList";
 import { SecurityRole } from "../../../../utils/SecurityRole";
-import { Text } from "@iob/io-bricks-ui/Foundations";
+import { Text } from "@hashgraph/uiComponents/Foundations";
 
 interface EditRolesFormValues {
   roles: string[];

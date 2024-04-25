@@ -1,15 +1,15 @@
 import { Divider, Flex, HStack, Menu, MenuButton } from "@chakra-ui/react";
-import { Button } from "@iob/io-bricks-ui/Interaction";
-import { Header as HeaderBase } from "@iob/io-bricks-ui/Navigation";
+import { Button } from "@hashgraph/uiComponents/Interaction";
+import { Header as HeaderBase } from "@hashgraph/uiComponents/Navigation";
 import { useWalletStore } from "../../store/walletStore";
 import { useTranslation } from "react-i18next";
 import { CaretDown, Power, SignOut, Wallet } from "@phosphor-icons/react";
-import { PhosphorIcon, Text } from "@iob/io-bricks-ui";
+import { PhosphorIcon, Text } from "@hashgraph/uiComponents";
 import { MetamaskStatus } from "../../utils/constants";
-import { Logo } from "@iob/io-bricks-ui/Basic";
+import { Logo } from "@hashgraph/uiComponents/Basic";
 import { useUserStore } from "../../store/userStore";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
-import { Dropdown, DropdownItem } from "@iob/io-bricks-ui/DataDisplay";
+import { Dropdown, DropdownItem } from "@hashgraph/uiComponents/DataDisplay";
 import { getLayoutBg } from "./helper";
 
 export const Header = () => {

@@ -1,5 +1,5 @@
 import { StackProps, VStack } from "@chakra-ui/react";
-import { PanelTitle } from "@iob/io-bricks-ui/DataDisplay";
+import { PanelTitle } from "@hashgraph/uiComponents/DataDisplay";
 
 export const Panel = ({ children, title, ...rest }: StackProps) => (
   <VStack layerStyle="container" {...rest}>

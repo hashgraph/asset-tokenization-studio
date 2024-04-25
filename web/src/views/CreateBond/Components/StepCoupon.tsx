@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { HStack, Stack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
-import { PhosphorIcon, Text } from "@iob/io-bricks-ui/Foundations";
+import { PhosphorIcon, Text } from "@hashgraph/uiComponents/Foundations";
 import { CancelButton } from "../../../components/CancelButton";
 import { NextStepButton } from "./NextStepButton";
 import { PreviousStepButton } from "./PreviousStepButton";
@@ -10,13 +10,13 @@ import {
   InputController,
   InputNumberController,
   SelectController,
-} from "@iob/io-bricks-ui";
+} from "@hashgraph/uiComponents";
 import { greaterThan, isBetweenDates, required } from "../../../utils/rules";
 import { ICreateBondFormValues } from "../ICreateBondFormValues";
 import { useFormContext, useFormState } from "react-hook-form";
 import { formatDate } from "../../../utils/format";
 import { CouponTypeOptions } from "../CouponType";
-import { Tooltip } from "@iob/io-bricks-ui/Overlay";
+import { Tooltip } from "@hashgraph/uiComponents/Overlay";
 import { Info } from "@phosphor-icons/react";
 import { Trans } from "react-i18next";
 import { FormStepContainer } from "../../../components/FormStepContainer";

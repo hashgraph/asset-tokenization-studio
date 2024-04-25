@@ -1,4 +1,4 @@
-import { SecurityViewModel } from "@iob/securitytoken-sdk";
+import { SecurityViewModel } from "@hashgraph/securitytoken-sdk";
 
 export interface RolesProps {
   roles: string[];

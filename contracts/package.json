@@ -1,7 +1,6 @@
 {
-  "name": "@iob/securitytoken-contracts",
-  "version": "1.0.7",
-  "description": "Testing to MASTER",
+  "name": "@hashgraph/securitytoken-contracts",
+  "version": "1.0.0",
   "main": "./build/typechain-types/index.js",
   "module": "./build/typechain-types/index.js",
   "files": [

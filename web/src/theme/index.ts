@@ -1,7 +1,7 @@
 import { extendTheme, type ThemeConfig } from "@chakra-ui/react";
 import _omit from "lodash/omit";
 import { fonts, fontWeights } from "./fonts";
-import { BasePlatformTheme } from "@iob/io-bricks-ui/Theme";
+import { BasePlatformTheme } from "@hashgraph/uiComponents/Theme";
 import { components } from "./components";
 import { colors } from "./colors";
 

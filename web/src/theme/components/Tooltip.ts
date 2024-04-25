@@ -1,5 +1,5 @@
 import { cssVar } from "@chakra-ui/react";
-import { TooltipThemeConfiguration } from "@iob/io-bricks-ui/Overlay";
+import { TooltipThemeConfiguration } from "@hashgraph/uiComponents/Overlay";
 
 const $arrowBg = cssVar("popper-arrow-bg");
 

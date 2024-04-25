@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 import { Trans, useTranslation } from "react-i18next";
 import { Info } from "@phosphor-icons/react";
-import { PhosphorIcon, Text } from "@iob/io-bricks-ui/Foundations";
+import { PhosphorIcon, Text } from "@hashgraph/uiComponents/Foundations";
 import { CancelButton } from "../../../components/CancelButton";
 import { NextStepButton } from "./NextStepButton";
 import { PreviousStepButton } from "./PreviousStepButton";
@@ -18,7 +18,7 @@ import {
   SelectController,
   ToggleController,
   Tooltip,
-} from "@iob/io-bricks-ui";
+} from "@hashgraph/uiComponents";
 import { greaterThan, min, required } from "../../../utils/rules";
 import { ICreateEquityFormValues } from "../ICreateEquityFormValues";
 import { useFormContext, useFormState } from "react-hook-form";

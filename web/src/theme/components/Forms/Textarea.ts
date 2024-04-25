@@ -1,7 +1,7 @@
 import {
   textareaPartsList,
   TextareaThemeConfiguration,
-} from "@iob/io-bricks-ui/Forms/Textarea";
+} from "@hashgraph/uiComponents/Forms/Textarea";
 
 export const Textarea: TextareaThemeConfiguration = {
   parts: textareaPartsList,

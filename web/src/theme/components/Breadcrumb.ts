@@ -1,5 +1,5 @@
-import type { BreadcrumbThemeConfiguration } from "@iob/io-bricks-ui/Navigation";
-import { breadcrumbPartsList } from "@iob/io-bricks-ui/Navigation";
+import type { BreadcrumbThemeConfiguration } from "@hashgraph/uiComponents/Navigation";
+import { breadcrumbPartsList } from "@hashgraph/uiComponents/Navigation";
 
 export const Breadcrumb: BreadcrumbThemeConfiguration = {
   parts: breadcrumbPartsList,

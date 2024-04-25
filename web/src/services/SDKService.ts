@@ -55,7 +55,7 @@ import type {
   GetLockedBalanceRequest,
   GetRegulationDetailsRequest,
   RegulationViewModel,
-} from "@iob/securitytoken-sdk";
+} from "@hashgraph/securitytoken-sdk";
 import {
   Bond,
   ConnectRequest,
@@ -67,7 +67,7 @@ import {
   Security,
   SetDividendsRequest,
   SupportedWallets,
-} from "@iob/securitytoken-sdk";
+} from "@hashgraph/securitytoken-sdk";
 
 export class SDKService {
   static initData?: InitializationData = undefined;

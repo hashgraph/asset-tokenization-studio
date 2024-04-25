@@ -1,15 +1,15 @@
 import { Button, HStack, Stack, VStack } from "@chakra-ui/react";
-import { Text } from "@iob/io-bricks-ui/Foundations";
+import { Text } from "@hashgraph/uiComponents/Foundations";
 import { useTranslation } from "react-i18next";
-import { SearchInputController } from "@iob/io-bricks-ui";
+import { SearchInputController } from "@hashgraph/uiComponents";
 import { required, isHederaValidAddress } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
 import { SecurityDetails } from "../SecurityDetails";
-import { GetRolesForRequest } from "@iob/securitytoken-sdk";
+import { GetRolesForRequest } from "@hashgraph/securitytoken-sdk";
 import { useGetSecurityRolesFor } from "../../../../hooks/queries/useGetSecurityDetails";
 import { useParams } from "react-router-dom";
 import { useState } from "react";
-import { useToast } from "@iob/io-bricks-ui/Overlay/Toast";
+import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
 import { rolesList } from "./rolesList";
 import { HandleRoles } from "./HandleRoles";
 

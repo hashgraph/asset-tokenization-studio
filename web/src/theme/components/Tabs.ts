@@ -1,5 +1,5 @@
-import { tabsPartsList } from "@iob/io-bricks-ui/DataDisplay/Tabs";
-import type { TabsThemeConfiguration } from "@iob/io-bricks-ui/DataDisplay/Tabs";
+import { tabsPartsList } from "@hashgraph/uiComponents/DataDisplay/Tabs";
+import type { TabsThemeConfiguration } from "@hashgraph/uiComponents/DataDisplay/Tabs";
 
 export const Tabs: TabsThemeConfiguration = {
   parts: tabsPartsList,

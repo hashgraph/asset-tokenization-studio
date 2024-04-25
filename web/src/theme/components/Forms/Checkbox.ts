@@ -1,8 +1,8 @@
 import {
   CheckboxThemeConfiguration,
   checkboxPartsList,
-} from "@iob/io-bricks-ui/Forms";
-import { BasePlatformTheme } from "@iob/io-bricks-ui/Theme";
+} from "@hashgraph/uiComponents/Forms";
+import { BasePlatformTheme } from "@hashgraph/uiComponents/Theme";
 
 export const Checkbox: CheckboxThemeConfiguration = {
   parts: checkboxPartsList,

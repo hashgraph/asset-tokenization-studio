@@ -1,8 +1,8 @@
 import { Center, Stack, StackProps } from "@chakra-ui/react";
-import { Button } from "@iob/io-bricks-ui/Interaction";
-import { PhosphorIcon } from "@iob/io-bricks-ui";
+import { Button } from "@hashgraph/uiComponents/Interaction";
+import { PhosphorIcon } from "@hashgraph/uiComponents";
 import { Plus } from "@phosphor-icons/react";
-import { Text } from "@iob/io-bricks-ui/Foundations";
+import { Text } from "@hashgraph/uiComponents/Foundations";
 import { useTranslation } from "react-i18next";
 import { RouteName } from "../../../router/RouteName";
 import { RouterManager } from "../../../router/RouterManager";

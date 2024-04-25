@@ -1,4 +1,4 @@
-import type { AccordionThemeConfiguration } from "@iob/io-bricks-ui/DataDisplay";
+import type { AccordionThemeConfiguration } from "@hashgraph/uiComponents/DataDisplay";
 
 // It is not exported from IOBricks
 const accordionPartsList: Array<string> = [

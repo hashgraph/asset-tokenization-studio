@@ -1,7 +1,7 @@
-import { Button } from "@iob/io-bricks-ui/Interaction";
-import type { ButtonProps } from "@iob/io-bricks-ui/Interaction";
+import { Button } from "@hashgraph/uiComponents/Interaction";
+import type { ButtonProps } from "@hashgraph/uiComponents/Interaction";
 import { useTranslation } from "react-i18next";
-import { useStepContext } from "@iob/io-bricks-ui/Indicators";
+import { useStepContext } from "@hashgraph/uiComponents/Indicators";
 
 export const NextStepButton = (props: ButtonProps) => {
   const { t } = useTranslation("security", { keyPrefix: "createEquity" });

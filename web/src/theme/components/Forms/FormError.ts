@@ -1,5 +1,5 @@
 import type { ComponentMultiStyleConfig } from "@chakra-ui/react";
-import { BasePlatformTheme } from "@iob/io-bricks-ui/Theme";
+import { BasePlatformTheme } from "@hashgraph/uiComponents/Theme";
 
 export const FormError: ComponentMultiStyleConfig = {
   parts: ["text"],

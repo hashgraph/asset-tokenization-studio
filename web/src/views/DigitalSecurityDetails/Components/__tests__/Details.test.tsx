@@ -4,7 +4,7 @@ import {
   BondDetailsViewModel,
   EquityDetailsViewModel,
   SecurityViewModel,
-} from "@iob/securitytoken-sdk";
+} from "@hashgraph/securitytoken-sdk";
 
 // TODO Improve tests when it is connected to SDK
 describe(`${Details.name}`, () => {

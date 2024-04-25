@@ -1,6 +1,6 @@
 import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
 import { SDKService } from "../../services/SDKService";
-import { useToast } from "@iob/io-bricks-ui/Overlay/Toast";
+import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
 import { useTranslation } from "react-i18next";
 import {
   DividendsForViewModel,
@@ -8,7 +8,7 @@ import {
   GetDividendsForRequest,
   GetDividendsRequest,
   SetDividendsRequest,
-} from "@iob/securitytoken-sdk";
+} from "@hashgraph/securitytoken-sdk";
 
 export const GET_SECURITY_DIVIDENDS_FOR = (
   securityId: string,

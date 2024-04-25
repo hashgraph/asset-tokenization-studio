@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button, HStack, Stack, VStack, useDisclosure } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
-import { PhosphorIcon, Text, Weight } from "@iob/io-bricks-ui/Foundations";
+import { PhosphorIcon, Text, Weight } from "@hashgraph/uiComponents/Foundations";
 import { Plus, X } from "@phosphor-icons/react";
 import { CancelButton } from "../../components/CancelButton";
 import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
@@ -14,16 +14,16 @@ import {
   Table,
   Tag,
   useStepContext,
-} from "@iob/io-bricks-ui";
+} from "@hashgraph/uiComponents";
 import { required } from "../../utils/rules";
 import { ICreateEquityFormValues } from "../CreateEquity/ICreateEquityFormValues";
 import { useFormContext, useFormState } from "react-hook-form";
-import { PopUp, Tooltip } from "@iob/io-bricks-ui/Overlay";
+import { PopUp, Tooltip } from "@hashgraph/uiComponents/Overlay";
 import { Info } from "@phosphor-icons/react";
 import { FormStepContainer } from "../../components/FormStepContainer";
 import { CountriesList } from "./CountriesList";
 import { useGetRegulationDetails } from "../../hooks/queries/useGetSecurityDetails";
-import { GetRegulationDetailsRequest } from "@iob/securitytoken-sdk";
+import { GetRegulationDetailsRequest } from "@hashgraph/securitytoken-sdk";
 import { createColumnHelper } from "@tanstack/react-table";
 import {
   COUNTRY_LIST_ALLOWED,

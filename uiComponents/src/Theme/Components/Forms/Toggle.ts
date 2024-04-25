@@ -2,7 +2,7 @@ import type { ToggleThemeConfiguration } from "@Components/Forms/Toggle";
 import { togglePartsList } from "@Components/Forms/Toggle";
 import { textStyles } from "@/Theme/textStyles";
 
-// WARNING: This is the Toggle component from io-bricks-ui but it is the Switch component from chakra.
+// WARNING: This is the Toggle component from uiComponents but it is the Switch component from chakra.
 // Must be set to Switch in the `theme.components`.
 export const ConfigToggle: ToggleThemeConfiguration = {
   parts: togglePartsList,

@@ -1,13 +1,13 @@
 import { FormControl, HStack, SimpleGrid, Stack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { Info } from "@phosphor-icons/react";
-import { PhosphorIcon, Tooltip } from "@iob/io-bricks-ui";
-import { Text } from "@iob/io-bricks-ui/Foundations";
+import { PhosphorIcon, Tooltip } from "@hashgraph/uiComponents";
+import { Text } from "@hashgraph/uiComponents/Foundations";
 import {
   InputController,
   InputNumberController,
   ToggleController,
-} from "@iob/io-bricks-ui/Forms/Controllers";
+} from "@hashgraph/uiComponents/Forms/Controllers";
 import {
   greaterOrEqualThan,
   isISINValid,

@@ -1,6 +1,6 @@
 import { FormStepContainer } from "../FormStepContainer";
 import { render } from "../../test-utils";
-import { Text } from "@iob/io-bricks-ui/Foundations";
+import { Text } from "@hashgraph/uiComponents/Foundations";
 
 describe(`${FormStepContainer.name}`, () => {
   test("should render correctly", () => {

@@ -2,7 +2,7 @@ import { HStack, Stack, VStack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { History } from "../../../components/History";
 import { RouteName } from "../../../router/RouteName";
-import { CardButton, Heading, PhosphorIcon, Text } from "@iob/io-bricks-ui";
+import { CardButton, Heading, PhosphorIcon, Text } from "@hashgraph/uiComponents";
 import { Link as RouterLink } from "react-router-dom";
 import { RouterManager } from "../../../router/RouterManager";
 import { DiamondsFour, CodesandboxLogo } from "@phosphor-icons/react";

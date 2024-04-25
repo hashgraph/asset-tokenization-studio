@@ -1,7 +1,7 @@
 import {
   DefinitionList,
   DefinitionListProps,
-} from "@iob/io-bricks-ui/DataDisplay";
+} from "@hashgraph/uiComponents/DataDisplay";
 import { useTranslation } from "react-i18next";
 import { useSecurityStore } from "../../../store/securityStore";
 import { useParams } from "react-router-dom";

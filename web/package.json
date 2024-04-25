@@ -1,7 +1,6 @@
 {
-  "name": "redswan",
-  "private": true,
-  "version": "0.0.1-SNAPSHOT",
+  "name": "@hashgraph/securitytoken-dapp",
+  "version": "1.0.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -14,8 +13,8 @@
     "@chakra-ui/react": "2.8.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@iob/io-bricks-ui": "2.7.2",
-    "@iob/securitytoken-sdk": "1.0.22",
+    "@hashgraph/securitytoken-uiComponents": "file:./../uiComponents",
+    "@hashgraph/securitytoken-sdk": "file:./../sdk",
     "@tanstack/react-query": "^4.35.3",
     "ethers": "^5.7.2",
     "framer-motion": "^10.16.4",

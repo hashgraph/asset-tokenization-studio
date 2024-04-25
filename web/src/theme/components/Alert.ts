@@ -1,10 +1,10 @@
 import { keyframes } from "@emotion/react";
-import { Weight } from "@iob/io-bricks-ui/Foundations";
+import { Weight } from "@hashgraph/uiComponents/Foundations";
 import type {
   AlertStatus,
   AlertThemeConfiguration,
-} from "@iob/io-bricks-ui/Overlay";
-import { alertPartsList } from "@iob/io-bricks-ui/Overlay";
+} from "@hashgraph/uiComponents/Overlay";
+import { alertPartsList } from "@hashgraph/uiComponents/Overlay";
 
 const loading = keyframes`
     0% {

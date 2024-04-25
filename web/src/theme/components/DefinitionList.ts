@@ -1,8 +1,8 @@
 import {
   DefinitionListThemeConfiguration,
   definitionListPartsList,
-} from "@iob/io-bricks-ui/DataDisplay";
-import { BasePlatformTheme } from "@iob/io-bricks-ui/Theme";
+} from "@hashgraph/uiComponents/DataDisplay";
+import { BasePlatformTheme } from "@hashgraph/uiComponents/Theme";
 
 export const DefinitionList: DefinitionListThemeConfiguration = {
   parts: definitionListPartsList,

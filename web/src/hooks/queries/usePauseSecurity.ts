@@ -1,7 +1,7 @@
 import { UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { SDKService } from "../../services/SDKService";
-import { PauseRequest } from "@iob/securitytoken-sdk";
-import { useToast } from "@iob/io-bricks-ui/Overlay/Toast";
+import { PauseRequest } from "@hashgraph/securitytoken-sdk";
+import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
 import { useTranslation } from "react-i18next";
 
 export const usePauseSecurity = (

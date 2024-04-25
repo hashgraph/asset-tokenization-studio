@@ -2,16 +2,16 @@ import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import {
   InputController,
   InputNumberController,
-} from "@iob/io-bricks-ui/Forms/Controllers";
+} from "@hashgraph/uiComponents/Forms/Controllers";
 import { isHederaValidAddress, min, required } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
 import { Info } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
-import { GetCouponForRequest, GetCouponRequest } from "@iob/securitytoken-sdk";
+import { GetCouponForRequest, GetCouponRequest } from "@hashgraph/securitytoken-sdk";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useToast } from "@iob/io-bricks-ui/Overlay/Toast";
-import { DefinitionList, PhosphorIcon, Text, Tooltip } from "@iob/io-bricks-ui";
+import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
+import { DefinitionList, PhosphorIcon, Text, Tooltip } from "@hashgraph/uiComponents";
 import {
   useGetCoupons,
   useGetCouponsFor,

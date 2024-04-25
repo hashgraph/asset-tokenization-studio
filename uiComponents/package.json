@@ -1,7 +1,6 @@
 {
-  "name": "@iob/io-bricks-ui",
-  "version": "2.7.2",
-  "license": "MIT",
+  "name": "@hashgraph/securitytoken-uiComponents",
+  "version": "1.0.0",
   "files": [
     "Theme/**/*",
     "Hooks/**/*",

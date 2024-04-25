@@ -1,6 +1,6 @@
 import { Flex, VStack } from "@chakra-ui/react";
 import type { StackProps } from "@chakra-ui/react";
-import { Breadcrumb } from "@iob/io-bricks-ui/Navigation";
+import { Breadcrumb } from "@hashgraph/uiComponents/Navigation";
 import { GobackButton, GobackButtonProps } from "./GobackButton";
 import { useBreadcrumbs } from "../hooks/useBreadcrumbs";
 import type { Options } from "use-react-router-breadcrumbs";

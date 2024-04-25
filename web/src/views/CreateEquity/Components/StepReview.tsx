@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { PreviousStepButton } from "./PreviousStepButton";
-import { PhosphorIcon, Text } from "@iob/io-bricks-ui/Foundations";
+import { PhosphorIcon, Text } from "@hashgraph/uiComponents/Foundations";
 import { useFormContext } from "react-hook-form";
 import { ICreateEquityFormValues } from "../ICreateEquityFormValues";
 import {
@@ -16,10 +16,10 @@ import {
   DetailReviewProps,
   InfoDivider,
   PopUp,
-} from "@iob/io-bricks-ui";
+} from "@hashgraph/uiComponents";
 import { useCreateEquity } from "../../../hooks/queries/useCreateEquity";
 import { useWalletStore } from "../../../store/walletStore";
-import { CreateEquityRequest } from "@iob/securitytoken-sdk";
+import { CreateEquityRequest } from "@hashgraph/securitytoken-sdk";
 import { transformDividendType } from "../DividendType";
 import { WarningCircle, Question } from "@phosphor-icons/react";
 import { RouterManager } from "../../../router/RouterManager";

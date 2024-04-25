@@ -1,7 +1,7 @@
 import {
   DropdownThemeConfiguration,
   dropdownPartsList,
-} from "@iob/io-bricks-ui/DataDisplay";
+} from "@hashgraph/uiComponents/DataDisplay";
 
 export const Dropdown: DropdownThemeConfiguration = {
   parts: dropdownPartsList,

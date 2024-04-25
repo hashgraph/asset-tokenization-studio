@@ -1,8 +1,8 @@
 import { Button, HStack, Stack, VStack } from "@chakra-ui/react";
-import { Text } from "@iob/io-bricks-ui/Foundations";
+import { Text } from "@hashgraph/uiComponents/Foundations";
 import { useTranslation } from "react-i18next";
-import { DefinitionList } from "@iob/io-bricks-ui/DataDisplay/DefinitionList";
-import { SelectController } from "@iob/io-bricks-ui";
+import { DefinitionList } from "@hashgraph/uiComponents/DataDisplay/DefinitionList";
+import { SelectController } from "@hashgraph/uiComponents";
 import { required } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
 import { SecurityDetails } from "../SecurityDetails";
@@ -13,7 +13,7 @@ import {
 import {
   GetRoleMemberCountRequest,
   GetRoleMembersRequest,
-} from "@iob/securitytoken-sdk";
+} from "@hashgraph/securitytoken-sdk";
 import { useParams } from "react-router-dom";
 import { rolesList } from "./rolesList";
 import { useEffect, useState } from "react";

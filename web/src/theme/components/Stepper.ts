@@ -1,4 +1,4 @@
-import { StepperThemeConfiguration } from "@iob/io-bricks-ui";
+import { StepperThemeConfiguration } from "@hashgraph/uiComponents";
 
 export const Stepper: StepperThemeConfiguration = {
   parts: [],

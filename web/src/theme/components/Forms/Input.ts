@@ -2,7 +2,7 @@ import {
   inputPartsList,
   type InputConfigProps,
   type InputThemeConfiguration,
-} from "@iob/io-bricks-ui/Forms";
+} from "@hashgraph/uiComponents/Forms";
 
 const baseStyle: InputThemeConfiguration["baseStyle"] = () => {
   return {

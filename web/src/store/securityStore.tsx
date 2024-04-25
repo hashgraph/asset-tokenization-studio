@@ -1,4 +1,4 @@
-import type { SecurityViewModel } from "@iob/securitytoken-sdk";
+import type { SecurityViewModel } from "@hashgraph/securitytoken-sdk";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 

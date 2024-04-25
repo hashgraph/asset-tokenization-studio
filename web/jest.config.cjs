@@ -14,8 +14,8 @@ module.exports = {
     "./jest.setup.tsx",
   ],
   moduleNameMapper: {
-    "^@iob/io-axios-services/(.*)$":
-      "<rootDir>/node_modules/@iob/io-axios-services/lib/$1.js",
+    "^@hashgraph/io-axios-services/(.*)$":
+      "<rootDir>/node_modules/@hashgraph/io-axios-services/lib/$1.js",
     "\\.(css|less|scss|sass|ttf|png)$": "ts-jest",
   },
   testTimeout: 20000,

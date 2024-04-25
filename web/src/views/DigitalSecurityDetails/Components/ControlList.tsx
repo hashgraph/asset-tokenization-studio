@@ -1,13 +1,13 @@
-import { Table } from "@iob/io-bricks-ui/DataDisplay";
+import { Table } from "@hashgraph/uiComponents/DataDisplay";
 import { CellContext, createColumnHelper } from "@tanstack/react-table";
 import { useTranslation } from "react-i18next";
-import { PopUp } from "@iob/io-bricks-ui";
+import { PopUp } from "@hashgraph/uiComponents";
 import { Trash } from "@phosphor-icons/react";
 import { HStack, Stack, useDisclosure } from "@chakra-ui/react";
-import { PhosphorIcon, Text } from "@iob/io-bricks-ui/Foundations";
-import { SearchInputController } from "@iob/io-bricks-ui/Forms/Controllers";
+import { PhosphorIcon, Text } from "@hashgraph/uiComponents/Foundations";
+import { SearchInputController } from "@hashgraph/uiComponents/Forms/Controllers";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Button, ClipboardButton } from "@iob/io-bricks-ui/Interaction";
+import { Button, ClipboardButton } from "@hashgraph/uiComponents/Interaction";
 import { useEffect, useMemo, useState } from "react";
 import { useTable } from "../../../hooks/useTable";
 import _chunk from "lodash/chunk";
@@ -22,9 +22,9 @@ import {
   ControlListRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,
-} from "@iob/securitytoken-sdk";
+} from "@hashgraph/securitytoken-sdk";
 import { useParams } from "react-router-dom";
-import { useToast } from "@iob/io-bricks-ui/Overlay/Toast";
+import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
 
 type securitiesSearch = {
   search: string;
