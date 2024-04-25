@@ -1,0 +1,60 @@
+import {
+  Story,
+  Meta,
+  Title,
+  Description,
+  Controls,
+  Primary,
+  Stories,
+  ArgTypes,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as AvatarStories from "./Avatar.stories";
+
+<Meta of={AvatarStories} />
+
+<Title />
+
+<a
+  href="https://www.figma.com/file/YF8AvIq0MclfhGDvKgzypp/NEW---ioBricks-Library?node-id=1825-13768&t=3ozoVrWQYvgw1fj3-4"
+  target="\_blank"
+>
+  View figma design
+</a>
+
+<Primary />
+
+## How to set up
+
+### Config theme
+
+Add the following configurations to the `theme.tsx` and `Avatar.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    Avatar: ConfigAvatar,
+  },
+};
+```
+
+```tsx dark
+const ConfigAvatar: AvatarThemeConfiguration = {
+  parts: avatarPartsList,
+  baseStyle: {},
+  sizes: {},
+  variants: {},
+};
+```
+
+### Component parts
+
+You have these parts available: `"container" | "badge" | "label" | "group" | "excessLabel"` (`avatarPartsList`)
+
+## Props
+
+<ArgTypes of={AvatarStories} />
+
+## Stories
+
+<Stories title="" />

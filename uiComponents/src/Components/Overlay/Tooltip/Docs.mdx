@@ -1,0 +1,52 @@
+import {
+  Story,
+  Meta,
+  Title,
+  ArgTypes,
+  Primary,
+  Stories,
+  Source,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as TooltipStories from "./Tooltip.stories";
+
+<Meta of={TooltipStories} />
+
+<Title />
+
+<a
+  href="https://www.figma.com/file/YF8AvIq0MclfhGDvKgzypp/ioBricks-Design-System?type=design&node-id=1643%3A12710&mode=design&t=k4jSCm0Q182mRyVn-1"
+  target="\_blank"
+>
+  View figma design
+</a>
+
+<Primary />
+
+## How to set up
+
+Add the following configurations to the `theme.tsx` and `Tooltip.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    Tooltip: ConfigTooltip,
+  },
+};
+```
+
+```tsx dark
+const ConfigTooltip = {
+  baseStyle: {},
+  variants: {},
+  defaultProps: {},
+};
+```
+
+## Props
+
+<ArgTypes of={TooltipStories} />
+
+## Stories
+
+<Stories title="" />

@@ -1,0 +1,52 @@
+import {
+  Story,
+  Meta,
+  Title,
+  Controls,
+  Primary,
+  Stories,
+  ArgTypes,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as PhosphorIconStories from "./PhosphorIcon.stories";
+
+<Meta of={PhosphorIconStories} />
+
+<Title />
+
+<a
+  href="https://www.figma.com/file/YF8AvIq0MclfhGDvKgzypp/ioBricks-Design-System?type=design&node-id=1503%3A22630&mode=design&t=KlerdyEMWSQWLAVX-1"
+  target="\_blank"
+>
+  View figma design
+</a>
+
+<Primary />
+
+## How to set up
+
+Add the following configurations to the `theme.tsx` and `PhosphorIcon.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    PhosphorIcon: ConfigPhosphorIcon,
+  },
+};
+```
+
+```tsx dark
+const ConfigPhosphorIcon = {
+  baseStyle: {},
+  sizes: {},
+  variants: {},
+};
+```
+
+## Props
+
+<ArgTypes of={PhosphorIconStories} />
+
+## Stories
+
+<Stories title="" />

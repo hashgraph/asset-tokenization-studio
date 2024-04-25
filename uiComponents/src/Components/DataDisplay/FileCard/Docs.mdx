@@ -1,0 +1,57 @@
+import {
+  Story,
+  Meta,
+  Title,
+  ArgTypes,
+  Primary,
+  Stories,
+  Source,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as FileCardStories from "./FileCard.stories";
+
+<Meta of={FileCardStories} />
+
+<Title />
+
+<a
+  href="https://www.figma.com/file/YF8AvIq0MclfhGDvKgzypp/ioBricks-Design-System?type=design&node-id=3670%3A47862&mode=design&t=k4jSCm0Q182mRyVn-1"
+  target="\_blank"
+>
+  View figma design
+</a>
+
+<Primary />
+
+## How to set up
+
+### Config theme
+
+Add the following configurations to the `theme.tsx` and `FileCard.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    FileCard: ConfigFileCard,
+  },
+};
+```
+
+```tsx dark
+const ConfigFileCard: FileCardThemeConfiguration = {
+  parts: dropdownPartsList,
+  baseStyle: {},
+};
+```
+
+### Component parts
+
+You have these parts available: `"container" | "name" | "size" | "closeIcon"` (`fileCardPartsList`)
+
+## Props
+
+<ArgTypes of={FileCardStories} />
+
+## Stories
+
+<Stories title="" />

@@ -1,0 +1,57 @@
+import {
+  Story,
+  Meta,
+  Title,
+  ArgTypes,
+  Primary,
+  Stories,
+  Source,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as PanelTitleStories from "./PanelTitle.stories";
+
+<Meta of={PanelTitleStories} />
+
+<Title />
+
+<a
+  href="https://www.figma.com/file/YF8AvIq0MclfhGDvKgzypp/NEW---ioBricks-Library?node-id=2091-20098&t=7YJ1vWLNVVuMBa0t-0"
+  target="\_blank"
+>
+  View figma design
+</a>
+
+<Primary />
+
+## How to set up
+
+### Config theme
+
+Add the following configurations to the `theme.tsx` and `PanelTitle.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    PanelTitle: ConfigPanelTitle,
+  },
+};
+```
+
+```tsx dark
+const ConfigPanelTitle: PanelTitleThemeConfiguration = {
+  parts: panelTitlePartsList,
+  baseStyle: {},
+};
+```
+
+### Component parts
+
+You have these parts available: `"title" | "container"` (`panelTitlePartsList`)
+
+## Props
+
+<ArgTypes of={PanelTitleStories} />
+
+## Stories
+
+<Stories title="" />
