@@ -1,0 +1,337 @@
+import StatusColors from "./statusColors";
+import MainColors from "./mainColors";
+export { default as StatusColors } from "./statusColors";
+export { default as MainColors } from "./mainColors";
+export { default as NeutralColors } from "./neutralColors";
+export { default as AlternativesColors } from "./alternativesColors";
+export type MainColorsType = keyof typeof MainColors;
+export type StatusColorsType = keyof typeof StatusColors;
+export declare const getListFromColors: (colors: any) => {
+    title: string;
+    subtitle: string;
+    key: string;
+    colors: any;
+}[];
+export declare const capitalize: (s: string) => string;
+export declare const camelToFlat: (s: string) => string;
+export declare const colors: {
+    alternativesA: {
+        50: string;
+        100: string;
+        400: string;
+        500: string;
+        700: string;
+        800: string;
+    };
+    alternativesB: {
+        50: string;
+        100: string;
+        400: string;
+        500: string;
+        700: string;
+        800: string;
+    };
+    alternativesC: {
+        50: string;
+        100: string;
+        400: string;
+        500: string;
+        700: string;
+        800: string;
+    };
+    alternativesD: {
+        50: string;
+        100: string;
+        400: string;
+        500: string;
+        700: string;
+        800: string;
+    };
+    primary: {
+        50: string;
+        100: string;
+        200: string;
+        400: string;
+        500: string;
+        700: string;
+        800: string;
+    };
+    secondary: {
+        50: string;
+        100: string;
+        400: string;
+        500: string;
+        700: string;
+        800: string;
+    };
+    tertiary: {
+        50: string;
+        100: string;
+        400: string;
+        500: string;
+        700: string;
+        800: string;
+    };
+    success: {
+        50: string;
+        100: string;
+        500: string;
+        700: string;
+        800: string;
+    };
+    error: {
+        50: string;
+        100: string;
+        500: string;
+        700: string;
+        800: string;
+    };
+    warning: {
+        50: string;
+        100: string;
+        500: string;
+        700: string;
+        800: string;
+    };
+    info: {
+        50: string;
+        100: string;
+        500: string;
+        700: string;
+        800: string;
+    };
+    white: string;
+    neutral: {
+        25: string;
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    transparent: string;
+    current: string;
+    black: string;
+    whiteAlpha: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    blackAlpha: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    gray: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    red: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    orange: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    yellow: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    green: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    teal: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    blue: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    cyan: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    purple: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    pink: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    linkedin: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    facebook: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    messenger: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    whatsapp: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    twitter: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+    telegram: {
+        50: string;
+        100: string;
+        200: string;
+        300: string;
+        400: string;
+        500: string;
+        600: string;
+        700: string;
+        800: string;
+        900: string;
+    };
+};
+export type ColorScheme = keyof typeof colors;

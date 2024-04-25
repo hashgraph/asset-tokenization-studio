@@ -1,0 +1,47 @@
+export declare const spacing: {
+    space: {
+        11: string;
+        12: string;
+        13: string;
+        14: string;
+        16: string;
+        18: string;
+        19: string;
+        21: string;
+        22: string;
+        23: string;
+        25: string;
+        26: string;
+        27: string;
+        29: string;
+        30: string;
+        31: string;
+        34: string;
+        35: string;
+        41: string;
+        45: string;
+        50: string;
+        95: string;
+        105: string;
+        125: string;
+    };
+    sizes: {
+        11: string;
+        13: string;
+        14: string;
+        19: string;
+        22: string;
+        25: string;
+        26: string;
+        29: string;
+        30: string;
+        31: string;
+        34: string;
+        41: string;
+        45: string;
+        50: string;
+        95: string;
+        105: string;
+        125: string;
+    };
+};

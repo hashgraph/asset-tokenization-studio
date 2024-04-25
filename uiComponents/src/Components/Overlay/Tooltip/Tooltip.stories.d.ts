@@ -1,0 +1,12 @@
+declare const meta: import("@storybook/types").ComponentAnnotations<import("@storybook/react/dist/types-0a347bb9").R, import("./Tooltip").TooltipProps>;
+export default meta;
+export declare const HoverText: import("@storybook/types").AnnotatedStoryFn<import("@storybook/react/dist/types-0a347bb9").R, import("./Tooltip").TooltipProps>;
+export declare const HoverIcon: import("@storybook/types").AnnotatedStoryFn<import("@storybook/react/dist/types-0a347bb9").R, import("./Tooltip").TooltipProps>;
+export declare const CenterTop: import("@storybook/types").AnnotatedStoryFn<import("@storybook/react/dist/types-0a347bb9").R, import("./Tooltip").TooltipProps>;
+export declare const LeftTop: import("@storybook/types").AnnotatedStoryFn<import("@storybook/react/dist/types-0a347bb9").R, import("./Tooltip").TooltipProps>;
+export declare const RightTop: import("@storybook/types").AnnotatedStoryFn<import("@storybook/react/dist/types-0a347bb9").R, import("./Tooltip").TooltipProps>;
+export declare const CenterBottom: import("@storybook/types").AnnotatedStoryFn<import("@storybook/react/dist/types-0a347bb9").R, import("./Tooltip").TooltipProps>;
+export declare const LeftBottom: import("@storybook/types").AnnotatedStoryFn<import("@storybook/react/dist/types-0a347bb9").R, import("./Tooltip").TooltipProps>;
+export declare const RightBottom: import("@storybook/types").AnnotatedStoryFn<import("@storybook/react/dist/types-0a347bb9").R, import("./Tooltip").TooltipProps>;
+export declare const Left: import("@storybook/types").AnnotatedStoryFn<import("@storybook/react/dist/types-0a347bb9").R, import("./Tooltip").TooltipProps>;
+export declare const Right: import("@storybook/types").AnnotatedStoryFn<import("@storybook/react/dist/types-0a347bb9").R, import("./Tooltip").TooltipProps>;
