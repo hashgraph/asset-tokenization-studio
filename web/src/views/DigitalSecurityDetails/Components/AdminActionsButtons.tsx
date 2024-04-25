@@ -1,13 +1,13 @@
 import { Link as RouterLink, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { HStack, Menu, MenuButton, VStack } from "@chakra-ui/react";
-import { Button } from "@hashgraph/uiComponents/Interaction";
+import { Button } from "@hashgraph/securitytoken-uicomponents/Interaction";
 import { RouteName } from "../../../router/RouteName";
 import { RouterManager } from "../../../router/RouterManager";
-import { PhosphorIcon, Toggle } from "@hashgraph/uiComponents";
+import { PhosphorIcon, Toggle } from "@hashgraph/securitytoken-uicomponents";
 import { DotsThreeVertical } from "@phosphor-icons/react";
-import { Dropdown, DropdownItem } from "@hashgraph/uiComponents/DataDisplay";
-import { Text } from "@hashgraph/uiComponents/Foundations";
+import { Dropdown, DropdownItem } from "@hashgraph/securitytoken-uicomponents/DataDisplay";
+import { Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
 import { usePauseSecurity } from "../../../hooks/queries/usePauseSecurity";
 import { useUnpauseSecurity } from "../../../hooks/queries/useUnpauseSecurity";
 import { PauseRequest } from "@hashgraph/securitytoken-sdk";

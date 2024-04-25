@@ -1,7 +1,7 @@
 import {
   DropdownThemeConfiguration,
   dropdownPartsList,
-} from "@hashgraph/uiComponents/DataDisplay";
+} from "@hashgraph/securitytoken-uicomponents/DataDisplay";
 
 export const Dropdown: DropdownThemeConfiguration = {
   parts: dropdownPartsList,

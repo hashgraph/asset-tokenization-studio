@@ -1,12 +1,12 @@
 import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { Button } from "@hashgraph/uiComponents/Interaction";
-import { SearchInputController } from "@hashgraph/uiComponents/Forms/Controllers";
-import { Heading, Text } from "@hashgraph/uiComponents/Foundations";
+import { Button } from "@hashgraph/securitytoken-uicomponents/Interaction";
+import { SearchInputController } from "@hashgraph/securitytoken-uicomponents/Forms/Controllers";
+import { Heading, Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
 import { useForm } from "react-hook-form";
-import { DefinitionList } from "@hashgraph/uiComponents";
+import { DefinitionList } from "@hashgraph/securitytoken-uicomponents";
 import { useTranslation } from "react-i18next";
 import { isHederaValidAddress, required } from "../../../utils/rules";
-import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
+import { useToast } from "@hashgraph/securitytoken-uicomponents/Overlay/Toast";
 import {
   GetAccountBalanceRequest,
   SecurityViewModel,

@@ -1,6 +1,6 @@
 import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
 import { SDKService } from "../../services/SDKService";
-import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
+import { useToast } from "@hashgraph/securitytoken-uicomponents/Overlay/Toast";
 import { useTranslation } from "react-i18next";
 import {
   DividendsForViewModel,

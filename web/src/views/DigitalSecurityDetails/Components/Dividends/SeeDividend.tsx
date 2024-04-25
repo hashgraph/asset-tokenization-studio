@@ -2,7 +2,7 @@ import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import {
   InputController,
   InputNumberController,
-} from "@hashgraph/uiComponents/Forms/Controllers";
+} from "@hashgraph/securitytoken-uicomponents/Forms/Controllers";
 import { Info } from "@phosphor-icons/react";
 import { isHederaValidAddress, min, required } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
@@ -17,8 +17,8 @@ import {
 } from "@hashgraph/securitytoken-sdk";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
-import { DefinitionList, PhosphorIcon, Text, Tooltip } from "@hashgraph/uiComponents";
+import { useToast } from "@hashgraph/securitytoken-uicomponents/Overlay/Toast";
+import { DefinitionList, PhosphorIcon, Text, Tooltip } from "@hashgraph/securitytoken-uicomponents";
 import { useSecurityStore } from "../../../../store/securityStore";
 import { formatNumberLocale } from "../../../../utils/format";
 

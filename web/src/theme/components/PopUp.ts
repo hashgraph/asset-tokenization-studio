@@ -1,5 +1,5 @@
-import type { PopUpThemeConfiguration } from "@hashgraph/uiComponents/Overlay/PopUp";
-import { popUpPartsList } from "@hashgraph/uiComponents/Overlay/PopUp";
+import type { PopUpThemeConfiguration } from "@hashgraph/securitytoken-uicomponents/Overlay/PopUp";
+import { popUpPartsList } from "@hashgraph/securitytoken-uicomponents/Overlay/PopUp";
 
 export const PopUp: PopUpThemeConfiguration = {
   parts: popUpPartsList,

@@ -10,7 +10,7 @@ import theme from "./theme";
 import i18n from "./i18n";
 import AppRouter from "./router";
 import { SDKConnection } from "./components/SDKConnection";
-import { InterFonts, useToast } from "@hashgraph/uiComponents";
+import { InterFonts, useToast } from "@hashgraph/securitytoken-uicomponents";
 
 function App() {
   const toast = useToast();

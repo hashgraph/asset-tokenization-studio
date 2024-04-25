@@ -1,8 +1,8 @@
 import { Button, HStack, Stack, VStack } from "@chakra-ui/react";
-import { Text } from "@hashgraph/uiComponents/Foundations";
+import { Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
 import { useTranslation } from "react-i18next";
-import { DefinitionList } from "@hashgraph/uiComponents/DataDisplay/DefinitionList";
-import { SelectController } from "@hashgraph/uiComponents";
+import { DefinitionList } from "@hashgraph/securitytoken-uicomponents/DataDisplay/DefinitionList";
+import { SelectController } from "@hashgraph/securitytoken-uicomponents";
 import { required } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
 import { SecurityDetails } from "../SecurityDetails";

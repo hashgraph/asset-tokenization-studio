@@ -1,7 +1,7 @@
 import { Link as RouterLink, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { HStack } from "@chakra-ui/react";
-import { Button } from "@hashgraph/uiComponents/Interaction";
+import { Button } from "@hashgraph/securitytoken-uicomponents/Interaction";
 import { RouteName } from "../../../router/RouteName";
 import { RouterManager } from "../../../router/RouterManager";
 import { useGetIsPaused } from "../../../hooks/queries/useGetSecurityDetails";

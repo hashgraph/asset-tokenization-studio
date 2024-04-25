@@ -1,5 +1,5 @@
-import type { BreadcrumbThemeConfiguration } from "@hashgraph/uiComponents/Navigation";
-import { breadcrumbPartsList } from "@hashgraph/uiComponents/Navigation";
+import type { BreadcrumbThemeConfiguration } from "@hashgraph/securitytoken-uicomponents/Navigation";
+import { breadcrumbPartsList } from "@hashgraph/securitytoken-uicomponents/Navigation";
 
 export const Breadcrumb: BreadcrumbThemeConfiguration = {
   parts: breadcrumbPartsList,

@@ -1,14 +1,14 @@
 import { HStack, Stack, VStack } from "@chakra-ui/react";
 import { History } from "../../components/History";
 import { useTranslation } from "react-i18next";
-import { Text } from "@hashgraph/uiComponents/Foundations";
+import { Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
 import {
   InputController,
   InputNumberController,
-} from "@hashgraph/uiComponents/Forms/Controllers";
+} from "@hashgraph/securitytoken-uicomponents/Forms/Controllers";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { required, min } from "../../utils/rules";
-import { Button } from "@hashgraph/uiComponents";
+import { Button } from "@hashgraph/securitytoken-uicomponents";
 import { CancelButton } from "../../components/CancelButton";
 import { useParams } from "react-router";
 import { ForceRedeemRequest } from "@hashgraph/securitytoken-sdk";

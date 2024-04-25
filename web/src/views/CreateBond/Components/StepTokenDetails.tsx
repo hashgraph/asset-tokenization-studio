@@ -1,13 +1,13 @@
 import { FormControl, HStack, SimpleGrid, Stack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { Info } from "@phosphor-icons/react";
-import { PhosphorIcon, Tooltip } from "@hashgraph/uiComponents";
-import { Text } from "@hashgraph/uiComponents/Foundations";
+import { PhosphorIcon, Tooltip } from "@hashgraph/securitytoken-uicomponents";
+import { Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
 import {
   InputController,
   InputNumberController,
   ToggleController,
-} from "@hashgraph/uiComponents/Forms/Controllers";
+} from "@hashgraph/securitytoken-uicomponents/Forms/Controllers";
 import {
   greaterOrEqualThan,
   isISINValid,

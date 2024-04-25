@@ -1,6 +1,6 @@
 import { Center, SkeletonText, Stack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
-import { Text } from "@hashgraph/uiComponents/Foundations";
+import { Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
 import { SecurityDetails } from "../views/DigitalSecurityDetails/Components/SecurityDetails";
 import { Panel } from "./Panel";
 import { useSecurityStore } from "../store/securityStore";

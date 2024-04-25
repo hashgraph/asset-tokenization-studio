@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { HStack, Stack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
-import { PhosphorIcon, Text } from "@hashgraph/uiComponents/Foundations";
+import { PhosphorIcon, Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
 import { CancelButton } from "../../../components/CancelButton";
 import { NextStepButton } from "./NextStepButton";
 import { PreviousStepButton } from "./PreviousStepButton";
@@ -10,7 +10,7 @@ import {
   InputController,
   InputNumberController,
   Tooltip,
-} from "@hashgraph/uiComponents";
+} from "@hashgraph/securitytoken-uicomponents";
 import { required, isAfterDate, min } from "../../../utils/rules";
 import { ICreateBondFormValues } from "../ICreateBondFormValues";
 import { useFormContext, useFormState } from "react-hook-form";

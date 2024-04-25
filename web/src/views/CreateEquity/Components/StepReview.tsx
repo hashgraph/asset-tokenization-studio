@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { PreviousStepButton } from "./PreviousStepButton";
-import { PhosphorIcon, Text } from "@hashgraph/uiComponents/Foundations";
+import { PhosphorIcon, Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
 import { useFormContext } from "react-hook-form";
 import { ICreateEquityFormValues } from "../ICreateEquityFormValues";
 import {
@@ -16,7 +16,7 @@ import {
   DetailReviewProps,
   InfoDivider,
   PopUp,
-} from "@hashgraph/uiComponents";
+} from "@hashgraph/securitytoken-uicomponents";
 import { useCreateEquity } from "../../../hooks/queries/useCreateEquity";
 import { useWalletStore } from "../../../store/walletStore";
 import { CreateEquityRequest } from "@hashgraph/securitytoken-sdk";

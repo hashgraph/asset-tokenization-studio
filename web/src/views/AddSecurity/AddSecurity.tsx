@@ -1,8 +1,8 @@
 import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { Heading, Text } from "@hashgraph/uiComponents/Foundations";
+import { Heading, Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
 import { useTranslation } from "react-i18next";
 import { RouteName } from "../../router/RouteName";
-import { InputController } from "@hashgraph/uiComponents/Forms/Controllers";
+import { InputController } from "@hashgraph/securitytoken-uicomponents/Forms/Controllers";
 import { History } from "../../components/History";
 import { CancelButton } from "../../components/CancelButton";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -13,13 +13,13 @@ import {
   GetSecurityDetailsRequest,
 } from "@hashgraph/securitytoken-sdk";
 import { isHederaValidAddress, required } from "../../utils/rules";
-import { Button } from "@hashgraph/uiComponents/Interaction";
+import { Button } from "@hashgraph/securitytoken-uicomponents/Interaction";
 import { RouterManager } from "../../router/RouterManager";
 import { useEffect, useState } from "react";
 import { useWalletStore } from "../../store/walletStore";
 import { useGetSecurityRoleCountFor } from "../../hooks/queries/useGetSecurityDetails";
 import { useAccountStore } from "../../store/accountStore";
-import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
+import { useToast } from "@hashgraph/securitytoken-uicomponents/Overlay/Toast";
 
 export const AddSecurity = () => {
   const {

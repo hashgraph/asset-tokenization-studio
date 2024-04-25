@@ -7,7 +7,7 @@ import type {
 } from "@hashgraph/securitytoken-sdk";
 import { useWalletStore } from "../store/walletStore";
 import { MetamaskStatus } from "../utils/constants";
-import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
+import { useToast } from "@hashgraph/securitytoken-uicomponents/Overlay/Toast";
 import { useTranslation } from "react-i18next";
 import _isEqual from "lodash/isEqual";
 import { RouterManager } from "../router/RouterManager";

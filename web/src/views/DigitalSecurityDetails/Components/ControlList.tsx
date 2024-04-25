@@ -1,13 +1,13 @@
-import { Table } from "@hashgraph/uiComponents/DataDisplay";
+import { Table } from "@hashgraph/securitytoken-uicomponents/DataDisplay";
 import { CellContext, createColumnHelper } from "@tanstack/react-table";
 import { useTranslation } from "react-i18next";
-import { PopUp } from "@hashgraph/uiComponents";
+import { PopUp } from "@hashgraph/securitytoken-uicomponents";
 import { Trash } from "@phosphor-icons/react";
 import { HStack, Stack, useDisclosure } from "@chakra-ui/react";
-import { PhosphorIcon, Text } from "@hashgraph/uiComponents/Foundations";
-import { SearchInputController } from "@hashgraph/uiComponents/Forms/Controllers";
+import { PhosphorIcon, Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
+import { SearchInputController } from "@hashgraph/securitytoken-uicomponents/Forms/Controllers";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Button, ClipboardButton } from "@hashgraph/uiComponents/Interaction";
+import { Button, ClipboardButton } from "@hashgraph/securitytoken-uicomponents/Interaction";
 import { useEffect, useMemo, useState } from "react";
 import { useTable } from "../../../hooks/useTable";
 import _chunk from "lodash/chunk";
@@ -24,7 +24,7 @@ import {
   GetControlListMembersRequest,
 } from "@hashgraph/securitytoken-sdk";
 import { useParams } from "react-router-dom";
-import { useToast } from "@hashgraph/uiComponents/Overlay/Toast";
+import { useToast } from "@hashgraph/securitytoken-uicomponents/Overlay/Toast";
 
 type securitiesSearch = {
   search: string;

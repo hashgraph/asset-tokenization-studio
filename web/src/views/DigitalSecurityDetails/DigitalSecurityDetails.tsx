@@ -1,6 +1,6 @@
 import { HStack, Stack } from "@chakra-ui/react";
-import { Tag } from "@hashgraph/uiComponents";
-import { Tabs } from "@hashgraph/uiComponents/DataDisplay";
+import { Tag } from "@hashgraph/securitytoken-uicomponents";
+import { Tabs } from "@hashgraph/securitytoken-uicomponents/DataDisplay";
 import { useTranslation } from "react-i18next";
 import { History } from "../../components/History";
 import { Details } from "./Components/Details";

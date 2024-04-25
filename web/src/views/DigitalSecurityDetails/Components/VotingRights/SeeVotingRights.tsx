@@ -2,7 +2,7 @@ import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import {
   InputController,
   InputNumberController,
-} from "@hashgraph/uiComponents/Forms/Controllers";
+} from "@hashgraph/securitytoken-uicomponents/Forms/Controllers";
 import {
   isHederaValidAddress,
   required,
@@ -20,10 +20,10 @@ import {
   GetVotingRightsRequest,
 } from "@hashgraph/securitytoken-sdk";
 import { useParams } from "react-router-dom";
-import { PhosphorIcon, Text } from "@hashgraph/uiComponents/Foundations";
+import { PhosphorIcon, Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
 import { Panel } from "../../../../components/Panel";
 import { hexToText } from "../../../../utils/format";
-import { Tooltip } from "@hashgraph/uiComponents";
+import { Tooltip } from "@hashgraph/securitytoken-uicomponents";
 
 interface SeeVotingRightsFormValues {
   votingId: number;

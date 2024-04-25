@@ -1,7 +1,7 @@
 import {
   textareaPartsList,
   TextareaThemeConfiguration,
-} from "@hashgraph/uiComponents/Forms/Textarea";
+} from "@hashgraph/securitytoken-uicomponents/Forms/Textarea";
 
 export const Textarea: TextareaThemeConfiguration = {
   parts: textareaPartsList,

@@ -1,6 +1,6 @@
 import { Box, Center, HStack, VStack } from "@chakra-ui/react";
-import { Text } from "@hashgraph/uiComponents/Foundations";
-import { DefinitionList } from "@hashgraph/uiComponents/DataDisplay";
+import { Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
+import { DefinitionList } from "@hashgraph/securitytoken-uicomponents/DataDisplay";
 import { Panel } from "../../../components/Panel";
 import { useTranslation } from "react-i18next";
 import { ActionsButtons } from "./ActionsButtons";

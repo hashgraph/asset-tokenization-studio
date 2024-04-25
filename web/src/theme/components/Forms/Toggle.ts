@@ -1,8 +1,8 @@
 import {
   ToggleThemeConfiguration,
   togglePartsList,
-} from "@hashgraph/uiComponents/Forms";
-import { BasePlatformTheme } from "@hashgraph/uiComponents/Theme";
+} from "@hashgraph/securitytoken-uicomponents/Forms";
+import { BasePlatformTheme } from "@hashgraph/securitytoken-uicomponents/Theme";
 
 export const Toggle: ToggleThemeConfiguration = {
   parts: togglePartsList,

@@ -7,7 +7,7 @@ import {
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { PreviousStepButton } from "./PreviousStepButton";
-import { PhosphorIcon } from "@hashgraph/uiComponents/Foundations";
+import { PhosphorIcon } from "@hashgraph/securitytoken-uicomponents/Foundations";
 import { useFormContext } from "react-hook-form";
 import {
   Button,
@@ -15,7 +15,7 @@ import {
   DetailReviewProps,
   InfoDivider,
   PopUp,
-} from "@hashgraph/uiComponents";
+} from "@hashgraph/securitytoken-uicomponents";
 import { useCreateBond } from "../../../hooks/queries/useCreateBond";
 import { useWalletStore } from "../../../store/walletStore";
 import { CreateBondRequest } from "@hashgraph/securitytoken-sdk";

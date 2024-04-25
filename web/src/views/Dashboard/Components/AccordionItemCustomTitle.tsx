@@ -4,8 +4,8 @@ import {
   HStack,
   StackProps,
 } from "@chakra-ui/react";
-import { Button } from "@hashgraph/uiComponents/Interaction";
-import { Tag } from "@hashgraph/uiComponents/DataDisplay";
+import { Button } from "@hashgraph/securitytoken-uicomponents/Interaction";
+import { Tag } from "@hashgraph/securitytoken-uicomponents/DataDisplay";
 import { useTranslation } from "react-i18next";
 import { RouterManager } from "../../../router/RouterManager";
 import { RouteName } from "../../../router/RouteName";
