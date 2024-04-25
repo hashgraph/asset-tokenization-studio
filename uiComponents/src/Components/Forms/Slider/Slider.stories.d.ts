@@ -1,5 +1,0 @@
-import React from "react";
-declare const meta: import("@storybook/types").ComponentAnnotations<import("@storybook/react/dist/types-0a347bb9").R, import("@chakra-ui/system/dist/system.types").MergeWithAs<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, any, import("./Slider").SliderProps, import("@chakra-ui/system/dist/system.types").As>>;
-export default meta;
-export declare const Horizontal: import("@storybook/types").AnnotatedStoryFn<import("@storybook/react/dist/types-0a347bb9").R, import("@chakra-ui/system/dist/system.types").MergeWithAs<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, any, import("./Slider").SliderProps, import("@chakra-ui/system/dist/system.types").As>>;
-export declare const Vertical: import("@storybook/types").AnnotatedStoryFn<import("@storybook/react/dist/types-0a347bb9").R, import("@chakra-ui/system/dist/system.types").MergeWithAs<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, any, import("./Slider").SliderProps, import("@chakra-ui/system/dist/system.types").As>>;

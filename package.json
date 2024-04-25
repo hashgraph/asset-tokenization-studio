@@ -14,7 +14,7 @@
       "publish:web": "cd web && npm publish",
       "build:sdk": "cd sdk && npm run build",
       "build:contracts": "cd contracts && npm run compile:force",
-      "build:uiComponents": "cd uiComponents && npm run build",
+      "build:uiComponents": "cd uiComponents && npm run rollup",
       "build:web": "cd web && npm run build",
       "build:web:full": "npm run build:contracts && npm run build:sdk",
       "setup": "npm run install",
