@@ -14,7 +14,7 @@ const handleError = (error, stdout, stderr) => {
 
 const npmInstall = (dir, name = "module") => {
   process.stdout.write(`Installing dependencies for ${name}...`);
-  execSync(`cd ${dir} && npm install`, handleError);
+  execSync(`cd ${dir} && npm ci`, handleError);
   console.log("\tDone");
 };
 
