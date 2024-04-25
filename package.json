@@ -7,7 +7,7 @@
       "install:contracts": "cd contracts && npm install",
       "install:sdk": "cd sdk && npm install",
       "install:uiComponents": "cd uiComponents && yarn install",
-      "install:web": "cd web && yarn install",
+      "install:web": "cd web && yarn install && yarn install-peers",
       "publish:contracts": "cd contracts && npm publish",
       "publish:sdk": "cd sdk && npm publish",
       "publish:uiComponents": "cd uiComponents && npm publish",
