@@ -56,7 +56,8 @@
     "slither": "npm run slither:summary && npm run slither:storageLayout && npm run slither:inheritance && npm run slither:analysis",
     "pre-commit": "npm run prettier && npm run lint",
     "prettierCheck": "prettier --check",
-    "prepack": "npm run compile:force"
+    "prepack": "npm run compile:force",
+    "cleanCache": "npx hardhat clean"
   },
   "keywords": [],
   "author": "",

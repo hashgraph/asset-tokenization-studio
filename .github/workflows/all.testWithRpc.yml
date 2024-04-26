@@ -1,0 +1,104 @@
+name: Testing
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  test-node:
+    name: testing    
+    #runs-on: [ self-hosted, Linux, medium, ephemeral ]
+    runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: "--max-old-space-size=32768"
+    permissions:
+      contents: read
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+
+      - name: Build the Docker image
+        run: docker build -t rpc .
+        working-directory: dockerfile
+
+      - name: Setup NodeJS Environment
+        uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d
+        with:
+          node-version: 18.x      
+      
+      - name: Cache npm dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies Contracts
+        run: |
+          npm ci
+          npm run compile:force
+        working-directory: contracts
+
+      - name: Install dependencies SDK
+        run: |
+          npm ci
+          npm run build
+        working-directory: sdk
+      
+      - name: Install dependencies UiComponents
+        run: |
+          yarn install 
+          yarn install-peers
+          npm run rollup
+        working-directory: uiComponents
+      
+      - name: Install dependencies web
+        run: yarn install
+        working-directory: web
+
+      - name: Create file
+        run: |
+          touch .env
+          echo "CLIENT_PRIVATE_KEY_ECDSA=${{ secrets.CLIENT_PRIVATE_KEY_ECDSA }}" >> .env
+          echo "CLIENT_PUBLIC_KEY_ECDSA=${{ secrets.CLIENT_PUBLIC_KEY_ECDSA }}"  >> .env
+          echo "CLIENT_EVM_ADDRESS_ECDSA=${{ secrets.CLIENT_EVM_ADDRESS_ECDSA }}" >> .env
+          echo "CLIENT_ACCOUNT_ID_ECDSA=${{ secrets.CLIENT_ACCOUNT_ID_ECDSA }}" >> .env
+          echo "CLIENT_PRIVATE_KEY_ECDSA_2=${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_2 }}"  >> .env
+          echo "CLIENT_PUBLIC_KEY_ECDSA_2=${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}"  >> .env
+          echo "CLIENT_EVM_ADDRESS_ECDSA_2=${{ secrets.CLIENT_EVM_ADDRESS_ECDSA_2 }}"  >> .env
+          echo "CLIENT_ACCOUNT_ID_ECDSA_2=${{ secrets.CLIENT_ACCOUNT_ID_ECDSA_2 }}"  >> .env
+          echo "FACTORY_ADDRESS=${{ secrets.FACTORY_ADDRESS }}"  >> .env
+          echo "RESOLVER_ADDRESS=${{ secrets.RESOLVER_ADDRESS }}"  >> .env
+          echo "BUSINESS_LOGIC_KEYS_COMMON=${{ secrets.BUSINESS_LOGIC_KEYS_COMMON }}"  >> .env
+          echo "BUSINESS_LOGIC_KEYS_EQUITY=${{ secrets.BUSINESS_LOGIC_KEYS_EQUITY }}"  >> .env
+          echo "BUSINESS_LOGIC_KEYS_BOND=${{ secrets.BUSINESS_LOGIC_KEYS_BOND }}"  >> .env
+        working-directory: sdk
+
+      - name: Test Contracts
+        run: |
+          npm run test
+          npm run cleanCache
+        working-directory: contracts
+
+      - name: Test web
+        run: |
+          npm run test
+          npm run cleanCache
+        working-directory: web
+      
+      - name: Run the Docker image
+        run: nohup docker run --network="host" rpc &
+      - name: Sleep for 25 seconds
+        run: sleep 25s
+        shell: bash
+      - name: DockerStatus
+        run: docker ps
+      - name: DockerStatus
+        run:  curl --location --request POST 'http://localhost:7546/api' --data ""
+
+      - name: Test sdk
+        run: |
+          npm run test
+          npm run cleanCache
+        working-directory: sdk

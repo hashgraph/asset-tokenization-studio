@@ -28,7 +28,8 @@
     "prettier": "prettier --config .prettierrc --write .",
     "pre-commit": "npm run lint && npm run prettier",
     "prettierCheck": "prettier --config .prettierrc --check",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "cleanCache": "npx jest --clearCache"
   },
   "license": "Apache-2.0",
   "devDependencies": {
