@@ -73,7 +73,7 @@ export class SDKService {
   static initData?: InitializationData = undefined;
   static testnetNetwork = "testnet";
   static testnetMirrorNode = {
-    baseUrl: "https://testnet.mirrornode.hedera.com/api/v1/",
+    baseUrl: process.env.REACT_APP_MIRROR_NODE ?? '',
     apiKey: "",
     headerName: "",
   };
@@ -86,7 +86,7 @@ export class SDKService {
     ],
   };
   static testnetRPCNode = {
-    baseUrl: "https://testnet.hashio.io/api",
+    baseUrl: process.env.REACT_APP_RPC_NODE ?? '',
     //baseUrl: "http://127.0.0.1:7546",
     apiKey: "",
     headerName: "",
@@ -99,30 +99,14 @@ export class SDKService {
       },
     ],
   };
-  static testnetResolverAddress = "0.0.3532144";
-  static testnetFactoryAddress = "0.0.3532205";
-  static testnetBusinessLogicKeysCommon = [
-    "0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6",
-    "0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c",
-    "0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c",
-    "0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b",
-    "0x064c883089ba1a596d9146c7aaa73c19ef8825f374c67a9538787c3d12e68dc5",
-    "0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f",
-    "0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625",
-    "0x0d714ae58404788b445b639b0a0bcf37eeeb2e661bfa542569f5555a9a40b5b2",
-    "0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d",
-    "0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf",
-    "0x1b5212ea37fb29e99afa2812a5d7d7e662a477424d3de1a18cc3871a2ee94d78",
-    "0x3cc74200ccfb5d585a6d170f8824979dbf1b592e0a41eef41cf6d86cf4882077",
-    "0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793",
-    "0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9",
-    "0xd9b300e6bf7a143b8fd8cf1d4ab050e691c862bf0f57a7d49cc08c60efe68d08",
-  ];
+  static testnetResolverAddress = process.env.REACT_APP_RPC_RESOLVER ?? '0.0.0';
+  static testnetFactoryAddress = process.env.REACT_APP_RPC_FACTORY ?? '0.0.0';
+  static testnetBusinessLogicKeysCommon = process.env.REACT_APP_BUSINESS_LOGIC_KEYS_COMMON!.split(",");
   static testnetBusinessLogicKeysEquity = [
-    "0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810",
+    process.env.REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY ?? '',
   ];
   static testnetBusinessLogicKeysBond = [
-    "0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef",
+    process.env.REACT_APP_BUSINESS_LOGIC_KEYS_BOND ?? '',
   ];
   static testnetConfiguration = {
     factoryAddress: this.testnetFactoryAddress,
