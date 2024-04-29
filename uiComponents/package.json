@@ -124,7 +124,7 @@
     "echarts-for-react": "^3.0.2",
     "lodash": "^4.17.21",
     "react-day-picker": "^8.6.0",
-    "react-hook-form": "^7.41.5",
+    "react-hook-form": "7.43.9",
     "react-markdown": "^6.0.3",
     "react-number-format": "5.1.4"
   },
