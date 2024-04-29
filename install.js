@@ -20,13 +20,13 @@ const npmInstall = (dir, name = "module") => {
 
 const yarnInstall = (dir, name = "module") => {
   process.stdout.write(`Installing dependencies for ${name}...`);
-  execSync(`cd ${dir} && yarn install`, handleError);
+  execSync(`cd ${dir} && yarn install --frozen-lockfile`, handleError);
   console.log("\tDone");
 };
 
 const yarnInstallPeer = (dir, name = "module") => {
   process.stdout.write(`Installing dependencies for ${name}...`);
-  execSync(`cd ${dir} && yarn install && yarn install-peers`, handleError);
+  execSync(`cd ${dir} && yarn install --frozen-lockfile && yarn install-peers`, handleError);
   console.log("\tDone");
 };
 
