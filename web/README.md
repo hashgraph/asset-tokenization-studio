@@ -32,8 +32,6 @@ This project has some private dependencies, so in order to install you would nee
 7. Run the following commands, bore in mind that you need to change from `<your_token>` to the previously generated token:
 
 ```
-npm config set @iob:registry https://gitlab.com/api/v4/projects/50254845/packages/npm/
-npm config set '//gitlab.com/api/v4/projects/50254845/packages/npm/:_authToken' "<your_token>"
 ```
 
 Now everything is ready to work, and `yarn install` could be run.

@@ -107,9 +107,6 @@
     "@types/react": "18.0.15",
     "nwsapi": "2.2.2"
   },
-  "publishConfig": {
-    "@iob:registry": "https://gitlab.com/api/v4/projects/42246696/packages/npm/"
-  },
   "volta": {
     "node": "18.14.1"
   },
