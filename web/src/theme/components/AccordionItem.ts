@@ -1,6 +1,6 @@
 import type { AccordionItemThemeConfiguration } from "@hashgraph/securitytoken-uicomponents/DataDisplay";
 
-// It is not exported from IOBricks
+// It is not exported from uiComponents
 const accordionItemPartsList: Array<string> = ["button", "item", "panel"];
 
 export const AccordionItem: AccordionItemThemeConfiguration = {

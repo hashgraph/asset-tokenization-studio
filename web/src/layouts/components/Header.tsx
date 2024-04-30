@@ -62,7 +62,6 @@ export const Header = () => {
           </HStack>
         </Flex>
       }
-      // TODO temporal fix that need to be fixes on IOBricks
       // seems to be that Header does not accept variants
       sx={{
         bg: getLayoutBg[userType],

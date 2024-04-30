@@ -41,7 +41,6 @@ export const Sidebar = () => {
           ))}
         </Stack>
       }
-      // TODO temporal fix that need to be fixes on IOBricks
       // seems to be that Sidebar does not accept variants
       sx={{
         bg: getLayoutBg[userType],

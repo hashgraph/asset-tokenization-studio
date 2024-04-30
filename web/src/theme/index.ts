@@ -9,7 +9,7 @@ const config: ThemeConfig = {
   initialColorMode: "dark",
   useSystemColorMode: false,
 };
-const iobricksTheme = _omit(BasePlatformTheme, "colors");
+const uiComponentsTheme = _omit(BasePlatformTheme, "colors");
 const commonContainerLayout = {
   w: "full",
   p: 4,
@@ -29,7 +29,7 @@ const commonContainerLayout = {
   },
 };
 
-const theme = extendTheme(iobricksTheme, {
+const theme = extendTheme(uiComponentsTheme, {
   breakpoints: {
     sm: "20em",
     md: "48em",
