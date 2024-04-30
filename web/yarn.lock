@@ -2801,7 +2801,7 @@
     "@ethersproject/contracts" "^5.7.0"
     "@hashgraph/hethers" "^1.2.5"
     "@hashgraph/sdk" "^2.33.0"
-    "@hashgraph/securitytoken-contracts" "file:../../../../.cache/yarn/v6/npm-@hashgraph-securitytoken-sdk-1.0.0-92ca13b6-db80-4567-be78-356a524becda-1714029696892/node_modules/@hashgraph/contracts"
+    "@hashgraph/securitytoken-contracts" "file:../../../../.cache/yarn/v6/npm-@hashgraph-securitytoken-sdk-1.0.0-438d00ba-a257-4f26-81a2-c32e8b2824eb-1714403749219/node_modules/@hashgraph/contracts"
     "@metamask/detect-provider" "^2.0.0"
     "@metamask/providers" "^12.0.0"
     axios "^1.5.0"
@@ -3559,17 +3559,17 @@
     "@tanstack/query-core" "4.36.1"
     use-sync-external-store "^1.2.0"
 
-"@tanstack/react-table@^8.9.1":
-  version "8.10.6"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-table/-/react-table-8.10.6.tgz#a8c03cc06ac890bce4404739b9356059c4259dd4"
-  integrity sha512-D0VEfkIYnIKdy6SHiBNEaMc4SxO+MV7ojaPhRu8jP933/gbMi367+Wul2LxkdovJ5cq6awm0L1+jgxdS/unzIg==
+"@tanstack/react-table@8.9.1", "@tanstack/react-table@^8.9.1":
+  version "8.9.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-table/-/react-table-8.9.1.tgz#bfe1d286f549b9743d99bfbeb531f2582f9d698b"
+  integrity sha512-yHs2m6lk5J5RNcu2dNtsDGux66wNXZjEgzxos6MRCX8gL+nqxeW3ZglqP6eANN0bGElPnjvqiUHGQvdACOr3Cw==
   dependencies:
-    "@tanstack/table-core" "8.10.6"
+    "@tanstack/table-core" "8.9.1"
 
-"@tanstack/table-core@8.10.6":
-  version "8.10.6"
-  resolved "https://registry.yarnpkg.com/@tanstack/table-core/-/table-core-8.10.6.tgz#c79d145dfc3dc9947a2b1cdac82cd4ec4cef822a"
-  integrity sha512-9t8brthhAmCBIjzk7fCDa/kPKoLQTtA31l9Ir76jYxciTlHU61r/6gYm69XF9cbg9n88gVL5y7rNpeJ2dc1AFA==
+"@tanstack/table-core@8.9.1":
+  version "8.9.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/table-core/-/table-core-8.9.1.tgz#869410ca1748c45d4e19ccfd4db7e36452611674"
+  integrity sha512-2+R83n8vMZND0q3W1lSiF7co9nFbeWbjAErFf27xwbeA9E0wtUu5ZDfgj+TZ6JzdAEQAgfxkk/QNFAKiS8E4MA==
 
 "@testing-library/dom@>=7", "@testing-library/dom@^9.0.0":
   version "9.3.3"

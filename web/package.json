@@ -72,7 +72,8 @@
     "vite-tsconfig-paths": "^4.2.1"
   },
   "resolutions": {
-    "nwsapi": "2.2.2"
+    "nwsapi": "2.2.2",
+    "@tanstack/react-table": "8.9.1"
   },
   "engines": {
     "yarn": "1.22.19"
