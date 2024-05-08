@@ -18,7 +18,10 @@ jobs:
       - name: Setup NodeJS Environment
         uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d
         with:
-          node-version: 18.x     
+          node-version: 18.x    
+
+      - name: Install Yarn
+        run: npm install -g yarn 
       
       - name: Create file .npmrc
         run: |
