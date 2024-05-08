@@ -1,4 +1,4 @@
-name: Publishing
+name: Publishing uiComponents
 on: 
   release:
     types:
@@ -24,24 +24,15 @@ jobs:
         run: |
             touch .npmrc
             echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
-            cp .npmrc ./contracts/.npmrc
-            cp .npmrc ./sdk/.npmrc
+            cp .npmrc ./uiComponents/.npmrc
       
-      - name: Change references
-        run: ./changeProyectsReferencesToRepo.sh
+      - name: Install uiComponents dependencies 
+        run: npm run install:uiComponents
 
-      - name: Install contracts dependencies 
-        run: npm run install:contracts
-
-      - name: Publish contracts package
-        run: npm run publish:contracts --access=public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Install sdk dependencies 
-        run: npm run install:sdk
-
-      - name: Publish sdk package
-        run: npm run publish:sdk --access=public
+      - name: Build uiComponents 
+        run: npm run build:uiComponents
+      
+      - name: Publish uiComponents package
+        run: npm run publish:uiComponents --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

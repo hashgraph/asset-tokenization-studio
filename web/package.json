@@ -14,7 +14,7 @@
     "@chakra-ui/react": "2.8.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@hashgraph/securitytoken-uicomponents": "file:./../uiComponents",
+    "@hashgraph/securitytoken-uicomponents": "1.0.0",
     "@hashgraph/securitytoken-sdk": "file:./../sdk",
     "@tanstack/react-query": "^4.35.3",
     "ethers": "^5.7.2",
