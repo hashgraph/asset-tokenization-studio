@@ -213,8 +213,9 @@ import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {ERC1594StorageWrapper} from './ERC1594StorageWrapper.sol';
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
+import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
 
-contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
+contract ERC1594 is IERC1594, IStaticFunctionSelectors, CapStorageWrapper, ERC1594StorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594()
         external
@@ -304,6 +305,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         virtual
         override
+        checkMaxSupply(_value)
         onlyUnpaused
         onlyRole(_ISSUER_ROLE)
         checkControlList(_tokenHolder)

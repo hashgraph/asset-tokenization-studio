@@ -241,6 +241,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 const amount = 1000
 const balanceOf_C_Original = 2 * amount
 const data = '0x1234'
+const maxSupply = 10000000
 
 describe('ERC1594 Tests', () => {
     let diamond: Diamond
@@ -260,6 +261,7 @@ describe('ERC1594 Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let controlList: ControlList
+
     describe('Multi partition mode', () => {
         beforeEach(async () => {
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -297,7 +299,7 @@ describe('ERC1594 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                maxSupply,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_B,
@@ -332,6 +334,18 @@ describe('ERC1594 Tests', () => {
             await expect(erc1594Facet.initialize_ERC1594()).to.be.rejectedWith(
                 'AlreadyInitialized'
             )
+        })
+
+        describe('Cap', () => {
+            it('GIVEN a max supply WHEN issue more than the max supply THEN transaction fails with MaxSupplyReached', async () => {
+                // Using account A (with role)
+                erc1594Facet = erc1594Facet.connect(signer_A)
+
+                // add to list fails
+                await expect(
+                    erc1594Facet.issue(account_E, maxSupply + 1, data)
+                ).to.be.rejectedWith('MaxSupplyReached')
+            })
         })
 
         describe('Paused', () => {
