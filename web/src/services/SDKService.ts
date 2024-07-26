@@ -55,7 +55,7 @@ import type {
   GetLockedBalanceRequest,
   GetRegulationDetailsRequest,
   RegulationViewModel,
-} from "@hashgraph/securitytoken-sdk";
+} from "@hashgraph/assettokenization-sdk";
 import {
   Bond,
   ConnectRequest,
@@ -67,7 +67,7 @@ import {
   Security,
   SetDividendsRequest,
   SupportedWallets,
-} from "@hashgraph/securitytoken-sdk";
+} from "@hashgraph/assettokenization-sdk";
 
 export class SDKService {
   static initData?: InitializationData = undefined;

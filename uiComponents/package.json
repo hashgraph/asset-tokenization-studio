@@ -1,5 +1,5 @@
 {
-  "name": "@hashgraph/securitytoken-uicomponents",
+  "name": "@hashgraph/assettokenization-uicomponents",
   "version": "1.0.0",
   "files": [
     "Theme/**/*",

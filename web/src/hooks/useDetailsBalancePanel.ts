@@ -1,7 +1,7 @@
 import {
   GetAccountBalanceRequest,
   GetSecurityDetailsRequest,
-} from "@hashgraph/securitytoken-sdk";
+} from "@hashgraph/assettokenization-sdk";
 import {
   useGetBalanceOf,
   useGetSecurityDetails,

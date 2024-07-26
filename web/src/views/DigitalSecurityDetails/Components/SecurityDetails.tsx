@@ -1,7 +1,7 @@
 import {
   DefinitionList,
   DefinitionListProps,
-} from "@hashgraph/securitytoken-uicomponents/DataDisplay";
+} from "@hashgraph/assettokenization-uicomponents/DataDisplay";
 import { useTranslation } from "react-i18next";
 import { useSecurityStore } from "../../../store/securityStore";
 import { useParams } from "react-router-dom";

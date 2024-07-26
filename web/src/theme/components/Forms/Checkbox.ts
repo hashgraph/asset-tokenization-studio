@@ -1,8 +1,8 @@
 import {
   CheckboxThemeConfiguration,
   checkboxPartsList,
-} from "@hashgraph/securitytoken-uicomponents/Forms";
-import { BasePlatformTheme } from "@hashgraph/securitytoken-uicomponents/Theme";
+} from "@hashgraph/assettokenization-uicomponents/Forms";
+import { BasePlatformTheme } from "@hashgraph/assettokenization-uicomponents/Theme";
 
 export const Checkbox: CheckboxThemeConfiguration = {
   parts: checkboxPartsList,

@@ -1,7 +1,7 @@
 import {
   ButtonProps,
   ButtonThemeConfiguration,
-} from "@hashgraph/securitytoken-uicomponents/Interaction";
+} from "@hashgraph/assettokenization-uicomponents/Interaction";
 
 export const sizes: ButtonThemeConfiguration["sizes"] = {
   sm: {

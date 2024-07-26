@@ -324,7 +324,7 @@ export async function getProxyImpl(
     console.log('New Implementation' + address[0])
 }
 
-export async function deploySecurityTokenFullInfrastructure(
+export async function deployassettokenizationFullInfrastructure(
     clientOperator: Client,
     privateKey: string,
     isED25519Type: boolean

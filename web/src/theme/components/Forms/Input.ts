@@ -2,7 +2,7 @@ import {
   inputPartsList,
   type InputConfigProps,
   type InputThemeConfiguration,
-} from "@hashgraph/securitytoken-uicomponents/Forms";
+} from "@hashgraph/assettokenization-uicomponents/Forms";
 
 const baseStyle: InputThemeConfiguration["baseStyle"] = () => {
   return {

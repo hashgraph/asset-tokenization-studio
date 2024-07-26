@@ -1,7 +1,7 @@
 import {
   AvatarThemeConfiguration,
   avatarPartsList,
-} from "@hashgraph/securitytoken-uicomponents/Basic";
+} from "@hashgraph/assettokenization-uicomponents/Basic";
 
 export const Avatar: AvatarThemeConfiguration = {
   parts: avatarPartsList,

@@ -1,7 +1,7 @@
 import { HStack, Stack, StackProps, VStack } from "@chakra-ui/react";
-import { PhosphorIcon, Weight } from "@hashgraph/securitytoken-uicomponents";
+import { PhosphorIcon, Weight } from "@hashgraph/assettokenization-uicomponents";
 import { Star } from "@phosphor-icons/react";
-import { Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
+import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
 import { SecurityStore } from "../../../store/securityStore";
 import { useWalletStore } from "../../../store/walletStore";
 import { useAccountStore } from "../../../store/accountStore";

@@ -1,4 +1,4 @@
-import { StepperThemeConfiguration } from "@hashgraph/securitytoken-uicomponents";
+import { StepperThemeConfiguration } from "@hashgraph/assettokenization-uicomponents";
 
 export const Stepper: StepperThemeConfiguration = {
   parts: [],

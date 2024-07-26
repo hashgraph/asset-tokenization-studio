@@ -1,7 +1,7 @@
 import {
   DetailReviewThemeConfiguration,
   detailReviewPartsList,
-} from "@hashgraph/securitytoken-uicomponents/DataDisplay";
+} from "@hashgraph/assettokenization-uicomponents/DataDisplay";
 
 export const DetailReview: DetailReviewThemeConfiguration = {
   parts: detailReviewPartsList,

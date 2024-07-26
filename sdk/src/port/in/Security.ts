@@ -480,5 +480,5 @@ class SecurityInPort implements ISecurityInPort {
   }
 }
 
-const SecurityToken = new SecurityInPort();
-export default SecurityToken;
+const assettokenization = new SecurityInPort();
+export default assettokenization;

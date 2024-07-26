@@ -1,5 +1,5 @@
 {
-  "name": "@hashgraph/securitytoken-dapp",
+  "name": "@hashgraph/assettokenization-dapp",
   "version": "1.0.0",
   "scripts": {
     "dev": "vite",
@@ -14,8 +14,8 @@
     "@chakra-ui/react": "2.8.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@hashgraph/securitytoken-uicomponents": "1.0.0",
-    "@hashgraph/securitytoken-sdk": "file:./../sdk",
+    "@hashgraph/assettokenization-uicomponents": "1.0.0",
+    "@hashgraph/assettokenization-sdk": "file:./../sdk",
     "@tanstack/react-query": "^4.35.3",
     "ethers": "^5.7.2",
     "framer-motion": "^10.16.4",

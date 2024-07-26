@@ -223,7 +223,7 @@ import {
     deploySnapshots,
     deployScheduledSnapshots,
     deployCorporateActionsSecurity,
-    deploySecurityTokenFullInfrastructure,
+    deployassettokenizationFullInfrastructure,
     toHashgraphKey,
     updateProxy,
     getProxyImpl,
@@ -448,7 +448,7 @@ task(
         toHashgraphKey(client1privatekey, client1isED25519)
     )
 
-    const result = await deploySecurityTokenFullInfrastructure(
+    const result = await deployassettokenizationFullInfrastructure(
         client,
         client1privatekey,
         client1isED25519

@@ -1,6 +1,6 @@
 import { HStack, Stack } from "@chakra-ui/react";
-import { Tag } from "@hashgraph/securitytoken-uicomponents";
-import { Tabs } from "@hashgraph/securitytoken-uicomponents/DataDisplay";
+import { Tag } from "@hashgraph/assettokenization-uicomponents";
+import { Tabs } from "@hashgraph/assettokenization-uicomponents/DataDisplay";
 import { useTranslation } from "react-i18next";
 import { History } from "../../components/History";
 import { Details } from "./Components/Details";
@@ -18,7 +18,7 @@ import {
   EquityDetailsViewModel,
   GetBondDetailsRequest,
   BondDetailsViewModel,
-} from "@hashgraph/securitytoken-sdk";
+} from "@hashgraph/assettokenization-sdk";
 import {
   useGetBondDetails,
   useGetEquityDetails,

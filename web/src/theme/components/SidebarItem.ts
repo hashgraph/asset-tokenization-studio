@@ -2,7 +2,7 @@ import {
   SidebarItemConfigProps,
   SidebarItemThemeConfiguration,
   sidebarPartsList,
-} from "@hashgraph/securitytoken-uicomponents/Navigation";
+} from "@hashgraph/assettokenization-uicomponents/Navigation";
 
 const iconStyles = {
   hover: {

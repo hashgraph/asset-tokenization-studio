@@ -1,7 +1,7 @@
 import { UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { SDKService } from "../../services/SDKService";
-import { ForceTransferRequest } from "@hashgraph/securitytoken-sdk";
-import { useToast } from "@hashgraph/securitytoken-uicomponents/Overlay/Toast";
+import { ForceTransferRequest } from "@hashgraph/assettokenization-sdk";
+import { useToast } from "@hashgraph/assettokenization-uicomponents/Overlay/Toast";
 import { useTranslation } from "react-i18next";
 
 export const useForceTransferSecurity = (

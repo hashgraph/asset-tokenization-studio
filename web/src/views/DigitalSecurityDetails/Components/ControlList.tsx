@@ -1,13 +1,13 @@
-import { Table } from "@hashgraph/securitytoken-uicomponents/DataDisplay";
+import { Table } from "@hashgraph/assettokenization-uicomponents/DataDisplay";
 import { CellContext, createColumnHelper } from "@tanstack/react-table";
 import { useTranslation } from "react-i18next";
-import { PopUp } from "@hashgraph/securitytoken-uicomponents";
+import { PopUp } from "@hashgraph/assettokenization-uicomponents";
 import { Trash } from "@phosphor-icons/react";
 import { HStack, Stack, useDisclosure } from "@chakra-ui/react";
-import { PhosphorIcon, Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
-import { SearchInputController } from "@hashgraph/securitytoken-uicomponents/Forms/Controllers";
+import { PhosphorIcon, Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import { SearchInputController } from "@hashgraph/assettokenization-uicomponents/Forms/Controllers";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Button, ClipboardButton } from "@hashgraph/securitytoken-uicomponents/Interaction";
+import { Button, ClipboardButton } from "@hashgraph/assettokenization-uicomponents/Interaction";
 import { useEffect, useMemo, useState } from "react";
 import { useTable } from "../../../hooks/useTable";
 import _chunk from "lodash/chunk";
@@ -22,9 +22,9 @@ import {
   ControlListRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,
-} from "@hashgraph/securitytoken-sdk";
+} from "@hashgraph/assettokenization-sdk";
 import { useParams } from "react-router-dom";
-import { useToast } from "@hashgraph/securitytoken-uicomponents/Overlay/Toast";
+import { useToast } from "@hashgraph/assettokenization-uicomponents/Overlay/Toast";
 
 type securitiesSearch = {
   search: string;

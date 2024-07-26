@@ -7,14 +7,14 @@ import {
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { Info } from "@phosphor-icons/react";
-import { InfoDivider, PhosphorIcon, Tooltip } from "@hashgraph/securitytoken-uicomponents";
+import { InfoDivider, PhosphorIcon, Tooltip } from "@hashgraph/assettokenization-uicomponents";
 
-import { Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
+import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
 import {
   InputController,
   InputNumberController,
   ToggleController,
-} from "@hashgraph/securitytoken-uicomponents/Forms/Controllers";
+} from "@hashgraph/assettokenization-uicomponents/Forms/Controllers";
 import {
   greaterOrEqualThan,
   isISINValid,

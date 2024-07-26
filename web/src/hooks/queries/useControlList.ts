@@ -10,8 +10,8 @@ import {
   ControlListRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,
-} from "@hashgraph/securitytoken-sdk";
-import { useToast } from "@hashgraph/securitytoken-uicomponents/Overlay/Toast";
+} from "@hashgraph/assettokenization-sdk";
+import { useToast } from "@hashgraph/assettokenization-uicomponents/Overlay/Toast";
 
 export const GET_CONTROL_LIST_COUNT = (securityId: string) =>
   `GET_CONTROL_LIST_COUNT${securityId}`;

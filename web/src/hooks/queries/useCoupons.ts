@@ -1,6 +1,6 @@
 import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
 import { SDKService } from "../../services/SDKService";
-import { useToast } from "@hashgraph/securitytoken-uicomponents/Overlay/Toast";
+import { useToast } from "@hashgraph/assettokenization-uicomponents/Overlay/Toast";
 import { useTranslation } from "react-i18next";
 import {
   CouponForViewModel,
@@ -9,7 +9,7 @@ import {
   GetCouponForRequest,
   GetCouponRequest,
   SetCouponRequest,
-} from "@hashgraph/securitytoken-sdk";
+} from "@hashgraph/assettokenization-sdk";
 
 export const GET_SECURITY_COUPONS_FOR = (
   securityId: string,

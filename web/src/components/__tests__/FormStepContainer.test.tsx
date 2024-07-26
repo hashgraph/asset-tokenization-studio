@@ -1,6 +1,6 @@
 import { FormStepContainer } from "../FormStepContainer";
 import { render } from "../../test-utils";
-import { Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
+import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
 
 describe(`${FormStepContainer.name}`, () => {
   test("should render correctly", () => {

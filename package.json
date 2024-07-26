@@ -1,7 +1,7 @@
 {
-    "name": "hedera-security-token",
+    "name": "hedera-asset-tokenization",
     "version": "1.0.0",
-    "description": "security token",
+    "description": "asset tokenization",
     "scripts": {
       "install:all": "node install.js && npm run prepare",
       "install:contracts": "cd contracts && npm ci",

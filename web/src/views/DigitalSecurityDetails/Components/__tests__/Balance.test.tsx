@@ -1,6 +1,6 @@
 import { Balance } from "../Balance";
 import { render } from "../../../../test-utils";
-import { SecurityViewModel } from "@hashgraph/securitytoken-sdk";
+import { SecurityViewModel } from "@hashgraph/assettokenization-sdk";
 
 // TODO Improve tests when it is connected to SDK
 describe(`${Balance.name}`, () => {

@@ -1,6 +1,6 @@
 <div align="center">
 
-# Security Token Studio
+# Asset Tokenization Studio
 
 [![License](https://img.shields.io/badge/license-apache2-blue.svg)](LICENSE)
 
@@ -48,4 +48,4 @@ to [oss@hedera.com](mailto:oss@hedera.com).
 
 # 🔐 Security
 
-Please do not file a public ticket mentioning the vulnerability. Refer to the security policy defined in the [SECURITY.md](https://github.com/hashgraph/securitytoken-studio/blob/main/SECURITY.md).
+Please do not file a public ticket mentioning the vulnerability. Refer to the security policy defined in the [SECURITY.md](https://github.com/hashgraph/assettokenization-studio/blob/main/SECURITY.md).

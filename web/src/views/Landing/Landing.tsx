@@ -8,17 +8,17 @@ import {
   VStack,
   Box,
 } from "@chakra-ui/react";
-import { PhosphorIcon, Text } from "@hashgraph/securitytoken-uicomponents/Foundations";
-import { Button } from "@hashgraph/securitytoken-uicomponents/Interaction";
+import { PhosphorIcon, Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import { Button } from "@hashgraph/assettokenization-uicomponents/Interaction";
 import landingBackground from "../../assets/layer.png";
 import { useWalletStore } from "../../store/walletStore";
 import _capitalize from "lodash/capitalize";
 import { Trans, useTranslation } from "react-i18next";
 import { RouterManager } from "../../router/RouterManager";
 import { RouteName } from "../../router/RouteName";
-import { PopUp } from "@hashgraph/securitytoken-uicomponents";
+import { PopUp } from "@hashgraph/assettokenization-uicomponents";
 import { Wallet } from "@phosphor-icons/react";
-import { Weight } from "@hashgraph/securitytoken-uicomponents/Foundations";
+import { Weight } from "@hashgraph/assettokenization-uicomponents/Foundations";
 import { MetamaskStatus, METAMASK_URL, User } from "../../utils/constants";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
 import { useUserStore } from "../../store/userStore";

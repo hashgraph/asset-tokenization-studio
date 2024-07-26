@@ -1,4 +1,4 @@
-import type { SecurityViewModel } from "@hashgraph/securitytoken-sdk";
+import type { SecurityViewModel } from "@hashgraph/assettokenization-sdk";
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 

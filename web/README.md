@@ -1,6 +1,6 @@
 <div align="center">
 
-# Security Token Studio - Web
+# Asset Tokenization Studio - Web
 
 [![License](https://img.shields.io/badge/license-apache2-blue.svg)](../LICENSE)
 

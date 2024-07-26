@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { SDKService } from "../../services/SDKService";
-import { useToast } from "@hashgraph/securitytoken-uicomponents/Overlay/Toast";
+import { useToast } from "@hashgraph/assettokenization-uicomponents/Overlay/Toast";
 import { useTranslation } from "react-i18next";
-import { ApplyRolesRequest } from "@hashgraph/securitytoken-sdk";
+import { ApplyRolesRequest } from "@hashgraph/assettokenization-sdk";
 
 export const useApplyRoles = () => {
   const toast = useToast();

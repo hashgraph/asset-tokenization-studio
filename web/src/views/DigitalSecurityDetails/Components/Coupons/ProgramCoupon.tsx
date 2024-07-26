@@ -2,7 +2,7 @@ import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import {
   CalendarInputController,
   InputNumberController,
-} from "@hashgraph/securitytoken-uicomponents/Forms/Controllers";
+} from "@hashgraph/assettokenization-uicomponents/Forms/Controllers";
 import { Info } from "@phosphor-icons/react";
 import { isAfterDate, min, required } from "../../../../utils/rules";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -10,13 +10,13 @@ import { useTranslation } from "react-i18next";
 import {
   GetBondDetailsRequest,
   SetCouponRequest,
-} from "@hashgraph/securitytoken-sdk";
+} from "@hashgraph/assettokenization-sdk";
 import { useParams } from "react-router-dom";
 import { useCoupons } from "../../../../hooks/queries/useCoupons";
 import { useGetBondDetails } from "../../../../hooks/queries/useGetSecurityDetails";
 import { dateToUnixTimestamp } from "../../../../utils/format";
 import { COUPONS_FACTOR } from "../../../../utils/constants";
-import { PhosphorIcon, Text, Tooltip } from "@hashgraph/securitytoken-uicomponents";
+import { PhosphorIcon, Text, Tooltip } from "@hashgraph/assettokenization-uicomponents";
 import { isBeforeDate } from "../../../../utils/helpers";
 
 interface ProgramCouponFormValues {

@@ -2,8 +2,8 @@ import { NextStepButton } from "../NextStepButton";
 import { render } from "../../../../test-utils";
 
 const goToNext = jest.fn();
-jest.mock("@hashgraph/securitytoken-uicomponents/Indicators", () => ({
-  ...jest.requireActual("@hashgraph/securitytoken-uicomponents/Indicators"),
+jest.mock("@hashgraph/assettokenization-uicomponents/Indicators", () => ({
+  ...jest.requireActual("@hashgraph/assettokenization-uicomponents/Indicators"),
   useStepContext: () => ({ goToNext }),
 }));
 
