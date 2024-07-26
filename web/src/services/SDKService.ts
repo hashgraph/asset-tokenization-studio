@@ -221,7 +221,8 @@ export class SDKService {
   public static async createEquity(
     createRequest: CreateEquityRequest,
   ): Promise<{ security: SecurityViewModel } | null> {
-    return await Equity.create(createRequest);
+    const response = await Equity.create(createRequest);
+    return response;
   }
 
   public static async getEquityDetails(
@@ -234,7 +235,8 @@ export class SDKService {
   public static async createBond(
     createRequest: CreateBondRequest,
   ): Promise<{ security: SecurityViewModel } | null> {
-    return await Bond.create(createRequest);
+    const response = await Bond.create(createRequest);
+    return response;
   }
 
   public static async getBondDetails(
@@ -251,7 +253,8 @@ export class SDKService {
 
   // COUPONS ////////////////////////////////////////////
   public static async setCoupon(req: SetCouponRequest): Promise<number> {
-    return await Bond.setCoupon(req);
+    const response = await Bond.setCoupon(req);
+    return response.payload;
   }
 
   public static async getCouponFor(
@@ -274,11 +277,13 @@ export class SDKService {
 
   // ROLES ////////////////////////////////////////////
   public static async grantRole(req: RoleRequest): Promise<boolean> {
-    return await Role.grantRole(req);
+    const response = await Role.grantRole(req);
+    return response.payload;
   }
 
   public static async revokeRole(req: RoleRequest): Promise<boolean> {
-    return await Role.revokeRole(req);
+    const response = await Role.revokeRole(req);
+    return response.payload;
   }
 
   public static async getRoleMemberCount(
@@ -304,20 +309,23 @@ export class SDKService {
   }
 
   public static async applyRoles(req: ApplyRolesRequest): Promise<boolean> {
-    return await Role.applyRoles(req);
+    const response = await Role.applyRoles(req);
+    return response.payload;
   }
 
   // CONTROL LIST ////////////////////////////////////////////
   public static async addToControlList(
     req: ControlListRequest,
   ): Promise<boolean> {
-    return await Security.addToControlList(req);
+    const response = await Security.addToControlList(req);
+    return response.payload;
   }
 
   public static async removeFromControlList(
     req: ControlListRequest,
   ): Promise<boolean> {
-    return await Security.removeFromControlList(req);
+    const response = await Security.removeFromControlList(req);
+    return response.payload;
   }
 
   public static async isAccountInControlList(
@@ -346,16 +354,19 @@ export class SDKService {
 
   // MINT ////////////////////////////////////////////
   public static async mint(req: IssueRequest): Promise<boolean> {
-    return await Security.issue(req);
+    const response = await Security.issue(req);
+    return response.payload;
   }
 
   // TRANSFER & REDEEM & BALANCES ////////////////////////////////////////////
   public static async transfer(req: TransferRequest): Promise<boolean> {
-    return await Security.transfer(req);
+    const response = await Security.transfer(req);
+    return response.payload;
   }
 
   public static async redeem(req: RedeemRequest): Promise<boolean> {
-    return await Security.redeem(req);
+    const response = await Security.redeem(req);
+    return response.payload;
   }
 
   public static async getBalanceOf(
@@ -366,7 +377,8 @@ export class SDKService {
 
   // DIVIDENDS ////////////////////////////////////////////
   public static async setDividends(req: SetDividendsRequest): Promise<number> {
-    return await Equity.setDividends(req);
+    const response = await Equity.setDividends(req);
+    return response.payload;
   }
 
   public static async getDividendsFor(
@@ -391,22 +403,26 @@ export class SDKService {
   public static async controllerTransfer(
     req: ForceTransferRequest,
   ): Promise<boolean> {
-    return await Security.controllerTransfer(req);
+    const response = await Security.controllerTransfer(req);
+    return response.payload;
   }
 
   public static async controllerRedeem(
     req: ForceRedeemRequest,
   ): Promise<boolean> {
-    return await Security.controllerRedeem(req);
+    const response = await Security.controllerRedeem(req);
+    return response.payload;
   }
 
   // PAUSE ////////////////////////////////////////////
   public static async pause(req: PauseRequest): Promise<boolean> {
-    return await Security.pause(req);
+    const response = await Security.pause(req);
+    return response.payload;
   }
 
   public static async unpause(req: PauseRequest): Promise<boolean> {
-    return await Security.unpause(req);
+    const response = await Security.unpause(req);
+    return response.payload;
   }
 
   public static async isPaused(req: PauseRequest): Promise<boolean> {
@@ -415,7 +431,8 @@ export class SDKService {
 
   // CAP ////////////////////////////////////////////
   public static async setMaxSupply(req: SetMaxSupplyRequest): Promise<boolean> {
-    return await Security.setMaxSupply(req);
+    const response = await Security.setMaxSupply(req);
+    return response.payload;
   }
 
   public static async getMaxSupply(
@@ -428,7 +445,8 @@ export class SDKService {
   public static async setVotingRights(
     req: SetVotingRightsRequest,
   ): Promise<number> {
-    return await Equity.setVotingRights(req);
+    const response = await Equity.setVotingRights(req);
+    return response.payload;
   }
 
   public static async getAllVotingRights(
@@ -451,11 +469,13 @@ export class SDKService {
 
   // HOLD ////////////////////////////////////////////
   public static async lock(req: LockRequest): Promise<boolean> {
-    return await Security.lock(req);
+    const response = await Security.lock(req);
+    return response.payload;
   }
 
   public static async release(req: ReleaseRequest): Promise<boolean> {
-    return await Security.release(req);
+    const response = await Security.release(req);
+    return response.payload;
   }
 
   public static async getLockedBalanceOf(
@@ -466,3 +486,4 @@ export class SDKService {
 }
 
 export default SDKService;
+

@@ -1,6 +1,6 @@
 {
-  "name": "@iob/securitytoken-sdk",
-  "version": "1.0.24",
+  "name": "@hashgraph/securitytoken-sdk",
+  "version": "1.0.0",
   "description": "Testing to MASTER",
   "main": "./build/cjs/src/index.js",
   "module": "./build/esm/src/index.js",
