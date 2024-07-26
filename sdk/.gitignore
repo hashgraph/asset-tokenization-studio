@@ -28,5 +28,6 @@ build
 # Misc
 .DS_Store
 
+package-lock.json
 report.json
 .env
