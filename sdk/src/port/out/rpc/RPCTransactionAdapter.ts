@@ -109,7 +109,7 @@ import {
   IBond,
   Bond__factory,
   TransferAndLock__factory,
-} from '@iob/securitytoken-contracts';
+} from '@hashgraph/securitytoken-contracts';
 import {
   EnvironmentResolver,
   Resolvers,
@@ -126,7 +126,7 @@ import {
   Snapshots__factory,
   ScheduledSnapshots__factory,
   Lock__factory,
-} from '@iob/securitytoken-contracts';
+} from '@hashgraph/securitytoken-contracts';
 import { BondDetails } from '../../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../../domain/context/bond/CouponDetails.js';
 import { BondDetailsData } from '../../../domain/context/factory/BondDetailsData.js';

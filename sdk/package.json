@@ -28,7 +28,8 @@
     "prettier": "prettier --config .prettierrc --write .",
     "pre-commit": "npm run lint && npm run prettier",
     "prettierCheck": "prettier --config .prettierrc --check",
-    "prepack": "npm run build"
+    "prepack": "npm run build",
+    "cleanCache": "npx jest --clearCache"
   },
   "license": "Apache-2.0",
   "devDependencies": {
@@ -52,7 +53,7 @@
     "@ethersproject/contracts": "^5.7.0",
     "@hashgraph/hethers": "^1.2.5",
     "@hashgraph/sdk": "^2.33.0",
-    "@iob/securitytoken-contracts": "1.0.8",
+    "@hashgraph/securitytoken-contracts": "file:./../contracts",
     "@metamask/detect-provider": "^2.0.0",
     "@metamask/providers": "^12.0.0",
     "axios": "^1.5.0",
