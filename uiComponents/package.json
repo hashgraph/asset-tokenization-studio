@@ -1,6 +1,6 @@
 {
-  "name": "@hashgraph/assettokenization-uicomponents",
-  "version": "1.0.0",
+  "name": "@localhashgraph/assettokenization-uicomponents",
+  "version": "1.0.1",
   "files": [
     "Theme/**/*",
     "Hooks/**/*",
