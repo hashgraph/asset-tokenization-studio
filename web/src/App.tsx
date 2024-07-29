@@ -1,4 +1,4 @@
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider, Flex, Text } from "@chakra-ui/react";
 import { I18nextProvider, useTranslation } from "react-i18next";
 import {
   MutationCache,
@@ -10,9 +10,13 @@ import theme from "./theme";
 import i18n from "./i18n";
 import AppRouter from "./router";
 import { SDKConnection } from "./components/SDKConnection";
-import { InterFonts, useToast } from "@hashgraph/assettokenization-uicomponents";
+import {
+  InterFonts,
+  useToast,
+} from "@hashgraph/assettokenization-uicomponents";
 import { useState } from "react";
 import Disclaimer from "./views/Initialization/CookieDisclaimer.js";
+import { isMobile } from "react-device-detect";
 
 function App() {
   const toast = useToast();
@@ -59,7 +63,20 @@ function App() {
     }),
   });
 
-  return !showDisclaimer || accepted ? (
+  return isMobile ? (
+    <Flex h="100vh" justify={"center"} flexDir="column">
+      <Text
+        fontSize="16px"
+        fontWeight={500}
+        textAlign="center"
+        lineHeight="16px"
+        color="brand.gray"
+        data-testid="isMobile"
+      >
+        {t("mobile.message")}
+      </Text>
+    </Flex>
+  ) : !showDisclaimer || accepted ? (
     <I18nextProvider i18n={i18n}>
       <QueryClientProvider client={queryClient}>
         <ChakraProvider theme={theme}>

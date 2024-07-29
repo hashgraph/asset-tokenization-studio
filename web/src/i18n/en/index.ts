@@ -32,6 +32,9 @@ export default {
     tokenDetails: "Token details",
     check: " Check",
     error: "The operation has failed",
+    mobile: {
+      message: "This app is for desktop use only",
+    },
   },
   properties: {
     type: "Type",

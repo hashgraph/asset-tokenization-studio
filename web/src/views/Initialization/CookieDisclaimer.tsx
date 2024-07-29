@@ -1,6 +1,9 @@
 import { ChakraProvider, Flex, useDisclosure } from "@chakra-ui/react";
 import { useEffect } from "react";
-import { PhosphorIcon, PopUp } from "@iob/io-bricks-ui";
+import {
+  PhosphorIcon,
+  PopUp,
+} from "@hashgraph/assettokenization-uicomponents";
 import { Info } from "@phosphor-icons/react";
 import theme from "../../theme";
 import { useTranslation } from "react-i18next";

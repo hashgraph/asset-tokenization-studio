@@ -13,11 +13,9 @@
 - **[Yarn Version Compatibility](#yarn-version-compatibility)**<br>
 - **[Installation](#installation)**<br>
 
-
 # Description
 
 Backoffice for Red Swan - Phase1a.
-
 
 # Private dependencies
 
@@ -32,6 +30,7 @@ This project has some private dependencies, so in order to install you would nee
 7. Run the following commands, bore in mind that you need to change from `<your_token>` to the previously generated token:
 
 ```
+
 ```
 
 Now everything is ready to work, and `yarn install` could be run.

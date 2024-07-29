@@ -5,5 +5,4 @@ export default {
     ConfirmButton: "Accept",
     CancelButton: "Decline",
   },
-  SignUp: {},
 };
