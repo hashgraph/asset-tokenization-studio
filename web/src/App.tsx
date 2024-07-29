@@ -11,10 +11,16 @@ import i18n from "./i18n";
 import AppRouter from "./router";
 import { SDKConnection } from "./components/SDKConnection";
 import { InterFonts, useToast } from "@hashgraph/assettokenization-uicomponents";
+import { useState } from "react";
+import Disclaimer from "./views/Initialization/CookieDisclaimer.js";
 
 function App() {
   const toast = useToast();
   const { t } = useTranslation("globals");
+  const [accepted, setAccepted] = useState<boolean>(false);
+  const showDisclaimer: boolean =
+    process.env.REACT_APP_SHOW_DISCLAIMER !== undefined &&
+    process.env.REACT_APP_SHOW_DISCLAIMER === "true";
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const showErrorToast = (error: any) => {
@@ -53,7 +59,7 @@ function App() {
     }),
   });
 
-  return (
+  return !showDisclaimer || accepted ? (
     <I18nextProvider i18n={i18n}>
       <QueryClientProvider client={queryClient}>
         <ChakraProvider theme={theme}>
@@ -63,6 +69,8 @@ function App() {
         </ChakraProvider>
       </QueryClientProvider>
     </I18nextProvider>
+  ) : (
+    <Disclaimer setAccepted={setAccepted} />
   );
 }
 

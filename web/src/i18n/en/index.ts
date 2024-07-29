@@ -3,6 +3,7 @@ import landing from "./landing";
 import dashboard from "./dashboard";
 import rules from "./rules";
 import security from "./security";
+import initialization from "./initialization";
 
 export default {
   globals: {
@@ -93,4 +94,5 @@ export default {
   dashboard,
   rules,
   security,
+  initialization,
 };
