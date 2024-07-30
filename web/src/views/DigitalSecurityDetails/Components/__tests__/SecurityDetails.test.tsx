@@ -64,7 +64,9 @@ describe(`${SecurityDetails.name}`, () => {
     const totalSupply = component.getByTestId(
       "definition-list-item-Total Supply",
     );
-    expect(totalSupply).toHaveTextContent("Total Supply1150000000000000000000 ET");
+    expect(totalSupply).toHaveTextContent(
+      "Total Supply1150000000000000000000 ET",
+    );
 
     expect(component.asFragment()).toMatchSnapshot("loading");
   });

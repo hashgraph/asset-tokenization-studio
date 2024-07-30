@@ -73,7 +73,7 @@ export class SDKService {
   static initData?: InitializationData = undefined;
   static testnetNetwork = "testnet";
   static testnetMirrorNode = {
-    baseUrl: process.env.REACT_APP_MIRROR_NODE ?? '',
+    baseUrl: process.env.REACT_APP_MIRROR_NODE ?? "",
     apiKey: "",
     headerName: "",
   };
@@ -86,7 +86,7 @@ export class SDKService {
     ],
   };
   static testnetRPCNode = {
-    baseUrl: process.env.REACT_APP_RPC_NODE ?? '',
+    baseUrl: process.env.REACT_APP_RPC_NODE ?? "",
     //baseUrl: "http://127.0.0.1:7546",
     apiKey: "",
     headerName: "",
@@ -99,14 +99,15 @@ export class SDKService {
       },
     ],
   };
-  static testnetResolverAddress = process.env.REACT_APP_RPC_RESOLVER ?? '0.0.0';
-  static testnetFactoryAddress = process.env.REACT_APP_RPC_FACTORY ?? '0.0.0';
-  static testnetBusinessLogicKeysCommon = process.env.REACT_APP_BUSINESS_LOGIC_KEYS_COMMON!.split(",");
+  static testnetResolverAddress = process.env.REACT_APP_RPC_RESOLVER ?? "0.0.0";
+  static testnetFactoryAddress = process.env.REACT_APP_RPC_FACTORY ?? "0.0.0";
+  static testnetBusinessLogicKeysCommon =
+    process.env.REACT_APP_BUSINESS_LOGIC_KEYS_COMMON!.split(",");
   static testnetBusinessLogicKeysEquity = [
-    process.env.REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY ?? '',
+    process.env.REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY ?? "",
   ];
   static testnetBusinessLogicKeysBond = [
-    process.env.REACT_APP_BUSINESS_LOGIC_KEYS_BOND ?? '',
+    process.env.REACT_APP_BUSINESS_LOGIC_KEYS_BOND ?? "",
   ];
   static testnetConfiguration = {
     factoryAddress: this.testnetFactoryAddress,
@@ -486,4 +487,3 @@ export class SDKService {
 }
 
 export default SDKService;
-

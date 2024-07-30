@@ -1,7 +1,10 @@
 import { useEffect } from "react";
 import { HStack, Stack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
-import { PhosphorIcon, Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import {
+  PhosphorIcon,
+  Text,
+} from "@hashgraph/assettokenization-uicomponents/Foundations";
 import { CancelButton } from "../../../components/CancelButton";
 import { NextStepButton } from "./NextStepButton";
 import { PreviousStepButton } from "./PreviousStepButton";

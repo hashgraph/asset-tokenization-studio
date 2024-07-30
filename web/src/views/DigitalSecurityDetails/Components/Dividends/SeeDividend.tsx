@@ -18,7 +18,12 @@ import {
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useToast } from "@hashgraph/assettokenization-uicomponents/Overlay/Toast";
-import { DefinitionList, PhosphorIcon, Text, Tooltip } from "@hashgraph/assettokenization-uicomponents";
+import {
+  DefinitionList,
+  PhosphorIcon,
+  Text,
+  Tooltip,
+} from "@hashgraph/assettokenization-uicomponents";
 import { useSecurityStore } from "../../../../store/securityStore";
 import { formatNumberLocale } from "../../../../utils/format";
 

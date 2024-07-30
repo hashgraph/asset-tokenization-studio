@@ -20,7 +20,10 @@ import {
   GetVotingRightsRequest,
 } from "@hashgraph/assettokenization-sdk";
 import { useParams } from "react-router-dom";
-import { PhosphorIcon, Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import {
+  PhosphorIcon,
+  Text,
+} from "@hashgraph/assettokenization-uicomponents/Foundations";
 import { Panel } from "../../../../components/Panel";
 import { hexToText } from "../../../../utils/format";
 import { Tooltip } from "@hashgraph/assettokenization-uicomponents";

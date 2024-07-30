@@ -3,7 +3,10 @@ import {
   AccordionItemCustomTitleProps,
 } from "../AccordionItemCustomTitle";
 import { render } from "../../../../test-utils";
-import { Accordion, AccordionItem } from "@hashgraph/assettokenization-uicomponents/DataDisplay";
+import {
+  Accordion,
+  AccordionItem,
+} from "@hashgraph/assettokenization-uicomponents/DataDisplay";
 
 const defaultProps = {
   isAdmin: true,

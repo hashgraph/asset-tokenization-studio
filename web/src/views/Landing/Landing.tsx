@@ -8,7 +8,10 @@ import {
   VStack,
   Box,
 } from "@chakra-ui/react";
-import { PhosphorIcon, Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import {
+  PhosphorIcon,
+  Text,
+} from "@hashgraph/assettokenization-uicomponents/Foundations";
 import { Button } from "@hashgraph/assettokenization-uicomponents/Interaction";
 import landingBackground from "../../assets/layer.png";
 import { useWalletStore } from "../../store/walletStore";

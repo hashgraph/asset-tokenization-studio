@@ -7,7 +7,11 @@ import {
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { Info } from "@phosphor-icons/react";
-import { InfoDivider, PhosphorIcon, Tooltip } from "@hashgraph/assettokenization-uicomponents";
+import {
+  InfoDivider,
+  PhosphorIcon,
+  Tooltip,
+} from "@hashgraph/assettokenization-uicomponents";
 
 import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
 import {

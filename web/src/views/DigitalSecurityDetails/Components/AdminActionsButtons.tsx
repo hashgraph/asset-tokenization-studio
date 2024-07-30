@@ -4,9 +4,15 @@ import { HStack, Menu, MenuButton, VStack } from "@chakra-ui/react";
 import { Button } from "@hashgraph/assettokenization-uicomponents/Interaction";
 import { RouteName } from "../../../router/RouteName";
 import { RouterManager } from "../../../router/RouterManager";
-import { PhosphorIcon, Toggle } from "@hashgraph/assettokenization-uicomponents";
+import {
+  PhosphorIcon,
+  Toggle,
+} from "@hashgraph/assettokenization-uicomponents";
 import { DotsThreeVertical } from "@phosphor-icons/react";
-import { Dropdown, DropdownItem } from "@hashgraph/assettokenization-uicomponents/DataDisplay";
+import {
+  Dropdown,
+  DropdownItem,
+} from "@hashgraph/assettokenization-uicomponents/DataDisplay";
 import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
 import { usePauseSecurity } from "../../../hooks/queries/usePauseSecurity";
 import { useUnpauseSecurity } from "../../../hooks/queries/useUnpauseSecurity";

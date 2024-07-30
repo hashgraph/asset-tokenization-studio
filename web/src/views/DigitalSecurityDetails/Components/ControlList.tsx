@@ -4,10 +4,16 @@ import { useTranslation } from "react-i18next";
 import { PopUp } from "@hashgraph/assettokenization-uicomponents";
 import { Trash } from "@phosphor-icons/react";
 import { HStack, Stack, useDisclosure } from "@chakra-ui/react";
-import { PhosphorIcon, Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import {
+  PhosphorIcon,
+  Text,
+} from "@hashgraph/assettokenization-uicomponents/Foundations";
 import { SearchInputController } from "@hashgraph/assettokenization-uicomponents/Forms/Controllers";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { Button, ClipboardButton } from "@hashgraph/assettokenization-uicomponents/Interaction";
+import {
+  Button,
+  ClipboardButton,
+} from "@hashgraph/assettokenization-uicomponents/Interaction";
 import { useEffect, useMemo, useState } from "react";
 import { useTable } from "../../../hooks/useTable";
 import _chunk from "lodash/chunk";

@@ -1,7 +1,10 @@
 import { HStack, Stack, VStack } from "@chakra-ui/react";
 import { Button } from "@hashgraph/assettokenization-uicomponents/Interaction";
 import { SearchInputController } from "@hashgraph/assettokenization-uicomponents/Forms/Controllers";
-import { Heading, Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import {
+  Heading,
+  Text,
+} from "@hashgraph/assettokenization-uicomponents/Foundations";
 import { useForm } from "react-hook-form";
 import { DefinitionList } from "@hashgraph/assettokenization-uicomponents";
 import { useTranslation } from "react-i18next";

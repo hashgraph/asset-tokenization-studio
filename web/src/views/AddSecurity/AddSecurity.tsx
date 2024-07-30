@@ -1,5 +1,8 @@
 import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { Heading, Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import {
+  Heading,
+  Text,
+} from "@hashgraph/assettokenization-uicomponents/Foundations";
 import { useTranslation } from "react-i18next";
 import { RouteName } from "../../router/RouteName";
 import { InputController } from "@hashgraph/assettokenization-uicomponents/Forms/Controllers";

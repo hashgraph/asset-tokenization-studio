@@ -11,7 +11,11 @@ import { useParams } from "react-router-dom";
 import { SetVotingRightsRequest } from "@hashgraph/assettokenization-sdk";
 import { useSetVotingRights } from "../../../../hooks/queries/VotingRights";
 import { dateToUnixTimestamp, textToHex } from "../../../../utils/format";
-import { PhosphorIcon, Text, Tooltip } from "@hashgraph/assettokenization-uicomponents";
+import {
+  PhosphorIcon,
+  Text,
+  Tooltip,
+} from "@hashgraph/assettokenization-uicomponents";
 
 interface ProgramVotingRightsFormValues {
   name: string;

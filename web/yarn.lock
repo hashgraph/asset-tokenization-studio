@@ -2713,6 +2713,35 @@
     protobufjs "^7.2.4"
     yargs "^17.7.2"
 
+"@hashgraph/assettokenization-contracts@file:../contracts":
+  version "1.0.0"
+  dependencies:
+    solidity-coverage "^0.8.5"
+
+"@hashgraph/assettokenization-sdk@file:../sdk":
+  version "1.0.0"
+  dependencies:
+    "@ethersproject/contracts" "^5.7.0"
+    "@hashgraph/assettokenization-contracts" "file:../../../../.cache/yarn/v6/npm-@hashgraph-assettokenization-sdk-1.0.0-72bd9827-0dc3-4cc6-8190-7c0380fe5e09-1722254104895/node_modules/@hashgraph/contracts"
+    "@hashgraph/hethers" "^1.2.5"
+    "@hashgraph/sdk" "^2.33.0"
+    "@metamask/detect-provider" "^2.0.0"
+    "@metamask/providers" "^12.0.0"
+    axios "^1.5.0"
+    cd "^0.3.3"
+    chai "^4.3.8"
+    chai-as-promised "^7.1.1"
+    dotenv "^16.3.1"
+    dpdm "^3.14.0"
+    ethers "^5.7.2"
+    long "^4.0.0"
+    reflect-metadata "^0.1.13"
+    tsyringe "^4.8.0"
+    uuid "^9.0.0"
+    web3 "^4.1.1"
+    winston "^3.8.2"
+    winston-daily-rotate-file "^4.7.1"
+
 "@hashgraph/cryptography@1.4.8-beta.4":
   version "1.4.8-beta.4"
   resolved "https://registry.yarnpkg.com/@hashgraph/cryptography/-/cryptography-1.4.8-beta.4.tgz#23efea4d991f3955bcd98f87c14985456070beb5"
@@ -2789,52 +2818,6 @@
     pino-pretty "^10.0.0"
     protobufjs "^7.2.5"
     utf8 "^3.0.0"
-
-"@hashgraph/assettokenization-contracts@file:../contracts":
-  version "1.0.0"
-  dependencies:
-    solidity-coverage "^0.8.5"
-
-"@hashgraph/assettokenization-sdk@file:../sdk":
-  version "1.0.0"
-  dependencies:
-    "@ethersproject/contracts" "^5.7.0"
-    "@hashgraph/hethers" "^1.2.5"
-    "@hashgraph/sdk" "^2.33.0"
-    "@hashgraph/assettokenization-contracts" "file:../../../../.cache/yarn/v6/npm-@hashgraph-assettokenization-sdk-1.0.0-438d00ba-a257-4f26-81a2-c32e8b2824eb-1714403749219/node_modules/@hashgraph/contracts"
-    "@metamask/detect-provider" "^2.0.0"
-    "@metamask/providers" "^12.0.0"
-    axios "^1.5.0"
-    cd "^0.3.3"
-    chai "^4.3.8"
-    chai-as-promised "^7.1.1"
-    dotenv "^16.3.1"
-    dpdm "^3.14.0"
-    ethers "^5.7.2"
-    long "^4.0.0"
-    reflect-metadata "^0.1.13"
-    tsyringe "^4.8.0"
-    uuid "^9.0.0"
-    web3 "^4.1.1"
-    winston "^3.8.2"
-    winston-daily-rotate-file "^4.7.1"
-
-"@hashgraph/assettokenization-uicomponents@file:../uiComponents":
-  version "1.0.0"
-  dependencies:
-    "@chakra-ui/anatomy" "2.1.1"
-    "@emotion/react" "^11.0.0"
-    "@phosphor-icons/react" "2.0.9"
-    "@tanstack/react-table" "^8.9.1"
-    chakra-react-select "4.5.0"
-    date-fns "^2.29.3"
-    echarts "^5.3.3"
-    echarts-for-react "^3.0.2"
-    lodash "^4.17.21"
-    react-day-picker "^8.6.0"
-    react-hook-form "7.43.9"
-    react-markdown "^6.0.3"
-    react-number-format "5.1.4"
 
 "@hethers/abstract-provider@1.2.1":
   version "1.2.1"
@@ -3301,6 +3284,25 @@
   dependencies:
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
+
+"@hashgraph/assettokenization-uicomponents@1.0.1":
+  version "1.0.1"
+  resolved "http://localhost:4873/@hashgraph/assettokenization-uicomponents/-/assettokenization-uicomponents-1.0.1.tgz#ecec8f67e94fd6d3c7b0ea602ea452353f14889f"
+  integrity sha512-olZmULOlEmSKwnTo3CSklv9lM5YAF29fF6qPtyOdN5Ch0NTXwqIG+o7mdcanBO+TgDYcHSvTn2/MK+RIHEuJfg==
+  dependencies:
+    "@chakra-ui/anatomy" "2.1.1"
+    "@emotion/react" "^11.0.0"
+    "@phosphor-icons/react" "2.0.9"
+    "@tanstack/react-table" "^8.9.1"
+    chakra-react-select "4.5.0"
+    date-fns "^2.29.3"
+    echarts "^5.3.3"
+    echarts-for-react "^3.0.2"
+    lodash "^4.17.21"
+    react-day-picker "^8.6.0"
+    react-hook-form "7.43.9"
+    react-markdown "^6.0.3"
+    react-number-format "5.1.4"
 
 "@metamask/detect-provider@^2.0.0":
   version "2.0.0"
@@ -8452,6 +8454,13 @@ react-day-picker@^8.6.0:
   resolved "https://registry.yarnpkg.com/react-day-picker/-/react-day-picker-8.8.2.tgz#1f778ad73fecf44105d2a02f5d15ec0eaa1afcc1"
   integrity sha512-sK5M5PNZaLiszmACUKUpVu1eX3eFDVV+WLdWQ3BxTPbEC9jhuawmlgpbSXX5dIIQQwJpZ4wwP5+vsMVOwa1IRw==
 
+react-device-detect@^2.2.3:
+  version "2.2.3"
+  resolved "https://registry.yarnpkg.com/react-device-detect/-/react-device-detect-2.2.3.tgz#97a7ae767cdd004e7c3578260f48cf70c036e7ca"
+  integrity sha512-buYY3qrCnQVlIFHrC5UcUoAj7iANs/+srdkwsnNjI7anr3Tt7UY6MqNxtMLlr0tMBied0O49UZVK8XKs3ZIiPw==
+  dependencies:
+    ua-parser-js "^1.0.33"
+
 react-dom@^18.2.0:
   version "18.2.0"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-18.2.0.tgz#22aaf38708db2674ed9ada224ca4aa708d821e3d"
@@ -9589,6 +9598,11 @@ typescript@^5.2.2:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.3.2.tgz#00d1c7c1c46928c5845c1ee8d0cc2791031d4c43"
   integrity sha512-6l+RyNy7oAHDfxC4FzSJcz9vnjTKxrLpDG5M2Vu4SHRVNg6xzqZp6LYSR9zjqQTu8DU/f5xwxUdADOkbrIX2gQ==
+
+ua-parser-js@^1.0.33:
+  version "1.0.38"
+  resolved "https://registry.yarnpkg.com/ua-parser-js/-/ua-parser-js-1.0.38.tgz#66bb0c4c0e322fe48edfe6d446df6042e62f25e2"
+  integrity sha512-Aq5ppTOfvrCMgAPneW1HfWj66Xi7XL+/mIy996R1/CLS/rcyJQm6QZdsKrUeivDFQ+Oc9Wyuwor8Ze8peEoUoQ==
 
 uglify-js@^3.1.4:
   version "3.17.4"

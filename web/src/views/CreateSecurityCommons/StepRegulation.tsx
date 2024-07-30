@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { Button, HStack, Stack, VStack, useDisclosure } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
-import { PhosphorIcon, Text, Weight } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import {
+  PhosphorIcon,
+  Text,
+  Weight,
+} from "@hashgraph/assettokenization-uicomponents/Foundations";
 import { Plus, X } from "@phosphor-icons/react";
 import { CancelButton } from "../../components/CancelButton";
 import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
@@ -18,7 +22,10 @@ import {
 import { required } from "../../utils/rules";
 import { ICreateEquityFormValues } from "../CreateEquity/ICreateEquityFormValues";
 import { useFormContext, useFormState } from "react-hook-form";
-import { PopUp, Tooltip } from "@hashgraph/assettokenization-uicomponents/Overlay";
+import {
+  PopUp,
+  Tooltip,
+} from "@hashgraph/assettokenization-uicomponents/Overlay";
 import { Info } from "@phosphor-icons/react";
 import { FormStepContainer } from "../../components/FormStepContainer";
 import { CountriesList } from "./CountriesList";

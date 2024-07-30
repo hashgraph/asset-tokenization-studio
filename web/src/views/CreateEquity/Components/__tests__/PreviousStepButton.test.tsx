@@ -3,7 +3,9 @@ import { render } from "../../../../test-utils";
 
 const goToPrevious = jest.fn();
 jest.mock("@hashgraph/assettokenization-uicomponents/Indicators", () => ({
-  ...jest.requireActual("@hashgraph/assettokenization-uicomponents/Indicators"),
+  ...jest.requireActual(
+    "@hashgraph/assettokenization-uicomponents/Indicators",
+  ),
   useStepContext: () => ({ goToPrevious }),
 }));
 

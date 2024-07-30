@@ -6,7 +6,10 @@ import { useTranslation } from "react-i18next";
 import { formatNumberLocale, toNumber } from "../../../utils/format";
 import { useSecurityStore } from "../../../store/securityStore";
 import { useParams } from "react-router-dom";
-import { ClipboardButton, Text } from "@hashgraph/assettokenization-uicomponents";
+import {
+  ClipboardButton,
+  Text,
+} from "@hashgraph/assettokenization-uicomponents";
 import { Flex } from "@chakra-ui/react";
 
 interface SecurityDetailsExtended extends Omit<DefinitionListProps, "items"> {

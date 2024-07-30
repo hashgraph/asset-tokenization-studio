@@ -16,7 +16,11 @@ import { useCoupons } from "../../../../hooks/queries/useCoupons";
 import { useGetBondDetails } from "../../../../hooks/queries/useGetSecurityDetails";
 import { dateToUnixTimestamp } from "../../../../utils/format";
 import { COUPONS_FACTOR } from "../../../../utils/constants";
-import { PhosphorIcon, Text, Tooltip } from "@hashgraph/assettokenization-uicomponents";
+import {
+  PhosphorIcon,
+  Text,
+  Tooltip,
+} from "@hashgraph/assettokenization-uicomponents";
 import { isBeforeDate } from "../../../../utils/helpers";
 
 interface ProgramCouponFormValues {

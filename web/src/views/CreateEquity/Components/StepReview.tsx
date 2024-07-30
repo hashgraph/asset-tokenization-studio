@@ -7,7 +7,10 @@ import {
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { PreviousStepButton } from "./PreviousStepButton";
-import { PhosphorIcon, Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import {
+  PhosphorIcon,
+  Text,
+} from "@hashgraph/assettokenization-uicomponents/Foundations";
 import { useFormContext } from "react-hook-form";
 import { ICreateEquityFormValues } from "../ICreateEquityFormValues";
 import {

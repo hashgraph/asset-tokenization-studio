@@ -11,7 +11,11 @@ import { useDividends } from "../../../../hooks/queries/useDividends";
 import { SetDividendsRequest } from "@hashgraph/assettokenization-sdk";
 import { useParams } from "react-router-dom";
 import { dateToUnixTimestamp } from "../../../../utils/format";
-import { PhosphorIcon, Text, Tooltip } from "@hashgraph/assettokenization-uicomponents";
+import {
+  PhosphorIcon,
+  Text,
+  Tooltip,
+} from "@hashgraph/assettokenization-uicomponents";
 
 interface ProgramDividendFormValues {
   amountPerUnitOfSecurity: string;

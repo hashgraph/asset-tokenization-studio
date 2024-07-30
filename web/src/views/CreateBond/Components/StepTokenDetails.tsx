@@ -1,7 +1,10 @@
 import { FormControl, HStack, SimpleGrid, Stack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { Info } from "@phosphor-icons/react";
-import { PhosphorIcon, Tooltip } from "@hashgraph/assettokenization-uicomponents";
+import {
+  PhosphorIcon,
+  Tooltip,
+} from "@hashgraph/assettokenization-uicomponents";
 import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
 import {
   InputController,

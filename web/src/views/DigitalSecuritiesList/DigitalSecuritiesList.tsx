@@ -3,7 +3,11 @@ import { Table } from "@hashgraph/assettokenization-uicomponents/DataDisplay";
 import { CellContext, createColumnHelper } from "@tanstack/react-table";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { PhosphorIcon, PopUp, Weight } from "@hashgraph/assettokenization-uicomponents";
+import {
+  PhosphorIcon,
+  PopUp,
+  Weight,
+} from "@hashgraph/assettokenization-uicomponents";
 import { Star, Trash } from "@phosphor-icons/react";
 import { Header } from "../../components/Header";
 import { useUserStore } from "../../store/userStore";
@@ -16,7 +20,11 @@ import { SearchInputController } from "@hashgraph/assettokenization-uicomponents
 import { useForm } from "react-hook-form";
 import { useAccountStore } from "../../store/accountStore";
 import { useWalletStore } from "../../store/walletStore";
-import { Button, ClipboardButton, Link } from "@hashgraph/assettokenization-uicomponents/Interaction";
+import {
+  Button,
+  ClipboardButton,
+  Link,
+} from "@hashgraph/assettokenization-uicomponents/Interaction";
 import { RouterManager } from "../../router/RouterManager";
 import { RouteName } from "../../router/RouteName";
 import { useTable } from "../../hooks/useTable";

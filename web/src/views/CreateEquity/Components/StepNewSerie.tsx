@@ -7,7 +7,10 @@ import {
 } from "@chakra-ui/react";
 import { Trans, useTranslation } from "react-i18next";
 import { Info } from "@phosphor-icons/react";
-import { PhosphorIcon, Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import {
+  PhosphorIcon,
+  Text,
+} from "@hashgraph/assettokenization-uicomponents/Foundations";
 import { CancelButton } from "../../../components/CancelButton";
 import { NextStepButton } from "./NextStepButton";
 import { PreviousStepButton } from "./PreviousStepButton";

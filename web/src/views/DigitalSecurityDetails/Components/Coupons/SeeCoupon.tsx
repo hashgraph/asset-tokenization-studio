@@ -7,11 +7,19 @@ import { isHederaValidAddress, min, required } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
 import { Info } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
-import { GetCouponForRequest, GetCouponRequest } from "@hashgraph/assettokenization-sdk";
+import {
+  GetCouponForRequest,
+  GetCouponRequest,
+} from "@hashgraph/assettokenization-sdk";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useToast } from "@hashgraph/assettokenization-uicomponents/Overlay/Toast";
-import { DefinitionList, PhosphorIcon, Text, Tooltip } from "@hashgraph/assettokenization-uicomponents";
+import {
+  DefinitionList,
+  PhosphorIcon,
+  Text,
+  Tooltip,
+} from "@hashgraph/assettokenization-uicomponents";
 import {
   useGetCoupons,
   useGetCouponsFor,
