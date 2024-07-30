@@ -6,8 +6,8 @@ on:
 jobs:
   test-node:
     name: testing    
-    #runs-on: [ self-hosted, Linux, medium, ephemeral ]
-    runs-on: ubuntu-latest
+    runs-on: [ self-hosted, Linux, medium, ephemeral ]
+    #runs-on: ubuntu-latest
     env:
       NODE_OPTIONS: "--max-old-space-size=32768"
     permissions:
@@ -15,19 +15,19 @@ jobs:
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
 
       - name: Build the Docker image
         run: docker build -t rpc .
         working-directory: dockerfile
 
       - name: Setup NodeJS Environment
-        uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d
+        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
         with:
           node-version: 18.x      
       
       - name: Cache npm dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -46,13 +46,6 @@ jobs:
           npm run build
         working-directory: sdk
       
-      - name: Install dependencies UiComponents
-        run: |
-          yarn install 
-          yarn install-peers
-          npm run rollup
-        working-directory: uiComponents
-      
       - name: Install dependencies web
         run: yarn install
         working-directory: web
@@ -60,19 +53,23 @@ jobs:
       - name: Create file
         run: |
           touch .env
-          echo "CLIENT_PRIVATE_KEY_ECDSA=${{ secrets.CLIENT_PRIVATE_KEY_ECDSA }}" >> .env
-          echo "CLIENT_PUBLIC_KEY_ECDSA=${{ secrets.CLIENT_PUBLIC_KEY_ECDSA }}"  >> .env
-          echo "CLIENT_EVM_ADDRESS_ECDSA=${{ secrets.CLIENT_EVM_ADDRESS_ECDSA }}" >> .env
-          echo "CLIENT_ACCOUNT_ID_ECDSA=${{ secrets.CLIENT_ACCOUNT_ID_ECDSA }}" >> .env
-          echo "CLIENT_PRIVATE_KEY_ECDSA_2=${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_2 }}"  >> .env
-          echo "CLIENT_PUBLIC_KEY_ECDSA_2=${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}"  >> .env
-          echo "CLIENT_EVM_ADDRESS_ECDSA_2=${{ secrets.CLIENT_EVM_ADDRESS_ECDSA_2 }}"  >> .env
-          echo "CLIENT_ACCOUNT_ID_ECDSA_2=${{ secrets.CLIENT_ACCOUNT_ID_ECDSA_2 }}"  >> .env
-          echo "FACTORY_ADDRESS=${{ secrets.FACTORY_ADDRESS }}"  >> .env
-          echo "RESOLVER_ADDRESS=${{ secrets.RESOLVER_ADDRESS }}"  >> .env
-          echo "BUSINESS_LOGIC_KEYS_COMMON=${{ secrets.BUSINESS_LOGIC_KEYS_COMMON }}"  >> .env
-          echo "BUSINESS_LOGIC_KEYS_EQUITY=${{ secrets.BUSINESS_LOGIC_KEYS_EQUITY }}"  >> .env
-          echo "BUSINESS_LOGIC_KEYS_BOND=${{ secrets.BUSINESS_LOGIC_KEYS_BOND }}"  >> .env
+          # Making API call to fetch secrets
+          API_RESPONSE_1=$(curl -s -H "Authorization: Bearer ${{ secrets.API_ACCESS_TOKEN_1 }}" -H "User-Agent: AppName/1.2.3" https://portal.hedera.com/api/account)
+          API_RESPONSE_2=$(curl -s -H "Authorization: Bearer ${{ secrets.API_ACCESS_TOKEN_2 }}" -H "User-Agent: AppName/1.2.3" https://portal.hedera.com/api/account)
+          # Assuming the API response is JSON and contains secrets like CLIENT_PRIVATE_KEY
+          echo "CLIENT_PRIVATE_KEY_ECDSA_1=$(echo $API_RESPONSE_1 | jq -r '.accounts[1].privateKey')" >> .env
+          echo "CLIENT_PUBLIC_KEY_ECDSA_1=$(echo $API_RESPONSE_1 | jq -r '.accounts[1].publicKey')" >> .env
+          echo "CLIENT_ACCOUNT_ID_ECDSA_1=0.0.$(echo $API_RESPONSE_1 | jq -r '.accounts[1].accountNum')" >> .env
+          echo "CLIENT_EVM_ADDRESS_ECDSA_1=$(curl -s https://testnet.mirrornode.hedera.com/api/v1/accounts/$CLIENT_ACCOUNT_ID_ECDSA)" >> .env
+          echo "CLIENT_PRIVATE_KEY_ECDSA_2=$(echo $API_RESPONSE_2 | jq -r '.accounts[1].privateKey')" >> .env
+          echo "CLIENT_PUBLIC_KEY_ECDSA_2=$(echo $API_RESPONSE_2 | jq -r '.accounts[1].publicKey')" >> .env
+          echo "CLIENT_ACCOUNT_ID_ECDSA_2=0.0.$(echo $API_RESPONSE_2 | jq -r '.accounts[1].accountNum')" >> .env
+          echo "CLIENT_EVM_ADDRESS_ECDSA_2=$(curl -s https://testnet.mirrornode.hedera.com/api/v1/accounts/$CLIENT_ACCOUNT_ID_ECDSA_2)" >> .env
+          echo "FACTORY_ADDRESS='0.0.4382086'"  >> .env
+          echo "RESOLVER_ADDRESS='0.0.4382042'}"  >> .env
+          echo "BUSINESS_LOGIC_KEYS_COMMON='0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6,0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c,0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c,0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b,0x064c883089ba1a596d9146c7aaa73c19ef8825f374c67a9538787c3d12e68dc5,0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f,0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625,0x0d714ae58404788b445b639b0a0bcf37eeeb2e661bfa542569f5555a9a40b5b2,0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d,0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf,0x1b5212ea37fb29e99afa2812a5d7d7e662a477424d3de1a18cc3871a2ee94d78,0x3cc74200ccfb5d585a6d170f8824979dbf1b592e0a41eef41cf6d86cf4882077,0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793,0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9,0xd9b300e6bf7a143b8fd8cf1d4ab050e691c862bf0f57a7d49cc08c60efe68d08'"  >> .env
+          echo "BUSINESS_LOGIC_KEYS_EQUITY='0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810'"  >> .env
+          echo "BUSINESS_LOGIC_KEYS_BOND='0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef'"  >> .env
         working-directory: sdk
 
       - name: Test Contracts
@@ -81,24 +78,15 @@ jobs:
           npm run cleanCache
         working-directory: contracts
 
-      - name: Test web
-        run: |
-          npm run test
-          npm run cleanCache
-        working-directory: web
-      
-      - name: Run the Docker image
-        run: nohup docker run --network="host" rpc &
-      - name: Sleep for 25 seconds
-        run: sleep 25s
-        shell: bash
-      - name: DockerStatus
-        run: docker ps
-      - name: DockerStatus
-        run:  curl --location --request POST 'http://localhost:7546/api' --data ""
-
       - name: Test sdk
         run: |
           npm run test
           npm run cleanCache
         working-directory: sdk
+
+      - name: Test web
+        run: |
+          npm run test
+          npm run cleanCache
+        working-directory: web
+

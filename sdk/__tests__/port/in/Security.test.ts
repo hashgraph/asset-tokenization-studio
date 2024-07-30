@@ -29,7 +29,6 @@ import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapte
 import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
 import {
   CLIENT_ACCOUNT_ECDSA,
-  CLIENT_ACCOUNT_ECDSA_B,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
   BUSINESS_LOGIC_KEYS_COMMON,
@@ -479,7 +478,7 @@ describe('🧪 Security tests', () => {
         await Security.transferAndLock(
           new TransferAndLockRequest({
             securityId: equity.evmDiamondAddress!,
-            targetId: CLIENT_ACCOUNT_ECDSA_B.evmAddress!.toString(),
+            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
             amount: transferredAndLockedAmount,
             expirationDate: expirationTimeStamp,
           }),
@@ -503,7 +502,7 @@ describe('🧪 Security tests', () => {
         await Security.getLockedBalanceOf(
           new GetAccountBalanceRequest({
             securityId: equity.evmDiamondAddress!,
-            targetId: CLIENT_ACCOUNT_ECDSA_B.evmAddress!.toString(),
+            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
           }),
         )
       ).value,
@@ -512,7 +511,7 @@ describe('🧪 Security tests', () => {
     const lockCount = await Security.getLockCount(
       new GetLockCountRequest({
         securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA_B.evmAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
       }),
     );
 
@@ -522,7 +521,7 @@ describe('🧪 Security tests', () => {
     const locksId = await Security.getLocksId(
       new GetLocksIdRequest({
         securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA_B.evmAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
         start: 0,
         end: 1,
       }),
@@ -537,7 +536,7 @@ describe('🧪 Security tests', () => {
         await Security.release(
           new ReleaseRequest({
             securityId: equity.evmDiamondAddress!,
-            targetId: CLIENT_ACCOUNT_ECDSA_B.evmAddress!.toString(),
+            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
             lockId: 1,
           }),
         )
@@ -549,7 +548,7 @@ describe('🧪 Security tests', () => {
         await Security.getLockedBalanceOf(
           new GetAccountBalanceRequest({
             securityId: equity.evmDiamondAddress!,
-            targetId: CLIENT_ACCOUNT_ECDSA_B.evmAddress!.toString(),
+            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
           }),
         )
       ).value,
@@ -560,7 +559,7 @@ describe('🧪 Security tests', () => {
         await Security.getBalanceOf(
           new GetAccountBalanceRequest({
             securityId: equity.evmDiamondAddress!,
-            targetId: CLIENT_ACCOUNT_ECDSA_B.evmAddress!.toString(),
+            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
           }),
         )
       ).value,
@@ -577,7 +576,7 @@ describe('🧪 Security tests', () => {
       new ForceRedeemRequest({
         securityId: equity.evmDiamondAddress!,
         amount: transferredAndLockedAmount,
-        sourceId: CLIENT_ACCOUNT_ECDSA_B.evmAddress!.toString(),
+        sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
       }),
     );
   }, 600_000);
@@ -590,7 +589,7 @@ describe('🧪 Security tests', () => {
     await Security.issue(
       new IssueRequest({
         securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA_B.evmAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
         amount: issueAmount,
       }),
     );
@@ -601,7 +600,7 @@ describe('🧪 Security tests', () => {
         await Security.controllerTransfer(
           new ForceTransferRequest({
             securityId: equity.evmDiamondAddress!,
-            sourceId: CLIENT_ACCOUNT_ECDSA_B.evmAddress!.toString(),
+            sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
             targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
             amount: forceTransferAmount,
           }),
@@ -615,7 +614,7 @@ describe('🧪 Security tests', () => {
         await Security.getBalanceOf(
           new GetAccountBalanceRequest({
             securityId: equity.evmDiamondAddress!,
-            targetId: CLIENT_ACCOUNT_ECDSA_B.evmAddress!.toString(),
+            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
           }),
         )
       ).value,
@@ -644,7 +643,7 @@ describe('🧪 Security tests', () => {
       new ForceRedeemRequest({
         securityId: equity.evmDiamondAddress!,
         amount: (+issueAmount - +forceTransferAmount).toString(),
-        sourceId: CLIENT_ACCOUNT_ECDSA_B.evmAddress!.toString(),
+        sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
       }),
     );
   }, 600_000);
