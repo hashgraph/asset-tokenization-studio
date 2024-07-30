@@ -36,7 +36,7 @@ import {
   Factory__factory,
   Lock__factory,
   Security__factory,
-} from '@hashgraph/assettokenization-contracts';
+} from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
 import { Coupon } from '../../../domain/context/bond/Coupon.js';
