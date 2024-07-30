@@ -2,20 +2,20 @@ import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import {
   CalendarInputController,
   InputController,
-} from "@hashgraph/assettokenization-uicomponents/Forms/Controllers";
+} from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
 import { Info } from "@phosphor-icons/react";
 import { required } from "../../../../utils/rules";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router-dom";
-import { SetVotingRightsRequest } from "@hashgraph/assettokenization-sdk";
+import { SetVotingRightsRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useSetVotingRights } from "../../../../hooks/queries/VotingRights";
 import { dateToUnixTimestamp, textToHex } from "../../../../utils/format";
 import {
   PhosphorIcon,
   Text,
   Tooltip,
-} from "@hashgraph/assettokenization-uicomponents";
+} from "@hashgraph/asset-tokenization-uicomponents";
 
 interface ProgramVotingRightsFormValues {
   name: string;

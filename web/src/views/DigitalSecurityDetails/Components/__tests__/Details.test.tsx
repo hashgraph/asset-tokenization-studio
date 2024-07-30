@@ -4,7 +4,7 @@ import {
   BondDetailsViewModel,
   EquityDetailsViewModel,
   SecurityViewModel,
-} from "@hashgraph/assettokenization-sdk";
+} from "@hashgraph/asset-tokenization-sdk";
 
 // TODO Improve tests when it is connected to SDK
 describe(`${Details.name}`, () => {

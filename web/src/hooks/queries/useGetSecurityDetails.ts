@@ -20,7 +20,7 @@ import {
   BondDetailsViewModel,
   GetRegulationDetailsRequest,
   RegulationViewModel,
-} from "@hashgraph/assettokenization-sdk";
+} from "@hashgraph/asset-tokenization-sdk";
 import { useSecurityStore } from "../../store/securityStore";
 import { SecurityRole } from "../../utils/SecurityRole";
 

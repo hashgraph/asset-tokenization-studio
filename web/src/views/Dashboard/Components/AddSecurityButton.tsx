@@ -1,6 +1,6 @@
-import { PhosphorIcon } from "@hashgraph/assettokenization-uicomponents/Foundations";
-import { Button } from "@hashgraph/assettokenization-uicomponents/Interaction";
-import type { ButtonProps } from "@hashgraph/assettokenization-uicomponents/Interaction";
+import { PhosphorIcon } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
+import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import type { ButtonProps } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
 import { useTranslation } from "react-i18next";
 import { RouterManager } from "../../../router/RouterManager";
 import { RouteName } from "../../../router/RouteName";

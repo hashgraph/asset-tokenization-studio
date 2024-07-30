@@ -2713,16 +2713,16 @@
     protobufjs "^7.2.4"
     yargs "^17.7.2"
 
-"@hashgraph/assettokenization-contracts@file:../contracts":
+"@hashgraph/asset-tokenization-contracts@file:../contracts":
   version "1.0.0"
   dependencies:
     solidity-coverage "^0.8.5"
 
-"@hashgraph/assettokenization-sdk@file:../sdk":
+"@hashgraph/asset-tokenization-sdk@file:../sdk":
   version "1.0.0"
   dependencies:
     "@ethersproject/contracts" "^5.7.0"
-    "@hashgraph/assettokenization-contracts" "file:../../../../.cache/yarn/v6/npm-@hashgraph-assettokenization-sdk-1.0.0-72bd9827-0dc3-4cc6-8190-7c0380fe5e09-1722254104895/node_modules/@hashgraph/contracts"
+    "@hashgraph/asset-tokenization-contracts" "file:../../../../.cache/yarn/v6/npm-@hashgraph-assettokenization-sdk-1.0.0-72bd9827-0dc3-4cc6-8190-7c0380fe5e09-1722254104895/node_modules/@hashgraph/contracts"
     "@hashgraph/hethers" "^1.2.5"
     "@hashgraph/sdk" "^2.33.0"
     "@metamask/detect-provider" "^2.0.0"
@@ -3285,9 +3285,9 @@
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
 
-"@hashgraph/assettokenization-uicomponents@1.0.1":
+"@hashgraph/asset-tokenization-uicomponents@1.0.1":
   version "1.0.1"
-  resolved "http://localhost:4873/@hashgraph/assettokenization-uicomponents/-/assettokenization-uicomponents-1.0.1.tgz#ecec8f67e94fd6d3c7b0ea602ea452353f14889f"
+  resolved "http://localhost:4873/@hashgraph/asset-tokenization-uicomponents/-/assettokenization-uicomponents-1.0.1.tgz#ecec8f67e94fd6d3c7b0ea602ea452353f14889f"
   integrity sha512-olZmULOlEmSKwnTo3CSklv9lM5YAF29fF6qPtyOdN5Ch0NTXwqIG+o7mdcanBO+TgDYcHSvTn2/MK+RIHEuJfg==
   dependencies:
     "@chakra-ui/anatomy" "2.1.1"

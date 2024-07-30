@@ -10,7 +10,7 @@ import { PreviousStepButton } from "./PreviousStepButton";
 import {
   PhosphorIcon,
   Text,
-} from "@hashgraph/assettokenization-uicomponents/Foundations";
+} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { useFormContext } from "react-hook-form";
 import { ICreateEquityFormValues } from "../ICreateEquityFormValues";
 import {
@@ -19,10 +19,10 @@ import {
   DetailReviewProps,
   InfoDivider,
   PopUp,
-} from "@hashgraph/assettokenization-uicomponents";
+} from "@hashgraph/asset-tokenization-uicomponents";
 import { useCreateEquity } from "../../../hooks/queries/useCreateEquity";
 import { useWalletStore } from "../../../store/walletStore";
-import { CreateEquityRequest } from "@hashgraph/assettokenization-sdk";
+import { CreateEquityRequest } from "@hashgraph/asset-tokenization-sdk";
 import { transformDividendType } from "../DividendType";
 import { WarningCircle, Question } from "@phosphor-icons/react";
 import { RouterManager } from "../../../router/RouterManager";

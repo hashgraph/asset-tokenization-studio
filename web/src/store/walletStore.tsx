@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { MetamaskStatus } from "../utils/constants";
-import type { InitializationData } from "@hashgraph/assettokenization-sdk";
-import { NetworkData } from "@hashgraph/assettokenization-sdk";
+import type { InitializationData } from "@hashgraph/asset-tokenization-sdk";
+import { NetworkData } from "@hashgraph/asset-tokenization-sdk";
 
 type WalletStoreStatus =
   | MetamaskStatus.disconnected

@@ -1,8 +1,8 @@
 import { Center, Stack, StackProps } from "@chakra-ui/react";
-import { Button } from "@hashgraph/assettokenization-uicomponents/Interaction";
-import { PhosphorIcon } from "@hashgraph/assettokenization-uicomponents";
+import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import { PhosphorIcon } from "@hashgraph/asset-tokenization-uicomponents";
 import { Plus } from "@phosphor-icons/react";
-import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { useTranslation } from "react-i18next";
 import { RouteName } from "../../../router/RouteName";
 import { RouterManager } from "../../../router/RouterManager";

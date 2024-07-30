@@ -1,4 +1,4 @@
-import type { AccordionThemeConfiguration } from "@hashgraph/assettokenization-uicomponents/DataDisplay";
+import type { AccordionThemeConfiguration } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
 
 // It is not exported from IOBricks
 const accordionPartsList: Array<string> = [

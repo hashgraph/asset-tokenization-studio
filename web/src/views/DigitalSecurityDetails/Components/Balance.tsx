@@ -1,19 +1,19 @@
 import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { Button } from "@hashgraph/assettokenization-uicomponents/Interaction";
-import { SearchInputController } from "@hashgraph/assettokenization-uicomponents/Forms/Controllers";
+import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import { SearchInputController } from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
 import {
   Heading,
   Text,
-} from "@hashgraph/assettokenization-uicomponents/Foundations";
+} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { useForm } from "react-hook-form";
-import { DefinitionList } from "@hashgraph/assettokenization-uicomponents";
+import { DefinitionList } from "@hashgraph/asset-tokenization-uicomponents";
 import { useTranslation } from "react-i18next";
 import { isHederaValidAddress, required } from "../../../utils/rules";
-import { useToast } from "@hashgraph/assettokenization-uicomponents/Overlay/Toast";
+import { useToast } from "@hashgraph/asset-tokenization-uicomponents/Overlay/Toast";
 import {
   GetAccountBalanceRequest,
   SecurityViewModel,
-} from "@hashgraph/assettokenization-sdk";
+} from "@hashgraph/asset-tokenization-sdk";
 import { useGetBalanceOf } from "../../../hooks/queries/useGetSecurityDetails";
 import { useEffect, useState } from "react";
 

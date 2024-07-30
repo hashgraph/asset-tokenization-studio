@@ -1,8 +1,8 @@
 import {
   DefinitionListThemeConfiguration,
   definitionListPartsList,
-} from "@hashgraph/assettokenization-uicomponents/DataDisplay";
-import { BasePlatformTheme } from "@hashgraph/assettokenization-uicomponents/Theme";
+} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import { BasePlatformTheme } from "@hashgraph/asset-tokenization-uicomponents/Theme";
 
 export const DefinitionList: DefinitionListThemeConfiguration = {
   parts: definitionListPartsList,

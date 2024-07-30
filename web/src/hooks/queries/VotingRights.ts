@@ -5,10 +5,10 @@ import {
   SetVotingRightsRequest,
   VotingRightsForViewModel,
   VotingRightsViewModel,
-} from "@hashgraph/assettokenization-sdk";
+} from "@hashgraph/asset-tokenization-sdk";
 import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
 import { SDKService } from "../../services/SDKService";
-import { useToast } from "@hashgraph/assettokenization-uicomponents/Overlay/Toast";
+import { useToast } from "@hashgraph/asset-tokenization-uicomponents/Overlay/Toast";
 import { useTranslation } from "react-i18next";
 
 export const GET_ALL_VOTING_RIGHTS = (securityId: string) =>

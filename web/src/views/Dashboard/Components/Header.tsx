@@ -1,5 +1,5 @@
 import { Stack, Flex, VStack } from "@chakra-ui/react";
-import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { useTranslation } from "react-i18next";
 import { AddSecurityButton } from "./AddSecurityButton";
 import { CreateNewSecurityButton } from "./CreateNewSecurityButton";

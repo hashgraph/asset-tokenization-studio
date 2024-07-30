@@ -1,5 +1,5 @@
 import { Stack } from "@chakra-ui/react";
-import { Tabs } from "@hashgraph/assettokenization-uicomponents/DataDisplay/Tabs";
+import { Tabs } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay/Tabs";
 import { useTranslation } from "react-i18next";
 import { ProgramCoupon } from "./ProgramCoupon";
 import { SeeCoupon } from "./SeeCoupon";

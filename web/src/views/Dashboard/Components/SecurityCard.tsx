@@ -2,9 +2,9 @@ import { HStack, Stack, StackProps, VStack } from "@chakra-ui/react";
 import {
   PhosphorIcon,
   Weight,
-} from "@hashgraph/assettokenization-uicomponents";
+} from "@hashgraph/asset-tokenization-uicomponents";
 import { Star } from "@phosphor-icons/react";
-import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { SecurityStore } from "../../../store/securityStore";
 import { useWalletStore } from "../../../store/walletStore";
 import { useAccountStore } from "../../../store/accountStore";

@@ -2,10 +2,10 @@ import { HStack, Stack, VStack } from "@chakra-ui/react";
 import {
   Heading,
   Text,
-} from "@hashgraph/assettokenization-uicomponents/Foundations";
+} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { useTranslation } from "react-i18next";
 import { RouteName } from "../../router/RouteName";
-import { InputController } from "@hashgraph/assettokenization-uicomponents/Forms/Controllers";
+import { InputController } from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
 import { History } from "../../components/History";
 import { CancelButton } from "../../components/CancelButton";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -14,15 +14,15 @@ import { useAddDigitalSecurity } from "../../hooks/queries/useAddDigitalSecurity
 import {
   GetRoleCountForRequest,
   GetSecurityDetailsRequest,
-} from "@hashgraph/assettokenization-sdk";
+} from "@hashgraph/asset-tokenization-sdk";
 import { isHederaValidAddress, required } from "../../utils/rules";
-import { Button } from "@hashgraph/assettokenization-uicomponents/Interaction";
+import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
 import { RouterManager } from "../../router/RouterManager";
 import { useEffect, useState } from "react";
 import { useWalletStore } from "../../store/walletStore";
 import { useGetSecurityRoleCountFor } from "../../hooks/queries/useGetSecurityDetails";
 import { useAccountStore } from "../../store/accountStore";
-import { useToast } from "@hashgraph/assettokenization-uicomponents/Overlay/Toast";
+import { useToast } from "@hashgraph/asset-tokenization-uicomponents/Overlay/Toast";
 
 export const AddSecurity = () => {
   const {

@@ -1,10 +1,10 @@
-import { IconButton } from "@hashgraph/assettokenization-uicomponents/Interaction";
+import { IconButton } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
 import { Flex, FlexProps } from "@chakra-ui/react";
-import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { ArrowLeft } from "@phosphor-icons/react";
 import { Link as RouterLink } from "react-router-dom";
 import type { To } from "react-router-dom";
-import { PhosphorIcon } from "@hashgraph/assettokenization-uicomponents";
+import { PhosphorIcon } from "@hashgraph/asset-tokenization-uicomponents";
 import { RouterManager } from "../router/RouterManager";
 import { useLocationStore } from "../store/locationStore";
 import { RoutePath } from "../router/RoutePath";

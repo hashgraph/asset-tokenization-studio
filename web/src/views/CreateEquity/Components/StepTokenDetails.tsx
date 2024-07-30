@@ -11,14 +11,14 @@ import {
   InfoDivider,
   PhosphorIcon,
   Tooltip,
-} from "@hashgraph/assettokenization-uicomponents";
+} from "@hashgraph/asset-tokenization-uicomponents";
 
-import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import {
   InputController,
   InputNumberController,
   ToggleController,
-} from "@hashgraph/assettokenization-uicomponents/Forms/Controllers";
+} from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
 import {
   greaterOrEqualThan,
   isISINValid,

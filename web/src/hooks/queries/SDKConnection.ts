@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { SDKService } from "../../services/SDKService";
-import type { WalletEvent } from "@hashgraph/assettokenization-sdk";
-import { SupportedWallets } from "@hashgraph/assettokenization-sdk";
+import type { WalletEvent } from "@hashgraph/asset-tokenization-sdk";
+import { SupportedWallets } from "@hashgraph/asset-tokenization-sdk";
 import { useWalletStore } from "../../store/walletStore";
 import { MetamaskStatus } from "../../utils/constants";
 

@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import {
   PhosphorIcon,
   Text,
-} from "@hashgraph/assettokenization-uicomponents/Foundations";
+} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { CancelButton } from "../../../components/CancelButton";
 import { NextStepButton } from "./NextStepButton";
 import { PreviousStepButton } from "./PreviousStepButton";
@@ -13,13 +13,13 @@ import {
   InputController,
   InputNumberController,
   SelectController,
-} from "@hashgraph/assettokenization-uicomponents";
+} from "@hashgraph/asset-tokenization-uicomponents";
 import { greaterThan, isBetweenDates, required } from "../../../utils/rules";
 import { ICreateBondFormValues } from "../ICreateBondFormValues";
 import { useFormContext, useFormState } from "react-hook-form";
 import { formatDate } from "../../../utils/format";
 import { CouponTypeOptions } from "../CouponType";
-import { Tooltip } from "@hashgraph/assettokenization-uicomponents/Overlay";
+import { Tooltip } from "@hashgraph/asset-tokenization-uicomponents/Overlay";
 import { Info } from "@phosphor-icons/react";
 import { Trans } from "react-i18next";
 import { FormStepContainer } from "../../../components/FormStepContainer";

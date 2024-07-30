@@ -1,6 +1,6 @@
 import { Box, Center, HStack, VStack } from "@chakra-ui/react";
-import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
-import { DefinitionList } from "@hashgraph/assettokenization-uicomponents/DataDisplay";
+import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
+import { DefinitionList } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
 import { Panel } from "../../../components/Panel";
 import { useTranslation } from "react-i18next";
 import { ActionsButtons } from "./ActionsButtons";
@@ -11,7 +11,7 @@ import {
   GetAllCouponsRequest,
   GetAllDividendsRequest,
   SecurityViewModel,
-} from "@hashgraph/assettokenization-sdk";
+} from "@hashgraph/asset-tokenization-sdk";
 import { formatNumberLocale, toNumber } from "../../../utils/format";
 import { useUserStore } from "../../../store/userStore";
 import { COUPONS_FACTOR, User } from "../../../utils/constants";

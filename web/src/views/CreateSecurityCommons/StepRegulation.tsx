@@ -5,7 +5,7 @@ import {
   PhosphorIcon,
   Text,
   Weight,
-} from "@hashgraph/assettokenization-uicomponents/Foundations";
+} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { Plus, X } from "@phosphor-icons/react";
 import { CancelButton } from "../../components/CancelButton";
 import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
@@ -18,19 +18,19 @@ import {
   Table,
   Tag,
   useStepContext,
-} from "@hashgraph/assettokenization-uicomponents";
+} from "@hashgraph/asset-tokenization-uicomponents";
 import { required } from "../../utils/rules";
 import { ICreateEquityFormValues } from "../CreateEquity/ICreateEquityFormValues";
 import { useFormContext, useFormState } from "react-hook-form";
 import {
   PopUp,
   Tooltip,
-} from "@hashgraph/assettokenization-uicomponents/Overlay";
+} from "@hashgraph/asset-tokenization-uicomponents/Overlay";
 import { Info } from "@phosphor-icons/react";
 import { FormStepContainer } from "../../components/FormStepContainer";
 import { CountriesList } from "./CountriesList";
 import { useGetRegulationDetails } from "../../hooks/queries/useGetSecurityDetails";
-import { GetRegulationDetailsRequest } from "@hashgraph/assettokenization-sdk";
+import { GetRegulationDetailsRequest } from "@hashgraph/asset-tokenization-sdk";
 import { createColumnHelper } from "@tanstack/react-table";
 import {
   COUNTRY_LIST_ALLOWED,

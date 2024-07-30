@@ -1,5 +1,5 @@
-import { Button } from "@hashgraph/assettokenization-uicomponents/Interaction";
-import type { ButtonProps } from "@hashgraph/assettokenization-uicomponents/Interaction";
+import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import type { ButtonProps } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
 import { useTranslation } from "react-i18next";
 
 export const CreateTokenButton = (props: ButtonProps) => {

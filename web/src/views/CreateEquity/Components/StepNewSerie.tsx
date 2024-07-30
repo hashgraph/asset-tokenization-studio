@@ -10,7 +10,7 @@ import { Info } from "@phosphor-icons/react";
 import {
   PhosphorIcon,
   Text,
-} from "@hashgraph/assettokenization-uicomponents/Foundations";
+} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { CancelButton } from "../../../components/CancelButton";
 import { NextStepButton } from "./NextStepButton";
 import { PreviousStepButton } from "./PreviousStepButton";
@@ -21,7 +21,7 @@ import {
   SelectController,
   ToggleController,
   Tooltip,
-} from "@hashgraph/assettokenization-uicomponents";
+} from "@hashgraph/asset-tokenization-uicomponents";
 import { greaterThan, min, required } from "../../../utils/rules";
 import { ICreateEquityFormValues } from "../ICreateEquityFormValues";
 import { useFormContext, useFormState } from "react-hook-form";

@@ -6,7 +6,7 @@ import { render } from "../../../../test-utils";
 import {
   Accordion,
   AccordionItem,
-} from "@hashgraph/assettokenization-uicomponents/DataDisplay";
+} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
 
 const defaultProps = {
   isAdmin: true,

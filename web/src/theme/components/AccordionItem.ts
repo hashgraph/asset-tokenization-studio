@@ -1,4 +1,4 @@
-import type { AccordionItemThemeConfiguration } from "@hashgraph/assettokenization-uicomponents/DataDisplay";
+import type { AccordionItemThemeConfiguration } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
 
 // It is not exported from uiComponents
 const accordionItemPartsList: Array<string> = ["button", "item", "panel"];

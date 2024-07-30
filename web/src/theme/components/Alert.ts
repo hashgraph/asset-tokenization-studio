@@ -1,10 +1,10 @@
 import { keyframes } from "@emotion/react";
-import { Weight } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import { Weight } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import type {
   AlertStatus,
   AlertThemeConfiguration,
-} from "@hashgraph/assettokenization-uicomponents/Overlay";
-import { alertPartsList } from "@hashgraph/assettokenization-uicomponents/Overlay";
+} from "@hashgraph/asset-tokenization-uicomponents/Overlay";
+import { alertPartsList } from "@hashgraph/asset-tokenization-uicomponents/Overlay";
 
 const loading = keyframes`
     0% {

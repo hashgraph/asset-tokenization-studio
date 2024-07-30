@@ -1,17 +1,17 @@
 import { HStack, Stack, VStack } from "@chakra-ui/react";
 import { History } from "../../components/History";
 import { useTranslation } from "react-i18next";
-import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import {
   InputController,
   InputNumberController,
-} from "@hashgraph/assettokenization-uicomponents/Forms/Controllers";
+} from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { required, min } from "../../utils/rules";
-import { Button } from "@hashgraph/assettokenization-uicomponents";
+import { Button } from "@hashgraph/asset-tokenization-uicomponents";
 import { CancelButton } from "../../components/CancelButton";
 import { useTransferSecurity } from "../../hooks/queries/useTransferSecurity";
-import { TransferRequest } from "@hashgraph/assettokenization-sdk";
+import { TransferRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router";
 import { DetailsBalancePanel } from "../../components/DetailsBalancePanel";
 import { useWalletStore } from "../../store/walletStore";

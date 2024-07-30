@@ -2,7 +2,7 @@ import {
   CalendarConfigProps,
   CalendarThemeConfiguration,
   calendarPartsList,
-} from "@hashgraph/assettokenization-uicomponents/DataDisplay";
+} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
 
 export const Calendar: CalendarThemeConfiguration = {
   parts: calendarPartsList,

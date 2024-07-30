@@ -7,7 +7,7 @@ import {
   Heading,
   PhosphorIcon,
   Text,
-} from "@hashgraph/assettokenization-uicomponents";
+} from "@hashgraph/asset-tokenization-uicomponents";
 import { Link as RouterLink } from "react-router-dom";
 import { RouterManager } from "../../../router/RouterManager";
 import { DiamondsFour, CodesandboxLogo } from "@phosphor-icons/react";

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import {
   PhosphorIcon,
   PopUp,
-} from "@hashgraph/assettokenization-uicomponents";
+} from "@hashgraph/asset-tokenization-uicomponents";
 import { Info } from "@phosphor-icons/react";
 import theme from "../../theme";
 import { useTranslation } from "react-i18next";

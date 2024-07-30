@@ -13,7 +13,7 @@ import { SDKConnection } from "./components/SDKConnection";
 import {
   InterFonts,
   useToast,
-} from "@hashgraph/assettokenization-uicomponents";
+} from "@hashgraph/asset-tokenization-uicomponents";
 import { useState } from "react";
 import Disclaimer from "./views/Initialization/CookieDisclaimer.js";
 import { isMobile } from "react-device-detect";

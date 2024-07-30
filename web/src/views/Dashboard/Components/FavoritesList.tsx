@@ -4,7 +4,7 @@ import {
   Accordion,
   AccordionItem,
   AccordionProps,
-} from "@hashgraph/assettokenization-uicomponents/DataDisplay";
+} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
 import { AccordionItemCustomTitle } from "./AccordionItemCustomTitle";
 import { SecurityCard } from "./SecurityCard";
 import { User } from "../../../utils/constants";

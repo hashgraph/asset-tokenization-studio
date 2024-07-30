@@ -2,7 +2,7 @@ import { Stack } from "@chakra-ui/react";
 import {
   Sidebar as BaseSidebar,
   SidebarItem,
-} from "@hashgraph/assettokenization-uicomponents/Navigation";
+} from "@hashgraph/asset-tokenization-uicomponents/Navigation";
 import { ChartPie, House } from "@phosphor-icons/react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";

@@ -1,8 +1,8 @@
 import {
   tablePartsList,
   TableThemeConfiguration,
-} from "@hashgraph/assettokenization-uicomponents/DataDisplay";
-import { BasePlatformTheme } from "@hashgraph/assettokenization-uicomponents/Theme";
+} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import { BasePlatformTheme } from "@hashgraph/asset-tokenization-uicomponents/Theme";
 
 const row = {
   bg: "neutral.400",

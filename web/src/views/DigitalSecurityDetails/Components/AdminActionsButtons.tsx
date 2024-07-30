@@ -1,22 +1,22 @@
 import { Link as RouterLink, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { HStack, Menu, MenuButton, VStack } from "@chakra-ui/react";
-import { Button } from "@hashgraph/assettokenization-uicomponents/Interaction";
+import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
 import { RouteName } from "../../../router/RouteName";
 import { RouterManager } from "../../../router/RouterManager";
 import {
   PhosphorIcon,
   Toggle,
-} from "@hashgraph/assettokenization-uicomponents";
+} from "@hashgraph/asset-tokenization-uicomponents";
 import { DotsThreeVertical } from "@phosphor-icons/react";
 import {
   Dropdown,
   DropdownItem,
-} from "@hashgraph/assettokenization-uicomponents/DataDisplay";
-import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { usePauseSecurity } from "../../../hooks/queries/usePauseSecurity";
 import { useUnpauseSecurity } from "../../../hooks/queries/useUnpauseSecurity";
-import { PauseRequest } from "@hashgraph/assettokenization-sdk";
+import { PauseRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useGetIsPaused } from "../../../hooks/queries/useGetSecurityDetails";
 import { useRolesStore } from "../../../store/rolesStore";
 import { SecurityRole } from "../../../utils/SecurityRole";

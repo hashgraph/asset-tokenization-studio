@@ -4,13 +4,13 @@ import { Info } from "@phosphor-icons/react";
 import {
   PhosphorIcon,
   Tooltip,
-} from "@hashgraph/assettokenization-uicomponents";
-import { Text } from "@hashgraph/assettokenization-uicomponents/Foundations";
+} from "@hashgraph/asset-tokenization-uicomponents";
+import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import {
   InputController,
   InputNumberController,
   ToggleController,
-} from "@hashgraph/assettokenization-uicomponents/Forms/Controllers";
+} from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
 import {
   greaterOrEqualThan,
   isISINValid,

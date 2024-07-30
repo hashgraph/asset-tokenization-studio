@@ -1,7 +1,7 @@
 import {
   HeaderThemeConfiguration,
   headerPartsList,
-} from "@hashgraph/assettokenization-uicomponents/Navigation";
+} from "@hashgraph/asset-tokenization-uicomponents/Navigation";
 
 export const Header: HeaderThemeConfiguration = {
   parts: headerPartsList,
