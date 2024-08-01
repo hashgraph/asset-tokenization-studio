@@ -41,6 +41,9 @@ jobs:
           npm ci
           npm run build
         working-directory: sdk
+
+      - name: Install Yarn
+        run: npm install -g yarn
       
       - name: Install dependencies web
         run: yarn install
