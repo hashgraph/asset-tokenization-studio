@@ -57,8 +57,8 @@ if (option) {
   npmCompile(conDir, "CONTRACTS");
   npmInstall(sdkDir, "SDK");
   npmBuild(sdkDir, "SDK");
-  yarnInstallPeer(uiComponentsDir, "UICOMPONENTS");
-  npmRollup(uiComponentsDir, "UICOMPONENTS");
+  // yarnInstallPeer(uiComponentsDir, "UICOMPONENTS");
+  // npmRollup(uiComponentsDir, "UICOMPONENTS");
   yarnInstall(webDir, "WEB");
 }
 

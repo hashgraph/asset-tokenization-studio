@@ -2722,7 +2722,7 @@
   version "1.0.0"
   dependencies:
     "@ethersproject/contracts" "^5.7.0"
-    "@hashgraph/asset-tokenization-contracts" "file:../../../../.cache/yarn/v6/npm-@hashgraph-assettokenization-sdk-1.0.0-72bd9827-0dc3-4cc6-8190-7c0380fe5e09-1722254104895/node_modules/@hashgraph/contracts"
+    "@hashgraph/asset-tokenization-contracts" "file:../../../../.cache/yarn/v6/npm-@hashgraph-asset-tokenization-sdk-1.0.0-dff38bc0-b96b-4f63-9f81-77f7750acc2e-1722515130423/node_modules/@hashgraph/contracts"
     "@hashgraph/hethers" "^1.2.5"
     "@hashgraph/sdk" "^2.33.0"
     "@metamask/detect-provider" "^2.0.0"
@@ -2741,6 +2741,25 @@
     web3 "^4.1.1"
     winston "^3.8.2"
     winston-daily-rotate-file "^4.7.1"
+
+"@hashgraph/asset-tokenization-uicomponents@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@hashgraph/asset-tokenization-uicomponents/-/asset-tokenization-uicomponents-1.0.0.tgz#5fbebca2048aa67729689f8087d494e19c357037"
+  integrity sha512-RMV/rk1mTnaEsObEo6wknBXOZuGfDLeuH/384qJ3GTto+dvYIM6ytXV1N1EhCIhoVrftdAlitMIP0Manfok6xA==
+  dependencies:
+    "@chakra-ui/anatomy" "2.1.1"
+    "@emotion/react" "^11.0.0"
+    "@phosphor-icons/react" "2.0.9"
+    "@tanstack/react-table" "^8.9.1"
+    chakra-react-select "4.5.0"
+    date-fns "^2.29.3"
+    echarts "^5.3.3"
+    echarts-for-react "^3.0.2"
+    lodash "^4.17.21"
+    react-day-picker "^8.6.0"
+    react-hook-form "7.43.9"
+    react-markdown "^6.0.3"
+    react-number-format "5.1.4"
 
 "@hashgraph/cryptography@1.4.8-beta.4":
   version "1.4.8-beta.4"
@@ -3284,25 +3303,6 @@
   dependencies:
     "@jridgewell/resolve-uri" "^3.1.0"
     "@jridgewell/sourcemap-codec" "^1.4.14"
-
-"@hashgraph/asset-tokenization-uicomponents@1.0.1":
-  version "1.0.1"
-  resolved "http://localhost:4873/@hashgraph/asset-tokenization-uicomponents/-/assettokenization-uicomponents-1.0.1.tgz#ecec8f67e94fd6d3c7b0ea602ea452353f14889f"
-  integrity sha512-olZmULOlEmSKwnTo3CSklv9lM5YAF29fF6qPtyOdN5Ch0NTXwqIG+o7mdcanBO+TgDYcHSvTn2/MK+RIHEuJfg==
-  dependencies:
-    "@chakra-ui/anatomy" "2.1.1"
-    "@emotion/react" "^11.0.0"
-    "@phosphor-icons/react" "2.0.9"
-    "@tanstack/react-table" "^8.9.1"
-    chakra-react-select "4.5.0"
-    date-fns "^2.29.3"
-    echarts "^5.3.3"
-    echarts-for-react "^3.0.2"
-    lodash "^4.17.21"
-    react-day-picker "^8.6.0"
-    react-hook-form "7.43.9"
-    react-markdown "^6.0.3"
-    react-number-format "5.1.4"
 
 "@metamask/detect-provider@^2.0.0":
   version "2.0.0"
