@@ -43,7 +43,7 @@ jobs:
         working-directory: sdk
 
       - name: Install Yarn
-        run: npm install -g yarn
+        run: npm install -g yarn@1.22.19
       
       - name: Install dependencies web
         run: yarn install
