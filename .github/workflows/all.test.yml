@@ -17,10 +17,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
 
-      - name: Build the Docker image
-        run: docker build -t rpc .
-        working-directory: dockerfile
-
       - name: Setup NodeJS Environment
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
         with:
