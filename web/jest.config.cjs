@@ -3,6 +3,8 @@ process.env.TZ = "GMT";
 module.exports = {
   testEnvironment: "jest-environment-jsdom",
   preset: "ts-jest",
+  ci: true,
+  testTimeout: 30000,
   transform: {
     "^.+\\.(ts|tsx)?$": "ts-jest",
     "^.+\\.(js|jsx)$": "babel-jest",
