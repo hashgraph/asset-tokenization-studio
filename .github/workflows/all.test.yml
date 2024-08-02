@@ -71,6 +71,12 @@ jobs:
           echo "BUSINESS_LOGIC_KEYS_BOND='0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef'"  >> .env
         working-directory: sdk
 
+      - name: Test web
+        run: |
+          npm run test
+          npm run cleanCache
+        working-directory: web
+
       - name: Test Contracts
         run: |
           npm run test
@@ -82,10 +88,4 @@ jobs:
           npm run test
           npm run cleanCache
         working-directory: sdk
-
-      - name: Test web
-        run: |
-          npm run test
-          npm run cleanCache
-        working-directory: web
 
