@@ -5,8 +5,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx",
-    "test:local": "NODE_ENV=test jest",
-		"test": "react-app-rewired test --maxWorkers=50% --watchAll=false",
+    "test": "NODE_ENV=test jest",
     "theme": "chakra-cli tokens src/theme/index.ts",
     "cleanCache": "react-app-rewired test --clearCache",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,html,md,json}\" --ignore-path .gitignore --ignore-path .prettierignore"
