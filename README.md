@@ -9,6 +9,9 @@
 ### Table of Contents
 
 - **[Development manifesto](#development-manifesto)**<br>
+- **[Installation](#installation)**<br>
+- **[Build](#build)**<br>
+- **[Run](#run)**<br>
 - **[Support](#support)**<br>
 - **[Contributing](#contributing)**<br>
 - **[Code of conduct](#code-of-conduct)**<br>
@@ -22,6 +25,44 @@ The development of the project follows enterprise-grade practices for software d
 ## Domain driven design
 
 By using DDD (Domain-Driven Design), we aim to create a shared language among all members of the project team, which allows us to focus our development efforts on thoroughly understanding the processes and rules of the domain. This helps to bring benefits such as increased efficiency and improved communication.
+
+
+# Installation
+
+In a terminal:
+
+```
+npm run install:all
+```
+
+This will install the dependencies in all projects and sets up the links between them.
+
+You can now start developing in any of the modules.
+
+
+# Build
+
+When making modifications to any of the modules, you have to re-compile the dependencies, in this order, depending on which ones the modifications where made:
+
+```bash
+  // 1st
+  $ npm run build:contracts
+  // 2nd
+  $ npm run build:sdk
+  // or
+  $ npm run build:web
+```
+
+# Run
+
+In order to run the application locally:
+
+- Clone the repository
+- Install the application as described in the *Installation* section
+- Create a ".env" file in the *web* module (using the ".env.sample" file as a template)
+- Open a terminal and go to the *web* folder
+- Run the command : __yarn dev__
+- Open a browser and type in the URL displayed in the terminal (by default it will be : *http://localhost:5173*)
 
 
 # Support

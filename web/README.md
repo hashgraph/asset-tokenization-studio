@@ -9,31 +9,17 @@
 ### Table of Contents
 
 - **[Description](#description)**<br>
-- **[Private dependencies](#private-dependencies)**<br>
 - **[Yarn Version Compatibility](#yarn-version-compatibility)**<br>
 - **[Installation](#installation)**<br>
+- **[Run](#run)**<br>
+- **[Test](#test)**<br>
+
+
 
 # Description
 
-Backoffice for Red Swan - Phase1a.
-
-# Private dependencies
-
-This project has some private dependencies, so in order to install you would need to add a gitlab private token.
-
-1. Go to Your profile > Access Tokens: [Link](https://gitlab.com/-/profile/personal_access_tokens)
-2. Insert "npm" on "Token name".
-3. Leave "Expiration date" empty.
-4. Very important, in "Select scopes" you must select exclusively "read_api". Do NOT mark more.
-5. Click on "Create personal access token"
-6. Copy the generated token.
-7. Run the following commands, bore in mind that you need to change from `<your_token>` to the previously generated token:
-
-```
-
-```
-
-Now everything is ready to work, and `yarn install` could be run.
+Front End for the Asset Tokenization Studio.
+This Dapp interacts directly with the Hedera Testnet through the SDK.
 
 # Yarn Version Compatibility
 
@@ -50,5 +36,29 @@ First, verify that you have the correct version of Yarn installed by running `ya
 Then, install the project dependencies with:
 
 ```
-yarn
+yarn install
 ```
+
+# Run
+
+Run the command :
+
+```
+yarn dev
+```
+
+Open a browser and type in the URL displayed in the terminal (by default it will be : *http://localhost:5173*)
+
+# Test
+
+The following *src* folders contain *__tests__* subfolders within them with their corresponding tests:
+- components
+- layouts
+- views
+
+In order to execute all the tests run this command from the *web* folder:
+
+```
+npm run test
+```
+
