@@ -14,8 +14,6 @@
 - **[Run](#run)**<br>
 - **[Test](#test)**<br>
 
-
-
 # Description
 
 Front End for the Asset Tokenization Studio.
@@ -47,18 +45,18 @@ Run the command :
 yarn dev
 ```
 
-Open a browser and type in the URL displayed in the terminal (by default it will be : *http://localhost:5173*)
+Open a browser and type in the URL displayed in the terminal (by default it will be : _http://localhost:5173_)
 
 # Test
 
-The following *src* folders contain *__tests__* subfolders within them with their corresponding tests:
+The following _src_ folders contain _**tests**_ subfolders within them with their corresponding tests:
+
 - components
 - layouts
 - views
 
-In order to execute all the tests run this command from the *web* folder:
+In order to execute all the tests run this command from the _web_ folder:
 
 ```
 npm run test
 ```
-

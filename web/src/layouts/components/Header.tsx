@@ -4,10 +4,7 @@ import { Header as HeaderBase } from "@hashgraph/asset-tokenization-uicomponents
 import { useWalletStore } from "../../store/walletStore";
 import { useTranslation } from "react-i18next";
 import { CaretDown, Power, SignOut, Wallet } from "@phosphor-icons/react";
-import {
-  PhosphorIcon,
-  Text,
-} from "@hashgraph/asset-tokenization-uicomponents";
+import { PhosphorIcon, Text } from "@hashgraph/asset-tokenization-uicomponents";
 import { MetamaskStatus } from "../../utils/constants";
 import { Logo } from "@hashgraph/asset-tokenization-uicomponents/Basic";
 import { useUserStore } from "../../store/userStore";
