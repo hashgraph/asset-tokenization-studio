@@ -1,0 +1,155 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Tag /> renders correctly 1`] = `
+<DocumentFragment>
+  <button
+    class="css-1jrjhv9"
+  >
+    <span
+      class="css-14ftdz1"
+    >
+      Tag
+    </span>
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Tag /> shows icon on left side: Using icon left 1`] = `
+<DocumentFragment>
+  <button
+    class="css-1jrjhv9"
+  >
+    <svg
+      class="chakra-icon css-1etpeyg"
+      fill="currentColor"
+      focusable="false"
+      height="1em"
+      viewBox="0 0 256 256"
+      width="1em"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"
+      />
+    </svg>
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Tag /> shows icon on right side: Using icon right 1`] = `
+<DocumentFragment>
+  <button
+    class="css-1jrjhv9"
+  >
+    <svg
+      class="chakra-icon css-1etpeyg"
+      fill="currentColor"
+      focusable="false"
+      height="1em"
+      viewBox="0 0 256 256"
+      width="1em"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm56-12a12,12,0,1,0,12,12A12,12,0,0,0,196,116ZM60,116a12,12,0,1,0,12,12A12,12,0,0,0,60,116Z"
+      />
+    </svg>
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Tag /> shows large size: Using size large 1`] = `
+<DocumentFragment>
+  <button
+    class="css-1jrjhv9"
+  >
+    <span
+      class="css-14ftdz1"
+    >
+      Tag
+    </span>
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Tag /> shows outline variant: Using variant outline 1`] = `
+<DocumentFragment>
+  <button
+    class="css-1xxiobd"
+  >
+    <span
+      class="css-14ftdz1"
+    >
+      Tag
+    </span>
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Tag /> shows skeleton when isLoading is true: WithLoading 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-skeleton css-1j9elmj"
+  />
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Tag /> shows small size: Using size small 1`] = `
+<DocumentFragment>
+  <button
+    class="css-xtw3c9"
+  >
+    <span
+      class="css-14ftdz1"
+    >
+      Tag
+    </span>
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Tag /> shows solid variant: Using variant solid 1`] = `
+<DocumentFragment>
+  <button
+    class="css-1xzypa3"
+  >
+    <span
+      class="css-14ftdz1"
+    >
+      Tag
+    </span>
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

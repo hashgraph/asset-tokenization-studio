@@ -1,0 +1,57 @@
+import {
+  Story,
+  Meta,
+  Title,
+  ArgTypes,
+  Primary,
+  Stories,
+  Source,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as DetailReviewStories from "./DetailReview.stories";
+
+<Meta of={DetailReviewStories} />
+
+<Title />
+
+<a
+  href="https://www.figma.com/file/YF8AvIq0MclfhGDvKgzypp/ioBricks-Design-System?type=design&node-id=3572%3A41849&mode=design&t=k4jSCm0Q182mRyVn-1"
+  target="\_blank"
+>
+  View figma design
+</a>
+
+<Primary />
+
+## How to set up
+
+### Config theme
+
+Add the following configurations to the `theme.tsx` and `DetailReview.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    DetailReview: ConfigDetailReview,
+  },
+};
+```
+
+```tsx dark
+const ConfigDetailReview: DetailReviewThemeConfiguration = {
+  parts: detailReviewPartsList,
+  baseStyle: {},
+};
+```
+
+### Component parts
+
+You have these parts available: `"title" | "value" | "container"` (`detailReviewPartsList`)
+
+## Props
+
+<ArgTypes of={DetailReviewStories} />
+
+## Stories
+
+<Stories title="" />

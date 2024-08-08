@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`< PopUp/> should render the default component 1`] = `
+<DocumentFragment>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`< PopUp/> should render with footer component 1`] = `
+<DocumentFragment>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`< PopUp/> should render with no overlay 1`] = `
+<DocumentFragment>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`< PopUp/> should render with one button in footer component 1`] = `
+<DocumentFragment>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

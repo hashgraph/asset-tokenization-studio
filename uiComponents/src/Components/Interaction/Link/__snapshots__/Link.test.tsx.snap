@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Link/> component renders correctly 1`] = `
+<DocumentFragment>
+  <a
+    class="chakra-link css-6a7sik"
+    data-testid="link"
+    tabindex="0"
+  >
+    Click me
+  </a>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

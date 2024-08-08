@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<HoverableContent /> renders correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="css-1en4ag4"
+    data-testid="hoverable-content"
+    tabindex="0"
+  >
+    <div
+      class="css-0"
+    >
+      Children
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

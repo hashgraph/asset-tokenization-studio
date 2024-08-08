@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccordionItemCustomTitle should render correctly as admin and collapsed: adminCollapsed 1`] = `[Function]`;
+
+exports[`AccordionItemCustomTitle should render correctly as admin and expanded: adminExpanded 1`] = `[Function]`;
+
+exports[`AccordionItemCustomTitle should render correctly as holder and collapsed: holderCollapsed 1`] = `[Function]`;
+
+exports[`AccordionItemCustomTitle should render correctly as holder and expanded: holderExpanded 1`] = `[Function]`;

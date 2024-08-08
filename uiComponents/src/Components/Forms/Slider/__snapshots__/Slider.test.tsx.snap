@@ -1,0 +1,161 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Slider /> renders correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-slider css-10gqts"
+    style="position: relative; user-select: none; outline: 0; padding-top: 0px; padding-bottom: 0px;"
+    tabindex="-1"
+  >
+    <div
+      class="chakra-slider__track css-k3nf9g"
+      id="slider-track-:r0:"
+      style="position: absolute; top: 50%; transform: translateY(-50%); width: 100%;"
+    >
+      <div
+        class="chakra-slider__filled-track css-q6qamm"
+        style="position: absolute; top: 50%; transform: translateY(-50%); width: 30%; left: 0%;"
+      />
+    </div>
+    <div
+      aria-orientation="horizontal"
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="30"
+      class="chakra-slider__thumb css-1ky2tds"
+      id="slider-thumb-:r0:"
+      role="slider"
+      style="position: absolute; user-select: none; left: calc(30% - 0px);"
+      tabindex="0"
+    />
+    <input
+      type="hidden"
+      value="30"
+    />
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Slider /> shows horizontal slider: horizontal slider 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-slider css-10gqts"
+    style="position: relative; user-select: none; outline: 0; padding-top: 0px; padding-bottom: 0px;"
+    tabindex="-1"
+  >
+    <div
+      class="chakra-slider__track css-k3nf9g"
+      id="slider-track-:r2:"
+      style="position: absolute; top: 50%; transform: translateY(-50%); width: 100%;"
+    >
+      <div
+        class="chakra-slider__filled-track css-q6qamm"
+        style="position: absolute; top: 50%; transform: translateY(-50%); width: 50%; left: 0%;"
+      />
+    </div>
+    <div
+      aria-orientation="horizontal"
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="50"
+      class="chakra-slider__thumb css-1ky2tds"
+      id="slider-thumb-:r2:"
+      role="slider"
+      style="position: absolute; user-select: none; left: calc(50% - 0px);"
+      tabindex="0"
+    />
+    <input
+      type="hidden"
+      value="50"
+    />
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Slider /> shows the default value: with default value 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-slider css-10gqts"
+    style="position: relative; user-select: none; outline: 0; padding-top: 0px; padding-bottom: 0px;"
+    tabindex="-1"
+  >
+    <div
+      class="chakra-slider__track css-k3nf9g"
+      id="slider-track-:r1:"
+      style="position: absolute; top: 50%; transform: translateY(-50%); width: 100%;"
+    >
+      <div
+        class="chakra-slider__filled-track css-q6qamm"
+        style="position: absolute; top: 50%; transform: translateY(-50%); width: 70%; left: 0%;"
+      />
+    </div>
+    <div
+      aria-orientation="horizontal"
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="70"
+      class="chakra-slider__thumb css-1ky2tds"
+      id="slider-thumb-:r1:"
+      role="slider"
+      style="position: absolute; user-select: none; left: calc(70% - 0px);"
+      tabindex="0"
+    />
+    <input
+      type="hidden"
+      value="70"
+    />
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Slider /> shows vertical slider: vertical slider 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-slider css-om0rg5"
+    style="position: relative; user-select: none; outline: 0; padding-left: 0px; padding-right: 0px;"
+    tabindex="-1"
+  >
+    <div
+      class="chakra-slider__track css-1i926hj"
+      id="slider-track-:r3:"
+      style="position: absolute; left: 50%; transform: translateX(-50%); height: 100%;"
+    >
+      <div
+        class="chakra-slider__filled-track css-q6qamm"
+        style="position: absolute; left: 50%; transform: translateX(-50%); height: 50%; bottom: 0%;"
+      />
+    </div>
+    <div
+      aria-orientation="vertical"
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="50"
+      class="chakra-slider__thumb css-1wo4imd"
+      id="slider-thumb-:r3:"
+      role="slider"
+      style="position: absolute; user-select: none; bottom: calc(50% - 0px);"
+      tabindex="0"
+    />
+    <input
+      type="hidden"
+      value="50"
+    />
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

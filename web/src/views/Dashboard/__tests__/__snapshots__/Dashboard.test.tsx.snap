@@ -1,0 +1,128 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dashboard render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-1153lrp"
+  >
+    <div
+      class="chakra-stack css-1vbflsr"
+    >
+      <p
+        class="css-r0wbil"
+      >
+        Dashboard
+      </p>
+      <p
+        class="css-oal6jm"
+      >
+        Your digital securities dashboard
+      </p>
+    </div>
+    <div
+      class="chakra-stack css-1lpnvx5"
+    >
+      <div
+        class="css-b0rmsk"
+      >
+        <a
+          class="chakra-button css-vueqt9"
+          data-testid="add-security-button"
+          href="/security/add"
+        >
+          <span
+            class="chakra-button__icon css-1wh2kri"
+          >
+            <svg
+              aria-hidden="true"
+              class="chakra-icon css-kpbtv0"
+              fill="currentColor"
+              focusable="false"
+              height="1em"
+              viewBox="0 0 256 256"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"
+              />
+            </svg>
+          </span>
+          Import a digital security token
+        </a>
+        <a
+          class="chakra-button css-vueqt9"
+          data-testid="create-new-security-button"
+          href="/security/create"
+        >
+          Create new digital security
+        </a>
+      </div>
+    </div>
+  </div>
+  <div
+    class="css-1ehhnoa"
+  >
+    <div
+      class="css-yglf3"
+    >
+      <div
+        class="chakra-stack css-1xkzybq"
+      >
+        <p
+          class="css-rp0w81"
+          data-testid="title"
+        >
+          You don't have digital securities yet
+        </p>
+        <p
+          class="css-nvgn7s"
+          data-testid="title"
+        >
+          Select if you want to create a new digital security or import an existing one.
+        </p>
+      </div>
+      <div
+        class="chakra-stack css-zg985e"
+      >
+        <a
+          class="chakra-button css-vueqt9"
+          data-testid="add-security-button"
+          href="/security/add"
+        >
+          <span
+            class="chakra-button__icon css-1wh2kri"
+          >
+            <svg
+              aria-hidden="true"
+              class="chakra-icon css-kpbtv0"
+              fill="currentColor"
+              focusable="false"
+              height="1em"
+              viewBox="0 0 256 256"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"
+              />
+            </svg>
+          </span>
+          Import a digital security token
+        </a>
+        <a
+          class="chakra-button css-1145i8e"
+          data-testid="create-new-security-button"
+          href="/security/create"
+        >
+          Create new digital security
+        </a>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

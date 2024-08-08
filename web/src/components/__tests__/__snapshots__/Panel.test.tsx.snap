@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Panel should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-17irsum"
+  >
+    <div
+      class="css-146esfn"
+    >
+      <p
+        class="css-dmlij3"
+      >
+        Testing
+      </p>
+    </div>
+    <h1>
+      TESTING
+    </h1>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

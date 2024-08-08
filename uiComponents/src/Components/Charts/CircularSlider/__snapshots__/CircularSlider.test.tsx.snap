@@ -1,0 +1,246 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<CircularSlider /> renders correctly 1`] = `
+<DocumentFragment>
+  <div
+    aria-valuemax="100"
+    aria-valuemin="0"
+    aria-valuenow="0"
+    class="chakra-progress css-eb5xc8"
+    role="progressbar"
+  >
+    <svg
+      class="css-kn46u7"
+      viewBox="0 0 100 100"
+    >
+      <circle
+        class="chakra-progress__track css-ol3i12"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke-width="10px"
+      />
+      <circle
+        class="chakra-progress__indicator css-1thbxp8"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke-dasharray="0 264"
+        stroke-dashoffset="66"
+        stroke-width="10px"
+      />
+    </svg>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<CircularSlider /> shows correctly when a color is passed over it : Using color 1`] = `
+<DocumentFragment>
+  <div
+    aria-valuemax="100"
+    aria-valuemin="0"
+    aria-valuenow="0"
+    class="chakra-progress css-eb5xc8"
+    role="progressbar"
+  >
+    <svg
+      class="css-kn46u7"
+      viewBox="0 0 100 100"
+    >
+      <circle
+        class="chakra-progress__track css-ol3i12"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke-width="10px"
+      />
+      <circle
+        class="chakra-progress__indicator css-1prp7l4"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke-dasharray="0 264"
+        stroke-dashoffset="66"
+        stroke-width="10px"
+      />
+    </svg>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<CircularSlider /> shows correctly when a label is passed over it : Using label 1`] = `
+<DocumentFragment>
+  <div
+    aria-valuemax="100"
+    aria-valuemin="0"
+    aria-valuenow="0"
+    class="chakra-progress css-eb5xc8"
+    role="progressbar"
+  >
+    <svg
+      class="css-kn46u7"
+      viewBox="0 0 100 100"
+    >
+      <circle
+        class="chakra-progress__track css-ol3i12"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke-width="10px"
+      />
+      <circle
+        class="chakra-progress__indicator css-1thbxp8"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke-dasharray="0 264"
+        stroke-dashoffset="66"
+        stroke-width="10px"
+      />
+    </svg>
+    <div
+      class="css-1uer2ql"
+    >
+      radio item
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<CircularSlider /> shows correctly when a value is passed over it : Using value 1`] = `
+<DocumentFragment>
+  <div
+    aria-valuemax="100"
+    aria-valuemin="0"
+    aria-valuenow="40"
+    class="chakra-progress css-eb5xc8"
+    role="progressbar"
+  >
+    <svg
+      class="css-kn46u7"
+      viewBox="0 0 100 100"
+    >
+      <circle
+        class="chakra-progress__track css-ol3i12"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke-width="10px"
+      />
+      <circle
+        class="chakra-progress__indicator css-hvagwd"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke-dasharray="105.60000000000001 158.39999999999998"
+        stroke-dashoffset="66"
+        stroke-width="10px"
+      />
+    </svg>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<CircularSlider /> shows correctly when isLoading is true: Using isLoading 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-skeleton css-1xm5d29"
+  />
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<CircularSlider /> shows correctly when size is medium: Using medium size 1`] = `
+<DocumentFragment>
+  <div
+    aria-valuemax="100"
+    aria-valuemin="0"
+    aria-valuenow="0"
+    class="chakra-progress css-ly9idg"
+    role="progressbar"
+  >
+    <svg
+      class="css-kn46u7"
+      viewBox="0 0 100 100"
+    >
+      <circle
+        class="chakra-progress__track css-ol3i12"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke-width="10px"
+      />
+      <circle
+        class="chakra-progress__indicator css-1thbxp8"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke-dasharray="0 264"
+        stroke-dashoffset="66"
+        stroke-width="10px"
+      />
+    </svg>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<CircularSlider /> shows correctly when size is small: Using small size 1`] = `
+<DocumentFragment>
+  <div
+    aria-valuemax="100"
+    aria-valuemin="0"
+    aria-valuenow="0"
+    class="chakra-progress css-eb5xc8"
+    role="progressbar"
+  >
+    <svg
+      class="css-kn46u7"
+      viewBox="0 0 100 100"
+    >
+      <circle
+        class="chakra-progress__track css-ol3i12"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke-width="10px"
+      />
+      <circle
+        class="chakra-progress__indicator css-1thbxp8"
+        cx="50"
+        cy="50"
+        r="42"
+        stroke-dasharray="0 264"
+        stroke-dashoffset="66"
+        stroke-width="10px"
+      />
+    </svg>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

@@ -1,0 +1,198 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DetailsBalancePanel should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-hagybd"
+  >
+    <div
+      class="chakra-stack css-ql2tiy"
+      data-testid="current-available-balance-panel"
+    >
+      <div
+        class="css-146esfn"
+      >
+        <p
+          class="css-dmlij3"
+        >
+          Current Available balance
+        </p>
+      </div>
+      <div
+        class="css-131o3s"
+      >
+        <p
+          class="css-1ysbn4y"
+        >
+          12
+          <span
+            class="css-650xeh"
+          />
+        </p>
+      </div>
+    </div>
+    <div
+      class="chakra-stack css-u634b8"
+      data-testid="security-details"
+    >
+      <div
+        class="css-1dixb64"
+      >
+        <p
+          class="chakra-text css-1an6htx"
+        >
+          Details
+        </p>
+      </div>
+      <div
+        class="css-tvba8"
+        data-testid="definition-list-item-Name"
+        tabindex="0"
+      >
+        <p
+          class="chakra-text css-vbc1qe"
+        >
+          Name
+        </p>
+        <div
+          class="chakra-skeleton__group css-1rr4qq7"
+        >
+          <div
+            class="chakra-skeleton css-5dkehc"
+          />
+        </div>
+      </div>
+      <div
+        class="css-tvba8"
+        data-testid="definition-list-item-Symbol"
+        tabindex="0"
+      >
+        <p
+          class="chakra-text css-vbc1qe"
+        >
+          Symbol
+        </p>
+        <div
+          class="chakra-skeleton__group css-1rr4qq7"
+        >
+          <div
+            class="chakra-skeleton css-5dkehc"
+          />
+        </div>
+      </div>
+      <div
+        class="css-tvba8"
+        data-testid="definition-list-item-Decimal"
+        tabindex="0"
+      >
+        <p
+          class="chakra-text css-vbc1qe"
+        >
+          Decimal
+        </p>
+        <div
+          class="chakra-skeleton__group css-1rr4qq7"
+        >
+          <div
+            class="chakra-skeleton css-5dkehc"
+          />
+        </div>
+      </div>
+      <div
+        class="css-tvba8"
+        data-testid="definition-list-item-ISIN"
+        tabindex="0"
+      >
+        <p
+          class="chakra-text css-vbc1qe"
+        >
+          ISIN
+        </p>
+        <div
+          class="chakra-skeleton__group css-1rr4qq7"
+        >
+          <div
+            class="chakra-skeleton css-5dkehc"
+          />
+        </div>
+      </div>
+      <div
+        class="css-tvba8"
+        data-testid="definition-list-item-ID"
+        tabindex="0"
+      >
+        <p
+          class="chakra-text css-vbc1qe"
+        >
+          ID
+        </p>
+        <div
+          class="chakra-skeleton__group css-1rr4qq7"
+        >
+          <div
+            class="chakra-skeleton css-5dkehc"
+          />
+        </div>
+      </div>
+      <div
+        class="css-tvba8"
+        data-testid="definition-list-item-Max Supply"
+        tabindex="0"
+      >
+        <p
+          class="chakra-text css-vbc1qe"
+        >
+          Max Supply
+        </p>
+        <div
+          class="chakra-skeleton__group css-1rr4qq7"
+        >
+          <div
+            class="chakra-skeleton css-5dkehc"
+          />
+        </div>
+      </div>
+      <div
+        class="css-tvba8"
+        data-testid="definition-list-item-Total Supply"
+        tabindex="0"
+      >
+        <p
+          class="chakra-text css-vbc1qe"
+        >
+          Total Supply
+        </p>
+        <div
+          class="chakra-skeleton__group css-1rr4qq7"
+        >
+          <div
+            class="chakra-skeleton css-5dkehc"
+          />
+        </div>
+      </div>
+      <div
+        class="css-tvba8"
+        data-testid="definition-list-item-Pending to be minted"
+        tabindex="0"
+      >
+        <p
+          class="chakra-text css-vbc1qe"
+        >
+          Pending to be minted
+        </p>
+        <div
+          class="chakra-skeleton__group css-1rr4qq7"
+        >
+          <div
+            class="chakra-skeleton css-5dkehc"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

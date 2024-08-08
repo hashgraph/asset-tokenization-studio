@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CancelButton render correctly 1`] = `
+<DocumentFragment>
+  <a
+    class="chakra-button css-vueqt9"
+    data-testid="cancel-button"
+    href="/"
+  >
+    Cancel
+  </a>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
