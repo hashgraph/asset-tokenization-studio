@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Logo /> renders correctly size iso: SizeISO 1`] = `
+<DocumentFragment>
+  <img
+    alt="logo"
+    src="[object Object]"
+    style="width: 100%; height: 100px;"
+  />
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Logo /> renders correctly: SizeFull 1`] = `
+<DocumentFragment>
+  <img
+    alt="logo"
+    src="[object Object]"
+    style="width: 100%; height: 100px;"
+  />
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

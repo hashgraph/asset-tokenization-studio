@@ -1,0 +1,41 @@
+# name: Publishing uiComponents
+# on: 
+#  release:
+#     types:
+#       - published
+# jobs:
+  # publish:
+  #   name: docker
+  #   runs-on: [ self-hosted, Linux, medium, ephemeral ]
+    
+  #   permissions:
+  #     contents: read  
+
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+        
+  #     - name: Setup NodeJS Environment
+  #       uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d
+  #       with:
+  #         node-version: 18.x    
+
+  #     - name: Install Yarn
+  #       run: npm install -g yarn 
+      
+  #     - name: Create file .npmrc
+  #       run: |
+  #           touch .npmrc
+  #           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+  #           cp .npmrc ./uiComponents/.npmrc
+      
+  #     - name: Install uiComponents dependencies 
+  #       run: npm run install:uiComponents
+
+  #     - name: Build uiComponents 
+  #       run: npm run build:uiComponents
+      
+  #     - name: Publish uiComponents package
+  #       run: npm run publish:uiComponents --access=public
+  #       env:
+  #         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

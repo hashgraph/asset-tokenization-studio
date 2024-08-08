@@ -1,0 +1,90 @@
+import {
+  Story,
+  Meta,
+  Title,
+  ArgTypes,
+  Primary,
+  Stories,
+  Source,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as PopUpStories from "./PopUp.stories";
+
+<Meta of={PopUpStories} />
+
+<Title />
+
+<a
+  href='https://www.figma.com/file/YF8AvIq0MclfhGDvKgzypp/NEW---ioBricks-Library?type=design&node-id=2710-33931&t=yFrtXzBtXhWvNqLo-0'
+  target='\_blank'
+>
+  View figma design
+</a>
+
+<Primary />
+
+## How to set up
+
+### Config theme
+
+Add the following configurations to the `theme.tsx` and `PopUp.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    PopUp: ConfigPopUp,
+  },
+};
+```
+
+```tsx dark
+const ConfigPopUp: PopUpThemeConfiguration = {
+  parts: popUpPartsList,
+  baseStyle: {},
+};
+```
+
+### Component parts
+
+You have these parts available: `"overlay" | "container"  | "dialog"  | "header" | "closeButton"  | "body"  | "footer"  | "icon"  | "title"  | "description"  | "contentContainer"  | "actionButton"` (`popUpPartsList`)
+
+## How to use
+
+### Default
+
+```tsx
+<PopUp isOpen isOpen title='title' description='description' />
+```
+
+### Custom organization
+
+```tsx
+<PopUp isOpen>
+  <PopupText type='description' label='title' />
+  <PopupText type='title' label='description' />
+  <PoupIcon />
+</PopUp>
+```
+
+### Confirmation Popup
+
+```tsx
+<ConfirmationPopUp
+  isOpen={isOpen}
+  onClose={onClose}
+  onCancel={handleCancel}
+  onConfirm={handleConfirm}
+  confirmationText='CONFIRMATION TEXT'
+  title='Title'
+  description='Description'
+  label="Type 'CONFIRMATION TEXT' to confirm"
+/>
+```
+
+## Props
+
+<ArgTypes of={PopUpStories} />
+
+## Stories
+
+<Stories title='' />

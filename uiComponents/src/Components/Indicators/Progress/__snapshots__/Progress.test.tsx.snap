@@ -1,0 +1,64 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Progress /> renders correctly with stripes and animation: Striped progress with animation 1`] = `
+<DocumentFragment>
+  <div
+    class="css-9mbr6u"
+  >
+    <div
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="60"
+      class="css-b2wzt2"
+      role="progressbar"
+      style="width: 60%;"
+    />
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Progress /> renders correctly with stripes: Striped progress 1`] = `
+<DocumentFragment>
+  <div
+    class="css-9mbr6u"
+  >
+    <div
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="60"
+      class="css-1ulqoxj"
+      role="progressbar"
+      style="width: 60%;"
+    />
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Progress /> renders correctly: Default progress 1`] = `
+<DocumentFragment>
+  <div
+    class="css-9mbr6u"
+  >
+    <div
+      aria-valuemax="100"
+      aria-valuemin="0"
+      aria-valuenow="60"
+      class="css-1nsw7s9"
+      role="progressbar"
+      style="width: 60%;"
+    />
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

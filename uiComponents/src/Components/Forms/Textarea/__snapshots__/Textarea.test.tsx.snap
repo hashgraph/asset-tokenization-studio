@@ -1,0 +1,71 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Textarea /> renders correctly 1`] = `
+<DocumentFragment>
+  <label
+    class="chakra-form__label css-tigm22"
+  >
+    <div
+      class="css-79elbk"
+    >
+      <textarea
+        class="chakra-textarea css-0"
+        data-testid="textareaTest"
+      />
+    </div>
+  </label>
+</DocumentFragment>
+`;
+
+exports[`<Textarea /> shows correctly when is disabled: Using disabled 1`] = `
+<DocumentFragment>
+  <label
+    class="chakra-form__label css-tigm22"
+  >
+    <div
+      class="css-79elbk"
+    >
+      <textarea
+        class="chakra-textarea css-0"
+        data-testid="textareaTest"
+        disabled=""
+      />
+    </div>
+  </label>
+</DocumentFragment>
+`;
+
+exports[`<Textarea /> shows correctly when is invalid: Using invalid 1`] = `
+<DocumentFragment>
+  <label
+    class="chakra-form__label css-tigm22"
+  >
+    <div
+      class="css-79elbk"
+    >
+      <textarea
+        aria-invalid="true"
+        class="chakra-textarea css-0"
+        data-testid="textareaTest"
+      />
+    </div>
+  </label>
+</DocumentFragment>
+`;
+
+exports[`<Textarea /> shows correctly when is success: Using success 1`] = `
+<DocumentFragment>
+  <label
+    class="chakra-form__label css-tigm22"
+  >
+    <div
+      class="css-79elbk"
+    >
+      <textarea
+        class="chakra-textarea css-0"
+        data-testid="textareaTest"
+      />
+    </div>
+  </label>
+</DocumentFragment>
+`;

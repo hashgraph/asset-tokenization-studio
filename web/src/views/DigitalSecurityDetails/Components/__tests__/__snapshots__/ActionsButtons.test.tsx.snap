@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActionsButtons should render correctly admin buttons: admin 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-i49z84"
+  />
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`ActionsButtons should render correctly holder buttons: holder 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-i49z84"
+    data-testid="holder-actions-buttons"
+  >
+    <a
+      class="chakra-button css-vueqt9"
+      data-testid="transfer-button"
+      href="/security/:id/transfer"
+    >
+      Transfer
+    </a>
+    <a
+      class="chakra-button css-vueqt9"
+      data-testid="redeem-button"
+      href="/security/:id/redeem"
+    >
+      Redeem
+    </a>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

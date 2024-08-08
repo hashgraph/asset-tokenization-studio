@@ -1,0 +1,720 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateBond render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-ahthbn"
+  >
+    <div
+      class="chakra-stack css-1yfjds0"
+    >
+      <div
+        class="css-k5rr6j"
+      >
+        <div
+          class="css-k5rr6j"
+          data-testid="go-back-button"
+        >
+          <button
+            aria-label="Go back"
+            class="chakra-button css-j1h3f5"
+            data-testid="go-back-button-button"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              class="chakra-icon css-kpbtv0"
+              fill="currentColor"
+              focusable="false"
+              height="1em"
+              viewBox="0 0 256 256"
+              width="1em"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M224,128a8,8,0,0,1-8,8H59.31l58.35,58.34a8,8,0,0,1-11.32,11.32l-72-72a8,8,0,0,1,0-11.32l72-72a8,8,0,0,1,11.32,11.32L59.31,120H216A8,8,0,0,1,224,128Z"
+              />
+            </svg>
+          </button>
+          <p
+            class="css-r0wbil"
+            data-testid="go-back-button-label"
+          >
+            Bond creation
+          </p>
+        </div>
+      </div>
+      <nav
+        aria-label="breadcrumb"
+        class="chakra-breadcrumb css-1y2eexs"
+        data-testid="breadcrumb-desktop"
+      >
+        <ol
+          class="chakra-breadcrumb__list css-70qvj9"
+        >
+          <li
+            class="chakra-breadcrumb__list-item css-1kcfkoc"
+          >
+            <a
+              aria-current="page"
+              class="chakra-breadcrumb__link css-zqoicl"
+              href="/"
+            >
+              Dashboard
+            </a>
+          </li>
+        </ol>
+      </nav>
+    </div>
+    <div
+      class="chakra-stack css-t8v5g3"
+    >
+      <form
+        class="css-re2v6r"
+        data-testid="create-equity-form"
+      >
+        <div
+          class="css-1qzog8y"
+        >
+          <div
+            aria-label="Progress"
+            class="chakra-stepper css-47o937"
+            data-orientation="horizontal"
+          >
+            <div
+              class="chakra-step css-9fgisr"
+              content="[object Object]"
+              data-orientation="horizontal"
+              data-status="active"
+            >
+              <div
+                class="chakra-step__indicator css-ae2ufg"
+                data-status="active"
+              >
+                <div
+                  class="chakra-step__number css-1brar58"
+                  data-status="active"
+                >
+                  1
+                </div>
+              </div>
+              <div
+                class="css-cimg9i"
+              >
+                <h3
+                  class="chakra-step__title css-gryw16"
+                  data-status="active"
+                >
+                  Details
+                </h3>
+              </div>
+              <div
+                class="chakra-step__separator css-14zkmre"
+                data-orientation="horizontal"
+                data-status="active"
+                role="separator"
+              />
+            </div>
+            <div
+              class="chakra-step css-9fgisr"
+              content="[object Object]"
+              data-orientation="horizontal"
+              data-status="incomplete"
+            >
+              <div
+                class="chakra-step__indicator css-ae2ufg"
+                data-status="incomplete"
+              >
+                <div
+                  class="chakra-step__number css-1brar58"
+                  data-status="incomplete"
+                >
+                  2
+                </div>
+              </div>
+              <div
+                class="css-cimg9i"
+              >
+                <h3
+                  class="chakra-step__title css-gryw16"
+                  data-status="incomplete"
+                >
+                  Configuration
+                </h3>
+              </div>
+              <div
+                class="chakra-step__separator css-14zkmre"
+                data-orientation="horizontal"
+                data-status="incomplete"
+                role="separator"
+              />
+            </div>
+            <div
+              class="chakra-step css-9fgisr"
+              content="[object Object]"
+              data-orientation="horizontal"
+              data-status="incomplete"
+            >
+              <div
+                class="chakra-step__indicator css-ae2ufg"
+                data-status="incomplete"
+              >
+                <div
+                  class="chakra-step__number css-1brar58"
+                  data-status="incomplete"
+                >
+                  3
+                </div>
+              </div>
+              <div
+                class="css-cimg9i"
+              >
+                <h3
+                  class="chakra-step__title css-gryw16"
+                  data-status="incomplete"
+                >
+                  Coupon
+                </h3>
+              </div>
+              <div
+                class="chakra-step__separator css-14zkmre"
+                data-orientation="horizontal"
+                data-status="incomplete"
+                role="separator"
+              />
+            </div>
+            <div
+              class="chakra-step css-9fgisr"
+              content="[object Object]"
+              data-orientation="horizontal"
+              data-status="incomplete"
+            >
+              <div
+                class="chakra-step__indicator css-ae2ufg"
+                data-status="incomplete"
+              >
+                <div
+                  class="chakra-step__number css-1brar58"
+                  data-status="incomplete"
+                >
+                  4
+                </div>
+              </div>
+              <div
+                class="css-cimg9i"
+              >
+                <h3
+                  class="chakra-step__title css-gryw16"
+                  data-status="incomplete"
+                >
+                  Regulation
+                </h3>
+              </div>
+              <div
+                class="chakra-step__separator css-14zkmre"
+                data-orientation="horizontal"
+                data-status="incomplete"
+                role="separator"
+              />
+            </div>
+            <div
+              class="chakra-step css-9fgisr"
+              content="[object Object]"
+              data-orientation="horizontal"
+              data-status="incomplete"
+            >
+              <div
+                class="chakra-step__indicator css-ae2ufg"
+                data-status="incomplete"
+              >
+                <div
+                  class="chakra-step__number css-1brar58"
+                  data-status="incomplete"
+                >
+                  5
+                </div>
+              </div>
+              <div
+                class="css-cimg9i"
+              >
+                <h3
+                  class="chakra-step__title css-gryw16"
+                  data-status="incomplete"
+                >
+                  Review
+                </h3>
+              </div>
+            </div>
+          </div>
+          <div
+            class="chakra-stack css-dlb2qh"
+          >
+            <div
+              class="chakra-stack css-2xph3x"
+            >
+              <p
+                class="css-1mk5tlk"
+              >
+                Bond details
+              </p>
+              <p
+                class="css-0"
+              >
+                Enter the basics details of the digital security to start creating it.
+              </p>
+              <p
+                class="css-ykptgm"
+              >
+                *Mandatory fields
+              </p>
+            </div>
+            <p
+              class="css-1q63bbb"
+            >
+              General information
+            </p>
+            <div
+              class="chakra-stack css-ppmla1"
+            >
+              <div
+                class="chakra-stack css-e7xy2r"
+              >
+                <p
+                  class="css-0"
+                >
+                  Name*
+                </p>
+                <div
+                  class="css-k008qs"
+                >
+                  <svg
+                    class="chakra-icon css-kpbtv0"
+                    fill="currentColor"
+                    focusable="false"
+                    height="1em"
+                    viewBox="0 0 256 256"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div
+                class="chakra-form-control css-1kxonj9"
+                role="group"
+              >
+                <label
+                  class="css-1fey8w1"
+                  for="name"
+                >
+                  <div
+                    class="chakra-input__group css-pwmwmr"
+                    data-group="true"
+                  >
+                    <input
+                      class="chakra-input css-o43sva"
+                      data-testid="name"
+                      id="name"
+                      name="name"
+                      placeholder="Enter name"
+                      value=""
+                    />
+                  </div>
+                </label>
+              </div>
+            </div>
+            <div
+              class="chakra-stack css-ppmla1"
+            >
+              <div
+                class="chakra-stack css-e7xy2r"
+              >
+                <p
+                  class="css-0"
+                >
+                  Symbol*
+                </p>
+                <div
+                  class="css-k008qs"
+                >
+                  <svg
+                    class="chakra-icon css-kpbtv0"
+                    fill="currentColor"
+                    focusable="false"
+                    height="1em"
+                    viewBox="0 0 256 256"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div
+                class="chakra-form-control css-1kxonj9"
+                role="group"
+              >
+                <label
+                  class="css-1fey8w1"
+                  for="symbol"
+                >
+                  <div
+                    class="chakra-input__group css-pwmwmr"
+                    data-group="true"
+                  >
+                    <input
+                      class="chakra-input css-o43sva"
+                      data-testid="symbol"
+                      id="symbol"
+                      name="symbol"
+                      placeholder="Enter Symbol"
+                      value=""
+                    />
+                  </div>
+                </label>
+              </div>
+            </div>
+            <div
+              class="chakra-stack css-ppmla1"
+            >
+              <div
+                class="chakra-stack css-e7xy2r"
+              >
+                <p
+                  class="css-0"
+                >
+                  Decimals*
+                </p>
+                <div
+                  class="css-k008qs"
+                >
+                  <svg
+                    class="chakra-icon css-kpbtv0"
+                    fill="currentColor"
+                    focusable="false"
+                    height="1em"
+                    viewBox="0 0 256 256"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div
+                class="chakra-form-control css-1kxonj9"
+                role="group"
+              >
+                <label
+                  class="css-1fey8w1"
+                >
+                  <div
+                    class="chakra-input__group css-pwmwmr"
+                    data-group="true"
+                  >
+                    <input
+                      class="chakra-input css-o43sva"
+                      data-testid="decimals"
+                      id="field-:r8:"
+                      inputmode="numeric"
+                      name="decimals"
+                      placeholder="6"
+                      type="text"
+                      value=""
+                    />
+                  </div>
+                </label>
+              </div>
+            </div>
+            <div
+              class="chakra-stack css-ppmla1"
+            >
+              <div
+                class="chakra-stack css-e7xy2r"
+              >
+                <p
+                  class="css-0"
+                >
+                  ISIN*
+                </p>
+                <div
+                  class="css-k008qs"
+                >
+                  <svg
+                    class="chakra-icon css-kpbtv0"
+                    fill="currentColor"
+                    focusable="false"
+                    height="1em"
+                    viewBox="0 0 256 256"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div
+                class="chakra-form-control css-1kxonj9"
+                role="group"
+              >
+                <label
+                  class="css-1fey8w1"
+                  for="isin"
+                >
+                  <div
+                    class="chakra-input__group css-pwmwmr"
+                    data-group="true"
+                  >
+                    <input
+                      class="chakra-input css-o43sva"
+                      data-testid="isin"
+                      id="isin"
+                      name="isin"
+                      placeholder="12"
+                      value=""
+                    />
+                  </div>
+                </label>
+              </div>
+            </div>
+            <div
+              class="chakra-stack css-14ragls"
+            >
+              <p
+                class="css-1q63bbb"
+              >
+                Bond permissions
+              </p>
+              <div
+                class="chakra-form-control css-1dq7dcw"
+                role="group"
+              >
+                <div
+                  class="chakra-stack css-e7xy2r"
+                >
+                  <div
+                    class="chakra-form-control css-1kxonj9"
+                    role="group"
+                  >
+                    <div
+                      class="css-70qvj9"
+                    >
+                      <label
+                        class="chakra-switch css-ghot30"
+                        data-checked=""
+                        data-testid="isControllable"
+                      >
+                        <input
+                          aria-disabled="false"
+                          aria-invalid="false"
+                          checked=""
+                          class="chakra-switch__input"
+                          id="isControllable"
+                          name="isControllable"
+                          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+                          type="checkbox"
+                          value="true"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="chakra-switch__track css-18ihtw3"
+                          data-checked=""
+                        >
+                          <span
+                            class="chakra-switch__thumb css-9hrcr1"
+                            data-checked=""
+                          />
+                        </span>
+                      </label>
+                      <label
+                        class="chakra-form__label css-1ii0m7i"
+                        for="isControllable"
+                        id="field-:rd:-label"
+                      >
+                        Controllable
+                      </label>
+                    </div>
+                  </div>
+                  <div
+                    class="css-k008qs"
+                  >
+                    <svg
+                      class="chakra-icon css-kpbtv0"
+                      fill="currentColor"
+                      focusable="false"
+                      height="1em"
+                      viewBox="0 0 256 256"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div
+                  class="chakra-stack css-e7xy2r"
+                >
+                  <div
+                    class="chakra-form-control css-1kxonj9"
+                    role="group"
+                  >
+                    <div
+                      class="css-70qvj9"
+                    >
+                      <label
+                        class="chakra-switch css-ghot30"
+                        data-checked=""
+                        data-testid="isBlocklist"
+                      >
+                        <input
+                          aria-disabled="false"
+                          aria-invalid="false"
+                          checked=""
+                          class="chakra-switch__input"
+                          id="isBlocklist"
+                          name="isBlocklist"
+                          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+                          type="checkbox"
+                          value="true"
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="chakra-switch__track css-18ihtw3"
+                          data-checked=""
+                        >
+                          <span
+                            class="chakra-switch__thumb css-9hrcr1"
+                            data-checked=""
+                          />
+                        </span>
+                      </label>
+                      <label
+                        class="chakra-form__label css-1ii0m7i"
+                        for="isBlocklist"
+                        id="field-:rg:-label"
+                      >
+                        Blocklist
+                      </label>
+                    </div>
+                  </div>
+                  <div
+                    class="css-k008qs"
+                  >
+                    <svg
+                      class="chakra-icon css-kpbtv0"
+                      fill="currentColor"
+                      focusable="false"
+                      height="1em"
+                      viewBox="0 0 256 256"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                <div
+                  class="chakra-stack css-e7xy2r"
+                >
+                  <div
+                    class="chakra-form-control css-1kxonj9"
+                    role="group"
+                  >
+                    <div
+                      class="css-70qvj9"
+                    >
+                      <label
+                        class="chakra-switch css-ghot30"
+                        data-testid="isApproval"
+                      >
+                        <input
+                          aria-disabled="false"
+                          aria-invalid="false"
+                          class="chakra-switch__input"
+                          id="isApproval"
+                          name="isApproval"
+                          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+                          type="checkbox"
+                          value=""
+                        />
+                        <span
+                          aria-hidden="true"
+                          class="chakra-switch__track css-18ihtw3"
+                        >
+                          <span
+                            class="chakra-switch__thumb css-9hrcr1"
+                          />
+                        </span>
+                      </label>
+                      <label
+                        class="chakra-form__label css-1ii0m7i"
+                        for="isApproval"
+                        id="field-:rj:-label"
+                      >
+                        Approval list
+                      </label>
+                    </div>
+                  </div>
+                  <div
+                    class="css-k008qs"
+                  >
+                    <svg
+                      class="chakra-icon css-kpbtv0"
+                      fill="currentColor"
+                      focusable="false"
+                      height="1em"
+                      viewBox="0 0 256 256"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="chakra-stack css-q5mzwg"
+            >
+              <a
+                class="chakra-button css-vueqt9"
+                data-testid="cancel-button"
+                href="/"
+              >
+                Cancel
+              </a>
+              <button
+                class="chakra-button css-1owz0pd"
+                data-testid="next-step-button"
+                disabled=""
+                type="button"
+              >
+                Next step
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

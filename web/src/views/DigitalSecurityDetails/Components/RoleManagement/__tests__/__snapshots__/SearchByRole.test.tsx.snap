@@ -1,0 +1,279 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SearchByRole should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-1voji0k"
+  >
+    <div
+      class="chakra-stack css-1utpalr"
+    >
+      <p
+        class="css-1mk5tlk"
+      >
+        Search by role
+      </p>
+      <p
+        class="css-0"
+      >
+        Pick a role to see its linked accounts
+      </p>
+    </div>
+    <div
+      class="chakra-stack css-8c063r"
+    >
+      <div
+        class="chakra-stack css-4tx9j6"
+      >
+        <div
+          class="chakra-stack css-1yxzzu5"
+        >
+          <form
+            class="chakra-stack css-1u2nxl"
+          >
+            <div
+              class="chakra-stack css-x9mz4b"
+            >
+              <div
+                class="chakra-form-control css-1kxonj9"
+                role="group"
+              >
+                <label
+                  class="chakra-form__label css-1egrqbi"
+                  for="role"
+                  id="field-:r0:-label"
+                >
+                  <span
+                    class="css-1o8l9xj"
+                    id="label"
+                  >
+                    Select a role to show*
+                  </span>
+                  <div
+                    class="css-kjafn5"
+                  >
+                    <span
+                      class="css-1f43avz-a11yText-A11yText"
+                      id="react-select-2-live-region"
+                    />
+                    <span
+                      aria-atomic="false"
+                      aria-live="polite"
+                      aria-relevant="additions text"
+                      class="css-1f43avz-a11yText-A11yText"
+                    />
+                    <div
+                      class=" css-13cymwt-control"
+                    >
+                      <div
+                        class=" css-1fdsijx-ValueContainer"
+                      >
+                        <div
+                          class=" css-1jqq78o-placeholder"
+                          id="react-select-2-placeholder"
+                        >
+                          Select role
+                        </div>
+                        <div
+                          class=" css-qbdosj-Input"
+                          data-value=""
+                        >
+                          <input
+                            aria-autocomplete="list"
+                            aria-describedby="react-select-2-placeholder"
+                            aria-expanded="false"
+                            aria-haspopup="true"
+                            autocapitalize="none"
+                            autocomplete="off"
+                            autocorrect="off"
+                            class=""
+                            id="role"
+                            role="combobox"
+                            spellcheck="false"
+                            style="opacity: 1; width: 100%; grid-area: 1 / 2; min-width: 2px; border: 0px; margin: 0px; outline: 0; padding: 0px;"
+                            tabindex="0"
+                            type="text"
+                            value=""
+                          />
+                        </div>
+                      </div>
+                      <div
+                        class=" css-1hb7zxy-IndicatorsContainer"
+                      >
+                        <div
+                          class="css-sppt3c"
+                        >
+                          <div
+                            class="css-amv3mm"
+                          >
+                            <svg
+                              class="chakra-icon css-j3hfir"
+                              fill="currentColor"
+                              focusable="false"
+                              height="1em"
+                              viewBox="0 0 256 256"
+                              width="1em"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <input
+                      name="role"
+                      type="hidden"
+                      value=""
+                    />
+                  </div>
+                </label>
+              </div>
+            </div>
+            <button
+              class="chakra-button css-frvfum"
+              data-testid="select-role-button"
+              disabled=""
+              type="submit"
+            >
+              Seach
+            </button>
+          </form>
+        </div>
+      </div>
+      <div
+        class="chakra-stack css-1tgv9q4"
+      >
+        <div
+          class="chakra-stack css-z0wha2"
+          data-testid="security-details"
+        >
+          <div
+            class="css-d5hr0q"
+          >
+            <p
+              class="chakra-text css-1an6htx"
+            >
+              Details
+            </p>
+          </div>
+          <div
+            class="css-11brmb4"
+            data-testid="definition-list-item-Name"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-u8o82o"
+            >
+              Name
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-11brmb4"
+            data-testid="definition-list-item-Symbol"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-u8o82o"
+            >
+              Symbol
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-11brmb4"
+            data-testid="definition-list-item-Decimal"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-u8o82o"
+            >
+              Decimal
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-11brmb4"
+            data-testid="definition-list-item-ISIN"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-u8o82o"
+            >
+              ISIN
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-11brmb4"
+            data-testid="definition-list-item-ID"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-u8o82o"
+            >
+              ID
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-11brmb4"
+            data-testid="definition-list-item-Total Supply"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-u8o82o"
+            >
+              Total Supply
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

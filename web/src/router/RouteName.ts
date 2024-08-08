@@ -1,0 +1,15 @@
+export enum RouteName {
+  Landing = "LANDING",
+  Dashboard = "DASHBOARD",
+  AddSecurity = "ADD_SECURITY",
+  CreateSecurity = "CREATE_SECURITY",
+  CreateEquity = "CREATE_EQUITY",
+  CreateBond = "CREATE_BOND",
+  DigitalSecurityDetails = "DIGITAL_SECURITY_DETAILS",
+  DigitalSecuritiesList = "DIGITAL_SECURITIES_LIST",
+  DigitalSecurityMint = "DIGITAL_SECURITY_MINT",
+  DigitalSecurityTransfer = "DIGITAL_SECURITY_TRANSFER",
+  DigitalSecurityForceTransfer = "DIGITAL_SECURITY_FORCE_TRANSFER",
+  DigitalSecurityRedeem = "DIGITAL_SECURITY_REDEEM",
+  DigitalSecurityForceRedeem = "DIGITAL_SECURITY_FORCE_REDEEM",
+}

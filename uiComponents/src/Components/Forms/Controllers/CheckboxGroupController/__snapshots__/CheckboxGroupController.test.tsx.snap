@@ -1,0 +1,223 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<CheckboxGroupController /> Component renders correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-form-control css-1kxonj9"
+    role="group"
+  >
+    <div
+      class="css-1azotaz"
+    >
+      <label
+        class="chakra-checkbox css-1577qb8"
+        data-checked=""
+      >
+        <input
+          aria-disabled="false"
+          aria-invalid="false"
+          class="chakra-checkbox__input"
+          id="field-:r0:"
+          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+          type="checkbox"
+          value="1"
+        />
+        <span
+          aria-hidden="true"
+          class="chakra-checkbox__control css-1suvs5d"
+          data-checked=""
+        >
+          <svg
+            class="chakra-icon css-1oeccli"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="0 0 256 256"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"
+            />
+          </svg>
+        </span>
+        <span
+          class="chakra-checkbox__label css-tzpp0r"
+          data-checked=""
+        >
+          One
+        </span>
+      </label>
+      <label
+        class="chakra-checkbox css-1577qb8"
+      >
+        <input
+          aria-disabled="false"
+          aria-invalid="false"
+          class="chakra-checkbox__input"
+          id="field-:r0:"
+          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+          type="checkbox"
+          value="2"
+        />
+        <span
+          aria-hidden="true"
+          class="chakra-checkbox__control css-1suvs5d"
+        />
+        <span
+          class="chakra-checkbox__label css-tzpp0r"
+        >
+          Two
+        </span>
+      </label>
+      <label
+        class="chakra-checkbox css-1577qb8"
+      >
+        <input
+          aria-disabled="false"
+          aria-invalid="false"
+          class="chakra-checkbox__input"
+          id="field-:r0:"
+          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+          type="checkbox"
+          value="3"
+        />
+        <span
+          aria-hidden="true"
+          class="chakra-checkbox__control css-1suvs5d"
+        />
+        <span
+          class="chakra-checkbox__label css-tzpp0r"
+        >
+          Three
+        </span>
+      </label>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<CheckboxGroupController /> Show error at bottom: RenderWithInvalid 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-form-control css-1kxonj9"
+    role="group"
+  >
+    <div
+      class="css-1azotaz"
+    >
+      <label
+        class="chakra-checkbox css-1577qb8"
+        data-invalid=""
+      >
+        <input
+          aria-describedby="field-:r1:-feedback"
+          aria-disabled="false"
+          aria-invalid="true"
+          class="chakra-checkbox__input"
+          id="field-:r1:"
+          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+          type="checkbox"
+          value="1"
+        />
+        <span
+          aria-hidden="true"
+          class="chakra-checkbox__control css-1suvs5d"
+          data-invalid=""
+        />
+        <span
+          class="chakra-checkbox__label css-tzpp0r"
+          data-invalid=""
+        >
+          One
+        </span>
+      </label>
+      <label
+        class="chakra-checkbox css-1577qb8"
+        data-checked=""
+        data-invalid=""
+      >
+        <input
+          aria-describedby="field-:r1:-feedback"
+          aria-disabled="false"
+          aria-invalid="true"
+          class="chakra-checkbox__input"
+          id="field-:r1:"
+          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+          type="checkbox"
+          value="2"
+        />
+        <span
+          aria-hidden="true"
+          class="chakra-checkbox__control css-1suvs5d"
+          data-checked=""
+          data-invalid=""
+        >
+          <svg
+            class="chakra-icon css-1oeccli"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="0 0 256 256"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"
+            />
+          </svg>
+        </span>
+        <span
+          class="chakra-checkbox__label css-tzpp0r"
+          data-checked=""
+          data-invalid=""
+        >
+          Two
+        </span>
+      </label>
+      <label
+        class="chakra-checkbox css-1577qb8"
+        data-invalid=""
+      >
+        <input
+          aria-describedby="field-:r1:-feedback"
+          aria-disabled="false"
+          aria-invalid="true"
+          class="chakra-checkbox__input"
+          id="field-:r1:"
+          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+          type="checkbox"
+          value="3"
+        />
+        <span
+          aria-hidden="true"
+          class="chakra-checkbox__control css-1suvs5d"
+          data-invalid=""
+        />
+        <span
+          class="chakra-checkbox__label css-tzpp0r"
+          data-invalid=""
+        >
+          Three
+        </span>
+      </label>
+    </div>
+    <div
+      aria-live="polite"
+      class="chakra-form__error-message css-e4t7bs"
+      data-testid="form-error-message"
+      id="field-:r1:-feedback"
+    >
+      This value is not valid
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

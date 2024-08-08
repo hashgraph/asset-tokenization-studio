@@ -1,0 +1,97 @@
+import {
+  Meta,
+  ColorPalette,
+  ColorItem,
+  Preview,
+  Canvas,
+} from "@storybook/addon-docs";
+import {
+  colors,
+  NeutralColors,
+  getListFromColors,
+  StatusColors,
+  MainColors,
+  AlternativesColors,
+} from "@Theme/colors";
+
+<Meta title="Design System/Foundations/Colors" />
+
+# Colors
+
+Maintaining consistent and engaging digital interfaces throughout, whether applications or experiences, demands extended guidance around color usage.
+
+## **Main colors**
+
+Main colors are related to the brand and can change between projects and products.
+
+**Generic uses:** This colors will be used for texts (always having in account accessibility), screens background, elements background, elements stroke, etc.
+
+<ColorPalette>
+  {getListFromColors(MainColors).map((color) => {
+    return (
+      <ColorItem
+        key={color.key}
+        title={color.title}
+        subtitle={color.subtitle}
+        colors={colors[color.key]}
+      />
+    );
+  })}
+</ColorPalette>
+
+## **Neutral Colors**
+
+The neutral colors will be used to design in a more harmonious way and and to help us to ensure accessible text, and distinguish UI elements and surfaces from one another.
+
+**Generic uses:** This colors will be used for texts (having in account accessibility), screens background, elements background, elements stroke, etc.
+
+<ColorPalette>
+  {getListFromColors(NeutralColors).map((color) => {
+    return (
+      <ColorItem
+        key={color.key}
+        title={color.title}
+        subtitle={color.subtitle}
+        colors={color.colors}
+      />
+    );
+  })}
+</ColorPalette>
+
+## **Status Colors**
+
+Main colors are related to the brand and can change between projects and products.
+
+**Generic uses:** This colors will be used for texts (always having in account accessibility), screens background, elements background, elements stroke, etc.
+
+<ColorPalette>
+  {getListFromColors(StatusColors).map((color) => {
+    return (
+      <ColorItem
+        key={color.key}
+        title={color.title}
+        subtitle={color.subtitle}
+        colors={colors[color.key]}
+      />
+    );
+  })}
+</ColorPalette>
+
+## **Alternatives Colors**
+
+Alternative colors will be used when extra colors are needed in a product (apart from the main ones).
+
+**Generic uses:** This colors will be used for specific cases when distinction between some elements is required and main colors are not enough for it. For example: tags, graphics, etc.
+
+<ColorPalette>
+  {getListFromColors(AlternativesColors).map((color) => {
+    return (
+      <ColorItem
+        key={color.key}
+        title={color.title}
+        subtitle={color.subtitle}
+        colors={colors[color.key]}
+      />
+    );
+  })}
+</ColorPalette>

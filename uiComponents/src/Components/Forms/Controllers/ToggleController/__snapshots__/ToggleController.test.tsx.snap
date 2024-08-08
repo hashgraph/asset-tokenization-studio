@@ -1,0 +1,109 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<ToggleController /> Component renders correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-form-control css-1kxonj9"
+    role="group"
+  >
+    <div
+      class="css-70qvj9"
+    >
+      <label
+        class="chakra-switch css-ghot30"
+        data-testid="test"
+      >
+        <input
+          aria-disabled="false"
+          aria-invalid="false"
+          class="chakra-switch__input"
+          id="test"
+          name="test"
+          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+          type="checkbox"
+          value=""
+        />
+        <span
+          aria-hidden="true"
+          class="chakra-switch__track css-1txbgvp"
+        >
+          <span
+            class="chakra-switch__thumb css-wmswoc"
+          />
+        </span>
+      </label>
+      <label
+        class="chakra-form__label css-1ii0m7i"
+        for="test"
+        id="field-:r0:-label"
+      >
+        Hello
+      </label>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<ToggleController /> Show error at bottom: RenderWithInvalid 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-form-control css-1kxonj9"
+    role="group"
+  >
+    <div
+      class="css-70qvj9"
+    >
+      <label
+        class="chakra-switch css-ghot30"
+        data-invalid=""
+        data-testid="test"
+      >
+        <input
+          aria-describedby="field-:r1:-feedback"
+          aria-disabled="false"
+          aria-invalid="true"
+          class="chakra-switch__input"
+          id="test"
+          name="test"
+          style="border: 0px; clip: rect(0px, 0px, 0px, 0px); height: 1px; width: 1px; margin: -1px; padding: 0px; overflow: hidden; white-space: nowrap; position: absolute;"
+          type="checkbox"
+          value=""
+        />
+        <span
+          aria-hidden="true"
+          class="chakra-switch__track css-1txbgvp"
+          data-invalid=""
+        >
+          <span
+            class="chakra-switch__thumb css-wmswoc"
+          />
+        </span>
+      </label>
+      <label
+        class="chakra-form__label css-1ii0m7i"
+        data-invalid=""
+        for="test"
+        id="field-:r1:-label"
+      >
+        Hello
+      </label>
+    </div>
+    <div
+      aria-live="polite"
+      class="chakra-form__error-message css-e4t7bs"
+      data-testid="form-error-message"
+      id="field-:r1:-feedback"
+    >
+      This is invalid
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

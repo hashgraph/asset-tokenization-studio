@@ -1,0 +1,505 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Details should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-1eykvv3"
+  >
+    <div
+      class="chakra-stack css-i49z84"
+      data-testid="holder-actions-buttons"
+    >
+      <a
+        class="chakra-button css-vueqt9"
+        data-testid="transfer-button"
+        href="/security/:id/transfer"
+      >
+        Transfer
+      </a>
+      <a
+        class="chakra-button css-vueqt9"
+        data-testid="redeem-button"
+        href="/security/:id/redeem"
+      >
+        Redeem
+      </a>
+    </div>
+    <div
+      class="chakra-stack css-9mll8r"
+    >
+      <div
+        class="chakra-stack css-1flyuon"
+      >
+        <div
+          class="chakra-stack css-3lo6qo"
+          data-testid="security-details"
+        >
+          <div
+            class="css-1dixb64"
+          >
+            <p
+              class="chakra-text css-1an6htx"
+            >
+              Details
+            </p>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Name"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Name
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Symbol"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Symbol
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Decimal"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Decimal
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-ISIN"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              ISIN
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-ID"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              ID
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Currency"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Currency
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Nominal Value"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Nominal Value
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Max Supply"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Max Supply
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Total Supply"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Total Supply
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Pending to be minted"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Pending to be minted
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="chakra-stack css-1flyuon"
+      >
+        <div
+          class="chakra-stack css-17irsum"
+        >
+          <div
+            class="css-146esfn"
+          >
+            <p
+              class="css-dmlij3"
+            >
+              Total Supply
+            </p>
+          </div>
+          <div
+            class="css-1jif775"
+          >
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="chakra-stack css-3lo6qo"
+        >
+          <div
+            class="css-1dixb64"
+          >
+            <p
+              class="chakra-text css-1an6htx"
+            >
+              Permissions
+            </p>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Controllable"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Controllable
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Blocklist"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Blocklist
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Approval list"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Approval list
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="chakra-stack css-3lo6qo"
+        >
+          <div
+            class="css-1dixb64"
+          >
+            <p
+              class="chakra-text css-1an6htx"
+            >
+              Regulations
+            </p>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Regulation type"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Regulation type
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Regulation sub-type"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Regulation sub-type
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Blocked countries"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Blocked countries
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Deal size"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Deal size
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Accredited investors"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Accredited investors
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Max non-accredited investors"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Max non-accredited investors
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Manual investor verification"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Manual investor verification
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-International investors"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              International investors
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+          <div
+            class="css-tvba8"
+            data-testid="definition-list-item-Resale hold period"
+            tabindex="0"
+          >
+            <p
+              class="chakra-text css-vbc1qe"
+            >
+              Resale hold period
+            </p>
+            <div
+              class="chakra-skeleton__group css-1rr4qq7"
+            >
+              <div
+                class="chakra-skeleton css-5dkehc"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

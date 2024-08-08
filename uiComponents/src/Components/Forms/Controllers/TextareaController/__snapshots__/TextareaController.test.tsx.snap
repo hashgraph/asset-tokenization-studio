@@ -1,0 +1,131 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<TextareaController /> Component renders correctly: RenderWithPlaceholder 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-form-control css-1kxonj9"
+    role="group"
+  >
+    <label
+      class="chakra-form__label css-31pxj9"
+      for="test"
+      id="field-:r0:-label"
+    >
+      <span
+        class="css-1e9661m"
+        id="label"
+      >
+        Hello*
+      </span>
+      <div
+        class="css-79elbk"
+      >
+        <textarea
+          class="chakra-textarea css-6eozt9"
+          data-testid="test"
+          id="test"
+          name="test"
+          placeholder="Hello"
+        />
+      </div>
+    </label>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<TextareaController /> Show error at bottom: RenderWithInvalid 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-form-control css-1kxonj9"
+    role="group"
+  >
+    <label
+      class="chakra-form__label css-31pxj9"
+      data-invalid=""
+      for="test"
+      id="field-:r2:-label"
+    >
+      <span
+        class="css-1e9661m"
+        id="label"
+      >
+        Hello*
+      </span>
+      <div
+        class="css-79elbk"
+      >
+        <textarea
+          aria-describedby="field-:r2:-feedback"
+          aria-invalid="true"
+          class="chakra-textarea css-6eozt9"
+          data-testid="test"
+          id="test"
+          name="test"
+          placeholder="Hello"
+        />
+      </div>
+    </label>
+    <div
+      aria-live="polite"
+      class="chakra-form__error-message css-e4t7bs"
+      data-testid="form-error-message"
+      id="field-:r2:-feedback"
+    >
+      This field is required
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<TextareaController /> should show maxLength text: RenderWithMaxLength 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-form-control css-1kxonj9"
+    role="group"
+  >
+    <label
+      class="chakra-form__label css-31pxj9"
+      for="test"
+      id="field-:r1:-label"
+    >
+      <span
+        class="css-1e9661m"
+        id="label"
+      >
+        Hello*
+      </span>
+      <div
+        class="css-79elbk"
+      >
+        <textarea
+          class="chakra-textarea css-6eozt9"
+          data-testid="test"
+          id="test"
+          maxlength="500"
+          name="test"
+          placeholder="Hello"
+        >
+          12345
+        </textarea>
+        <p
+          class="css-1sztn7p"
+        >
+          5/500
+        </p>
+      </div>
+    </label>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

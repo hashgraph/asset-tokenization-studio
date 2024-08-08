@@ -1,0 +1,97 @@
+import {
+  Story,
+  Meta,
+  Title,
+  ArgTypes,
+  Primary,
+  Stories,
+  Source,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as DropdownStories from "./Dropdown.stories";
+
+<Meta of={DropdownStories} />
+
+<Title />
+
+<a
+  href="https://www.figma.com/file/YF8AvIq0MclfhGDvKgzypp/ioBricks-Design-System?type=design&node-id=2092%3A22397&mode=design&t=k4jSCm0Q182mRyVn-1"
+  target="\_blank"
+>
+  View figma design
+</a>
+
+<Primary />
+
+## How to set up
+
+### Config theme
+
+Add the following configurations to the `theme.tsx` and `Dropdown.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    Dropdown: ConfigDropdown,
+  },
+};
+```
+
+```tsx dark
+const ConfigDropdown: DropdownThemeConfiguration = {
+  parts: dropdownPartsList,
+  baseStyle: {},
+};
+```
+
+### Component parts
+
+You have these parts available: `"wrapper" | "container" | "itemIconWeight" | "itemLabel" | "itemContainer"` (`dropdownPartsList`)
+
+## How to use
+
+### Dropdown
+
+Make sure to wrap the `Dropdown` component inside a `Menu` component from `@chakra-ui`
+
+The trigger to open it should be wrapped in a `MenuButton` from `@chakra-ui`
+
+```tsx dark
+<Menu>
+  <MenuButton>
+    <Avatar />
+  </MenuButton>
+  <Dropdown>
+    <DropdownItem label="Item" isActive />
+    <DropdownItem label="Item" />
+    <DropdownItem label="Item" />
+    <DropdownItem label="Item" />
+  </Dropdown>
+</Menu>
+```
+
+### DropdownItem
+
+Use this component inside the `Dropdown` component.
+
+```tsx dark
+<DropdownItem icon={Cookie} label="Item" />
+```
+
+### I only want the style of the dropdown
+
+If you only want the look and feel of the component, but you want to implement it in other component because the `Dropdown` doesn't fit your needs, you can use:
+
+```tsx dark
+const styles = useChakraMultiStyleConfig("Dropdown", {
+  variant,
+}) as DropdownThemeStyle;
+```
+
+## Props
+
+<ArgTypes of={DropdownStories} />
+
+## Stories
+
+<Stories title="" />

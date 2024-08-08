@@ -1,0 +1,376 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Button /> renders correctly 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-1c8yzl7"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size lg & variant primary: Button-primary-lg-error 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-1p4yh7l"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size lg & variant primary: Button-primary-lg-info 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-493doh"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size lg & variant primary: Button-primary-lg-success 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-17bas7"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size lg & variant primary: Button-primary-lg-warning 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-1bfguqv"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size lg & variant secondary: Button-secondary-lg-error 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-c6c3sq"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size lg & variant secondary: Button-secondary-lg-info 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-wcx3ir"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size lg & variant secondary: Button-secondary-lg-success 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-yczomy"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size lg & variant secondary: Button-secondary-lg-warning 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-9r1lkf"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size lg & variant tertiary: Button-tertiary-lg-error 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-1ule0dh"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size lg & variant tertiary: Button-tertiary-lg-info 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-1524wrs"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size lg & variant tertiary: Button-tertiary-lg-success 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-j0go3y"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size lg & variant tertiary: Button-tertiary-lg-warning 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-nt47wb"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size md & variant primary: Button-primary-md-error 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-dwbvxv"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size md & variant primary: Button-primary-md-info 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-2h6xjp"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size md & variant primary: Button-primary-md-success 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-111wghi"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size md & variant primary: Button-primary-md-warning 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-9bpvsg"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size md & variant secondary: Button-secondary-md-error 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-jrquix"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size md & variant secondary: Button-secondary-md-info 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-og06iw"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size md & variant secondary: Button-secondary-md-success 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-1d200yb"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size md & variant secondary: Button-secondary-md-warning 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-1x1zowq"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size md & variant tertiary: Button-tertiary-md-error 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-o2nbyp"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size md & variant tertiary: Button-tertiary-md-info 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-uo9j4h"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size md & variant tertiary: Button-tertiary-md-success 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-5lfg67"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<Button /> renders correctly for size md & variant tertiary: Button-tertiary-md-warning 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-1s06x8d"
+    type="button"
+  >
+    Content of the button
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateTokenButton render correctly 1`] = `
+<DocumentFragment>
+  <button
+    class="chakra-button css-1145i8e"
+    data-testid="create-token-button"
+    type="button"
+  >
+    Create Bond
+  </button>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

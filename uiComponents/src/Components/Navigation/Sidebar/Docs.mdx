@@ -1,0 +1,134 @@
+import {
+  Story,
+  Meta,
+  Title,
+  ArgTypes,
+  Primary,
+  Stories,
+  Source,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as SidebarStories from "./Sidebar.stories";
+import * as SidebarDropdownItemStories from "./Components/SidebarDropdownItem.stories";
+import * as SidebarItemStories from "./Components/SidebarItem.stories";
+
+<Meta of={SidebarStories} />
+
+<Title />
+
+<a
+  href="https://www.figma.com/file/YF8AvIq0MclfhGDvKgzypp/ioBricks-Design-System?type=design&node-id=1516%3A12435&mode=design&t=k4jSCm0Q182mRyVn-1"
+  target="\_blank"
+>
+  View figma design
+</a>
+
+<Primary />
+## How to set up
+
+### Config theme
+
+Add the following configurations to the `theme.tsx`, `Sidebar.ts`, `SidebarDropdown.ts` and `SidebarItem.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    Sidebar: ConfigSidebar,
+    SidebarDropdown: ConfigSidebarDropdown,
+    SidebarItem: ConfigSidebarItem,
+  },
+};
+```
+
+```tsx dark
+const ConfigSidebar = {
+  baseStyle: {},
+};
+```
+
+```tsx dark
+const ConfigSidebarDropdown: SidebarDropdownThemeConfiguration = {
+  parts: sidebarDropdownPartsList,
+  baseStyle: {},
+};
+```
+
+```tsx dark
+const ConfigSidebarItem: SidebarItemThemeConfiguration = {
+  parts: sidebarItemPartsList,
+  baseStyle: {},
+};
+```
+
+### Component parts
+
+You have these parts available:
+
+- `"header" | "wrapper" | "container" | "itemIconWeight" | "itemLabel" | "itemContainer"` (`sidebarDropdownPartsList`)
+- `"iconWeight" | "icon" | "label" | "container"` (`sidebarItemPartsList`)
+
+## How to use
+
+### Sidebar
+
+```tsx dark
+<Sidebar
+  topContent={
+    <Stack spacing={6}>
+      <SidebarItem label="Home" icon={House} />
+      <SidebarItem label="Item molecule" icon={Cookie} isDisabled />
+      <SidebarItemWithDropdown
+        label="Item section"
+        icon={Cookie}
+        header={
+          <Button variant="secondary" size="md">
+            Main action
+          </Button>
+        }
+      >
+        <SidebarDropdownItem label="Page 1" icon={UserPlus} isActive />
+        <SidebarDropdownItem label="Page 2" icon={UserPlus} />
+        <SidebarDropdownItem label="Page 2" icon={UserPlus} isDisabled />
+      </SidebarItemWithDropdown>
+    </Stack>
+  }
+  bottomContent={<SidebarItem label="Configuration" icon={Gear} />}
+/>
+```
+
+### SidebarItem
+
+Use this component if it's only a link to one page
+
+```tsx dark
+<SidebarItem label="Example" icon={Cookie} />
+```
+
+### SidebarItemWithDropdown
+
+Use this component if you have multiple subsections.
+
+```tsx dark
+<SidebarItemWithDropdown label="Example" icon={Cookie}>
+  <SidebarDropdownItem label="Page 1" icon={UserPlus} />
+  <SidebarDropdownItem label="Page 2" icon={UserPlus} isActive={true} />
+</SidebarItemWithDropdown>
+```
+
+## Props
+
+### Sidebar props
+
+<ArgTypes of={SidebarStories} />
+
+### SidebarDropdownItem props
+
+<ArgTypes of={SidebarDropdownItemStories} />
+
+### SidebarItem props
+
+<ArgTypes of={SidebarItemStories} />
+
+## Stories
+
+<Stories />

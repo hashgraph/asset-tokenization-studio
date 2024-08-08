@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<LineChart /> renders correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="echarts-for-react "
+    size-sensor-id="1"
+    style="height: 300px;"
+  >
+    <object
+      class="size-sensor-object"
+      data="about:blank"
+      style="display: block; position: absolute; top: 0px; left: 0px; height: 100%; width: 100%; overflow: hidden; pointer-events: none; z-index: -1; opacity: 0;"
+      tabindex="-1"
+      type="text/html"
+    />
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

@@ -1,0 +1,50 @@
+import {
+  Story,
+  Meta,
+  Title,
+  ArgTypes,
+  Primary,
+  Stories,
+  Source,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as AddAreaButtonStories from "./AddAreaButton.stories";
+
+<Meta of={AddAreaButtonStories} />
+
+<Title />
+
+<a
+  href="https://www.figma.com/file/YF8AvIq0MclfhGDvKgzypp/ioBricks-Design-System?type=design&node-id=3635%3A63030&mode=design&t=KlerdyEMWSQWLAVX-1"
+  target="\_blank"
+>
+  View figma design
+</a>
+
+<Primary />
+
+## How to set up
+
+Add the following configurations to the `theme.tsx` and `AddAreaButton.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    AddAreaButton: ConfigAddAreaButton,
+  },
+};
+```
+
+```tsx dark
+const ConfigAddAreaButton: AddAreaButtonThemeConfiguration = {
+  baseStyle: {},
+};
+```
+
+## Props
+
+<ArgTypes of={AddAreaButtonStories} />
+
+## Stories
+
+<Stories title="" />

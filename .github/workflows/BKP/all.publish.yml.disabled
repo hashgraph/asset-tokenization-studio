@@ -1,0 +1,47 @@
+# name: Publishing
+# on: 
+#   release:
+#     types:
+#       - published
+# jobs:
+#   publish:
+#     name: docker
+#     runs-on: [ self-hosted, Linux, medium, ephemeral ]
+    
+#     permissions:
+#       contents: read  
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608
+        
+#       - name: Setup NodeJS Environment
+#         uses: actions/setup-node@5e21ff4d9bc1a8cf6de233a3057d20ec6b3fb69d
+#         with:
+#           node-version: 18.x     
+      
+#       - name: Create file .npmrc
+#         run: |
+#             touch .npmrc
+#             echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+#             cp .npmrc ./contracts/.npmrc
+#             cp .npmrc ./sdk/.npmrc
+      
+#       - name: Change references
+#         run: ./changeProyectsReferencesToRepo.sh
+
+#       - name: Install contracts dependencies 
+#         run: npm run install:contracts
+
+#       - name: Publish contracts package
+#         run: npm run publish:contracts --access=public
+#         env:
+#           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+#       - name: Install sdk dependencies 
+#         run: npm run install:sdk
+
+#       - name: Publish sdk package
+#         run: npm run publish:sdk --access=public
+#         env:
+#           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<PageTitle/> Should render loading skeleton : WithLoading 1`] = `
+<div>
+  <div
+    class="css-1dtnjt5"
+  >
+    <div
+      class="chakra-skeleton__group css-1ksujjj"
+    >
+      <div
+        class="chakra-skeleton css-1nd92f6"
+      />
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</div>
+`;
+
+exports[`<PageTitle/> renders correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="css-1dtnjt5"
+  >
+    <p
+      class="css-1ppjmwm"
+    >
+      Content of the button
+    </p>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;

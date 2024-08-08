@@ -1,0 +1,49 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`< DetailReview /> should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="css-2xph3x"
+  >
+    <p
+      class="css-ek1zv3"
+    >
+      Example
+    </p>
+    <p
+      class="css-1wzmjm0"
+    >
+      This is the value
+    </p>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`< DetailReview /> should show skeleton when isLoading is true: WithLoading 1`] = `
+<div>
+  <div
+    class="css-2xph3x"
+  >
+    <p
+      class="css-ek1zv3"
+    >
+      Example
+    </p>
+    <div
+      class="chakra-skeleton__group css-0"
+    >
+      <div
+        class="chakra-skeleton css-1ysakuj"
+      />
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</div>
+`;

@@ -1,0 +1,57 @@
+import {
+  Story,
+  Meta,
+  Title,
+  ArgTypes,
+  Primary,
+  Stories,
+  Source,
+} from "@storybook/addon-docs";
+import { Grid, GridItem, Text, Link, Center, Flex } from "@chakra-ui/react";
+import * as HeaderStories from "./Header.stories";
+
+<Meta of={HeaderStories} />
+
+<Title />
+
+<a
+  href="https://www.figma.com/file/YF8AvIq0MclfhGDvKgzypp/NEW---ioBricks-Library?node-id=1860-13948&t=3ozoVrWQYvgw1fj3-4"
+  target="\_blank"
+>
+  View figma design
+</a>
+
+<Primary />
+
+## How to set up
+
+### Config theme
+
+Add the following configurations to the `theme.tsx` and `Header.ts` files, respectively.
+
+```tsx dark
+const theme = {
+  components: {
+    Header: ConfigHeader,
+  },
+};
+```
+
+```tsx dark
+const ConfigHeader: HeaderThemeConfiguration = {
+  parts: headerPartsList,
+  baseStyle: {},
+};
+```
+
+### Component parts
+
+You have these parts available: `"container" | "contentContainer"` (`headerPartsList`)
+
+## Props
+
+<ArgTypes of={HeaderStories} />
+
+## Stories
+
+<Stories title="" />

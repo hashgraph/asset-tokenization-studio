@@ -1,0 +1,364 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<SidebarItemWithDropdown /> renders correctly 1`] = `
+<DocumentFragment>
+  <div
+    aria-controls="menu-list-:r4:"
+    aria-expanded="false"
+    aria-haspopup="menu"
+    class="chakra-menu__menu-button css-df6r3v"
+    data-testid="sidebar-item-Item"
+    id="menu-button-:r4:"
+  >
+    <button
+      class="css-1rb62th"
+    >
+      <svg
+        class="chakra-icon css-1qzovvq"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M164.49,163.51a12,12,0,1,1-17,0A12,12,0,0,1,164.49,163.51Zm-81-8a12,12,0,1,0,17,0A12,12,0,0,0,83.51,155.51Zm9-39a12,12,0,1,0-17,0A12,12,0,0,0,92.49,116.49Zm48-1a12,12,0,1,0,0,17A12,12,0,0,0,140.49,115.51ZM232,128A104,104,0,1,1,128,24a8,8,0,0,1,8,8,40,40,0,0,0,40,40,8,8,0,0,1,8,8,40,40,0,0,0,40,40A8,8,0,0,1,232,128Zm-16.31,7.39A56.13,56.13,0,0,1,168.5,87.5a56.13,56.13,0,0,1-47.89-47.19,88,88,0,1,0,95.08,95.08Z"
+        />
+      </svg>
+    </button>
+    <p
+      class="css-owi0ee"
+    >
+      Item 
+    </p>
+  </div>
+  <div
+    class="css-r6z5ec"
+    style="visibility: hidden; position: absolute; min-width: max-content; inset: 0 auto auto 0;"
+  >
+    <div
+      aria-orientation="vertical"
+      class="chakra-menu__menu-list css-1ayccjv"
+      id="menu-list-:r4:"
+      role="menu"
+      style="transform-origin: var(--popper-transform-origin); opacity: 0; visibility: hidden; transform: scale(0.8) translateZ(0);"
+      tabindex="-1"
+    >
+      <div
+        class="chakra-stack css-9jw3b1"
+      >
+        <button
+          class="chakra-menu__menuitem css-qqyk6q"
+          data-index="0"
+          data-testid="sidebar-dropdown-item-Page 1"
+          id="menu-list-:r4:-menuitem-:r5:"
+          role="menuitem"
+          tabindex="-1"
+          type="button"
+        >
+          <svg
+            class="chakra-icon css-1qzovvq"
+            data-testid="sidebar-dropdown-item-icon"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="0 0 256 256"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M256,136a8,8,0,0,1-8,8H232v16a8,8,0,0,1-16,0V144H200a8,8,0,0,1,0-16h16V112a8,8,0,0,1,16,0v16h16A8,8,0,0,1,256,136Zm-57.87,58.85a8,8,0,0,1-12.26,10.3C165.75,181.19,138.09,168,108,168s-57.75,13.19-77.87,37.15a8,8,0,0,1-12.25-10.3c14.94-17.78,33.52-30.41,54.17-37.17a68,68,0,1,1,71.9,0C164.6,164.44,183.18,177.07,198.13,194.85ZM108,152a52,52,0,1,0-52-52A52.06,52.06,0,0,0,108,152Z"
+            />
+          </svg>
+          <p
+            class="css-pyxwkt"
+          >
+            Page 1
+          </p>
+        </button>
+        <button
+          class="chakra-menu__menuitem css-xe6699"
+          data-index="1"
+          data-testid="sidebar-dropdown-item-Page 2"
+          id="menu-list-:r4:-menuitem-:r6:"
+          role="menuitem"
+          tabindex="-1"
+          type="button"
+        >
+          <svg
+            class="chakra-icon css-1qzovvq"
+            data-testid="sidebar-dropdown-item-icon"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="0 0 256 256"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M256,136a8,8,0,0,1-8,8H232v16a8,8,0,0,1-16,0V144H200a8,8,0,0,1,0-16h16V112a8,8,0,0,1,16,0v16h16A8,8,0,0,1,256,136ZM144,157.68a68,68,0,1,0-71.9,0c-20.65,6.76-39.23,19.39-54.17,37.17A8,8,0,0,0,24,208H192a8,8,0,0,0,6.13-13.15C183.18,177.07,164.6,164.44,144,157.68Z"
+            />
+          </svg>
+          <p
+            class="css-1n40qdq"
+          >
+            Page 2
+          </p>
+        </button>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<SidebarItemWithDropdown /> renders correctly when hovered: Hovered 1`] = `
+<DocumentFragment>
+  <div
+    aria-controls="menu-list-:rb:"
+    aria-expanded="true"
+    aria-haspopup="menu"
+    class="chakra-menu__menu-button css-df6r3v"
+    data-active=""
+    data-testid="sidebar-item-Item"
+    id="menu-button-:rb:"
+  >
+    <button
+      class="css-ek0iur"
+    >
+      <svg
+        class="chakra-icon css-1qzovvq"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M164.49,163.51a12,12,0,1,1-17,0A12,12,0,0,1,164.49,163.51Zm-81-8a12,12,0,1,0,17,0A12,12,0,0,0,83.51,155.51Zm9-39a12,12,0,1,0-17,0A12,12,0,0,0,92.49,116.49Zm48-1a12,12,0,1,0,0,17A12,12,0,0,0,140.49,115.51ZM232,128A104,104,0,1,1,128,24a8,8,0,0,1,8,8,40,40,0,0,0,40,40,8,8,0,0,1,8,8,40,40,0,0,0,40,40A8,8,0,0,1,232,128Zm-16.31,7.39A56.13,56.13,0,0,1,168.5,87.5a56.13,56.13,0,0,1-47.89-47.19,88,88,0,1,0,95.08,95.08Z"
+        />
+      </svg>
+    </button>
+    <p
+      class="css-owi0ee"
+    >
+      Item 
+    </p>
+  </div>
+  <div
+    class="css-r6z5ec"
+    data-popper-escaped=""
+    data-popper-placement="right-start"
+    data-popper-reference-hidden=""
+    style="visibility: visible; position: absolute; min-width: max-content; inset: 0 auto auto 0; left: 0px; top: 0px; margin: 0px; transform: translate(0px, 0px); --popper-transform-origin: left top;"
+  >
+    <div
+      aria-orientation="vertical"
+      class="chakra-menu__menu-list css-1ayccjv"
+      id="menu-list-:rb:"
+      role="menu"
+      style="transform-origin: var(--popper-transform-origin); opacity: 0; visibility: hidden; transform: scale(0.8) translateZ(0);"
+      tabindex="-1"
+    >
+      <div
+        class="chakra-stack css-9jw3b1"
+      >
+        <button
+          class="chakra-menu__menuitem css-qqyk6q"
+          data-index="0"
+          data-testid="sidebar-dropdown-item-Page 1"
+          id="menu-list-:rb:-menuitem-:rc:"
+          role="menuitem"
+          tabindex="-1"
+          type="button"
+        >
+          <svg
+            class="chakra-icon css-1qzovvq"
+            data-testid="sidebar-dropdown-item-icon"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="0 0 256 256"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M256,136a8,8,0,0,1-8,8H232v16a8,8,0,0,1-16,0V144H200a8,8,0,0,1,0-16h16V112a8,8,0,0,1,16,0v16h16A8,8,0,0,1,256,136Zm-57.87,58.85a8,8,0,0,1-12.26,10.3C165.75,181.19,138.09,168,108,168s-57.75,13.19-77.87,37.15a8,8,0,0,1-12.25-10.3c14.94-17.78,33.52-30.41,54.17-37.17a68,68,0,1,1,71.9,0C164.6,164.44,183.18,177.07,198.13,194.85ZM108,152a52,52,0,1,0-52-52A52.06,52.06,0,0,0,108,152Z"
+            />
+          </svg>
+          <p
+            class="css-pyxwkt"
+          >
+            Page 1
+          </p>
+        </button>
+        <button
+          class="chakra-menu__menuitem css-xe6699"
+          data-index="1"
+          data-testid="sidebar-dropdown-item-Page 2"
+          id="menu-list-:rb:-menuitem-:rd:"
+          role="menuitem"
+          tabindex="-1"
+          type="button"
+        >
+          <svg
+            class="chakra-icon css-1qzovvq"
+            data-testid="sidebar-dropdown-item-icon"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="0 0 256 256"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M256,136a8,8,0,0,1-8,8H232v16a8,8,0,0,1-16,0V144H200a8,8,0,0,1,0-16h16V112a8,8,0,0,1,16,0v16h16A8,8,0,0,1,256,136ZM144,157.68a68,68,0,1,0-71.9,0c-20.65,6.76-39.23,19.39-54.17,37.17A8,8,0,0,0,24,208H192a8,8,0,0,0,6.13-13.15C183.18,177.07,164.6,164.44,144,157.68Z"
+            />
+          </svg>
+          <p
+            class="css-1n40qdq"
+          >
+            Page 2
+          </p>
+        </button>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
+
+exports[`<SidebarItemWithDropdown /> renders correctly with header: WithHeader 1`] = `
+<DocumentFragment>
+  <div
+    aria-controls="menu-list-:ri:"
+    aria-expanded="false"
+    aria-haspopup="menu"
+    class="chakra-menu__menu-button css-df6r3v"
+    data-testid="sidebar-item-Item"
+    id="menu-button-:ri:"
+  >
+    <button
+      class="css-1rb62th"
+    >
+      <svg
+        class="chakra-icon css-1qzovvq"
+        fill="currentColor"
+        focusable="false"
+        height="1em"
+        viewBox="0 0 256 256"
+        width="1em"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M164.49,163.51a12,12,0,1,1-17,0A12,12,0,0,1,164.49,163.51Zm-81-8a12,12,0,1,0,17,0A12,12,0,0,0,83.51,155.51Zm9-39a12,12,0,1,0-17,0A12,12,0,0,0,92.49,116.49Zm48-1a12,12,0,1,0,0,17A12,12,0,0,0,140.49,115.51ZM232,128A104,104,0,1,1,128,24a8,8,0,0,1,8,8,40,40,0,0,0,40,40,8,8,0,0,1,8,8,40,40,0,0,0,40,40A8,8,0,0,1,232,128Zm-16.31,7.39A56.13,56.13,0,0,1,168.5,87.5a56.13,56.13,0,0,1-47.89-47.19,88,88,0,1,0,95.08,95.08Z"
+        />
+      </svg>
+    </button>
+    <p
+      class="css-owi0ee"
+    >
+      Item 
+    </p>
+  </div>
+  <div
+    class="css-r6z5ec"
+    style="visibility: hidden; position: absolute; min-width: max-content; inset: 0 auto auto 0;"
+  >
+    <div
+      aria-orientation="vertical"
+      class="chakra-menu__menu-list css-j55j5w"
+      id="menu-list-:ri:"
+      role="menu"
+      style="transform-origin: var(--popper-transform-origin); opacity: 0; visibility: hidden; transform: scale(0.8) translateZ(0);"
+      tabindex="-1"
+    >
+      <div
+        class="css-kfy7fn"
+        data-testid="sidebar-dropdown-header"
+      >
+        <button
+          class="chakra-button css-trpjf1"
+          type="button"
+        >
+          Main action
+        </button>
+      </div>
+      <div
+        class="chakra-stack css-9jw3b1"
+      >
+        <button
+          class="chakra-menu__menuitem css-qqyk6q"
+          data-index="0"
+          data-testid="sidebar-dropdown-item-Page 1"
+          id="menu-list-:ri:-menuitem-:rj:"
+          role="menuitem"
+          tabindex="-1"
+          type="button"
+        >
+          <svg
+            class="chakra-icon css-1qzovvq"
+            data-testid="sidebar-dropdown-item-icon"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="0 0 256 256"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M256,136a8,8,0,0,1-8,8H232v16a8,8,0,0,1-16,0V144H200a8,8,0,0,1,0-16h16V112a8,8,0,0,1,16,0v16h16A8,8,0,0,1,256,136Zm-57.87,58.85a8,8,0,0,1-12.26,10.3C165.75,181.19,138.09,168,108,168s-57.75,13.19-77.87,37.15a8,8,0,0,1-12.25-10.3c14.94-17.78,33.52-30.41,54.17-37.17a68,68,0,1,1,71.9,0C164.6,164.44,183.18,177.07,198.13,194.85ZM108,152a52,52,0,1,0-52-52A52.06,52.06,0,0,0,108,152Z"
+            />
+          </svg>
+          <p
+            class="css-pyxwkt"
+          >
+            Page 1
+          </p>
+        </button>
+        <button
+          class="chakra-menu__menuitem css-xe6699"
+          data-index="1"
+          data-testid="sidebar-dropdown-item-Page 2"
+          id="menu-list-:ri:-menuitem-:rk:"
+          role="menuitem"
+          tabindex="-1"
+          type="button"
+        >
+          <svg
+            class="chakra-icon css-1qzovvq"
+            data-testid="sidebar-dropdown-item-icon"
+            fill="currentColor"
+            focusable="false"
+            height="1em"
+            viewBox="0 0 256 256"
+            width="1em"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M256,136a8,8,0,0,1-8,8H232v16a8,8,0,0,1-16,0V144H200a8,8,0,0,1,0-16h16V112a8,8,0,0,1,16,0v16h16A8,8,0,0,1,256,136ZM144,157.68a68,68,0,1,0-71.9,0c-20.65,6.76-39.23,19.39-54.17,37.17A8,8,0,0,0,24,208H192a8,8,0,0,0,6.13-13.15C183.18,177.07,164.6,164.44,144,157.68Z"
+            />
+          </svg>
+          <p
+            class="css-1n40qdq"
+          >
+            Page 2
+          </p>
+        </button>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
