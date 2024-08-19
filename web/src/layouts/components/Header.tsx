@@ -1,19 +1,16 @@
-import { Divider, Flex, HStack, Menu, MenuButton } from "@chakra-ui/react";
-import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
-import { Header as HeaderBase } from "@hashgraph/asset-tokenization-uicomponents/Navigation";
-import { useWalletStore } from "../../store/walletStore";
-import { useTranslation } from "react-i18next";
-import { CaretDown, Power, SignOut, Wallet } from "@phosphor-icons/react";
-import { PhosphorIcon, Text } from "@hashgraph/asset-tokenization-uicomponents";
-import { MetamaskStatus } from "../../utils/constants";
-import { Logo } from "@hashgraph/asset-tokenization-uicomponents/Basic";
-import { useUserStore } from "../../store/userStore";
-import { useWalletConnection } from "../../hooks/useWalletConnection";
-import {
-  Dropdown,
-  DropdownItem,
-} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
-import { getLayoutBg } from "./helper";
+import {Divider, Flex, HStack, Menu, MenuButton} from "@chakra-ui/react";
+import {Button} from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import {Header as HeaderBase} from "@hashgraph/asset-tokenization-uicomponents/Navigation";
+import {useWalletStore} from "../../store/walletStore";
+import {useTranslation} from "react-i18next";
+import {CaretDown, Power, SignOut, Wallet} from "@phosphor-icons/react";
+import {PhosphorIcon, Text} from "@hashgraph/asset-tokenization-uicomponents";
+import {MetamaskStatus, Wallets} from "../../utils/constants";
+import {Logo} from "@hashgraph/asset-tokenization-uicomponents/Basic";
+import {useUserStore} from "../../store/userStore";
+import {useWalletConnection} from "../../hooks/useWalletConnection";
+import {Dropdown, DropdownItem,} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import {getLayoutBg} from "./helper";
 
 export const Header = () => {
   const { t } = useTranslation("globals");
@@ -52,8 +49,9 @@ export const Header = () => {
           ) : (
             <Button
               size="sm"
+              hidden={true}
               isLoading={isLoading}
-              onClick={() => handleConnectWallet()}
+              onClick={() => handleConnectWallet(Wallets.metamask)}
               rightIcon={<PhosphorIcon as={Power} />}
             >
               {t("connectMetamask")}

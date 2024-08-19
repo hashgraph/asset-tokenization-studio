@@ -1,17 +1,17 @@
 import _capitalize from "lodash/capitalize";
 import { useWalletStore } from "../store/walletStore";
-import { MetamaskStatus } from "../utils/constants";
-import { useSDKConnectToMetamask } from "./queries/SDKConnection";
+import {MetamaskStatus, Wallets} from "../utils/constants";
+import { useSDKConnectToWallet } from "./queries/SDKConnection";
 
 export const useWalletConnection = () => {
   const { setConnectionStatus } = useWalletStore();
-  const { mutate: connectWallet } = useSDKConnectToMetamask();
+  const { mutate: connectWallet } = useSDKConnectToWallet();
 
-  const handleConnectWallet = async () => {
+  const handleConnectWallet = async (wallet:Wallets) => {
     setConnectionStatus(MetamaskStatus.connecting);
     try {
       if (window.ethereum) {
-        connectWallet();
+        connectWallet(wallet);
       } else {
         setConnectionStatus(MetamaskStatus.uninstalled);
       }

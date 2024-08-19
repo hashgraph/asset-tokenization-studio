@@ -7,6 +7,11 @@ export enum MetamaskStatus {
   uninstalled = "UNINSTALLED",
 }
 
+export enum Wallets {
+    metamask = "METAMASK",
+    hashpack = "HASHPACK"
+}
+
 export enum User {
   admin = "admin",
   holder = "holder",

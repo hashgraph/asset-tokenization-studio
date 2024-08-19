@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import {
-  Center,
-  ListItem,
-  Link,
-  OrderedList,
-  Stack,
-  VStack,
-  Box,
+    Center,
+    ListItem,
+    Link,
+    OrderedList,
+    Stack,
+    VStack,
+    Box, HStack,
 } from "@chakra-ui/react";
 import {
   PhosphorIcon,
@@ -22,7 +22,7 @@ import { RouteName } from "../../router/RouteName";
 import { PopUp } from "@hashgraph/asset-tokenization-uicomponents";
 import { Wallet } from "@phosphor-icons/react";
 import { Weight } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { MetamaskStatus, METAMASK_URL, User } from "../../utils/constants";
+import {MetamaskStatus, METAMASK_URL, User, Wallets} from "../../utils/constants";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
 import { useUserStore } from "../../store/userStore";
 
@@ -157,15 +157,24 @@ export const Landing = () => {
           />
         </Box>
 
-        <Button
-          data-testid="connect-to-metamask-landing-button"
-          onClick={() => handleConnectWallet()}
-          mt={7}
-        >
-          <Text textStyle="ElementsMediumSM" color="neutral.650">
-            {tGlobals("connectMetamask")}
-          </Text>
-        </Button>
+          <HStack spacing={4} mt={7}>
+              <Button
+                  data-testid="connect-to-metamask-landing-button"
+                  onClick={() => handleConnectWallet(Wallets.metamask)}
+              >
+                  <Text textStyle="ElementsMediumSM" color="neutral.650">
+                      {tGlobals("connectMetamask")}
+                  </Text>
+              </Button>
+              <Button
+                  data-testid="connect-to-hashpack-landing-button"
+                  onClick={() => handleConnectWallet(Wallets.hashpack)}
+              >
+                  <Text textStyle="ElementsMediumSM" color="neutral.650">
+                      {tGlobals("connectHashpack")}
+                  </Text>
+              </Button>
+          </HStack>
       </VStack>
     </Stack>
   );
