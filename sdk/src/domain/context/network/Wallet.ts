@@ -2,7 +2,7 @@ import Account from '../account/Account.js';
 
 export enum SupportedWallets {
   METAMASK = 'Metamask',
-  //HASHPACK = 'HashPack',
+  HASHPACK = 'HashPack',
   //CLIENT = 'Client',
 }
 
