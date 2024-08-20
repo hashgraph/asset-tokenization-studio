@@ -1,9 +1,9 @@
-import { useMutation } from "@tanstack/react-query";
-import { SDKService } from "../../services/SDKService";
-import type { WalletEvent } from "@hashgraph/asset-tokenization-sdk";
-import { SupportedWallets } from "@hashgraph/asset-tokenization-sdk";
-import { useWalletStore } from "../../store/walletStore";
-import {MetamaskStatus, Wallets} from "../../utils/constants";
+import {useMutation} from "@tanstack/react-query";
+import {SDKService} from "../../services/SDKService";
+import type {WalletEvent} from "@hashgraph/asset-tokenization-sdk";
+import {useWalletStore} from "../../store/walletStore";
+import {MetamaskStatus} from "../../utils/constants";
+import {SupportedWallets} from "@hashgraph/asset-tokenization-sdk";
 
 export const useSDKInit = () =>
   useMutation(
@@ -22,7 +22,7 @@ export const useSDKConnectToWallet = () => {
     const { setConnectionStatus, reset } = useWalletStore();
 
     return useMutation(
-        (wallet: Wallets) => SDKService.connectWallet(wallet),
+        (wallet: SupportedWallets) => SDKService.connectWallet(wallet),
         {
             cacheTime: 0,
             onSuccess: (data) => {

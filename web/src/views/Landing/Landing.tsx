@@ -1,30 +1,18 @@
-import { useEffect } from "react";
-import {
-    Center,
-    ListItem,
-    Link,
-    OrderedList,
-    Stack,
-    VStack,
-    Box, HStack,
-} from "@chakra-ui/react";
-import {
-  PhosphorIcon,
-  Text,
-} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import {useEffect} from "react";
+import {Box, Center, HStack, Link, ListItem, OrderedList, Stack, VStack,} from "@chakra-ui/react";
+import {PhosphorIcon, Text, Weight,} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
+import {Button} from "@hashgraph/asset-tokenization-uicomponents/Interaction";
 import landingBackground from "../../assets/layer.png";
-import { useWalletStore } from "../../store/walletStore";
-import _capitalize from "lodash/capitalize";
-import { Trans, useTranslation } from "react-i18next";
-import { RouterManager } from "../../router/RouterManager";
-import { RouteName } from "../../router/RouteName";
-import { PopUp } from "@hashgraph/asset-tokenization-uicomponents";
-import { Wallet } from "@phosphor-icons/react";
-import { Weight } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import {MetamaskStatus, METAMASK_URL, User, Wallets} from "../../utils/constants";
-import { useWalletConnection } from "../../hooks/useWalletConnection";
-import { useUserStore } from "../../store/userStore";
+import {useWalletStore} from "../../store/walletStore";
+import {Trans, useTranslation} from "react-i18next";
+import {RouterManager} from "../../router/RouterManager";
+import {RouteName} from "../../router/RouteName";
+import {PopUp} from "@hashgraph/asset-tokenization-uicomponents";
+import {Wallet} from "@phosphor-icons/react";
+import {METAMASK_URL, MetamaskStatus, User} from "../../utils/constants";
+import {useWalletConnection} from "../../hooks/useWalletConnection";
+import {useUserStore} from "../../store/userStore";
+import {SupportedWallets} from "@hashgraph/asset-tokenization-sdk";
 
 export const Landing = () => {
   const { t } = useTranslation("landing");
@@ -160,7 +148,7 @@ export const Landing = () => {
           <HStack spacing={4} mt={7}>
               <Button
                   data-testid="connect-to-metamask-landing-button"
-                  onClick={() => handleConnectWallet(Wallets.metamask)}
+                  onClick={() => handleConnectWallet(SupportedWallets.METAMASK)}
               >
                   <Text textStyle="ElementsMediumSM" color="neutral.650">
                       {tGlobals("connectMetamask")}
@@ -168,7 +156,7 @@ export const Landing = () => {
               </Button>
               <Button
                   data-testid="connect-to-hashpack-landing-button"
-                  onClick={() => handleConnectWallet(Wallets.hashpack)}
+                  onClick={() => handleConnectWallet(SupportedWallets.HASHPACK)}
               >
                   <Text textStyle="ElementsMediumSM" color="neutral.650">
                       {tGlobals("connectHashpack")}

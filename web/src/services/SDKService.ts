@@ -51,6 +51,7 @@ import type {
     SetCouponRequest,
     SetMaxSupplyRequest,
     SetVotingRightsRequest,
+    SupportedWallets,
     TransferRequest,
     VotingRightsForViewModel,
     VotingRightsViewModel,
@@ -67,7 +68,6 @@ import {
     Security,
     SetDividendsRequest,
 } from "@hashgraph/asset-tokenization-sdk";
-import {Wallets} from "../utils/constants";
 
 export class SDKService {
   static initData?: InitializationData = undefined;
@@ -161,7 +161,7 @@ export class SDKService {
     return !!this.initData;
   }
 
-  public static async connectWallet(wallet: Wallets) {
+  public static async connectWallet(wallet: SupportedWallets) {
     this.initData = await Network.connect(
       new ConnectRequest({
         network: this.testnetNetwork,
