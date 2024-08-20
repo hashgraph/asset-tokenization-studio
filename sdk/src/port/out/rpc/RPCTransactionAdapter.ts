@@ -82,8 +82,6 @@ import {
   TRANSFER_AND_LOCK_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
-import { DiamondArgs } from '../../../domain/context/factory/DiamondArgs.js';
-import { DiamondInitialization } from '../../../domain/context/factory/DiamondInitialization.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
 import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
 import {
@@ -91,18 +89,12 @@ import {
   FactoryBondToken,
   FactoryRegulationData,
 } from '../../../domain/context/factory/FactorySecurityToken.js';
-import {
-  ERC20Metadata,
-  ERC20MetadataInfo,
-} from '../../../domain/context/factory/ERC20Metadata.js';
+import { ERC20MetadataInfo } from '../../../domain/context/factory/ERC20Metadata.js';
 import { SigningError } from '../error/SigningError.js';
 import {
-  ERC1594__factory,
-  ERC20__factory,
   Factory__factory,
   Pause__factory,
   AccessControl__factory,
-  IERC1594__factory,
   ERC1410ScheduledSnapshot__factory,
   ControlList__factory,
   Cap__factory,
@@ -142,14 +134,6 @@ import {
 } from '../../../domain/context/factory/RegulationType.js';
 
 declare const ethereum: MetaMaskInpageProvider;
-
-type StaticConnect = { connect: (...args: any[]) => any };
-
-type FactoryContract<T extends StaticConnect> = T['connect'] extends (
-  ...args: any[]
-) => infer K
-  ? K
-  : never;
 
 @singleton()
 export class RPCTransactionAdapter extends TransactionAdapter {
