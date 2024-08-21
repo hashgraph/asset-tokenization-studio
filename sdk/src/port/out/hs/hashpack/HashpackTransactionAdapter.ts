@@ -89,7 +89,7 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
     this.init();
   }
 
-  async init(network?: string): Promise<string> {
+  public async init(network?: string): Promise<string> {
     const currentNetwork = network ?? this.networkService.environment;
     //* Create the hashconnect instance
     this.hashConnect = new HashConnect(
@@ -129,7 +129,7 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
         },
         wallet: SupportedWallets.HASHPACK,
       });
-      this.setSigner(currentNetwork);
+      this.setSigner();
       LogService.logTrace(
         `Previous pairing found for ${currentNetwork} with account ${this.account.id.toString()} and event: ${JSON.stringify(
           eventData,
@@ -144,7 +144,7 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
     return currentNetwork;
   }
 
-  async register(): Promise<InitializationData> {
+  public async register(): Promise<InitializationData> {
     Injectable.registerTransactionHandler(this);
     LogService.logTrace('HashPack Registered as handler');
     if (
@@ -183,63 +183,13 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
     });
   }
 
-  async stop(): Promise<boolean> {
+  public async stop(): Promise<boolean> {
     await this.hashConnect.disconnect();
     LogService.logInfo('HashPack stopped');
     this.eventService.emit(WalletEvents.walletDisconnect, {
       wallet: SupportedWallets.HASHPACK,
     });
     return Promise.resolve(true);
-  }
-
-  async signAndSendTransaction(
-    t: Transaction,
-    transactionType: TransactionType,
-    nameFunction?: string,
-    abi?: any[],
-  ): Promise<TransactionResponse> {
-    if (!this.signer) throw new SigningError('Signer is empty');
-    try {
-      LogService.logTrace(
-        'HashPack is singing and sending transaction:',
-        nameFunction,
-        t,
-      );
-      // Ensure we have the public key
-      if (!this.getAccountKey()) throw new SigningError('Public key is empty');
-      const signer = await this.getSigner();
-      // Freeze the transaction
-      if (!t.isFrozen()) {
-        t = await t.freezeWithSigner(signer);
-      }
-      const hashPackTransactionResponse = await t.executeWithSigner(signer);
-      this.logTransaction(
-        hashPackTransactionResponse.transactionId.toString(),
-        this.networkService.environment,
-      );
-      return HashpackTransactionResponseAdapter.manageResponse(
-        this.networkService.environment,
-        signer,
-        hashPackTransactionResponse,
-        transactionType,
-        nameFunction,
-        abi,
-      );
-    } catch (error) {
-      LogService.logError(error);
-      throw new SigningError(error);
-    }
-  }
-
-  async getAccountKey(): Promise<HPublicKey> {
-    return this.signer.getAccountKey() as HPublicKey;
-  }
-
-  getAccount(): Account {
-    if (this.account) return this.account;
-    throw new RuntimeError(
-      'There are no accounts currently paired with HashPack!',
-    );
   }
 
   public async restart(network: string): Promise<void> {
@@ -261,7 +211,7 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
         this.pairingData = newPairing;
         const id = newPairing.accountIds[0];
         this.account = await this.getAccountInfo(id);
-        this.setSigner(this.networkService.environment);
+        this.setSigner();
         this.eventService.emit(WalletEvents.walletPaired, {
           wallet: SupportedWallets.HASHPACK,
           data: {
@@ -300,92 +250,155 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
     });
   }
 
-  public getConectionState(): HashConnectConnectionState {
-    return this.state;
-  }
-
-  public async getAccountInfo(id: string): Promise<Account> {
-    const account = (
-      await this.queryBus.execute(new GetAccountInfoQuery(HederaId.from(id)))
-    ).account;
-    if (!account.id) throw new AccountIdNotValid(id.toString());
-    return new Account({
-      id: account.id,
-      publicKey: account.publicKey,
-      evmAddress: account.accountEvmAddress,
-    });
-  }
-
-  public async getHashConnectSigner(): Promise<HashConnectSigner> {
-    return this.signer;
-  }
-
-  public async getSigner(): Promise<Signer> {
-    return this.signer as unknown as Signer;
-  }
-
-  public async sign(message: string | Transaction): Promise<string> {
+  public async signAndSendTransaction(
+    t: Transaction,
+    transactionType: TransactionType,
+    nameFunction?: string,
+    abi?: any[],
+  ): Promise<TransactionResponse> {
     if (!this.signer) throw new SigningError('Signer is empty');
-    if (!(message instanceof Transaction))
-      throw new SigningError('Hashpack must sign a transaction not a string');
-
     try {
-      if (
-        !this.networkService.consensusNodes ||
-        this.networkService.consensusNodes.length == 0
-      ) {
-        throw new Error(
-          'In order to create sign multisignature transactions you must set consensus nodes for the environment',
-        );
+      LogService.logTrace(
+        'HashPack is singing and sending transaction:',
+        nameFunction,
+        t,
+      );
+      // Ensure we have the public key
+      if (!this.getAccountKey()) throw new SigningError('Public key is empty');
+      const signer = await this.getSigner();
+      // Freeze the transaction
+      if (!t.isFrozen()) {
+        t = await t.freezeWithSigner(signer);
       }
-
-      const hashPackTrx = {
-        topic: this.initData.topic,
-        byteArray: message.toBytes(),
-        metadata: {
-          accountToSign: this.account.id.toString(),
-          returnTransaction: true,
-          getRecord: false,
-        },
-      };
-
-      const PublicKey_Der_Encoded =
-        this.account.publicKey?.toHederaKey().toStringDer() ?? '';
-
-      const t = await this.hc.sendTransaction(this.initData.topic, hashPackTrx);
-
-      if (t.signedTransaction instanceof Uint8Array) {
-        const signedTrans = Transaction.fromBytes(t.signedTransaction);
-        const signatures_list = signedTrans.getSignatures();
-        const nodes_signature = signatures_list.get(
-          this.networkService.consensusNodes[0].nodeId,
-        );
-        if (nodes_signature) {
-          const signature = nodes_signature.get(PublicKey_Der_Encoded);
-          if (signature) {
-            return Hex.fromUint8Array(signature);
-          }
-          throw new Error(
-            'Hashapck no signatures found for public key : ' +
-              PublicKey_Der_Encoded,
-          );
-        }
-        throw new Error(
-          'Hashapck no signatures found for node id : ' +
-            this.networkService.consensusNodes[0].nodeId,
-        );
-      }
-      throw new Error('Hashapck wrong signed transaction');
+      const hashPackTransactionResponse = await t.executeWithSigner(signer);
+      this.logTransaction(
+        hashPackTransactionResponse.transactionId.toString(),
+        this.networkService.environment,
+      );
+      return HashpackTransactionResponseAdapter.manageResponse(
+        this.networkService.environment,
+        signer,
+        hashPackTransactionResponse,
+        transactionType,
+        nameFunction,
+        abi,
+      );
     } catch (error) {
       LogService.logError(error);
       throw new SigningError(error);
     }
   }
 
-  private async setSigner(network: string): Promise<HashConnectSigner> {
+  // public async sign(message: string | Transaction): Promise<string> {
+  //   if (!this.signer) throw new SigningError('Signer is empty');
+  //   // TODO: Check if this is correct in v3
+  //   if (!(message instanceof Transaction))
+  //     throw new SigningError('Hashpack must sign a transaction not a string');
+
+  //   try {
+  //     if (
+  //       !this.networkService.consensusNodes ||
+  //       this.networkService.consensusNodes.length == 0
+  //     ) {
+  //       throw new Error(
+  //         'In order to create sign multisignature transactions you must set consensus nodes for the environment',
+  //       );
+  //     }
+
+  //     const hashPackTrx = {
+  //       topic: this.initData.topic,
+  //       byteArray: message.toBytes(),
+  //       metadata: {
+  //         accountToSign: this.account.id.toString(),
+  //         returnTransaction: true,
+  //         getRecord: false,
+  //       },
+  //     };
+
+  //     const PublicKeyDer =
+  //       this.account.publicKey?.toHederaKey().toStringDer() ?? '';
+
+  //     const signedTx = await message.signWithSigner(this.getSigner());
+
+  //     const signatureList = signedTx.getSignatures();
+  //     const nodeSignature = signatureList.get(
+  //       this.networkService.consensusNodes[0].nodeId,
+  //     );
+  //     if (nodeSignature) {
+  //       const signature = nodeSignature.get(PublicKeyDer);
+  //       if (signature) {
+  //         return Hex.fromUint8Array(signature);
+  //       }
+  //       throw new Error(
+  //         'Hashapck no signatures found for public key : ' + PublicKeyDer,
+  //       );
+  //     }
+  //     throw new Error(
+  //       'Hashapck no signatures found for node id : ' +
+  //         this.networkService.consensusNodes[0].nodeId,
+  //     );
+  //   } catch (error) {
+  //     LogService.logError(error);
+  //     throw new SigningError(error);
+  //   }
+  // }
+
+  private async setSigner(): Promise<HashConnectSigner> {
     this.signer = this.hashConnect.getSigner(
       this.account.id.toHederaAddress() as unknown as AccountId, // TODO: Fix this
     );
     return this.signer;
+  }
+
+  public async getAccountKey(): Promise<HPublicKey> {
+    return this.signer.getAccountKey() as HPublicKey;
+  }
+
+  public getAccount(): Account {
+    if (this.account) return this.account;
+    throw new RuntimeError(
+      'There are no accounts currently paired with HashPack!',
+    );
+  }
+
+  public getConectionState(): HashConnectConnectionState {
+    return this.state;
+  }
+
+  /**
+   * Retrieves the account information for the specified ID.
+   *
+   * @param id - The ID of the account.
+   * @returns A promise that resolves to an instance of the Account class.
+   * @throws {AccountIdNotValid} If the account ID is not valid.
+   */
+  public async getAccountInfo(id: string): Promise<Account> {
+    const account = (
+      await this.queryBus.execute(new GetAccountInfoQuery(HederaId.from(id)))
+    ).account;
+    if (!account.id) throw new AccountIdNotValid(id.toString());
+    return new Account({
+      id: account.id.toString(),
+      publicKey: account.publicKey,
+      evmAddress: account.evmAddress,
+    });
+  }
+
+  /**
+   * Retrieves the HashConnectSigner associated with this HashpackTransactionAdapter.
+   *
+   * @returns A Promise that resolves to the HashConnectSigner.
+   */
+  public getHashConnectSigner(): HashConnectSigner {
+    return this.signer;
+  }
+
+  /**
+   * Retrieves the Hashpack Signer associated with this HashpackTransactionAdapter.
+   *
+   * @returns A promise that resolves to the signer of the transaction.
+   */
+  public getSigner(): Signer {
+    return this.signer as unknown as Signer;
   }
 }
