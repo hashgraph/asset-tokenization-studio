@@ -9,7 +9,6 @@ import { useWalletStore } from "../store/walletStore";
 import { MetamaskStatus } from "../utils/constants";
 import { useToast } from "@hashgraph/asset-tokenization-uicomponents/Overlay/Toast";
 import { useTranslation } from "react-i18next";
-import _isEqual from "lodash/isEqual";
 import { RouterManager } from "../router/RouterManager";
 
 export const SDKConnection = () => {

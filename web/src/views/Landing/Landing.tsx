@@ -1,18 +1,36 @@
-import {useEffect} from "react";
-import {Box, Center, HStack, Link, ListItem, OrderedList, Stack, VStack,} from "@chakra-ui/react";
-import {PhosphorIcon, Text, Weight,} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import {Button} from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import { useEffect } from "react";
+import {
+  Box,
+  Center,
+  Accordion,
+  AccordionItem,
+  AccordionButton,
+  AccordionPanel,
+  AccordionIcon,
+  HStack,
+  Link,
+  ListItem,
+  OrderedList,
+  Stack,
+  VStack,
+} from "@chakra-ui/react";
+import {
+  PhosphorIcon,
+  Text,
+  Weight,
+} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
+import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
 import landingBackground from "../../assets/layer.png";
-import {useWalletStore} from "../../store/walletStore";
-import {Trans, useTranslation} from "react-i18next";
-import {RouterManager} from "../../router/RouterManager";
-import {RouteName} from "../../router/RouteName";
-import {PopUp} from "@hashgraph/asset-tokenization-uicomponents";
-import {Wallet} from "@phosphor-icons/react";
-import {METAMASK_URL, MetamaskStatus, User} from "../../utils/constants";
-import {useWalletConnection} from "../../hooks/useWalletConnection";
-import {useUserStore} from "../../store/userStore";
-import {SupportedWallets} from "@hashgraph/asset-tokenization-sdk";
+import { useWalletStore } from "../../store/walletStore";
+import { Trans, useTranslation } from "react-i18next";
+import { RouterManager } from "../../router/RouterManager";
+import { RouteName } from "../../router/RouteName";
+import { PopUp } from "@hashgraph/asset-tokenization-uicomponents";
+import { Wallet } from "@phosphor-icons/react";
+import { METAMASK_URL, MetamaskStatus, User } from "../../utils/constants";
+import { useWalletConnection } from "../../hooks/useWalletConnection";
+import { useUserStore } from "../../store/userStore";
+import { SupportedWallets } from "@hashgraph/asset-tokenization-sdk";
 
 export const Landing = () => {
   const { t } = useTranslation("landing");
@@ -132,37 +150,49 @@ export const Landing = () => {
         >
           {t("welcomeMessage")}
         </Text>
-        <Box textStyle="ElementsLightSM">
-          <Trans
-            t={t}
-            i18nKey="instructions"
-            components={{
-              p: <Text />,
-              ol: <OrderedList />,
-              li: <ListItem />,
-              a: <Link isExternal sx={{ display: "inline" }} />,
-            }}
-          />
+        <Box textStyle="ElementsLightSM" width="100%">
+          <Accordion allowToggle width="fit-content">
+            <AccordionItem>
+              <AccordionButton>
+                <Box flex="1" textAlign="left">
+                  {t("showMetamaskInstructions")}
+                </Box>
+                <AccordionIcon />
+              </AccordionButton>
+              <AccordionPanel pb={4}>
+                <Trans
+                  t={t}
+                  i18nKey="instructionsMetamask"
+                  components={{
+                    p: <Text />,
+                    ol: <OrderedList />,
+                    li: <ListItem />,
+                    a: <Link isExternal sx={{ display: "inline" }} />,
+                  }}
+                />
+              </AccordionPanel>
+            </AccordionItem>
+          </Accordion>
         </Box>
 
-          <HStack spacing={4} mt={7}>
-              <Button
-                  data-testid="connect-to-metamask-landing-button"
-                  onClick={() => handleConnectWallet(SupportedWallets.METAMASK)}
-              >
-                  <Text textStyle="ElementsMediumSM" color="neutral.650">
-                      {tGlobals("connectMetamask")}
-                  </Text>
-              </Button>
-              <Button
-                  data-testid="connect-to-hashpack-landing-button"
-                  onClick={() => handleConnectWallet(SupportedWallets.HASHPACK)}
-              >
-                  <Text textStyle="ElementsMediumSM" color="neutral.650">
-                      {tGlobals("connectHashpack")}
-                  </Text>
-              </Button>
-          </HStack>
+        <HStack spacing={4} mt={7}>
+          <Button
+            data-testid="connect-to-metamask-landing-button"
+            onClick={() => handleConnectWallet(SupportedWallets.METAMASK)}
+          >
+            <Text textStyle="ElementsMediumSM" color="neutral.650">
+              {tGlobals("connectMetamask")}
+            </Text>
+          </Button>
+          <Button
+            data-testid="connect-to-hashpack-landing-button"
+            onClick={() => handleConnectWallet(SupportedWallets.HASHPACK)}
+          >
+            <Text textStyle="ElementsMediumSM" color="neutral.650">
+              {tGlobals("connectHashpack")}
+            </Text>
+          </Button>
+        </HStack>
       </VStack>
     </Stack>
   );

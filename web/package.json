@@ -6,6 +6,7 @@
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx",
     "test": "NODE_ENV=test jest --ci --runInBand",
+    "test:snapshots": "NODE_ENV=test jest --ci --runInBand --updateSnapshot",
     "theme": "chakra-cli tokens src/theme/index.ts",
     "cleanCache": "npx jest --clearCache",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,html,md,json}\" --ignore-path .gitignore --ignore-path .prettierignore"

@@ -156,6 +156,7 @@ exports[`Header if user is not connected should show connect button: disconnecte
       >
         <button
           class="chakra-button css-gobc5v"
+          hidden=""
           type="button"
         >
           Connect Metamask
