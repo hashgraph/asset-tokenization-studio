@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
-  Transaction,
-  TransactionResponse as HTransactionResponse,
   Signer,
   PublicKey as HPublicKey,
   LedgerId,
@@ -16,31 +14,30 @@ import {
 import { HashConnectSigner } from 'hashconnect/dist/signer.js';
 import AccountId from 'hashconnect/node_modules/@hashgraph/sdk/lib/account/AccountId'; // TODO: Fix this
 import { singleton } from 'tsyringe';
-import { HederaTransactionAdapter } from '../HederaTransactionAdapter.js';
-import Account from '../../../../domain/context/account/Account.js';
-import TransactionResponse from '../../../../domain/context/transaction/TransactionResponse.js';
-import Injectable from '../../../../core/Injectable.js';
-import { SigningError } from '../error/SigningError.js';
 import { HashpackTransactionResponseAdapter } from './HashpackTransactionResponseAdapter.js';
-import LogService from '../../../../app/service/LogService.js';
-import EventService from '../../../../app/service/event/EventService.js';
+import { PairingError } from './error/PairingError.js';
+import { HederaTransactionAdapter } from '../HederaTransactionAdapter.js';
+import { SigningError } from '../error/SigningError.js';
 import { InitializationData } from '../../TransactionAdapter.js';
+import { MirrorNodeAdapter } from '../../mirror/MirrorNodeAdapter.js';
+import { SupportedWallets } from '../../../in/request/ConnectRequest.js';
+import Injectable from '../../../../core/Injectable.js';
 import { lazyInject } from '../../../../core/decorator/LazyInjectDecorator.js';
-import NetworkService from '../../../../app/service/NetworkService.js';
 import { RuntimeError } from '../../../../core/error/RuntimeError.js';
+import { QueryBus } from '../../../../core/query/QueryBus.js';
 import {
   ConnectionState,
   WalletEvents,
   WalletInitEvent,
 } from '../../../../app/service/event/WalletEvent.js';
-import { SupportedWallets } from '../../../in/request/ConnectRequest.js';
-import { MirrorNodeAdapter } from '../../mirror/MirrorNodeAdapter.js';
-import { HederaId } from '../../../../domain/context/shared/HederaId.js';
-import { QueryBus } from '../../../../core/query/QueryBus.js';
-import { AccountIdNotValid } from '../../../../domain/context/account/error/AccountIdNotValid.js';
+import LogService from '../../../../app/service/LogService.js';
+import EventService from '../../../../app/service/event/EventService.js';
+import NetworkService from '../../../../app/service/NetworkService.js';
 import { GetAccountInfoQuery } from '../../../../app/usecase/query/account/info/GetAccountInfoQuery.js';
-import { PairingError } from './error/PairingError.js';
-import { TransactionType } from 'port/out/TransactionResponseEnums.js';
+import Account from '../../../../domain/context/account/Account.js';
+import TransactionResponse from '../../../../domain/context/transaction/TransactionResponse.js';
+import { HederaId } from '../../../../domain/context/shared/HederaId.js';
+import { AccountIdNotValid } from '../../../../domain/context/account/error/AccountIdNotValid.js';
 
 @singleton()
 export class HashpackTransactionAdapter extends HederaTransactionAdapter {
