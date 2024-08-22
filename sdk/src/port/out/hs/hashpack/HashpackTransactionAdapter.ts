@@ -1,29 +1,11 @@
-/*
- *
- * Hedera Stablecoin SDK
- *
- * Copyright (C) 2023 Hedera Hashgraph, LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Transaction,
+  TransactionResponse as HTransactionResponse,
   Signer,
   PublicKey as HPublicKey,
   LedgerId,
+  EthereumTransaction,
 } from '@hashgraph/sdk';
 import {
   HashConnect,
@@ -72,8 +54,9 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
   private hashConnect: HashConnect;
   private state: HashConnectConnectionState;
   private pairingData: SessionData | null;
-  public account: Account;
-  public signer: HashConnectSigner;
+  private account: Account;
+  protected signer: Signer;
+  private hashConnectSigner: HashConnectSigner;
 
   constructor(
     @lazyInject(EventService)
@@ -251,37 +234,30 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
   }
 
   public async signAndSendTransaction(
-    t: Transaction,
-    transactionType: TransactionType,
-    nameFunction?: string,
-    abi?: any[],
+    transaction: EthereumTransaction,
   ): Promise<TransactionResponse> {
     if (!this.signer) throw new SigningError('Signer is empty');
     try {
       LogService.logTrace(
-        'HashPack is singing and sending transaction:',
-        nameFunction,
-        t,
+        `Hashpack signing and sending transaction: ${JSON.stringify(transaction)}`,
       );
       // Ensure we have the public key
       if (!this.getAccountKey()) throw new SigningError('Public key is empty');
-      const signer = await this.getSigner();
+      const signer = this.getSigner();
       // Freeze the transaction
-      if (!t.isFrozen()) {
-        t = await t.freezeWithSigner(signer);
+      if (!transaction.isFrozen()) {
+        transaction = await transaction.freezeWithSigner(signer);
       }
-      const hashPackTransactionResponse = await t.executeWithSigner(signer);
+      const hashPackTransactionResponse =
+        await transaction.executeWithSigner(signer);
       this.logTransaction(
         hashPackTransactionResponse.transactionId.toString(),
         this.networkService.environment,
       );
       return HashpackTransactionResponseAdapter.manageResponse(
-        this.networkService.environment,
-        signer,
         hashPackTransactionResponse,
-        transactionType,
-        nameFunction,
-        abi,
+        signer,
+        this.networkService.environment,
       );
     } catch (error) {
       LogService.logError(error);
@@ -344,14 +320,16 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
   // }
 
   private async setSigner(): Promise<HashConnectSigner> {
-    this.signer = this.hashConnect.getSigner(
+    this.hashConnectSigner = this.hashConnect.getSigner(
       this.account.id.toHederaAddress() as unknown as AccountId, // TODO: Fix this
     );
-    return this.signer;
+    this.signer = this.hashConnectSigner as unknown as Signer;
+    return this.hashConnectSigner;
   }
 
   public async getAccountKey(): Promise<HPublicKey> {
-    return this.signer.getAccountKey() as HPublicKey;
+    if (!this.signer) throw new SigningError('Signer is empty');
+    return this.getHashConnectSigner().getAccountKey() as HPublicKey;
   }
 
   public getAccount(): Account {
@@ -390,7 +368,7 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
    * @returns A Promise that resolves to the HashConnectSigner.
    */
   public getHashConnectSigner(): HashConnectSigner {
-    return this.signer;
+    return this.hashConnectSigner;
   }
 
   /**
@@ -399,6 +377,6 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
    * @returns A promise that resolves to the signer of the transaction.
    */
   public getSigner(): Signer {
-    return this.signer as unknown as Signer;
+    return this.signer;
   }
 }
