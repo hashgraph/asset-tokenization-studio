@@ -1,71 +1,15 @@
-/*
- *
- * Hedera Stablecoin SDK
- *
- * Copyright (C) 2023 Hedera Hashgraph, LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-case-declarations */
-import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
-import TransactionAdapter, { InitializationData } from '../TransactionAdapter';
-import { ethers } from 'ethers';
-import { singleton } from 'tsyringe';
-import Injectable from '../../../core/Injectable.js';
-import type { Provider } from '@ethersproject/providers';
-import detectEthereumProvider from '@metamask/detect-provider';
-import { RuntimeError } from '../../../core/error/RuntimeError.js';
-import Account from '../../../domain/context/account/Account.js';
-import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
-import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
-import NetworkService from '../../../app/service/NetworkService.js';
-import { MetaMaskInpageProvider } from '@metamask/providers';
-import { WalletConnectError } from '../../../domain/context/network/error/WalletConnectError.js';
-import EventService from '../../../app/service/event/EventService.js';
 import {
-  ConnectionState,
-  WalletEvents,
-} from '../../../app/service/event/WalletEvent.js';
-import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
-import LogService from '../../../app/service/LogService.js';
-import { WalletConnectRejectedError } from '../../../domain/context/network/error/WalletConnectRejectedError.js';
-import {
-  HederaNetworks,
-  unrecognized,
-} from '../../../domain/context/network/Environment.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import { SetNetworkCommand } from '../../../app/usecase/command/network/setNetwork/SetNetworkCommand.js';
-import { SetConfigurationCommand } from '../../../app/usecase/command/network/setConfiguration/SetConfigurationCommand.js';
-import {
-  EnvironmentMirrorNode,
-  MirrorNode,
-  MirrorNodes,
-} from '../../../domain/context/network/MirrorNode.js';
-import {
-  EnvironmentJsonRpcRelay,
-  JsonRpcRelay,
-  JsonRpcRelays,
-} from '../../../domain/context/network/JsonRpcRelay.js';
-import {
-  EnvironmentFactory,
-  Factories,
-} from '../../../domain/context/factory/Factories.js';
-import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
+  ContractExecuteTransaction,
+  ContractFunctionParameters,
+  Signer,
+  Transaction,
+  Long,
+} from '@hashgraph/sdk';
+import { Factory__factory } from '@hashgraph/asset-tokenization-contracts';
 import {
   TRANSFER_GAS,
   PAUSE_GAS,
@@ -85,8 +29,6 @@ import {
   RENOUNCE_ROLES_GAS,
   TAKE_SNAPSHOT_GAS,
   _PARTITION_ID_1,
-  SET_DIVIDEND_EVENT,
-  SET_VOTING_RIGHTS_EVENT,
   SET_DOCUMENT_GAS,
   REMOVE_DOCUMENT_GAS,
   AUTHORIZE_OPERATOR_GAS,
@@ -94,50 +36,37 @@ import {
   TRANSFER_OPERATOR_GAS,
   TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
   SET_MAX_SUPPLY_GAS,
-  SET_COUPON_EVENT,
   SET_COUPON_GAS,
   LOCK_GAS,
   RELEASE_GAS,
   TRANSFER_AND_LOCK_GAS,
 } from '../../../core/Constants.js';
-import { Security } from '../../../domain/context/security/Security.js';
-import { Rbac } from '../../../domain/context/factory/Rbac.js';
-import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
+import TransactionAdapter from '../TransactionAdapter';
+import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
+import { SigningError } from '../error/SigningError.js';
+import NetworkService from '../../../app/service/NetworkService.js';
+import LogService from '../../../app/service/LogService.js';
 import {
   FactoryEquityToken,
   FactoryBondToken,
   FactoryRegulationData,
 } from '../../../domain/context/factory/FactorySecurityToken.js';
+import {
+  CastRegulationSubType,
+  CastRegulationType,
+} from '../../../domain/context/factory/RegulationType.js';
+import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
+import { MirrorNodes } from '../../../domain/context/network/MirrorNode.js';
+import { JsonRpcRelays } from '../../../domain/context/network/JsonRpcRelay.js';
+import { Factories } from '../../../domain/context/factory/Factories.js';
+import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
+import { Security } from '../../../domain/context/security/Security.js';
+import { Rbac } from '../../../domain/context/factory/Rbac.js';
+import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
 import { ERC20MetadataInfo } from '../../../domain/context/factory/ERC20Metadata.js';
-import { SigningError } from '../error/SigningError.js';
-import {
-  Factory__factory,
-  Pause__factory,
-  AccessControl__factory,
-  ERC1410ScheduledSnapshot__factory,
-  ControlList__factory,
-  Cap__factory,
-  IBond,
-  Bond__factory,
-  TransferAndLock__factory,
-} from '@hashgraph/asset-tokenization-contracts';
-import {
-  EnvironmentResolver,
-  Resolvers,
-} from '../../../domain/context/factory/Resolvers.js';
-import {
-  BusinessLogicKeys,
-  EnvironmentBusinessLogicKeys,
-} from '../../../domain/context/factory/BusinessLogicKeys.js';
+import { Resolvers } from '../../../domain/context/factory/Resolvers.js';
+import { BusinessLogicKeys } from '../../../domain/context/factory/BusinessLogicKeys.js';
 import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
-import {
-  Equity__factory,
-  ERC1643__factory,
-  IEquity,
-  Snapshots__factory,
-  ScheduledSnapshots__factory,
-  Lock__factory,
-} from '@hashgraph/asset-tokenization-contracts';
 import { BondDetails } from '../../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../../domain/context/bond/CouponDetails.js';
 import { BondDetailsData } from '../../../domain/context/factory/BondDetailsData.js';
@@ -147,22 +76,6 @@ import { EquityDetailsData } from '../../../domain/context/factory/EquityDetails
 import { SecurityData } from '../../../domain/context/factory/SecurityData.js';
 import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
 import { AdditionalSecurityData } from '../../../domain/context/factory/AdditionalSecurityData.js';
-import {
-  CastRegulationSubType,
-  CastRegulationType,
-} from '../../../domain/context/factory/RegulationType.js';
-import { TransactionType } from '../TransactionResponseEnums.js';
-import {
-  ContractExecuteTransaction,
-  ContractFunctionParameters,
-  ContractId,
-  EthereumTransaction,
-  Signer,
-  Transaction,
-  Long,
-} from '@hashgraph/sdk';
-import { toUtf8Bytes } from 'ethers/lib/utils.js';
-import { eth } from 'web3';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
