@@ -512,4 +512,13 @@ export default abstract class TransactionAdapter
     LogService.logInfo(msg);
     console.log(msg);
   }
+
+  async getEVMAddress(parameter: HederaId | string): Promise<any> {
+    if (parameter instanceof HederaId) {
+      parameter = parameter.toString();
+    }
+    return (
+      await this.getMirrorNodeAdapter().accountToEvmAddress(parameter)
+    ).toString();
+  }
 }
