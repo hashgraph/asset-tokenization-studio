@@ -22,6 +22,7 @@ import SetConfigurationRequest from './request/SetConfigurationRequest.js';
 import { handleValidation } from './Common.js';
 import { MirrorNode } from '../../domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../domain/context/network/JsonRpcRelay.js';
+import { HashpackTransactionAdapter } from '../out/hs/hashpack/HashpackTransactionAdapter.js';
 
 export { InitializationData, NetworkData, SupportedWallets };
 
@@ -177,6 +178,8 @@ class NetworkInPort implements INetworkInPort {
     for (const val of instances) {
       if (val instanceof RPCTransactionAdapter) {
         wallets.push(SupportedWallets.METAMASK);
+      } else if (val instanceof HashpackTransactionAdapter) {
+        wallets.push(SupportedWallets.HASHPACK);
       }
       await val.init();
 
@@ -204,7 +207,13 @@ class NetworkInPort implements INetworkInPort {
     );
 
     const res = await this.commandBus.execute(
-      new ConnectCommand(req.network, req.wallet, account, debug),
+      new ConnectCommand(
+        req.network,
+        req.wallet,
+        req.wcConnectingSettings,
+        account,
+        debug,
+      ),
     );
     return res.payload;
   }

@@ -3,9 +3,9 @@ import Injectable from '../../core/Injectable.js';
 import { RPCTransactionAdapter } from '../../port/out/rpc/RPCTransactionAdapter.js';
 import TransactionAdapter from '../../port/out/TransactionAdapter.js';
 import Service from './Service.js';
-import {SupportedWallets} from "../../domain/context/network/Wallet";
-import {HashpackTransactionAdapter} from "../../port/out/hs/hashpack/HashpackTransactionAdapter";
-import {InvalidWalletTypeError} from "../../domain/context/network/error/InvalidWalletAccountTypeError";
+import { SupportedWallets } from '../../domain/context/network/Wallet';
+import { HashpackTransactionAdapter } from '../../port/out/hs/hashpack/HashpackTransactionAdapter';
+import { InvalidWalletTypeError } from '../../domain/context/network/error/InvalidWalletAccountTypeError';
 
 @singleton()
 export default class TransactionService extends Service {

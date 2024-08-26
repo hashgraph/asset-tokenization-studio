@@ -106,7 +106,7 @@ describe('🧪 Role test', () => {
     ns.rpcNode = rpcNode;
 
     await th.init(true);
-    await th.register(undefined, true);
+    await th.register(undefined, undefined, true);
 
     const url = 'http://127.0.0.1:7546';
     const customHttpProvider = new ethers.providers.JsonRpcProvider(url);

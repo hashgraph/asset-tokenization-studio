@@ -1,4 +1,4 @@
-import type {
+import {
   ApplyRolesRequest,
   BalanceViewModel,
   BondDetailsViewModel,
@@ -162,11 +162,25 @@ export class SDKService {
   }
 
   public static async connectWallet(wallet: SupportedWallets) {
+    const wcConnectingSettings =
+      wallet == SupportedWallets.HASHPACK
+        ? {
+            projectId: "8fc26370383a50de1c3bd638d334292e",
+            dappName: "StableCoin",
+            dappDescription:
+              "StableCoin is a decentralized stablecoin platform built on Hedera Hashgraph.",
+            dappURL: "https://wc.hgraph.app/",
+            dappIcons: [
+              "https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg",
+            ],
+          }
+        : undefined;
     this.initData = await Network.connect(
       new ConnectRequest({
         network: this.testnetNetwork,
         mirrorNode: this.testnetMirrorNode,
         rpcNode: this.testnetRPCNode,
+        wcConnectingSettings: wcConnectingSettings,
         wallet,
       }),
     );

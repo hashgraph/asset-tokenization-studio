@@ -13,6 +13,7 @@ import EvmAddress from '../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../domain/context/bond/CouponDetails.js';
 import { EquityDetails } from '../../domain/context/equity/EquityDetails.js';
+import WalletConnectSettings from '../../domain/context/walletConnect/WalletConnectSettings.js';
 
 export interface InitializationData {
   account?: Account;
@@ -49,7 +50,10 @@ interface ITransactionAdapter {
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse>;
   init(): Promise<Environment>;
-  register(account?: Account): Promise<InitializationData>;
+  register(
+    wcSettings?: WalletConnectSettings | undefined,
+    account?: Account,
+  ): Promise<InitializationData>;
   stop(): Promise<boolean>;
   balanceOf(
     security: HederaId,
@@ -360,6 +364,7 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   register(
+    wcSettings?: WalletConnectSettings | undefined,
     account?: Account | undefined,
     debug?: boolean,
   ): Promise<InitializationData> {
