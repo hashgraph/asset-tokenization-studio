@@ -1,38 +1,48 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {EthereumTransaction, LedgerId, PublicKey as HPublicKey, Signer,} from '@hashgraph/sdk';
-import {DappMetadata, HashConnect, HashConnectConnectionState, SessionData,} from 'hashconnect';
-import {HashConnectSigner} from 'hashconnect/dist/signer.js';
+import {
+  EthereumTransaction,
+  LedgerId,
+  PublicKey as HPublicKey,
+  Signer,
+} from '@hashgraph/sdk';
+import {
+  DappMetadata,
+  HashConnect,
+  HashConnectConnectionState,
+  SessionData,
+} from 'hashconnect';
+import { HashConnectSigner } from 'hashconnect/dist/signer.js';
 import AccountId from 'hashconnect/node_modules/@hashgraph/sdk/lib/account/AccountId'; // TODO: Fix this
-import {singleton} from 'tsyringe';
-import {HashpackTransactionResponseAdapter} from './HashpackTransactionResponseAdapter.js';
-import {PairingError} from './error/PairingError.js';
-import {HederaTransactionAdapter} from '../HederaTransactionAdapter.js';
-import {SigningError} from '../error/SigningError.js';
-import {InitializationData} from '../../TransactionAdapter.js';
-import {MirrorNodeAdapter} from '../../mirror/MirrorNodeAdapter.js';
-import {SupportedWallets} from '../../../in/request/ConnectRequest.js';
+import { singleton } from 'tsyringe';
+import { HashpackTransactionResponseAdapter } from './HashpackTransactionResponseAdapter.js';
+import { PairingError } from './error/PairingError.js';
+import { HederaTransactionAdapter } from '../HederaTransactionAdapter.js';
+import { SigningError } from '../error/SigningError.js';
+import { InitializationData } from '../../TransactionAdapter.js';
+import { MirrorNodeAdapter } from '../../mirror/MirrorNodeAdapter.js';
+import { SupportedWallets } from '../../../in/request/ConnectRequest.js';
 import Injectable from '../../../../core/Injectable.js';
-import {lazyInject} from '../../../../core/decorator/LazyInjectDecorator.js';
-import {RuntimeError} from '../../../../core/error/RuntimeError.js';
-import {QueryBus} from '../../../../core/query/QueryBus.js';
-import {ConnectionState, WalletEvents, WalletInitEvent,} from '../../../../app/service/event/WalletEvent.js';
+import { lazyInject } from '../../../../core/decorator/LazyInjectDecorator.js';
+import { RuntimeError } from '../../../../core/error/RuntimeError.js';
+import { QueryBus } from '../../../../core/query/QueryBus.js';
+import {
+  ConnectionState,
+  WalletEvents,
+  WalletInitEvent,
+} from '../../../../app/service/event/WalletEvent.js';
 import LogService from '../../../../app/service/LogService.js';
 import EventService from '../../../../app/service/event/EventService.js';
 import NetworkService from '../../../../app/service/NetworkService.js';
-import {GetAccountInfoQuery} from '../../../../app/usecase/query/account/info/GetAccountInfoQuery.js';
+import { GetAccountInfoQuery } from '../../../../app/usecase/query/account/info/GetAccountInfoQuery.js';
 import Account from '../../../../domain/context/account/Account.js';
 import TransactionResponse from '../../../../domain/context/transaction/TransactionResponse.js';
-import {HederaId} from '../../../../domain/context/shared/HederaId.js';
-import {AccountIdNotValid} from '../../../../domain/context/account/error/AccountIdNotValid.js';
+import { HederaId } from '../../../../domain/context/shared/HederaId.js';
+import { AccountIdNotValid } from '../../../../domain/context/account/error/AccountIdNotValid.js';
+import WalletConnectSettings from '../../../../domain/context/walletConnect/WalletConnectSettings.js';
 
 @singleton()
 export class HashpackTransactionAdapter extends HederaTransactionAdapter {
-  private appMetadata = {
-    name: '<Your dapp name>',
-    description: '<Your dapp description>',
-    icons: ['<Image url>'],
-    url: '<Dapp url>',
-  } as DappMetadata;
+  private appMetadata: DappMetadata;
 
   private hashConnect: HashConnect;
   private state: HashConnectConnectionState;
@@ -52,15 +62,27 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
     public readonly queryBus: QueryBus,
   ) {
     super(mirrorNodeAdapter, networkService);
-    this.init();
+    // this.init();
   }
-
-  public async init(network?: string): Promise<string> {
+  public async init(
+    wcSettings?: WalletConnectSettings,
+    network?: string,
+  ): Promise<string> {
+    // TODO: Improve this
+    if (!wcSettings) {
+      throw new Error('Hashpack settings are required');
+    }
+    this.appMetadata = {
+      name: wcSettings.dappName,
+      description: wcSettings.dappDescription,
+      url: wcSettings.dappURL,
+      icons: wcSettings.dappIcons,
+    };
     const currentNetwork = network ?? this.networkService.environment;
     //* Create the hashconnect instance
     this.hashConnect = new HashConnect(
       LedgerId.fromString(currentNetwork),
-      '<Your Project ID>',
+      wcSettings.projectId,
       this.appMetadata,
       true, //! Check this for production
     );
@@ -158,9 +180,12 @@ export class HashpackTransactionAdapter extends HederaTransactionAdapter {
     return Promise.resolve(true);
   }
 
-  public async restart(network: string): Promise<void> {
+  public async restart(
+    wcSettings: WalletConnectSettings,
+    network: string,
+  ): Promise<void> {
     await this.stop();
-    await this.init(network);
+    await this.init(wcSettings, network);
   }
 
   /**
