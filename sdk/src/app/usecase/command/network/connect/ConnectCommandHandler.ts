@@ -6,7 +6,8 @@ import { ConnectCommand, ConnectCommandResponse } from './ConnectCommand.js';
 @CommandHandler(ConnectCommand)
 export class ConnectCommandHandler implements ICommandHandler<ConnectCommand> {
   async execute(command: ConnectCommand): Promise<ConnectCommandResponse> {
-    const handler = TransactionService.getHandlerClass();
+    const handler = TransactionService.getHandlerClass(command.wallet);
+    console.log('ConnectCommandHandler', handler);
     const debug = command.debug ? command.debug : false;
     const registration = await handler.register(command.account, debug);
 

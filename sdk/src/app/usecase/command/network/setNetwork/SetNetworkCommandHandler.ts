@@ -24,6 +24,7 @@ export class SetNetworkCommandHandler
   async execute(
     command: SetNetworkCommand,
   ): Promise<SetNetworkCommandResponse> {
+    console.log('SetNetworkCommandHandler', command);
     this.networkService.environment = command.environment;
     if (command.consensusNodes)
       this.networkService.consensusNodes = command.consensusNodes;

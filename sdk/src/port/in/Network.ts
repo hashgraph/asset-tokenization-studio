@@ -195,6 +195,7 @@ class NetworkInPort implements INetworkInPort {
 
   @LogError
   async connect(req: ConnectRequest): Promise<InitializationData> {
+    console.log('ConnectRequest from network', req);
     handleValidation('ConnectRequest', req);
     const account = RequestMapper.mapAccount(req.account);
     const debug = req.debug ?? false;
