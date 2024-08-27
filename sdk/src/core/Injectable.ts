@@ -80,7 +80,6 @@ import { GetCouponForQueryHandler } from '../app/usecase/query/bond/coupons/getC
 import { GetMaxSupplyQueryHandler } from '../app/usecase/query/security/cap/GetMaxSupplyQueryHandler.js';
 
 import { SDK } from '../port/in/Common.js';
-import { HashpackTransactionAdapter } from '../port/out/hs/hashpack/HashpackTransactionAdapter.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -345,10 +344,6 @@ const TRANSACTION_HANDLER = [
     token: TOKENS.TRANSACTION_HANDLER,
     useClass: RPCTransactionAdapter,
   },
-  {
-    token: TOKENS.TRANSACTION_HANDLER,
-    useClass: HashpackTransactionAdapter,
-  },
 ];
 
 const defaultNetworkProps: NetworkProps = {
@@ -432,7 +427,6 @@ export default class Injectable {
   static registerTransactionAdapterInstances(): TransactionAdapter[] {
     const adapters: TransactionAdapter[] = [];
     adapters.push(Injectable.resolve(RPCTransactionAdapter));
-    adapters.push(Injectable.resolve(HashpackTransactionAdapter));
     return adapters;
   }
 

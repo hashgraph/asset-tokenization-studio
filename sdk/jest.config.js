@@ -17,6 +17,7 @@ module.exports = {
     'src/**/*.mts',
     '!src/**/*.d.ts',
     '!src/**/*.d.mts',
+    '!build/**', // Exclude the build directory
   ],
   transform: {
     '^.+\\.ts?$': 'ts-jest',

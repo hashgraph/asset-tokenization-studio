@@ -4,8 +4,8 @@ import { RPCTransactionAdapter } from '../../port/out/rpc/RPCTransactionAdapter.
 import TransactionAdapter from '../../port/out/TransactionAdapter.js';
 import Service from './Service.js';
 import { SupportedWallets } from '../../domain/context/network/Wallet';
-import { HashpackTransactionAdapter } from '../../port/out/hs/hashpack/HashpackTransactionAdapter';
 import { InvalidWalletTypeError } from '../../domain/context/network/error/InvalidWalletAccountTypeError';
+import LogService from './LogService.js';
 
 @singleton()
 export default class TransactionService extends Service {
@@ -24,18 +24,20 @@ export default class TransactionService extends Service {
 
   static getHandlerClass(type: SupportedWallets): TransactionAdapter {
     switch (type) {
-      case SupportedWallets.HASHPACK:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        console.log('HashpackTransactionAdapter');
-        return Injectable.resolve(HashpackTransactionAdapter);
       case SupportedWallets.METAMASK:
         if (!Injectable.isWeb()) {
           throw new InvalidWalletTypeError();
         }
-        console.log('RPCTransactionAdapter');
+        LogService.logTrace('METAMASK TransactionAdapter');
         return Injectable.resolve(RPCTransactionAdapter);
+      case SupportedWallets.HWALLETCONNECT:
+        if (!Injectable.isWeb()) {
+          throw new InvalidWalletTypeError();
+        }
+        LogService.logTrace('HWALLETCONNECT TransactionAdapter');
+        return Injectable.resolve(RPCTransactionAdapter);
+      default:
+        throw new Error('Invalid wallet type');
     }
   }
 }
