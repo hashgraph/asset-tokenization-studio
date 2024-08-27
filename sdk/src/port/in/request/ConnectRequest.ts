@@ -6,6 +6,7 @@ import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
 import { BaseRequest, RequestAccount } from './BaseRequest.js';
 import ValidatedRequest from './validation/ValidatedRequest.js';
 import Validation from './validation/Validation.js';
+import WalletConnectSettings from '../../../domain/context/walletConnect/WalletConnectSettings.js';
 
 export { SupportedWallets };
 
@@ -19,6 +20,7 @@ export default class ConnectRequest
   mirrorNode: MirrorNode;
   rpcNode: JsonRpcRelay;
   wallet: SupportedWallets;
+  wcConnectingSettings?: WalletConnectSettings;
   debug?: boolean;
 
   constructor({
@@ -27,6 +29,7 @@ export default class ConnectRequest
     mirrorNode,
     rpcNode,
     wallet,
+    wcConnectingSettings,
     debug,
   }: {
     account?: RequestAccount;
@@ -34,6 +37,7 @@ export default class ConnectRequest
     mirrorNode: MirrorNode;
     rpcNode: JsonRpcRelay;
     wallet: SupportedWallets;
+    wcConnectingSettings?: WalletConnectSettings;
     debug?: boolean;
   }) {
     super({
@@ -45,6 +49,7 @@ export default class ConnectRequest
     this.mirrorNode = mirrorNode;
     this.rpcNode = rpcNode;
     this.wallet = wallet;
+    this.wcConnectingSettings = wcConnectingSettings;
     this.debug = debug;
   }
 }

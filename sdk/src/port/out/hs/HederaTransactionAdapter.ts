@@ -305,7 +305,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     } catch (error) {
       LogService.logError(error);
       throw new SigningError(
-        `Unexpected error in RPCTransactionAdapter create operation : ${error}`,
+        `Unexpected error in HederaTransactionAdapter create operation : ${error}`,
       );
     }
   }
@@ -412,7 +412,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     } catch (error) {
       LogService.logError(error);
       throw new SigningError(
-        `Unexpected error in RPCTransactionAdapter create operation : ${error}`,
+        `Unexpected error in HederaTransactionAdapter create operation : ${error}`,
       );
     }
   }
