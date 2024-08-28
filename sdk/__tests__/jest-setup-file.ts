@@ -30,6 +30,11 @@ import {
   CastRegulationType,
 } from '../src/domain/context/factory/RegulationType.js';
 
+//* Mock console.log() method
+global.console.log = jest.fn();
+//* Mock isWeb() method
+Injectable.isWeb = jest.fn(() => true);
+
 function hexToDecimal(hexString: string): number {
   if (!/^0x[a-fA-F0-9]+$|^[a-fA-F0-9]+$/.test(hexString)) {
     throw new Error('Invalid hexadecimal input.');
