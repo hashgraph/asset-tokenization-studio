@@ -127,7 +127,7 @@ describe('🧪 Security tests', () => {
       privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
       publicKey: CLIENT_ACCOUNT_ECDSA.publicKey,
     });
-    await th.register(undefined, account, true);
+    await th.register(account, true);
 
     th.signerOrProvider = wallet;
 

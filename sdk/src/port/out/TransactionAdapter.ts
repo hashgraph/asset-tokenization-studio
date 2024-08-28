@@ -51,8 +51,7 @@ interface ITransactionAdapter {
   ): Promise<TransactionResponse>;
   init(): Promise<Environment>;
   register(
-    wcSettings?: WalletConnectSettings | undefined,
-    account?: Account,
+    input?: Account | WalletConnectSettings,
   ): Promise<InitializationData>;
   stop(): Promise<boolean>;
   balanceOf(
@@ -364,9 +363,7 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   register(
-    wcSettings?: WalletConnectSettings | undefined,
-    account?: Account | undefined,
-    debug?: boolean,
+    input?: Account | WalletConnectSettings,
   ): Promise<InitializationData> {
     throw new Error('Method not implemented.');
   }

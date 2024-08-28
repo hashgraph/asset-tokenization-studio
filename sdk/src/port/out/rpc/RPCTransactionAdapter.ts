@@ -422,7 +422,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   }
 
   async register(
-    wcSettings?: undefined,
     account?: Account,
     debug = false,
   ): Promise<InitializationData> {
