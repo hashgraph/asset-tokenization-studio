@@ -189,7 +189,7 @@ export const Landing = () => {
             onClick={() => handleConnectWallet(SupportedWallets.HWALLETCONNECT)}
           >
             <Text textStyle="ElementsMediumSM" color="neutral.650">
-              {tGlobals("connectHWC")}
+              {tGlobals("connectWalletConnect")}
             </Text>
           </Button>
         </HStack>
