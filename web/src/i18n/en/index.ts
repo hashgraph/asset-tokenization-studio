@@ -10,7 +10,7 @@ export default {
     iob: "IO Builders",
     tag: "Proof of concept",
     connectMetamask: "Connect Metamask",
-    connectHashpack: "Connect Hashpack",
+    connectWalletConnect: "Connect Wallet Connect",
     walletChanged: "Wallet was changed to {{ currentWallet }}",
     networkChanged: "Network changed to {{ currentNetwork }}",
     unrecognizedNetwork: "Changed to an unrecognized network",

@@ -185,11 +185,11 @@ export const Landing = () => {
             </Text>
           </Button>
           <Button
-            data-testid="connect-to-hashpack-landing-button"
-            onClick={() => handleConnectWallet(SupportedWallets.HASHPACK)}
+            data-testid="connect-to-hwc-landing-button"
+            onClick={() => handleConnectWallet(SupportedWallets.HWALLETCONNECT)}
           >
             <Text textStyle="ElementsMediumSM" color="neutral.650">
-              {tGlobals("connectHashpack")}
+              {tGlobals("connectHWC")}
             </Text>
           </Button>
         </HStack>

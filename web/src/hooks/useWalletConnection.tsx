@@ -19,7 +19,7 @@ export const useWalletConnection = () => {
         } else {
           setConnectionStatus(MetamaskStatus.uninstalled);
         }
-      } else if (wallet === SupportedWallets.HASHPACK) {
+      } else if (wallet === SupportedWallets.HWALLETCONNECT) {
         connectWallet(wallet);
       } else {
         throw new Error("Wallet not supported");

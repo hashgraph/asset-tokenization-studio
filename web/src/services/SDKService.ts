@@ -162,19 +162,24 @@ export class SDKService {
   }
 
   public static async connectWallet(wallet: SupportedWallets) {
-    const wcConnectingSettings =
-      wallet == SupportedWallets.HASHPACK
-        ? {
-            projectId: "8fc26370383a50de1c3bd638d334292e",
-            dappName: "StableCoin",
-            dappDescription:
-              "StableCoin is a decentralized stablecoin platform built on Hedera Hashgraph.",
-            dappURL: "https://wc.hgraph.app/",
-            dappIcons: [
-              "https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg",
-            ],
-          }
-        : undefined;
+    let wcConnectingSettings;
+    if (wallet === SupportedWallets.HWALLETCONNECT) {
+      const projectId = process.env.REACT_APP_PROJECT_ID ?? "";
+      const dappName = process.env.REACT_APP_DAPP_NAME ?? "";
+      const dappDescription = process.env.REACT_APP_DAPP_DESCRIPTION ?? "";
+      const dappURL = process.env.REACT_APP_DAPP_URL ?? "";
+      const dappIcons = process.env.REACT_APP_DAPP_ICONS?.split(",") ?? [];
+
+      if (projectId) {
+        wcConnectingSettings = {
+          projectId,
+          dappName,
+          dappDescription,
+          dappURL,
+          dappIcons,
+        };
+      }
+    }
     this.initData = await Network.connect(
       new ConnectRequest({
         network: this.testnetNetwork,
