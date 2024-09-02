@@ -88,6 +88,11 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
   public async init(network?: NetworkName): Promise<string> {
     const currentNetwork = network ?? this.networkService.environment;
 
+    this.eventService.emit(WalletEvents.walletFound, {
+      wallet: SupportedWallets.HWALLETCONNECT,
+      name: SupportedWallets.HWALLETCONNECT,
+    });
+
     const eventData = {
       initData: {
         account: this.account,
@@ -97,7 +102,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
       wallet: SupportedWallets.HWALLETCONNECT,
     };
     this.eventService.emit(WalletEvents.walletInit, eventData);
-    LogService.logInfo('✅ Hedera Wallet Connect Handler Initialized');
+    LogService.logInfo(`✅ Hedera Wallet Connect initialized ${eventData}`);
     return currentNetwork;
   }
 

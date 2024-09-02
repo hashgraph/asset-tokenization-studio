@@ -172,8 +172,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       wallet: SupportedWallets.METAMASK,
     };
     this.eventService.emit(WalletEvents.walletInit, eventData);
-    LogService.logTrace('Metamask Initialized ', eventData);
-
+    LogService.logTrace(`✅ Metamask initialized ${eventData}`);
     return this.networkService.environment;
   }
 

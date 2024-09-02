@@ -22,6 +22,7 @@ import SetConfigurationRequest from './request/SetConfigurationRequest.js';
 import { handleValidation } from './Common.js';
 import { MirrorNode } from '../../domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../domain/context/network/JsonRpcRelay.js';
+import { HederaWalletConnectTransactionAdapter } from '../out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.js';
 
 export { InitializationData, NetworkData, SupportedWallets };
 
@@ -177,6 +178,8 @@ class NetworkInPort implements INetworkInPort {
     for (const val of instances) {
       if (val instanceof RPCTransactionAdapter) {
         wallets.push(SupportedWallets.METAMASK);
+      } else if (val instanceof HederaWalletConnectTransactionAdapter) {
+        wallets.push(SupportedWallets.HWALLETCONNECT);
       }
       await val.init();
 

@@ -13,6 +13,7 @@ import { SetVotingRightsCommandHandler } from '../app/usecase/command/equity/vot
 import { GetSecurityQueryHandler } from '../app/usecase/query/security/get/GetSecurityQueryHandler.js';
 import { GetAccountBalanceQueryHandler } from '../app/usecase/query/account/balance/GetAccountBalanceQueryHandler.js';
 import { RPCTransactionAdapter } from '../port/out/rpc/RPCTransactionAdapter.js';
+import { HederaWalletConnectTransactionAdapter } from '../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.js';
 import { Constructor } from './Type.js';
 import { CreateEquityCommandHandler } from '../app/usecase/command/equity/create/CreateEquityCommandHandler.js';
 import { CreateBondCommandHandler } from '../app/usecase/command/bond/create/CreateBondCommandHandler.js';
@@ -427,6 +428,7 @@ export default class Injectable {
   static registerTransactionAdapterInstances(): TransactionAdapter[] {
     const adapters: TransactionAdapter[] = [];
     adapters.push(Injectable.resolve(RPCTransactionAdapter));
+    adapters.push(Injectable.resolve(HederaWalletConnectTransactionAdapter));
     return adapters;
   }
 
