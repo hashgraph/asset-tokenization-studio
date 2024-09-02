@@ -48,17 +48,24 @@ export class MirrorNodeAdapter {
   }
 
   public async getAccountInfo(accountId: HederaId | string): Promise<Account> {
+    let accountIdString: string;
+    if (typeof accountId === 'string') {
+      accountIdString = accountId;
+      accountId = HederaId.from(accountId);
+    } else {
+      accountIdString = accountId.toString();
+    }
     try {
       LogService.logTrace(
         'Getting account info -> ',
-        this.mirrorNodeConfig.baseUrl + 'accounts/' + accountId,
+        this.mirrorNodeConfig.baseUrl + 'accounts/' + accountIdString,
       );
       const res = await this.instance.get<IAccount>(
-        this.mirrorNodeConfig.baseUrl + 'accounts/' + accountId.toString(),
+        this.mirrorNodeConfig.baseUrl + 'accounts/' + accountIdString,
       );
 
       const account: Account = {
-        id: HederaId.from(res.data.account),
+        id: accountId,
         evmAddress: res.data.evm_address,
         alias: res.data.alias,
       };

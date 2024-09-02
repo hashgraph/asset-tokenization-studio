@@ -425,7 +425,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     account?: Account,
     debug = false,
   ): Promise<InitializationData> {
-    if (account) {
+    if (account && account instanceof Account) {
       const accountMirror = await this.mirrorNodeAdapter.getAccountInfo(
         account.id,
       );

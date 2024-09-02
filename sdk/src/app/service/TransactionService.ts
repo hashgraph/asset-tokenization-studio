@@ -1,11 +1,12 @@
 import { singleton } from 'tsyringe';
+import Service from './Service.js';
+import LogService from './LogService.js';
 import Injectable from '../../core/Injectable.js';
 import { RPCTransactionAdapter } from '../../port/out/rpc/RPCTransactionAdapter.js';
+import { HederaWalletConnectTransactionAdapter } from '../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter.js';
 import TransactionAdapter from '../../port/out/TransactionAdapter.js';
-import Service from './Service.js';
 import { SupportedWallets } from '../../domain/context/network/Wallet';
 import { InvalidWalletTypeError } from '../../domain/context/network/error/InvalidWalletAccountTypeError';
-import LogService from './LogService.js';
 
 @singleton()
 export default class TransactionService extends Service {
@@ -35,7 +36,7 @@ export default class TransactionService extends Service {
           throw new InvalidWalletTypeError();
         }
         LogService.logTrace('HWALLETCONNECT TransactionAdapter');
-        return Injectable.resolve(RPCTransactionAdapter);
+        return Injectable.resolve(HederaWalletConnectTransactionAdapter);
       default:
         throw new Error('Invalid wallet type');
     }
