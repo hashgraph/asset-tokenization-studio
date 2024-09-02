@@ -3,11 +3,11 @@
     // "target": "esnext",
     "lib": ["DOM", "DOM.Iterable", "esnext"],
     "target": "ES2020",
-    "module": "NodeNext",
-    // "moduleResolution": "node",
+    "module": "ES2020",
+    "moduleResolution": "node",
     // "module": "esnext",
     /* Bundler mode */
-    "moduleResolution": "nodenext",
+    // "moduleResolution": "nodenext",
     "isolatedModules": true,
     "allowJs": true,
     "noEmit": true,
@@ -16,7 +16,6 @@
     "types": ["vite/client", "jest", "node", "@testing-library/jest-dom"],
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-
     "declaration": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,

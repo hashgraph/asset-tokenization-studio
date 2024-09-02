@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2020" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
-    "module": "ESNext" /* Specify what module code is generated. */,
+    "module": "ES2020" /* Specify what module code is generated. */,
     "moduleResolution": "node",
     "declaration": true /* Generate .d.ts files from TypeScript and JavaScript files in your project. */,
     "rootDir": ".",
@@ -17,6 +17,5 @@
     "experimentalDecorators": true,
     "resolveJsonModule": true
   },
-  "exclude": ["build/**/*", "node_modules", "example/**/*"],
   "include": ["src/**/*", "__tests__/**/*"]
 }
