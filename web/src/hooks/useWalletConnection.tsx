@@ -1,23 +1,31 @@
-import _capitalize from "lodash/capitalize";
-import { useWalletStore } from "../store/walletStore";
-import { MetamaskStatus } from "../utils/constants";
-import { useSDKConnectToMetamask } from "./queries/SDKConnection";
+import {useWalletStore} from "../store/walletStore";
+import {MetamaskStatus} from "../utils/constants";
+import {useSDKConnectToWallet} from "./queries/SDKConnection";
+import {SupportedWallets} from "@hashgraph/asset-tokenization-sdk";
 
 export const useWalletConnection = () => {
   const { setConnectionStatus } = useWalletStore();
-  const { mutate: connectWallet } = useSDKConnectToMetamask();
+  //TODO: not a good practice to use SupportedWallets from SDK -> use a new WEB enum instead
+  const { mutate: connectWallet } = useSDKConnectToWallet();
 
-  const handleConnectWallet = async () => {
+  const handleConnectWallet = async (wallet: SupportedWallets) => {
     setConnectionStatus(MetamaskStatus.connecting);
+
     try {
-      if (window.ethereum) {
-        connectWallet();
+      if (wallet === SupportedWallets.METAMASK) {
+        if (window.ethereum) {
+          connectWallet(wallet);
+        } else {
+          setConnectionStatus(MetamaskStatus.uninstalled);
+        }
+      } else if (wallet === SupportedWallets.HWALLETCONNECT) {
+        connectWallet(wallet);
       } else {
-        setConnectionStatus(MetamaskStatus.uninstalled);
+        throw new Error("Wallet not supported");
       }
     } catch (error) {
       console.error(error);
-      // setConnectionStatus(MetamaskStatus.disconnected);
+      setConnectionStatus(MetamaskStatus.disconnected);
     }
   };
 

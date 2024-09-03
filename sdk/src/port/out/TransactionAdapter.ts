@@ -13,7 +13,7 @@ import EvmAddress from '../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../domain/context/bond/CouponDetails.js';
 import { EquityDetails } from '../../domain/context/equity/EquityDetails.js';
-import WalletConnectSettings from '../../domain/context/walletConnect/WalletConnectSettings.js';
+import HWCSettings from '../../domain/context/walletConnect/HWCSettings';
 
 export interface InitializationData {
   account?: Account;
@@ -51,7 +51,7 @@ interface ITransactionAdapter {
   ): Promise<TransactionResponse>;
   init(): Promise<Environment>;
   register(
-    input?: Account | WalletConnectSettings,
+    input?: Account | HWCSettings,
   ): Promise<InitializationData>;
   stop(): Promise<boolean>;
   balanceOf(
@@ -363,7 +363,7 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   register(
-    input?: Account | WalletConnectSettings,
+    input?: Account | HWCSettings,
     debug?: boolean,
   ): Promise<InitializationData> {
     throw new Error('Method not implemented.');

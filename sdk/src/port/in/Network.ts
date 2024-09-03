@@ -22,6 +22,9 @@ import SetConfigurationRequest from './request/SetConfigurationRequest.js';
 import { handleValidation } from './Common.js';
 import { MirrorNode } from '../../domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../domain/context/network/JsonRpcRelay.js';
+import {
+  HederaWalletConnectTransactionAdapter
+} from "../out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter";
 
 export { InitializationData, NetworkData, SupportedWallets };
 
@@ -177,6 +180,8 @@ class NetworkInPort implements INetworkInPort {
     for (const val of instances) {
       if (val instanceof RPCTransactionAdapter) {
         wallets.push(SupportedWallets.METAMASK);
+      } else if (val instanceof HederaWalletConnectTransactionAdapter) {
+        wallets.push(SupportedWallets.HWALLETCONNECT);
       }
       await val.init();
 
@@ -195,15 +200,36 @@ class NetworkInPort implements INetworkInPort {
 
   @LogError
   async connect(req: ConnectRequest): Promise<InitializationData> {
+    console.log('ConnectRequest from network', req);
     handleValidation('ConnectRequest', req);
-    const account = RequestMapper.mapAccount(req.account);
+
+    const account = req.account
+        ? RequestMapper.mapAccount(req.account)
+        : undefined;
     const debug = req.debug ?? false;
+    const hwcSettings = req.hwcSettings
+        ? RequestMapper.hwcRequestToHWCSettings(req.hwcSettings)
+        : undefined;
+
+    console.log(
+        'SetNetworkCommand',
+        req.network,
+        req.mirrorNode,
+        req.rpcNode,
+    );
     await this.commandBus.execute(
       new SetNetworkCommand(req.network, req.mirrorNode, req.rpcNode),
     );
 
+    console.log('ConnectRequest', req.wallet, account, hwcSettings, debug);
     const res = await this.commandBus.execute(
-      new ConnectCommand(req.network, req.wallet, account, debug),
+      new ConnectCommand(
+        req.network,
+        req.wallet,
+        account,
+        hwcSettings,
+        debug,
+      ),
     );
     return res.payload;
   }

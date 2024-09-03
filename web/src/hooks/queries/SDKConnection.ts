@@ -18,19 +18,19 @@ export const useSDKInit = () =>
     },
   );
 
-export const useSDKConnectToMetamask = () => {
+export const useSDKConnectToWallet = () => {
   const { setConnectionStatus, reset } = useWalletStore();
 
   return useMutation(
-    () => SDKService.connectWallet(SupportedWallets.METAMASK),
+    (wallet: SupportedWallets) => SDKService.connectWallet(wallet),
     {
       cacheTime: 0,
       onSuccess: (data) => {
-        console.log("SDK message --> Connected to Metamask", data);
+        console.log("SDK message --> Connected to wallet", data);
         //setConnectionStatus(MetamaskStatus.connected);
       },
       onError: (error) => {
-        console.log("SDK message --> Error connecting to Metamask: ", error);
+        console.log("SDK message --> Error connecting to wallet: ", error);
         reset();
       },
       onMutate: () => {

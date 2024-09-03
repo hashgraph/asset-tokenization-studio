@@ -80,6 +80,9 @@ import { GetCouponForQueryHandler } from '../app/usecase/query/bond/coupons/getC
 import { GetMaxSupplyQueryHandler } from '../app/usecase/query/security/cap/GetMaxSupplyQueryHandler.js';
 
 import { SDK } from '../port/in/Common.js';
+import {
+  HederaWalletConnectTransactionAdapter
+} from "../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter";
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -336,13 +339,17 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetMaxSupplyQueryHandler,
-  },
+  }
 ];
 
 const TRANSACTION_HANDLER = [
   {
     token: TOKENS.TRANSACTION_HANDLER,
     useClass: RPCTransactionAdapter,
+  },
+  {
+    token: TOKENS.TRANSACTION_HANDLER,
+    useClass: HederaWalletConnectTransactionAdapter,
   },
 ];
 
@@ -426,7 +433,10 @@ export default class Injectable {
 
   static registerTransactionAdapterInstances(): TransactionAdapter[] {
     const adapters: TransactionAdapter[] = [];
-    adapters.push(Injectable.resolve(RPCTransactionAdapter));
+    adapters.push(
+        Injectable.resolve(RPCTransactionAdapter),
+        Injectable.resolve(HederaWalletConnectTransactionAdapter)
+    );
     return adapters;
   }
 

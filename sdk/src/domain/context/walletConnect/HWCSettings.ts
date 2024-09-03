@@ -1,4 +1,4 @@
-export default class WalletConnectSettings {
+export default class HWCSettings {
   constructor(
     public projectId: string,
     public dappName: string,

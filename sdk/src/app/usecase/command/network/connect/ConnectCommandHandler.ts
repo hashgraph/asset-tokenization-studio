@@ -8,7 +8,10 @@ export class ConnectCommandHandler implements ICommandHandler<ConnectCommand> {
   async execute(command: ConnectCommand): Promise<ConnectCommandResponse> {
     const handler = TransactionService.getHandlerClass(command.wallet);
     const debug = command.debug ? command.debug : false;
-    const registration = await handler.register(command.account, debug);
+
+    const input = command.HWCSettings ? command.HWCSettings : command.account;
+
+    const registration = await handler.register(input, debug);
 
     return Promise.resolve(
       new ConnectCommandResponse(registration, command.wallet),
