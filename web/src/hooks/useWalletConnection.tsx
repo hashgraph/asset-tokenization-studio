@@ -1,6 +1,6 @@
 import _capitalize from "lodash/capitalize";
 import { useWalletStore } from "../store/walletStore";
-import { MetamaskStatus } from "../utils/constants";
+import { WalletStatus } from "../utils/constants";
 import { useSDKConnectToWallet } from "./queries/SDKConnection";
 import { SupportedWallets } from "@hashgraph/asset-tokenization-sdk";
 
@@ -10,15 +10,10 @@ export const useWalletConnection = () => {
   const { mutate: connectWallet } = useSDKConnectToWallet();
 
   const handleConnectWallet = async (wallet: SupportedWallets) => {
-    setConnectionStatus(MetamaskStatus.connecting);
-
     try {
-      if (wallet === SupportedWallets.METAMASK) {
-        if (window.ethereum) {
-          connectWallet(wallet);
-        } else {
-          setConnectionStatus(MetamaskStatus.uninstalled);
-        }
+      setConnectionStatus(WalletStatus.connecting);
+      if (wallet === SupportedWallets.METAMASK && window.ethereum) {
+        connectWallet(wallet);
       } else if (wallet === SupportedWallets.HWALLETCONNECT) {
         connectWallet(wallet);
       } else {
@@ -26,7 +21,7 @@ export const useWalletConnection = () => {
       }
     } catch (error) {
       console.error(error);
-      setConnectionStatus(MetamaskStatus.disconnected);
+      setConnectionStatus(WalletStatus.disconnected);
     }
   };
 

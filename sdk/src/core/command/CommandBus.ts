@@ -35,7 +35,11 @@ export class CommandBus<T extends CommandResponse = CommandResponse>
       throw new CommandHandlerNotFoundException(commandId);
     }
     // Has to be casted to return type as it its inferred based off the parameter
-    return handler.execute(command) as Promise<X>;
+    const returned = (handler.execute(command) as Promise<X>).then((result) => {
+      console.log(result);
+      return result;
+    });
+    return returned;
   }
 
   bind<X extends T>(handler: ICommandHandler<Command<X>>, id: string): void {

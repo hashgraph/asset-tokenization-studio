@@ -5,7 +5,7 @@ import { render } from "../../../test-utils";
 import { RouterManager } from "../../../router/RouterManager";
 import { RouteName } from "../../../router/RouteName";
 import { useWalletStore } from "../../../store/walletStore";
-import { METAMASK_URL, MetamaskStatus } from "../../../utils/constants";
+import { METAMASK_URL, WalletStatus } from "../../../utils/constants";
 
 jest.mock("../../../router/RouterManager", () => ({
   RouterManager: {
@@ -38,7 +38,7 @@ describe(`${Landing.name}`, () => {
     useWalletStore.setState(
       {
         ...initialStoreState,
-        connectionStatus: MetamaskStatus.connected,
+        connectionStatus: WalletStatus.connected,
         address: accounts[0],
       },
       true,
@@ -73,7 +73,7 @@ describe(`${Landing.name}`, () => {
 
     userEvent.click(button);
     useWalletStore.setState(
-      { ...initialStoreState, connectionStatus: MetamaskStatus.connecting },
+      { ...initialStoreState, connectionStatus: WalletStatus.connecting },
       true,
     );
 
@@ -97,7 +97,7 @@ describe(`${Landing.name}`, () => {
     const component = render(<Landing />);
     const uninstalled = {
       ...initialStoreState,
-      connectionStatus: MetamaskStatus.uninstalled,
+      connectionStatus: WalletStatus.uninstalled,
     };
     useWalletStore.setState(uninstalled, true);
 
@@ -115,7 +115,7 @@ describe(`${Landing.name}`, () => {
 
     const uninstalled = {
       ...initialStoreState,
-      connectionStatus: MetamaskStatus.uninstalled,
+      connectionStatus: WalletStatus.uninstalled,
     };
     useWalletStore.setState(uninstalled, true);
 
