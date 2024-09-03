@@ -4,11 +4,11 @@ import _capitalize from "lodash/capitalize";
 import { Sidebar } from "./components/Sidebar";
 import { useWalletStore } from "../store/walletStore";
 import { Header } from "./components/Header";
-import { MetamaskStatus } from "../utils/constants";
+import { WalletStatus } from "../utils/constants";
 
 export const MainLayout = () => {
   const { connectionStatus } = useWalletStore();
-  const disconnected = connectionStatus === MetamaskStatus.disconnected;
+  const disconnected = connectionStatus === WalletStatus.disconnected;
 
   return (
     <>

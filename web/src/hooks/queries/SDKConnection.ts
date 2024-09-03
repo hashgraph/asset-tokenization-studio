@@ -3,7 +3,7 @@ import { SDKService } from "../../services/SDKService";
 import type { WalletEvent } from "@hashgraph/asset-tokenization-sdk";
 import { SupportedWallets } from "@hashgraph/asset-tokenization-sdk";
 import { useWalletStore } from "../../store/walletStore";
-import { MetamaskStatus } from "../../utils/constants";
+import { WalletStatus } from "../../utils/constants";
 
 export const useSDKInit = () =>
   useMutation(
@@ -34,7 +34,7 @@ export const useSDKConnectToWallet = () => {
         reset();
       },
       onMutate: () => {
-        setConnectionStatus(MetamaskStatus.connecting);
+        setConnectionStatus(WalletStatus.connecting);
       },
     },
   );

@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 import { RoutePath } from "../RoutePath";
 import { useWalletStore } from "../../store/walletStore";
-import { MetamaskStatus } from "../../utils/constants";
+import { WalletStatus } from "../../utils/constants";
 import { useEffect } from "react";
 import { useLocationStore } from "../../store/locationStore";
 
@@ -11,7 +11,7 @@ export const PrivateRoute = ({
   children: React.ReactElement;
 }) => {
   const { connectionStatus } = useWalletStore();
-  const connected = connectionStatus === MetamaskStatus.connected;
+  const connected = connectionStatus === WalletStatus.connected;
   const location = useLocation();
   const { locations, setLocations } = useLocationStore();
 

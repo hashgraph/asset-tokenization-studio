@@ -5,7 +5,7 @@ import {useWalletStore} from "../../store/walletStore";
 import {useTranslation} from "react-i18next";
 import {CaretDown, SignOut, Wallet} from "@phosphor-icons/react";
 import {PhosphorIcon, Text} from "@hashgraph/asset-tokenization-uicomponents";
-import {MetamaskStatus} from "../../utils/constants";
+import {WalletStatus} from "../../utils/constants";
 import {Logo} from "@hashgraph/asset-tokenization-uicomponents/Basic";
 import {useUserStore} from "../../store/userStore";
 import {Dropdown, DropdownItem,} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
@@ -15,7 +15,7 @@ export const Header = () => {
   const { t } = useTranslation("globals");
   const { address, connectionStatus, reset } = useWalletStore();
   const { type: userType } = useUserStore();
-  const connected = connectionStatus === MetamaskStatus.connected;
+  const connected = connectionStatus === WalletStatus.connected;
 
   return (
     <HeaderBase

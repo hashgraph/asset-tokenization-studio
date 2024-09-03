@@ -1,6 +1,6 @@
 export const METAMASK_URL = "https://metamask.io/download/";
 
-export enum MetamaskStatus {
+export enum WalletStatus {
   connected = "CONNECTED",
   connecting = "CONNECTING",
   disconnected = "DISCONNECTED",

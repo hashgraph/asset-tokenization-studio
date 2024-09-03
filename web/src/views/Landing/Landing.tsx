@@ -27,7 +27,7 @@ import { RouterManager } from "../../router/RouterManager";
 import { RouteName } from "../../router/RouteName";
 import { PopUp } from "@hashgraph/asset-tokenization-uicomponents";
 import { Wallet } from "@phosphor-icons/react";
-import { METAMASK_URL, MetamaskStatus, User } from "../../utils/constants";
+import { METAMASK_URL, WalletStatus, User } from "../../utils/constants";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
 import { useUserStore } from "../../store/userStore";
 import { SupportedWallets } from "@hashgraph/asset-tokenization-sdk";
@@ -51,12 +51,12 @@ export const Landing = () => {
   };
 
   useEffect(() => {
-    const connected = connectionStatus === MetamaskStatus.connected;
+    const connected = connectionStatus === WalletStatus.connected;
     if (connected) {
       RouterManager.to(RouteName.Dashboard);
     }
 
-    const disconnected = connectionStatus === MetamaskStatus.disconnected;
+    const disconnected = connectionStatus === WalletStatus.disconnected;
     if (disconnected) {
       setType(User.general);
     }
@@ -64,7 +64,7 @@ export const Landing = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionStatus]);
 
-  const isLoading = connectionStatus === MetamaskStatus.connecting;
+  const isLoading = connectionStatus === WalletStatus.connecting;
   if (isLoading) {
     return (
       <Center h="full" data-testid="connecting-to-metamask">
@@ -86,7 +86,7 @@ export const Landing = () => {
     );
   }
 
-  const uninstalled = connectionStatus === MetamaskStatus.uninstalled;
+  const uninstalled = connectionStatus === WalletStatus.uninstalled;
   if (uninstalled) {
     return (
       <Center h="full" data-testid="install-metamask">
