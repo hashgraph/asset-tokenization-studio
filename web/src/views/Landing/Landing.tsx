@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Center,
@@ -42,8 +42,16 @@ export const Landing = () => {
     keyPrefix: "metamaskPopup.uninstalled",
   });
   const { connectionStatus, reset } = useWalletStore();
-  const { handleConnectWallet } = useWalletConnection();
+  const { handleConnectWallet: connectWallet } = useWalletConnection();
   const { setType } = useUserStore();
+  const [selectedWallet, setSelectedWallet] = useState<SupportedWallets | null>(
+    null,
+  );
+
+  const handleConnectWallet = (wallet: SupportedWallets) => {
+    setSelectedWallet(wallet);
+    connectWallet(wallet);
+  };
 
   const handleInstallButton = () => {
     window.open(METAMASK_URL, "_blank");
@@ -64,7 +72,9 @@ export const Landing = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionStatus]);
 
-  const isLoading = connectionStatus === WalletStatus.connecting;
+  const isLoading =
+    connectionStatus === WalletStatus.connecting &&
+    selectedWallet !== SupportedWallets.HWALLETCONNECT;
   if (isLoading) {
     return (
       <Center h="full" data-testid="connecting-to-metamask">
@@ -189,7 +199,7 @@ export const Landing = () => {
             onClick={() => handleConnectWallet(SupportedWallets.HWALLETCONNECT)}
           >
             <Text textStyle="ElementsMediumSM" color="neutral.650">
-              {tGlobals("connectHWC")}
+              {tGlobals("connectWalletConnect")}
             </Text>
           </Button>
         </HStack>
