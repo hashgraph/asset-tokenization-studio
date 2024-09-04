@@ -404,7 +404,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         }}`,
       );
       const transaction = new ContractExecuteTransaction()
-        .setContractId(factory.toString())
+        .setContractId(factory.toContractId().toString())
         .setGas(CREATE_BOND_ST_GAS)
         .setFunctionParameters(functionDataEncoded);
 
