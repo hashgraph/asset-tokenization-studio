@@ -99,8 +99,18 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
     network: string,
     signer: Signer,
     transactionResponse: HTransactionResponse,
-  ): Promise<TransactionReceipt> {
-    return await transactionResponse.getReceiptWithSigner(signer);
+  ): Promise<TransactionReceipt | boolean> {
+    try{
+      return await transactionResponse.getReceiptWithSigner(signer);
+    }
+    catch(error: any){
+      if(error.status){
+        if(error.status.toString() === "SUCCESS"){
+          return true;
+        }
+      }
+      throw error;
+    }
   }
 
   private static async getRecord(
