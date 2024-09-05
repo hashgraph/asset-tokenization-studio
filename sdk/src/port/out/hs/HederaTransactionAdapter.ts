@@ -9,7 +9,10 @@ import {
   Transaction,
   Long,
 } from '@hashgraph/sdk';
-import { Factory__factory } from '@hashgraph/asset-tokenization-contracts';
+import {
+  AccessControl__factory,
+  Factory__factory,
+} from '@hashgraph/asset-tokenization-contracts';
 import {
   TRANSFER_GAS,
   PAUSE_GAS,
@@ -525,14 +528,20 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Granting role ${role.toString()} to account: ${targetId.toString()}`,
     );
 
-    // Create ContractFunctionParameters and add the parameters
-    const functionParameters = new ContractFunctionParameters()
-      .addBytes32(new Uint8Array(Buffer.from(role, 'hex')))
-      .addAddress(targetId.toString());
+    const factoryInstance = new AccessControl__factory().attach(
+      address.toString(),
+    );
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [role, targetId.toString()],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
     const transaction = new ContractExecuteTransaction()
       .setContractId(address.toContractId().toString())
       .setGas(GRANT_ROLES_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
