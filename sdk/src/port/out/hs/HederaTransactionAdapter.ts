@@ -556,19 +556,20 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     let gas = roles.length * GRANT_ROLES_GAS;
     gas = gas > MAX_ROLES_GAS ? MAX_ROLES_GAS : gas;
 
-    // Create ContractFunctionParameters and add the parameters
-    // Convert boolean array to byte array
-    const byteArray = actives.map((val) => (val ? 0x01 : 0x00));
-    const functionParameters = new ContractFunctionParameters()
-      .addBytes32Array(
-        roles.map((role) => new Uint8Array(Buffer.from(role, 'hex'))),
-      )
-      .addBytes(Buffer.from(byteArray))
-      .addAddress(targetId.toString());
+    const factoryInstance = new AccessControl__factory().attach(
+      address.toString(),
+    );
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [roles, actives, targetId.toString()],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
     const transaction = new ContractExecuteTransaction()
       .setContractId(address.toContractId().toString())
       .setGas(gas)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
