@@ -20,7 +20,7 @@
   "rules": {
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/explicit-function-return-type": "warn",
-    "@typescript-eslint/no-var-requires": 0
-    //"license-header/header": ["error", "./resources/license-header.js"]
+    "@typescript-eslint/no-var-requires": 0,
+    "license-header/header": ["error", "./resources/license-header.js"]
   }
 }
