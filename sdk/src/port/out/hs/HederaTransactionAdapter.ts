@@ -873,7 +873,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
     const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(SET_VOTING_RIGHTS_GAS)
       .setFunctionParameters(functionDataEncoded);
 
@@ -906,7 +906,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
     const transaction = new ContractExecuteTransaction()
-      .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(SET_COUPON_GAS)
       .setFunctionParameters(functionDataEncoded);
 
