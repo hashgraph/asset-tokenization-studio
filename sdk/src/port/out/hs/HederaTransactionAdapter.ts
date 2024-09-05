@@ -548,6 +548,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
   async applyRoles(
     address: EvmAddress,
+    securityId: string,
     targetId: EvmAddress,
     roles: SecurityRole[],
     actives: boolean[],
@@ -567,7 +568,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(gas)
       .setFunctionParameters(functionDataEncoded);
 

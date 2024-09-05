@@ -6,9 +6,7 @@ import Service from './Service.js';
 import { SupportedWallets } from '../../domain/context/network/Wallet';
 import { InvalidWalletTypeError } from '../../domain/context/network/error/InvalidWalletAccountTypeError';
 import LogService from './LogService.js';
-import {
-  HederaWalletConnectTransactionAdapter
-} from "../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter";
+import { HederaWalletConnectTransactionAdapter } from '../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
 
 @singleton()
 export default class TransactionService extends Service {

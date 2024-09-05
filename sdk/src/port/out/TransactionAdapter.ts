@@ -50,9 +50,7 @@ interface ITransactionAdapter {
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse>;
   init(): Promise<Environment>;
-  register(
-    input?: Account | HWCSettings,
-  ): Promise<InitializationData>;
+  register(input?: Account | HWCSettings): Promise<InitializationData>;
   stop(): Promise<boolean>;
   balanceOf(
     security: HederaId,
@@ -186,6 +184,7 @@ interface RoleTransactionAdapter {
   ): Promise<TransactionResponse>;
   applyRoles(
     security: EvmAddress,
+    securityId: string,
     targetId: EvmAddress,
     roles: SecurityRole[],
     actives: boolean[],
@@ -333,6 +332,7 @@ export default abstract class TransactionAdapter
   }
   applyRoles(
     security: EvmAddress,
+    securityId: string,
     targetId: EvmAddress,
     roles: SecurityRole[],
     actives: boolean[],

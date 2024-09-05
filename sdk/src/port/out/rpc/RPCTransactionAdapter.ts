@@ -936,6 +936,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   async applyRoles(
     address: EvmAddress,
+    securityId: string,
     targetId: EvmAddress,
     roles: SecurityRole[],
     actives: boolean[],

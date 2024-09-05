@@ -4,7 +4,7 @@ import Account from '../../../../../domain/context/account/Account.js';
 import { Environment } from '../../../../../domain/context/network/Environment.js';
 import { SupportedWallets } from '../../../../../domain/context/network/Wallet.js';
 import { InitializationData } from '../../../../../port/out/TransactionAdapter.js';
-import HWCSettings from "../../../../../domain/context/walletConnect/HWCSettings";
+import HWCSettings from '../../../../../domain/context/walletConnect/HWCSettings';
 
 export class ConnectCommandResponse implements CommandResponse {
   constructor(

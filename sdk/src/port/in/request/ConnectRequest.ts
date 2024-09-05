@@ -1,14 +1,13 @@
-import {OptionalField} from '../../../core/decorator/OptionalDecorator.js';
-import {Environment} from '../../../domain/context/network/Environment.js';
-import {MirrorNode} from '../../../domain/context/network/MirrorNode.js';
-import {JsonRpcRelay} from '../../../domain/context/network/JsonRpcRelay.js';
-import {SupportedWallets} from '../../../domain/context/network/Wallet.js';
-import {BaseRequest, RequestAccount} from './BaseRequest.js';
+import { OptionalField } from '../../../core/decorator/OptionalDecorator.js';
+import { Environment } from '../../../domain/context/network/Environment.js';
+import { MirrorNode } from '../../../domain/context/network/MirrorNode.js';
+import { JsonRpcRelay } from '../../../domain/context/network/JsonRpcRelay.js';
+import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
+import { BaseRequest, RequestAccount } from './BaseRequest.js';
 import ValidatedRequest from './validation/ValidatedRequest.js';
 import Validation from './validation/Validation.js';
 
 export { SupportedWallets };
-
 
 export type HWCRequestSettings = {
   projectId: string;
@@ -62,5 +61,4 @@ export default class ConnectRequest
   }
 
   [n: string]: any;
-
 }

@@ -22,9 +22,7 @@ import SetConfigurationRequest from './request/SetConfigurationRequest.js';
 import { handleValidation } from './Common.js';
 import { MirrorNode } from '../../domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../domain/context/network/JsonRpcRelay.js';
-import {
-  HederaWalletConnectTransactionAdapter
-} from "../out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter";
+import { HederaWalletConnectTransactionAdapter } from '../out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
 
 export { InitializationData, NetworkData, SupportedWallets };
 
@@ -204,32 +202,21 @@ class NetworkInPort implements INetworkInPort {
     handleValidation('ConnectRequest', req);
 
     const account = req.account
-        ? RequestMapper.mapAccount(req.account)
-        : undefined;
+      ? RequestMapper.mapAccount(req.account)
+      : undefined;
     const debug = req.debug ?? false;
     const hwcSettings = req.hwcSettings
-        ? RequestMapper.hwcRequestToHWCSettings(req.hwcSettings)
-        : undefined;
+      ? RequestMapper.hwcRequestToHWCSettings(req.hwcSettings)
+      : undefined;
 
-    console.log(
-        'SetNetworkCommand',
-        req.network,
-        req.mirrorNode,
-        req.rpcNode,
-    );
+    console.log('SetNetworkCommand', req.network, req.mirrorNode, req.rpcNode);
     await this.commandBus.execute(
       new SetNetworkCommand(req.network, req.mirrorNode, req.rpcNode),
     );
 
     console.log('ConnectRequest', req.wallet, account, hwcSettings, debug);
     const res = await this.commandBus.execute(
-      new ConnectCommand(
-        req.network,
-        req.wallet,
-        account,
-        hwcSettings,
-        debug,
-      ),
+      new ConnectCommand(req.network, req.wallet, account, hwcSettings, debug),
     );
     return res.payload;
   }
