@@ -124,12 +124,14 @@ interface ITransactionAdapter {
     address: EvmAddress,
     recordDate: BigDecimal,
     data: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setCoupon(
     address: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setDocument(
     security: EvmAddress,
@@ -497,6 +499,7 @@ export default abstract class TransactionAdapter
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -504,6 +507,7 @@ export default abstract class TransactionAdapter
     address: EvmAddress,
     recordDate: BigDecimal,
     data: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }

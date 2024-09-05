@@ -37,6 +37,7 @@ export class SetCouponCommandHandler
       BigDecimal.fromString(recordDate),
       BigDecimal.fromString(executionDate),
       BigDecimal.fromString(rate),
+      address,
     );
 
     return Promise.resolve(new SetCouponCommandResponse(res.response, res.id!));

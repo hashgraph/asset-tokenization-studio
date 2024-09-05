@@ -831,13 +831,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       amount : ${amount}  `,
     );
 
+    const dividend = {
+      recordDate: recordDate.toHexString(),
+      executionDate: executionDate.toHexString(),
+      amount: amount.toHexString(),
+    };
+
     const functionDataEncodedHex = new Interface(
       EquityUSA__factory.abi,
     ).encodeFunctionData(FUNCTION_NAME, [
-      _PARTITION_ID_1,
-      recordDate.toHexString(),
-      executionDate.toHexString(),
-      amount.toHexString(),
+      dividend,
     ]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -854,6 +857,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     address: EvmAddress,
     recordDate: BigDecimal,
     data: string,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
 
     const FUNCTION_NAME = 'setVoting';
@@ -862,18 +866,21 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       recordDate :${recordDate} , `,
     );
 
+    const voting = {
+      recordDate: recordDate.toHexString(),
+      data: data,
+    };
+
     const functionDataEncodedHex = new Interface(
       EquityUSA__factory.abi,
     ).encodeFunctionData(FUNCTION_NAME, [
-      _PARTITION_ID_1,
-      recordDate.toHexString(),
-      data
+      voting
     ]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(SET_VOTING_RIGHTS_GAS)
       .setFunctionParameters(functionDataEncoded);
 
@@ -885,6 +892,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'setCoupon';
     LogService.logTrace(
@@ -894,19 +902,22 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       rate : ${rate}  `,
     );
 
+    const coupon = {
+      recordDate: recordDate.toHexString(),
+      executionDate: executionDate.toHexString(),
+      rate: rate.toHexString(),
+    };
+
     const functionDataEncodedHex = new Interface(
       BondUSA__factory.abi,
     ).encodeFunctionData(FUNCTION_NAME, [
-      _PARTITION_ID_1,
-      recordDate.toHexString(),
-      executionDate.toHexString(),
-      rate.toHexString(),
+      coupon,
     ]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(SET_COUPON_GAS)
       .setFunctionParameters(functionDataEncoded);
 
