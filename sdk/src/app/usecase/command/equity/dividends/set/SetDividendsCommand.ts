@@ -11,7 +11,6 @@ export class SetDividendsCommandResponse implements CommandResponse {
 export class SetDividendsCommand extends Command<SetDividendsCommandResponse> {
   constructor(
     public readonly address: string,
-    public readonly securityId: string,
     public readonly recordDate: string,
     public readonly executionDate: string,
     public readonly amount: string,

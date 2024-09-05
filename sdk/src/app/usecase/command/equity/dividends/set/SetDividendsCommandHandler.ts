@@ -25,7 +25,7 @@ export class SetDividendsCommandHandler
   async execute(
     command: SetDividendsCommand,
   ): Promise<SetDividendsCommandResponse> {
-    const { address, recordDate, executionDate, amount, securityId } = command;
+    const { address, recordDate, executionDate, amount } = command;
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
@@ -39,7 +39,7 @@ export class SetDividendsCommandHandler
       BigDecimal.fromString(recordDate),
       BigDecimal.fromString(executionDate),
       BigDecimal.fromString(amount),
-      securityId,
+      address,
     );
 
     return Promise.resolve(
