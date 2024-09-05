@@ -12,7 +12,9 @@ import {
 } from '@hashgraph/sdk';
 import {
   AccessControl__factory,
+  ERC1410ScheduledSnapshot__factory,
   Factory__factory,
+  TransferAndLock__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   TRANSFER_GAS,
@@ -425,22 +427,27 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     address: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'transferByPartition';
     LogService.logTrace(
       `Transfering ${amount} securities to account ${targetId.toString()}`,
     );
 
-    // Create ContractFunctionParameters and add the parameters
-    const functionParameters = new ContractFunctionParameters()
-      .addBytes32(new Uint8Array(Buffer.from(_PARTITION_ID_1)))
-      .addAddress(targetId.toString())
-      .addUint256(Long.fromString(amount.toHexString()))
-      .addBytes(Buffer.from('0x', 'hex'));
+    const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
+      address.toString(),
+    );
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [_PARTITION_ID_1, targetId.toString(), amount.toHexString(), '0x'],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(TRANSFER_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
@@ -450,23 +457,33 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'transferAndLockByPartition';
     LogService.logTrace(
       `Transfering ${amount} securities to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
     );
 
-    // Create ContractFunctionParameters and add the parameters
-    const functionParameters = new ContractFunctionParameters()
-      .addBytes32(new Uint8Array(Buffer.from(_PARTITION_ID_1)))
-      .addAddress(targetId.toString())
-      .addUint256(Long.fromString(amount.toHexString()))
-      .addBytes(Buffer.from('0x', 'hex'))
-      .addUint256(Long.fromString(expirationDate.toHexString()));
+    const factoryInstance = new TransferAndLock__factory().attach(
+      address.toString(),
+    );
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [
+        _PARTITION_ID_1,
+        targetId.toString(),
+        amount.toHexString(),
+        '0x',
+        expirationDate.toHexString(),
+      ],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(TRANSFER_AND_LOCK_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
@@ -474,45 +491,59 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async redeem(
     address: EvmAddress,
     amount: BigDecimal,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'redeemByPartition';
-    LogService.logTrace(`Redeeming ${amount} securities`);
+    LogService.logTrace(
+      `Redeeming ${amount} securities from account ${address.toString()}`,
+    );
 
-    // Create ContractFunctionParameters and add the parameters
-    const functionParameters = new ContractFunctionParameters()
-      .addBytes32(new Uint8Array(Buffer.from(_PARTITION_ID_1)))
-      .addUint256(Long.fromString(amount.toHexString()))
-      .addBytes(Buffer.from('0x', 'hex'));
+    const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
+      address.toString(),
+    );
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [_PARTITION_ID_1, amount.toHexString(), '0x'],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(REDEEM_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
-  async pause(address: EvmAddress): Promise<TransactionResponse<any, Error>> {
+  async pause(
+    address: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'pause';
     LogService.logTrace(`Pausing security: ${address.toString()}`);
 
     // Create ContractFunctionParameters and add the parameters
     const functionParameters = new ContractFunctionParameters();
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(PAUSE_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
   }
 
-  async unpause(address: EvmAddress): Promise<TransactionResponse<any, Error>> {
+  async unpause(
+    address: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'unpause';
     LogService.logTrace(`Unpausing security: ${address.toString()}`);
 
     // Create ContractFunctionParameters and add the parameters
     const functionParameters = new ContractFunctionParameters();
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(UNPAUSE_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
 

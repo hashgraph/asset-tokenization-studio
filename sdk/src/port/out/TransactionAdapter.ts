@@ -77,16 +77,19 @@ interface ITransactionAdapter {
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   transferAndLock(
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   redeem(
     security: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   addToControlList(
     security: EvmAddress,
@@ -96,8 +99,14 @@ interface ITransactionAdapter {
     security: EvmAddress,
     targetId: EvmAddress,
   ): Promise<TransactionResponse>;
-  pause(security: EvmAddress): Promise<TransactionResponse>;
-  unpause(security: EvmAddress): Promise<TransactionResponse>;
+  pause(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  unpause(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
   takeSnapshot(security: EvmAddress): Promise<TransactionResponse>;
   setDividends(
     address: EvmAddress,
@@ -410,6 +419,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -418,12 +428,14 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   redeem(
     security: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -439,10 +451,16 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
-  pause(security: EvmAddress): Promise<TransactionResponse<any, Error>> {
+  pause(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
-  unpause(security: EvmAddress): Promise<TransactionResponse<any, Error>> {
+  unpause(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   takeSnapshot(security: EvmAddress): Promise<TransactionResponse<any, Error>> {

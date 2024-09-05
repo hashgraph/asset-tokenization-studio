@@ -131,6 +131,7 @@ export class TransferAndLockCommandHandler
       targetEvmAddress,
       amountBd,
       BigDecimal.fromString(expirationDate),
+      securityId,
     );
     return Promise.resolve(
       new TransferAndLockCommandResponse(res.error === undefined, res.id!),
