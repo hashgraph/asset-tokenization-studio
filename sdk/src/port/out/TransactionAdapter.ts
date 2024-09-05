@@ -14,6 +14,7 @@ import { BondDetails } from '../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../domain/context/bond/CouponDetails.js';
 import { EquityDetails } from '../../domain/context/equity/EquityDetails.js';
 import HWCSettings from '../../domain/context/walletConnect/HWCSettings';
+import { ContractId } from '@hashgraph/sdk';
 
 export interface InitializationData {
   account?: Account;
@@ -181,22 +182,25 @@ interface RoleTransactionAdapter {
     security: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   applyRoles(
     security: EvmAddress,
-    securityId: string,
     targetId: EvmAddress,
     roles: SecurityRole[],
     actives: boolean[],
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   revokeRole(
     security: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   renounceRole(
     security: EvmAddress,
     role: SecurityRole,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   hasRole(
     security: EvmAddress,
@@ -327,15 +331,16 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   applyRoles(
     security: EvmAddress,
-    securityId: string,
     targetId: EvmAddress,
     roles: SecurityRole[],
     actives: boolean[],
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -343,12 +348,14 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   renounceRole(
     security: EvmAddress,
     role: SecurityRole,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }

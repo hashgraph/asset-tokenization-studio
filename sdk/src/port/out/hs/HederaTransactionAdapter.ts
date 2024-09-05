@@ -8,6 +8,7 @@ import {
   Signer,
   Transaction,
   Long,
+  ContractId,
 } from '@hashgraph/sdk';
 import {
   AccessControl__factory,
@@ -522,6 +523,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     address: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'grantRole';
     LogService.logTrace(
@@ -539,7 +541,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(GRANT_ROLES_GAS)
       .setFunctionParameters(functionDataEncoded);
 
@@ -548,10 +550,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
   async applyRoles(
     address: EvmAddress,
-    securityId: string,
     targetId: EvmAddress,
     roles: SecurityRole[],
     actives: boolean[],
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'applyRoles';
     let gas = roles.length * GRANT_ROLES_GAS;
@@ -579,40 +581,52 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     address: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'revokeRole';
     LogService.logTrace(
       `Revoking role ${role.toString()} to account: ${targetId.toString()}`,
     );
 
-    // Create ContractFunctionParameters and add the parameters
-    const functionParameters = new ContractFunctionParameters()
-      .addBytes32(new Uint8Array(Buffer.from(role, 'hex')))
-      .addAddress(targetId.toString());
+    const factoryInstance = new AccessControl__factory().attach(
+      address.toString(),
+    );
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [role, targetId.toString()],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(GRANT_ROLES_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
-
+      .setFunctionParameters(functionDataEncoded);
     return this.signAndSendTransaction(transaction);
   }
 
   async renounceRole(
     address: EvmAddress,
     role: SecurityRole,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'renounceRole';
     LogService.logTrace(`Renounce role ${role.toString()}`);
 
-    // Create ContractFunctionParameters and add the parameters
-    const functionParameters = new ContractFunctionParameters().addBytes32(
-      new Uint8Array(Buffer.from(role, 'hex')),
+    const factoryInstance = new AccessControl__factory().attach(
+      address.toString(),
+    );
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [role],
+    );
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(RENOUNCE_ROLES_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
-
+      .setFunctionParameters(functionDataEncoded);
     return this.signAndSendTransaction(transaction);
   }
 

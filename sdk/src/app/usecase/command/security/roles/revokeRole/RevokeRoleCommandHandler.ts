@@ -55,6 +55,7 @@ export class RevokeRoleCommandHandler
       securityEvmAddress,
       targetEvmAddress,
       role,
+      securityId,
     );
 
     // return Promise.resolve({ payload: res.response ?? false });

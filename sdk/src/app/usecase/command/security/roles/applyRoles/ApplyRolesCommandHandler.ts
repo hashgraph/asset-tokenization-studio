@@ -47,10 +47,10 @@ export class ApplyRolesCommandHandler
 
     const res = await handler.applyRoles(
       securityEvmAddress,
-      securityId,
       targetEvmAddress,
       roles,
       actives,
+      securityId,
     );
 
     return Promise.resolve(
