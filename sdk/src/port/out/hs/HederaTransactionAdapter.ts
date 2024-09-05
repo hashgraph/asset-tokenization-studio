@@ -854,7 +854,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     address: EvmAddress,
     recordDate: BigDecimal,
     data: string,
-    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
 
     const FUNCTION_NAME = 'setVoting';
@@ -886,7 +885,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
-    securityId: ContractId | string
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'setCoupon';
     LogService.logTrace(
@@ -918,13 +916,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
   async takeSnapshot(
     address: EvmAddress,
-    securityId: ContractId | string
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'takeSnapshot';
     LogService.logTrace(`Take snapshot of: ${address.toString()}`);
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(TAKE_SNAPSHOT_GAS)
       .setFunction(FUNCTION_NAME, new ContractFunctionParameters());
 
@@ -936,7 +933,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     name: string,
     uri: string,
     hash: string,
-    securityId: ContractId | string
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'setDocument';
     LogService.logTrace(
@@ -949,7 +945,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .addString(hash);
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(SET_DOCUMENT_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
 
@@ -978,7 +974,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async authorizeOperator(
     address: EvmAddress,
     targetId: EvmAddress,
-    securityId: ContractId | string
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'authorizeOperator';
     LogService.logTrace(
@@ -990,7 +985,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(AUTHORIZE_OPERATOR_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
 
@@ -1000,7 +995,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async revokeOperator(
     address: EvmAddress,
     targetId: EvmAddress,
-    securityId: ContractId | string
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'revokeOperator';
     LogService.logTrace(
@@ -1012,7 +1006,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(REVOKE_OPERATOR_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
 
@@ -1023,7 +1017,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     address: EvmAddress,
     targetId: EvmAddress,
     partitionId: string,
-    securityId: ContractId | string
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'authorizeOperatorByPartition';
     LogService.logTrace(
@@ -1035,7 +1028,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .addAddress(targetId.toString());
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(AUTHORIZE_OPERATOR_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
 
@@ -1046,7 +1039,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     address: EvmAddress,
     targetId: EvmAddress,
     partitionId: string,
-    securityId: ContractId | string
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'revokeOperatorByPartition';
     LogService.logTrace(
@@ -1058,7 +1050,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .addAddress(targetId.toString());
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(REVOKE_OPERATOR_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
 
@@ -1071,7 +1063,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
-    securityId: ContractId | string
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'operatorTransferByPartition';
     LogService.logTrace(
@@ -1085,7 +1076,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .addUint256(Long.fromString(amount.toHexString()));
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(TRANSFER_OPERATOR_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
 
@@ -1095,7 +1086,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async setMaxSupply(
     security: EvmAddress,
     maxSupply: BigDecimal,
-    securityId: ContractId | string
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'setMaxSupply';
     LogService.logTrace(
@@ -1107,7 +1097,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(security.toContractId().toString())
       .setGas(SET_MAX_SUPPLY_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
 
@@ -1116,7 +1106,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
   async triggerPendingScheduledSnapshots(
     address: EvmAddress,
-    securityId: ContractId | string
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'triggerPendingScheduledSnapshots';
     LogService.logTrace(
@@ -1124,7 +1113,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS)
       .setFunction(FUNCTION_NAME, new ContractFunctionParameters());
 
@@ -1134,7 +1123,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async triggerScheduledSnapshots(
     address: EvmAddress,
     max: number,
-    securityId: ContractId | string
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'triggerScheduledSnapshots';
     LogService.logTrace(
@@ -1144,7 +1132,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const functionParameters = new ContractFunctionParameters().addUint256(max);
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
 
@@ -1156,7 +1144,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     sourceId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
-    securityId: ContractId | string
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'lockByPartition';
     LogService.logTrace(
@@ -1170,7 +1157,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .addUint256(Long.fromString(expirationDate.toHexString()));
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(LOCK_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
 
@@ -1181,7 +1168,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     address: EvmAddress,
     sourceId: EvmAddress,
     lockId: number,
-    securityId: ContractId | string
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'releaseByPartition';
     LogService.logTrace(
@@ -1194,7 +1180,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .addAddress(sourceId.toString());
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(address.toContractId().toString())
       .setGas(RELEASE_GAS)
       .setFunction(FUNCTION_NAME, functionParameters);
 
