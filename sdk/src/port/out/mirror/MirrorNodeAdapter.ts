@@ -1,18 +1,24 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import { AxiosInstance } from 'axios';
 import { singleton } from 'tsyringe';
+import { PublicKey as HPublicKey } from '@hashgraph/sdk';
+import { InvalidResponse } from './error/InvalidResponse.js';
+import { REGEX_TRANSACTION } from '../error/TransactionResponseError.js';
 import TransactionResultViewModel from '../../in/response/TransactionResultViewModel.js';
+import ContractViewModel from '../../in/response/ContractViewModel.js';
+import {
+  ADDRESS_LENGTH,
+  BYTES_32_LENGTH,
+  TOPICS_IN_FACTORY_RESULT,
+} from '../../../core/Constants.js';
+import { Time } from '../../../core/Time.js';
 import LogService from '../../../app/service/LogService.js';
 import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import { PublicKey as HPublicKey } from '@hashgraph/sdk';
 import PublicKey from '../../../domain/context/account/PublicKey.js';
-import { InvalidResponse } from './error/InvalidResponse.js';
 import { HederaId } from '../../../domain/context/shared/HederaId.js';
 import { KeyType } from '../../../domain/context/account/KeyProps.js';
 import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
-import { REGEX_TRANSACTION } from '../error/TransactionResponseError.js';
 import { MirrorNode } from '../../../domain/context/network/MirrorNode.js';
-import ContractViewModel from '../../in/response/ContractViewModel.js';
 import Account from '../../../domain/context/account/Account.js';
 
 @singleton()
@@ -77,6 +83,95 @@ export class MirrorNodeAdapter {
     } catch (error) {
       LogService.logError(error);
       return Promise.reject<Account>(new InvalidResponse(error));
+    }
+  }
+
+  /**
+   * Retrieves the consensus timestamp for a given transaction ID.
+   *
+   * @param transactionId - The ID of the transaction.
+   * @param timeout - The maximum time to wait for the consensus timestamp, in seconds. Default is 10 seconds.
+   * @param requestInterval - The interval between each request to check for the consensus timestamp, in seconds. Default is 2 seconds.
+   * @returns A Promise that resolves to the consensus timestamp as a string, or undefined if the timeout is reached.
+   */
+  public async getConsensusTimestamp({
+    transactionId,
+    timeout = 15,
+    requestInterval = 2,
+  }: {
+    transactionId: string;
+    timeout?: number;
+    requestInterval?: number;
+  }): Promise<string | undefined> {
+    if (transactionId.match(REGEX_TRANSACTION)) {
+      transactionId = transactionId
+        .replace('@', '-')
+        .replace(/.([^.]*)$/, '-$1');
+    }
+    const url = `${this.mirrorNodeConfig.baseUrl}transactions/${transactionId}`;
+    let consensusTimestamp: string | undefined;
+    do {
+      await Time.delay(requestInterval, 'seconds');
+      timeout = timeout - requestInterval;
+      this.instance
+        .get(url)
+        .then((response) => {
+          if (
+            response.status === 200 &&
+            response.data &&
+            response.data.transactions &&
+            response.data.transactions.length > 0 &&
+            response.data.transactions[0] &&
+            response.data.transactions[0].consensus_timestamp
+          ) {
+            consensusTimestamp =
+              response.data.transactions[0].consensus_timestamp;
+          }
+        })
+        .catch((error) => {
+          LogService.logError(
+            `Error getting consensus timestamp for transaction ${transactionId}: ${error}`,
+          );
+        });
+    } while (timeout > 0 && !consensusTimestamp);
+    return consensusTimestamp;
+  }
+
+  public async getContractLogData(
+    contractId: string,
+    consensusTimestamp: string,
+  ): Promise<string[] | null> {
+    const url = `${this.mirrorNodeConfig.baseUrl}contracts/${contractId}/results/logs?timestamp=${consensusTimestamp}`;
+    try {
+      const res = await this.instance.get(url);
+
+      if (res.data.logs && res.data.logs.length > 0) {
+        const log = res.data.logs[0];
+        const data = log.data;
+
+        if (
+          data &&
+          data.startsWith('0x') &&
+          data.length >= 2 + TOPICS_IN_FACTORY_RESULT * BYTES_32_LENGTH
+        ) {
+          // 2 for "0x" and TOPICS_IN_FACTORY_RESULT * bytes32Length chars (32 bytes each)
+          const addresses: string[] = [];
+
+          for (let i = 0; i < TOPICS_IN_FACTORY_RESULT; i++) {
+            const start =
+              2 + i * BYTES_32_LENGTH + (BYTES_32_LENGTH - ADDRESS_LENGTH);
+            const end = start + ADDRESS_LENGTH;
+            const address = `0x${data.slice(start, end)}`;
+            addresses.push(address);
+          }
+
+          return addresses;
+        }
+      }
+      return null;
+    } catch (error) {
+      LogService.logError(error);
+      return Promise.reject<string[]>(new InvalidResponse(error));
     }
   }
 
