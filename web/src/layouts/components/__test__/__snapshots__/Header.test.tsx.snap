@@ -154,30 +154,6 @@ exports[`Header if user is not connected should show connect button: disconnecte
       <div
         class="css-16bqc1g"
       >
-        <button
-          class="chakra-button css-gobc5v"
-          type="button"
-        >
-          Connect Metamask
-          <span
-            class="chakra-button__icon css-1hzyiq5"
-          >
-            <svg
-              aria-hidden="true"
-              class="chakra-icon css-kpbtv0"
-              fill="currentColor"
-              focusable="false"
-              height="1em"
-              viewBox="0 0 256 256"
-              width="1em"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M120,128V48a8,8,0,0,1,16,0v80a8,8,0,0,1-16,0Zm60.37-78.7a8,8,0,0,0-8.74,13.4C194.74,77.77,208,101.57,208,128a80,80,0,0,1-160,0c0-26.43,13.26-50.23,36.37-65.3a8,8,0,0,0-8.74-13.4C47.9,67.38,32,96.06,32,128a96,96,0,0,0,192,0C224,96.06,208.1,67.38,180.37,49.3Z"
-              />
-            </svg>
-          </span>
-        </button>
         <hr
           aria-orientation="vertical"
           class="chakra-divider css-1aam7vk"
