@@ -89,6 +89,7 @@ export class ControllerRedeemCommandHandler
       securityEvmAddress,
       sourceEvmAddress,
       amountBd,
+      securityId,
     );
     return Promise.resolve(
       new ControllerRedeemCommandResponse(res.error === undefined, res.id!),

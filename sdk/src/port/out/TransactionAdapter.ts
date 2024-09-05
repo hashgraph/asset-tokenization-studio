@@ -62,16 +62,19 @@ interface ITransactionAdapter {
     sourceId: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   controllerRedeem(
     security: EvmAddress,
     sourceId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   issue(
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   transfer(
     security: EvmAddress,
@@ -94,10 +97,12 @@ interface ITransactionAdapter {
   addToControlList(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   removeFromControlList(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   pause(
     security: EvmAddress,
@@ -113,6 +118,7 @@ interface ITransactionAdapter {
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setVotingRights(
     address: EvmAddress,
@@ -398,6 +404,7 @@ export default abstract class TransactionAdapter
     sourceId: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -405,6 +412,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     sourceId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -412,6 +420,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -442,12 +451,14 @@ export default abstract class TransactionAdapter
   addToControlList(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   removeFromControlList(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -477,6 +488,7 @@ export default abstract class TransactionAdapter
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
