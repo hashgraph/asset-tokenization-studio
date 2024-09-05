@@ -13,10 +13,11 @@ import {
 import {
   AccessControl__factory,
   ControlList__factory,
-  Equity__factory,
+  EquityUSA__factory,
   ERC1410ScheduledSnapshot__factory,
   Factory__factory,
   TransferAndLock__factory,
+  BondUSA__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   TRANSFER_GAS,
@@ -831,7 +832,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const functionDataEncodedHex = new Interface(
-      Equity__factory.abi,
+      EquityUSA__factory.abi,
     ).encodeFunctionData(FUNCTION_NAME, [
       _PARTITION_ID_1,
       recordDate.toHexString(),
@@ -855,20 +856,27 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     data: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
+
     const FUNCTION_NAME = 'setVoting';
     LogService.logTrace(
       `equity: ${address} ,
       recordDate :${recordDate} , `,
     );
 
-    const functionParameters = new ContractFunctionParameters()
-      .addUint256(Long.fromString(recordDate.toHexString()))
-      .addString(data);
-
+    const functionDataEncodedHex = new Interface(
+      EquityUSA__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [
+      _PARTITION_ID_1,
+      recordDate.toHexString(),
+      data
+    ]);
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(securityId)
       .setGas(SET_VOTING_RIGHTS_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
@@ -888,15 +896,22 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       rate : ${rate}  `,
     );
 
-    const functionParameters = new ContractFunctionParameters()
-      .addUint256(Long.fromString(recordDate.toHexString()))
-      .addUint256(Long.fromString(executionDate.toHexString()))
-      .addUint256(Long.fromString(rate.toHexString()));
-
+    const functionDataEncodedHex = new Interface(
+      BondUSA__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [
+      _PARTITION_ID_1,
+      recordDate.toHexString(),
+      executionDate.toHexString(),
+      rate.toHexString(),
+    ]);
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
+      .setContractId(securityId)
       .setGas(SET_COUPON_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
+
 
     return this.signAndSendTransaction(transaction);
   }
