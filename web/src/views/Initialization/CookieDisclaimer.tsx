@@ -18,7 +18,7 @@ const Disclaimer = ({ setAccepted }: DisclaimerProps) => {
 
   useEffect(() => {
     onOpen();
-  }, []);
+  }, [onOpen]);
 
   return (
     <ChakraProvider theme={theme}>

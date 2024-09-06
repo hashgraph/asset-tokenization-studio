@@ -1,15 +1,18 @@
-import {Divider, Flex, HStack, Menu, MenuButton} from "@chakra-ui/react";
-import {Button} from "@hashgraph/asset-tokenization-uicomponents/Interaction";
-import {Header as HeaderBase} from "@hashgraph/asset-tokenization-uicomponents/Navigation";
-import {useWalletStore} from "../../store/walletStore";
-import {useTranslation} from "react-i18next";
-import {CaretDown, SignOut, Wallet} from "@phosphor-icons/react";
-import {PhosphorIcon, Text} from "@hashgraph/asset-tokenization-uicomponents";
-import {WalletStatus} from "../../utils/constants";
-import {Logo} from "@hashgraph/asset-tokenization-uicomponents/Basic";
-import {useUserStore} from "../../store/userStore";
-import {Dropdown, DropdownItem,} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
-import {getLayoutBg} from "./helper";
+import { Divider, Flex, HStack, Menu, MenuButton } from "@chakra-ui/react";
+import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import { Header as HeaderBase } from "@hashgraph/asset-tokenization-uicomponents/Navigation";
+import { useWalletStore } from "../../store/walletStore";
+import { useTranslation } from "react-i18next";
+import { CaretDown, SignOut, Wallet } from "@phosphor-icons/react";
+import { PhosphorIcon, Text } from "@hashgraph/asset-tokenization-uicomponents";
+import { WalletStatus } from "../../utils/constants";
+import { Logo } from "@hashgraph/asset-tokenization-uicomponents/Basic";
+import { useUserStore } from "../../store/userStore";
+import {
+  Dropdown,
+  DropdownItem,
+} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import { getLayoutBg } from "./helper";
 
 export const Header = () => {
   const { t } = useTranslation("globals");
@@ -43,7 +46,8 @@ export const Header = () => {
                 />
               </Dropdown>
             </Menu>
-          ) : (<></>
+          ) : (
+            <></>
             // <Button
             //   size="sm"
             //   isLoading={isLoading}
