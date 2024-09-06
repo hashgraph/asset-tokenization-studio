@@ -16,7 +16,7 @@
       "build:contracts": "cd contracts && npm run compile:force",
       "build:uiComponents": "cd uiComponents && yarn rollup",
       "build:web": "cd web && npm run build",
-      "setup": "npm run install",a
+      "setup": "npm run install",
       "clean": "concurrently \"npm run --silent clean:all:build\" \"npm run --silent clean:all:modules\"  > '/dev/null' 2>&1",
       "clean:sdk:modules": "rimraf ./sdk/node_modules",
       "clean:web:modules": "rimraf ./web/node_modules",
