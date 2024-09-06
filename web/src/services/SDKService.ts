@@ -1,72 +1,70 @@
-import type {
+import {
   ApplyRolesRequest,
   BalanceViewModel,
+  Bond,
+  BondDetailsViewModel,
+  ConnectRequest,
   ControlListRequest,
+  CouponDetailsViewModel,
+  CouponForViewModel,
+  CouponViewModel,
+  CreateBondRequest,
   CreateEquityRequest,
   DividendsForViewModel,
   DividendsViewModel,
+  Equity,
+  EquityDetailsViewModel,
+  Factory,
   ForceRedeemRequest,
   ForceTransferRequest,
   GetAccountBalanceRequest,
+  GetAllCouponsRequest,
   GetAllDividendsRequest,
+  GetAllVotingRightsRequest,
+  GetBondDetailsRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,
   GetControlListTypeRequest,
+  GetCouponDetailsRequest,
+  GetCouponForRequest,
+  GetCouponRequest,
   GetDividendsForRequest,
   GetDividendsRequest,
-  GetSecurityDetailsRequest,
+  GetEquityDetailsRequest,
+  GetLockedBalanceRequest,
+  GetMaxSupplyRequest,
+  GetRegulationDetailsRequest,
   GetRoleCountForRequest,
   GetRoleMemberCountRequest,
   GetRoleMembersRequest,
   GetRolesForRequest,
-  InitializationData,
-  IssueRequest,
-  PauseRequest,
-  RedeemRequest,
-  RoleRequest,
-  SecurityControlListType,
-  SecurityViewModel,
-  TransferRequest,
-  WalletEvent,
-  SetMaxSupplyRequest,
-  GetMaxSupplyRequest,
-  MaxSupplyViewModel,
-  GetEquityDetailsRequest,
-  GetBondDetailsRequest,
-  GetCouponDetailsRequest,
-  EquityDetailsViewModel,
-  CreateBondRequest,
-  BondDetailsViewModel,
-  CouponDetailsViewModel,
+  GetSecurityDetailsRequest,
   GetVotingRightsForRequest,
   GetVotingRightsRequest,
-  SetVotingRightsRequest,
-  GetAllVotingRightsRequest,
-  VotingRightsViewModel,
-  VotingRightsForViewModel,
-  SetCouponRequest,
-  GetCouponForRequest,
-  CouponForViewModel,
-  GetCouponRequest,
-  CouponViewModel,
-  GetAllCouponsRequest,
-  LockRequest,
-  ReleaseRequest,
-  GetLockedBalanceRequest,
-  GetRegulationDetailsRequest,
-  RegulationViewModel,
-} from "@hashgraph/asset-tokenization-sdk";
-import {
-  Bond,
-  ConnectRequest,
-  Equity,
-  Factory,
+  InitializationData,
   InitializationRequest,
+  IssueRequest,
+  LockRequest,
+  MaxSupplyViewModel,
   Network,
+  PauseRequest,
+  RedeemRequest,
+  RegulationViewModel,
+  ReleaseRequest,
   Role,
+  RoleRequest,
   Security,
+  SecurityControlListType,
+  SecurityViewModel,
+  SetCouponRequest,
   SetDividendsRequest,
+  SetMaxSupplyRequest,
+  SetVotingRightsRequest,
   SupportedWallets,
+  TransferRequest,
+  VotingRightsForViewModel,
+  VotingRightsViewModel,
+  WalletEvent,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -162,11 +160,30 @@ export class SDKService {
   }
 
   public static async connectWallet(wallet: SupportedWallets) {
+    let hwcSettings;
+    if (wallet === SupportedWallets.HWALLETCONNECT) {
+      const projectId = process.env.REACT_APP_PROJECT_ID ?? "";
+      const dappName = process.env.REACT_APP_DAPP_NAME ?? "";
+      const dappDescription = process.env.REACT_APP_DAPP_DESCRIPTION ?? "";
+      const dappURL = process.env.REACT_APP_DAPP_URL ?? "";
+      const dappIcons = process.env.REACT_APP_DAPP_ICONS?.split(",") ?? [];
+
+      if (projectId) {
+        hwcSettings = {
+          projectId,
+          dappName,
+          dappDescription,
+          dappURL,
+          dappIcons,
+        };
+      }
+    }
     this.initData = await Network.connect(
       new ConnectRequest({
         network: this.testnetNetwork,
         mirrorNode: this.testnetMirrorNode,
         rpcNode: this.testnetRPCNode,
+        hwcSettings,
         wallet,
       }),
     );

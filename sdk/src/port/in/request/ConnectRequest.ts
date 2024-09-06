@@ -9,6 +9,14 @@ import Validation from './validation/Validation.js';
 
 export { SupportedWallets };
 
+export type HWCRequestSettings = {
+  projectId: string;
+  dappName: string;
+  dappDescription: string;
+  dappURL: string;
+  dappIcons: string[];
+};
+
 export default class ConnectRequest
   extends ValidatedRequest<ConnectRequest>
   implements BaseRequest
@@ -19,6 +27,7 @@ export default class ConnectRequest
   mirrorNode: MirrorNode;
   rpcNode: JsonRpcRelay;
   wallet: SupportedWallets;
+  hwcSettings?: HWCRequestSettings;
   debug?: boolean;
 
   constructor({
@@ -27,6 +36,7 @@ export default class ConnectRequest
     mirrorNode,
     rpcNode,
     wallet,
+    hwcSettings,
     debug,
   }: {
     account?: RequestAccount;
@@ -34,6 +44,7 @@ export default class ConnectRequest
     mirrorNode: MirrorNode;
     rpcNode: JsonRpcRelay;
     wallet: SupportedWallets;
+    hwcSettings?: HWCRequestSettings;
     debug?: boolean;
   }) {
     super({
@@ -46,5 +57,8 @@ export default class ConnectRequest
     this.rpcNode = rpcNode;
     this.wallet = wallet;
     this.debug = debug;
+    this.hwcSettings = hwcSettings;
   }
+
+  [n: string]: any;
 }

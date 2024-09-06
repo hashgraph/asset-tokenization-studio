@@ -94,6 +94,7 @@ export class ControllerTransferCommandHandler
       sourceEvmAddress,
       targetEvmAddress,
       amountBd,
+      securityId,
     );
     return Promise.resolve(
       new ControllerTransferCommandResponse(res.error === undefined, res.id!),

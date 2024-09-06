@@ -125,6 +125,7 @@ export class TransferCommandHandler
       securityEvmAddress,
       targetEvmAddress,
       amountBd,
+      securityId,
     );
     return Promise.resolve(
       new TransferCommandResponse(res.error === undefined, res.id!),
