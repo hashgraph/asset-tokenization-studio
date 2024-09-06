@@ -52,18 +52,14 @@ jobs:
       - name: Create .env file in SDK
         run: |
           touch .env
-          # Making API call to fetch secrets
-          API_RESPONSE_1=$(curl -s -H "Authorization: Bearer ${{ secrets.API_ACCESS_TOKEN_1 }}" -H "User-Agent: AppName/1.2.3" https://portal.hedera.com/api/account)
-          API_RESPONSE_2=$(curl -s -H "Authorization: Bearer ${{ secrets.API_ACCESS_TOKEN_2 }}" -H "User-Agent: AppName/1.2.3" https://portal.hedera.com/api/account)
-          # Assuming the API response is JSON and contains secrets like CLIENT_PRIVATE_KEY
-          echo "CLIENT_PRIVATE_KEY_ECDSA_1=$(echo $API_RESPONSE_1 | jq -r '.accounts[1].privateKey')" >> .env
-          echo "CLIENT_PUBLIC_KEY_ECDSA_1=$(echo $API_RESPONSE_1 | jq -r '.accounts[1].publicKey')" >> .env
-          echo "CLIENT_ACCOUNT_ID_ECDSA_1=0.0.$(echo $API_RESPONSE_1 | jq -r '.accounts[1].accountNum')" >> .env
-          echo "CLIENT_EVM_ADDRESS_ECDSA_1=$(curl -s https://testnet.mirrornode.hedera.com/api/v1/accounts/$CLIENT_ACCOUNT_ID_ECDSA)" >> .env
-          echo "CLIENT_PRIVATE_KEY_ECDSA_2=$(echo $API_RESPONSE_2 | jq -r '.accounts[1].privateKey')" >> .env
-          echo "CLIENT_PUBLIC_KEY_ECDSA_2=$(echo $API_RESPONSE_2 | jq -r '.accounts[1].publicKey')" >> .env
-          echo "CLIENT_ACCOUNT_ID_ECDSA_2=0.0.$(echo $API_RESPONSE_2 | jq -r '.accounts[1].accountNum')" >> .env
-          echo "CLIENT_EVM_ADDRESS_ECDSA_2=$(curl -s https://testnet.mirrornode.hedera.com/api/v1/accounts/$CLIENT_ACCOUNT_ID_ECDSA_2)" >> .env
+          echo "CLIENT_PRIVATE_KEY_ECDSA_1='3c8055953320b1001b93f6c99518ec0a1daf7210f1bb02dd11c64f3dec96fdb6'" >> .env
+          echo "CLIENT_PUBLIC_KEY_ECDSA_1='302d300706052b8104000a032200024d7906cba70ad272e93b94f2bbd4276b55cb3172403013973071163a6b7656a0'" >> .env
+          echo "CLIENT_ACCOUNT_ID_ECDSA_1='0.0.1328'" >> .env
+          echo "CLIENT_EVM_ADDRESS_ECDSA_1='0x0000000000000000000000000000000000000530'" >> .env
+          echo "CLIENT_PRIVATE_KEY_ECDSA_2='3030020100300706052b8104000a0422042080aafd9165eaff821f7f7ed6ee05234eda44456f6b5945dd227695a10e6cd2ec'" >> .env
+          echo "CLIENT_PUBLIC_KEY_ECDSA_2='302d300706052b8104000a0322000218a75aae34f55bd693d7cfea8038be4c1590a265d310356d54ca7dfe6525f099'" >> .env
+          echo "CLIENT_ACCOUNT_ID_ECDSA_2='0.0.2168740'" >> .env
+          echo "CLIENT_EVM_ADDRESS_ECDSA_2='0x00000000000000000000000000000000002117A4'" >> .env
           echo "FACTORY_ADDRESS='0.0.4382086'"  >> .env
           echo "RESOLVER_ADDRESS='0.0.4382042'}"  >> .env
           echo "BUSINESS_LOGIC_KEYS_COMMON='0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6,0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c,0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c,0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b,0x064c883089ba1a596d9146c7aaa73c19ef8825f374c67a9538787c3d12e68dc5,0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f,0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625,0x0d714ae58404788b445b639b0a0bcf37eeeb2e661bfa542569f5555a9a40b5b2,0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d,0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf,0x1b5212ea37fb29e99afa2812a5d7d7e662a477424d3de1a18cc3871a2ee94d78,0x3cc74200ccfb5d585a6d170f8824979dbf1b592e0a41eef41cf6d86cf4882077,0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793,0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9,0xd9b300e6bf7a143b8fd8cf1d4ab050e691c862bf0f57a7d49cc08c60efe68d08'"  >> .env
