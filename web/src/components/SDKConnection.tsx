@@ -6,7 +6,7 @@ import type {
   NetworkData,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useWalletStore } from "../store/walletStore";
-import { MetamaskStatus } from "../utils/constants";
+import { WalletStatus } from "../utils/constants";
 import { useToast } from "@hashgraph/asset-tokenization-uicomponents/Overlay/Toast";
 import { useTranslation } from "react-i18next";
 import _isEqual from "lodash/isEqual";
@@ -114,14 +114,14 @@ export const SDKConnection = () => {
     event: EventParameter<"walletConnectionStatusChanged">,
   ) => {
     console.log("SDK message --> Wallet Connection Status Changed", event);
-    setConnectionStatus(MetamaskStatus.connecting);
+    setConnectionStatus(WalletStatus.connecting);
   };
 
   const walletDisconnect = (event: EventParameter<"walletDisconnect">) => {
     console.log("SDK messege --> Wallet disconnected", event);
     // We need to check if we are waiting on connection process, due if we cancel connection on Landing Page
     // and we try again then reset() put connection status on DISCONNECTED and we loose the Connecting transition page
-    const isNotConnecting = connectionStatus !== MetamaskStatus.connecting;
+    const isNotConnecting = connectionStatus !== WalletStatus.connecting;
     if (isNotConnecting) {
       console.log("ESTAMOS ENTRANDO AQUI", connectionStatus);
       reset();

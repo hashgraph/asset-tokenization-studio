@@ -54,7 +54,7 @@ export class PauseCommandHandler implements ICommandHandler<PauseCommand> {
       throw new SecurityPaused();
     }
 
-    const res = await handler.pause(securityEvmAddress);
+    const res = await handler.pause(securityEvmAddress, securityId);
     return Promise.resolve(
       new PauseCommandResponse(res.error === undefined, res.id!),
     );
