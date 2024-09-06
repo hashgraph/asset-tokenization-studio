@@ -54,7 +54,7 @@ export class UnpauseCommandHandler implements ICommandHandler<UnpauseCommand> {
       throw new SecurityUnPaused();
     }
 
-    const res = await handler.unpause(securityEvmAddress);
+    const res = await handler.unpause(securityEvmAddress, securityId);
     return Promise.resolve(
       new UnpauseCommandResponse(res.error === undefined, res.id!),
     );

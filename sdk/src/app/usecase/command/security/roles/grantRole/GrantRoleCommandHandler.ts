@@ -53,6 +53,7 @@ export class GrantRoleCommandHandler
       securityEvmAddress,
       targetEvmAddress,
       role,
+      securityId,
     );
 
     return Promise.resolve(
