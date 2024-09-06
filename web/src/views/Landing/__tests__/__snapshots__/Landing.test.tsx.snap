@@ -72,7 +72,7 @@ exports[`Landing should render correctly: disconnected 1`] = `
               <div
                 class="css-1eziwv"
               >
-                showMetamaskInstructions
+                Show Metamask instructions
               </div>
               <svg
                 aria-hidden="true"
@@ -96,7 +96,78 @@ exports[`Landing should render correctly: disconnected 1`] = `
                 id="accordion-panel-:r0:"
                 role="region"
               >
-                instructionsMetamask
+                <p
+                  class="css-0"
+                >
+                  Instructions to set up your Hedera account and your Metamask wallet:
+                </p>
+                 
+                <ol
+                  class="css-1dg6mvm"
+                  role="list"
+                >
+                  <li
+                    class="css-0"
+                  >
+                    Configure the Hedera Testnet Network in Metamask and connect Metamask to it. Recommendation: 
+                    <a
+                      class="chakra-link css-1j7tat"
+                      href="https://chainlist.org/chain/296"
+                      rel="noopener"
+                      target="_blank"
+                    >
+                      use Chainlist
+                    </a>
+                    .
+                  </li>
+                  <li
+                    class="css-0"
+                  >
+                     Create an ECDSA account in the 
+                    <a
+                      class="chakra-link css-1j7tat"
+                      href="https://portal.hedera.com/"
+                      rel="noopener"
+                      target="_blank"
+                    >
+                      Hedera Portal
+                    </a>
+                    .
+                  </li>
+                  <li
+                    class="css-0"
+                  >
+                    Import the Private Key in Metamask (
+                    <a
+                      class="chakra-link css-1j7tat"
+                      href="https://support.metamask.io/hc/en-us/articles/360015489331-How-to-import-an-account"
+                      rel="noopener"
+                      target="_blank"
+                    >
+                      instructions
+                    </a>
+                    ). 
+                  </li>
+                  <li
+                    class="css-0"
+                  >
+                    Switch to that new account in Metamask (
+                    <a
+                      class="chakra-link css-1j7tat"
+                      href="https://support.metamask.io/hc/en-us/articles/360061346311-Switching-accounts-in-MetaMask"
+                      rel="noopener"
+                      target="_blank"
+                    >
+                      instructions
+                    </a>
+                    ). 
+                  </li>
+                  <li
+                    class="css-0"
+                  >
+                    Authorize the Token Studio site to use the account.
+                  </li>
+                </ol>
               </div>
             </div>
           </div>
