@@ -39,6 +39,7 @@ export class SetDividendsCommandHandler
       BigDecimal.fromString(recordDate),
       BigDecimal.fromString(executionDate),
       BigDecimal.fromString(amount),
+      address,
     );
 
     return Promise.resolve(
