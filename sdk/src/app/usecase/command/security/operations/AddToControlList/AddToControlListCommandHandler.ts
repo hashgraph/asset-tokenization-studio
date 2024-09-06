@@ -64,6 +64,7 @@ export class AddToControlListCommandHandler
     const res = await handler.addToControlList(
       securityEvmAddress,
       targetEvmAddress,
+      securityId,
     );
 
     return Promise.resolve(

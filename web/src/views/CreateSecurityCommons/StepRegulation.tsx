@@ -59,7 +59,7 @@ export const StepRegulation = () => {
   const regulationType = watch("regulationType");
   const regulationSubType = watch("regulationSubType");
   const countriesListType = watch("countriesListType");
-  let countriesList: string[] = watch("countriesList");
+  const countriesList: string[] = watch("countriesList");
 
   useEffect(() => {
     if (regulationType === 1) {
