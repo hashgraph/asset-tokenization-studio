@@ -1,23 +1,3 @@
-/*
- *
- * Hedera Asset Tokenization Studio SDK
- *
- * Copyright (C) 2023 Hedera Hashgraph, LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import TransactionResponse from '../../domain/context/transaction/TransactionResponse.js';
@@ -34,6 +14,7 @@ import { BondDetails } from '../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../domain/context/bond/CouponDetails.js';
 import { EquityDetails } from '../../domain/context/equity/EquityDetails.js';
 import HWCSettings from '../../domain/context/walletConnect/HWCSettings';
+import { ContractId } from '@hashgraph/sdk';
 
 export interface InitializationData {
   account?: Account;
@@ -70,9 +51,7 @@ interface ITransactionAdapter {
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse>;
   init(): Promise<Environment>;
-  register(
-    input?: Account | HWCSettings,
-  ): Promise<InitializationData>;
+  register(input?: Account | HWCSettings): Promise<InitializationData>;
   stop(): Promise<boolean>;
   balanceOf(
     security: HederaId,
@@ -83,59 +62,76 @@ interface ITransactionAdapter {
     sourceId: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   controllerRedeem(
     security: EvmAddress,
     sourceId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   issue(
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   transfer(
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   transferAndLock(
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   redeem(
     security: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   addToControlList(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   removeFromControlList(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  pause(security: EvmAddress): Promise<TransactionResponse>;
-  unpause(security: EvmAddress): Promise<TransactionResponse>;
+  pause(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  unpause(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
   takeSnapshot(security: EvmAddress): Promise<TransactionResponse>;
   setDividends(
     address: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setVotingRights(
     address: EvmAddress,
     recordDate: BigDecimal,
     data: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setCoupon(
     address: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setDocument(
     security: EvmAddress,
@@ -203,21 +199,25 @@ interface RoleTransactionAdapter {
     security: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   applyRoles(
     security: EvmAddress,
     targetId: EvmAddress,
     roles: SecurityRole[],
     actives: boolean[],
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   revokeRole(
     security: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   renounceRole(
     security: EvmAddress,
     role: SecurityRole,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   hasRole(
     security: EvmAddress,
@@ -348,6 +348,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -356,6 +357,7 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     roles: SecurityRole[],
     actives: boolean[],
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -363,12 +365,14 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   renounceRole(
     security: EvmAddress,
     role: SecurityRole,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -402,6 +406,7 @@ export default abstract class TransactionAdapter
     sourceId: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -409,6 +414,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     sourceId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -416,6 +422,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -423,6 +430,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -431,31 +439,41 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   redeem(
     security: EvmAddress,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   addToControlList(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   removeFromControlList(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
-  pause(security: EvmAddress): Promise<TransactionResponse<any, Error>> {
+  pause(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
-  unpause(security: EvmAddress): Promise<TransactionResponse<any, Error>> {
+  unpause(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   takeSnapshot(security: EvmAddress): Promise<TransactionResponse<any, Error>> {
@@ -472,6 +490,7 @@ export default abstract class TransactionAdapter
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     amount: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -480,6 +499,7 @@ export default abstract class TransactionAdapter
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -487,6 +507,7 @@ export default abstract class TransactionAdapter
     address: EvmAddress,
     recordDate: BigDecimal,
     data: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }

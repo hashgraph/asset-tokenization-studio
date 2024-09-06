@@ -1,23 +1,3 @@
-/*
- *
- * Hedera Asset Tokenization Studio SDK
- *
- * Copyright (C) 2023 Hedera Hashgraph, LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // import LogService from '../../../../app/service/LogService.js';
 import { isConstructible } from '../../../../core/Cast.js';
@@ -26,8 +6,8 @@ import Account from '../../../../domain/context/account/Account.js';
 import PublicKey from '../../../../domain/context/account/PublicKey.js';
 import { RequestAccount, RequestPublicKey } from '../BaseRequest.js';
 import ValidatedRequest from '../validation/ValidatedRequest.js';
-import {HWCRequestSettings} from "../ConnectRequest";
-import HWCSettings from "../../../../domain/context/walletConnect/HWCSettings";
+import { HWCRequestSettings } from '../ConnectRequest';
+import HWCSettings from '../../../../domain/context/walletConnect/HWCSettings';
 
 export default class RequestMapper {
   public static isPublicKey = (val: any): val is RequestPublicKey => {
@@ -151,15 +131,13 @@ export default class RequestMapper {
       : undefined;
   }
 
-  public static hwcRequestToHWCSettings(
-      req: HWCRequestSettings,
-  ): HWCSettings {
+  public static hwcRequestToHWCSettings(req: HWCRequestSettings): HWCSettings {
     return new HWCSettings(
-        req.projectId,
-        req.dappName,
-        req.dappDescription,
-        req.dappURL,
-        req.dappIcons,
+      req.projectId,
+      req.dappName,
+      req.dappDescription,
+      req.dappURL,
+      req.dappIcons,
     );
   }
 }

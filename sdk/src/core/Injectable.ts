@@ -1,23 +1,3 @@
-/*
- *
- * Hedera Asset Tokenization Studio SDK
- *
- * Copyright (C) 2023 Hedera Hashgraph, LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
 import {
   registry,
   container,
@@ -100,9 +80,7 @@ import { GetCouponForQueryHandler } from '../app/usecase/query/bond/coupons/getC
 import { GetMaxSupplyQueryHandler } from '../app/usecase/query/security/cap/GetMaxSupplyQueryHandler.js';
 
 import { SDK } from '../port/in/Common.js';
-import {
-  HederaWalletConnectTransactionAdapter
-} from "../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter";
+import { HederaWalletConnectTransactionAdapter } from '../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -359,7 +337,7 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetMaxSupplyQueryHandler,
-  }
+  },
 ];
 
 const TRANSACTION_HANDLER = [
@@ -454,8 +432,8 @@ export default class Injectable {
   static registerTransactionAdapterInstances(): TransactionAdapter[] {
     const adapters: TransactionAdapter[] = [];
     adapters.push(
-        Injectable.resolve(RPCTransactionAdapter),
-        Injectable.resolve(HederaWalletConnectTransactionAdapter)
+      Injectable.resolve(RPCTransactionAdapter),
+      Injectable.resolve(HederaWalletConnectTransactionAdapter),
     );
     return adapters;
   }

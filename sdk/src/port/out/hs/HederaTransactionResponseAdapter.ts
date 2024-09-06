@@ -1,23 +1,3 @@
-/*
- *
- * Hedera Asset Tokenization Studio SDK
- *
- * Copyright (C) 2023 Hedera Hashgraph, LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- */
-
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Signer,
@@ -40,8 +20,6 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
     nameFunction?: string,
     abi?: object[],
   ): Promise<TransactionResponse> {
-    console.log('Manage Response BEFORE : ' + responseType.toString());
-
     let results: Uint8Array = new Uint8Array();
     LogService.logTrace(
       'Managing Hedera Transaction response: ',
@@ -50,8 +28,12 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
       nameFunction,
     );
     if (responseType === TransactionType.RECEIPT) {
-      console.log('RECEIPT');
-      await this.getReceipt(network, signer, transactionResponse);
+      // Does not block execution thread
+      this.getReceipt(network, signer, transactionResponse).then((result) => {
+        if (!result) {
+          LogService.logError('Receipt not found after timeout');
+        }
+      });
       let transId;
       if (transactionResponse?.transactionId) {
         transId = transactionResponse?.transactionId;
@@ -119,13 +101,19 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
     network: string,
     signer: Signer,
     transactionResponse: HTransactionResponse,
+    timeout = 5,
   ): Promise<TransactionReceipt | boolean> {
-    try{
-      return await transactionResponse.getReceiptWithSigner(signer);
-    }
-    catch(error: any){
-      if(error.status){
-        if(error.status.toString() === "SUCCESS"){
+    try {
+      const receiptPromise = transactionResponse.getReceiptWithSigner(signer);
+      const timeoutPromise = new Promise<TransactionReceipt | boolean>(
+        (resolve) => {
+          setTimeout(() => resolve(false), timeout * 1000);
+        },
+      );
+      return Promise.race([receiptPromise, timeoutPromise]);
+    } catch (error: any) {
+      if (error.status) {
+        if (error.status.toString() === 'SUCCESS') {
           return true;
         }
       }
