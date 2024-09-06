@@ -106,6 +106,7 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
       securityEvmAddress,
       targetEvmAddress,
       amountBd,
+      securityId,
     );
     return Promise.resolve(
       new IssueCommandResponse(res.error === undefined, res.id!),

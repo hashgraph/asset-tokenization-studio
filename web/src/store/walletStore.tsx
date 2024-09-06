@@ -1,13 +1,13 @@
 import { create } from "zustand";
-import { MetamaskStatus } from "../utils/constants";
+import { WalletStatus } from "../utils/constants";
 import type { InitializationData } from "@hashgraph/asset-tokenization-sdk";
 import { NetworkData } from "@hashgraph/asset-tokenization-sdk";
 
 type WalletStoreStatus =
-  | MetamaskStatus.disconnected
-  | MetamaskStatus.connected
-  | MetamaskStatus.connecting
-  | MetamaskStatus.uninstalled;
+  | WalletStatus.disconnected
+  | WalletStatus.connected
+  | WalletStatus.connecting
+  | WalletStatus.uninstalled;
 
 interface WalletStore {
   address: string;
@@ -26,9 +26,9 @@ export const useWalletStore = create<WalletStore>((set) => ({
     set((state: WalletStore) => ({
       ...state,
       address,
-      connectionStatus: MetamaskStatus.connected,
+      connectionStatus: WalletStatus.connected,
     })),
-  connectionStatus: MetamaskStatus.disconnected,
+  connectionStatus: WalletStatus.disconnected,
   setConnectionStatus: (status: WalletStoreStatus) =>
     set((state: WalletStore) => ({ ...state, connectionStatus: status })),
   reset: () =>
@@ -37,7 +37,7 @@ export const useWalletStore = create<WalletStore>((set) => ({
       address: "",
       data: null,
       network: null,
-      connectionStatus: MetamaskStatus.disconnected,
+      connectionStatus: WalletStatus.disconnected,
     })),
   data: null,
   network: null,
@@ -47,6 +47,6 @@ export const useWalletStore = create<WalletStore>((set) => ({
       data,
       network,
       address: data.account?.id.value,
-      connectionStatus: MetamaskStatus.connected,
+      connectionStatus: WalletStatus.connected,
     })),
 }));

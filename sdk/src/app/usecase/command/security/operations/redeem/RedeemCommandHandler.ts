@@ -100,7 +100,7 @@ export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
       throw new InsufficientBalance();
     }
 
-    const res = await handler.redeem(securityEvmAddress, amountBd);
+    const res = await handler.redeem(securityEvmAddress, amountBd, securityId);
     return Promise.resolve(
       new RedeemCommandResponse(res.error === undefined, res.id!),
     );

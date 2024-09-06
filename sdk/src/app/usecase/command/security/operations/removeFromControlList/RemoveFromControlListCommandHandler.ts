@@ -64,6 +64,7 @@ export class RemoveFromControlListCommandHandler
     const res = await handler.removeFromControlList(
       securityEvmAddress,
       targetEvmAddress,
+      securityId,
     );
     // return Promise.resolve({ payload: res.response });
     return Promise.resolve(

@@ -3,7 +3,7 @@ import { SDKService } from "../../services/SDKService";
 import type { WalletEvent } from "@hashgraph/asset-tokenization-sdk";
 import { SupportedWallets } from "@hashgraph/asset-tokenization-sdk";
 import { useWalletStore } from "../../store/walletStore";
-import { MetamaskStatus } from "../../utils/constants";
+import { WalletStatus } from "../../utils/constants";
 
 export const useSDKInit = () =>
   useMutation(
@@ -18,23 +18,23 @@ export const useSDKInit = () =>
     },
   );
 
-export const useSDKConnectToMetamask = () => {
+export const useSDKConnectToWallet = () => {
   const { setConnectionStatus, reset } = useWalletStore();
 
   return useMutation(
-    () => SDKService.connectWallet(SupportedWallets.METAMASK),
+    (wallet: SupportedWallets) => SDKService.connectWallet(wallet),
     {
       cacheTime: 0,
       onSuccess: (data) => {
-        console.log("SDK message --> Connected to Metamask", data);
+        console.log("SDK message --> Connected to wallet", data);
         //setConnectionStatus(MetamaskStatus.connected);
       },
       onError: (error) => {
-        console.log("SDK message --> Error connecting to Metamask: ", error);
+        console.log("SDK message --> Error connecting to wallet: ", error);
         reset();
       },
       onMutate: () => {
-        setConnectionStatus(MetamaskStatus.connecting);
+        setConnectionStatus(WalletStatus.connecting);
       },
     },
   );

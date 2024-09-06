@@ -50,6 +50,7 @@ export class ApplyRolesCommandHandler
       targetEvmAddress,
       roles,
       actives,
+      securityId,
     );
 
     return Promise.resolve(

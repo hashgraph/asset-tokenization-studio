@@ -6,6 +6,8 @@ import Account from '../../../../domain/context/account/Account.js';
 import PublicKey from '../../../../domain/context/account/PublicKey.js';
 import { RequestAccount, RequestPublicKey } from '../BaseRequest.js';
 import ValidatedRequest from '../validation/ValidatedRequest.js';
+import { HWCRequestSettings } from '../ConnectRequest';
+import HWCSettings from '../../../../domain/context/walletConnect/HWCSettings';
 
 export default class RequestMapper {
   public static isPublicKey = (val: any): val is RequestPublicKey => {
@@ -127,5 +129,15 @@ export default class RequestMapper {
               : undefined,
         })
       : undefined;
+  }
+
+  public static hwcRequestToHWCSettings(req: HWCRequestSettings): HWCSettings {
+    return new HWCSettings(
+      req.projectId,
+      req.dappName,
+      req.dappDescription,
+      req.dappURL,
+      req.dappIcons,
+    );
   }
 }

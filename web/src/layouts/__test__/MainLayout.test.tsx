@@ -1,7 +1,7 @@
 import { MainLayout } from "../MainLayout";
 import { useWalletStore } from "../../store/walletStore";
 import { render } from "../../test-utils";
-import { MetamaskStatus } from "../../utils/constants";
+import { WalletStatus } from "../../utils/constants";
 
 const initialStoreState = useWalletStore.getState();
 
@@ -22,7 +22,7 @@ describe(`${MainLayout.name}`, () => {
   test("if user is not connected should not render sidebar", async () => {
     const connected = {
       initialStoreState,
-      connectionStatus: MetamaskStatus.connected,
+      connectionStatus: WalletStatus.connected,
       address: "0xd8da6bf26964af9d7eed9e03e53415d37aa96045",
     };
     useWalletStore.setState(connected, true);

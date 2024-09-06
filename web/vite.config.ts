@@ -100,4 +100,7 @@ export default {
       ],
     },
   },
+  server: {
+    sourcemap: true, // Source maps are enabled for debugging in browser
+  }
 };
