@@ -133,3 +133,6 @@ dist
 .pnp.*
 
 package-lock.json
+
+# IntelliJ Idea
+/.idea/
