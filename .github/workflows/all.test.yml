@@ -75,7 +75,7 @@ jobs:
           echo "REACT_APP_RPC_FACTORY='${{ secrets.REACT_APP_RPC_FACTORY }}'"  >> .env
           echo "REACT_APP_BUSINESS_LOGIC_KEYS_COMMON='${{ secrets.REACT_APP_BUSINESS_LOGIC_KEYS_COMMON }}'"  >> .env
           echo "REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY='${{ secrets.REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY }}'"  >> .env
-          echo "REACT_APP_BUSINESS_LOGIC_KEYS_BOND='${{ REACT_APP_BUSINESS_LOGIC_KEYS_BOND }}'"  >> .env
+          echo "REACT_APP_BUSINESS_LOGIC_KEYS_BOND='${{ secrets.REACT_APP_BUSINESS_LOGIC_KEYS_BOND }}'"  >> .env
           echo "REACT_APP_SHOW_DISCLAIMER='true'"  >> .env
         working-directory: web
 
