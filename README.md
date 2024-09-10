@@ -12,6 +12,10 @@
 - **[Prerequisites](#prerequisites)**<br>
 - **[Installation](#installation)**<br>
 - **[Build](#build)**<br>
+- **[Setting Up the Environment](#setting-up-the-environment)**<br>
+  - **[Required Environment Variables](#required-environment-variables)**<br>
+  - **[Optional Environment Variables (Hedera Wallet Connect)](#optional-environment-variables-hedera-wallet-connect)**<br>
+  - **[Steps to set up the `.env` file](#steps-to-set-up-the-env-file)**<br>
 - **[Run](#run)**<br>
 - **[Support](#support)**<br>
 - **[Contributing](#contributing)**<br>
