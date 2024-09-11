@@ -19,6 +19,7 @@
   - **[Security](#security)**<br>
   - **[Role](#role)**<br>
   - **[Factory](#factory)**<br>
+  - **[Event](#event)**<br>
 - **[Use Cases](#use-cases)**<br>
   - **[Initialise the SDK](#initialise-the-sdk)**<br>
   - **[Connect an account to the SDK](#connect-an-account-to-the-sdk)**<br>
@@ -99,6 +100,50 @@ Connects an account to the SDK.
       - pairing: string; Wallet pairing string
       - topic: string; Wallet’s connection topic
 
+### disconnect
+
+Disconnects an account from the SDK.
+
+- Request
+
+- Response : True (success), false (failed)
+
+### setNetwork
+
+Sets a new network into the SDK.
+
+- Request
+   - environment : network that we are connecting too
+   - mirrorNode: name and url of the mirror node the SDK will connect too.
+   - rpcNode: name and url of the rpc node the SDK will connect too.
+   - consensusNodes : (optional) list of consensus node
+
+- Response
+   - NetworkResponse:
+      - environment: network that we are connecting too
+      - mirrorNode: name and url of the mirror node the SDK will connect too.
+      - rpcNode: name and url of the rpc node the SDK will connect too.
+      - consensusNodes : (optional) list of consensus node
+
+### setConfig
+
+Sets a new configuration into the SDK.
+
+- Request
+   - factoryAddress: new factory address.
+   - resolverAddress: new resolver address.
+   - businessLogicKeysCommon: new list of business common keys.
+   - businessLogicKeysEquity : new list of business equity keys.
+   - businessLogicKeysBond : new list of business bond keys.
+
+- Response
+   - ConfigResponse:
+      - factoryAddress: new factory address.
+      - resolverAddress: new resolver address.
+      - businessLogicKeysCommon: new list of business common keys.
+      - businessLogicKeysEquity : new list of business equity keys.
+      - businessLogicKeysBond : new list of business bond keys.
+
 ## Bond
 
 ### create
@@ -139,6 +184,20 @@ The returned information is identical to the provided one, except for this field
   - TransactionId: 
 Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
+### setCoupon
+
+Creates a new coupon for the bond.
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset.
+   - rate: coupon percentage rate.
+   - recordTimestamp: date (in seconds) at which token holders balances will be snapshotted.
+   - executionTimestamp : date (in seconds) at which the coupon should be paid.
+
+- Response
+   - Payload: coupon Id
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
 ## Equity
 
@@ -183,6 +242,34 @@ The returned information is identical to the provided one, except for this field
    - TransactionId: 
 Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
+### setDividends
+
+Creates a new dividend for the equity.
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset.
+   - amountPerUnitOfSecurity: dividend amount per security.
+   - recordTimestamp: date (in seconds) at which token holders balances will be snapshotted.
+   - executionTimestamp : date (in seconds) at which the dividend should be paid.
+
+- Response
+   - Payload: dividend Id
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### setVotingRights
+
+Creates a new voting right for the equity.
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset.
+   - recordTimestamp: date (in seconds) at which token holders balances will be snapshotted.
+   - data : metadata associated to the voting rights.
+
+- Response
+   - Payload: voting right Id
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
 ## Security
 
@@ -193,13 +280,79 @@ Mints new assets to a given account
 - Request
    - securityId: Hedera id of the diamond contract representing the asset
    - targetId: accounts hedera id
-amount: amount to be minted with decimals included
+   - amount: amount to be minted with decimals included
 
 - Response
    - Payload: True (success), false (failed)
    - TransactionId: 
 Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
+
+### redeem
+
+Redeems assets
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset
+   - amount: amount to be redeemed with decimals included
+
+- Response
+   - Payload: True (success), false (failed)
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### controllerRedeem
+
+Redeems assets from a given account
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset
+   - sourceId: accounts hedera id
+   - amount: amount to be redeemed with decimals included
+
+- Response
+   - Payload: True (success), false (failed)
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### controllerTransfer
+
+Transfer assets from a given account
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset
+   - sourceId: source accounts hedera id
+   - targetId: destination accounts hedera id
+   - amount: amount to be transfered with decimals included
+
+- Response
+   - Payload: True (success), false (failed)
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### pause
+
+Pauses the Security (can only be executed if the security is not paused)
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset
+
+- Response
+   - Payload: True (success), false (failed)
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### unpause
+
+Unpauses the Security (can only be executed if the security is paused)
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset
+
+- Response
+   - Payload: True (success), false (failed)
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
 ### addToControlList
 
@@ -227,6 +380,19 @@ Removes an account from the control list (either blacklist or whitelist dependin
    - TransactionId: 
 Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
+### transfer
+
+Transfer fund to an account
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset
+   - targetId: accounts hedera id
+   - amount: amount to be transferred with decimals included
+
+- Response
+   - Payload: True (success), false (failed)
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
 ### transferAndLock
 
@@ -243,6 +409,47 @@ Transfer fund to an account and locks them for a given amount of time
    - TransactionId: 
 Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
+### setMaxSupply
+
+Updates the max supply. Setting max supply to "0" means removing it (unllimited max supply).
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset
+   - maxSupply: new max supply
+
+- Response
+   - Payload: True (success), false (failed)
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### lock
+
+Locks funds into an account for a certain period of time
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset
+   - targetId: accounts hedera id where funds will be locked
+   - amount: amount to be locked with decimals included
+   - expirationDate: date in seconds at which the funds can be released (lock expiration date)
+
+- Response
+   - Payload: True (success), false (failed)
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### release
+
+Releases locked funds from an account
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset
+   - targetId: accounts hedera id where funds will be released
+   - lockId: Id of the lock to be released
+
+- Response
+   - Payload: True (success), false (failed)
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
 
 ## Role
 
@@ -255,6 +462,34 @@ Assigns a new set of roles for a given account
    - targetId: accounts hedera id
    - roles: list of roles.
    - actives: list of boolean indicating whether the correspond role (from the above mentioned role list) must be granted or revoked.
+
+- Response
+   - Payload: True (success), false (failed)
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### grantRole
+
+Grants a role to an account
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset
+   - targetId: accounts hedera id
+   - role: role to be granted.
+
+- Response
+   - Payload: True (success), false (failed)
+   - TransactionId: 
+Id of the Hedera transaction. Can be used to track the transaction in any Hedera block explorer.
+
+### revokeRole
+
+Revokes a role from an account
+
+- Request
+   - securityId: Hedera id of the diamond contract representing the asset
+   - targetId: accounts hedera id
+   - role: role to be revoked.
 
 - Response
    - Payload: True (success), false (failed)
@@ -288,6 +523,16 @@ Returns the details of a specific regulation and subregulation.
       - internationalInvestors: string;
       - resaleHoldPeriod: string;
 
+## Event
+
+### register
+
+Registers callbacks for the wallet events emitted by the SDK
+
+- Request : callbacks to the wallet events (walletInit, walletFound, …) 
+
+- Response : -
+   
 
 # Use Cases
 
