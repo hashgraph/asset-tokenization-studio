@@ -33,7 +33,6 @@ import EventService from '../../../../app/service/event/EventService';
 import NetworkService from '../../../../app/service/NetworkService';
 import { lazyInject } from '../../../../core/decorator/LazyInjectDecorator';
 import Injectable from '../../../../core/Injectable';
-import { QueryBus } from '../../../../core/query/QueryBus';
 import Hex from '../../../../core/Hex';
 import Account from '../../../../domain/context/account/Account';
 import TransactionResponse from '../../../../domain/context/transaction/TransactionResponse.js';
@@ -66,8 +65,6 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
     public readonly networkService: NetworkService,
     @lazyInject(MirrorNodeAdapter)
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(QueryBus)
-    public readonly queryBus: QueryBus,
   ) {
     super(mirrorNodeAdapter, networkService);
     this.projectId = '';
