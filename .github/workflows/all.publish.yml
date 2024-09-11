@@ -5,7 +5,7 @@ on:
       - published
 jobs:
   publish:
-    name: publishing packages
+    name: Publish NPM Packages
     runs-on: ubuntu-latest
 
     permissions:
@@ -37,9 +37,6 @@ jobs:
         run: npm run publish:contracts --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Wait for contracts package availability
-        run: sleep 10
 
       - name: Install sdk dependencies
         run: npm run install:sdk
