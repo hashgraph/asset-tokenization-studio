@@ -5,7 +5,7 @@ on:
       - published
 jobs:
   publish:
-    name: docker
+    name: publishing packages
     runs-on: ubuntu-latest
 
     permissions:
@@ -26,7 +26,6 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
           cp .npmrc ./contracts/.npmrc
           cp .npmrc ./sdk/.npmrc
-          
 
       - name: Change references
         run: ./changeProyectsReferencesToRepo.sh
@@ -38,6 +37,9 @@ jobs:
         run: npm run publish:contracts --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Wait for contracts package availability
+        run: sleep 10
 
       - name: Install sdk dependencies
         run: npm run install:sdk
