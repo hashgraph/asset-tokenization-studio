@@ -7,7 +7,6 @@ import {
   ContractFunctionParameters,
   Signer,
   Transaction,
-  Long,
   ContractId,
 } from '@hashgraph/sdk';
 import {
@@ -86,6 +85,7 @@ import { SecurityData } from '../../../domain/context/factory/SecurityData.js';
 import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
 import { AdditionalSecurityData } from '../../../domain/context/factory/AdditionalSecurityData.js';
 import { Interface } from 'ethers/lib/utils.js';
+import Long from "long";
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
