@@ -10,6 +10,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { SecurityPaused } from '../../error/SecurityPaused.js';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 
 @CommandHandler(ReleaseCommand)
 export class ReleaseCommandHandler implements ICommandHandler<ReleaseCommand> {
@@ -44,10 +45,14 @@ export class ReleaseCommandHandler implements ICommandHandler<ReleaseCommand> {
       ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
       : new EvmAddress(sourceId);
 
+    const lockIdBd: BigDecimal = BigDecimal.fromString(
+        lockId.toString()
+    );
+
     const res = await handler.release(
       securityEvmAddress,
       sourceEvmAddress,
-      lockId,
+      lockIdBd,
     );
     return Promise.resolve(
       new ReleaseCommandResponse(res.error === undefined, res.id!),

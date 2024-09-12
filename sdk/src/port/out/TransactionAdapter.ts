@@ -112,22 +112,22 @@ interface ITransactionAdapter {
     security: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  takeSnapshot(security: EvmAddress): Promise<TransactionResponse>;
+  takeSnapshot(security: EvmAddress, securityId?: ContractId | string,): Promise<TransactionResponse>;
   setDividends(
-    address: EvmAddress,
+    security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     amount: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setVotingRights(
-    address: EvmAddress,
+    security: EvmAddress,
     recordDate: BigDecimal,
     data: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
   setCoupon(
-    address: EvmAddress,
+    security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
@@ -138,28 +138,34 @@ interface ITransactionAdapter {
     name: string,
     uri: string,
     hash: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   removeDocument(
     security: EvmAddress,
     name: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   authorizeOperator(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   revokeOperator(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   authorizeOperatorByPartition(
     security: EvmAddress,
     targetId: EvmAddress,
     partitionId: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   revokeOperatorByPartition(
     security: EvmAddress,
     targetId: EvmAddress,
     partitionId: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   operatorTransferByPartition(
     security: EvmAddress,
@@ -167,28 +173,34 @@ interface ITransactionAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   triggerScheduledSnapshots(
     security: EvmAddress,
-    max: number,
+    max: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   setMaxSupply(
     security: EvmAddress,
     maxSupply: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   lock(
     security: EvmAddress,
     sourceId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   release(
     security: EvmAddress,
     sourceId: EvmAddress,
-    lockId: number,
+    lockId: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   getAccount(): Account;
   getMirrorNodeAdapter(): MirrorNodeAdapter;
@@ -251,24 +263,28 @@ export default abstract class TransactionAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   triggerScheduledSnapshots(
     security: EvmAddress,
-    max: number,
+    max: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   authorizeOperator(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   revokeOperator(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -276,6 +292,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     targetId: EvmAddress,
     partitionId: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -283,6 +300,7 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     targetId: EvmAddress,
     partitionId: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -292,6 +310,7 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -476,7 +495,7 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
-  takeSnapshot(security: EvmAddress): Promise<TransactionResponse<any, Error>> {
+  takeSnapshot(security: EvmAddress, securityId?: ContractId | string,): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   getAccount(): Account {
@@ -486,7 +505,7 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   setDividends(
-    address: EvmAddress,
+    security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     amount: BigDecimal,
@@ -495,7 +514,7 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   setCoupon(
-    address: EvmAddress,
+    security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
@@ -504,7 +523,7 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   setVotingRights(
-    address: EvmAddress,
+    security: EvmAddress,
     recordDate: BigDecimal,
     data: string,
     securityId?: ContractId | string,
@@ -517,18 +536,21 @@ export default abstract class TransactionAdapter
     name: string,
     uri: string,
     hash: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
   removeDocument(
     security: EvmAddress,
     name: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
   setMaxSupply(
     security: EvmAddress,
     maxSupply: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -537,13 +559,15 @@ export default abstract class TransactionAdapter
     sourceId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   release(
     security: EvmAddress,
     sourceId: EvmAddress,
-    lockId: number,
+    lockId: BigDecimal,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
