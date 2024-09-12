@@ -6,12 +6,7 @@ import { InvalidResponse } from './error/InvalidResponse.js';
 import { REGEX_TRANSACTION } from '../error/TransactionResponseError.js';
 import TransactionResultViewModel from '../../in/response/TransactionResultViewModel.js';
 import ContractViewModel from '../../in/response/ContractViewModel.js';
-import {
-  ADDRESS_LENGTH,
-  BYTES_32_LENGTH,
-  TOPICS_IN_FACTORY_RESULT,
-} from '../../../core/Constants.js';
-import { Time } from '../../../core/Time.js';
+import { BYTES_32_LENGTH } from '../../../core/Constants.js';
 import LogService from '../../../app/service/LogService.js';
 import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
 import PublicKey from '../../../domain/context/account/PublicKey.js';
@@ -20,6 +15,7 @@ import { KeyType } from '../../../domain/context/account/KeyProps.js';
 import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
 import { MirrorNode } from '../../../domain/context/network/MirrorNode.js';
 import Account from '../../../domain/context/account/Account.js';
+import { Time } from '../../../core/Time.js';
 
 @singleton()
 export class MirrorNodeAdapter {
@@ -86,30 +82,21 @@ export class MirrorNodeAdapter {
     }
   }
 
-  /**
-   * Retrieves the consensus timestamp for a given transaction ID.
-   *
-   * @param transactionId - The ID of the transaction.
-   * @param timeout - The maximum time to wait for the consensus timestamp, in seconds. Default is 10 seconds.
-   * @param requestInterval - The interval between each request to check for the consensus timestamp, in seconds. Default is 2 seconds.
-   * @returns A Promise that resolves to the consensus timestamp as a string, or undefined if the timeout is reached.
-   */
-  public async getConsensusTimestamp({
-    transactionId,
+  public async getContractResults(
+    transactionId: string,
+    numberOfResultItems: number,
     timeout = 15,
     requestInterval = 2,
-  }: {
-    transactionId: string;
-    timeout?: number;
-    requestInterval?: number;
-  }): Promise<string | undefined> {
+  ): Promise<string[] | null> {
     if (transactionId.match(REGEX_TRANSACTION)) {
       transactionId = transactionId
         .replace('@', '-')
         .replace(/.([^.]*)$/, '-$1');
     }
-    const url = `${this.mirrorNodeConfig.baseUrl}transactions/${transactionId}`;
-    let consensusTimestamp: string | undefined;
+    const url = `${this.mirrorNodeConfig.baseUrl}contracts/results/${transactionId}`;
+    let call_OK = false;
+    const results: string[] = [];
+
     do {
       await Time.delay(requestInterval, 'seconds');
       timeout = timeout - requestInterval;
@@ -117,62 +104,49 @@ export class MirrorNodeAdapter {
         .get(url)
         .then((response) => {
           if (
+            response &&
             response.status === 200 &&
-            response.data &&
-            response.data.transactions &&
-            response.data.transactions.length > 0 &&
-            response.data.transactions[0] &&
-            response.data.transactions[0].consensus_timestamp
+            response.data.call_result &&
+            response.data.call_result.length > 2
           ) {
-            consensusTimestamp =
-              response.data.transactions[0].consensus_timestamp;
+            try {
+              call_OK = true;
+
+              const data = response.data.call_result;
+
+              if (numberOfResultItems == 0) {
+                numberOfResultItems = (data.length - 2) / BYTES_32_LENGTH;
+              }
+
+              if (
+                data &&
+                data.startsWith('0x') &&
+                data.length >= 2 + numberOfResultItems * BYTES_32_LENGTH
+              ) {
+                for (let i = 0; i < numberOfResultItems; i++) {
+                  const start = 2 + i * BYTES_32_LENGTH;
+                  const end = start + BYTES_32_LENGTH;
+                  const result = `0x${data.slice(start, end)}`;
+                  results.push(result);
+                }
+                return results;
+              }
+
+              return null;
+            } catch (error) {
+              LogService.logError(error);
+              return Promise.reject<string[]>(new InvalidResponse(error));
+            }
           }
         })
         .catch((error) => {
           LogService.logError(
-            `Error getting consensus timestamp for transaction ${transactionId}: ${error}`,
+            `Error getting contracts result for transaction ${transactionId}: ${error}`,
           );
         });
-    } while (timeout > 0 && !consensusTimestamp);
-    return consensusTimestamp;
-  }
+    } while (timeout > 0 && !call_OK);
 
-  public async getContractLogData(
-    contractId: string,
-    consensusTimestamp: string,
-  ): Promise<string[] | null> {
-    const url = `${this.mirrorNodeConfig.baseUrl}contracts/${contractId}/results/logs?timestamp=${consensusTimestamp}`;
-    try {
-      const res = await this.instance.get(url);
-
-      if (res.data.logs && res.data.logs.length > 0) {
-        const log = res.data.logs[0];
-        const data = log.data;
-
-        if (
-          data &&
-          data.startsWith('0x') &&
-          data.length >= 2 + TOPICS_IN_FACTORY_RESULT * BYTES_32_LENGTH
-        ) {
-          // 2 for "0x" and TOPICS_IN_FACTORY_RESULT * bytes32Length chars (32 bytes each)
-          const addresses: string[] = [];
-
-          for (let i = 0; i < TOPICS_IN_FACTORY_RESULT; i++) {
-            const start =
-              2 + i * BYTES_32_LENGTH + (BYTES_32_LENGTH - ADDRESS_LENGTH);
-            const end = start + ADDRESS_LENGTH;
-            const address = `0x${data.slice(start, end)}`;
-            addresses.push(address);
-          }
-
-          return addresses;
-        }
-      }
-      return null;
-    } catch (error) {
-      LogService.logError(error);
-      return Promise.reject<string[]>(new InvalidResponse(error));
-    }
+    return results;
   }
 
   private trimLeadingZeros(publicKey: string): string {

@@ -38,7 +38,7 @@ export class SetVotingRightsCommandHandler
       securityEvmAddress,
       BigDecimal.fromString(recordDate),
       data,
-      address
+      address,
     );
 
     return Promise.resolve(
