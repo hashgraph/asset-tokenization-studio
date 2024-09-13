@@ -72,32 +72,6 @@ export const Landing = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionStatus]);
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (selectedWallet === SupportedWallets.HWALLETCONNECT) {
-        const modal = document.querySelector("body > wcm-modal");
-        const backcard = modal?.shadowRoot?.querySelector(
-          "#wcm-modal > div > wcm-modal-backcard",
-        );
-        const toolbar = backcard?.shadowRoot?.querySelector("div.wcm-toolbar");
-        const closeButton = toolbar?.querySelector("button");
-
-        if (closeButton) {
-          const handleClose = () => {
-            window.location.reload();
-          };
-          closeButton.addEventListener("click", handleClose);
-          clearInterval(intervalId);
-          return () => {
-            closeButton.removeEventListener("click", handleClose);
-          };
-        }
-      }
-    }, 500);
-
-    return () => clearInterval(intervalId);
-  }, [selectedWallet]);
-
   const isLoading =
     connectionStatus === WalletStatus.connecting &&
     selectedWallet !== SupportedWallets.HWALLETCONNECT;

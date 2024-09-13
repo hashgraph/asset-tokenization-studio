@@ -182,7 +182,15 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
       'DAppConnector state before opening modal:',
       this.dAppConnector,
     );
-
+    if (!this.dAppConnector) {
+      console.log('dAppConnector is undefined. Reinitializing...');
+      this.dAppConnector = new DAppConnector(
+        this.dappMetadata,
+        LedgerId.fromString(currentNetwork),
+        this.projectId,
+      );
+      await this.dAppConnector.init({ logger: 'debug' });
+    }
     await this.dAppConnector.openModal();
 
     console.log('WalletConnect modal opened. Retrieving signers...');
