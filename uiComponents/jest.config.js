@@ -21,4 +21,6 @@ module.exports = {
   transform: {
     "^.+\\.svg$": "../svgTransform.js",
   },
+  collectCoverage: true,
+  coverageDirectory: '../coverage/ui',
 };

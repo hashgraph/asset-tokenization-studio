@@ -12,7 +12,7 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.(test|spec).[jt]s?(x)'],
   testPathIgnorePatterns: ['/build/', '/src_old/'],
   collectCoverage: true,
-  coverageDirectory: 'coverage',
+  coverageDirectory: '../coverage/sdk',
   collectCoverageFrom: [
     'src/**/*.ts',
     'src/**/*.mts',

@@ -28,7 +28,7 @@ jobs:
       - name: Create file .npmrc
         run: |
           touch .npmrc
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
+          echo '//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}' >> .npmrc
           cp .npmrc ./contracts/.npmrc
           cp .npmrc ./sdk/.npmrc
 

@@ -32,8 +32,9 @@
     "postpack": "clean-package restore",
     "rollup": "rm -fr Components Theme Hooks && rollup -c rollup.config.js",
     "storybook": "storybook dev -p 6006",
-    "test": "jest",
-    "test:components": "TZ=UTC jest --watchAll --testPathIgnorePatterns='src/(?!Components)'",
+    "test:local": "npx jest --forceExit",
+    "test": "npx jest  --forceExit --detectOpenHandles",
+    "test:components": "TZ=UTC npx jest  --forceExit --detectOpenHandles --watchAll --testPathIgnorePatterns='src/(?!Components)'",
     "theme": "install-peers -f && chakra-cli tokens src/Theme/theme.ts",
     "theme:watch": "install-peers -f && chakra-cli tokens src/Theme/theme.ts --watch",
     "peers": "yarn && yarn install-peers"

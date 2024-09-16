@@ -21,6 +21,8 @@ module.exports = {
     "\\.(css|less|scss|sass|ttf|png)$": "ts-jest",
   },
   testTimeout: 20000,
+  collectCoverage: true,
+  coverageDirectory: '../coverage/web',
   collectCoverageFrom: [
     "**/views/**/*.{ts,tsx}",
     "**/components/**/*.{ts,tsx}",

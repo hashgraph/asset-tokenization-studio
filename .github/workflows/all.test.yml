@@ -92,7 +92,7 @@ jobs:
 
       - name: Test Contracts
         run: |
-          npm run test
+          npm run test-coverage
           npm run cleanCache
         working-directory: contracts
 
