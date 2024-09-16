@@ -130,12 +130,12 @@ jobs:
         working-directory: contracts
         run: ${{ steps.cgroup.outputs.exec }} npm run test-coverage
 
-      - name: Test UI Comoponents
-        working-directory: uiComponents
-        run: ${{ steps.cgroup.outputs.exec }} npm run test
-
       - name: Test sdk
         working-directory: sdk
+        run: ${{ steps.cgroup.outputs.exec }} npm run test
+
+      - name: Test UI Components
+        working-directory: uiComponents
         run: ${{ steps.cgroup.outputs.exec }} npm run test
 
       - name: Upload coverage report
