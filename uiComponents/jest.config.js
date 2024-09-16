@@ -4,7 +4,6 @@ module.exports = {
   preset: "ts-jest",
   clearMocks: true,
   testTimeout: 20_000,
-  testEnvironment: "jsdom",
   rootDir: "./src",
   modulePaths: ["<rootDir>"],
   setupFiles: ["jest-canvas-mock"],
@@ -20,6 +19,7 @@ module.exports = {
     "\\.(css|less|scss|sass|ttf)$": "ts-jest",
   },
   transform: {
+    '^.+\\.ts?$': 'ts-jest',
     "^.+\\.svg$": "../svgTransform.js",
   },
   collectCoverage: true,

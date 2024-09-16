@@ -22,7 +22,6 @@ module.exports = {
       "<rootDir>/node_modules/@hashgraph/io-axios-services/lib/$1.js",
     "\\.(css|less|scss|sass|ttf|png)$": "ts-jest",
   },
-  testTimeout: 20000,
   collectCoverage: true,
   coverageDirectory: '../coverage/web',
   collectCoverageFrom: [
