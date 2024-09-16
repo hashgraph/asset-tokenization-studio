@@ -204,20 +204,115 @@
 */
 
 pragma solidity 0.8.18;
+
+import {
+    IDiamondCutManager
+} from '../../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol';
+import {_DEFAULT_ADMIN_ROLE} from '../../layer_1/constants/roles.sol';
+import {Pause} from '../../layer_1/pause/Pause.sol';
+import {AccessControl} from '../../layer_1/accessControl/AccessControl.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IDiamond} from './IDiamond.sol';
-import {IStaticFunctionSelectors} from './IStaticFunctionSelectors.sol';
+abstract contract DiamondCutManager is IDiamondCutManager {
+    function createConfiguration(
+        bytes32 _configurationKey,
+        bytes32[] calldata _businessLogicKeys
+    ) external override {}
 
-interface IDiamondCut is IDiamond, IStaticFunctionSelectors {
-    error InvalidBusinessLogicKey(
-        bytes32 providedBusinesLogicKey,
-        bytes32 contractBusinessLogicKey,
-        address businessLogicAddress
-    );
-    error DiamondFacetNotFoundInRegistry(bytes32 facetKey);
+    function resolveDiamondCall(
+        bytes32 _configurationKey,
+        uint256 _version,
+        bytes4 _signature
+    ) external view override returns (address facetAddress_) {
+        return facetAddress_;
+    }
 
-    event FacetsRegistered(bytes32[] businessLogicKeys);
+    function resolverSupportsInterface(
+        bytes32 _configurationKey,
+        uint256 _version,
+        bytes4 _interfaceId
+    ) external view override returns (bool exists_) {
+        return exists_;
+    }
 
-    function registerFacets(bytes32[] calldata _businessLogicKeys) external;
+    function checkDiamondConfigurationRegistered(
+        bytes32 _configurationKey,
+        uint256 _version
+    ) external override {
+        revert DiamondConfigurationNoRegistered(_configurationKey, _version);
+    }
+
+    function getConfigurations(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (bytes32[] memory configurationKeys_) {
+        return configurationKeys_;
+    }
+
+    function getLatestVersionOfConfiguration(
+        bytes32 _configurationKey
+    ) external view override returns (uint256 latestVersion_) {
+        return latestVersion_;
+    }
+
+    function getConfigurationByKeyAndLatestVersion(
+        bytes32 _configurationKey
+    )
+        external
+        view
+        override
+        returns (DiamondConfiguration memory configuration_)
+    {
+        return configuration_;
+    }
+
+    function getConfigurationByKeyAndVersion(
+        bytes32 _configurationKey,
+        uint256 _initialVersion,
+        uint256 _pageLength
+    )
+        external
+        view
+        override
+        returns (DiamondConfiguration memory configuration_)
+    {
+        return configuration_;
+    }
+
+    function getFacetsByConfigurationKeyAndVersion(
+        bytes32 _configurationKey,
+        uint256 _version
+    ) external view override returns (Facet[] memory facets_) {
+        return facets_;
+    }
+
+    function getFacetKeysByConfigurationKeyAndVersion(
+        bytes32 _configurationKey,
+        uint256 _version
+    ) external view override returns (bytes32[] memory facets_) {
+        return facets_;
+    }
+
+    function getFacetKeyByConfigurationKeyVersionAndFunctionSelector(
+        bytes32 _configurationKey,
+        uint256 _version,
+        bytes4 _functionSelector
+    ) external view override returns (bytes32 facetKey_) {
+        return facetKey_;
+    }
+
+    function getFacetByConfigurationKeyVersionAndBusinessLogicKey(
+        bytes32 _configurationKey,
+        uint256 _version,
+        bytes32 _businessLogicKey
+    ) external view override returns (Facet memory facet_) {
+        return facet_;
+    }
+
+    function getFacetAddressesByConfigurationKeyAndVersion(
+        bytes32 _configurationKey,
+        uint256 _version
+    ) external view returns (address[] memory facetAddresses_) {
+        return facetAddresses_;
+    }
 }

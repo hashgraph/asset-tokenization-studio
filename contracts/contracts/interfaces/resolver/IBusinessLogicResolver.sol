@@ -204,6 +204,7 @@
 */
 
 pragma solidity 0.8.18;
+import './diamondCutManager/IDiamondCutManager.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -218,7 +219,7 @@ pragma solidity 0.8.18;
 /// 		considered fully compatible.
 ///			Registering a business logic (register = update its latest version or add it to the registry) will increase the
 ///			latest version for all Business Logics by 1.
-interface IBusinessLogicResolver {
+interface IBusinessLogicResolver is IDiamondCutManager {
     enum VersionStatus {
         NONE,
         ACTIVATED,

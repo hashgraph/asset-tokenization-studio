@@ -222,10 +222,11 @@ import {
 contract Diamond is DiamondUnstructured {
     constructor(
         IBusinessLogicResolver _resolver,
-        bytes32[] memory _businessLogicKeys,
-        IDiamond.Rbac[] memory _rbacs
+        bytes32 _diamondConfigurationKey,
+        uint256 _version,
+        IDiamond.Rbac[] memory _rbac
     ) payable {
-        _initialize(_resolver, _businessLogicKeys, _rbacs);
+        _initialize(_resolver, _diamondConfigurationKey, _version, _rbac);
     }
 
     // Find facet for function that is called and execute the

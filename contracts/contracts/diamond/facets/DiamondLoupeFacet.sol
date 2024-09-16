@@ -230,11 +230,14 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165, DiamondUnstructured {
     function getFacetFunctionSelectors(
         bytes32 _facetKey
     ) external view override returns (bytes4[] memory facetFunctionSelectors_) {
+        DiamondStorage storage ds = _getDiamondStorage();
         (
             facetFunctionSelectors_,
 
         ) = _getSelectorsAndInterfaceIdsByBusinessLogicKey(
-            _getDiamondStorage().resolver,
+            ds.resolver,
+            ds.diamondConfigurationKey,
+            ds.version,
             _facetKey
         );
     }
@@ -245,7 +248,7 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165, DiamondUnstructured {
         override
         returns (bytes32[] memory facetKeys_)
     {
-        facetKeys_ = _getDiamondStorage().facetKeys;
+        facetKeys_ = _getFacetKeys(_getDiamondStorage());
     }
 
     function getFacetAddresses()
@@ -260,10 +263,10 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165, DiamondUnstructured {
     function getFacetKeyBySelector(
         bytes4 _functionSelector
     ) external view override returns (bytes32 facetKey_) {
-        facetKey_ = DiamondUnstructured
-            ._getDiamondStorage()
-            .facetKeysAndSelectorPosition[_functionSelector]
-            .facetKey;
+        facetKey_ = _getFacetKeyBySelector(
+            _getDiamondStorage(),
+            _functionSelector
+        );
     }
 
     function getFacet(
@@ -285,7 +288,7 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165, DiamondUnstructured {
     function supportsInterface(
         bytes4 _interfaceId
     ) external view override returns (bool) {
-        return _getDiamondStorage().supportedInterfaces[_interfaceId];
+        return _supportsInterface(_getDiamondStorage(), _interfaceId);
     }
 
     function getStaticResolverKey()

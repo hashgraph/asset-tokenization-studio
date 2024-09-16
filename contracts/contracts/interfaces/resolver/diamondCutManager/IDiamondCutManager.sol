@@ -204,59 +204,163 @@
 */
 
 pragma solidity 0.8.18;
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IDiamondCut} from '../../interfaces/diamond/IDiamondCut.sol';
-import {IDiamond} from '../../interfaces/diamond/IDiamond.sol';
-import {DiamondUnstructured} from '../unstructured/DiamondUnstructured.sol';
-import {_DEFAULT_ADMIN_ROLE} from '../../layer_1/constants/roles.sol';
-import {
-    _DIAMOND_CUT_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
-
-// Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
-// The loupe functions are required by the EIP2535 Diamonds standard
-contract DiamondCutFacet is IDiamondCut, DiamondUnstructured {
-    function registerFacets(
-        bytes32[] calldata _facets
-    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
-        _cleanAndRegisterBusinessLogics(_getDiamondStorage(), _facets);
+/// @title Diamond Cut Manager
+/// @notice This contract is used to manage configurations of diamonds.
+///		 Each diamond smart contract must have a diamond configuration id. With it, it could ask to the DiamondCutManger by:
+///      * Maintain the list of business logic that forms part of a diamond configuration.
+///      * Maintain and resolve the list of signatures by each configuration knowing its business logic address.
+///      * Maintain and resolve the list of interface ids by each configuration.
+interface IDiamondCutManager {
+    /// @notice structure defining each facet to extract the information
+    struct Facet {
+        bytes32 businessLogicKey;
+        uint256 businessLogicVersion;
+        address businessLogicAddress;
+        bytes4[] functionSelectors;
+        bytes4[] interfaceIds;
+    }
+    /// @notice structure defining the information for each version
+    struct Version {
+        uint256 version;
+        Facet[] facets;
+    }
+    /// @notice structure to define each configuration to extract the information
+    struct DiamondConfiguration {
+        bytes32 configurationKey;
+        Version[] versions;
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _DIAMOND_CUT_RESOLVER_KEY;
-    }
+    /// @notice error that occurs when try to create a configuration and the configuration key doesn't exists
+    error DiamondConfigurationNoRegistered(
+        bytes32 diamondConfigurationKey,
+        uint256 version
+    );
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = IDiamondCut
-            .registerFacets
-            .selector;
-    }
+    /// @notice emited when createConfiguration is executed
+    event DiamondConfigurationCreated(DiamondConfiguration configuration);
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](2);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IDiamond).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IDiamondCut).interfaceId;
-    }
+    /// @notice Create a new configuration to the latest version of all facets.
+    /// @param _configurationKey unused identifier to the configuration.
+    /// @param _businessLogics list of business logics to be registered.
+    function createConfiguration(
+        bytes32 _configurationKey,
+        bytes32[] calldata _businessLogics
+    ) external;
+
+    /// @notice Resolve the facet address knowing configuration, version and signature.
+    /// @param _configurationKey configured key in the diamond.
+    /// @param _version configured version in the diamond. if is 0, ask for latest version.
+    /// @param _signature received in the call/tx to be resolver.
+    /// @return facetAddress_ with the resolver address of the facet.
+    ///       If facet address cant been resolved, returns address(0).
+    function resolveDiamondCall(
+        bytes32 _configurationKey,
+        uint256 _version,
+        bytes4 _signature
+    ) external view returns (address facetAddress_);
+
+    /// @notice Resolve if an interfaceId is present in the diamond configured version.
+    /// @param _configurationKey configured key in the diamond.
+    /// @param _version configured version in the diamond. if is 0, ask for latest version.
+    /// @param _interfaceId received to be tested.
+    /// @return exists_ a true if the interfaceId is part of the diamond configuration.
+    function resolverSupportsInterface(
+        bytes32 _configurationKey,
+        uint256 _version,
+        bytes4 _interfaceId
+    ) external view returns (bool exists_);
+
+    /// @notice check if a diamond is registered.
+    /// @param _configurationKey the configuration key to be checked.
+    /// @param _version configured version in the diamond.
+    function checkDiamondConfigurationRegistered(
+        bytes32 _configurationKey,
+        uint256 _version
+    ) external;
+
+    /// @notice Returns a list of configuration keys
+    /// @param _pageIndex members to skip : _pageIndex * _pageLength
+    /// @param _pageLength number of members to return
+    /// @return configurationKeys_ list of business logic keys
+    function getConfigurations(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (bytes32[] memory configurationKeys_);
+
+    /// @notice Returns the latest version registered of a diamond configuration.
+    /// @param _configurationKey key to be obtained.
+    /// @return latestVersion_ latest version registered of a diamond configuration.
+    function getLatestVersionOfConfiguration(
+        bytes32 _configurationKey
+    ) external view returns (uint256 latestVersion_);
+
+    /// @notice Returns a diamond configuration only with the latest version.
+    /// @param _configurationKey key to be obtained.
+    /// @return configuration_ diamond configuration in it's latest version.
+    function getConfigurationByKeyAndLatestVersion(
+        bytes32 _configurationKey
+    ) external view returns (DiamondConfiguration memory configuration_);
+
+    /// @notice Returns a diamond configuration of an specific version.
+    /// @param _configurationKey key to be obtained.
+    /// @param _initialVersion the initial version to be obtained
+    /// @param _pageLength number of versions to be obtained. lastVersion = _initialVersion + _pageLength
+    /// @return configuration_ diamond configuration in it's latest version.
+    function getConfigurationByKeyAndVersion(
+        bytes32 _configurationKey,
+        uint256 _initialVersion,
+        uint256 _pageLength
+    ) external view returns (DiamondConfiguration memory configuration_);
+
+    /// @notice Returns the list of facets with its information.
+    /// @param _configurationKey key to filter the facets.
+    /// @param _version the version to filter the facets.
+    /// @return facets_ List of the facet by key and version
+    function getFacetsByConfigurationKeyAndVersion(
+        bytes32 _configurationKey,
+        uint256 _version
+    ) external view returns (Facet[] memory facets_);
+
+    /// @notice Returns the list of facet keys.
+    /// @param _configurationKey key to filter the facets.
+    /// @param _version the version to filter the facets.
+    /// @return facets_ List of the facet key by key and version
+    function getFacetKeysByConfigurationKeyAndVersion(
+        bytes32 _configurationKey,
+        uint256 _version
+    ) external view returns (bytes32[] memory facets_);
+
+    /// @notice Returns the facet key
+    /// @param _configurationKey key to filter the facets.
+    /// @param _version the version to filter the facets.
+    /// @param _functionSelector  selector to be searched.
+    /// @return facetKey_ related facet key.
+    function getFacetKeyByConfigurationKeyVersionAndFunctionSelector(
+        bytes32 _configurationKey,
+        uint256 _version,
+        bytes4 _functionSelector
+    ) external view returns (bytes32 facetKey_);
+
+    /// @notice Returns the facet information.
+    /// @param _configurationKey key to filter the facets.
+    /// @param _version the version to filter the facets.
+    /// @param _businessLogicKey the business logic key
+    /// @return facet_ the facet information
+    function getFacetByConfigurationKeyVersionAndBusinessLogicKey(
+        bytes32 _configurationKey,
+        uint256 _version,
+        bytes32 _businessLogicKey
+    ) external view returns (Facet memory facet_);
+
+    /// @notice Returns the facet addresses con configuration
+    /// @param _configurationKey key to filter the facets.
+    /// @param _version the version to filter the facets.
+    /// @return facetAddresses_ List of the facet addresses
+    function getFacetAddressesByConfigurationKeyAndVersion(
+        bytes32 _configurationKey,
+        uint256 _version
+    ) external view returns (address[] memory facetAddresses_);
 }

@@ -224,11 +224,16 @@ interface IFactory {
         Equity
     }
 
+    struct DiamondConfiguration {
+        bytes32 key;
+        uint256 version;
+    }
+
     // TODO: Separete common data in new struct
     struct SecurityData {
         bool isMultiPartition;
         IBusinessLogicResolver resolver;
-        bytes32[] businessLogicKeys;
+        DiamondConfiguration diamondConfiguration;
         IDiamond.Rbac[] rbacs;
         bool isControllable;
         bool isWhiteList;

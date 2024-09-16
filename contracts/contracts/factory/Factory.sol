@@ -366,7 +366,8 @@ contract Factory is IFactory, LocalContext {
     ) private returns (address securityAddress_) {
         Diamond equity = new Diamond(
             _securityData.resolver,
-            _securityData.businessLogicKeys,
+            _securityData.diamondConfiguration.key,
+            _securityData.diamondConfiguration.version,
             _securityData.rbacs
         );
 

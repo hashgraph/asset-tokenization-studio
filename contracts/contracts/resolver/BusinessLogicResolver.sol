@@ -211,18 +211,23 @@ import {
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
 import {AccessControl} from '../layer_1/accessControl/AccessControl.sol';
 import {Pause} from '../layer_1/pause/Pause.sol';
+import {DiamondCutManager} from './diamondCutManager/DiamondCutManager.sol';
 import {BusinessLogicResolverWrapper} from './BusinessLogicResolverWrapper.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../layer_1/constants/roles.sol';
 import {IPause} from '../layer_1/interfaces/pause/IPause.sol';
 import {
     IAccessControl
 } from '../layer_1/interfaces/accessControl/IAccessControl.sol';
+import {
+    IDiamondCutManager
+} from '../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol';
 
 contract BusinessLogicResolver is
     IBusinessLogicResolver,
     AccessControl,
     Pause,
-    BusinessLogicResolverWrapper
+    BusinessLogicResolverWrapper,
+    DiamondCutManager
 {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_BusinessLogicResolver()
@@ -340,7 +345,6 @@ contract BusinessLogicResolver is
     {}
 
     // solhint-enable no-empty-blocks
-
     function getStaticInterfaceIds()
         external
         pure
@@ -348,12 +352,14 @@ contract BusinessLogicResolver is
         override(AccessControl, Pause)
         returns (bytes4[] memory staticInterfaceIds_)
     {
-        staticInterfaceIds_ = new bytes4[](3);
+        staticInterfaceIds_ = new bytes4[](4);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IPause).interfaceId;
         staticInterfaceIds_[selectorsIndex++] = type(IAccessControl)
             .interfaceId;
         staticInterfaceIds_[selectorsIndex++] = type(IBusinessLogicResolver)
+            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IDiamondCutManager)
             .interfaceId;
     }
 }
