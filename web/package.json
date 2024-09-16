@@ -1,13 +1,16 @@
 {
   "name": "@hashgraph/asset-tokenization-dapp",
-  "version": "1.0.0",
+  "version": "1.3.2",
+  "license": "Apache-2.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx",
     "test": "NODE_ENV=test jest --ci --runInBand",
+    "test:update": "NODE_ENV=test jest --ci --runInBand --updateSnapshot",
     "theme": "chakra-cli tokens src/theme/index.ts",
     "cleanCache": "npx jest --clearCache",
+    "start": "vite preview",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,html,md,json}\" --ignore-path .gitignore --ignore-path .prettierignore"
   },
   "dependencies": {
@@ -67,6 +70,7 @@
     "ts-jest": "^29.1.0",
     "ts-xor": "^1.1.0",
     "typescript": "4.9.5",
+    "util": "^0.12.5",
     "vite": "4.3.9",
     "vite-plugin-environment": "^1.1.3",
     "vite-plugin-rewrite-all": "^1.0.1",
