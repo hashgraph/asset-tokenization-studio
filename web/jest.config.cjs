@@ -4,7 +4,7 @@ module.exports = {
   testEnvironment: "node",
   preset: "ts-jest",
   ci: true,
-  testTimeout: 30000,
+  testTimeout: 3000,
   transform: {
     "^.+\\.(ts|tsx)?$": "ts-jest",
     "^.+\\.(js|jsx)$": "babel-jest",
