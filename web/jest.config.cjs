@@ -9,7 +9,8 @@ module.exports = {
     "^.+\\.(ts|tsx)?$": "ts-jest",
     "^.+\\.(js|jsx)$": "babel-jest",
     "^.+\\.svg$": "<rootDir>/svgTransform.js",
-    "^.+.tsx?$": ["ts-jest",{}],
+    '^.+\\.ts?$': 'ts-jest',
+
   },
   moduleFileExtensions: ["tsx", "ts", "js", "jsx"],
   setupFilesAfterEnv: [
