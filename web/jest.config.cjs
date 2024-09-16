@@ -1,7 +1,7 @@
 process.env.TZ = "GMT";
 
 module.exports = {
-  testEnvironment: "node",
+  testEnvironment: "jsdom",
   preset: "ts-jest",
   ci: true,
   testTimeout: 30000,
