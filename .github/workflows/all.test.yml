@@ -76,9 +76,7 @@ jobs:
 
       - name: Install dependencies UI Components
         working-directory: uiComponents
-        run: |
-          npm ci
-          npm run build
+        run: yarn install
 
       - name: Install dependencies SDK
         working-directory: sdk
