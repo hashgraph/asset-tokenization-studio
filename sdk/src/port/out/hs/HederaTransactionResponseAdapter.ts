@@ -102,23 +102,8 @@ export class HederaTransactionResponseAdapter extends TransactionResponseAdapter
     signer: Signer,
     transactionResponse: HTransactionResponse,
     timeout = 5,
-  ): Promise<TransactionReceipt | boolean> {
-    try {
-      const receiptPromise = transactionResponse.getReceiptWithSigner(signer);
-      const timeoutPromise = new Promise<TransactionReceipt | boolean>(
-        (resolve) => {
-          setTimeout(() => resolve(false), timeout * 1000);
-        },
-      );
-      return Promise.race([receiptPromise, timeoutPromise]);
-    } catch (error: any) {
-      if (error.status) {
-        if (error.status.toString() === 'SUCCESS') {
-          return true;
-        }
-      }
-      throw error;
-    }
+  ): Promise<TransactionReceipt> {
+    return await transactionResponse.getReceiptWithSigner(signer);
   }
 
   private static async getRecord(
