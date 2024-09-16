@@ -1,7 +1,7 @@
 process.env.TZ = "GMT";
 
 module.exports = {
-  testEnvironment: "jest-environment-jsdom",
+  testEnvironment: "node",
   preset: "ts-jest",
   ci: true,
   testTimeout: 30000,
@@ -9,6 +9,7 @@ module.exports = {
     "^.+\\.(ts|tsx)?$": "ts-jest",
     "^.+\\.(js|jsx)$": "babel-jest",
     "^.+\\.svg$": "<rootDir>/svgTransform.js",
+    "^.+.tsx?$": ["ts-jest",{}],
   },
   moduleFileExtensions: ["tsx", "ts", "js", "jsx"],
   setupFilesAfterEnv: [
