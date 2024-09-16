@@ -32,4 +32,4 @@ async function prependContentToFiles(directory, contentFile, fileExtension) {
 }
 
 // Usage example (adjust the paths as needed)
-prependContentToFiles('./web/src/**', './LICENSE', 'tsx');
+prependContentToFiles('./uiComponents/src/**', './LICENSE', 'ts');
