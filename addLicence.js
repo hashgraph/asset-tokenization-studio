@@ -15,8 +15,16 @@ async function prependContentToFiles(directory, contentFile, fileExtension) {
         // Prepend the comment to each file
         for (const file of files) {
             const existingContent = await fs.readFile(file, 'utf8');
-            await fs.writeFile(file, comment + existingContent);
-            console.log(`Prepended content to ${file}`);
+
+             // Check if the license header is already present at the beginning of the file
+             if (!existingContent.startsWith(comment)) {
+                // If not, prepend the comment
+                await fs.writeFile(file, comment + existingContent);
+                console.log(`Prepended content to ${file}`);
+            } else {
+                console.log(`License header already exists in ${file}, skipping.`);
+            }
+
         }
     } catch (error) {
         console.error('Error:', error);
@@ -24,4 +32,4 @@ async function prependContentToFiles(directory, contentFile, fileExtension) {
 }
 
 // Usage example (adjust the paths as needed)
-prependContentToFiles('./contracts/test/**', './LICENSE', 'ts');
+prependContentToFiles('./uiComponents/src/**', './LICENSE', 'tsx');
