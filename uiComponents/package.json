@@ -32,7 +32,7 @@
     "postpack": "clean-package restore",
     "rollup": "rm -fr Components Theme Hooks && rollup -c rollup.config.js",
     "storybook": "storybook dev -p 6006",
-    "test": "npx jest",
+    "test": "NODE_ENV=test npx jest",
     "test:components": "TZ=UTC npx jest --watchAll --testPathIgnorePatterns='src/(?!Components)'",
     "theme": "install-peers -f && chakra-cli tokens src/Theme/theme.ts",
     "theme:watch": "install-peers -f && chakra-cli tokens src/Theme/theme.ts --watch",
