@@ -290,7 +290,7 @@ import { SecurityData } from '../../../domain/context/factory/SecurityData.js';
 import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
 import { AdditionalSecurityData } from '../../../domain/context/factory/AdditionalSecurityData.js';
 import { Interface } from 'ethers/lib/utils.js';
-import Long from "long";
+import Long from 'long';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -1044,9 +1044,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const functionDataEncodedHex = new Interface(
       EquityUSA__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [
-      dividend,
-    ]);
+    ).encodeFunctionData(FUNCTION_NAME, [dividend]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -1064,7 +1062,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     data: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-
     const FUNCTION_NAME = 'setVoting';
     LogService.logTrace(
       `equity: ${address} ,
@@ -1078,9 +1075,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const functionDataEncodedHex = new Interface(
       EquityUSA__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [
-      voting
-    ]);
+    ).encodeFunctionData(FUNCTION_NAME, [voting]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -1115,9 +1110,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const functionDataEncodedHex = new Interface(
       BondUSA__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [
-      coupon,
-    ]);
+    ).encodeFunctionData(FUNCTION_NAME, [coupon]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -1125,7 +1118,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setContractId(securityId)
       .setGas(SET_COUPON_GAS)
       .setFunctionParameters(functionDataEncoded);
-
 
     return this.signAndSendTransaction(transaction);
   }
