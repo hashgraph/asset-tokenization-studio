@@ -1,3 +1,208 @@
+/*
+                                 Apache License
+                           Version 2.0, January 2004
+                        http://www.apache.org/licenses/
+
+   TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+   1. Definitions.
+
+      "License" shall mean the terms and conditions for use, reproduction,
+      and distribution as defined by Sections 1 through 9 of this document.
+
+      "Licensor" shall mean the copyright owner or entity authorized by
+      the copyright owner that is granting the License.
+
+      "Legal Entity" shall mean the union of the acting entity and all
+      other entities that control, are controlled by, or are under common
+      control with that entity. For the purposes of this definition,
+      "control" means (i) the power, direct or indirect, to cause the
+      direction or management of such entity, whether by contract or
+      otherwise, or (ii) ownership of fifty percent (50%) or more of the
+      outstanding shares, or (iii) beneficial ownership of such entity.
+
+      "You" (or "Your") shall mean an individual or Legal Entity
+      exercising permissions granted by this License.
+
+      "Source" form shall mean the preferred form for making modifications,
+      including but not limited to software source code, documentation
+      source, and configuration files.
+
+      "Object" form shall mean any form resulting from mechanical
+      transformation or translation of a Source form, including but
+      not limited to compiled object code, generated documentation,
+      and conversions to other media types.
+
+      "Work" shall mean the work of authorship, whether in Source or
+      Object form, made available under the License, as indicated by a
+      copyright notice that is included in or attached to the work
+      (an example is provided in the Appendix below).
+
+      "Derivative Works" shall mean any work, whether in Source or Object
+      form, that is based on (or derived from) the Work and for which the
+      editorial revisions, annotations, elaborations, or other modifications
+      represent, as a whole, an original work of authorship. For the purposes
+      of this License, Derivative Works shall not include works that remain
+      separable from, or merely link (or bind by name) to the interfaces of,
+      the Work and Derivative Works thereof.
+
+      "Contribution" shall mean any work of authorship, including
+      the original version of the Work and any modifications or additions
+      to that Work or Derivative Works thereof, that is intentionally
+      submitted to Licensor for inclusion in the Work by the copyright owner
+      or by an individual or Legal Entity authorized to submit on behalf of
+      the copyright owner. For the purposes of this definition, "submitted"
+      means any form of electronic, verbal, or written communication sent
+      to the Licensor or its representatives, including but not limited to
+      communication on electronic mailing lists, source code control systems,
+      and issue tracking systems that are managed by, or on behalf of, the
+      Licensor for the purpose of discussing and improving the Work, but
+      excluding communication that is conspicuously marked or otherwise
+      designated in writing by the copyright owner as "Not a Contribution."
+
+      "Contributor" shall mean Licensor and any individual or Legal Entity
+      on behalf of whom a Contribution has been received by Licensor and
+      subsequently incorporated within the Work.
+
+   2. Grant of Copyright License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      copyright license to reproduce, prepare Derivative Works of,
+      publicly display, publicly perform, sublicense, and distribute the
+      Work and such Derivative Works in Source or Object form.
+
+   3. Grant of Patent License. Subject to the terms and conditions of
+      this License, each Contributor hereby grants to You a perpetual,
+      worldwide, non-exclusive, no-charge, royalty-free, irrevocable
+      (except as stated in this section) patent license to make, have made,
+      use, offer to sell, sell, import, and otherwise transfer the Work,
+      where such license applies only to those patent claims licensable
+      by such Contributor that are necessarily infringed by their
+      Contribution(s) alone or by combination of their Contribution(s)
+      with the Work to which such Contribution(s) was submitted. If You
+      institute patent litigation against any entity (including a
+      cross-claim or counterclaim in a lawsuit) alleging that the Work
+      or a Contribution incorporated within the Work constitutes direct
+      or contributory patent infringement, then any patent licenses
+      granted to You under this License for that Work shall terminate
+      as of the date such litigation is filed.
+
+   4. Redistribution. You may reproduce and distribute copies of the
+      Work or Derivative Works thereof in any medium, with or without
+      modifications, and in Source or Object form, provided that You
+      meet the following conditions:
+
+      (a) You must give any other recipients of the Work or
+          Derivative Works a copy of this License; and
+
+      (b) You must cause any modified files to carry prominent notices
+          stating that You changed the files; and
+
+      (c) You must retain, in the Source form of any Derivative Works
+          that You distribute, all copyright, patent, trademark, and
+          attribution notices from the Source form of the Work,
+          excluding those notices that do not pertain to any part of
+          the Derivative Works; and
+
+      (d) If the Work includes a "NOTICE" text file as part of its
+          distribution, then any Derivative Works that You distribute must
+          include a readable copy of the attribution notices contained
+          within such NOTICE file, excluding those notices that do not
+          pertain to any part of the Derivative Works, in at least one
+          of the following places: within a NOTICE text file distributed
+          as part of the Derivative Works; within the Source form or
+          documentation, if provided along with the Derivative Works; or,
+          within a display generated by the Derivative Works, if and
+          wherever such third-party notices normally appear. The contents
+          of the NOTICE file are for informational purposes only and
+          do not modify the License. You may add Your own attribution
+          notices within Derivative Works that You distribute, alongside
+          or as an addendum to the NOTICE text from the Work, provided
+          that such additional attribution notices cannot be construed
+          as modifying the License.
+
+      You may add Your own copyright statement to Your modifications and
+      may provide additional or different license terms and conditions
+      for use, reproduction, or distribution of Your modifications, or
+      for any such Derivative Works as a whole, provided Your use,
+      reproduction, and distribution of the Work otherwise complies with
+      the conditions stated in this License.
+
+   5. Submission of Contributions. Unless You explicitly state otherwise,
+      any Contribution intentionally submitted for inclusion in the Work
+      by You to the Licensor shall be under the terms and conditions of
+      this License, without any additional terms or conditions.
+      Notwithstanding the above, nothing herein shall supersede or modify
+      the terms of any separate license agreement you may have executed
+      with Licensor regarding such Contributions.
+
+   6. Trademarks. This License does not grant permission to use the trade
+      names, trademarks, service marks, or product names of the Licensor,
+      except as required for reasonable and customary use in describing the
+      origin of the Work and reproducing the content of the NOTICE file.
+
+   7. Disclaimer of Warranty. Unless required by applicable law or
+      agreed to in writing, Licensor provides the Work (and each
+      Contributor provides its Contributions) on an "AS IS" BASIS,
+      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+      implied, including, without limitation, any warranties or conditions
+      of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
+      PARTICULAR PURPOSE. You are solely responsible for determining the
+      appropriateness of using or redistributing the Work and assume any
+      risks associated with Your exercise of permissions under this License.
+
+   8. Limitation of Liability. In no event and under no legal theory,
+      whether in tort (including negligence), contract, or otherwise,
+      unless required by applicable law (such as deliberate and grossly
+      negligent acts) or agreed to in writing, shall any Contributor be
+      liable to You for damages, including any direct, indirect, special,
+      incidental, or consequential damages of any character arising as a
+      result of this License or out of the use or inability to use the
+      Work (including but not limited to damages for loss of goodwill,
+      work stoppage, computer failure or malfunction, or any and all
+      other commercial damages or losses), even if such Contributor
+      has been advised of the possibility of such damages.
+
+   9. Accepting Warranty or Additional Liability. While redistributing
+      the Work or Derivative Works thereof, You may choose to offer,
+      and charge a fee for, acceptance of support, warranty, indemnity,
+      or other liability obligations and/or rights consistent with this
+      License. However, in accepting such obligations, You may act only
+      on Your own behalf and on Your sole responsibility, not on behalf
+      of any other Contributor, and only if You agree to indemnify,
+      defend, and hold each Contributor harmless for any liability
+      incurred by, or claims asserted against, such Contributor by reason
+      of your accepting any such warranty or additional liability.
+
+   END OF TERMS AND CONDITIONS
+
+   APPENDIX: How to apply the Apache License to your work.
+
+      To apply the Apache License to your work, attach the following
+      boilerplate notice, with the fields enclosed by brackets "[]"
+      replaced with your own identifying information. (Don't include
+      the brackets!)  The text should be enclosed in the appropriate
+      comment syntax for the file format. We also recommend that a
+      file or class name and description of purpose be included on the
+      same "printed page" as the copyright notice for easier
+      identification within third-party archives.
+
+   Copyright [yyyy] [name of copyright owner]
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+
+*/
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
@@ -17,6 +222,12 @@ import {
   Factory__factory,
   TransferAndLock__factory,
   BondUSA__factory,
+  Snapshots__factory,
+  ERC1643__factory,
+  ScheduledSnapshots__factory,
+  ERC1410Snapshot__factory,
+  Cap__factory,
+  Lock__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   TRANSFER_GAS,
@@ -85,7 +296,6 @@ import { SecurityData } from '../../../domain/context/factory/SecurityData.js';
 import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
 import { AdditionalSecurityData } from '../../../domain/context/factory/AdditionalSecurityData.js';
 import { Interface } from 'ethers/lib/utils.js';
-import Long from "long";
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -138,81 +348,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     if (businessLogicKeys) this.businessLogicKeysBond = businessLogicKeys;
   }
 
-  // ! Not used for now...
-  // private async performSmartContractOperation(
-  //   contractAddress: string,
-  //   operationName: string,
-  //   gas: number,
-  //   params?: Params,
-  //   transactionType: TransactionType = TransactionType.RECEIPT,
-  //   contractAbi?: any,
-  //   startDate?: string,
-  // ): Promise<TransactionResponse> {
-  //   const filteredContractParams =
-  //     params === undefined || params === null
-  //       ? []
-  //       : Object.values(params).filter((element) => {
-  //           return element !== undefined;
-  //         });
-  //   if (filteredContractParams.length < 1) {
-  //     throw new Error('No parameters provided for the contract call');
-  //   }
-  //   for (let i = 0; i < filteredContractParams.length; i++) {
-  //     if (Array.isArray(filteredContractParams[i])) {
-  //       for (let j = 0; j < filteredContractParams[i].length; j++) {
-  //         filteredContractParams[i][j] = await this.getEVMAddress(
-  //           filteredContractParams[i][j],
-  //         );
-  //       }
-  //     }
-  //     filteredContractParams[i] = await this.getEVMAddress(
-  //       filteredContractParams[i],
-  //     );
-  //   }
-
-  //   return await this.contractCall(
-  //     contractAddress,
-  //     operationName,
-  //     filteredContractParams,
-  //     gas,
-  //     transactionType,
-  //     contractAbi,
-  //     undefined,
-  //     startDate,
-  //   );
-  // }
-
-  // public async contractCall(
-  //   contractAddress: string,
-  //   functionName: string,
-  //   parameters: any[],
-  //   gas: number,
-  //   trxType: TransactionType,
-  //   abi: any,
-  //   value?: number,
-  //   startDate?: string,
-  // ): Promise<TransactionResponse> {
-  //   const functionCallParameters = this.encodeFunctionCall(
-  //     functionName,
-  //     parameters,
-  //     abi,
-  //   );
-  //   const transaction: Transaction =
-  //     HTSTransactionBuilder.buildContractExecuteTransaction(
-  //       contractAddress,
-  //       functionCallParameters,
-  //       gas,
-  //       value,
-  //     );
-  //   return await this.signAndSendTransaction(
-  //     transaction,
-  //     trxType,
-  //     functionName,
-  //     abi,
-  //     startDate ?? undefined,
-  //   );
-  // }
-  // * Smart Contract related operations
   async createEquity(
     securityInfo: Security,
     equityInfo: EquityDetails,
@@ -428,7 +563,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async transfer(
-    address: EvmAddress,
+    security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     securityId: ContractId | string,
@@ -439,7 +574,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
-      address.toString(),
+      security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -457,7 +592,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async transferAndLock(
-    address: EvmAddress,
+    security: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
@@ -469,7 +604,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const factoryInstance = new TransferAndLock__factory().attach(
-      address.toString(),
+      security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -493,17 +628,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async redeem(
-    address: EvmAddress,
+    security: EvmAddress,
     amount: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'redeemByPartition';
     LogService.logTrace(
-      `Redeeming ${amount} securities from account ${address.toString()}`,
+      `Redeeming ${amount} securities from account ${security.toString()}`,
     );
 
     const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
-      address.toString(),
+      security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -521,11 +656,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async pause(
-    address: EvmAddress,
+    security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'pause';
-    LogService.logTrace(`Pausing security: ${address.toString()}`);
+    LogService.logTrace(`Pausing security: ${security.toString()}`);
 
     // Create ContractFunctionParameters and add the parameters
     const functionParameters = new ContractFunctionParameters();
@@ -538,11 +673,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async unpause(
-    address: EvmAddress,
+    security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'unpause';
-    LogService.logTrace(`Unpausing security: ${address.toString()}`);
+    LogService.logTrace(`Unpausing security: ${security.toString()}`);
 
     // Create ContractFunctionParameters and add the parameters
     const functionParameters = new ContractFunctionParameters();
@@ -555,7 +690,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async grantRole(
-    address: EvmAddress,
+    security: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
     securityId: ContractId | string,
@@ -566,7 +701,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const factoryInstance = new AccessControl__factory().attach(
-      address.toString(),
+      security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -584,7 +719,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async applyRoles(
-    address: EvmAddress,
+    security: EvmAddress,
     targetId: EvmAddress,
     roles: SecurityRole[],
     actives: boolean[],
@@ -595,7 +730,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     gas = gas > MAX_ROLES_GAS ? MAX_ROLES_GAS : gas;
 
     const factoryInstance = new AccessControl__factory().attach(
-      address.toString(),
+      security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -613,7 +748,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async revokeRole(
-    address: EvmAddress,
+    security: EvmAddress,
     targetId: EvmAddress,
     role: SecurityRole,
     securityId: ContractId | string,
@@ -624,7 +759,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const factoryInstance = new AccessControl__factory().attach(
-      address.toString(),
+      security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -641,7 +776,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async renounceRole(
-    address: EvmAddress,
+    security: EvmAddress,
     role: SecurityRole,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
@@ -649,7 +784,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Renounce role ${role.toString()}`);
 
     const factoryInstance = new AccessControl__factory().attach(
-      address.toString(),
+      security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -695,7 +830,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async addToControlList(
-    address: EvmAddress,
+    security: EvmAddress,
     targetId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
@@ -705,7 +840,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const factoryInstance = new ControlList__factory().attach(
-      address.toString(),
+      security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -723,7 +858,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async removeFromControlList(
-    address: EvmAddress,
+    security: EvmAddress,
     targetId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
@@ -733,7 +868,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const factoryInstance = new ControlList__factory().attach(
-      address.toString(),
+      security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -751,7 +886,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async controllerTransfer(
-    address: EvmAddress,
+    security: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
@@ -763,7 +898,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
-      address.toString(),
+      security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -788,7 +923,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async controllerRedeem(
-    address: EvmAddress,
+    security: EvmAddress,
     sourceId: EvmAddress,
     amount: BigDecimal,
     securityId: ContractId | string,
@@ -799,7 +934,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
-      address.toString(),
+      security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -817,7 +952,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async setDividends(
-    address: EvmAddress,
+    security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     amount: BigDecimal,
@@ -825,7 +960,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'setDividends';
     LogService.logTrace(
-      `equity: ${address} ,
+      `equity: ${security} ,
       recordDate :${recordDate} , 
       executionDate: ${executionDate},
       amount : ${amount}  `,
@@ -839,9 +974,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const functionDataEncodedHex = new Interface(
       EquityUSA__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [
-      dividend,
-    ]);
+    ).encodeFunctionData(FUNCTION_NAME, [dividend]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -854,15 +987,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async setVotingRights(
-    address: EvmAddress,
+    security: EvmAddress,
     recordDate: BigDecimal,
     data: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-
     const FUNCTION_NAME = 'setVoting';
     LogService.logTrace(
-      `equity: ${address} ,
+      `equity: ${security} ,
       recordDate :${recordDate} , `,
     );
 
@@ -873,9 +1005,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const functionDataEncodedHex = new Interface(
       EquityUSA__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [
-      voting
-    ]);
+    ).encodeFunctionData(FUNCTION_NAME, [voting]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -888,7 +1018,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async setCoupon(
-    address: EvmAddress,
+    security: EvmAddress,
     recordDate: BigDecimal,
     executionDate: BigDecimal,
     rate: BigDecimal,
@@ -896,7 +1026,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'setCoupon';
     LogService.logTrace(
-      `bond: ${address} ,
+      `bond: ${security} ,
       recordDate :${recordDate} , 
       executionDate: ${executionDate},
       rate : ${rate}  `,
@@ -910,9 +1040,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const functionDataEncodedHex = new Interface(
       BondUSA__factory.abi,
-    ).encodeFunctionData(FUNCTION_NAME, [
-      coupon,
-    ]);
+    ).encodeFunctionData(FUNCTION_NAME, [coupon]);
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -921,175 +1049,249 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setGas(SET_COUPON_GAS)
       .setFunctionParameters(functionDataEncoded);
 
-
     return this.signAndSendTransaction(transaction);
   }
 
   async takeSnapshot(
-    address: EvmAddress,
+    security: EvmAddress,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'takeSnapshot';
-    LogService.logTrace(`Take snapshot of: ${address.toString()}`);
+    LogService.logTrace(`Take snapshot of: ${security.toString()}`);
+
+    const factoryInstance = new Snapshots__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(TAKE_SNAPSHOT_GAS)
-      .setFunction(FUNCTION_NAME, new ContractFunctionParameters());
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async setDocument(
-    address: EvmAddress,
+    security: EvmAddress,
     name: string,
     uri: string,
     hash: string,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'setDocument';
     LogService.logTrace(
-      `Setting document: ${name}, with ${uri}, and hash ${hash} for security ${address.toString()}`,
+      `Setting document: ${name}, with ${uri}, and hash ${hash} for security ${security.toString()}`,
     );
 
-    const functionParameters = new ContractFunctionParameters()
-      .addString(name)
-      .addString(uri)
-      .addString(hash);
+    const factoryInstance = new ERC1643__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME, [name,uri,hash]
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(SET_DOCUMENT_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async removeDocument(
-    address: EvmAddress,
+    security: EvmAddress,
     name: string,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'removeDocument';
     LogService.logTrace(
-      `Removing document: ${name} for security ${address.toString()}`,
+      `Removing document: ${name} for security ${security.toString()}`,
     );
 
-    const functionParameters = new ContractFunctionParameters().addString(name);
+    const factoryInstance = new ERC1643__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME, [name]
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(REMOVE_DOCUMENT_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async authorizeOperator(
-    address: EvmAddress,
+    security: EvmAddress,
     targetId: EvmAddress,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'authorizeOperator';
     LogService.logTrace(
-      `authorizing operator: ${targetId.toString()} for security ${address.toString()}`,
+      `authorizing operator: ${targetId.toString()} for security ${security.toString()}`,
     );
 
-    const functionParameters = new ContractFunctionParameters().addAddress(
-      targetId.toString(),
+    const factoryInstance = new ERC1410Snapshot__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME, [targetId.toString()]
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(AUTHORIZE_OPERATOR_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async revokeOperator(
-    address: EvmAddress,
+    security: EvmAddress,
     targetId: EvmAddress,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'revokeOperator';
     LogService.logTrace(
-      `revoking operator: ${targetId.toString()} for security ${address.toString()}`,
+      `revoking operator: ${targetId.toString()} for security ${security.toString()}`,
     );
 
-    const functionParameters = new ContractFunctionParameters().addAddress(
-      targetId.toString(),
+    const factoryInstance = new ERC1410Snapshot__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME, [targetId.toString()]
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(REVOKE_OPERATOR_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async authorizeOperatorByPartition(
-    address: EvmAddress,
+    security: EvmAddress,
     targetId: EvmAddress,
     partitionId: string,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'authorizeOperatorByPartition';
     LogService.logTrace(
-      `authorizing operator: ${targetId.toString()} for security ${address.toString()} and partition ${partitionId}`,
+      `authorizing operator: ${targetId.toString()} for security ${security.toString()} and partition ${partitionId}`,
     );
 
-    const functionParameters = new ContractFunctionParameters()
-      .addBytes32(new Uint8Array(Buffer.from(partitionId)))
-      .addAddress(targetId.toString());
+    const factoryInstance = new ERC1410Snapshot__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME, [partitionId, targetId.toString()]
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(AUTHORIZE_OPERATOR_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async revokeOperatorByPartition(
-    address: EvmAddress,
+    security: EvmAddress,
     targetId: EvmAddress,
     partitionId: string,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'revokeOperatorByPartition';
     LogService.logTrace(
-      `revoking operator: ${targetId.toString()} for security ${address.toString()} and partition ${partitionId}`,
+      `revoking operator: ${targetId.toString()} for security ${security.toString()} and partition ${partitionId}`,
     );
 
-    const functionParameters = new ContractFunctionParameters()
-      .addBytes32(new Uint8Array(Buffer.from(partitionId)))
-      .addAddress(targetId.toString());
+    const factoryInstance = new ERC1410Snapshot__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME, [partitionId, targetId.toString()]
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(REVOKE_OPERATOR_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async operatorTransferByPartition(
-    address: EvmAddress,
+    security: EvmAddress,
     sourceId: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'operatorTransferByPartition';
     LogService.logTrace(
       `Transfering ${amount} securities to account ${targetId.toString()} from account ${sourceId.toString()} on partition ${partitionId}`,
     );
 
-    const functionParameters = new ContractFunctionParameters()
-      .addBytes32(new Uint8Array(Buffer.from(partitionId)))
-      .addAddress(sourceId.toString())
-      .addAddress(targetId.toString())
-      .addUint256(Long.fromString(amount.toHexString()));
+    const factoryInstance = new ERC1410Snapshot__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME, [partitionId, sourceId.toString(), targetId.toString(), amount.toHexString(), '0x', '0x']
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(TRANSFER_OPERATOR_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
@@ -1097,103 +1299,151 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async setMaxSupply(
     security: EvmAddress,
     maxSupply: BigDecimal,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'setMaxSupply';
     LogService.logTrace(
       `Setting max supply ${maxSupply} for security ${security.toString()}`,
     );
 
-    const functionParameters = new ContractFunctionParameters().addUint256(
-      Long.fromString(maxSupply.toHexString()),
+    const factoryInstance = new Cap__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME, [maxSupply.toHexString()]
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(security.toContractId().toString())
+      .setContractId(securityId)
       .setGas(SET_MAX_SUPPLY_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async triggerPendingScheduledSnapshots(
-    address: EvmAddress,
+    security: EvmAddress,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'triggerPendingScheduledSnapshots';
     LogService.logTrace(
-      `Triggering pending scheduled snapshots for ${address.toString()}`,
+      `Triggering pending scheduled snapshots for ${security.toString()}`,
+    );
+
+    const factoryInstance = new ScheduledSnapshots__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS)
-      .setFunction(FUNCTION_NAME, new ContractFunctionParameters());
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async triggerScheduledSnapshots(
-    address: EvmAddress,
-    max: number,
+    security: EvmAddress,
+    max: BigDecimal,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'triggerScheduledSnapshots';
     LogService.logTrace(
-      `Triggering up to ${max.toString()} pending scheduled snapshots for ${address.toString()}`,
+      `Triggering up to ${max.toString()} pending scheduled snapshots for ${security.toString()}`,
     );
 
-    const functionParameters = new ContractFunctionParameters().addUint256(max);
+    const factoryInstance = new ScheduledSnapshots__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME, [max.toHexString()]
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async lock(
-    address: EvmAddress,
+    security: EvmAddress,
     sourceId: EvmAddress,
     amount: BigDecimal,
     expirationDate: BigDecimal,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'lockByPartition';
     LogService.logTrace(
       `Locking ${amount} tokens from account ${sourceId.toString()} until ${expirationDate}`,
     );
 
-    const functionParameters = new ContractFunctionParameters()
-      .addBytes32(new Uint8Array(Buffer.from(_PARTITION_ID_1)))
-      .addUint256(Long.fromString(amount.toHexString()))
-      .addAddress(sourceId.toString())
-      .addUint256(Long.fromString(expirationDate.toHexString()));
+    const factoryInstance = new Lock__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME, [_PARTITION_ID_1, amount.toHexString(), sourceId.toString(), expirationDate.toHexString()]
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(LOCK_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async release(
-    address: EvmAddress,
+    security: EvmAddress,
     sourceId: EvmAddress,
-    lockId: number,
+    lockId: BigDecimal,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'releaseByPartition';
     LogService.logTrace(
       `Releasing lock ${lockId} from account ${sourceId.toString()}`,
     );
 
-    const functionParameters = new ContractFunctionParameters()
-      .addBytes32(new Uint8Array(Buffer.from(_PARTITION_ID_1)))
-      .addUint256(lockId)
-      .addAddress(sourceId.toString());
+    const factoryInstance = new Lock__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME, [_PARTITION_ID_1, lockId.toHexString(), sourceId.toString()]
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
 
     const transaction = new ContractExecuteTransaction()
-      .setContractId(address.toContractId().toString())
+      .setContractId(securityId)
       .setGas(RELEASE_GAS)
-      .setFunction(FUNCTION_NAME, functionParameters);
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
