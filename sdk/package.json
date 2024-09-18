@@ -65,7 +65,7 @@
     "chai-as-promised": "^7.1.1",
     "dotenv": "^16.3.1",
     "dpdm": "^3.14.0",
-    "ethers": "^5.7.2",
+    "ethers": "^6.0.0",
     "long": "^4.0.0",
     "reflect-metadata": "^0.1.13",
     "tsyringe": "^4.8.0",
