@@ -14,46 +14,46 @@ jobs:
       contents: read
     
     steps:
-      - name: Setup Control Groups
-        id: cgroup
-        run: |
-          echo "::group::Get System Configuration"
-            USR_ID="$(id -un)"
-            GRP_ID="$(id -gn)"
-            SDK_CPP_MEM_LIMIT="30064771072"
-            AGENT_MEM_LIMIT="2147483648"
-            USER_SLICE="user.slice/user-$(id -u).slice"
-            USER_SERVICE="${USER_SLICE}/user@$(id -u).service"
-            SDK_CPP_GROUP_NAME="${USER_SERVICE}/sdk-cpp-${{ github.run_id }}"
-            AGENT_GROUP_NAME="${USER_SERVICE}/agent-${{ github.run_id }}"
-          echo "::endgroup::"
-          echo "::group::Install Control Group Tools"
-            if ! command -v cgcreate >/dev/null 2>&1; then
-              sudo apt-get update
-              sudo apt-get install -y cgroup-tools
-            fi
-          echo "::endgroup::"
-          echo "::group::Create Control Groups"
-            sudo cgcreate -g cpu,memory:${USER_SLICE} -a ${USR_ID}:${GRP_ID} -t ${USR_ID}:${GRP_ID}
-            sudo cgcreate -g cpu,memory:${USER_SERVICE} -a ${USR_ID}:${GRP_ID} -t ${USR_ID}:${GRP_ID}
-            sudo cgcreate -g cpu,memory:${SDK_CPP_GROUP_NAME} -a ${USR_ID}:${GRP_ID} -t ${USR_ID}:${GRP_ID}
-            sudo cgcreate -g cpu,memory:${AGENT_GROUP_NAME} -a ${USR_ID}:${GRP_ID} -t ${USR_ID}:${GRP_ID}
-          echo "::endgroup::"
-          echo "::group::Set Control Group Limits"
-            cgset -r cpu.weight=768 ${SDK_CPP_GROUP_NAME}
-            cgset -r cpu.weight=500 ${AGENT_GROUP_NAME}
-            cgset -r memory.max=${SDK_CPP_MEM_LIMIT} ${SDK_CPP_GROUP_NAME}
-            cgset -r memory.max=${AGENT_MEM_LIMIT} ${AGENT_GROUP_NAME}
-            cgset -r memory.swap.max=${SDK_CPP_MEM_LIMIT} ${SDK_CPP_GROUP_NAME}
-            cgset -r memory.swap.max=${AGENT_MEM_LIMIT} ${AGENT_GROUP_NAME}
-          echo "::endgroup::"
-          echo "::group::Move Runner Processes to Control Groups"
-            sudo cgclassify --sticky -g cpu,memory:${AGENT_GROUP_NAME} $(pgrep 'Runner.Listener' | tr '\n' ' ')
-            sudo cgclassify -g cpu,memory:${AGENT_GROUP_NAME} $(pgrep 'Runner.Worker' | tr '\n' ' ')
-          echo "::endgroup::"
-          
-          CG_EXEC="cgexec -g cpu,memory:${SDK_CPP_GROUP_NAME} --sticky ionice -c 2 -n 2 nice -n 19"
-          echo "exec=${CG_EXEC}" >> "${GITHUB_OUTPUT}"
+#      - name: Setup Control Groups
+#        id: cgroup
+#        run: |
+#          echo "::group::Get System Configuration"
+#            USR_ID="$(id -un)"
+#            GRP_ID="$(id -gn)"
+#            SDK_CPP_MEM_LIMIT="30064771072"
+#            AGENT_MEM_LIMIT="2147483648"
+#            USER_SLICE="user.slice/user-$(id -u).slice"
+#            USER_SERVICE="${USER_SLICE}/user@$(id -u).service"
+#            SDK_CPP_GROUP_NAME="${USER_SERVICE}/sdk-cpp-${{ github.run_id }}"
+#            AGENT_GROUP_NAME="${USER_SERVICE}/agent-${{ github.run_id }}"
+#          echo "::endgroup::"
+#          echo "::group::Install Control Group Tools"
+#            if ! command -v cgcreate >/dev/null 2>&1; then
+#              sudo apt-get update
+#              sudo apt-get install -y cgroup-tools
+#            fi
+#          echo "::endgroup::"
+#          echo "::group::Create Control Groups"
+#            sudo cgcreate -g cpu,memory:${USER_SLICE} -a ${USR_ID}:${GRP_ID} -t ${USR_ID}:${GRP_ID}
+#            sudo cgcreate -g cpu,memory:${USER_SERVICE} -a ${USR_ID}:${GRP_ID} -t ${USR_ID}:${GRP_ID}
+#            sudo cgcreate -g cpu,memory:${SDK_CPP_GROUP_NAME} -a ${USR_ID}:${GRP_ID} -t ${USR_ID}:${GRP_ID}
+#            sudo cgcreate -g cpu,memory:${AGENT_GROUP_NAME} -a ${USR_ID}:${GRP_ID} -t ${USR_ID}:${GRP_ID}
+#          echo "::endgroup::"
+#          echo "::group::Set Control Group Limits"
+#            cgset -r cpu.weight=768 ${SDK_CPP_GROUP_NAME}
+#            cgset -r cpu.weight=500 ${AGENT_GROUP_NAME}
+#            cgset -r memory.max=${SDK_CPP_MEM_LIMIT} ${SDK_CPP_GROUP_NAME}
+#            cgset -r memory.max=${AGENT_MEM_LIMIT} ${AGENT_GROUP_NAME}
+#            cgset -r memory.swap.max=${SDK_CPP_MEM_LIMIT} ${SDK_CPP_GROUP_NAME}
+#            cgset -r memory.swap.max=${AGENT_MEM_LIMIT} ${AGENT_GROUP_NAME}
+#          echo "::endgroup::"
+#          echo "::group::Move Runner Processes to Control Groups"
+#            sudo cgclassify --sticky -g cpu,memory:${AGENT_GROUP_NAME} $(pgrep 'Runner.Listener' | tr '\n' ' ')
+#            sudo cgclassify -g cpu,memory:${AGENT_GROUP_NAME} $(pgrep 'Runner.Worker' | tr '\n' ' ')
+#          echo "::endgroup::"
+#
+#          CG_EXEC="cgexec -g cpu,memory:${SDK_CPP_GROUP_NAME} --sticky ionice -c 2 -n 2 nice -n 19"
+#          echo "exec=${CG_EXEC}" >> "${GITHUB_OUTPUT}"
 
       - name: Harden Runner
         uses: step-security/harden-runner@f086349bfa2bd1361f7909c78558e816508cdc10 # v2.8.0
@@ -125,15 +125,18 @@ jobs:
 
       - name: Test web
         working-directory: web
-        run: ${{ steps.cgroup.outputs.exec }} npm run test
+#        run: ${{ steps.cgroup.outputs.exec }} npm run test
+        run: npm run test
 
       - name: Test Contracts
         working-directory: contracts
-        run: ${{ steps.cgroup.outputs.exec }} npm run test-coverage
+#        run: ${{ steps.cgroup.outputs.exec }} npm run test-coverage
+        run: npm run test-coverage
 
       - name: Test sdk
         working-directory: sdk
-        run: ${{ steps.cgroup.outputs.exec }} npm run test
+#        run: ${{ steps.cgroup.outputs.exec }} npm run test
+        run: npm run test
 
 #      # No tests for UI components yet
 #      - name: Test UI Components
