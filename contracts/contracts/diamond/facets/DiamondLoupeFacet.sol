@@ -224,31 +224,74 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165, DiamondUnstructured {
         override
         returns (Facet[] memory facets_)
     {
-        facets_ = _getFacets(_getDiamondStorage());
-    }
-
-    function getFacetFunctionSelectors(
-        bytes32 _facetKey
-    ) external view override returns (bytes4[] memory facetFunctionSelectors_) {
         DiamondStorage storage ds = _getDiamondStorage();
-        (
-            facetFunctionSelectors_,
-
-        ) = _getSelectorsAndInterfaceIdsByBusinessLogicKey(
-            ds.resolver,
-            ds.diamondConfigurationKey,
-            ds.version,
-            _facetKey
-        );
+        facets_ = _getFacets(ds, 0, _getFacetsLength(ds));
     }
-
-    function getFacetKeys()
+    function getFacetsLength()
         external
         view
         override
-        returns (bytes32[] memory facetKeys_)
+        returns (uint256 facetsLength_)
     {
-        facetKeys_ = _getFacetKeys(_getDiamondStorage());
+        facetsLength_ = _getFacetsLength(_getDiamondStorage());
+    }
+
+    function getFacetsByPage(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (Facet[] memory facets_) {
+        facets_ = _getFacets(_getDiamondStorage(), _pageIndex, _pageLength);
+    }
+
+    function getFacetSelectors(
+        bytes32 _facetId
+    ) external view override returns (bytes4[] memory facetSelectors_) {
+        DiamondStorage storage ds = _getDiamondStorage();
+        facetSelectors_ = _getFacetSelectors(
+            ds,
+            _facetId,
+            0,
+            _getFacetSelectorsLength(ds, _facetId)
+        );
+    }
+
+    function getFacetSelectorsLength(
+        bytes32 _facetId
+    ) external view override returns (uint256 facetSelectorsLength_) {
+        facetSelectorsLength_ = _getFacetSelectorsLength(
+            _getDiamondStorage(),
+            _facetId
+        );
+    }
+
+    function getFacetSelectorsByPage(
+        bytes32 _facetId,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (bytes4[] memory facetSelectors_) {
+        facetSelectors_ = _getFacetSelectors(
+            _getDiamondStorage(),
+            _facetId,
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function getFacetIds()
+        external
+        view
+        override
+        returns (bytes32[] memory facetIds_)
+    {
+        DiamondStorage storage ds = _getDiamondStorage();
+        facetIds_ = _getFacetIds(ds, 0, _getFacetsLength(ds));
+    }
+
+    function getFacetIdsByPage(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (bytes32[] memory facetIds_) {
+        facetIds_ = _getFacetIds(_getDiamondStorage(), _pageIndex, _pageLength);
     }
 
     function getFacetAddresses()
@@ -257,31 +300,37 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165, DiamondUnstructured {
         override
         returns (address[] memory facetAddresses_)
     {
-        facetAddresses_ = _getFacetAddresses(_getDiamondStorage());
+        DiamondStorage storage ds = _getDiamondStorage();
+        facetAddresses_ = _getFacetAddresses(ds, 0, _getFacetsLength(ds));
     }
 
-    function getFacetKeyBySelector(
-        bytes4 _functionSelector
-    ) external view override returns (bytes32 facetKey_) {
-        facetKey_ = _getFacetKeyBySelector(
+    function getFacetAddressesByPage(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (address[] memory facetAddresses_) {
+        facetAddresses_ = _getFacetAddresses(
             _getDiamondStorage(),
-            _functionSelector
+            _pageIndex,
+            _pageLength
         );
+    }
+
+    function getFacetIdBySelector(
+        bytes4 _selector
+    ) external view returns (bytes32 facetId_) {
+        facetId_ = _getFacetIdBySelector(_getDiamondStorage(), _selector);
     }
 
     function getFacet(
-        bytes32 _facetKey
+        bytes32 _facetId
     ) external view override returns (Facet memory facet_) {
-        facet_ = _getFacet(_getDiamondStorage(), _facetKey);
+        facet_ = _getFacet(_getDiamondStorage(), _facetId);
     }
 
     function getFacetAddress(
-        bytes4 _functionSelector
+        bytes4 _selector
     ) external view override returns (address facetAddress_) {
-        facetAddress_ = _getFacetAddress(
-            _getDiamondStorage(),
-            _functionSelector
-        );
+        facetAddress_ = _getFacetAddress(_getDiamondStorage(), _selector);
     }
 
     // This implements ERC-165.
@@ -308,26 +357,48 @@ contract DiamondLoupeFacet is IDiamondLoupe, IERC165, DiamondUnstructured {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](8);
+        staticFunctionSelectors_ = new bytes4[](13);
         uint256 selectorIndex;
-        staticFunctionSelectors_[selectorIndex++] = this.getFacets.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getFacetFunctionSelectors
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getFacetKeys.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getFacetAddresses
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getFacetKeyBySelector
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getFacet.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getFacetAddress
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .supportsInterface
-            .selector;
+        unchecked {
+            staticFunctionSelectors_[++selectorIndex] = this.getFacets.selector;
+            staticFunctionSelectors_[++selectorIndex] = this
+                .getFacetsLength
+                .selector;
+            staticFunctionSelectors_[++selectorIndex] = this
+                .getFacetsByPage
+                .selector;
+            staticFunctionSelectors_[++selectorIndex] = this
+                .getFacetSelectors
+                .selector;
+            staticFunctionSelectors_[++selectorIndex] = this
+                .getFacetSelectorsLength
+                .selector;
+            staticFunctionSelectors_[++selectorIndex] = this
+                .getFacetSelectorsByPage
+                .selector;
+            staticFunctionSelectors_[++selectorIndex] = this
+                .getFacetIds
+                .selector;
+            staticFunctionSelectors_[++selectorIndex] = this
+                .getFacetIdsByPage
+                .selector;
+            staticFunctionSelectors_[++selectorIndex] = this
+                .getFacetAddresses
+                .selector;
+            staticFunctionSelectors_[++selectorIndex] = this
+                .getFacetAddressesByPage
+                .selector;
+            staticFunctionSelectors_[++selectorIndex] = this
+                .getFacetIdBySelector
+                .selector;
+            staticFunctionSelectors_[++selectorIndex] = this.getFacet.selector;
+            staticFunctionSelectors_[++selectorIndex] = this
+                .getFacetAddress
+                .selector;
+            staticFunctionSelectors_[++selectorIndex] = this
+                .supportsInterface
+                .selector;
+        }
     }
 
     function getStaticInterfaceIds()

@@ -238,9 +238,6 @@ bytes32 constant _ERC1644_RESOLVER_KEY = 0xf1da2ed271d62ba0b6597874c96fb6ed7d929
 // keccak256('security.token.standard.snapshots.resolverKey');
 bytes32 constant _SNAPSHOTS_RESOLVER_KEY = 0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf;
 
-// keccak256("security.token.standard.diamondCut.resolverKey")
-bytes32 constant _DIAMOND_CUT_RESOLVER_KEY = 0x6d86de52020713e61130d370625c63ea234a9d3553f6af18ee221771b3733791;
-
 // keccak256("security.token.standard.diamondLoupe.resolverKey")
 bytes32 constant _DIAMOND_LOUPE_RESOLVER_KEY = 0x2313db4da9ddc852c53f8db718654c544a96f74a8cc0d8a8e03198d23f5f4b38;
 

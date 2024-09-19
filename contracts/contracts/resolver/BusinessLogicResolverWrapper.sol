@@ -219,9 +219,6 @@ import {
 import {
     _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
-import {
-    _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
 
 contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
     struct BusinessLogicResolverDataStorage {

@@ -204,7 +204,7 @@
 */
 
 pragma solidity 0.8.18;
-import './diamondCutManager/IDiamondCutManager.sol';
+import {IDiamondCutManager} from './diamondCutManager/IDiamondCutManager.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 

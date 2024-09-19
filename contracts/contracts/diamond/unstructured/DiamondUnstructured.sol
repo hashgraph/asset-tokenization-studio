@@ -210,9 +210,6 @@ import {IDiamond} from '../../interfaces/diamond/IDiamond.sol';
 import {
     IBusinessLogicResolver
 } from '../../interfaces/resolver/IBusinessLogicResolver.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
 import {IDiamondLoupe} from '../../interfaces/diamond/IDiamondLoupe.sol';
 import {
     AccessControlStorageWrapper
@@ -221,11 +218,6 @@ import {PauseStorageWrapper} from '../../layer_1/pause/PauseStorageWrapper.sol';
 import {
     _DIAMOND_STORAGE_POSITION
 } from '../../layer_1/constants/storagePositions.sol';
-import {
-    _DIAMOND_CUT_RESOLVER_KEY,
-    _DIAMOND_LOUPE_RESOLVER_KEY,
-    _DIAMOND_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
 
 // Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
 // The loupe functions are required by the EIP2535 Diamonds standard
@@ -233,14 +225,14 @@ abstract contract DiamondUnstructured is
     AccessControlStorageWrapper,
     PauseStorageWrapper
 {
-    struct FacetKeysAndSelectorPosition {
-        bytes32 facetKey;
+    struct FacetIdsAndSelectorPosition {
+        bytes32 facetId;
         uint16 selectorPosition;
     }
 
     struct DiamondStorage {
         IBusinessLogicResolver resolver;
-        bytes32 diamondConfigurationKey;
+        bytes32 diamondConfigurationId;
         uint256 version;
         // AccessControl instead of owned. Only DEFAULT_ADMIN role.
     }
@@ -259,17 +251,17 @@ abstract contract DiamondUnstructured is
 
     function _initialize(
         IBusinessLogicResolver _resolver,
-        bytes32 _diamondConfigurationKey,
+        bytes32 _diamondConfigurationId,
         uint256 _version,
         IDiamond.Rbac[] memory _rbacs
     ) internal {
         _resolver.checkDiamondConfigurationRegistered(
-            _diamondConfigurationKey,
+            _diamondConfigurationId,
             _version
         );
         DiamondStorage storage ds = _getDiamondStorage();
         ds.resolver = _resolver;
-        ds.diamondConfigurationKey = _diamondConfigurationKey;
+        ds.diamondConfigurationId = _diamondConfigurationId;
         ds.version = _version;
         _assignRbacRoles(_rbacs);
     }
@@ -289,111 +281,117 @@ abstract contract DiamondUnstructured is
         }
     }
 
-    function _getSelectorsAndInterfaceIdsByBusinessLogicKey(
-        IBusinessLogicResolver _resolver,
-        bytes32 _diamondConfigurationKey,
-        uint256 _version,
-        bytes32 _businessLogicKey
-    )
-        internal
-        view
-        returns (bytes4[] memory selectors_, bytes4[] memory interfaceIds_)
-    {
-        IBusinessLogicResolver.Facet memory resolverFacet = _resolver
-            .getFacetByConfigurationKeyVersionAndBusinessLogicKey(
-                _diamondConfigurationKey,
-                _version,
-                _businessLogicKey
-            );
-        selectors_ = resolverFacet.functionSelectors;
-        interfaceIds_ = resolverFacet.interfaceIds;
-    }
-
-    function _getFacetKeys(
+    function _getFacetsLength(
         DiamondStorage storage _ds
-    ) internal view returns (bytes32[] memory facetKeys_) {
-        facetKeys_ = _ds.resolver.getFacetKeysByConfigurationKeyAndVersion(
-            _ds.diamondConfigurationKey,
+    ) internal view returns (uint256 facetsLength_) {
+        facetsLength_ = _ds.resolver.getFacetsLengthByConfigurationIdAndVersion(
+            _ds.diamondConfigurationId,
             _ds.version
         );
     }
 
     function _getFacets(
-        DiamondStorage storage _ds
+        DiamondStorage storage _ds,
+        uint256 _pageIndex,
+        uint256 _pageLength
     ) internal view returns (IDiamondLoupe.Facet[] memory facets_) {
-        IBusinessLogicResolver.Facet[] memory resolverFacets = _ds
+        facets_ = _ds.resolver.getFacetsByConfigurationIdAndVersion(
+            _ds.diamondConfigurationId,
+            _ds.version,
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function _getFacetSelectorsLength(
+        DiamondStorage storage _ds,
+        bytes32 _facetId
+    ) internal view returns (uint256 facetSelectorsLength_) {
+        facetSelectorsLength_ = _ds
             .resolver
-            .getFacetsByConfigurationKeyAndVersion(
-                _ds.diamondConfigurationKey,
-                _ds.version
+            .getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
+                _ds.diamondConfigurationId,
+                _ds.version,
+                _facetId
             );
-        uint256 facetLength = resolverFacets.length;
-        facets_ = new IDiamondLoupe.Facet[](facetLength);
-        for (uint256 index; index < facetLength; ) {
-            facets_[index] = IDiamondLoupe.Facet({
-                facetKey: resolverFacets[index].businessLogicKey,
-                facetAddress: resolverFacets[index].businessLogicAddress,
-                functionSelectors: resolverFacets[index].functionSelectors,
-                interfaceIds: resolverFacets[index].interfaceIds
-            });
-            unchecked {
-                ++index;
-            }
-        }
+    }
+
+    function _getFacetSelectors(
+        DiamondStorage storage _ds,
+        bytes32 _facetId,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (bytes4[] memory facetSelectors_) {
+        facetSelectors_ = _ds
+            .resolver
+            .getFacetSelectorsByConfigurationIdVersionAndFacetId(
+                _ds.diamondConfigurationId,
+                _ds.version,
+                _facetId,
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _getFacetIds(
+        DiamondStorage storage _ds,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (bytes32[] memory facetIds_) {
+        facetIds_ = _ds.resolver.getFacetIdsByConfigurationIdAndVersion(
+            _ds.diamondConfigurationId,
+            _ds.version,
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function _getFacetAddresses(
+        DiamondStorage storage _ds,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory facetAddresses_) {
+        facetAddresses_ = _ds
+            .resolver
+            .getFacetAddressesByConfigurationIdAndVersion(
+                _ds.diamondConfigurationId,
+                _ds.version,
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _getFacetIdBySelector(
+        DiamondStorage storage _ds,
+        bytes4 _selector
+    ) internal view returns (bytes32 facetId_) {
+        facetId_ = _ds.resolver.getFacetIdByConfigurationIdVersionAndSelector(
+            _ds.diamondConfigurationId,
+            _ds.version,
+            _selector
+        );
     }
 
     function _getFacet(
         DiamondStorage storage _ds,
-        bytes32 _facetKey
+        bytes32 _facetId
     ) internal view returns (IDiamondLoupe.Facet memory facet_) {
-        IBusinessLogicResolver.Facet memory resolverFacet = _ds
-            .resolver
-            .getFacetByConfigurationKeyVersionAndBusinessLogicKey(
-                _ds.diamondConfigurationKey,
-                _ds.version,
-                _facetKey
-            );
-        facet_ = IDiamondLoupe.Facet({
-            facetKey: resolverFacet.businessLogicKey,
-            facetAddress: resolverFacet.businessLogicAddress,
-            functionSelectors: resolverFacet.functionSelectors,
-            interfaceIds: resolverFacet.interfaceIds
-        });
-    }
-
-    function _getFacetAddresses(
-        DiamondStorage storage _ds
-    ) internal view returns (address[] memory facetAddresses_) {
-        facetAddresses_ = _ds
-            .resolver
-            .getFacetAddressesByConfigurationKeyAndVersion(
-                _ds.diamondConfigurationKey,
-                _ds.version
-            );
-    }
-
-    function _getFacetKeyBySelector(
-        DiamondStorage storage _ds,
-        bytes4 _functionSelector
-    ) internal view returns (bytes32 facetKey_) {
-        facetKey_ = _ds
-            .resolver
-            .getFacetKeyByConfigurationKeyVersionAndFunctionSelector(
-                _ds.diamondConfigurationKey,
-                _ds.version,
-                _functionSelector
-            );
+        facet_ = _ds.resolver.getFacetByConfigurationIdVersionAndFacetId(
+            _ds.diamondConfigurationId,
+            _ds.version,
+            _facetId
+        );
     }
 
     function _getFacetAddress(
         DiamondStorage storage _ds,
-        bytes4 _signature
+        bytes4 _selector
     ) internal view returns (address) {
         return
             _ds.resolver.resolveDiamondCall(
-                _ds.diamondConfigurationKey,
+                _ds.diamondConfigurationId,
                 _ds.version,
-                _signature
+                _selector
             );
     }
 
@@ -401,8 +399,8 @@ abstract contract DiamondUnstructured is
         DiamondStorage storage _ds,
         bytes4 _interfaceId
     ) internal view returns (bool isSupported_) {
-        isSupported_ = _ds.resolver.resolverSupportsInterface(
-            _ds.diamondConfigurationKey,
+        isSupported_ = _ds.resolver.resolveSupportsInterface(
+            _ds.diamondConfigurationId,
             _ds.version,
             _interfaceId
         );

@@ -205,114 +205,272 @@
 
 pragma solidity 0.8.18;
 
-import {
-    IDiamondCutManager
-} from '../../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../../layer_1/constants/roles.sol';
 import {Pause} from '../../layer_1/pause/Pause.sol';
 import {AccessControl} from '../../layer_1/accessControl/AccessControl.sol';
+import {DiamondCutManagerWrapper} from './DiamondCutManagerWrapper.sol';
+import {IDiamondLoupe} from '../../interfaces/diamond/IDiamondLoupe.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract DiamondCutManager is IDiamondCutManager {
-    function createConfiguration(
-        bytes32 _configurationKey,
-        bytes32[] calldata _businessLogicKeys
-    ) external override {}
-
-    function resolveDiamondCall(
-        bytes32 _configurationKey,
-        uint256 _version,
-        bytes4 _signature
-    ) external view override returns (address facetAddress_) {
-        return facetAddress_;
+abstract contract DiamondCutManager is
+    AccessControl,
+    Pause,
+    DiamondCutManagerWrapper
+{
+    modifier validConfigurationIdFormat(bytes32 _configurationId) {
+        if (uint256(_configurationId) == 0) {
+            revert DefaultValueForConfigurationIdNotPermitted();
+        }
+        _;
     }
 
-    function resolverSupportsInterface(
-        bytes32 _configurationKey,
+    function createConfiguration(
+        bytes32 _configurationId,
+        bytes32[] calldata _facetIds
+    )
+        external
+        override
+        validConfigurationIdFormat(_configurationId)
+        onlyRole(_getRoleAdmin(_DEFAULT_ADMIN_ROLE))
+        onlyUnpaused
+    {
+        emit DiamondConfigurationCreated(
+            _configurationId,
+            _facetIds,
+            _createConfiguration(
+                _getDiamondCutManagerStorage(),
+                _configurationId,
+                _facetIds
+            )
+        );
+    }
+
+    function resolveDiamondCall(
+        bytes32 _configurationId,
+        uint256 _version,
+        bytes4 _selector
+    ) external view override returns (address facetAddress_) {
+        facetAddress_ = _resolveDiamondCall(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _selector
+        );
+    }
+
+    function resolveSupportsInterface(
+        bytes32 _configurationId,
         uint256 _version,
         bytes4 _interfaceId
     ) external view override returns (bool exists_) {
-        return exists_;
+        exists_ = _resolveSupportsInterface(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _interfaceId
+        );
+    }
+
+    function isDiamondConfigurationRegistered(
+        bytes32 _configurationId,
+        uint256 _version
+    ) external view override returns (bool isRegistered_) {
+        isRegistered_ = _isDiamondConfigurationRegistered(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version
+        );
     }
 
     function checkDiamondConfigurationRegistered(
-        bytes32 _configurationKey,
+        bytes32 _configurationId,
         uint256 _version
     ) external override {
-        revert DiamondConfigurationNoRegistered(_configurationKey, _version);
+        _checkDiamondConfigurationRegistered(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version
+        );
+    }
+
+    function getConfigurationsLength()
+        external
+        view
+        override
+        returns (uint256 configurationsLength_)
+    {
+        configurationsLength_ = _getDiamondCutManagerStorage()
+            .configurations
+            .length;
     }
 
     function getConfigurations(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view override returns (bytes32[] memory configurationKeys_) {
-        return configurationKeys_;
+    ) external view override returns (bytes32[] memory configurationIds_) {
+        configurationIds_ = _getConfigurations(
+            _getDiamondCutManagerStorage(),
+            _pageIndex,
+            _pageLength
+        );
     }
 
-    function getLatestVersionOfConfiguration(
-        bytes32 _configurationKey
+    function getLatestVersionByConfiguration(
+        bytes32 _configurationId
     ) external view override returns (uint256 latestVersion_) {
-        return latestVersion_;
+        latestVersion_ = _getDiamondCutManagerStorage().latestVersion[
+            _configurationId
+        ];
     }
 
-    function getConfigurationByKeyAndLatestVersion(
-        bytes32 _configurationKey
-    )
-        external
-        view
-        override
-        returns (DiamondConfiguration memory configuration_)
-    {
-        return configuration_;
+    function getFacetsLengthByConfigurationIdAndVersion(
+        bytes32 _configurationId,
+        uint256 _version
+    ) external view override returns (uint256 facetsLength_) {
+        facetsLength_ = _getFacetsLengthByConfigurationIdAndVersion(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version
+        );
     }
 
-    function getConfigurationByKeyAndVersion(
-        bytes32 _configurationKey,
-        uint256 _initialVersion,
+    function getFacetsByConfigurationIdAndVersion(
+        bytes32 _configurationId,
+        uint256 _version,
+        uint256 _pageIndex,
         uint256 _pageLength
-    )
+    ) external view override returns (IDiamondLoupe.Facet[] memory facets_) {
+        facets_ = _getFacetsByConfigurationIdAndVersion(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
+        bytes32 _configurationId,
+        uint256 _version,
+        bytes32 _facetId
+    ) external view override returns (uint256 facetSelectorsLength_) {
+        facetSelectorsLength_ = _getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _facetId
+        );
+    }
+
+    function getFacetSelectorsByConfigurationIdVersionAndFacetId(
+        bytes32 _configurationId,
+        uint256 _version,
+        bytes32 _facetId,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (bytes4[] memory facetSelectors_) {
+        facetSelectors_ = _getFacetSelectorsByConfigurationIdVersionAndFacetId(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _facetId,
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function getFacetIdsByConfigurationIdAndVersion(
+        bytes32 _configurationId,
+        uint256 _version,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (bytes32[] memory facetIds_) {
+        facetIds_ = _getFacetIdsByConfigurationIdAndVersion(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function getFacetAddressesByConfigurationIdAndVersion(
+        bytes32 _configurationId,
+        uint256 _version,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (address[] memory facetAddresses_) {
+        facetAddresses_ = _getFacetAddressesByConfigurationIdAndVersion(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function getFacetIdByConfigurationIdVersionAndSelector(
+        bytes32 _configurationId,
+        uint256 _version,
+        bytes4 _selector
+    ) external view override returns (bytes32 facetId_) {
+        facetId_ = _getFacetIdByConfigurationIdVersionAndSelector(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _selector
+        );
+    }
+
+    function getFacetByConfigurationIdVersionAndFacetId(
+        bytes32 _configurationId,
+        uint256 _version,
+        bytes32 _facetId
+    ) external view override returns (IDiamondLoupe.Facet memory facet_) {
+        facet_ = _getFacetByConfigurationIdVersionAndFacetId(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _facetId
+        );
+    }
+
+    function getFacetAddressByConfigurationIdVersionAndFacetId(
+        bytes32 _configurationId,
+        uint256 _version,
+        bytes32 _facetId
+    ) external view override returns (address facetAddress_) {
+        facetAddress_ = _getFacetAddressByConfigurationIdVersionAndFacetId(
+            _getDiamondCutManagerStorage(),
+            _configurationId,
+            _version,
+            _facetId
+        );
+    }
+
+    // solhint-disable no-empty-blocks
+    function getStaticResolverKey()
         external
-        view
-        override
-        returns (DiamondConfiguration memory configuration_)
-    {
-        return configuration_;
-    }
+        pure
+        virtual
+        override(AccessControl, Pause)
+        returns (bytes32 staticResolverKey_)
+    {}
 
-    function getFacetsByConfigurationKeyAndVersion(
-        bytes32 _configurationKey,
-        uint256 _version
-    ) external view override returns (Facet[] memory facets_) {
-        return facets_;
-    }
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override(AccessControl, Pause)
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {}
 
-    function getFacetKeysByConfigurationKeyAndVersion(
-        bytes32 _configurationKey,
-        uint256 _version
-    ) external view override returns (bytes32[] memory facets_) {
-        return facets_;
-    }
-
-    function getFacetKeyByConfigurationKeyVersionAndFunctionSelector(
-        bytes32 _configurationKey,
-        uint256 _version,
-        bytes4 _functionSelector
-    ) external view override returns (bytes32 facetKey_) {
-        return facetKey_;
-    }
-
-    function getFacetByConfigurationKeyVersionAndBusinessLogicKey(
-        bytes32 _configurationKey,
-        uint256 _version,
-        bytes32 _businessLogicKey
-    ) external view override returns (Facet memory facet_) {
-        return facet_;
-    }
-
-    function getFacetAddressesByConfigurationKeyAndVersion(
-        bytes32 _configurationKey,
-        uint256 _version
-    ) external view returns (address[] memory facetAddresses_) {
-        return facetAddresses_;
-    }
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override(AccessControl, Pause)
+        returns (bytes4[] memory staticInterfaceIds_)
+    {}
+    // solhint-enable no-empty-blocks
 }
