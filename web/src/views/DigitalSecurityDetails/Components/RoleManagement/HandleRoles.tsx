@@ -205,7 +205,7 @@
 
 import { Button, HStack, VStack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
-import { CheckboxGroupController } from "@hashgraph/asset-tokenization-uicomponents";
+import { CheckboxGroupController, Text } from "io-bricks-ui";
 import { required } from "../../../../utils/rules";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { ApplyRolesRequest } from "@hashgraph/asset-tokenization-sdk";
@@ -213,7 +213,6 @@ import { useParams } from "react-router-dom";
 import { useApplyRoles } from "../../../../hooks/queries/useApplyRoles";
 import { rolesList } from "./rolesList";
 import { SecurityRole } from "../../../../utils/SecurityRole";
-import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 
 interface EditRolesFormValues {
   roles: string[];

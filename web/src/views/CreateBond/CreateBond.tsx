@@ -206,10 +206,7 @@
 import { Box, HStack, Stack } from "@chakra-ui/react";
 import { StepTokenDetails } from "./Components/StepTokenDetails";
 import { FormProvider, useForm } from "react-hook-form";
-import {
-  useSteps,
-  Wizard,
-} from "@hashgraph/asset-tokenization-uicomponents/Indicators";
+import { useSteps, Wizard } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { History } from "../../components/History";
 import { RouteName } from "../../router/RouteName";

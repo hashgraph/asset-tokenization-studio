@@ -203,9 +203,9 @@
 
 */
 
-import type { AccordionItemThemeConfiguration } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import type { AccordionItemThemeConfiguration } from "io-bricks-ui";
 
-// It is not exported from uiComponents
+// It is not exported from iobricks
 const accordionItemPartsList: Array<string> = ["button", "item", "panel"];
 
 export const AccordionItem: AccordionItemThemeConfiguration = {

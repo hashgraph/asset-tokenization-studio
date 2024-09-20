@@ -204,8 +204,7 @@
 */
 
 import { Box, Center, HStack, VStack } from "@chakra-ui/react";
-import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { DefinitionList } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import { Text, DefinitionList } from "io-bricks-ui";
 import { Panel } from "../../../components/Panel";
 import { useTranslation } from "react-i18next";
 import { ActionsButtons } from "./ActionsButtons";

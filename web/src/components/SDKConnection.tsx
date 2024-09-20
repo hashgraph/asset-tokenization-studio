@@ -212,7 +212,7 @@ import type {
 } from "@hashgraph/asset-tokenization-sdk";
 import { useWalletStore } from "../store/walletStore";
 import { WalletStatus } from "../utils/constants";
-import { useToast } from "@hashgraph/asset-tokenization-uicomponents/Overlay/Toast";
+import { useToast } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import _isEqual from "lodash/isEqual";
 import { RouterManager } from "../router/RouterManager";
