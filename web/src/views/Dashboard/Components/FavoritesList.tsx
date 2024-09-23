@@ -205,11 +205,7 @@
 
 import { useMemo, useState } from "react";
 import { AccordionPanel, SimpleGrid } from "@chakra-ui/react";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionProps,
-} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import { Accordion, AccordionItem, AccordionProps } from "io-bricks-ui";
 import { AccordionItemCustomTitle } from "./AccordionItemCustomTitle";
 import { SecurityCard } from "./SecurityCard";
 import { User } from "../../../utils/constants";

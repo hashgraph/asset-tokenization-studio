@@ -9,7 +9,7 @@ exports[`NoTokens render correctly 1`] = `
       class="css-yglf3"
     >
       <div
-        class="chakra-stack css-1xkzybq"
+        class="chakra-stack css-1n2jce"
       >
         <p
           class="css-rp0w81"
@@ -25,7 +25,7 @@ exports[`NoTokens render correctly 1`] = `
         </p>
       </div>
       <div
-        class="chakra-stack css-zg985e"
+        class="chakra-stack css-1tl0tho"
       >
         <a
           class="chakra-button css-vueqt9"

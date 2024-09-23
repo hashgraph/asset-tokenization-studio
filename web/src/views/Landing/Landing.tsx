@@ -219,18 +219,12 @@ import {
   Stack,
   VStack,
 } from "@chakra-ui/react";
-import {
-  PhosphorIcon,
-  Text,
-  Weight,
-} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import { PhosphorIcon, Text, Weight, Button, PopUp } from "io-bricks-ui";
 import landingBackground from "../../assets/layer.png";
 import { useWalletStore } from "../../store/walletStore";
 import { Trans, useTranslation } from "react-i18next";
 import { RouterManager } from "../../router/RouterManager";
 import { RouteName } from "../../router/RouteName";
-import { PopUp } from "@hashgraph/asset-tokenization-uicomponents";
 import { Wallet } from "@phosphor-icons/react";
 import { METAMASK_URL, WalletStatus, User } from "../../utils/constants";
 import { useWalletConnection } from "../../hooks/useWalletConnection";

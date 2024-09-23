@@ -215,10 +215,7 @@ import theme from "./theme";
 import i18n from "./i18n";
 import AppRouter from "./router";
 import { SDKConnection } from "./components/SDKConnection";
-import {
-  InterFonts,
-  useToast,
-} from "@hashgraph/asset-tokenization-uicomponents";
+import { InterFonts, useToast } from "io-bricks-ui";
 import { useState } from "react";
 import Disclaimer from "./views/Initialization/CookieDisclaimer.js";
 import { isMobile } from "react-device-detect";

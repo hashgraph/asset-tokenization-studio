@@ -209,22 +209,20 @@ import { useTranslation } from "react-i18next";
 import {
   PhosphorIcon,
   Text,
-} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { CancelButton } from "../../../components/CancelButton";
-import { NextStepButton } from "./NextStepButton";
-import { PreviousStepButton } from "./PreviousStepButton";
-import {
   CalendarInputController,
   InputController,
   InputNumberController,
   SelectController,
-} from "@hashgraph/asset-tokenization-uicomponents";
+} from "io-bricks-ui";
+import { CancelButton } from "../../../components/CancelButton";
+import { NextStepButton } from "./NextStepButton";
+import { PreviousStepButton } from "./PreviousStepButton";
 import { greaterThan, isBetweenDates, required } from "../../../utils/rules";
 import { ICreateBondFormValues } from "../ICreateBondFormValues";
 import { useFormContext, useFormState } from "react-hook-form";
 import { formatDate } from "../../../utils/format";
 import { CouponTypeOptions } from "../CouponType";
-import { Tooltip } from "@hashgraph/asset-tokenization-uicomponents/Overlay";
+import { Tooltip } from "io-bricks-ui";
 import { Info } from "@phosphor-icons/react";
 import { Trans } from "react-i18next";
 import { FormStepContainer } from "../../../components/FormStepContainer";

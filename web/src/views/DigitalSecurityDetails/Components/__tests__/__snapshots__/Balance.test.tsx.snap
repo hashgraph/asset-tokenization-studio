@@ -3,13 +3,13 @@
 exports[`Balance should render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1urha0v"
+    class="chakra-stack css-frx4bb"
   >
     <div
-      class="chakra-stack css-17irsum"
+      class="chakra-stack css-169eia3"
     >
       <div
-        class="chakra-stack css-1fgxx0x"
+        class="chakra-stack css-1qx0yhn"
       >
         <h2
           class="css-1mk5tlk"
@@ -22,7 +22,7 @@ exports[`Balance should render correctly 1`] = `
           Add the ID account to preview its balance
         </p>
         <form
-          class="chakra-stack css-jvrikk"
+          class="chakra-stack css-1y1dtud"
         >
           <div
             class="chakra-form-control css-1kxonj9"
@@ -37,7 +37,7 @@ exports[`Balance should render correctly 1`] = `
                 data-group="true"
               >
                 <input
-                  class="chakra-input css-1e8gdzn"
+                  class="chakra-input css-1ymw93l"
                   data-testid="search"
                   id="search"
                   name="search"
@@ -45,7 +45,7 @@ exports[`Balance should render correctly 1`] = `
                   value=""
                 />
                 <div
-                  class="chakra-input__right-element css-17uv17e"
+                  class="chakra-input__right-element css-1akgnmh"
                 >
                   <button
                     aria-label="search"
@@ -88,13 +88,13 @@ exports[`Balance should render correctly 1`] = `
       </div>
     </div>
     <div
-      class="chakra-stack css-9mll8r"
+      class="chakra-stack css-13czc0d"
     >
       <div
-        class="chakra-stack css-18ym346"
+        class="chakra-stack css-159zjtk"
       >
         <div
-          class="chakra-stack css-3lo6qo"
+          class="chakra-stack css-1yqmcpo"
         >
           <div
             class="css-1dixb64"
@@ -122,7 +122,7 @@ exports[`Balance should render correctly 1`] = `
         </div>
       </div>
       <div
-        class="chakra-stack css-15191ly"
+        class="chakra-stack css-19rghx9"
       >
         <p
           class="css-kwpule"
@@ -130,7 +130,7 @@ exports[`Balance should render correctly 1`] = `
           Account Balance
         </p>
         <div
-          class="chakra-stack css-dk69dq"
+          class="chakra-stack css-1kn39y0"
         >
           <p
             class="css-1ysbn4y"

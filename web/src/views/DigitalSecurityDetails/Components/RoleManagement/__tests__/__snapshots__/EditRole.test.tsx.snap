@@ -3,10 +3,10 @@
 exports[`EditRole should render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1voji0k"
+    class="chakra-stack css-1pa0k2v"
   >
     <div
-      class="chakra-stack css-1utpalr"
+      class="chakra-stack css-1nb7vi4"
     >
       <p
         class="css-1mk5tlk"
@@ -20,22 +20,22 @@ exports[`EditRole should render correctly 1`] = `
       </p>
     </div>
     <div
-      class="chakra-stack css-8c063r"
+      class="chakra-stack css-1ao5vqt"
     >
       <div
-        class="chakra-stack css-1yghfag"
+        class="chakra-stack css-1eowlil"
       >
         <div
-          class="chakra-stack css-1cxhm5k"
+          class="chakra-stack css-1blyqkq"
         >
           <div
-            class="chakra-stack css-1yxzzu5"
+            class="chakra-stack css-b1sb84"
           >
             <form
-              class="chakra-stack css-gulfsa"
+              class="chakra-stack css-1b210bn"
             >
               <div
-                class="chakra-stack css-x9mz4b"
+                class="chakra-stack css-96qqtw"
               >
                 <div
                   class="chakra-form-control css-1kxonj9"
@@ -50,7 +50,7 @@ exports[`EditRole should render correctly 1`] = `
                       data-group="true"
                     >
                       <input
-                        class="chakra-input css-1e8gdzn"
+                        class="chakra-input css-1ymw93l"
                         data-testid="address"
                         id="address"
                         name="address"
@@ -58,7 +58,7 @@ exports[`EditRole should render correctly 1`] = `
                         value=""
                       />
                       <div
-                        class="chakra-input__right-element css-17uv17e"
+                        class="chakra-input__right-element css-1akgnmh"
                       >
                         <button
                           aria-label="search"
@@ -98,14 +98,14 @@ exports[`EditRole should render correctly 1`] = `
           </div>
         </div>
         <div
-          class="chakra-stack css-o51fhk"
+          class="chakra-stack css-1iz0bch"
         />
       </div>
       <div
-        class="chakra-stack css-1tgv9q4"
+        class="chakra-stack css-16p9gj0"
       >
         <div
-          class="chakra-stack css-u634b8"
+          class="chakra-stack css-1ma2bgy"
           data-testid="security-details"
         >
           <div
