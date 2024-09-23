@@ -223,10 +223,15 @@ import {
 contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
     struct BusinessLogicResolverDataStorage {
         uint256 latestVersion;
+        // list of facetIds
         bytes32[] activeBusinessLogics;
+        // facetId -> bool
         mapping(bytes32 => bool) businessLogicActive;
+        // facetId -> pos (one per vesion) -> version + status + address
         mapping(bytes32 => IBusinessLogicResolver.BusinessLogicVersion[]) businessLogics;
+        // keccaak256(facetId, version) -> position
         mapping(bytes32 => uint256) businessLogicVersionIndex;
+        // version to status
         mapping(uint256 => IBusinessLogicResolver.VersionStatus) versionStatuses;
         bool initialized;
     }

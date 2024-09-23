@@ -235,6 +235,7 @@ contract DiamondLoupeFacet is
         ResolverProxyStorage storage ds = _getResolverProxyStorage();
         facets_ = _getFacets(ds, 0, _getFacetsLength(ds));
     }
+
     function getFacetsLength()
         external
         view

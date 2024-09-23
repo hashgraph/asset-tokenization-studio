@@ -212,6 +212,7 @@ import {DiamondCutManagerWrapper} from './DiamondCutManagerWrapper.sol';
 import {
     IDiamondLoupe
 } from '../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract DiamondCutManager is
@@ -226,27 +227,38 @@ abstract contract DiamondCutManager is
         _;
     }
 
-    function createConfiguration(
-        bytes32 _configurationId,
+    modifier validFacetIdsAndVersion(
         bytes32[] calldata _facetIds,
         uint256[] calldata _facetVersions
+    ) {
+        if (_facetIds.length != _facetVersions.length) {
+            revert FacetIdsAndVersionsLengthMismatch(
+                _facetIds.length,
+                _facetVersions.length
+            );
+        }
+        _;
+    }
+
+    function createConfiguration(
+        bytes32 _configurationId,
+        ConfigurationContentDefinition calldata _configurationContent
     )
         external
         override
         validConfigurationIdFormat(_configurationId)
-        onlyRole(_getRoleAdmin(_DEFAULT_ADMIN_ROLE))
+        validFacetIdsAndVersion(
+            _configurationContent.facetIds,
+            _configurationContent.facetVersions
+        )
+        onlyRole(_DEFAULT_ADMIN_ROLE)
         onlyUnpaused
     {
         emit DiamondConfigurationCreated(
             _configurationId,
-            _facetIds,
-            _facetVersions,
-            _createConfiguration(
-                _getDiamondCutManagerStorage(),
-                _configurationId,
-                _facetIds,
-                _facetVersions
-            )
+            _configurationContent.facetIds,
+            _configurationContent.facetVersions,
+            _createConfiguration(_configurationId, _configurationContent)
         );
     }
 
@@ -344,12 +356,7 @@ abstract contract DiamondCutManager is
         uint256 _version,
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        override
-        returns (IDiamondLoupe.Facet[] memory facets_)
-    {
+    ) external view override returns (IDiamondLoupe.Facet[] memory facets_) {
         facets_ = _getFacetsByConfigurationIdAndVersion(
             _getDiamondCutManagerStorage(),
             _configurationId,

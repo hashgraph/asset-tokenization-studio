@@ -224,6 +224,11 @@ import {IDiamondLoupe} from '../resolverProxy/IDiamondLoupe.sol';
 ///          * list of selectors
 ///          * list of interfaceIds
 interface IDiamondCutManager {
+    struct ConfigurationContentDefinition {
+        bytes32[] facetIds;
+        uint256[] facetVersions;
+    }
+
     // @notice Not able to use bytes32(0) with configurationId
     error DefaultValueForConfigurationIdNotPermitted();
 
@@ -238,6 +243,11 @@ interface IDiamondCutManager {
         bytes32 resolverProxyConfigurationId,
         uint256 version
     );
+    // @notice provided facetIds array length and facetVersions array length do not match
+    error FacetIdsAndVersionsLengthMismatch(
+        uint256 facetIdsLength,
+        uint256 facetVersionsLength
+    );
 
     /// @notice emited when createConfiguration is executed
     event DiamondConfigurationCreated(
@@ -249,12 +259,11 @@ interface IDiamondCutManager {
 
     /// @notice Create a new configuration to the latest version of all facets.
     /// @param _configurationId unused identifier to the configuration.
-    /// @param _facetIds list of business logics to be registered.
-    /// @param _facetVersions list of versions of each _facetIds.
+    /// @param _configurationContent.facetIds list of business logics to be registered.
+    /// @param _configurationContent.facetVersions list of versions of each _facetIds.
     function createConfiguration(
         bytes32 _configurationId,
-        bytes32[] calldata _facetIds,
-        uint256[] calldata _facetVersions
+        ConfigurationContentDefinition calldata _configurationContent
     ) external;
 
     /// @notice Resolve the facet address knowing configuration, version and selector.
