@@ -207,8 +207,10 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {IFactory} from '../interfaces/factory/IFactory.sol';
-import {Diamond} from '../diamond/Diamond.sol';
-import {IDiamond} from '../interfaces/diamond/IDiamond.sol';
+import {ResolverProxy} from '../resolver/resolverProxy/ResolverProxy.sol';
+import {
+    IResolverProxy
+} from '../interfaces/resolver/resolverProxy/IResolverProxy.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../layer_1/constants/roles.sol';
 import {IControlList} from '../layer_1/interfaces/controlList/IControlList.sol';
 import {IERC20} from '../layer_1/interfaces/ERC1400/IERC20.sol';
@@ -247,7 +249,7 @@ contract Factory is IFactory, LocalContext {
         _;
     }
 
-    modifier checkAdmins(IDiamond.Rbac[] calldata rbacs) {
+    modifier checkAdmins(IResolverProxy.Rbac[] calldata rbacs) {
         bool adminFound;
 
         // Looking for admin role within initialization rbacas in order to add the factory
@@ -364,10 +366,10 @@ contract Factory is IFactory, LocalContext {
         SecurityData calldata _securityData,
         SecurityType _securityType
     ) private returns (address securityAddress_) {
-        Diamond equity = new Diamond(
+        ResolverProxy equity = new ResolverProxy(
             _securityData.resolver,
-            _securityData.diamondConfiguration.key,
-            _securityData.diamondConfiguration.version,
+            _securityData.resolverProxyConfiguration.key,
+            _securityData.resolverProxyConfiguration.version,
             _securityData.rbacs
         );
 

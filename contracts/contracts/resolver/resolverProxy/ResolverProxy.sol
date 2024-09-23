@@ -206,203 +206,61 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IDiamond} from '../../interfaces/diamond/IDiamond.sol';
+/******************************************************************************\
+* Author: Nick Mudge <nick@perfectabstractions.com>, Twitter/Github: @mudgen
+* EIP-2535 ResolverProxys
+*
+* Implementation of a resolverProxy.
+/******************************************************************************/
+
+import {
+    ResolverProxyUnstructured
+} from './unstructured/ResolverProxyUnstructured.sol';
+import {
+    IResolverProxy
+} from '../../interfaces/resolver/resolverProxy/IResolverProxy.sol';
 import {
     IBusinessLogicResolver
 } from '../../interfaces/resolver/IBusinessLogicResolver.sol';
-import {IDiamondLoupe} from '../../interfaces/diamond/IDiamondLoupe.sol';
-import {
-    AccessControlStorageWrapper
-} from '../../layer_1/accessControl/AccessControlStorageWrapper.sol';
-import {PauseStorageWrapper} from '../../layer_1/pause/PauseStorageWrapper.sol';
-import {
-    _DIAMOND_STORAGE_POSITION
-} from '../../layer_1/constants/storagePositions.sol';
 
-// Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
-// The loupe functions are required by the EIP2535 Diamonds standard
-abstract contract DiamondUnstructured is
-    AccessControlStorageWrapper,
-    PauseStorageWrapper
-{
-    struct FacetIdsAndSelectorPosition {
-        bytes32 facetId;
-        uint16 selectorPosition;
+contract ResolverProxy is ResolverProxyUnstructured {
+    constructor(
+        IBusinessLogicResolver _resolver,
+        bytes32 _resolverProxyConfigurationId,
+        uint256 _version,
+        IResolverProxy.Rbac[] memory _rbac
+    ) payable {
+        _initialize(_resolver, _resolverProxyConfigurationId, _version, _rbac);
     }
 
-    struct DiamondStorage {
-        IBusinessLogicResolver resolver;
-        bytes32 diamondConfigurationId;
-        uint256 version;
-        // AccessControl instead of owned. Only DEFAULT_ADMIN role.
-    }
-
-    function _getDiamondStorage()
-        internal
-        pure
-        returns (DiamondStorage storage ds)
-    {
-        bytes32 position = _DIAMOND_STORAGE_POSITION;
+    // Find facet for function that is called and execute the
+    // function if a facet is found and return any value.
+    // solhint-disable-next-line no-complex-fallback
+    fallback() external payable {
+        // get facet from function selector
+        address facet = _getFacetAddress(_getResolverProxyStorage(), msg.sig);
+        if (facet == address(0)) {
+            revert IResolverProxy.FunctionNotFound(msg.sig);
+        }
+        // Execute external function from facet using delegatecall and return any value.
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            ds.slot := position
-        }
-    }
-
-    function _initialize(
-        IBusinessLogicResolver _resolver,
-        bytes32 _diamondConfigurationId,
-        uint256 _version,
-        IDiamond.Rbac[] memory _rbacs
-    ) internal {
-        _resolver.checkDiamondConfigurationRegistered(
-            _diamondConfigurationId,
-            _version
-        );
-        DiamondStorage storage ds = _getDiamondStorage();
-        ds.resolver = _resolver;
-        ds.diamondConfigurationId = _diamondConfigurationId;
-        ds.version = _version;
-        _assignRbacRoles(_rbacs);
-    }
-
-    function _assignRbacRoles(IDiamond.Rbac[] memory _rbacs) internal {
-        for (uint256 rbacIndex; rbacIndex < _rbacs.length; rbacIndex++) {
-            for (
-                uint256 memberIndex;
-                memberIndex < _rbacs[rbacIndex].members.length;
-                memberIndex++
-            ) {
-                _grantRole(
-                    _rbacs[rbacIndex].role,
-                    _rbacs[rbacIndex].members[memberIndex]
-                );
+            // copy function selector and any arguments
+            calldatacopy(0, 0, calldatasize())
+            // execute function call using the facet
+            let result := delegatecall(gas(), facet, 0, calldatasize(), 0, 0)
+            // get any return value
+            returndatacopy(0, 0, returndatasize())
+            // return any return value or error back to the caller
+            switch result
+            case 0 {
+                revert(0, returndatasize())
+            }
+            default {
+                return(0, returndatasize())
             }
         }
     }
 
-    function _getFacetsLength(
-        DiamondStorage storage _ds
-    ) internal view returns (uint256 facetsLength_) {
-        facetsLength_ = _ds.resolver.getFacetsLengthByConfigurationIdAndVersion(
-            _ds.diamondConfigurationId,
-            _ds.version
-        );
-    }
-
-    function _getFacets(
-        DiamondStorage storage _ds,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (IDiamondLoupe.Facet[] memory facets_) {
-        facets_ = _ds.resolver.getFacetsByConfigurationIdAndVersion(
-            _ds.diamondConfigurationId,
-            _ds.version,
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function _getFacetSelectorsLength(
-        DiamondStorage storage _ds,
-        bytes32 _facetId
-    ) internal view returns (uint256 facetSelectorsLength_) {
-        facetSelectorsLength_ = _ds
-            .resolver
-            .getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
-                _ds.diamondConfigurationId,
-                _ds.version,
-                _facetId
-            );
-    }
-
-    function _getFacetSelectors(
-        DiamondStorage storage _ds,
-        bytes32 _facetId,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (bytes4[] memory facetSelectors_) {
-        facetSelectors_ = _ds
-            .resolver
-            .getFacetSelectorsByConfigurationIdVersionAndFacetId(
-                _ds.diamondConfigurationId,
-                _ds.version,
-                _facetId,
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function _getFacetIds(
-        DiamondStorage storage _ds,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (bytes32[] memory facetIds_) {
-        facetIds_ = _ds.resolver.getFacetIdsByConfigurationIdAndVersion(
-            _ds.diamondConfigurationId,
-            _ds.version,
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function _getFacetAddresses(
-        DiamondStorage storage _ds,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (address[] memory facetAddresses_) {
-        facetAddresses_ = _ds
-            .resolver
-            .getFacetAddressesByConfigurationIdAndVersion(
-                _ds.diamondConfigurationId,
-                _ds.version,
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function _getFacetIdBySelector(
-        DiamondStorage storage _ds,
-        bytes4 _selector
-    ) internal view returns (bytes32 facetId_) {
-        facetId_ = _ds.resolver.getFacetIdByConfigurationIdVersionAndSelector(
-            _ds.diamondConfigurationId,
-            _ds.version,
-            _selector
-        );
-    }
-
-    function _getFacet(
-        DiamondStorage storage _ds,
-        bytes32 _facetId
-    ) internal view returns (IDiamondLoupe.Facet memory facet_) {
-        facet_ = _ds.resolver.getFacetByConfigurationIdVersionAndFacetId(
-            _ds.diamondConfigurationId,
-            _ds.version,
-            _facetId
-        );
-    }
-
-    function _getFacetAddress(
-        DiamondStorage storage _ds,
-        bytes4 _selector
-    ) internal view returns (address) {
-        return
-            _ds.resolver.resolveDiamondCall(
-                _ds.diamondConfigurationId,
-                _ds.version,
-                _selector
-            );
-    }
-
-    function _supportsInterface(
-        DiamondStorage storage _ds,
-        bytes4 _interfaceId
-    ) internal view returns (bool isSupported_) {
-        isSupported_ = _ds.resolver.resolveSupportsInterface(
-            _ds.diamondConfigurationId,
-            _ds.version,
-            _interfaceId
-        );
-    }
+    receive() external payable {}
 }

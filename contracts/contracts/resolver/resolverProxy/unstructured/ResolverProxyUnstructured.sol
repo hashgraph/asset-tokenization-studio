@@ -206,211 +206,209 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// The functions in DiamondLoupeFacet MUST be added to a diamond.
-// The EIP-2535 Diamond standard requires these functions.
-
-import {DiamondUnstructured} from '../unstructured/DiamondUnstructured.sol';
-import {IDiamondLoupe} from '../../interfaces/diamond/IDiamondLoupe.sol';
-import {IERC165} from '@openzeppelin/contracts/utils/introspection/IERC165.sol';
 import {
-    _DIAMOND_LOUPE_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
+    IResolverProxy
+} from '../../../interfaces/resolver/resolverProxy/IResolverProxy.sol';
+import {
+    IBusinessLogicResolver
+} from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
+import {
+    IDiamondLoupe
+} from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
+import {
+    AccessControlStorageWrapper
+} from '../../../layer_1/accessControl/AccessControlStorageWrapper.sol';
+import {
+    PauseStorageWrapper
+} from '../../../layer_1/pause/PauseStorageWrapper.sol';
+import {
+    _RESOLVER_PROXY_STORAGE_POSITION
+} from '../../../layer_1/constants/storagePositions.sol';
 
-// HACK: I think that Loupe and Cut implementation should be only one contract.
-contract DiamondLoupeFacet is IDiamondLoupe, IERC165, DiamondUnstructured {
-    function getFacets()
-        external
-        view
-        override
-        returns (Facet[] memory facets_)
+// Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.
+// The loupe functions are required by the EIP2535 ResolverProxys standard
+abstract contract ResolverProxyUnstructured is
+    AccessControlStorageWrapper,
+    PauseStorageWrapper
+{
+    struct FacetIdsAndSelectorPosition {
+        bytes32 facetId;
+        uint16 selectorPosition;
+    }
+
+    struct ResolverProxyStorage {
+        IBusinessLogicResolver resolver;
+        bytes32 resolverProxyConfigurationId;
+        uint256 version;
+        // AccessControl instead of owned. Only DEFAULT_ADMIN role.
+    }
+
+    function _getResolverProxyStorage()
+        internal
+        pure
+        returns (ResolverProxyStorage storage ds)
     {
-        DiamondStorage storage ds = _getDiamondStorage();
-        facets_ = _getFacets(ds, 0, _getFacetsLength(ds));
-    }
-    function getFacetsLength()
-        external
-        view
-        override
-        returns (uint256 facetsLength_)
-    {
-        facetsLength_ = _getFacetsLength(_getDiamondStorage());
+        bytes32 position = _RESOLVER_PROXY_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            ds.slot := position
+        }
     }
 
-    function getFacetsByPage(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (Facet[] memory facets_) {
-        facets_ = _getFacets(_getDiamondStorage(), _pageIndex, _pageLength);
+    function _initialize(
+        IBusinessLogicResolver _resolver,
+        bytes32 _resolverProxyConfigurationId,
+        uint256 _version,
+        IResolverProxy.Rbac[] memory _rbacs
+    ) internal {
+        _resolver.checkResolverProxyConfigurationRegistered(
+            _resolverProxyConfigurationId,
+            _version
+        );
+        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ds.resolver = _resolver;
+        ds.resolverProxyConfigurationId = _resolverProxyConfigurationId;
+        ds.version = _version;
+        _assignRbacRoles(_rbacs);
     }
 
-    function getFacetSelectors(
-        bytes32 _facetId
-    ) external view override returns (bytes4[] memory facetSelectors_) {
-        DiamondStorage storage ds = _getDiamondStorage();
-        facetSelectors_ = _getFacetSelectors(
-            ds,
-            _facetId,
-            0,
-            _getFacetSelectorsLength(ds, _facetId)
+    function _assignRbacRoles(IResolverProxy.Rbac[] memory _rbacs) internal {
+        for (uint256 rbacIndex; rbacIndex < _rbacs.length; rbacIndex++) {
+            for (
+                uint256 memberIndex;
+                memberIndex < _rbacs[rbacIndex].members.length;
+                memberIndex++
+            ) {
+                _grantRole(
+                    _rbacs[rbacIndex].role,
+                    _rbacs[rbacIndex].members[memberIndex]
+                );
+            }
+        }
+    }
+
+    function _getFacetsLength(
+        ResolverProxyStorage storage _ds
+    ) internal view returns (uint256 facetsLength_) {
+        facetsLength_ = _ds.resolver.getFacetsLengthByConfigurationIdAndVersion(
+            _ds.resolverProxyConfigurationId,
+            _ds.version
         );
     }
 
-    function getFacetSelectorsLength(
+    function _getFacets(
+        ResolverProxyStorage storage _ds,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (IDiamondLoupe.Facet[] memory facets_) {
+        facets_ = _ds.resolver.getFacetsByConfigurationIdAndVersion(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function _getFacetSelectorsLength(
+        ResolverProxyStorage storage _ds,
         bytes32 _facetId
-    ) external view override returns (uint256 facetSelectorsLength_) {
-        facetSelectorsLength_ = _getFacetSelectorsLength(
-            _getDiamondStorage(),
+    ) internal view returns (uint256 facetSelectorsLength_) {
+        facetSelectorsLength_ = _ds
+            .resolver
+            .getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
+                _ds.resolverProxyConfigurationId,
+                _ds.version,
+                _facetId
+            );
+    }
+
+    function _getFacetSelectors(
+        ResolverProxyStorage storage _ds,
+        bytes32 _facetId,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (bytes4[] memory facetSelectors_) {
+        facetSelectors_ = _ds
+            .resolver
+            .getFacetSelectorsByConfigurationIdVersionAndFacetId(
+                _ds.resolverProxyConfigurationId,
+                _ds.version,
+                _facetId,
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _getFacetIds(
+        ResolverProxyStorage storage _ds,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (bytes32[] memory facetIds_) {
+        facetIds_ = _ds.resolver.getFacetIdsByConfigurationIdAndVersion(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function _getFacetAddresses(
+        ResolverProxyStorage storage _ds,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory facetAddresses_) {
+        facetAddresses_ = _ds
+            .resolver
+            .getFacetAddressesByConfigurationIdAndVersion(
+                _ds.resolverProxyConfigurationId,
+                _ds.version,
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _getFacetIdBySelector(
+        ResolverProxyStorage storage _ds,
+        bytes4 _selector
+    ) internal view returns (bytes32 facetId_) {
+        facetId_ = _ds.resolver.getFacetIdByConfigurationIdVersionAndSelector(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
+            _selector
+        );
+    }
+
+    function _getFacet(
+        ResolverProxyStorage storage _ds,
+        bytes32 _facetId
+    ) internal view returns (IDiamondLoupe.Facet memory facet_) {
+        facet_ = _ds.resolver.getFacetByConfigurationIdVersionAndFacetId(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
             _facetId
         );
     }
 
-    function getFacetSelectorsByPage(
-        bytes32 _facetId,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (bytes4[] memory facetSelectors_) {
-        facetSelectors_ = _getFacetSelectors(
-            _getDiamondStorage(),
-            _facetId,
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function getFacetIds()
-        external
-        view
-        override
-        returns (bytes32[] memory facetIds_)
-    {
-        DiamondStorage storage ds = _getDiamondStorage();
-        facetIds_ = _getFacetIds(ds, 0, _getFacetsLength(ds));
-    }
-
-    function getFacetIdsByPage(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (bytes32[] memory facetIds_) {
-        facetIds_ = _getFacetIds(_getDiamondStorage(), _pageIndex, _pageLength);
-    }
-
-    function getFacetAddresses()
-        external
-        view
-        override
-        returns (address[] memory facetAddresses_)
-    {
-        DiamondStorage storage ds = _getDiamondStorage();
-        facetAddresses_ = _getFacetAddresses(ds, 0, _getFacetsLength(ds));
-    }
-
-    function getFacetAddressesByPage(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (address[] memory facetAddresses_) {
-        facetAddresses_ = _getFacetAddresses(
-            _getDiamondStorage(),
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function getFacetIdBySelector(
+    function _getFacetAddress(
+        ResolverProxyStorage storage _ds,
         bytes4 _selector
-    ) external view returns (bytes32 facetId_) {
-        facetId_ = _getFacetIdBySelector(_getDiamondStorage(), _selector);
+    ) internal view returns (address) {
+        return
+            _ds.resolver.resolveResolverProxyCall(
+                _ds.resolverProxyConfigurationId,
+                _ds.version,
+                _selector
+            );
     }
 
-    function getFacet(
-        bytes32 _facetId
-    ) external view override returns (Facet memory facet_) {
-        facet_ = _getFacet(_getDiamondStorage(), _facetId);
-    }
-
-    function getFacetAddress(
-        bytes4 _selector
-    ) external view override returns (address facetAddress_) {
-        facetAddress_ = _getFacetAddress(_getDiamondStorage(), _selector);
-    }
-
-    // This implements ERC-165.
-    function supportsInterface(
+    function _supportsInterface(
+        ResolverProxyStorage storage _ds,
         bytes4 _interfaceId
-    ) external view override returns (bool) {
-        return _supportsInterface(_getDiamondStorage(), _interfaceId);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _DIAMOND_LOUPE_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](13);
-        uint256 selectorIndex;
-        unchecked {
-            staticFunctionSelectors_[++selectorIndex] = this.getFacets.selector;
-            staticFunctionSelectors_[++selectorIndex] = this
-                .getFacetsLength
-                .selector;
-            staticFunctionSelectors_[++selectorIndex] = this
-                .getFacetsByPage
-                .selector;
-            staticFunctionSelectors_[++selectorIndex] = this
-                .getFacetSelectors
-                .selector;
-            staticFunctionSelectors_[++selectorIndex] = this
-                .getFacetSelectorsLength
-                .selector;
-            staticFunctionSelectors_[++selectorIndex] = this
-                .getFacetSelectorsByPage
-                .selector;
-            staticFunctionSelectors_[++selectorIndex] = this
-                .getFacetIds
-                .selector;
-            staticFunctionSelectors_[++selectorIndex] = this
-                .getFacetIdsByPage
-                .selector;
-            staticFunctionSelectors_[++selectorIndex] = this
-                .getFacetAddresses
-                .selector;
-            staticFunctionSelectors_[++selectorIndex] = this
-                .getFacetAddressesByPage
-                .selector;
-            staticFunctionSelectors_[++selectorIndex] = this
-                .getFacetIdBySelector
-                .selector;
-            staticFunctionSelectors_[++selectorIndex] = this.getFacet.selector;
-            staticFunctionSelectors_[++selectorIndex] = this
-                .getFacetAddress
-                .selector;
-            staticFunctionSelectors_[++selectorIndex] = this
-                .supportsInterface
-                .selector;
-        }
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](2);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IDiamondLoupe).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC165).interfaceId;
+    ) internal view returns (bool isSupported_) {
+        isSupported_ = _ds.resolver.resolveSupportsInterface(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
+            _interfaceId
+        );
     }
 }

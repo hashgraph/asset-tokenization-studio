@@ -209,7 +209,9 @@ import {_DEFAULT_ADMIN_ROLE} from '../../layer_1/constants/roles.sol';
 import {Pause} from '../../layer_1/pause/Pause.sol';
 import {AccessControl} from '../../layer_1/accessControl/AccessControl.sol';
 import {DiamondCutManagerWrapper} from './DiamondCutManagerWrapper.sol';
-import {IDiamondLoupe} from '../../interfaces/diamond/IDiamondLoupe.sol';
+import {
+    IDiamondLoupe
+} from '../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract DiamondCutManager is
@@ -226,7 +228,8 @@ abstract contract DiamondCutManager is
 
     function createConfiguration(
         bytes32 _configurationId,
-        bytes32[] calldata _facetIds
+        bytes32[] calldata _facetIds,
+        uint256[] calldata _facetVersions
     )
         external
         override
@@ -237,20 +240,22 @@ abstract contract DiamondCutManager is
         emit DiamondConfigurationCreated(
             _configurationId,
             _facetIds,
+            _facetVersions,
             _createConfiguration(
                 _getDiamondCutManagerStorage(),
                 _configurationId,
-                _facetIds
+                _facetIds,
+                _facetVersions
             )
         );
     }
 
-    function resolveDiamondCall(
+    function resolveResolverProxyCall(
         bytes32 _configurationId,
         uint256 _version,
         bytes4 _selector
     ) external view override returns (address facetAddress_) {
-        facetAddress_ = _resolveDiamondCall(
+        facetAddress_ = _resolveResolverProxyCall(
             _getDiamondCutManagerStorage(),
             _configurationId,
             _version,
@@ -271,22 +276,22 @@ abstract contract DiamondCutManager is
         );
     }
 
-    function isDiamondConfigurationRegistered(
+    function isResolverProxyConfigurationRegistered(
         bytes32 _configurationId,
         uint256 _version
     ) external view override returns (bool isRegistered_) {
-        isRegistered_ = _isDiamondConfigurationRegistered(
+        isRegistered_ = _isResolverProxyConfigurationRegistered(
             _getDiamondCutManagerStorage(),
             _configurationId,
             _version
         );
     }
 
-    function checkDiamondConfigurationRegistered(
+    function checkResolverProxyConfigurationRegistered(
         bytes32 _configurationId,
         uint256 _version
     ) external override {
-        _checkDiamondConfigurationRegistered(
+        _checkResolverProxyConfigurationRegistered(
             _getDiamondCutManagerStorage(),
             _configurationId,
             _version
@@ -339,7 +344,12 @@ abstract contract DiamondCutManager is
         uint256 _version,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view override returns (IDiamondLoupe.Facet[] memory facets_) {
+    )
+        external
+        view
+        override
+        returns (IDiamondLoupe.Facet[] memory facets_)
+    {
         facets_ = _getFacetsByConfigurationIdAndVersion(
             _getDiamondCutManagerStorage(),
             _configurationId,

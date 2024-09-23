@@ -212,7 +212,7 @@ import {ERC20StorageWrapper} from './ERC20StorageWrapper.sol';
 import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
 import {
     IStaticFunctionSelectors
-} from '../../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC20_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 
 contract ERC20 is IERC20, IStaticFunctionSelectors, ERC20StorageWrapper {

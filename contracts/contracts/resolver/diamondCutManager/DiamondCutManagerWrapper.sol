@@ -211,8 +211,10 @@ import {
 } from '../../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
-import {IDiamondLoupe} from '../../interfaces/diamond/IDiamondLoupe.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {
+    IDiamondLoupe
+} from '../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
 import {
     BusinessLogicResolverWrapper
 } from '../BusinessLogicResolverWrapper.sol';
@@ -225,13 +227,14 @@ abstract contract DiamondCutManagerWrapper is
     IDiamondCutManager,
     BusinessLogicResolverWrapper
 {
-    // TODO: To discuss Use IDiamondLoup.Facet instead separated fields in single map.
-    struct DiamondCutMangerStorage {
+    struct DiamondCutManagerStorage {
         bytes32[] configurations;
         mapping(bytes32 => bool) activeConfigurations;
         mapping(bytes32 => uint256) latestVersion;
         // keccak256(configurationId, version)
         mapping(bytes32 => bytes32[]) facetIds;
+        // keccak256(configurationId, version)
+        mapping(bytes32 => uint256) facetVersions;
         // keccak256(configurationId, version, selector)
         mapping(bytes32 => address) facetAddress;
         // keccak256(configurationId, version, facetId)
@@ -248,9 +251,10 @@ abstract contract DiamondCutManagerWrapper is
 
     // TODO: Very complex... Perhaps needs protocol with pagination
     function _createConfiguration(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
-        bytes32[] calldata _facetIds
+        bytes32[] calldata _facetIds,
+        uint256[] calldata _facetVersions
     ) internal returns (uint256 latestVersion_) {
         if (!_dcms.activeConfigurations[_configurationId]) {
             _dcms.configurations.push(_configurationId);
@@ -263,7 +267,10 @@ abstract contract DiamondCutManagerWrapper is
         uint256 facetsLength = _facetIds.length;
         for (uint256 index; index < facetsLength; ) {
             bytes32 facetId = _facetIds[index];
-            address _address = _resolveLatestBusinessLogic(facetId);
+            if (_dcms.facetAddress[_buildHash(_configurationId, latestVersion_, facetId)] != address(0)) {
+                revert DuplicatedFacetInConfiguration(facetId);
+            }
+            address _address = _resolveBusinessLogicByVersion(facetId, _facetVersions[index]);
             // TODO: is better a checkFacetRegistered in BusinessLogicResolverWrapper??
             if (_address == address(0)) {
                 revert FacetIdNotRegistered(_configurationId, facetId);
@@ -298,7 +305,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _registerSelectors(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId,
@@ -325,7 +332,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _registerInterfaceIds(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId,
@@ -347,8 +354,8 @@ abstract contract DiamondCutManagerWrapper is
         }
     }
 
-    function _resolveDiamondCall(
-        DiamondCutMangerStorage storage _dcms,
+    function _resolveResolverProxyCall(
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
         bytes4 _selector
@@ -363,7 +370,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _resolveSupportsInterface(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
         bytes4 _interfaceId
@@ -377,21 +384,21 @@ abstract contract DiamondCutManagerWrapper is
         ];
     }
 
-    function _isDiamondConfigurationRegistered(
-        DiamondCutMangerStorage storage _dcms,
+    function _isResolverProxyConfigurationRegistered(
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version
     ) internal view returns (bool isRegistered_) {
         return
-            !_isDiamondConfigurationNotRegistered(
+            !_isResolverProxyConfigurationNotRegistered(
                 _dcms,
                 _configurationId,
                 _version
             );
     }
 
-    function _isDiamondConfigurationNotRegistered(
-        DiamondCutMangerStorage storage _dcms,
+    function _isResolverProxyConfigurationNotRegistered(
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version
     ) internal view returns (bool isRegistered_) {
@@ -400,8 +407,8 @@ abstract contract DiamondCutManagerWrapper is
             _version > _dcms.latestVersion[_configurationId];
     }
 
-    function _checkDiamondConfigurationRegistered(
-        DiamondCutMangerStorage storage _dcms,
+    function _checkResolverProxyConfigurationRegistered(
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version
     ) internal view {
@@ -409,12 +416,15 @@ abstract contract DiamondCutManagerWrapper is
             !_dcms.activeConfigurations[_configurationId] ||
             _version > _dcms.latestVersion[_configurationId]
         ) {
-            revert DiamondConfigurationNoRegistered(_configurationId, _version);
+            revert ResolverProxyConfigurationNoRegistered(
+                _configurationId,
+                _version
+            );
         }
     }
 
     function _getConfigurations(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (bytes32[] memory configurationIds_) {
@@ -426,7 +436,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _getFacetsLengthByConfigurationIdAndVersion(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version
     ) internal view returns (uint256 facetsLength_) {
@@ -441,7 +451,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _getFacetsByConfigurationIdAndVersion(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
         uint256 _pageIndex,
@@ -470,7 +480,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId
@@ -487,7 +497,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _getFacetSelectorsByConfigurationIdVersionAndFacetId(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId,
@@ -508,7 +518,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _getFacetIdsByConfigurationIdAndVersion(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
         uint256 _pageIndex,
@@ -527,7 +537,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _getFacetAddressesByConfigurationIdAndVersion(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
         uint256 _pageIndex,
@@ -556,7 +566,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _getFacetIdByConfigurationIdVersionAndSelector(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
         bytes4 _selector
@@ -571,7 +581,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _getFacetByConfigurationIdVersionAndFacetId(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId
@@ -590,7 +600,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _getFacetAddressByConfigurationIdVersionAndFacetId(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId
@@ -607,7 +617,7 @@ abstract contract DiamondCutManagerWrapper is
     function _getDiamondCutManagerStorage()
         internal
         pure
-        returns (DiamondCutMangerStorage storage ds)
+        returns (DiamondCutManagerStorage storage ds)
     {
         bytes32 position = _DIAMOND_CUT_MANAGER_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -617,7 +627,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _resolveVersion(
-        DiamondCutMangerStorage storage _dcms,
+        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version
     ) private view returns (uint256 version_) {

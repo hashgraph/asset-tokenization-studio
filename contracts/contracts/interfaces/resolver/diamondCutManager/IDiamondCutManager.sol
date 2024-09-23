@@ -205,14 +205,14 @@
 
 pragma solidity 0.8.18;
 
-import {IDiamondLoupe} from '../../diamond/IDiamondLoupe.sol';
+import {IDiamondLoupe} from '../resolverProxy/IDiamondLoupe.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-/// @title Diamond Cut Manager
-/// @notice This contract is used to manage configurations of diamonds.
-///		 Each diamond must have a diamond configuration id. With it, it could ask to the DiamondCutManger by:
-///      * Maintain the list of business logic that forms part of a diamond configuration.
+/// @title Resolver Proxy Manager
+/// @notice This contract is used to manage configurations of resolverProxy's.
+///		 Each resolverProxy must have a resolverProxy configuration id. With it, it could ask to the ResolverProxyCutManger by:
+///      * Maintain the list of business logic that forms part of a resolverProxy configuration.
 ///      * Maintain and resolve the list of function selectors by each configuration knowing its business logic address.
 ///      * Maintain and resolve the list of interface ids by each configuration.
 ///      By each configurationId:
@@ -230,9 +230,12 @@ interface IDiamondCutManager {
     /// @notice Not able to use a facetId unregistered
     error FacetIdNotRegistered(bytes32 configurationId, bytes32 facetId);
 
+    /// @notice Not able to duplicate facetId in list
+    error DuplicatedFacetInConfiguration(bytes32 facetId);
+
     /// @notice error that occurs when try to create a configuration and the configuration key doesn't exists
-    error DiamondConfigurationNoRegistered(
-        bytes32 diamondConfigurationId,
+    error ResolverProxyConfigurationNoRegistered(
+        bytes32 resolverProxyConfigurationId,
         uint256 version
     );
 
@@ -240,53 +243,55 @@ interface IDiamondCutManager {
     event DiamondConfigurationCreated(
         bytes32 configurationId,
         bytes32[] facetIds,
+        uint256[] facetVersions,
         uint256 version
     );
 
-    // TODO: interface to use facet versions instead of latest facetIds
     /// @notice Create a new configuration to the latest version of all facets.
     /// @param _configurationId unused identifier to the configuration.
     /// @param _facetIds list of business logics to be registered.
+    /// @param _facetVersions list of versions of each _facetIds.
     function createConfiguration(
         bytes32 _configurationId,
-        bytes32[] calldata _facetIds
+        bytes32[] calldata _facetIds,
+        uint256[] calldata _facetVersions
     ) external;
 
     /// @notice Resolve the facet address knowing configuration, version and selector.
-    /// @param _configurationId configured key in the diamond.
-    /// @param _version configured version in the diamond. if is 0, ask for latest version.
+    /// @param _configurationId configured key in the resolverProxy.
+    /// @param _version configured version in the resolverProxy. if is 0, ask for latest version.
     /// @param _selector received in the call/tx to be resolver.
     /// @return facetAddress_ with the resolver address of the facet.
     ///       If facet address cant been resolved, returns address(0).
-    function resolveDiamondCall(
+    function resolveResolverProxyCall(
         bytes32 _configurationId,
         uint256 _version,
         bytes4 _selector
     ) external view returns (address facetAddress_);
 
-    /// @notice Resolve if an interfaceId is present in the diamond configured version.
-    /// @param _configurationId configured key in the diamond.
-    /// @param _version configured version in the diamond. if is 0, ask for latest version.
+    /// @notice Resolve if an interfaceId is present in the resolverProxy configured version.
+    /// @param _configurationId configured key in the resolverProxy.
+    /// @param _version configured version in the resolverProxy. if is 0, ask for latest version.
     /// @param _interfaceId received to be tested.
-    /// @return exists_ a true if the interfaceId is part of the diamond configuration.
+    /// @return exists_ a true if the interfaceId is part of the resolverProxy configuration.
     function resolveSupportsInterface(
         bytes32 _configurationId,
         uint256 _version,
         bytes4 _interfaceId
     ) external view returns (bool exists_);
 
-    /// @notice if a diamond is registered.
+    /// @notice if a resolverProxy is registered.
     /// @param _configurationId the configuration key to be checked.
-    /// @param _version configured version in the diamond.
-    function isDiamondConfigurationRegistered(
+    /// @param _version configured version in the resolverProxy.
+    function isResolverProxyConfigurationRegistered(
         bytes32 _configurationId,
         uint256 _version
     ) external view returns (bool);
 
-    /// @notice check if a diamond is registered. If not revert.
+    /// @notice check if a resolverProxy is registered. If not revert.
     /// @param _configurationId the configuration key to be checked.
-    /// @param _version configured version in the diamond.
-    function checkDiamondConfigurationRegistered(
+    /// @param _version configured version in the resolverProxy.
+    function checkResolverProxyConfigurationRegistered(
         bytes32 _configurationId,
         uint256 _version
     ) external;
@@ -307,9 +312,9 @@ interface IDiamondCutManager {
         uint256 _pageLength
     ) external view returns (bytes32[] memory configurationIds_);
 
-    /// @notice Returns the latest version registered of a diamond configuration.
+    /// @notice Returns the latest version registered of a resolverProxy configuration.
     /// @param _configurationId key to be obtained.
-    /// @return latestVersion_ latest version registered of a diamond configuration.
+    /// @return latestVersion_ latest version registered of a resolverProxy configuration.
     function getLatestVersionByConfiguration(
         bytes32 _configurationId
     ) external view returns (uint256 latestVersion_);

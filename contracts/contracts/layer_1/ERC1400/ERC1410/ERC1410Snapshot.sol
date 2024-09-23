@@ -216,7 +216,7 @@ import {ERC1410Controller} from './ERC1410Controller.sol';
 import {_ERC1410_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {
     IStaticFunctionSelectors
-} from '../../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {IERC1410} from '../../interfaces/ERC1400/IERC1410.sol';
 
 contract ERC1410Snapshot is

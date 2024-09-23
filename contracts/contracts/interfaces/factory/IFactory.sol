@@ -206,7 +206,7 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IDiamond} from '../../interfaces/diamond/IDiamond.sol';
+import {IResolverProxy} from '../resolver/resolverProxy/IResolverProxy.sol';
 import {IBusinessLogicResolver} from '../resolver/IBusinessLogicResolver.sol';
 import {ERC20} from '../../layer_1/ERC1400/ERC20/ERC20.sol';
 import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
@@ -224,7 +224,7 @@ interface IFactory {
         Equity
     }
 
-    struct DiamondConfiguration {
+    struct ResolverProxyConfiguration {
         bytes32 key;
         uint256 version;
     }
@@ -233,8 +233,8 @@ interface IFactory {
     struct SecurityData {
         bool isMultiPartition;
         IBusinessLogicResolver resolver;
-        DiamondConfiguration diamondConfiguration;
-        IDiamond.Rbac[] rbacs;
+        ResolverProxyConfiguration resolverProxyConfiguration;
+        IResolverProxy.Rbac[] rbacs;
         bool isControllable;
         bool isWhiteList;
         uint256 maxSupply;
