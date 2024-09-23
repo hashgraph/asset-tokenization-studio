@@ -3,7 +3,7 @@
 exports[`ControlList should render correctly as blockList: blockList 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1f4pa1h"
+    class="chakra-stack css-1ygn4ha"
   >
     <p
       class="css-1ivtnlg"
@@ -11,10 +11,10 @@ exports[`ControlList should render correctly as blockList: blockList 1`] = `
       Control list
     </p>
     <form
-      class="chakra-stack css-1ah53el"
+      class="chakra-stack css-1f1uoxj"
     >
       <div
-        class="chakra-stack css-1gdahuk"
+        class="chakra-stack css-1jl72gh"
       >
         <div
           class="chakra-form-control css-1kxonj9"
@@ -29,7 +29,7 @@ exports[`ControlList should render correctly as blockList: blockList 1`] = `
               data-group="true"
             >
               <input
-                class="chakra-input css-1e8gdzn"
+                class="chakra-input css-1ymw93l"
                 data-testid="search"
                 id="search"
                 name="search"
@@ -37,7 +37,7 @@ exports[`ControlList should render correctly as blockList: blockList 1`] = `
                 value=""
               />
               <div
-                class="chakra-input__right-element css-17uv17e"
+                class="chakra-input__right-element css-1akgnmh"
               >
                 <button
                   aria-label="search"
@@ -147,7 +147,7 @@ exports[`ControlList should render correctly as blockList: blockList 1`] = `
 exports[`ControlList should render correctly as whiteList: whiteList 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1f4pa1h"
+    class="chakra-stack css-1ygn4ha"
   >
     <p
       class="css-1ivtnlg"
@@ -155,10 +155,10 @@ exports[`ControlList should render correctly as whiteList: whiteList 1`] = `
       Control list
     </p>
     <form
-      class="chakra-stack css-1ah53el"
+      class="chakra-stack css-1f1uoxj"
     >
       <div
-        class="chakra-stack css-1gdahuk"
+        class="chakra-stack css-1jl72gh"
       >
         <div
           class="chakra-form-control css-1kxonj9"
@@ -173,7 +173,7 @@ exports[`ControlList should render correctly as whiteList: whiteList 1`] = `
               data-group="true"
             >
               <input
-                class="chakra-input css-1e8gdzn"
+                class="chakra-input css-1ymw93l"
                 data-testid="search"
                 id="search"
                 name="search"
@@ -181,7 +181,7 @@ exports[`ControlList should render correctly as whiteList: whiteList 1`] = `
                 value=""
               />
               <div
-                class="chakra-input__right-element css-17uv17e"
+                class="chakra-input__right-element css-1akgnmh"
               >
                 <button
                   aria-label="search"

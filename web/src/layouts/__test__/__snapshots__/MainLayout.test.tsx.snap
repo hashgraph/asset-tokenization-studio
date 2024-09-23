@@ -7,7 +7,7 @@ exports[`MainLayout if user is not connected should not render sidebar: connecte
     data-testid="sidebar-layout"
   >
     <div
-      class="chakra-stack css-ahthbn"
+      class="chakra-stack css-b5leqj"
     >
       <div
         class="css-df6r3v"
@@ -40,7 +40,7 @@ exports[`MainLayout if user is not connected should not render sidebar: connecte
     </div>
   </div>
   <div
-    class="chakra-stack css-ppmla1"
+    class="chakra-stack css-1h0sumw"
   >
     <div
       class="css-18ne1hj"
@@ -120,7 +120,7 @@ exports[`MainLayout if user is not connected should not render sidebar: connecte
               tabindex="-1"
             >
               <div
-                class="chakra-stack css-1ynn7q9"
+                class="chakra-stack css-6ekxde"
               >
                 <button
                   class="chakra-menu__menuitem css-1xsc1dv"
@@ -159,7 +159,7 @@ exports[`MainLayout if user is not connected should not render sidebar: connecte
             class="chakra-divider css-1aam7vk"
           />
           <div
-            class="chakra-stack css-1uodvt1"
+            class="chakra-stack css-x0u0or"
           >
             <p
               class="css-sl9a0d"
@@ -171,7 +171,7 @@ exports[`MainLayout if user is not connected should not render sidebar: connecte
       </div>
     </div>
     <main
-      class="chakra-stack css-11wtijr"
+      class="chakra-stack css-1jt16a2"
     />
   </div>
   <span
@@ -184,7 +184,7 @@ exports[`MainLayout if user is not connected should not render sidebar: connecte
 exports[`MainLayout if user is not connected should not render sidebar: disconnected 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-ppmla1"
+    class="chakra-stack css-1h0sumw"
   >
     <div
       class="css-18ne1hj"
@@ -206,7 +206,7 @@ exports[`MainLayout if user is not connected should not render sidebar: disconne
             class="chakra-divider css-1aam7vk"
           />
           <div
-            class="chakra-stack css-1uodvt1"
+            class="chakra-stack css-x0u0or"
           >
             <p
               class="css-sl9a0d"
@@ -218,7 +218,7 @@ exports[`MainLayout if user is not connected should not render sidebar: disconne
       </div>
     </div>
     <main
-      class="chakra-stack css-11wtijr"
+      class="chakra-stack css-1jt16a2"
     />
   </div>
   <span

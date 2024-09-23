@@ -3,14 +3,14 @@
 exports[`SecurityCard render correctly as admin: admin 1`] = `
 <DocumentFragment>
   <a
-    class="chakra-stack css-134mea9"
+    class="chakra-stack css-12rha61"
     href="/security/0.0.123456"
   >
     <div
-      class="chakra-stack css-vedre6"
+      class="chakra-stack css-h3g6v6"
     >
       <div
-        class="chakra-stack css-11ehgu5"
+        class="chakra-stack css-198f9j2"
       >
         <p
           class="css-1bcbshz"
@@ -46,14 +46,14 @@ exports[`SecurityCard render correctly as admin: admin 1`] = `
 exports[`SecurityCard render correctly as holder: holder 1`] = `
 <DocumentFragment>
   <a
-    class="chakra-stack css-1dfj533"
+    class="chakra-stack css-zxhdiq"
     href="/security/0.0.123456"
   >
     <div
-      class="chakra-stack css-vedre6"
+      class="chakra-stack css-h3g6v6"
     >
       <div
-        class="chakra-stack css-11ehgu5"
+        class="chakra-stack css-198f9j2"
       >
         <p
           class="css-1bcbshz"

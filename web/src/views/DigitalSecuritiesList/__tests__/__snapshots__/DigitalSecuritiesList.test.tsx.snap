@@ -3,10 +3,10 @@
 exports[`DigitalSecuritiesList render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1y3f6ad"
+    class="chakra-stack css-1oeb4ru"
   >
     <div
-      class="chakra-stack css-1yfjds0"
+      class="chakra-stack css-1qyhq9w"
     >
       <div
         class="css-k5rr6j"
@@ -67,7 +67,7 @@ exports[`DigitalSecuritiesList render correctly 1`] = `
       </nav>
     </div>
     <div
-      class="chakra-stack css-7926va"
+      class="chakra-stack css-1mdpefa"
     >
       <a
         class="chakra-button css-vueqt9"
@@ -104,7 +104,7 @@ exports[`DigitalSecuritiesList render correctly 1`] = `
     </div>
   </div>
   <div
-    class="chakra-stack css-1f4pa1h"
+    class="chakra-stack css-1ygn4ha"
   >
     <p
       class="css-9to9lm"
@@ -112,7 +112,7 @@ exports[`DigitalSecuritiesList render correctly 1`] = `
       Digital securities list
     </p>
     <div
-      class="chakra-stack css-1gdahuk"
+      class="chakra-stack css-1jl72gh"
     >
       <div
         class="chakra-form-control css-1kxonj9"
@@ -127,7 +127,7 @@ exports[`DigitalSecuritiesList render correctly 1`] = `
             data-group="true"
           >
             <input
-              class="chakra-input css-1b0zves"
+              class="chakra-input css-1ncmsep"
               data-testid="search"
               id="search"
               name="search"
@@ -135,7 +135,7 @@ exports[`DigitalSecuritiesList render correctly 1`] = `
               value=""
             />
             <div
-              class="chakra-input__right-element css-17uv17e"
+              class="chakra-input__right-element css-1akgnmh"
             >
               <button
                 aria-label="search"
