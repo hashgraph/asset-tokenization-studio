@@ -209,6 +209,13 @@ pragma solidity 0.8.18;
 import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
+import {
+    IAccessControl
+} from '../layer_1/interfaces/accessControl/IAccessControl.sol';
+import {IPause} from '../layer_1/interfaces/pause/IPause.sol';
+import {
+    IDiamondCutManager
+} from '../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol';
 import {DiamondCutManager} from './diamondCutManager/DiamondCutManager.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../layer_1/constants/roles.sol';
 
@@ -334,6 +341,16 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
-    {}
+    {
+        staticInterfaceIds_ = new bytes4[](4);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IBusinessLogicResolver)
+            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IAccessControl)
+            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IPause).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IDiamondCutManager)
+            .interfaceId;
+    }
     // solhint-enable no-empty-blocks
 }

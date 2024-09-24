@@ -218,12 +218,12 @@ import {
     deployERC1594,
     deployERC1643,
     deployERC1644,
-    deployDiamondFacet,
+    deployDiamondLoupeFacet,
     deployEquity,
     deploySnapshots,
     deployScheduledSnapshots,
     deployCorporateActionsSecurity,
-    deployassettokenizationFullInfrastructure,
+    deployAssettokenizationFullInfrastructure,
     toHashgraphKey,
     updateProxy,
     getProxyImpl,
@@ -448,7 +448,7 @@ task(
         toHashgraphKey(client1privatekey, client1isED25519)
     )
 
-    const result = await deployassettokenizationFullInfrastructure(
+    const result = await deployAssettokenizationFullInfrastructure(
         client,
         client1privatekey,
         client1isED25519
@@ -467,7 +467,7 @@ task(
     const erc1643 = result[i++]
     const erc1644 = result[i++]
     const snapshots = result[i++]
-    const diamondFacet = result[i++]
+    const diamondLoupeFacet = result[i++]
     const equity = result[i++]
     const bond = result[i++]
     const scheduledSnapshot = result[i++]
@@ -511,8 +511,8 @@ task(
         erc1644.toString(),
         '\nSnapshots Address: \t',
         snapshots.toString(),
-        '\nDiamond Facet Address: \t',
-        diamondFacet.toString(),
+        '\nDiamond Loupe Facet Address: \t',
+        diamondLoupeFacet.toString(),
         '\nEquity Address: \t',
         equity.toString(),
         '\nBond Address: \t',
@@ -919,7 +919,7 @@ task('deployERC1644', 'Deploy new erc1644').setAction(
     }
 )
 
-task('deployDiamondFacet', 'Deploy new diamond facet').setAction(
+task('deployDiamondLoupeFacet', 'Deploy new diamond facet').setAction(
     async (arguements: any, hre) => {
         const accounts = hre.network.config
             .accounts as unknown as Array<AccountHedera>
@@ -936,10 +936,13 @@ task('deployDiamondFacet', 'Deploy new diamond facet').setAction(
             toHashgraphKey(client1privatekey, client1isED25519)
         )
 
-        const result = await deployDiamondFacet(client, client1privatekey)
-        const diamondAddress = result
+        const result = await deployDiamondLoupeFacet(client, client1privatekey)
+        const diamondLoupeAddress = result
 
-        console.log('\nDiamond Facet Address: \t', diamondAddress.toString())
+        console.log(
+            '\nDiamond Loupe Facet Address: \t',
+            diamondLoupeAddress.toString()
+        )
     }
 )
 

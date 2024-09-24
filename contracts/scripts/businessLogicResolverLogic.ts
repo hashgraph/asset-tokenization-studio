@@ -222,7 +222,7 @@ export interface BusinessLogicRegistryData {
 export interface DeployedBusinessLogics {
     businessLogicResolver: IStaticFunctionSelectors
     factory: IStaticFunctionSelectors
-    diamondFacet: IStaticFunctionSelectors
+    diamondLoupeFacet: IStaticFunctionSelectors
     accessControl: IStaticFunctionSelectors
     controlList: IStaticFunctionSelectors
     corporateActionsSecurity: IStaticFunctionSelectors
@@ -253,7 +253,6 @@ export async function deployProxyToBusinessLogicResolver(
         'BusinessLogicResolver',
         transparentUpgradableProxy.address
     )
-
     await businessLogicResolver.initialize_BusinessLogicResolver()
 }
 

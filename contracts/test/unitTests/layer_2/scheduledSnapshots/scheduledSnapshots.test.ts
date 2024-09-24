@@ -206,7 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
-    type Diamond,
+    type ResolverProxy,
     type Equity,
     type Pause,
     type ScheduledSnapshots,
@@ -228,7 +228,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 const TIME = 6000
 
 describe('Scheduled Snapshots Tests', () => {
-    let diamond: Diamond
+    let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
     let signer_C: SignerWithAddress

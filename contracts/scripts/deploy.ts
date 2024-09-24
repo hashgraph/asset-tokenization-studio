@@ -217,7 +217,7 @@ import {
     Cap__factory,
     ControlList__factory,
     CorporateActionsSecurity__factory,
-    DiamondFacet__factory,
+    DiamondLoupeFacet__factory,
     EquityUSA__factory,
     ERC1410ScheduledSnapshot__factory,
     ERC1594__factory,
@@ -246,6 +246,8 @@ import {
     getStaticResolverKey,
     registerBusinessLogics,
 } from './contractsMethods'
+import { BondConfigId, EquityConfigId } from './constants.js'
+import { createResolverConfig } from './resolverDiamondCut.js'
 
 export function initializeClient(): [
     Client,
@@ -324,7 +326,7 @@ export async function getProxyImpl(
     console.log('New Implementation' + address[0])
 }
 
-export async function deployassettokenizationFullInfrastructure(
+export async function deployAssettokenizationFullInfrastructure(
     clientOperator: Client,
     privateKey: string,
     isED25519Type: boolean
@@ -346,7 +348,10 @@ export async function deployassettokenizationFullInfrastructure(
     const erc1643 = await deployERC1643(clientOperator, privateKey)
     const erc1644 = await deployERC1644(clientOperator, privateKey)
     const snapshots = await deploySnapshots(clientOperator, privateKey)
-    const diamondFacet = await deployDiamondFacet(clientOperator, privateKey)
+    const diamondLoupeFacet = await deployDiamondLoupeFacet(
+        clientOperator,
+        privateKey
+    )
     const equity = await deployEquity(clientOperator, privateKey)
     const bond = await deployBond(clientOperator, privateKey)
     const scheduledSnapshots = await deployScheduledSnapshots(
@@ -365,10 +370,10 @@ export async function deployassettokenizationFullInfrastructure(
     const businessLogicRegistries: BusinessLogicRegistryData[] = [
         {
             businessLogicKey: await getStaticResolverKey(
-                diamondFacet,
+                diamondLoupeFacet,
                 clientOperator
             ),
-            businessLogicAddress: getSolidityAddress(diamondFacet),
+            businessLogicAddress: getSolidityAddress(diamondLoupeFacet),
         },
         {
             businessLogicKey: await getStaticResolverKey(
@@ -475,6 +480,44 @@ export async function deployassettokenizationFullInfrastructure(
         clientOperator
     )
 
+    const facetIdsCommon: string[] = [
+        await getStaticResolverKey(diamondLoupeFacet, clientOperator),
+        await getStaticResolverKey(accessControl, clientOperator),
+        await getStaticResolverKey(cap, clientOperator),
+        await getStaticResolverKey(pause, clientOperator),
+        await getStaticResolverKey(controlList, clientOperator),
+        await getStaticResolverKey(erc20, clientOperator),
+        await getStaticResolverKey(erc1644, clientOperator),
+        await getStaticResolverKey(erc1410, clientOperator),
+        await getStaticResolverKey(erc1594, clientOperator),
+        await getStaticResolverKey(erc1643, clientOperator),
+        await getStaticResolverKey(snapshots, clientOperator),
+        await getStaticResolverKey(scheduledSnapshots, clientOperator),
+        await getStaticResolverKey(corporateActionsSecurity, clientOperator),
+        await getStaticResolverKey(lock, clientOperator),
+        await getStaticResolverKey(transferAndLock, clientOperator),
+    ]
+
+    const facetIdsEquities: string[] = facetIdsCommon.concat(
+        await getStaticResolverKey(equity, clientOperator)
+    )
+
+    const facetVersionsEquities: number[] = facetIdsEquities.map(() => 1)
+
+    const facetIdsBonds: string[] = facetIdsCommon.concat(
+        await getStaticResolverKey(bond, clientOperator)
+    )
+
+    const facetVersionsBonds: number[] = facetIdsBonds.map(() => 1)
+
+    await createResolverConfig(
+        EquityConfigId,
+        facetIdsEquities,
+        facetVersionsEquities
+    )
+
+    await createResolverConfig(BondConfigId, facetIdsBonds, facetVersionsBonds)
+
     const factoryResult = await deployFactory(
         clientOperator,
         privateKey,
@@ -495,7 +538,7 @@ export async function deployassettokenizationFullInfrastructure(
         erc1643,
         erc1644,
         snapshots,
-        diamondFacet,
+        diamondLoupeFacet,
         equity,
         bond,
         scheduledSnapshots,
@@ -894,26 +937,26 @@ export async function deploySnapshots(
     return snapshots
 }
 
-export async function deployDiamondFacet(
+export async function deployDiamondLoupeFacet(
     clientOperator: Client,
     privateKey: string
 ) {
     // Deploying Diamond cut logic
-    console.log(`Deploying Diamond Facet. please wait...`)
+    console.log(`Deploying Diamond Loupe Facet. please wait...`)
 
-    const diamondFacet = await deployContractSDK(
-        DiamondFacet__factory,
+    const diamondLoupeFacet = await deployContractSDK(
+        DiamondLoupeFacet__factory,
         privateKey,
         clientOperator
     )
 
     console.log(
-        `Diamond Facet deployed ${
-            (await getContractInfo(diamondFacet.toString())).evm_address
+        `Diamond Loupe Facet deployed ${
+            (await getContractInfo(diamondLoupeFacet.toString())).evm_address
         }`
     )
 
-    return diamondFacet
+    return diamondLoupeFacet
 }
 
 export async function deployEquity(clientOperator: Client, privateKey: string) {

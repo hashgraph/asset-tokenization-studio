@@ -239,7 +239,7 @@ abstract contract DiamondCutManagerWrapper is
         // keccak256(configurationId, version, selector)
         mapping(bytes32 => address) facetAddress;
         // keccak256(configurationId, version, facetId)
-        mapping(bytes32 => address) _address;
+        mapping(bytes32 => address) addr;
         // keccak256(configurationId, version, facetId)
         mapping(bytes32 => bytes4[]) selectors;
         // keccak256(configurationId, version, selector)
@@ -296,7 +296,7 @@ abstract contract DiamondCutManagerWrapper is
             if (_address == address(0)) {
                 revert FacetIdNotRegistered(_configurationId, facetId);
             }
-            _dcms._address[configVersionFacetHash] = _address;
+            _dcms.addr[configVersionFacetHash] = _address;
 
             IStaticFunctionSelectors staticFunctionSelectors = IStaticFunctionSelectors(
                     _address
@@ -465,7 +465,12 @@ abstract contract DiamondCutManagerWrapper is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (IDiamondLoupe.Facet[] memory facets_) {
-        bytes32[] memory facetIds = _dcms.facetIds[_configurationId];
+        bytes32[] memory facetIds = _dcms.facetIds[
+            _buildHash(
+                _configurationId,
+                _resolveVersion(_dcms, _configurationId, _version)
+            )
+        ];
         (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
             _pageIndex,
             _pageLength
@@ -551,7 +556,12 @@ abstract contract DiamondCutManagerWrapper is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory facetAddresses_) {
-        bytes32[] memory facetIds = _dcms.facetIds[_configurationId];
+        bytes32[] memory facetIds = _dcms.facetIds[
+            _buildHash(
+                _configurationId,
+                _resolveVersion(_dcms, _configurationId, _version)
+            )
+        ];
         (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
             _pageIndex,
             _pageLength
@@ -559,7 +569,7 @@ abstract contract DiamondCutManagerWrapper is
         uint256 size = LibCommon.getSize(start, end, facetIds.length);
         facetAddresses_ = new address[](size);
         for (uint256 index; index < size; ) {
-            facetAddresses_[index] = _dcms._address[
+            facetAddresses_[index] = _dcms.addr[
                 _buildHash(
                     _configurationId,
                     _resolveVersion(_dcms, _configurationId, _version),
@@ -601,9 +611,9 @@ abstract contract DiamondCutManagerWrapper is
         );
         facet_ = IDiamondLoupe.Facet({
             id: _facetId,
-            _address: _dcms._address[facetIdHash],
+            addr: _dcms.addr[facetIdHash],
             selectors: _dcms.selectors[facetIdHash],
-            interfaceIds: _dcms.selectors[facetIdHash]
+            interfaceIds: _dcms.interfaceIds[facetIdHash]
         });
     }
 
@@ -613,7 +623,7 @@ abstract contract DiamondCutManagerWrapper is
         uint256 _version,
         bytes32 _facetId
     ) internal view returns (address facetAddress_) {
-        facetAddress_ = _dcms._address[
+        facetAddress_ = _dcms.addr[
             _buildHash(
                 _configurationId,
                 _resolveVersion(_dcms, _configurationId, _version),
