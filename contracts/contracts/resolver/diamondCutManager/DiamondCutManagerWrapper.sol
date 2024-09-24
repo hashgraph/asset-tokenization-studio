@@ -276,7 +276,7 @@ abstract contract DiamondCutManagerWrapper is
 
         uint256 facetsLength = _configurationContent.facetIds.length;
 
-        for (uint256 index; index < facetsLength; index++) {
+        for (uint256 index; index < facetsLength; ) {
             bytes32 facetId = _configurationContent.facetIds[index];
             bytes32 configVersionFacetHash = _buildHash(
                 _configurationId,
@@ -317,6 +317,10 @@ abstract contract DiamondCutManagerWrapper is
                 staticFunctionSelectors,
                 configVersionFacetHash
             );
+
+            unchecked {
+                ++index;
+            }
         }
     }
 
@@ -332,7 +336,7 @@ abstract contract DiamondCutManagerWrapper is
         bytes4[] memory selectors = _static.getStaticFunctionSelectors();
         _dcms.selectors[_configVersionFacetHash] = selectors;
         uint256 length = selectors.length;
-        for (uint256 index; index < length; index++) {
+        for (uint256 index; index < length; ) {
             bytes4 selector = selectors[index];
             bytes32 configVersionSelectorHash = _buildHashSelector(
                 _configurationId,
@@ -341,6 +345,9 @@ abstract contract DiamondCutManagerWrapper is
             );
             _dcms.facetAddress[configVersionSelectorHash] = selectorAddress;
             _dcms.selectorToFacetId[configVersionSelectorHash] = _facetId;
+            unchecked {
+                ++index;
+            }
         }
     }
 
@@ -354,11 +361,14 @@ abstract contract DiamondCutManagerWrapper is
         bytes4[] memory interfaceIds = _static.getStaticInterfaceIds();
         _dcms.interfaceIds[_configVersionFacetHash] = interfaceIds;
         uint256 length = interfaceIds.length;
-        for (uint256 index; index < length; index++) {
+        for (uint256 index; index < length; ) {
             bytes4 interfaceId = interfaceIds[index];
             _dcms.supportsInterface[
                 _buildHashSelector(_configurationId, _version, interfaceId)
             ] = true;
+            unchecked {
+                ++index;
+            }
         }
     }
 

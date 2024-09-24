@@ -287,11 +287,13 @@ export async function deployEnvironment() {
         environment.facetVersionsBonds = environment.facetIdsBonds.map(() => 1)
 
         await createResolverConfig(
+            environment,
             EquityConfigId,
             environment.facetIdsEquities,
             environment.facetVersionsEquities
         )
         await createResolverConfig(
+            environment,
             BondConfigId,
             environment.facetIdsBonds,
             environment.facetVersionsBonds
