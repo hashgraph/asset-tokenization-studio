@@ -638,7 +638,7 @@ task('getConfigurationInfo', 'Get all info for a given configuration')
                     )
                     console.log(
                         `interfacesId : ${JSON.stringify(
-                            facets[0][j].interfacesId
+                            facets[0][j].interfaceIds
                         )}`
                     )
                     console.log('-------------------------')

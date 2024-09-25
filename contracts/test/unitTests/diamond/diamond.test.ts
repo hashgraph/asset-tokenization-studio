@@ -374,10 +374,12 @@ describe('Diamond Tests', () => {
         await businessLogicResolver.registerBusinessLogics(
             businessLogicsRegistryDatas
         )
+
         await businessLogicResolver.createConfiguration(
             configId,
             configurationContentDefinition
         )
+
         const diamond = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(businessLogicResolver.address, configId, 1, [])
