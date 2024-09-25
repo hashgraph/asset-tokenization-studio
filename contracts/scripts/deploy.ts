@@ -249,36 +249,36 @@ import {
 } from './contractsMethods'
 import { BondConfigId, EquityConfigId } from './constants'
 
-const used_already_deployed = false
-const resolver_contract: ContractId = ContractId.fromString('0.0.4901183')
+const used_already_deployed = true
+const resolver_proxy_contract: ContractId = ContractId.fromString('0.0.4909802')
 const resolver_proxyAdmin_contract: ContractId =
-    ContractId.fromString('0.0.4901185')
-const resolver_proxy_contract: ContractId = ContractId.fromString('0.0.4901187')
-const factory_contract: ContractId = ContractId.fromString('0.0.4901380')
+    ContractId.fromString('0.0.4909799')
+const resolver_contract: ContractId = ContractId.fromString('0.0.4909796')
+const factory_proxy_contract: ContractId = ContractId.fromString('0.0.4909865')
 const factory_proxyAdmin_contract: ContractId =
-    ContractId.fromString('0.0.4901383')
-const factory_proxy_contract: ContractId = ContractId.fromString('0.0.4901387')
-const accessControl_contract: ContractId = ContractId.fromString('0.0.4899980')
-const cap_contract: ContractId = ContractId.fromString('0.0.4899983')
-const controlList_contract: ContractId = ContractId.fromString('0.0.4899986')
-const pause_contract: ContractId = ContractId.fromString('0.0.4899988')
-const lock_contract: ContractId = ContractId.fromString('0.0.4899992')
-const erc20_contract: ContractId = ContractId.fromString('0.0.4899997')
-const erc1410_contract: ContractId = ContractId.fromString('0.0.4900001')
-const erc1594_contract: ContractId = ContractId.fromString('0.0.4900005')
-const erc1643_contract: ContractId = ContractId.fromString('0.0.4900008')
-const erc1644_contract: ContractId = ContractId.fromString('0.0.4900011')
-const snapshots_contract: ContractId = ContractId.fromString('0.0.4900015')
+    ContractId.fromString('0.0.4909863')
+const factory_contract: ContractId = ContractId.fromString('0.0.4909861')
+const accessControl_contract: ContractId = ContractId.fromString('0.0.4909804')
+const cap_contract: ContractId = ContractId.fromString('0.0.4909806')
+const controlList_contract: ContractId = ContractId.fromString('0.0.4909812')
+const pause_contract: ContractId = ContractId.fromString('0.0.4909814')
+const erc20_contract: ContractId = ContractId.fromString('0.0.4909820')
+const erc1410_contract: ContractId = ContractId.fromString('0.0.4909823')
+const erc1594_contract: ContractId = ContractId.fromString('0.0.4909826')
+const erc1643_contract: ContractId = ContractId.fromString('0.0.4909828')
+const erc1644_contract: ContractId = ContractId.fromString('0.0.4909832')
+const snapshots_contract: ContractId = ContractId.fromString('0.0.4909834')
 const diamondLoupeFacet_contract: ContractId =
-    ContractId.fromString('0.0.4900018')
-const equity_contract: ContractId = ContractId.fromString('0.0.4900022')
-const bond_contract: ContractId = ContractId.fromString('0.0.4900028')
+    ContractId.fromString('0.0.4909837')
+const equity_contract: ContractId = ContractId.fromString('0.0.4909841')
+const bond_contract: ContractId = ContractId.fromString('0.0.4909843')
 const scheduledSnapshots_contract: ContractId =
-    ContractId.fromString('0.0.4900032')
+    ContractId.fromString('0.0.4909846')
 const corporateActionsSecurity_contract: ContractId =
-    ContractId.fromString('0.0.4900035')
+    ContractId.fromString('0.0.4909851')
+const lock_contract: ContractId = ContractId.fromString('0.0.4909817')
 const transferAndLock_contract: ContractId =
-    ContractId.fromString('0.0.4900037')
+    ContractId.fromString('0.0.4909854')
 
 export function initializeClient(): [
     Client,
