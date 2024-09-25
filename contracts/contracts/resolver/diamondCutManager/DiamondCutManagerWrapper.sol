@@ -284,18 +284,20 @@ abstract contract DiamondCutManagerWrapper is
                 facetId
             );
 
-            if (_dcms.facetAddress[configVersionFacetHash] != address(0)) {
-                revert DuplicatedFacetInConfiguration(facetId);
-            }
-
             address _address = _resolveBusinessLogicByVersion(
                 facetId,
                 _configurationContent.facetVersions[index]
             );
+
             // TODO: is better a checkFacetRegistered in BusinessLogicResolverWrapper??
             if (_address == address(0)) {
                 revert FacetIdNotRegistered(_configurationId, facetId);
             }
+
+            if (_dcms.addr[configVersionFacetHash] != address(0)) {
+                revert DuplicatedFacetInConfiguration(facetId);
+            }
+
             _dcms.addr[configVersionFacetHash] = _address;
 
             IStaticFunctionSelectors staticFunctionSelectors = IStaticFunctionSelectors(

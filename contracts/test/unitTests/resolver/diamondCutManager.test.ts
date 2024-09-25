@@ -583,5 +583,50 @@ describe('DiamondCutManager', () => {
                 configurationContentDefinition
             )
         ).to.be.rejectedWith('TokenIsPaused')
+
+        await pause.unpause()
+    })
+
+    it('GIVEN a resolver WHEN adding a new configuration with a non registered facet THEN fails with FacetIdNotRegistered', async () => {
+        diamondCutManager = diamondCutManager.connect(signer_A)
+
+        const facetsIds = [
+            '0x0000000000000000000000000000000000000000000000000000000000000000',
+        ]
+        const facetVersions = [1]
+
+        const configurationContentDefinition: ConfigurationContentDefinition = {
+            facetIds: facetsIds,
+            facetVersions: facetVersions,
+        }
+
+        await expect(
+            diamondCutManager.createConfiguration(
+                EquityConfigId,
+                configurationContentDefinition
+            )
+        ).to.be.rejectedWith('FacetIdNotRegistered')
+    })
+
+    it('GIVEN a resolver WHEN adding a new configuration with a duplicated facet THEN fails with DuplicatedFacetInConfiguration', async () => {
+        diamondCutManager = diamondCutManager.connect(signer_A)
+
+        const facetsIds = [...environment.facetIdsEquities]
+        facetsIds.push(environment.facetIdsEquities[0])
+
+        const facetVersions = [...environment.facetVersionsEquities]
+        facetVersions.push(environment.facetVersionsEquities[0])
+
+        const configurationContentDefinition: ConfigurationContentDefinition = {
+            facetIds: facetsIds,
+            facetVersions: facetVersions,
+        }
+
+        await expect(
+            diamondCutManager.createConfiguration(
+                EquityConfigId,
+                configurationContentDefinition
+            )
+        ).to.be.rejectedWith('DuplicatedFacetInConfiguration')
     })
 })
