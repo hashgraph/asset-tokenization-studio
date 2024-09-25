@@ -296,6 +296,18 @@ describe('DiamondCutManager', () => {
                 configVersion <= configLatestVersion;
                 configVersion++
             ) {
+                const isConfigRegistered =
+                    await diamondCutManager.isResolverProxyConfigurationRegistered(
+                        configId,
+                        configVersion
+                    )
+                expect(isConfigRegistered).to.be.true
+
+                await diamondCutManager.checkResolverProxyConfigurationRegistered(
+                    configId,
+                    configVersion
+                )
+
                 const facetsLength = (
                     await diamondCutManager.getFacetsLengthByConfigurationIdAndVersion(
                         configId,
@@ -355,6 +367,9 @@ describe('DiamondCutManager', () => {
                     expect(facet.addr).to.exist
                     expect(facet.addr).to.not.be.empty
                     expect(facet.addr).to.equal(address)
+                    expect(facet.addr).to.not.equal(
+                        '0x0000000000000000000000000000000000000000'
+                    )
 
                     expect(facet.selectors).to.exist
                     expect(facet.selectors).to.not.be.empty
@@ -377,8 +392,29 @@ describe('DiamondCutManager', () => {
                                 configVersion,
                                 selectorId
                             )
-
+                        const facetAddressForSelector =
+                            await diamondCutManager.resolveResolverProxyCall(
+                                configId,
+                                configVersion,
+                                selectorId
+                            )
+                        expect(facetAddressForSelector).to.equal(facet.addr)
                         expect(id).to.equal(facet.id)
+                    }
+
+                    for (
+                        let interfaceIndex = 0;
+                        interfaceIndex < facet.interfaceIds.length;
+                        interfaceIndex++
+                    ) {
+                        const interfaceId = facet.interfaceIds[interfaceIndex]
+                        const interfaceExists =
+                            await diamondCutManager.resolveSupportsInterface(
+                                configId,
+                                configVersion,
+                                interfaceId
+                            )
+                        expect(interfaceExists).to.be.true
                     }
                 }
 
@@ -422,6 +458,61 @@ describe('DiamondCutManager', () => {
                 }
             }
         }
+    })
+
+    it('GIVEN a resolver WHEN resolving calls THEN success', async () => {
+        const facets =
+            await diamondCutManager.getFacetsByConfigurationIdAndVersion(
+                EquityConfigId,
+                1,
+                0,
+                environment.facetIdsEquities.length
+            )
+
+        expect(facets.length).to.be.greaterThan(0)
+
+        const configVersionDoesNotExist =
+            await diamondCutManager.isResolverProxyConfigurationRegistered(
+                EquityConfigId,
+                2
+            )
+        expect(configVersionDoesNotExist).to.be.false
+        await expect(
+            diamondCutManager.checkResolverProxyConfigurationRegistered(
+                EquityConfigId,
+                2
+            )
+        ).to.be.rejectedWith('ResolverProxyConfigurationNoRegistered')
+
+        const configDoesNotExist =
+            await diamondCutManager.isResolverProxyConfigurationRegistered(
+                '0x0000000000000000000000000000000000000000000000000000000000000000',
+                1
+            )
+        expect(configDoesNotExist).to.be.false
+        await expect(
+            diamondCutManager.checkResolverProxyConfigurationRegistered(
+                '0x0000000000000000000000000000000000000000000000000000000000000000',
+                1
+            )
+        ).to.be.rejectedWith('ResolverProxyConfigurationNoRegistered')
+
+        const noFacetAddress = await diamondCutManager.resolveResolverProxyCall(
+            EquityConfigId,
+            1,
+            '0x00000001'
+        )
+        expect(noFacetAddress).to.equal(
+            '0x0000000000000000000000000000000000000000'
+        )
+
+        const interfaceDoesnotExist =
+            await diamondCutManager.resolveSupportsInterface(
+                EquityConfigId,
+                1,
+                '0x00000001'
+            )
+        expect(interfaceDoesnotExist).to.be.false
     })
 
     it('GIVEN a resolver WHEN adding a new configuration with configId at 0 THEN fails with DefaultValueForConfigurationIdNotPermitted', async () => {
