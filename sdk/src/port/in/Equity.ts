@@ -296,13 +296,6 @@ class EquityInPort implements IEquityInPort {
 
     const securityFactory = this.networkService.configuration.factoryAddress;
     const resolver = this.networkService.configuration.resolverAddress;
-    const businessLogicKeysCommon =
-      this.networkService.configuration.businessLogicKeysCommon;
-    const businessLogicKeysEquity =
-      this.networkService.configuration.businessLogicKeysEquity;
-    const businessLogicKeys = businessLogicKeysCommon.concat(
-      businessLogicKeysEquity,
-    );
 
     const newSecurity: SecurityProps = {
       name: req.name,
@@ -337,7 +330,8 @@ class EquityInPort implements IEquityInPort {
         req.nominalValue,
         securityFactory ? new ContractId(securityFactory) : undefined,
         resolver ? new ContractId(resolver) : undefined,
-        businessLogicKeys ? businessLogicKeys : [],
+        req.configId,
+        req.configVersion,
         diamondOwnerAccount,
       ),
     );

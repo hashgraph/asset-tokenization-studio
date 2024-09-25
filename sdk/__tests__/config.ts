@@ -214,18 +214,6 @@ config();
 export const ENVIRONMENT = 'testnet';
 export const FACTORY_ADDRESS = process.env.FACTORY_ADDRESS ?? '';
 export const RESOLVER_ADDRESS = process.env.RESOLVER_ADDRESS ?? '';
-export const BUSINESS_LOGIC_KEYS_COMMON: string[] = process.env
-  .BUSINESS_LOGIC_KEYS_COMMON
-  ? process.env.BUSINESS_LOGIC_KEYS_COMMON.split(',')
-  : [];
-export const BUSINESS_LOGIC_KEYS_EQUITY: string[] = process.env
-  .BUSINESS_LOGIC_KEYS_EQUITY
-  ? process.env.BUSINESS_LOGIC_KEYS_EQUITY.split(',')
-  : [];
-export const BUSINESS_LOGIC_KEYS_BOND: string[] = process.env
-  .BUSINESS_LOGIC_KEYS_BOND
-  ? process.env.BUSINESS_LOGIC_KEYS_BOND.split(',')
-  : [];
 
 export const CLIENT_PRIVATE_KEY_ECDSA = new PrivateKey({
   key: process.env.CLIENT_PRIVATE_KEY_ECDSA_1 ?? '',
