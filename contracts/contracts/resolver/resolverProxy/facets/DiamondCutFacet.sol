@@ -203,118 +203,122 @@
 
 */
 
-//import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ethers } from 'hardhat'
-import { IBusinessLogicResolver } from '../typechain-types'
-import { IStaticFunctionSelectors } from '../typechain-types'
+pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
 import {
-    transparentUpgradableProxy,
-    deployProxyAdmin,
-    deployTransparentUpgradeableProxy,
-} from './transparentUpgradableProxy'
-import { expect } from 'chai'
+    IDiamondCut
+} from '../../../interfaces/resolver/resolverProxy/IDiamondCut.sol';
+import {
+    ResolverProxyUnstructured
+} from '../unstructured/ResolverProxyUnstructured.sol';
+import {
+    IBusinessLogicResolver
+} from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
+import {
+    _DIAMOND_CUT_RESOLVER_KEY
+} from '../../../layer_1/constants/resolverKeys.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
+import {_DEFAULT_ADMIN_ROLE} from '../../../layer_1/constants/roles.sol';
 
-export interface BusinessLogicRegistryData {
-    businessLogicKey: string
-    businessLogicAddress: string
-}
+contract DiamondCutFacet is IDiamondCut, Common, ResolverProxyUnstructured {
+    function updateConfigVersion(
+        uint256 _newVersion
+    ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {
+        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ds.resolver.checkResolverProxyConfigurationRegistered(
+            ds.resolverProxyConfigurationId,
+            _newVersion
+        );
+        _updateVersion(ds, _newVersion);
+    }
 
-export interface DeployedBusinessLogics {
-    businessLogicResolver: IStaticFunctionSelectors
-    factory: IStaticFunctionSelectors
-    diamondFacet: IStaticFunctionSelectors
-    accessControl: IStaticFunctionSelectors
-    controlList: IStaticFunctionSelectors
-    corporateActionsSecurity: IStaticFunctionSelectors
-    pause: IStaticFunctionSelectors
-    eRC20: IStaticFunctionSelectors
-    eRC1644: IStaticFunctionSelectors
-    eRC1410ScheduledSnapshot: IStaticFunctionSelectors
-    eRC1594: IStaticFunctionSelectors
-    eRC1643: IStaticFunctionSelectors
-    equityUSA: IStaticFunctionSelectors
-    bondUSA: IStaticFunctionSelectors
-    snapshots: IStaticFunctionSelectors
-    scheduledSnapshots: IStaticFunctionSelectors
-    cap: IStaticFunctionSelectors
-    lock: IStaticFunctionSelectors
-    transferAndLock: IStaticFunctionSelectors
-}
+    function updateConfig(
+        bytes32 _newConfigurationId,
+        uint256 _newVersion
+    ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {
+        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ds.resolver.checkResolverProxyConfigurationRegistered(
+            _newConfigurationId,
+            _newVersion
+        );
+        _updateConfigId(ds, _newConfigurationId);
+        _updateVersion(ds, _newVersion);
+    }
 
-export let businessLogicResolver: IBusinessLogicResolver
+    function updateResolver(
+        IBusinessLogicResolver _newResolver,
+        bytes32 _newConfigurationId,
+        uint256 _newVersion
+    ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {
+        _newResolver.checkResolverProxyConfigurationRegistered(
+            _newConfigurationId,
+            _newVersion
+        );
+        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        _updateResolver(ds, _newResolver);
+        _updateConfigId(ds, _newConfigurationId);
+        _updateVersion(ds, _newVersion);
+    }
 
-export async function deployProxyToBusinessLogicResolver(
-    businessLogicResolverLogicAddress: string
-) {
-    //await loadFixture(deployProxyAdmin)
-    await deployProxyAdmin()
-    await deployTransparentUpgradeableProxy(businessLogicResolverLogicAddress)
-    businessLogicResolver = await ethers.getContractAt(
-        'BusinessLogicResolver',
-        transparentUpgradableProxy.address
-    )
-    await businessLogicResolver.initialize_BusinessLogicResolver()
-}
+    function getConfigInfo()
+        external
+        view
+        returns (address resolver_, bytes32 configurationId_, uint256 version_)
+    {
+        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        return (
+            address(ds.resolver),
+            ds.resolverProxyConfigurationId,
+            ds.version
+        );
+    }
 
-async function toStaticFunctionSelectors(
-    address: string
-): Promise<IStaticFunctionSelectors> {
-    return await ethers.getContractAt('IStaticFunctionSelectors', address)
-}
+    // This implements ERC-165.
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _DIAMOND_CUT_RESOLVER_KEY;
+    }
 
-function capitalizeFirst(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-}
-
-function uncapitalizeFirst(str: string) {
-    return str.charAt(0).toLowerCase() + str.slice(1)
-}
-
-export async function deployBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    async function deployContractAndAssignIt(
-        deployedAndRegisteredBusinessLogics: DeployedBusinessLogics,
-        contractToDeploy: string
-    ) {
-        async function deployContract() {
-            return await (
-                await ethers.getContractFactory(contractToDeploy)
-            ).deploy()
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](4);
+        uint256 selectorIndex;
+        unchecked {
+            staticFunctionSelectors_[selectorIndex++] = this
+                .updateConfigVersion
+                .selector;
+            staticFunctionSelectors_[selectorIndex++] = this
+                .updateConfig
+                .selector;
+            staticFunctionSelectors_[selectorIndex++] = this
+                .updateResolver
+                .selector;
+            staticFunctionSelectors_[selectorIndex++] = this
+                .getConfigInfo
+                .selector;
         }
-        //await loadFixture(deployContract)
-        const deployedContract = await deployContract()
-        const deployedAndRegisteredBusinessLogics_Property =
-            uncapitalizeFirst(contractToDeploy)
-        deployedAndRegisteredBusinessLogics[
-            deployedAndRegisteredBusinessLogics_Property as keyof DeployedBusinessLogics
-        ] = await toStaticFunctionSelectors(deployedContract.address)
     }
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        await deployContractAndAssignIt(
-            deployedAndRegisteredBusinessLogics,
-            capitalizeFirst(key)
-        )
-    }
-}
 
-export async function registerBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    const businessLogicsData: BusinessLogicRegistryData[] = []
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        if (key === 'businessLogicResolver' || key === 'factory') {
-            continue
-        }
-        const businessLogic = deployedAndRegisteredBusinessLogics[key]
-        businessLogicsData.push({
-            businessLogicKey: await businessLogic.getStaticResolverKey(),
-            businessLogicAddress: businessLogic.address,
-        })
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IDiamondCut).interfaceId;
     }
-    await expect(
-        businessLogicResolver.registerBusinessLogics(businessLogicsData)
-    ).to.emit(businessLogicResolver, 'BusinessLogicsRegistered')
 }

@@ -308,7 +308,7 @@ function buildEmptyEnvironment(): Environment {
         deployedBusinessLogics: {
             businessLogicResolver: {} as IStaticFunctionSelectors,
             factory: {} as IStaticFunctionSelectors,
-            diamondLoupeFacet: {} as IStaticFunctionSelectors,
+            diamondFacet: {} as IStaticFunctionSelectors,
             accessControl: {} as IStaticFunctionSelectors,
             controlList: {} as IStaticFunctionSelectors,
             corporateActionsSecurity: {} as IStaticFunctionSelectors,

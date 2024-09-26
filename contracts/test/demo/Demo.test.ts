@@ -275,13 +275,11 @@ describe('Demo RedSwam', () => {
 Deployed contracts:
     BusinessLogicResolver: ${environment.resolver.address},
     Factory: ${environment.factory.address},
-    DiamondLoupeFacet: 
-        address: ${
-            environment.deployedBusinessLogics.diamondLoupeFacet.address
-        },
-        key: ${await environment.deployedBusinessLogics.diamondLoupeFacet.getStaticResolverKey()},
+    DiamondFacet: 
+        address: ${environment.deployedBusinessLogics.diamondFacet.address},
+        key: ${await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.diamondLoupeFacet.getStaticFunctionSelectors()
+            await environment.deployedBusinessLogics.diamondFacet.getStaticFunctionSelectors()
         )},
     AccessControl: 
         address: ${environment.deployedBusinessLogics.accessControl.address},
@@ -383,11 +381,9 @@ Deployed contracts:
         expect(await environment.resolver.getLatestVersion()).to.be.equal(1)
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.diamondLoupeFacet.getStaticResolverKey()
+                await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey()
             )
-        ).to.be.equal(
-            environment.deployedBusinessLogics.diamondLoupeFacet.address
-        )
+        ).to.be.equal(environment.deployedBusinessLogics.diamondFacet.address)
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.accessControl.getStaticResolverKey()
@@ -480,7 +476,7 @@ Deployed contracts:
         ).sort()
         expect(businessLogicKeys).to.be.deep.equal(
             [
-                await environment.deployedBusinessLogics.diamondLoupeFacet.getStaticResolverKey(),
+                await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.accessControl.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.pause.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.controlList.getStaticResolverKey(),
@@ -560,9 +556,9 @@ Deployed contracts:
         console.log(`
 DiamondResume:
     DiamondLoupe.facets: ${JSON.stringify(await loupeFacet.getFacets())}
-    DiamondLoupe.facetFunctionSelectors[diamondLoupeFacet]: ${JSON.stringify(
+    DiamondLoupe.facetFunctionSelectors[diamondFacet]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.diamondLoupeFacet.getStaticResolverKey()
+            await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[accessControl]: ${JSON.stringify(
@@ -653,7 +649,7 @@ DiamondResume:
         '0xb8fb063e'
     )}
     DiamondLoupe.facet(0xb8fb063e): ${await loupeFacet.getFacet(
-        await environment.deployedBusinessLogics.diamondLoupeFacet.getStaticResolverKey()
+        await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey()
     )}
     DiamondLoupe.facetAddress(0xb8fb063e): ${await loupeFacet.getFacetAddress(
         '0xb8fb063e'

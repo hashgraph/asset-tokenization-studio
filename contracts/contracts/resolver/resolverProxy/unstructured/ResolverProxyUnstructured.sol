@@ -266,10 +266,31 @@ abstract contract ResolverProxyUnstructured is
             _version
         );
         ResolverProxyStorage storage ds = _getResolverProxyStorage();
-        ds.resolver = _resolver;
-        ds.resolverProxyConfigurationId = _resolverProxyConfigurationId;
-        ds.version = _version;
+        _updateResolver(ds, _resolver);
+        _updateConfigId(ds, _resolverProxyConfigurationId);
+        _updateVersion(ds, _version);
         _assignRbacRoles(_rbacs);
+    }
+
+    function _updateResolver(
+        ResolverProxyStorage storage _ds,
+        IBusinessLogicResolver _resolver
+    ) internal {
+        _ds.resolver = _resolver;
+    }
+
+    function _updateConfigId(
+        ResolverProxyStorage storage _ds,
+        bytes32 _resolverProxyConfigurationId
+    ) internal {
+        _ds.resolverProxyConfigurationId = _resolverProxyConfigurationId;
+    }
+
+    function _updateVersion(
+        ResolverProxyStorage storage _ds,
+        uint256 _version
+    ) internal {
+        _ds.version = _version;
     }
 
     function _assignRbacRoles(IResolverProxy.Rbac[] memory _rbacs) internal {

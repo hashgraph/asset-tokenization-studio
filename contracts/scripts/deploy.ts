@@ -217,7 +217,7 @@ import {
     Cap__factory,
     ControlList__factory,
     CorporateActionsSecurity__factory,
-    DiamondLoupeFacet__factory,
+    DiamondFacet__factory,
     EquityUSA__factory,
     ERC1410ScheduledSnapshot__factory,
     ERC1594__factory,
@@ -249,7 +249,7 @@ import {
 } from './contractsMethods'
 import { BondConfigId, EquityConfigId } from './constants'
 
-const used_already_deployed = true
+const used_already_deployed = false
 const resolver_proxy_contract: ContractId = ContractId.fromString('0.0.4910756')
 const resolver_proxyAdmin_contract: ContractId =
     ContractId.fromString('0.0.4910754')
@@ -268,8 +268,7 @@ const erc1594_contract: ContractId = ContractId.fromString('0.0.4910780')
 const erc1643_contract: ContractId = ContractId.fromString('0.0.4910783')
 const erc1644_contract: ContractId = ContractId.fromString('0.0.4910785')
 const snapshots_contract: ContractId = ContractId.fromString('0.0.4910787')
-const diamondLoupeFacet_contract: ContractId =
-    ContractId.fromString('0.0.4910790')
+const diamondFacet_contract: ContractId = ContractId.fromString('0.0.0')
 const equity_contract: ContractId = ContractId.fromString('0.0.4910792')
 const bond_contract: ContractId = ContractId.fromString('0.0.4910794')
 const scheduledSnapshots_contract: ContractId =
@@ -424,11 +423,10 @@ export async function deployAssettokenizationFullInfrastructure(
         used_already_deployed && snapshots_contract.num.toString() !== '0'
             ? snapshots_contract
             : await deploySnapshots(clientOperator, privateKey)
-    const diamondLoupeFacet =
-        used_already_deployed &&
-        diamondLoupeFacet_contract.num.toString() !== '0'
-            ? diamondLoupeFacet_contract
-            : await deployDiamondLoupeFacet(clientOperator, privateKey)
+    const diamondFacet =
+        used_already_deployed && diamondFacet_contract.num.toString() !== '0'
+            ? diamondFacet_contract
+            : await deployDiamondFacet(clientOperator, privateKey)
     const equity =
         used_already_deployed && equity_contract.num.toString() !== '0'
             ? equity_contract
@@ -455,10 +453,10 @@ export async function deployAssettokenizationFullInfrastructure(
     const businessLogicRegistries: BusinessLogicRegistryData[] = [
         {
             businessLogicKey: await getStaticResolverKey(
-                diamondLoupeFacet,
+                diamondFacet,
                 clientOperator
             ),
-            businessLogicAddress: getSolidityAddress(diamondLoupeFacet),
+            businessLogicAddress: getSolidityAddress(diamondFacet),
         },
         {
             businessLogicKey: await getStaticResolverKey(
@@ -567,7 +565,7 @@ export async function deployAssettokenizationFullInfrastructure(
         )
 
         const facetIdsCommon: string[] = [
-            await getStaticResolverKey(diamondLoupeFacet, clientOperator),
+            await getStaticResolverKey(diamondFacet, clientOperator),
             await getStaticResolverKey(accessControl, clientOperator),
             await getStaticResolverKey(cap, clientOperator),
             await getStaticResolverKey(pause, clientOperator),
@@ -642,7 +640,7 @@ export async function deployAssettokenizationFullInfrastructure(
         erc1643,
         erc1644,
         snapshots,
-        diamondLoupeFacet,
+        diamondFacet,
         equity,
         bond,
         scheduledSnapshots,
@@ -1041,26 +1039,26 @@ export async function deploySnapshots(
     return snapshots
 }
 
-export async function deployDiamondLoupeFacet(
+export async function deployDiamondFacet(
     clientOperator: Client,
     privateKey: string
 ) {
-    // Deploying Diamond cut logic
-    console.log(`Deploying Diamond Loupe Facet. please wait...`)
+    // Deploying Diamond logic
+    console.log(`Deploying Diamond Facet. please wait...`)
 
-    const diamondLoupeFacet = await deployContractSDK(
-        DiamondLoupeFacet__factory,
+    const diamondFacet = await deployContractSDK(
+        DiamondFacet__factory,
         privateKey,
         clientOperator
     )
 
     console.log(
-        `Diamond Loupe Facet deployed ${
-            (await getContractInfo(diamondLoupeFacet.toString())).evm_address
+        `Diamond deployed ${
+            (await getContractInfo(diamondFacet.toString())).evm_address
         }`
     )
 
-    return diamondLoupeFacet
+    return diamondFacet
 }
 
 export async function deployEquity(clientOperator: Client, privateKey: string) {

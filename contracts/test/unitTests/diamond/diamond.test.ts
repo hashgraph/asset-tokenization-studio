@@ -209,22 +209,29 @@ import {
     type BusinessLogicResolver,
     type ResolverProxy,
     type AccessControl,
-    DiamondCutManager,
+    type Pause,
+    DiamondFacet,
+    DiamondCutFacet,
     DiamondLoupeFacet,
+    IStaticFunctionSelectors,
 } from '../../../typechain-types'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { assertObject } from '../../assert'
 import { _DEFAULT_ADMIN_ROLE } from '../../../scripts/constants'
 import { ConfigurationContentDefinition } from '../../../scripts/resolverDiamondCut.js'
+import { BusinessLogicRegistryData } from '../../../scripts/businessLogicResolverLogic.js'
 
 describe('Diamond Tests', () => {
-    const UNDECLARED_FACET_KEY =
-        '0x28b41992d7b956a53cbf1da765b654ceca55ce7551992ff46ee9b9178dee383a'
+    const CONFIG_ID =
+        '0x0000000000000000000000000000000000000000000000000000000000000011'
+    const CONFIG_ID_2 =
+        '0x0000000000000000000000000000000000000000000000000000000000000022'
 
-    let businessLogicResolver: BusinessLogicResolver
-    let diamondFacet: ResolverProxy
-    let diamondLoupeFacet: DiamondLoupeFacet
-    let accessControlFacet: AccessControl
+    let resolver: BusinessLogicResolver
+    let resolver_2: BusinessLogicResolver
+    let diamondFacet: DiamondFacet
+    let accessControlImpl: AccessControl
+    let pauseImpl: Pause
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
 
@@ -232,29 +239,123 @@ describe('Diamond Tests', () => {
     let account_B: string
 
     async function deployContracts() {
-        businessLogicResolver = await (
-            await ethers.getContractFactory('BusinessLogicResolver')
+        resolver = await deployResolver()
+
+        diamondFacet = await (
+            await ethers.getContractFactory('DiamondFacet')
         ).deploy()
 
-        businessLogicResolver = businessLogicResolver.connect(signer_A)
-
-        await businessLogicResolver.initialize_BusinessLogicResolver()
-
-        diamondLoupeFacet = await (
-            await ethers.getContractFactory('DiamondLoupeFacet')
-        ).deploy()
-
-        accessControlFacet = await (
+        accessControlImpl = await (
             await ethers.getContractFactory('AccessControl')
         ).deploy()
 
-        await businessLogicResolver.registerBusinessLogics([
-            {
-                businessLogicKey:
-                    await diamondLoupeFacet.getStaticResolverKey(),
-                businessLogicAddress: diamondLoupeFacet.address,
-            },
-        ])
+        pauseImpl = await (await ethers.getContractFactory('Pause')).deploy()
+    }
+
+    async function setUpResolver(
+        businessLogicsRegistryDatas: BusinessLogicRegistryData[],
+        configID?: string,
+        resolverContract?: BusinessLogicResolver
+    ) {
+        if (!configID) configID = CONFIG_ID
+        if (!resolverContract) resolverContract = resolver
+
+        const facetIds = businessLogicsRegistryDatas.map(
+            (data) => `${data.businessLogicKey}`
+        )
+
+        const facetVersions = facetIds.map(() => 1)
+
+        const configurationContentDefinition: ConfigurationContentDefinition = {
+            facetIds,
+            facetVersions,
+        }
+
+        await resolverContract.registerBusinessLogics(
+            businessLogicsRegistryDatas
+        )
+
+        await resolverContract.createConfiguration(
+            configID,
+            configurationContentDefinition
+        )
+    }
+
+    async function deployResolver(): Promise<BusinessLogicResolver> {
+        let newResolver = await (
+            await ethers.getContractFactory('BusinessLogicResolver')
+        ).deploy()
+
+        newResolver = newResolver.connect(signer_A)
+
+        await newResolver.initialize_BusinessLogicResolver()
+
+        return newResolver
+    }
+
+    async function checkFacets(
+        businessLogicsRegistryDatas: BusinessLogicRegistryData[],
+        diamondLoupe: DiamondLoupeFacet
+    ) {
+        const EXPECTED_FACETS: any[] = []
+
+        for (
+            let index = 0;
+            index < businessLogicsRegistryDatas.length;
+            index++
+        ) {
+            const businessLogicsRegistryData =
+                businessLogicsRegistryDatas[index]
+
+            const staticFunctionSelectors = await ethers.getContractAt(
+                'IStaticFunctionSelectors',
+                businessLogicsRegistryData.businessLogicAddress
+            )
+
+            EXPECTED_FACETS.push({
+                id: businessLogicsRegistryData.businessLogicKey,
+                addr: businessLogicsRegistryData.businessLogicAddress,
+                selectors:
+                    await staticFunctionSelectors.getStaticFunctionSelectors(),
+                interfaceIds:
+                    await staticFunctionSelectors.getStaticInterfaceIds(),
+            })
+        }
+
+        assertObject(await diamondLoupe.getFacets(), EXPECTED_FACETS)
+
+        const EXPECTED_FACETS_IDS: string[] = []
+        const EXPECTED_FACETS_ADDRS: string[] = []
+
+        for (let index = 0; index < EXPECTED_FACETS.length; index++) {
+            const EXPECTED_FACET = EXPECTED_FACETS[index]
+            expect(
+                await diamondLoupe.getFacetSelectors(EXPECTED_FACET.id)
+            ).to.be.deep.equal(EXPECTED_FACET.selectors)
+            expect(
+                await diamondLoupe.getFacetIdBySelector(
+                    EXPECTED_FACET.selectors[0]
+                )
+            ).to.be.deep.equal(EXPECTED_FACET.id)
+
+            assertObject(
+                await diamondLoupe.getFacet(EXPECTED_FACET.id),
+                EXPECTED_FACET
+            )
+            expect(
+                await diamondLoupe.getFacetAddress(EXPECTED_FACET.selectors[0])
+            ).to.be.deep.equal(EXPECTED_FACET.addr)
+
+            EXPECTED_FACETS_IDS.push(EXPECTED_FACET.id)
+            EXPECTED_FACETS_ADDRS.push(EXPECTED_FACET.addr)
+        }
+
+        expect(await diamondLoupe.getFacetIds()).to.be.deep.equal(
+            EXPECTED_FACETS_IDS
+        )
+        expect(await diamondLoupe.getFacetAddresses()).to.be.deep.equal(
+            EXPECTED_FACETS_ADDRS
+        )
     }
 
     beforeEach(async () => {
@@ -267,428 +368,57 @@ describe('Diamond Tests', () => {
         await deployContracts()
     })
 
-    /*it('GIVEN deployed facets WHEN deploy a new diamond without DiamondFacet THEN DiamondFacetsNotFound', async () => {
-        await expect(
-            (
-                await ethers.getContractFactory('Diamond')
-            ).deploy(
-                businessLogicResolver.address,
-                [await accessControlFacet.getStaticResolverKey()],
-                []
-            )
-        ).to.be.revertedWithCustomError(
-            diamondCutFacet,
-            'DiamondFacetsNotFound'
-        )
-    })*/
-
-    /*it('GIVEN deployed facets WHEN deploy a new diamond without DiamondFacet THEN DiamondFacetsNotFound', async () => {
-        await expect(
-            (
-                await ethers.getContractFactory('Diamond')
-            ).deploy(
-                businessLogicResolver.address,
-                [await diamondCutFacet.getStaticResolverKey()],
-                []
-            )
-        ).to.be.revertedWithCustomError(
-            diamondCutFacet,
-            'DiamondFacetsNotFound'
-        )
-    })*/
-
-    /*it('GIVEN deployed facets WHEN deploy a new diamond with undeclared facet THEN DiamondFacetsNotFoundInRegistry', async () => {
-        await expect(
-            (
-                await ethers.getContractFactory('Diamond')
-            ).deploy(
-                businessLogicResolver.address,
-                [
-                    await diamondFacet.getStaticResolverKey(),
-                    UNDECLARED_FACET_KEY,
-                ],
-                []
-            )
-        ).to.be.revertedWithCustomError(
-            diamondCutFacet,
-            'DiamondFacetNotFoundInRegistry'
-        )
-    })*/
-
-    /*it('GIVEN deployed facets WHEN deploy a new diamond without correct Key THEN InvalidBusinessLogicKey', async () => {
-        await businessLogicResolver.registerBusinessLogics([
-            {
-                businessLogicKey: await diamondFacet.getStaticResolverKey(),
-                businessLogicAddress: diamondFacet.address,
-            },
-            {
-                businessLogicKey: UNDECLARED_FACET_KEY,
-                businessLogicAddress: diamondCutFacet.address,
-            },
-        ])
-
-        await expect(
-            (
-                await ethers.getContractFactory('Diamond')
-            ).deploy(
-                businessLogicResolver.address,
-                [
-                    await diamondFacet.getStaticResolverKey(),
-                    UNDECLARED_FACET_KEY,
-                ],
-                []
-            )
-        ).to.be.revertedWithCustomError(
-            diamondCutFacet,
-            'InvalidBusinessLogicKey'
-        )
-    })*/
-
     it('GIVEN deployed facets WHEN deploy a new diamond with correct keys THEN a new diamond proxy was deployed', async () => {
         const businessLogicsRegistryDatas = [
             {
-                businessLogicKey:
-                    await diamondLoupeFacet.getStaticResolverKey(),
-                businessLogicAddress: diamondLoupeFacet.address,
-            },
-            {
-                businessLogicKey:
-                    await accessControlFacet.getStaticResolverKey(),
-                businessLogicAddress: accessControlFacet.address,
-            },
-        ]
-        const facetIds = businessLogicsRegistryDatas.map(
-            (data) => `${data.businessLogicKey}`
-        )
-
-        const facetVersions = facetIds.map(() => 1)
-
-        const configId =
-            '0x0000000000000000000000000000000000000000000000000000000000000011'
-
-        const configurationContentDefinition: ConfigurationContentDefinition = {
-            facetIds,
-            facetVersions,
-        }
-
-        await businessLogicResolver.registerBusinessLogics(
-            businessLogicsRegistryDatas
-        )
-
-        await businessLogicResolver.createConfiguration(
-            configId,
-            configurationContentDefinition
-        )
-
-        const diamond = await (
-            await ethers.getContractFactory('ResolverProxy')
-        ).deploy(businessLogicResolver.address, configId, 1, [])
-
-        const diamondLoupe = await ethers.getContractAt(
-            'DiamondLoupeFacet',
-            diamond.address
-        )
-        const EXPECTED_FACETS = [
-            {
-                id: businessLogicsRegistryDatas[0].businessLogicKey,
-                addr: businessLogicsRegistryDatas[0].businessLogicAddress,
-                selectors: await diamondLoupeFacet.getStaticFunctionSelectors(),
-                interfaceIds: await diamondLoupeFacet.getStaticInterfaceIds(),
-            },
-            {
-                id: businessLogicsRegistryDatas[1].businessLogicKey,
-                addr: businessLogicsRegistryDatas[1].businessLogicAddress,
-                selectors:
-                    await accessControlFacet.getStaticFunctionSelectors(),
-                interfaceIds: await accessControlFacet.getStaticInterfaceIds(),
-            },
-        ]
-
-        assertObject(await diamondLoupe.getFacets(), EXPECTED_FACETS)
-
-        expect(
-            await diamondLoupe.getFacetSelectors(EXPECTED_FACETS[1].id)
-        ).to.be.deep.equal(EXPECTED_FACETS[1].selectors)
-
-        expect(await diamondLoupe.getFacetIds()).to.be.deep.equal([
-            EXPECTED_FACETS[0].id,
-            EXPECTED_FACETS[1].id,
-        ])
-
-        expect(await diamondLoupe.getFacetAddresses()).to.be.deep.equal([
-            EXPECTED_FACETS[0].addr,
-            EXPECTED_FACETS[1].addr,
-        ])
-
-        expect(
-            await diamondLoupe.getFacetIdBySelector(
-                EXPECTED_FACETS[0].selectors[0]
-            )
-        ).to.be.deep.equal(EXPECTED_FACETS[0].id)
-
-        expect(
-            await diamondLoupe.getFacetIdBySelector(
-                EXPECTED_FACETS[1].selectors[1]
-            )
-        ).to.be.deep.equal(EXPECTED_FACETS[1].id)
-
-        assertObject(
-            await diamondLoupe.getFacet(EXPECTED_FACETS[0].id),
-            EXPECTED_FACETS[0]
-        )
-        assertObject(
-            await diamondLoupe.getFacet(EXPECTED_FACETS[1].id),
-            EXPECTED_FACETS[1]
-        )
-        expect(
-            await diamondLoupe.getFacetAddress(EXPECTED_FACETS[1].selectors[2])
-        ).to.be.deep.equal(EXPECTED_FACETS[1].addr)
-    })
-
-    /*it('GIVEN deployed facets and diamond deployed WHEN registerFacets with non granted role THEN AccountHasNoRole', async () => {
-        const businessLogicsRegistryDatas = [
-            {
-                businessLogicKey: await diamondLoupeFacet.getStaticResolverKey(),
-                businessLogicAddress: diamondLoupeFacet.address,
-            },
-        ]
-
-        const facetIds = businessLogicsRegistryDatas.map((data) => `${data.businessLogicKey}`)
-
-        const facetVersions = facetIds.map(
-                    () => 1
-            )
-
-        const configId = '0x0000000000000000000000000000000000000000000000000000000000000011';
-
-        const configurationContentDefinition: ConfigurationContentDefinition = {
-            facetIds,
-            facetVersions,
-        }
-
-
-        await businessLogicResolver.registerBusinessLogics(
-            businessLogicsRegistryDatas
-        )
-
-        await businessLogicResolver.createConfiguration(
-            configId,
-            configurationContentDefinition
-        )
-
-        const businessLogicKeys = [
-            businessLogicsRegistryDatas[0].businessLogicKey,
-        ]
-
-        const diamond = await (
-            await ethers.getContractFactory('ResolverProxy')
-        ).deploy(
-            businessLogicResolver.address,
-            configId,
-            1,
-            [
-                { role: _DEFAULT_ADMIN_ROLE, members: [account_A] },
-            ]
-        )
-
-        let diamondCut = await ethers.getContractAt(
-            'DiamondCutFacet',
-            diamond.address
-        )
-
-        diamondCut = diamondCut.connect(signer_B)
-
-        await expect(diamondCut.registerFacets(businessLogicKeys))
-            .to.be.revertedWithCustomError(
-                accessControlFacet,
-                'AccountHasNoRole'
-            )
-            .withArgs(account_B, _DEFAULT_ADMIN_ROLE)
-    })*/
-
-    /*it('GIVEN deployed facets WHEN deploy a new diamond and registerFacets THEN FacetsRegistered event was emitted', async () => {
-        const businessLogicsRegistryDatas = [
-            {
                 businessLogicKey: await diamondFacet.getStaticResolverKey(),
                 businessLogicAddress: diamondFacet.address,
             },
             {
-                businessLogicKey: await diamondCutFacet.getStaticResolverKey(),
-                businessLogicAddress: diamondCutFacet.address,
-            },
-            {
                 businessLogicKey:
-                    await diamondLoupeFacet.getStaticResolverKey(),
-                businessLogicAddress: diamondLoupeFacet.address,
-            },
-            {
-                businessLogicKey:
-                    await accessControlFacet.getStaticResolverKey(),
-                businessLogicAddress: accessControlFacet.address,
+                    await accessControlImpl.getStaticResolverKey(),
+                businessLogicAddress: accessControlImpl.address,
             },
         ]
-        await businessLogicResolver.registerBusinessLogics(
-            businessLogicsRegistryDatas
-        )
-        const businessLogicKeys = [
-            businessLogicsRegistryDatas[1].businessLogicKey,
-            businessLogicsRegistryDatas[2].businessLogicKey,
-        ]
+
+        await setUpResolver(businessLogicsRegistryDatas)
+
         const diamond = await (
-            await ethers.getContractFactory('Diamond')
-        ).deploy(businessLogicResolver.address, businessLogicKeys, [
-            { role: _DEFAULT_ADMIN_ROLE, members: [account_A] },
-        ])
+            await ethers.getContractFactory('ResolverProxy')
+        ).deploy(resolver.address, CONFIG_ID, 1, [])
 
         const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
             diamond.address
         )
-        businessLogicKeys.push(businessLogicsRegistryDatas[3].businessLogicKey)
-        expect(await diamondCut.registerFacets(businessLogicKeys))
-            .to.emit(diamondCut, 'FacetsRegistered')
-            .withArgs(businessLogicKeys)
+
+        let result = await diamondCut.getConfigInfo()
+
+        expect(result.resolver_).to.equal(resolver.address)
+        expect(result.configurationId_).to.equal(CONFIG_ID)
+        expect(result.version_).to.equal(1)
 
         const diamondLoupe = await ethers.getContractAt(
             'DiamondLoupeFacet',
             diamond.address
         )
-        const EXPECTED_FACETS = [
-            {
-                facetKey: businessLogicsRegistryDatas[1].businessLogicKey,
-                facetAddress:
-                    businessLogicsRegistryDatas[1].businessLogicAddress,
-                functionSelectors:
-                    await diamondCutFacet.getStaticFunctionSelectors(),
-                interfaceIds: await diamondCutFacet.getStaticInterfaceIds(),
-            },
-            {
-                facetKey: businessLogicsRegistryDatas[2].businessLogicKey,
-                facetAddress:
-                    businessLogicsRegistryDatas[2].businessLogicAddress,
-                functionSelectors:
-                    await diamondLoupeFacet.getStaticFunctionSelectors(),
-                interfaceIds: await diamondLoupeFacet.getStaticInterfaceIds(),
-            },
-            {
-                facetKey: businessLogicsRegistryDatas[3].businessLogicKey,
-                facetAddress:
-                    businessLogicsRegistryDatas[3].businessLogicAddress,
-                functionSelectors:
-                    await accessControlFacet.getStaticFunctionSelectors(),
-                interfaceIds: await accessControlFacet.getStaticInterfaceIds(),
-            },
-        ]
-        assertObject(await diamondLoupe.getFacets(), EXPECTED_FACETS)
-        expect(
-            await diamondLoupe.getFacetFunctionSelectors(
-                EXPECTED_FACETS[0].facetKey
-            )
-        ).to.be.deep.equal(EXPECTED_FACETS[0].functionSelectors)
-        expect(
-            await diamondLoupe.getFacetFunctionSelectors(
-                EXPECTED_FACETS[1].facetKey
-            )
-        ).to.be.deep.equal(EXPECTED_FACETS[1].functionSelectors)
-        expect(
-            await diamondLoupe.getFacetFunctionSelectors(
-                EXPECTED_FACETS[2].facetKey
-            )
-        ).to.be.deep.equal(EXPECTED_FACETS[2].functionSelectors)
-        expect(await diamondLoupe.getFacetKeys()).to.be.deep.equal([
-            EXPECTED_FACETS[0].facetKey,
-            EXPECTED_FACETS[1].facetKey,
-            EXPECTED_FACETS[2].facetKey,
-        ])
-        expect(await diamondLoupe.getFacetAddresses()).to.be.deep.equal([
-            EXPECTED_FACETS[0].facetAddress,
-            EXPECTED_FACETS[1].facetAddress,
-            EXPECTED_FACETS[2].facetAddress,
-        ])
-        expect(
-            await diamondLoupe.getFacetKeyBySelector(
-                EXPECTED_FACETS[0].functionSelectors[0]
-            )
-        ).to.be.deep.equal(EXPECTED_FACETS[0].facetKey)
-        expect(
-            await diamondLoupe.getFacetKeyBySelector(
-                EXPECTED_FACETS[1].functionSelectors[1]
-            )
-        ).to.be.deep.equal(EXPECTED_FACETS[1].facetKey)
-        expect(
-            await diamondLoupe.getFacetKeyBySelector(
-                EXPECTED_FACETS[2].functionSelectors[2]
-            )
-        ).to.be.deep.equal(EXPECTED_FACETS[2].facetKey)
-        assertObject(
-            await diamondLoupe.getFacet(EXPECTED_FACETS[0].facetKey),
-            EXPECTED_FACETS[0]
-        )
-        assertObject(
-            await diamondLoupe.getFacet(EXPECTED_FACETS[1].facetKey),
-            EXPECTED_FACETS[1]
-        )
-        assertObject(
-            await diamondLoupe.getFacet(EXPECTED_FACETS[2].facetKey),
-            EXPECTED_FACETS[2]
-        )
-        expect(
-            await diamondLoupe.getFacetAddress(
-                EXPECTED_FACETS[1].functionSelectors[2]
-            )
-        ).to.be.deep.equal(EXPECTED_FACETS[1].facetAddress)
-        expect(
-            await diamondLoupe.getFacetAddress(
-                EXPECTED_FACETS[2].functionSelectors[2]
-            )
-        ).to.be.deep.equal(EXPECTED_FACETS[2].facetAddress)
-        expect(
-            await diamondLoupe.supportsInterface(
-                EXPECTED_FACETS[1].functionSelectors[2]
-            )
-        ).to.be.true
-        expect(
-            await diamondLoupe.supportsInterface(
-                EXPECTED_FACETS[2].interfaceIds[0]
-            )
-        ).to.be.true
-    }) */
 
-    it('GIVEN deployed facets, deploy a diamond and registerFacet WHEN try to use a non exposed signature THEN raise FunctionNotFound and it is not recognized by supportsInterface', async () => {
+        await checkFacets(businessLogicsRegistryDatas, diamondLoupe)
+    })
+
+    it('GIVEN deployed facets WHEN deploying a diamond and registering Facets to use a non exposed signature THEN raise FunctionNotFound and it is not recognized by supportsInterface', async () => {
         const businessLogicsRegistryDatas = [
             {
-                businessLogicKey:
-                    await diamondLoupeFacet.getStaticResolverKey(),
-                businessLogicAddress: diamondLoupeFacet.address,
+                businessLogicKey: await diamondFacet.getStaticResolverKey(),
+                businessLogicAddress: diamondFacet.address,
             },
         ]
 
-        const facetIds = businessLogicsRegistryDatas.map(
-            (data) => `${data.businessLogicKey}`
-        )
-
-        const facetVersions = facetIds.map(() => 1)
-
-        const configId =
-            '0x0000000000000000000000000000000000000000000000000000000000000011'
-
-        const configurationContentDefinition: ConfigurationContentDefinition = {
-            facetIds,
-            facetVersions,
-        }
-
-        await businessLogicResolver.registerBusinessLogics(
-            businessLogicsRegistryDatas
-        )
-
-        await businessLogicResolver.createConfiguration(
-            configId,
-            configurationContentDefinition
-        )
+        await setUpResolver(businessLogicsRegistryDatas)
 
         const diamond = await (
             await ethers.getContractFactory('ResolverProxy')
-        ).deploy(businessLogicResolver.address, configId, 1, [])
+        ).deploy(resolver.address, CONFIG_ID, 1, [])
 
         const accessControl = await ethers.getContractAt(
             'AccessControl',
@@ -705,5 +435,436 @@ describe('Diamond Tests', () => {
             .withArgs(GRANT_ROLE_SIGNATURE)
         expect(await diamondLoupe.supportsInterface(GRANT_ROLE_SIGNATURE)).to.be
             .false
+    })
+
+    it('GIVEN deployed facets WHEN deploy a diamond to latestVersion and one to a specific version THEN only the latest version one will get updated', async () => {
+        const businessLogicsRegistryDatas_1 = [
+            {
+                businessLogicKey: await diamondFacet.getStaticResolverKey(),
+                businessLogicAddress: diamondFacet.address,
+            },
+            {
+                businessLogicKey:
+                    await accessControlImpl.getStaticResolverKey(),
+                businessLogicAddress: accessControlImpl.address,
+            },
+        ]
+
+        const businessLogicsRegistryDatas_2 = [
+            {
+                businessLogicKey: await diamondFacet.getStaticResolverKey(),
+                businessLogicAddress: diamondFacet.address,
+            },
+            {
+                businessLogicKey:
+                    await accessControlImpl.getStaticResolverKey(),
+                businessLogicAddress: accessControlImpl.address,
+            },
+            {
+                businessLogicKey: await pauseImpl.getStaticResolverKey(),
+                businessLogicAddress: pauseImpl.address,
+            },
+        ]
+
+        await setUpResolver(businessLogicsRegistryDatas_1)
+
+        const diamond_v1 = await (
+            await ethers.getContractFactory('ResolverProxy')
+        ).deploy(resolver.address, CONFIG_ID, 1, [])
+
+        const diamond_latest = await (
+            await ethers.getContractFactory('ResolverProxy')
+        ).deploy(resolver.address, CONFIG_ID, 0, [])
+
+        const diamondFacet_v1 = await ethers.getContractAt(
+            'DiamondFacet',
+            diamond_v1.address
+        )
+
+        const diamondFacet_latest = await ethers.getContractAt(
+            'DiamondFacet',
+            diamond_latest.address
+        )
+
+        await checkFacets(businessLogicsRegistryDatas_1, diamondFacet_v1)
+        await checkFacets(businessLogicsRegistryDatas_1, diamondFacet_latest)
+
+        await setUpResolver(businessLogicsRegistryDatas_2)
+
+        await checkFacets(businessLogicsRegistryDatas_1, diamondFacet_v1)
+        await checkFacets(businessLogicsRegistryDatas_2, diamondFacet_latest)
+    })
+
+    it('GIVEN diamond and non-admin user WHEN updating version THEN fails with AccountHasNoRole', async () => {
+        const businessLogicsRegistryDatas = [
+            {
+                businessLogicKey: await diamondFacet.getStaticResolverKey(),
+                businessLogicAddress: diamondFacet.address,
+            },
+            {
+                businessLogicKey:
+                    await accessControlImpl.getStaticResolverKey(),
+                businessLogicAddress: accessControlImpl.address,
+            },
+        ]
+
+        await setUpResolver(businessLogicsRegistryDatas)
+
+        const diamond = await (
+            await ethers.getContractFactory('ResolverProxy')
+        ).deploy(resolver.address, CONFIG_ID, 1, [])
+
+        let diamondCut = await ethers.getContractAt(
+            'DiamondCutFacet',
+            diamond.address
+        )
+
+        await expect(diamondCut.updateConfigVersion(0)).to.be.rejectedWith(
+            'AccountHasNoRole'
+        )
+    })
+
+    it('GIVEN diamond and admin user WHEN updating to non existing version THEN fails with ResolverProxyConfigurationNoRegistered', async () => {
+        const businessLogicsRegistryDatas = [
+            {
+                businessLogicKey: await diamondFacet.getStaticResolverKey(),
+                businessLogicAddress: diamondFacet.address,
+            },
+            {
+                businessLogicKey:
+                    await accessControlImpl.getStaticResolverKey(),
+                businessLogicAddress: accessControlImpl.address,
+            },
+        ]
+
+        await setUpResolver(businessLogicsRegistryDatas)
+
+        const rbac = [
+            {
+                role: _DEFAULT_ADMIN_ROLE,
+                members: [account_A],
+            },
+        ]
+
+        const diamond = await (
+            await ethers.getContractFactory('ResolverProxy')
+        ).deploy(resolver.address, CONFIG_ID, 1, rbac)
+
+        let diamondCut = await ethers.getContractAt(
+            'DiamondCutFacet',
+            diamond.address
+        )
+
+        diamondCut = diamondCut.connect(signer_A)
+
+        await expect(diamondCut.updateConfigVersion(100)).to.be.rejectedWith(
+            'ResolverProxyConfigurationNoRegistered'
+        )
+    })
+
+    it('GIVEN diamond and admin user WHEN updating version THEN succeeds', async () => {
+        const businessLogicsRegistryDatas = [
+            {
+                businessLogicKey: await diamondFacet.getStaticResolverKey(),
+                businessLogicAddress: diamondFacet.address,
+            },
+            {
+                businessLogicKey:
+                    await accessControlImpl.getStaticResolverKey(),
+                businessLogicAddress: accessControlImpl.address,
+            },
+        ]
+
+        await setUpResolver(businessLogicsRegistryDatas)
+
+        const rbac = [
+            {
+                role: _DEFAULT_ADMIN_ROLE,
+                members: [account_A],
+            },
+        ]
+
+        const oldVersion = 1
+
+        const diamond = await (
+            await ethers.getContractFactory('ResolverProxy')
+        ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac)
+
+        let diamondCut = await ethers.getContractAt(
+            'DiamondCutFacet',
+            diamond.address
+        )
+
+        let result = await diamondCut.getConfigInfo()
+
+        expect(result.resolver_).to.equal(resolver.address)
+        expect(result.configurationId_).to.equal(CONFIG_ID)
+        expect(result.version_).to.equal(oldVersion)
+
+        diamondCut = diamondCut.connect(signer_A)
+
+        const newVersion = 0
+
+        await diamondCut.updateConfigVersion(newVersion)
+
+        result = await diamondCut.getConfigInfo()
+
+        expect(result.resolver_).to.equal(resolver.address)
+        expect(result.configurationId_).to.equal(CONFIG_ID)
+        expect(result.version_).to.equal(newVersion)
+    })
+
+    it('GIVEN diamond and non-admin user WHEN updating configID THEN fails with AccountHasNoRole', async () => {
+        const businessLogicsRegistryDatas = [
+            {
+                businessLogicKey: await diamondFacet.getStaticResolverKey(),
+                businessLogicAddress: diamondFacet.address,
+            },
+            {
+                businessLogicKey:
+                    await accessControlImpl.getStaticResolverKey(),
+                businessLogicAddress: accessControlImpl.address,
+            },
+        ]
+
+        await setUpResolver(businessLogicsRegistryDatas)
+
+        const diamond = await (
+            await ethers.getContractFactory('ResolverProxy')
+        ).deploy(resolver.address, CONFIG_ID, 1, [])
+
+        let diamondCut = await ethers.getContractAt(
+            'DiamondCutFacet',
+            diamond.address
+        )
+
+        await expect(
+            diamondCut.updateConfig(CONFIG_ID_2, 1)
+        ).to.be.rejectedWith('AccountHasNoRole')
+    })
+
+    it('GIVEN diamond and admin user WHEN updating to non existing configID THEN fails with ResolverProxyConfigurationNoRegistered', async () => {
+        const businessLogicsRegistryDatas = [
+            {
+                businessLogicKey: await diamondFacet.getStaticResolverKey(),
+                businessLogicAddress: diamondFacet.address,
+            },
+            {
+                businessLogicKey:
+                    await accessControlImpl.getStaticResolverKey(),
+                businessLogicAddress: accessControlImpl.address,
+            },
+        ]
+
+        await setUpResolver(businessLogicsRegistryDatas)
+
+        const rbac = [
+            {
+                role: _DEFAULT_ADMIN_ROLE,
+                members: [account_A],
+            },
+        ]
+
+        const diamond = await (
+            await ethers.getContractFactory('ResolverProxy')
+        ).deploy(resolver.address, CONFIG_ID, 1, rbac)
+
+        let diamondCut = await ethers.getContractAt(
+            'DiamondCutFacet',
+            diamond.address
+        )
+
+        diamondCut = diamondCut.connect(signer_A)
+
+        await expect(
+            diamondCut.updateConfig(CONFIG_ID_2, 1)
+        ).to.be.rejectedWith('ResolverProxyConfigurationNoRegistered')
+    })
+
+    it('GIVEN diamond and admin user WHEN updating configID THEN succeeds', async () => {
+        const businessLogicsRegistryDatas = [
+            {
+                businessLogicKey: await diamondFacet.getStaticResolverKey(),
+                businessLogicAddress: diamondFacet.address,
+            },
+            {
+                businessLogicKey:
+                    await accessControlImpl.getStaticResolverKey(),
+                businessLogicAddress: accessControlImpl.address,
+            },
+        ]
+
+        await setUpResolver(businessLogicsRegistryDatas)
+        await setUpResolver(businessLogicsRegistryDatas, CONFIG_ID_2)
+
+        const rbac = [
+            {
+                role: _DEFAULT_ADMIN_ROLE,
+                members: [account_A],
+            },
+        ]
+
+        const oldVersion = 1
+
+        const diamond = await (
+            await ethers.getContractFactory('ResolverProxy')
+        ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac)
+
+        let diamondCut = await ethers.getContractAt(
+            'DiamondCutFacet',
+            diamond.address
+        )
+
+        let result = await diamondCut.getConfigInfo()
+
+        expect(result.resolver_).to.equal(resolver.address)
+        expect(result.configurationId_).to.equal(CONFIG_ID)
+        expect(result.version_).to.equal(oldVersion)
+
+        diamondCut = diamondCut.connect(signer_A)
+
+        const newVersion = 0
+
+        await diamondCut.updateConfig(CONFIG_ID_2, newVersion)
+
+        result = await diamondCut.getConfigInfo()
+
+        expect(result.resolver_).to.equal(resolver.address)
+        expect(result.configurationId_).to.equal(CONFIG_ID_2)
+        expect(result.version_).to.equal(newVersion)
+    })
+
+    it('GIVEN diamond and non-admin user WHEN updating resolver THEN fails with AccountHasNoRole', async () => {
+        resolver_2 = await deployResolver()
+
+        const businessLogicsRegistryDatas = [
+            {
+                businessLogicKey: await diamondFacet.getStaticResolverKey(),
+                businessLogicAddress: diamondFacet.address,
+            },
+            {
+                businessLogicKey:
+                    await accessControlImpl.getStaticResolverKey(),
+                businessLogicAddress: accessControlImpl.address,
+            },
+        ]
+
+        await setUpResolver(businessLogicsRegistryDatas)
+
+        const diamond = await (
+            await ethers.getContractFactory('ResolverProxy')
+        ).deploy(resolver.address, CONFIG_ID, 1, [])
+
+        let diamondCut = await ethers.getContractAt(
+            'DiamondCutFacet',
+            diamond.address
+        )
+
+        await expect(
+            diamondCut.updateResolver(resolver_2.address, CONFIG_ID_2, 1)
+        ).to.be.rejectedWith('AccountHasNoRole')
+    })
+
+    it('GIVEN diamond and admin user WHEN updating to non existing resolver THEN fails with ResolverProxyConfigurationNoRegistered', async () => {
+        resolver_2 = await deployResolver()
+
+        const businessLogicsRegistryDatas = [
+            {
+                businessLogicKey: await diamondFacet.getStaticResolverKey(),
+                businessLogicAddress: diamondFacet.address,
+            },
+            {
+                businessLogicKey:
+                    await accessControlImpl.getStaticResolverKey(),
+                businessLogicAddress: accessControlImpl.address,
+            },
+        ]
+
+        await setUpResolver(businessLogicsRegistryDatas, CONFIG_ID)
+
+        const rbac = [
+            {
+                role: _DEFAULT_ADMIN_ROLE,
+                members: [account_A],
+            },
+        ]
+
+        const diamond = await (
+            await ethers.getContractFactory('ResolverProxy')
+        ).deploy(resolver.address, CONFIG_ID, 1, rbac)
+
+        let diamondCut = await ethers.getContractAt(
+            'DiamondCutFacet',
+            diamond.address
+        )
+
+        diamondCut = diamondCut.connect(signer_A)
+
+        await expect(
+            diamondCut.updateResolver(resolver_2.address, CONFIG_ID_2, 1)
+        ).to.be.rejectedWith('ResolverProxyConfigurationNoRegistered')
+    })
+
+    it('GIVEN diamond and admin user WHEN updating resolver THEN succeeds', async () => {
+        resolver_2 = await deployResolver()
+
+        const businessLogicsRegistryDatas = [
+            {
+                businessLogicKey: await diamondFacet.getStaticResolverKey(),
+                businessLogicAddress: diamondFacet.address,
+            },
+            {
+                businessLogicKey:
+                    await accessControlImpl.getStaticResolverKey(),
+                businessLogicAddress: accessControlImpl.address,
+            },
+        ]
+
+        await setUpResolver(businessLogicsRegistryDatas)
+        await setUpResolver(
+            businessLogicsRegistryDatas,
+            CONFIG_ID_2,
+            resolver_2
+        )
+
+        const rbac = [
+            {
+                role: _DEFAULT_ADMIN_ROLE,
+                members: [account_A],
+            },
+        ]
+
+        const oldVersion = 1
+
+        const diamond = await (
+            await ethers.getContractFactory('ResolverProxy')
+        ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac)
+
+        let diamondCut = await ethers.getContractAt(
+            'DiamondCutFacet',
+            diamond.address
+        )
+
+        let result = await diamondCut.getConfigInfo()
+
+        expect(result.resolver_).to.equal(resolver.address)
+        expect(result.configurationId_).to.equal(CONFIG_ID)
+        expect(result.version_).to.equal(oldVersion)
+
+        diamondCut = diamondCut.connect(signer_A)
+
+        const newVersion = 0
+
+        await diamondCut.updateResolver(
+            resolver_2.address,
+            CONFIG_ID_2,
+            newVersion
+        )
+
+        result = await diamondCut.getConfigInfo()
+
+        expect(result.resolver_).to.equal(resolver_2.address)
+        expect(result.configurationId_).to.equal(CONFIG_ID_2)
+        expect(result.version_).to.equal(newVersion)
     })
 })
