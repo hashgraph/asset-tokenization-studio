@@ -278,7 +278,7 @@ export class CreateEquityCommandHandler
       throw new InvalidRequest('Config Id not found in request');
     }
 
-    if (!configVersion) {
+    if (configVersion === undefined) {
       throw new InvalidRequest('Config Version not found in request');
     }
 
