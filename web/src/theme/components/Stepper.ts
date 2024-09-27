@@ -203,7 +203,7 @@
 
 */
 
-import { StepperThemeConfiguration } from "@hashgraph/asset-tokenization-uicomponents";
+import { StepperThemeConfiguration } from "io-bricks-ui";
 
 export const Stepper: StepperThemeConfiguration = {
   parts: [],

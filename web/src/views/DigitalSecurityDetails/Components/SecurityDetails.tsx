@@ -203,10 +203,7 @@
 
 */
 
-import {
-  DefinitionList,
-  DefinitionListProps,
-} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import { DefinitionList, DefinitionListProps } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { useSecurityStore } from "../../../store/securityStore";
 import { useParams } from "react-router-dom";

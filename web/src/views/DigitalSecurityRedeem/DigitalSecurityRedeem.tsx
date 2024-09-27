@@ -206,11 +206,9 @@
 import { HStack, Stack, VStack } from "@chakra-ui/react";
 import { History } from "../../components/History";
 import { useTranslation } from "react-i18next";
-import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { InputNumberController } from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
+import { Text, InputNumberController, Button } from "io-bricks-ui";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { required, min } from "../../utils/rules";
-import { Button } from "@hashgraph/asset-tokenization-uicomponents";
 import { CancelButton } from "../../components/CancelButton";
 import { useParams } from "react-router";
 import { useRedeemSecurity } from "../../hooks/queries/useRedeemSecurity";

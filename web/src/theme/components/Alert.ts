@@ -204,12 +204,12 @@
 */
 
 import { keyframes } from "@emotion/react";
-import { Weight } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import type {
+import {
+  Weight,
   AlertStatus,
   AlertThemeConfiguration,
-} from "@hashgraph/asset-tokenization-uicomponents/Overlay";
-import { alertPartsList } from "@hashgraph/asset-tokenization-uicomponents/Overlay";
+  alertPartsList,
+} from "io-bricks-ui";
 
 const loading = keyframes`
     0% {

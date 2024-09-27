@@ -3,10 +3,10 @@
 exports[`AddSecurity should render correctly 1`] = `
 <DocumentFragment>
   <form
-    class="chakra-stack css-19t9j1"
+    class="chakra-stack css-16oka5y"
   >
     <div
-      class="chakra-stack css-1yfjds0"
+      class="chakra-stack css-1qyhq9w"
     >
       <div
         class="css-k5rr6j"
@@ -67,10 +67,10 @@ exports[`AddSecurity should render correctly 1`] = `
       </nav>
     </div>
     <div
-      class="chakra-stack css-96ff1z"
+      class="chakra-stack css-1jwg3mw"
     >
       <div
-        class="chakra-stack css-1ey9w6j"
+        class="chakra-stack css-1h4ws66"
       >
         <h2
           class="css-1mk5tlk"
@@ -93,7 +93,7 @@ exports[`AddSecurity should render correctly 1`] = `
           ID or DLT address*
         </p>
         <div
-          class="chakra-stack css-asuujy"
+          class="chakra-stack css-zoewrz"
         >
           <div
             class="chakra-form-control css-1kxonj9"
@@ -108,7 +108,7 @@ exports[`AddSecurity should render correctly 1`] = `
                 data-group="true"
               >
                 <input
-                  class="chakra-input css-1a6xl0x"
+                  class="chakra-input css-1pioc6y"
                   data-testid="securityId"
                   id="securityId"
                   name="securityId"
@@ -120,7 +120,7 @@ exports[`AddSecurity should render correctly 1`] = `
           </div>
         </div>
         <div
-          class="chakra-stack css-invgd8"
+          class="chakra-stack css-q4fbcn"
         >
           <a
             class="chakra-button css-vueqt9"

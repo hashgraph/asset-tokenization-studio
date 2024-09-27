@@ -216,14 +216,11 @@ import {
   InfoDivider,
   PhosphorIcon,
   Tooltip,
-} from "@hashgraph/asset-tokenization-uicomponents";
-
-import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import {
+  Text,
   InputController,
   InputNumberController,
   ToggleController,
-} from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
+} from "io-bricks-ui";
 import {
   greaterOrEqualThan,
   isISINValid,

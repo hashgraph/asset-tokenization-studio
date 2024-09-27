@@ -207,7 +207,10 @@ import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import {
   InputController,
   InputNumberController,
-} from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
+  PhosphorIcon,
+  Text,
+  Tooltip,
+} from "io-bricks-ui";
 import {
   isHederaValidAddress,
   required,
@@ -225,13 +228,8 @@ import {
   GetVotingRightsRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
-import {
-  PhosphorIcon,
-  Text,
-} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { Panel } from "../../../../components/Panel";
 import { hexToText } from "../../../../utils/format";
-import { Tooltip } from "@hashgraph/asset-tokenization-uicomponents";
 
 interface SeeVotingRightsFormValues {
   votingId: number;

@@ -208,10 +208,7 @@ import {
   AccordionItemCustomTitleProps,
 } from "../AccordionItemCustomTitle";
 import { render } from "../../../../test-utils";
-import {
-  Accordion,
-  AccordionItem,
-} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import { Accordion, AccordionItem } from "io-bricks-ui";
 
 const defaultProps = {
   isAdmin: true,

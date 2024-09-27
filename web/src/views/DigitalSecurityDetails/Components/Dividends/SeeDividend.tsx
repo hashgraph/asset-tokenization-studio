@@ -207,7 +207,12 @@ import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import {
   InputController,
   InputNumberController,
-} from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
+  useToast,
+  DefinitionList,
+  PhosphorIcon,
+  Text,
+  Tooltip,
+} from "io-bricks-ui";
 import { Info } from "@phosphor-icons/react";
 import { isHederaValidAddress, min, required } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
@@ -222,13 +227,6 @@ import {
 } from "@hashgraph/asset-tokenization-sdk";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useToast } from "@hashgraph/asset-tokenization-uicomponents/Overlay/Toast";
-import {
-  DefinitionList,
-  PhosphorIcon,
-  Text,
-  Tooltip,
-} from "@hashgraph/asset-tokenization-uicomponents";
 import { useSecurityStore } from "../../../../store/securityStore";
 import { formatNumberLocale } from "../../../../utils/format";
 

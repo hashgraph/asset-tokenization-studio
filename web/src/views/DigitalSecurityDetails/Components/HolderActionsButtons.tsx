@@ -206,7 +206,7 @@
 import { Link as RouterLink, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { HStack } from "@chakra-ui/react";
-import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import { Button } from "io-bricks-ui";
 import { RouteName } from "../../../router/RouteName";
 import { RouterManager } from "../../../router/RouterManager";
 import { useGetIsPaused } from "../../../hooks/queries/useGetSecurityDetails";

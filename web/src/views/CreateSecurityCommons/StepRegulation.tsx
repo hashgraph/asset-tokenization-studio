@@ -210,11 +210,6 @@ import {
   PhosphorIcon,
   Text,
   Weight,
-} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { Plus, X } from "@phosphor-icons/react";
-import { CancelButton } from "../../components/CancelButton";
-import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
-import {
   InfoDivider,
   PanelTitle,
   Select,
@@ -223,14 +218,15 @@ import {
   Table,
   Tag,
   useStepContext,
-} from "@hashgraph/asset-tokenization-uicomponents";
+  PopUp,
+  Tooltip,
+} from "io-bricks-ui";
+import { Plus, X } from "@phosphor-icons/react";
+import { CancelButton } from "../../components/CancelButton";
+import { PreviousStepButton } from "../CreateEquity/Components/PreviousStepButton";
 import { required } from "../../utils/rules";
 import { ICreateEquityFormValues } from "../CreateEquity/ICreateEquityFormValues";
 import { useFormContext, useFormState } from "react-hook-form";
-import {
-  PopUp,
-  Tooltip,
-} from "@hashgraph/asset-tokenization-uicomponents/Overlay";
 import { Info } from "@phosphor-icons/react";
 import { FormStepContainer } from "../../components/FormStepContainer";
 import { CountriesList } from "./CountriesList";

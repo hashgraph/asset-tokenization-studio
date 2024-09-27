@@ -207,7 +207,7 @@ import {
   inputPartsList,
   type InputConfigProps,
   type InputThemeConfiguration,
-} from "@hashgraph/asset-tokenization-uicomponents/Forms";
+} from "io-bricks-ui";
 
 const baseStyle: InputThemeConfiguration["baseStyle"] = () => {
   return {

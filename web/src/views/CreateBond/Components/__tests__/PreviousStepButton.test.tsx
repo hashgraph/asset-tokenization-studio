@@ -207,10 +207,8 @@ import { PreviousStepButton } from "../PreviousStepButton";
 import { render } from "../../../../test-utils";
 
 const goToPrevious = jest.fn();
-jest.mock("@hashgraph/asset-tokenization-uicomponents/Indicators", () => ({
-  ...jest.requireActual(
-    "@hashgraph/asset-tokenization-uicomponents/Indicators",
-  ),
+jest.mock("io-bricks-ui", () => ({
+  ...jest.requireActual("io-bricks-ui"),
   useStepContext: () => ({ goToPrevious }),
 }));
 

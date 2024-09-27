@@ -216,7 +216,7 @@ import {
   GetControlListCountRequest,
   GetControlListMembersRequest,
 } from "@hashgraph/asset-tokenization-sdk";
-import { useToast } from "@hashgraph/asset-tokenization-uicomponents/Overlay/Toast";
+import { useToast } from "io-bricks-ui";
 
 export const GET_CONTROL_LIST_COUNT = (securityId: string) =>
   `GET_CONTROL_LIST_COUNT${securityId}`;

@@ -3,7 +3,7 @@
 exports[`AddFavorite render correctly as admin: admin 1`] = `
 <DocumentFragment>
   <button
-    class="chakra-button chakra-stack css-527del"
+    class="chakra-button chakra-stack css-1lxfpe5"
     data-testid="add-favorite-button"
     type="button"
   >
@@ -40,7 +40,7 @@ exports[`AddFavorite render correctly as admin: admin 1`] = `
 exports[`AddFavorite render correctly as holder: holder 1`] = `
 <DocumentFragment>
   <button
-    class="chakra-button chakra-stack css-10l86rq"
+    class="chakra-button chakra-stack css-1hp2lew"
     data-testid="add-favorite-button"
     type="button"
   >

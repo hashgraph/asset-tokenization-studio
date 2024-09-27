@@ -207,7 +207,7 @@ import {
   SidebarItemConfigProps,
   SidebarItemThemeConfiguration,
   sidebarPartsList,
-} from "@hashgraph/asset-tokenization-uicomponents/Navigation";
+} from "io-bricks-ui";
 
 const iconStyles = {
   hover: {

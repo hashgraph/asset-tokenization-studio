@@ -29,11 +29,11 @@ exports[`Landing if user connect to metamask then should redirect to dashboard: 
 exports[`Landing should render correctly: disconnected 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-dd1ej"
+    class="chakra-stack css-31iced"
     data-testid="landing-page"
   >
     <div
-      class="chakra-stack css-1pze2lt"
+      class="chakra-stack css-1h7sl3e"
     >
       <p
         class="css-hwd6mb"
@@ -174,7 +174,7 @@ exports[`Landing should render correctly: disconnected 1`] = `
         </div>
       </div>
       <div
-        class="chakra-stack css-7o0uyf"
+        class="chakra-stack css-ph6hc8"
       >
         <button
           class="chakra-button css-1145i8e"

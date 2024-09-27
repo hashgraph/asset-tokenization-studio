@@ -204,7 +204,7 @@
 */
 
 import { StackProps, VStack } from "@chakra-ui/react";
-import { PanelTitle } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import { PanelTitle } from "io-bricks-ui";
 
 export const Panel = ({ children, title, ...rest }: StackProps) => (
   <VStack layerStyle="container" {...rest}>

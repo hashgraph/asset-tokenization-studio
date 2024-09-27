@@ -204,7 +204,7 @@
 */
 
 import { Stack } from "@chakra-ui/react";
-import { Tabs } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay/Tabs";
+import { Tabs } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { ProgramDividend } from "./ProgramDividend";
 import { SeeDividend } from "./SeeDividend";

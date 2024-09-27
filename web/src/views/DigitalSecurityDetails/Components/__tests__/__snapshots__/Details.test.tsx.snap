@@ -3,10 +3,10 @@
 exports[`Details should render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1eykvv3"
+    class="chakra-stack css-1lzo5bt"
   >
     <div
-      class="chakra-stack css-i49z84"
+      class="chakra-stack css-1xa9bwv"
       data-testid="holder-actions-buttons"
     >
       <a
@@ -25,13 +25,13 @@ exports[`Details should render correctly 1`] = `
       </a>
     </div>
     <div
-      class="chakra-stack css-9mll8r"
+      class="chakra-stack css-13czc0d"
     >
       <div
-        class="chakra-stack css-1flyuon"
+        class="chakra-stack css-1yf3ocy"
       >
         <div
-          class="chakra-stack css-3lo6qo"
+          class="chakra-stack css-1yqmcpo"
           data-testid="security-details"
         >
           <div
@@ -226,10 +226,10 @@ exports[`Details should render correctly 1`] = `
         </div>
       </div>
       <div
-        class="chakra-stack css-1flyuon"
+        class="chakra-stack css-1yf3ocy"
       >
         <div
-          class="chakra-stack css-17irsum"
+          class="chakra-stack css-169eia3"
         >
           <div
             class="css-146esfn"
@@ -253,7 +253,7 @@ exports[`Details should render correctly 1`] = `
           </div>
         </div>
         <div
-          class="chakra-stack css-3lo6qo"
+          class="chakra-stack css-1yqmcpo"
         >
           <div
             class="css-1dixb64"
@@ -320,7 +320,7 @@ exports[`Details should render correctly 1`] = `
           </div>
         </div>
         <div
-          class="chakra-stack css-3lo6qo"
+          class="chakra-stack css-1yqmcpo"
         >
           <div
             class="css-1dixb64"

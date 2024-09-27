@@ -206,19 +206,17 @@
 import { Link as RouterLink, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { HStack, Menu, MenuButton, VStack } from "@chakra-ui/react";
-import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
-import { RouteName } from "../../../router/RouteName";
-import { RouterManager } from "../../../router/RouterManager";
 import {
+  Button,
   PhosphorIcon,
   Toggle,
-} from "@hashgraph/asset-tokenization-uicomponents";
-import { DotsThreeVertical } from "@phosphor-icons/react";
-import {
   Dropdown,
   DropdownItem,
-} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
-import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
+  Text,
+} from "io-bricks-ui";
+import { RouteName } from "../../../router/RouteName";
+import { RouterManager } from "../../../router/RouterManager";
+import { DotsThreeVertical } from "@phosphor-icons/react";
 import { usePauseSecurity } from "../../../hooks/queries/usePauseSecurity";
 import { useUnpauseSecurity } from "../../../hooks/queries/useUnpauseSecurity";
 import { PauseRequest } from "@hashgraph/asset-tokenization-sdk";

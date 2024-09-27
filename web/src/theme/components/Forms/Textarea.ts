@@ -203,10 +203,7 @@
 
 */
 
-import {
-  textareaPartsList,
-  TextareaThemeConfiguration,
-} from "@hashgraph/asset-tokenization-uicomponents/Forms/Textarea";
+import { textareaPartsList, TextareaThemeConfiguration } from "io-bricks-ui";
 
 export const Textarea: TextareaThemeConfiguration = {
   parts: textareaPartsList,

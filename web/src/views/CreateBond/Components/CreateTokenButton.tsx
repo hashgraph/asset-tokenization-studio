@@ -203,8 +203,8 @@
 
 */
 
-import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
-import type { ButtonProps } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import { Button } from "io-bricks-ui";
+import type { ButtonProps } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 
 export const CreateTokenButton = (props: ButtonProps) => {

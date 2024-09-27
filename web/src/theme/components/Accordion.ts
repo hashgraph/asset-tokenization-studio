@@ -203,7 +203,7 @@
 
 */
 
-import type { AccordionThemeConfiguration } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import type { AccordionThemeConfiguration } from "io-bricks-ui";
 
 // It is not exported from IOBricks
 const accordionPartsList: Array<string> = [
