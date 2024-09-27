@@ -1,6 +1,6 @@
 {
   "name": "hedera-asset-tokenization",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "asset tokenization",
   "scripts": {
     "install:all": "node install.js && npm run prepare",
