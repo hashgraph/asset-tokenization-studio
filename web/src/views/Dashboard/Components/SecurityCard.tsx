@@ -204,12 +204,8 @@
 */
 
 import { HStack, Stack, StackProps, VStack } from "@chakra-ui/react";
-import {
-  PhosphorIcon,
-  Weight,
-} from "@hashgraph/asset-tokenization-uicomponents";
+import { PhosphorIcon, Weight, Text } from "io-bricks-ui";
 import { Star } from "@phosphor-icons/react";
-import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { SecurityStore } from "../../../store/securityStore";
 import { useWalletStore } from "../../../store/walletStore";
 import { useAccountStore } from "../../../store/accountStore";

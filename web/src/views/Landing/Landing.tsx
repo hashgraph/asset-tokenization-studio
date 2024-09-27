@@ -219,18 +219,12 @@ import {
   Stack,
   VStack,
 } from "@chakra-ui/react";
-import {
-  PhosphorIcon,
-  Text,
-  Weight,
-} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import { PhosphorIcon, Text, Weight, Button, PopUp } from "io-bricks-ui";
 import landingBackground from "../../assets/layer.png";
 import { useWalletStore } from "../../store/walletStore";
 import { Trans, useTranslation } from "react-i18next";
 import { RouterManager } from "../../router/RouterManager";
 import { RouteName } from "../../router/RouteName";
-import { PopUp } from "@hashgraph/asset-tokenization-uicomponents";
 import { Wallet } from "@phosphor-icons/react";
 import { METAMASK_URL, WalletStatus, User } from "../../utils/constants";
 import { useWalletConnection } from "../../hooks/useWalletConnection";
@@ -276,32 +270,6 @@ export const Landing = () => {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectionStatus]);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      if (selectedWallet === SupportedWallets.HWALLETCONNECT) {
-        const modal = document.querySelector("body > wcm-modal");
-        const backcard = modal?.shadowRoot?.querySelector(
-          "#wcm-modal > div > wcm-modal-backcard",
-        );
-        const toolbar = backcard?.shadowRoot?.querySelector("div.wcm-toolbar");
-        const closeButton = toolbar?.querySelector("button");
-
-        if (closeButton) {
-          const handleClose = () => {
-            window.location.reload();
-          };
-          closeButton.addEventListener("click", handleClose);
-          clearInterval(intervalId);
-          return () => {
-            closeButton.removeEventListener("click", handleClose);
-          };
-        }
-      }
-    }, 500);
-
-    return () => clearInterval(intervalId);
-  }, [selectedWallet]);
 
   const isLoading =
     connectionStatus === WalletStatus.connecting &&

@@ -8,15 +8,15 @@ exports[`() => {
     const { data: isPaused } = (0, useGetSecurityDetails_1.useGetIsPaused)(new asset_tokenization_sdk_1.PauseRequest({ securityId: id }));
     if (isPaused)
         return (0, jsx_runtime_1.jsx)(jsx_runtime_1.Fragment, {});
-    return ((0, jsx_runtime_1.jsxs)(react_1.HStack, { "data-testid": "holder-actions-buttons", w: "full", justifyContent: "flex-end", gap: 4, children: [(0, jsx_runtime_1.jsx)(Interaction_1.Button, { "data-testid": "transfer-button", as: react_router_dom_1.Link, to: RouterManager_1.RouterManager.getUrl(RouteName_1.RouteName.DigitalSecurityTransfer, {
+    return ((0, jsx_runtime_1.jsxs)(react_1.HStack, { "data-testid": "holder-actions-buttons", w: "full", justifyContent: "flex-end", gap: 4, children: [(0, jsx_runtime_1.jsx)(io_bricks_ui_1.Button, { "data-testid": "transfer-button", as: react_router_dom_1.Link, to: RouterManager_1.RouterManager.getUrl(RouteName_1.RouteName.DigitalSecurityTransfer, {
                     params: { id },
-                }), variant: "secondary", children: tButtons("transfer") }), (0, jsx_runtime_1.jsx)(Interaction_1.Button, { "data-testid": "redeem-button", as: react_router_dom_1.Link, to: RouterManager_1.RouterManager.getUrl(RouteName_1.RouteName.DigitalSecurityRedeem, {
+                }), variant: "secondary", children: tButtons("transfer") }), (0, jsx_runtime_1.jsx)(io_bricks_ui_1.Button, { "data-testid": "redeem-button", as: react_router_dom_1.Link, to: RouterManager_1.RouterManager.getUrl(RouteName_1.RouteName.DigitalSecurityRedeem, {
                     params: { id },
                 }), variant: "secondary", children: tButtons("redeem") })] }));
 }.name should render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-i49z84"
+    class="chakra-stack css-1xa9bwv"
     data-testid="holder-actions-buttons"
   >
     <a

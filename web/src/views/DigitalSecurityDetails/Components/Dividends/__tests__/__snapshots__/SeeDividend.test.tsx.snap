@@ -6,17 +6,17 @@ exports[`SeeDividend should render correctly 1`] = `
     class="css-3d6uxt"
   >
     <div
-      class="chakra-stack css-tl3ftk"
+      class="chakra-stack css-owjkmg"
     >
       <form
-        class="chakra-stack css-acgahh"
+        class="chakra-stack css-ip7fdm"
         data-testid="dividends-form"
       >
         <div
-          class="chakra-stack css-ppmla1"
+          class="chakra-stack css-1h0sumw"
         >
           <div
-            class="chakra-stack css-e7xy2r"
+            class="chakra-stack css-1nqqhpy"
           >
             <p
               class="css-0"
@@ -53,7 +53,7 @@ exports[`SeeDividend should render correctly 1`] = `
                 data-group="true"
               >
                 <input
-                  class="chakra-input css-w4jx8b"
+                  class="chakra-input css-ifstuv"
                   data-testid="dividendId"
                   id="field-:r2:"
                   inputmode="numeric"
@@ -67,10 +67,10 @@ exports[`SeeDividend should render correctly 1`] = `
           </div>
         </div>
         <div
-          class="chakra-stack css-ppmla1"
+          class="chakra-stack css-1h0sumw"
         >
           <div
-            class="chakra-stack css-e7xy2r"
+            class="chakra-stack css-1nqqhpy"
           >
             <p
               class="css-0"
@@ -108,7 +108,7 @@ exports[`SeeDividend should render correctly 1`] = `
                 data-group="true"
               >
                 <input
-                  class="chakra-input css-w4jx8b"
+                  class="chakra-input css-ifstuv"
                   data-testid="targetId"
                   id="targetId"
                   name="targetId"

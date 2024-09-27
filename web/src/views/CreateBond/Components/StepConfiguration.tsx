@@ -209,16 +209,14 @@ import { useTranslation } from "react-i18next";
 import {
   PhosphorIcon,
   Text,
-} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { CancelButton } from "../../../components/CancelButton";
-import { NextStepButton } from "./NextStepButton";
-import { PreviousStepButton } from "./PreviousStepButton";
-import {
   CalendarInputController,
   InputController,
   InputNumberController,
   Tooltip,
-} from "@hashgraph/asset-tokenization-uicomponents";
+} from "io-bricks-ui";
+import { CancelButton } from "../../../components/CancelButton";
+import { NextStepButton } from "./NextStepButton";
+import { PreviousStepButton } from "./PreviousStepButton";
 import { required, isAfterDate, min } from "../../../utils/rules";
 import { ICreateBondFormValues } from "../ICreateBondFormValues";
 import { useFormContext, useFormState } from "react-hook-form";
