@@ -204,15 +204,21 @@
 */
 
 import { useEffect, useMemo, useState } from "react";
-import { Table } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
-import { CellContext, createColumnHelper } from "@tanstack/react-table";
-import { useParams } from "react-router-dom";
-import { useTranslation } from "react-i18next";
 import {
+  Table,
   PhosphorIcon,
   PopUp,
   Weight,
-} from "@hashgraph/asset-tokenization-uicomponents";
+  Text,
+  SearchInputController,
+  Button,
+  ClipboardButton,
+  Link,
+} from "io-bricks-ui";
+import { CellContext, createColumnHelper } from "@tanstack/react-table";
+import { useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+
 import { Star, Trash } from "@phosphor-icons/react";
 import { Header } from "../../components/Header";
 import { useUserStore } from "../../store/userStore";
@@ -220,16 +226,9 @@ import { User } from "../../utils/constants";
 import type { SecurityStore } from "../../store/securityStore";
 import { useSecurityStore } from "../../store/securityStore";
 import { HStack, Stack, useDisclosure } from "@chakra-ui/react";
-import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { SearchInputController } from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
 import { useForm } from "react-hook-form";
 import { useAccountStore } from "../../store/accountStore";
 import { useWalletStore } from "../../store/walletStore";
-import {
-  Button,
-  ClipboardButton,
-  Link,
-} from "@hashgraph/asset-tokenization-uicomponents/Interaction";
 import { RouterManager } from "../../router/RouterManager";
 import { RouteName } from "../../router/RouteName";
 import { useTable } from "../../hooks/useTable";

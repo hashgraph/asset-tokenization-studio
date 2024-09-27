@@ -207,12 +207,7 @@ import { HStack, Stack, VStack } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { History } from "../../../components/History";
 import { RouteName } from "../../../router/RouteName";
-import {
-  CardButton,
-  Heading,
-  PhosphorIcon,
-  Text,
-} from "@hashgraph/asset-tokenization-uicomponents";
+import { CardButton, Heading, PhosphorIcon, Text } from "io-bricks-ui";
 import { Link as RouterLink } from "react-router-dom";
 import { RouterManager } from "../../../router/RouterManager";
 import { DiamondsFour, CodesandboxLogo } from "@phosphor-icons/react";

@@ -1219,8 +1219,9 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
   });
 
   singletonInstance.release = jest.fn(
-    async (address: EvmAddress, sourceId: EvmAddress, lockId: number) => {
+    async (address: EvmAddress, sourceId: EvmAddress, lockIdBd: BigDecimal) => {
       const account = '0x' + sourceId.toString().toUpperCase().substring(2);
+      const lockId = lockIdBd.toBigNumber().toNumber();
 
       const accountLocks = locks.get(account);
       let lockIds = locksIds.get(account);

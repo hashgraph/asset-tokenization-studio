@@ -279,6 +279,21 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
       url: '',
       icons: [],
     };
+    this.setupDisconnectEventHandler();
+  }
+
+  private setupDisconnectEventHandler() {
+    if (this.dAppConnector?.walletConnectClient) {
+      const client = this.dAppConnector.walletConnectClient;
+      client.on('session_delete', this.handleDisconnect.bind(this));
+    }
+  }
+
+  private handleDisconnect() {
+    this.stop();
+    this.eventService.emit(WalletEvents.walletDisconnect, {
+      wallet: SupportedWallets.HWALLETCONNECT,
+    });
   }
 
   /**
@@ -361,6 +376,13 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
     const currentNetwork = network ?? this.networkService.environment;
     console.log('Current network set to:', currentNetwork);
 
+    if (this.dAppConnector) {
+      console.log(
+        'Existing dAppConnector detected. Calling stop() to clean up.',
+      );
+      await this.stop();
+    }
+
     try {
       this.dAppConnector = new DAppConnector(
         this.dappMetadata,
@@ -372,6 +394,7 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
       LogService.logTrace(
         `✅ HWC Initialized with network: ${currentNetwork} and projectId: ${this.projectId}`,
       );
+      this.setupDisconnectEventHandler();
     } catch (error) {
       console.error('Error initializing HWC:', error);
       LogService.logError(
@@ -466,7 +489,9 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
    */
   public async stop(): Promise<boolean> {
     try {
-      await this.dAppConnector?.disconnectAll();
+      if (this.dAppConnector) {
+        await this.dAppConnector.disconnectAll();
+      }
       this.dAppConnector = undefined;
       LogService.logInfo(`🛑 🏁 Hedera WalletConnect stopped successfully`);
       this.eventService.emit(WalletEvents.walletDisconnect, {

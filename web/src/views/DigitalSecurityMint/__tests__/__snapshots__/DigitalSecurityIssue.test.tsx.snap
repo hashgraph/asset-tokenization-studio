@@ -3,7 +3,7 @@
 exports[`DigitalSecurityMint render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1yfjds0"
+    class="chakra-stack css-1qyhq9w"
   >
     <div
       class="css-k5rr6j"
@@ -64,10 +64,10 @@ exports[`DigitalSecurityMint render correctly 1`] = `
     </nav>
   </div>
   <div
-    class="chakra-stack css-1tholn6"
+    class="chakra-stack css-609749"
   >
     <form
-      class="chakra-stack css-pvn8lw"
+      class="chakra-stack css-1cekp7u"
       data-testid="mint-form"
     >
       <p
@@ -86,7 +86,7 @@ exports[`DigitalSecurityMint render correctly 1`] = `
         *Mandatory fields
       </p>
       <div
-        class="chakra-stack css-obs79e"
+        class="chakra-stack css-vxrbwu"
       >
         <div
           class="chakra-form-control css-1kxonj9"
@@ -106,7 +106,7 @@ exports[`DigitalSecurityMint render correctly 1`] = `
               data-group="true"
             >
               <input
-                class="chakra-input css-7m20m2"
+                class="chakra-input css-1kpneii"
                 data-testid="amount"
                 id="field-:r0:"
                 inputmode="numeric"
@@ -120,7 +120,7 @@ exports[`DigitalSecurityMint render correctly 1`] = `
         </div>
       </div>
       <div
-        class="chakra-stack css-obs79e"
+        class="chakra-stack css-vxrbwu"
       >
         <div
           class="chakra-form-control css-1kxonj9"
@@ -141,7 +141,7 @@ exports[`DigitalSecurityMint render correctly 1`] = `
               data-group="true"
             >
               <input
-                class="chakra-input css-7m20m2"
+                class="chakra-input css-1kpneii"
                 data-testid="destination"
                 id="destination"
                 name="destination"
@@ -153,7 +153,7 @@ exports[`DigitalSecurityMint render correctly 1`] = `
         </div>
       </div>
       <div
-        class="chakra-stack css-j3abzx"
+        class="chakra-stack css-1hfumyk"
       >
         <a
           class="chakra-button css-vueqt9"
@@ -173,10 +173,10 @@ exports[`DigitalSecurityMint render correctly 1`] = `
       </div>
     </form>
     <div
-      class="chakra-stack css-hagybd"
+      class="chakra-stack css-1v7qrid"
     >
       <div
-        class="chakra-stack css-ql2tiy"
+        class="chakra-stack css-1sbpyey"
         data-testid="current-available-balance-panel"
       >
         <div
@@ -201,7 +201,7 @@ exports[`DigitalSecurityMint render correctly 1`] = `
         </div>
       </div>
       <div
-        class="chakra-stack css-u634b8"
+        class="chakra-stack css-1ma2bgy"
         data-testid="security-details"
       >
         <div

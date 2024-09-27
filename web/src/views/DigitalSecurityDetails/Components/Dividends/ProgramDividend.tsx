@@ -207,7 +207,10 @@ import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import {
   CalendarInputController,
   InputNumberController,
-} from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
+  PhosphorIcon,
+  Text,
+  Tooltip,
+} from "io-bricks-ui";
 import { min, required } from "../../../../utils/rules";
 import { Info } from "@phosphor-icons/react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -216,11 +219,6 @@ import { useDividends } from "../../../../hooks/queries/useDividends";
 import { SetDividendsRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
 import { dateToUnixTimestamp } from "../../../../utils/format";
-import {
-  PhosphorIcon,
-  Text,
-  Tooltip,
-} from "@hashgraph/asset-tokenization-uicomponents";
 
 interface ProgramDividendFormValues {
   amountPerUnitOfSecurity: string;
