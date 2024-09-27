@@ -203,8 +203,8 @@
 
 */
 
-import type { BreadcrumbThemeConfiguration } from "@hashgraph/asset-tokenization-uicomponents/Navigation";
-import { breadcrumbPartsList } from "@hashgraph/asset-tokenization-uicomponents/Navigation";
+import type { BreadcrumbThemeConfiguration } from "io-bricks-ui";
+import { breadcrumbPartsList } from "io-bricks-ui";
 
 export const Breadcrumb: BreadcrumbThemeConfiguration = {
   parts: breadcrumbPartsList,

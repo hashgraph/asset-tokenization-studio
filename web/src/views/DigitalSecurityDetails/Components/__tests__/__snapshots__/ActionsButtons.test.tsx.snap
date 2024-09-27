@@ -3,7 +3,7 @@
 exports[`ActionsButtons should render correctly admin buttons: admin 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-i49z84"
+    class="chakra-stack css-1xa9bwv"
   />
   <span
     hidden=""
@@ -15,7 +15,7 @@ exports[`ActionsButtons should render correctly admin buttons: admin 1`] = `
 exports[`ActionsButtons should render correctly holder buttons: holder 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-i49z84"
+    class="chakra-stack css-1xa9bwv"
     data-testid="holder-actions-buttons"
   >
     <a

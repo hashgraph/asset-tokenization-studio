@@ -3,7 +3,7 @@
 exports[`SecurityDetails should render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1drdag2"
+    class="chakra-stack css-1uwjhyv"
     data-testid="security-details"
   >
     <div
@@ -152,7 +152,7 @@ exports[`SecurityDetails should render correctly 1`] = `
 exports[`SecurityDetails should show loading state: loading 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1drdag2"
+    class="chakra-stack css-1uwjhyv"
     data-testid="security-details"
   >
     <div
@@ -319,7 +319,7 @@ exports[`SecurityDetails should show loading state: loading 1`] = `
 exports[`SecurityDetails total supply should be formatted: loading 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1drdag2"
+    class="chakra-stack css-1uwjhyv"
     data-testid="security-details"
   >
     <div

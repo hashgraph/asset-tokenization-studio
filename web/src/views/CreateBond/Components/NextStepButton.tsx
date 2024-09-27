@@ -203,10 +203,9 @@
 
 */
 
-import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
-import type { ButtonProps } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import { Button, useStepContext } from "io-bricks-ui";
+import type { ButtonProps } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
-import { useStepContext } from "@hashgraph/asset-tokenization-uicomponents/Indicators";
 
 export const NextStepButton = (props: ButtonProps) => {
   const { t } = useTranslation("security", { keyPrefix: "createEquity" });

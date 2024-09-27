@@ -206,7 +206,7 @@
 import { extendTheme, type ThemeConfig } from "@chakra-ui/react";
 import _omit from "lodash/omit";
 import { fonts, fontWeights } from "./fonts";
-import { BasePlatformTheme } from "@hashgraph/asset-tokenization-uicomponents/Theme";
+import { BasePlatformTheme } from "io-bricks-ui/Theme";
 import { components } from "./components";
 import { colors } from "./colors";
 
@@ -214,7 +214,7 @@ const config: ThemeConfig = {
   initialColorMode: "dark",
   useSystemColorMode: false,
 };
-const uiComponentsTheme = _omit(BasePlatformTheme, "colors");
+const iobricksTheme = _omit(BasePlatformTheme, "colors");
 const commonContainerLayout = {
   w: "full",
   p: 4,
@@ -234,7 +234,7 @@ const commonContainerLayout = {
   },
 };
 
-const theme = extendTheme(uiComponentsTheme, {
+const theme = extendTheme(iobricksTheme, {
   breakpoints: {
     sm: "20em",
     md: "48em",

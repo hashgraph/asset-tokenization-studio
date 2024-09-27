@@ -3,7 +3,7 @@
 exports[`AdminActionsButtons Admin has controller role should render correctly: controllerRole 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-i49z84"
+    class="chakra-stack css-1xa9bwv"
   >
     <a
       class="chakra-button css-vueqt9"
@@ -53,7 +53,7 @@ exports[`AdminActionsButtons Admin has controller role should render correctly: 
         tabindex="-1"
       >
         <div
-          class="chakra-stack css-1ynn7q9"
+          class="chakra-stack css-6ekxde"
         >
           <a
             class="chakra-menu__menuitem css-1xsc1dv"
@@ -84,7 +84,7 @@ exports[`AdminActionsButtons Admin has controller role should render correctly: 
 exports[`AdminActionsButtons Admin has minter role should render correctly: minterRole 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-i49z84"
+    class="chakra-stack css-1xa9bwv"
   >
     <a
       class="chakra-button css-vueqt9"
@@ -104,7 +104,7 @@ exports[`AdminActionsButtons Admin has minter role should render correctly: mint
 exports[`AdminActionsButtons Admin has pauser role should render correctly: pauserRole 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-i49z84"
+    class="chakra-stack css-1xa9bwv"
   >
     <button
       aria-controls="menu-list-:rd:"
@@ -147,13 +147,13 @@ exports[`AdminActionsButtons Admin has pauser role should render correctly: paus
         tabindex="-1"
       >
         <div
-          class="chakra-stack css-1ynn7q9"
+          class="chakra-stack css-6ekxde"
         >
           <div
-            class="chakra-stack css-11hhz12"
+            class="chakra-stack css-w0rccg"
           >
             <div
-              class="chakra-stack css-sdwvrv"
+              class="chakra-stack css-1nf0e9g"
             >
               <p
                 class="css-1i1oq6k"
@@ -167,7 +167,7 @@ exports[`AdminActionsButtons Admin has pauser role should render correctly: paus
               Pause security token
             </p>
             <div
-              class="chakra-stack css-17o2k89"
+              class="chakra-stack css-1txf1ih"
             >
               <div
                 class="css-70qvj9"
@@ -214,7 +214,7 @@ exports[`AdminActionsButtons Admin has pauser role should render correctly: paus
 exports[`AdminActionsButtons should render correctly: defaultAdminRole 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-i49z84"
+    class="chakra-stack css-1xa9bwv"
   />
   <span
     hidden=""

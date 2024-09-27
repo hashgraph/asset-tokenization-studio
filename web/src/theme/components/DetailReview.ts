@@ -206,7 +206,7 @@
 import {
   DetailReviewThemeConfiguration,
   detailReviewPartsList,
-} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+} from "io-bricks-ui";
 
 export const DetailReview: DetailReviewThemeConfiguration = {
   parts: detailReviewPartsList,

@@ -203,11 +203,8 @@
 
 */
 
-import {
-  tablePartsList,
-  TableThemeConfiguration,
-} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
-import { BasePlatformTheme } from "@hashgraph/asset-tokenization-uicomponents/Theme";
+import { tablePartsList, TableThemeConfiguration } from "io-bricks-ui";
+import { BasePlatformTheme } from "io-bricks-ui/Theme";
 
 const row = {
   bg: "neutral.400",

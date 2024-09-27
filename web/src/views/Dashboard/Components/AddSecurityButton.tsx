@@ -203,9 +203,8 @@
 
 */
 
-import { PhosphorIcon } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
-import type { ButtonProps } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import { PhosphorIcon, Button } from "io-bricks-ui";
+import type { ButtonProps } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { RouterManager } from "../../../router/RouterManager";
 import { RouteName } from "../../../router/RouteName";

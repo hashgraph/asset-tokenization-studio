@@ -203,10 +203,7 @@
 
 */
 
-import {
-  DropdownThemeConfiguration,
-  dropdownPartsList,
-} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
+import { DropdownThemeConfiguration, dropdownPartsList } from "io-bricks-ui";
 
 export const Dropdown: DropdownThemeConfiguration = {
   parts: dropdownPartsList,

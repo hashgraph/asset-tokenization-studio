@@ -204,17 +204,11 @@
 */
 
 import { HStack, Stack, VStack } from "@chakra-ui/react";
-import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
-import { SearchInputController } from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
-import {
-  Heading,
-  Text,
-} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
+import { Button, Heading, Text, useToast } from "io-bricks-ui";
+import { SearchInputController, DefinitionList } from "io-bricks-ui";
 import { useForm } from "react-hook-form";
-import { DefinitionList } from "@hashgraph/asset-tokenization-uicomponents";
 import { useTranslation } from "react-i18next";
 import { isHederaValidAddress, required } from "../../../utils/rules";
-import { useToast } from "@hashgraph/asset-tokenization-uicomponents/Overlay/Toast";
 import {
   GetAccountBalanceRequest,
   SecurityViewModel,

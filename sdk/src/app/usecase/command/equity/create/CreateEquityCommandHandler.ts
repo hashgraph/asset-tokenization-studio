@@ -216,7 +216,10 @@ import { Security } from '../../../../../domain/context/security/Security.js';
 import AccountService from '../../../../service/AccountService.js';
 import TransactionService from '../../../../service/TransactionService.js';
 import NetworkService from '../../../../service/NetworkService.js';
-import { TOPICS_IN_FACTORY_RESULT } from '../../../../../core/Constants.js';
+import {
+  ADDRESS_LENGTH,
+  BYTES_32_LENGTH,
+} from '../../../../../core/Constants.js';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
@@ -324,26 +327,22 @@ export class CreateEquityCommandHandler
         contractAddress = res.response.equityAddress;
       } else {
         // * Recover the new contract ID from Event data from the Mirror Node
-
-        const consensusTimestamp =
-          await this.mirrorNodeAdapter.getConsensusTimestamp({
-            transactionId: res.id.toString(),
-            timeout: 15,
-          });
-        if (!consensusTimestamp) {
-          throw new Error('Consensus timestamp not found before timeout');
-        }
-
-        const data = await this.mirrorNodeAdapter.getContractLogData(
-          factory.toString(),
-          consensusTimestamp,
+        const results = await this.mirrorNodeAdapter.getContractResults(
+          res.id.toString(),
+          1,
         );
-        console.log(`Creation event data:${data}`); //! Remove this line
 
-        if (!data || data.length !== TOPICS_IN_FACTORY_RESULT) {
+        console.log(`Creation event data:${results}`); //! Remove this line
+
+        if (!results || results.length !== 1) {
           throw new Error('Invalid data structure');
         }
-        contractAddress = data[0];
+
+        const data = results.map((result) =>
+          result.substring(BYTES_32_LENGTH - ADDRESS_LENGTH + 2),
+        );
+
+        contractAddress = '0x' + data[0];
       }
       const contractId =
         await this.mirrorNodeAdapter.getHederaIdfromContractAddress(

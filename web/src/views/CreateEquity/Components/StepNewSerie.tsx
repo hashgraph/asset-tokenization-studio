@@ -215,18 +215,16 @@ import { Info } from "@phosphor-icons/react";
 import {
   PhosphorIcon,
   Text,
-} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { CancelButton } from "../../../components/CancelButton";
-import { NextStepButton } from "./NextStepButton";
-import { PreviousStepButton } from "./PreviousStepButton";
-import {
   InfoDivider,
   InputController,
   InputNumberController,
   SelectController,
   ToggleController,
   Tooltip,
-} from "@hashgraph/asset-tokenization-uicomponents";
+} from "io-bricks-ui";
+import { CancelButton } from "../../../components/CancelButton";
+import { NextStepButton } from "./NextStepButton";
+import { PreviousStepButton } from "./PreviousStepButton";
 import { greaterThan, min, required } from "../../../utils/rules";
 import { ICreateEquityFormValues } from "../ICreateEquityFormValues";
 import { useFormContext, useFormState } from "react-hook-form";

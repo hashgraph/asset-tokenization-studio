@@ -203,10 +203,7 @@
 
 */
 
-import {
-  ButtonProps,
-  ButtonThemeConfiguration,
-} from "@hashgraph/asset-tokenization-uicomponents/Interaction";
+import { ButtonProps, ButtonThemeConfiguration } from "io-bricks-ui";
 
 export const sizes: ButtonThemeConfiguration["sizes"] = {
   sm: {

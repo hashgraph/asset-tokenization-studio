@@ -204,10 +204,8 @@
 */
 
 import { Center, Stack, StackProps } from "@chakra-ui/react";
-import { Button } from "@hashgraph/asset-tokenization-uicomponents/Interaction";
-import { PhosphorIcon } from "@hashgraph/asset-tokenization-uicomponents";
+import { Button, PhosphorIcon, Text } from "io-bricks-ui";
 import { Plus } from "@phosphor-icons/react";
-import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
 import { useTranslation } from "react-i18next";
 import { RouteName } from "../../../router/RouteName";
 import { RouterManager } from "../../../router/RouterManager";

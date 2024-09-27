@@ -3,10 +3,10 @@
 exports[`DigitalSecurityDetails render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1ps2wlz"
+    class="chakra-stack css-1bn8alk"
   >
     <div
-      class="chakra-stack css-1yfjds0"
+      class="chakra-stack css-1qyhq9w"
     >
       <div
         class="css-k5rr6j"
@@ -68,7 +68,7 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
     </div>
   </div>
   <div
-    class="chakra-stack css-1e1udn4"
+    class="chakra-stack css-updx4y"
   >
     <div
       class="chakra-tabs css-1bx5ylf"
@@ -80,7 +80,6 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
       >
         <button
           aria-controls="tabs-:r0:--tabpanel-0"
-          aria-disabled="false"
           aria-selected="true"
           class="chakra-tabs__tab css-8mj2xm"
           data-index="0"
@@ -93,7 +92,6 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
         </button>
         <button
           aria-controls="tabs-:r0:--tabpanel-1"
-          aria-disabled="false"
           aria-selected="false"
           class="chakra-tabs__tab css-8mj2xm"
           data-index="1"
@@ -120,10 +118,10 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
           tabindex="0"
         >
           <div
-            class="chakra-stack css-1eykvv3"
+            class="chakra-stack css-1lzo5bt"
           >
             <div
-              class="chakra-stack css-i49z84"
+              class="chakra-stack css-1xa9bwv"
               data-testid="holder-actions-buttons"
             >
               <a
@@ -142,13 +140,13 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
               </a>
             </div>
             <div
-              class="chakra-stack css-9mll8r"
+              class="chakra-stack css-13czc0d"
             >
               <div
-                class="chakra-stack css-1flyuon"
+                class="chakra-stack css-1yf3ocy"
               >
                 <div
-                  class="chakra-stack css-3lo6qo"
+                  class="chakra-stack css-1yqmcpo"
                   data-testid="security-details"
                 >
                   <div
@@ -343,10 +341,10 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                 </div>
               </div>
               <div
-                class="chakra-stack css-1flyuon"
+                class="chakra-stack css-1yf3ocy"
               >
                 <div
-                  class="chakra-stack css-17irsum"
+                  class="chakra-stack css-169eia3"
                 >
                   <div
                     class="css-146esfn"
@@ -370,7 +368,7 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                   </div>
                 </div>
                 <div
-                  class="chakra-stack css-3lo6qo"
+                  class="chakra-stack css-1yqmcpo"
                 >
                   <div
                     class="css-1dixb64"
@@ -437,7 +435,7 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                   </div>
                 </div>
                 <div
-                  class="chakra-stack css-3lo6qo"
+                  class="chakra-stack css-1yqmcpo"
                 >
                   <div
                     class="css-1dixb64"
@@ -624,13 +622,13 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
           tabindex="0"
         >
           <div
-            class="chakra-stack css-1urha0v"
+            class="chakra-stack css-frx4bb"
           >
             <div
-              class="chakra-stack css-17irsum"
+              class="chakra-stack css-169eia3"
             >
               <div
-                class="chakra-stack css-1fgxx0x"
+                class="chakra-stack css-1qx0yhn"
               >
                 <h2
                   class="css-1mk5tlk"
@@ -643,7 +641,7 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                   Add the ID account to preview its balance
                 </p>
                 <form
-                  class="chakra-stack css-jvrikk"
+                  class="chakra-stack css-1y1dtud"
                 >
                   <div
                     class="chakra-form-control css-1kxonj9"
@@ -658,7 +656,7 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                         data-group="true"
                       >
                         <input
-                          class="chakra-input css-1e8gdzn"
+                          class="chakra-input css-1ymw93l"
                           data-testid="search"
                           id="search"
                           name="search"
@@ -666,7 +664,7 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                           value=""
                         />
                         <div
-                          class="chakra-input__right-element css-17uv17e"
+                          class="chakra-input__right-element css-1akgnmh"
                         >
                           <button
                             aria-label="search"
@@ -709,13 +707,13 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
               </div>
             </div>
             <div
-              class="chakra-stack css-9mll8r"
+              class="chakra-stack css-13czc0d"
             >
               <div
-                class="chakra-stack css-18ym346"
+                class="chakra-stack css-159zjtk"
               >
                 <div
-                  class="chakra-stack css-3lo6qo"
+                  class="chakra-stack css-1yqmcpo"
                 >
                   <div
                     class="css-1dixb64"
@@ -743,7 +741,7 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                 </div>
               </div>
               <div
-                class="chakra-stack css-15191ly"
+                class="chakra-stack css-19rghx9"
               >
                 <p
                   class="css-kwpule"
@@ -751,7 +749,7 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                   Account Balance
                 </p>
                 <div
-                  class="chakra-stack css-dk69dq"
+                  class="chakra-stack css-1kn39y0"
                 >
                   <p
                     class="css-1ysbn4y"

@@ -205,7 +205,7 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { SDKService } from "../../services/SDKService";
-import { useToast } from "@hashgraph/asset-tokenization-uicomponents/Overlay/Toast";
+import { useToast } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { ApplyRolesRequest } from "@hashgraph/asset-tokenization-sdk";
 

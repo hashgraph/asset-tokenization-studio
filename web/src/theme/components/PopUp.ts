@@ -203,8 +203,8 @@
 
 */
 
-import type { PopUpThemeConfiguration } from "@hashgraph/asset-tokenization-uicomponents/Overlay/PopUp";
-import { popUpPartsList } from "@hashgraph/asset-tokenization-uicomponents/Overlay/PopUp";
+import type { PopUpThemeConfiguration } from "io-bricks-ui";
+import { popUpPartsList } from "io-bricks-ui";
 
 export const PopUp: PopUpThemeConfiguration = {
   parts: popUpPartsList,

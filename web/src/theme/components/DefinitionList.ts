@@ -206,8 +206,8 @@
 import {
   DefinitionListThemeConfiguration,
   definitionListPartsList,
-} from "@hashgraph/asset-tokenization-uicomponents/DataDisplay";
-import { BasePlatformTheme } from "@hashgraph/asset-tokenization-uicomponents/Theme";
+} from "io-bricks-ui";
+import { BasePlatformTheme } from "io-bricks-ui/Theme";
 
 export const DefinitionList: DefinitionListThemeConfiguration = {
   parts: definitionListPartsList,

@@ -3,10 +3,10 @@
 exports[`Dashboard render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-1153lrp"
+    class="chakra-stack css-t3mtkc"
   >
     <div
-      class="chakra-stack css-1vbflsr"
+      class="chakra-stack css-94x0m1"
     >
       <p
         class="css-r0wbil"
@@ -20,7 +20,7 @@ exports[`Dashboard render correctly 1`] = `
       </p>
     </div>
     <div
-      class="chakra-stack css-1lpnvx5"
+      class="chakra-stack css-1cadweg"
     >
       <div
         class="css-b0rmsk"
@@ -67,7 +67,7 @@ exports[`Dashboard render correctly 1`] = `
       class="css-yglf3"
     >
       <div
-        class="chakra-stack css-1xkzybq"
+        class="chakra-stack css-1n2jce"
       >
         <p
           class="css-rp0w81"
@@ -83,7 +83,7 @@ exports[`Dashboard render correctly 1`] = `
         </p>
       </div>
       <div
-        class="chakra-stack css-zg985e"
+        class="chakra-stack css-1tl0tho"
       >
         <a
           class="chakra-button css-vueqt9"
