@@ -28,7 +28,7 @@ jobs:
           cp .npmrc ./sdk/.npmrc
 
       - name: Change references
-        run: ./changeProyectsReferencesToRepo.sh
+        run: ./changeProjectsReferencesToRepo.sh
 
       - name: Install contracts dependencies
         run: npm run install:contracts
