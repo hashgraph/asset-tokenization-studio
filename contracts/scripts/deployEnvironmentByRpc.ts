@@ -258,27 +258,25 @@ export async function deployEnvironment() {
         environment.facetIdsEquities = await Promise.all(
             Object.entries(environment.deployedBusinessLogics)
                 .filter(
-                    ([key, value]) =>
+                    ([key]) =>
                         !key.startsWith('factory') &&
                         !key.startsWith('businessLogicResolver') &&
                         !key.startsWith('bondUSA')
                 )
                 .map(
-                    async ([key, value]) =>
-                        `${await value.getStaticResolverKey()}`
+                    async ([, value]) => `${await value.getStaticResolverKey()}`
                 )
         )
         environment.facetIdsBonds = await Promise.all(
             Object.entries(environment.deployedBusinessLogics)
                 .filter(
-                    ([key, value]) =>
+                    ([key]) =>
                         !key.startsWith('factory') &&
                         !key.startsWith('businessLogicResolver') &&
                         !key.startsWith('equityUSA')
                 )
                 .map(
-                    async ([key, value]) =>
-                        `${await value.getStaticResolverKey()}`
+                    async ([, value]) => `${await value.getStaticResolverKey()}`
                 )
         )
         environment.facetVersionsEquities = environment.facetIdsEquities.map(

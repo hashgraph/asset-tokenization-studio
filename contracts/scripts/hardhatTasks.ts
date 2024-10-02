@@ -605,7 +605,7 @@ task('getConfigurationInfo', 'Get all info for a given configuration')
             )
 
             for (let i = 0; i < configVersionLatest; i++) {
-                let currentVersion = i + 1
+                const currentVersion = i + 1
 
                 const facetLength = parseInt(
                     await getFacetsLengthByConfigurationIdAndVersion(

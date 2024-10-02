@@ -222,12 +222,11 @@ import {
     deployEnvironment,
     environment,
 } from '../../../scripts/deployEnvironmentByRpc'
-import { ConfigurationContentDefinition } from '../../../scripts/resolverDiamondCut.js'
+import { FacetConfiguration } from '../../../scripts/resolverDiamondCut.js'
 
 describe('DiamondCutManager', () => {
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
 
     let account_B: string
 
@@ -239,7 +238,7 @@ describe('DiamondCutManager', () => {
     before(async () => {
         //await loadFixture(deployBusinessLogicResolverFixture)
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        ;[signer_A, signer_B] = await ethers.getSigners()
         account_B = signer_B.address
 
         await deployEnvironment()
@@ -518,50 +517,37 @@ describe('DiamondCutManager', () => {
     it('GIVEN a resolver WHEN adding a new configuration with configId at 0 THEN fails with DefaultValueForConfigurationIdNotPermitted', async () => {
         diamondCutManager = diamondCutManager.connect(signer_A)
 
-        const configurationContentDefinition: ConfigurationContentDefinition = {
-            facetIds: environment.facetIdsEquities,
-            facetVersions: environment.facetVersionsEquities,
-        }
+        const facetConfigurations: FacetConfiguration[] = []
+        environment.facetIdsEquities.forEach((id, index) =>
+            facetConfigurations.push({
+                id,
+                version: environment.facetVersionsEquities[index],
+            })
+        )
 
         await expect(
             diamondCutManager.createConfiguration(
                 '0x0000000000000000000000000000000000000000000000000000000000000000',
-                configurationContentDefinition
+                facetConfigurations
             )
         ).to.be.rejectedWith('DefaultValueForConfigurationIdNotPermitted')
-    })
-
-    it('GIVEN a resolver WHEN adding a new configuration where facetIDs and facetVersions length do not match THEN fails with FacetIdsAndVersionsLengthMismatch', async () => {
-        diamondCutManager = diamondCutManager.connect(signer_A)
-
-        const configurationContentDefinition: ConfigurationContentDefinition = {
-            facetIds: [
-                '0x0000000000000000000000000000000000000000000000000000000000000001',
-                '0x0000000000000000000000000000000000000000000000000000000000000002',
-            ],
-            facetVersions: [1],
-        }
-
-        await expect(
-            diamondCutManager.createConfiguration(
-                EquityConfigId,
-                configurationContentDefinition
-            )
-        ).to.be.rejectedWith('FacetIdsAndVersionsLengthMismatch')
     })
 
     it('GIVEN a resolver and a non admin user WHEN adding a new configuration THEN fails with AccountHasNoRole', async () => {
         diamondCutManager = diamondCutManager.connect(signer_B)
 
-        const configurationContentDefinition: ConfigurationContentDefinition = {
-            facetIds: environment.facetIdsEquities,
-            facetVersions: environment.facetVersionsEquities,
-        }
+        const facetConfigurations: FacetConfiguration[] = []
+        environment.facetIdsEquities.forEach((id, index) =>
+            facetConfigurations.push({
+                id,
+                version: environment.facetVersionsEquities[index],
+            })
+        )
 
         await expect(
             diamondCutManager.createConfiguration(
                 EquityConfigId,
-                configurationContentDefinition
+                facetConfigurations
             )
         ).to.be.rejectedWith('AccountHasNoRole')
     })
@@ -572,15 +558,18 @@ describe('DiamondCutManager', () => {
 
         await pause.pause()
 
-        const configurationContentDefinition: ConfigurationContentDefinition = {
-            facetIds: environment.facetIdsEquities,
-            facetVersions: environment.facetVersionsEquities,
-        }
+        const facetConfigurations: FacetConfiguration[] = []
+        environment.facetIdsEquities.forEach((id, index) =>
+            facetConfigurations.push({
+                id,
+                version: environment.facetVersionsEquities[index],
+            })
+        )
 
         await expect(
             diamondCutManager.createConfiguration(
                 EquityConfigId,
-                configurationContentDefinition
+                facetConfigurations
             )
         ).to.be.rejectedWith('TokenIsPaused')
 
@@ -590,20 +579,17 @@ describe('DiamondCutManager', () => {
     it('GIVEN a resolver WHEN adding a new configuration with a non registered facet THEN fails with FacetIdNotRegistered', async () => {
         diamondCutManager = diamondCutManager.connect(signer_A)
 
-        const facetsIds = [
-            '0x0000000000000000000000000000000000000000000000000000000000000000',
+        const facetConfigurations: FacetConfiguration[] = [
+            {
+                id: '0x0000000000000000000000000000000000000000000000000000000000000000',
+                version: 1,
+            },
         ]
-        const facetVersions = [1]
-
-        const configurationContentDefinition: ConfigurationContentDefinition = {
-            facetIds: facetsIds,
-            facetVersions: facetVersions,
-        }
 
         await expect(
             diamondCutManager.createConfiguration(
                 EquityConfigId,
-                configurationContentDefinition
+                facetConfigurations
             )
         ).to.be.rejectedWith('FacetIdNotRegistered')
     })
@@ -617,15 +603,18 @@ describe('DiamondCutManager', () => {
         const facetVersions = [...environment.facetVersionsEquities]
         facetVersions.push(environment.facetVersionsEquities[0])
 
-        const configurationContentDefinition: ConfigurationContentDefinition = {
-            facetIds: facetsIds,
-            facetVersions: facetVersions,
-        }
+        const facetConfigurations: FacetConfiguration[] = []
+        facetsIds.forEach((id, index) => {
+            facetConfigurations.push({
+                id,
+                version: facetVersions[index],
+            })
+        })
 
         await expect(
             diamondCutManager.createConfiguration(
                 EquityConfigId,
-                configurationContentDefinition
+                facetConfigurations
             )
         ).to.be.rejectedWith('DuplicatedFacetInConfiguration')
     })

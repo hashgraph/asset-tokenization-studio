@@ -207,18 +207,15 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
     type BusinessLogicResolver,
-    type ResolverProxy,
     type AccessControl,
     type Pause,
     DiamondFacet,
-    DiamondCutFacet,
     DiamondLoupeFacet,
-    IStaticFunctionSelectors,
 } from '../../../typechain-types'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { assertObject } from '../../assert'
 import { _DEFAULT_ADMIN_ROLE } from '../../../scripts/constants'
-import { ConfigurationContentDefinition } from '../../../scripts/resolverDiamondCut.js'
+import { FacetConfiguration } from '../../../scripts/resolverDiamondCut.js'
 import { BusinessLogicRegistryData } from '../../../scripts/businessLogicResolverLogic.js'
 
 describe('Diamond Tests', () => {
@@ -233,10 +230,8 @@ describe('Diamond Tests', () => {
     let accessControlImpl: AccessControl
     let pauseImpl: Pause
     let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
 
     let account_A: string
-    let account_B: string
 
     async function deployContracts() {
         resolver = await deployResolver()
@@ -266,10 +261,10 @@ describe('Diamond Tests', () => {
 
         const facetVersions = facetIds.map(() => 1)
 
-        const configurationContentDefinition: ConfigurationContentDefinition = {
-            facetIds,
-            facetVersions,
-        }
+        const facetConfigurations: FacetConfiguration[] = []
+        facetIds.forEach((id, index) =>
+            facetConfigurations.push({ id, version: facetVersions[index] })
+        )
 
         await resolverContract.registerBusinessLogics(
             businessLogicsRegistryDatas
@@ -277,7 +272,7 @@ describe('Diamond Tests', () => {
 
         await resolverContract.createConfiguration(
             configID,
-            configurationContentDefinition
+            facetConfigurations
         )
     }
 
@@ -360,9 +355,8 @@ describe('Diamond Tests', () => {
 
     beforeEach(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B] = await ethers.getSigners()
+        ;[signer_A] = await ethers.getSigners()
         account_A = signer_A.address
-        account_B = signer_B.address
 
         //await loadFixture(deployContracts)
         await deployContracts()
@@ -392,7 +386,7 @@ describe('Diamond Tests', () => {
             diamond.address
         )
 
-        let result = await diamondCut.getConfigInfo()
+        const result = await diamondCut.getConfigInfo()
 
         expect(result.resolver_).to.equal(resolver.address)
         expect(result.configurationId_).to.equal(CONFIG_ID)
@@ -514,7 +508,7 @@ describe('Diamond Tests', () => {
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, [])
 
-        let diamondCut = await ethers.getContractAt(
+        const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
             diamond.address
         )
@@ -633,7 +627,7 @@ describe('Diamond Tests', () => {
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, [])
 
-        let diamondCut = await ethers.getContractAt(
+        const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
             diamond.address
         )
@@ -755,7 +749,7 @@ describe('Diamond Tests', () => {
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, [])
 
-        let diamondCut = await ethers.getContractAt(
+        const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
             diamond.address
         )

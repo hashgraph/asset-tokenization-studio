@@ -203,9 +203,9 @@
 
 */
 
-export interface ConfigurationContentDefinition {
-    facetIds: string[]
-    facetVersions: number[]
+export interface FacetConfiguration {
+    id: string
+    version: number
 }
 
 export async function createResolverConfig(
@@ -214,14 +214,14 @@ export async function createResolverConfig(
     facetIds: string[],
     facetVersions: number[]
 ): Promise<number> {
-    const configurationContentDefinition: ConfigurationContentDefinition = {
-        facetIds,
-        facetVersions,
-    }
+    const facetConfigurations: FacetConfiguration[] = []
+    facetIds.forEach((id, index) =>
+        facetConfigurations.push({ id, version: facetVersions[index] })
+    )
 
     await environment.resolver.createConfiguration(
         configId,
-        configurationContentDefinition
+        facetConfigurations
     )
 
     return (

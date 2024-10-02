@@ -227,38 +227,20 @@ abstract contract DiamondCutManager is
         _;
     }
 
-    modifier validFacetIdsAndVersion(
-        bytes32[] calldata _facetIds,
-        uint256[] calldata _facetVersions
-    ) {
-        if (_facetIds.length != _facetVersions.length) {
-            revert FacetIdsAndVersionsLengthMismatch(
-                _facetIds.length,
-                _facetVersions.length
-            );
-        }
-        _;
-    }
-
     function createConfiguration(
         bytes32 _configurationId,
-        ConfigurationContentDefinition calldata _configurationContent
+        FacetConfiguration[] calldata _facetConfigurations
     )
         external
         override
         validConfigurationIdFormat(_configurationId)
-        validFacetIdsAndVersion(
-            _configurationContent.facetIds,
-            _configurationContent.facetVersions
-        )
         onlyRole(_DEFAULT_ADMIN_ROLE)
         onlyUnpaused
     {
         emit DiamondConfigurationCreated(
             _configurationId,
-            _configurationContent.facetIds,
-            _configurationContent.facetVersions,
-            _createConfiguration(_configurationId, _configurationContent)
+            _facetConfigurations,
+            _createConfiguration(_configurationId, _facetConfigurations)
         );
     }
 

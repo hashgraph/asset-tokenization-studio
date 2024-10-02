@@ -221,14 +221,17 @@ import {
     IDiamondLoupe
 } from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
 import {IERC165} from '@openzeppelin/contracts/utils/introspection/IERC165.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
 // Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
 // The loupe functions are required by the EIP2535 Diamonds standard
-contract DiamondFacet is DiamondCutFacet, DiamondLoupeFacet {
+contract DiamondFacet is IDiamond, DiamondCutFacet, DiamondLoupeFacet {
     function getStaticResolverKey()
         external
         pure
-        override(DiamondCutFacet, DiamondLoupeFacet)
+        override(IStaticFunctionSelectors, DiamondCutFacet, DiamondLoupeFacet)
         returns (bytes32 staticResolverKey_)
     {
         staticResolverKey_ = _DIAMOND_RESOLVER_KEY;
@@ -237,7 +240,7 @@ contract DiamondFacet is DiamondCutFacet, DiamondLoupeFacet {
     function getStaticFunctionSelectors()
         external
         pure
-        override(DiamondCutFacet, DiamondLoupeFacet)
+        override(IStaticFunctionSelectors, DiamondCutFacet, DiamondLoupeFacet)
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         staticFunctionSelectors_ = new bytes4[](18);
@@ -293,7 +296,7 @@ contract DiamondFacet is DiamondCutFacet, DiamondLoupeFacet {
     function getStaticInterfaceIds()
         external
         pure
-        override(DiamondCutFacet, DiamondLoupeFacet)
+        override(IStaticFunctionSelectors, DiamondCutFacet, DiamondLoupeFacet)
         returns (bytes4[] memory staticInterfaceIds_)
     {
         staticInterfaceIds_ = new bytes4[](4);

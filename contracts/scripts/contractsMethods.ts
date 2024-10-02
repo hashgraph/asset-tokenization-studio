@@ -211,7 +211,7 @@ import {
     IStaticFunctionSelectors__factory,
     DiamondCutManager__factory,
 } from '../typechain-types'
-import { ConfigurationContentDefinition } from './resolverDiamondCut.js'
+import { FacetConfiguration } from './resolverDiamondCut.js'
 
 export async function getProxyImplementation(
     proxyAdminAddress: ContractId,
@@ -275,12 +275,12 @@ export async function createConfiguration(
     proxyAddress: ContractId,
     client: Client
 ) {
-    const configurationContentDefinition: ConfigurationContentDefinition = {
-        facetIds,
-        facetVersions,
-    }
+    const facetConfigurations: FacetConfiguration[] = []
+    facetIds.forEach((id, index) =>
+        facetConfigurations.push({ id, version: facetVersions[index] })
+    )
 
-    const params = [configId, configurationContentDefinition]
+    const params = [configId, facetConfigurations]
 
     console.log(params)
 

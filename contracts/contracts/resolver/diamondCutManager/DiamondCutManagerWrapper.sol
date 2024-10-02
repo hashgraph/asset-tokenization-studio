@@ -253,7 +253,7 @@ abstract contract DiamondCutManagerWrapper is
     // TODO: Very complex... Perhaps needs protocol with pagination
     function _createConfiguration(
         bytes32 _configurationId,
-        ConfigurationContentDefinition calldata _configurationContent
+        FacetConfiguration[] calldata _facetConfigurations
     ) internal returns (uint256 latestVersion_) {
         DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
 
@@ -262,35 +262,37 @@ abstract contract DiamondCutManagerWrapper is
             _dcms.activeConfigurations[_configurationId] = true;
         }
 
-        latestVersion_ = ++_dcms.latestVersion[_configurationId];
+        unchecked {
+            latestVersion_ = ++_dcms.latestVersion[_configurationId];
+        }
 
         bytes32 configVersionHash = _buildHash(
             _configurationId,
             latestVersion_
         );
 
-        _dcms.facetIds[configVersionHash] = _configurationContent.facetIds;
-
-        _dcms.facetVersions[configVersionHash] = _configurationContent
-            .facetVersions;
-
-        uint256 facetsLength = _configurationContent.facetIds.length;
+        uint256 facetsLength = _facetConfigurations.length;
+        _dcms.facetIds[configVersionHash] = new bytes32[](facetsLength);
+        _dcms.facetVersions[configVersionHash] = new uint256[](facetsLength);
 
         for (uint256 index; index < facetsLength; ) {
-            bytes32 facetId = _configurationContent.facetIds[index];
+            bytes32 facetId = _facetConfigurations[index].id;
+            uint256 facetVersion = _facetConfigurations[index].version;
+            _dcms.facetIds[configVersionHash][index] = facetId;
+            _dcms.facetVersions[configVersionHash][index] = facetVersion;
             bytes32 configVersionFacetHash = _buildHash(
                 _configurationId,
                 latestVersion_,
                 facetId
             );
 
-            address _address = _resolveBusinessLogicByVersion(
+            address addr = _resolveBusinessLogicByVersion(
                 facetId,
-                _configurationContent.facetVersions[index]
+                facetVersion
             );
 
             // TODO: is better a checkFacetRegistered in BusinessLogicResolverWrapper??
-            if (_address == address(0)) {
+            if (addr == address(0)) {
                 revert FacetIdNotRegistered(_configurationId, facetId);
             }
 
@@ -298,10 +300,10 @@ abstract contract DiamondCutManagerWrapper is
                 revert DuplicatedFacetInConfiguration(facetId);
             }
 
-            _dcms.addr[configVersionFacetHash] = _address;
+            _dcms.addr[configVersionFacetHash] = addr;
 
             IStaticFunctionSelectors staticFunctionSelectors = IStaticFunctionSelectors(
-                    _address
+                    addr
                 );
 
             _registerSelectors(
