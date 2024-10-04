@@ -203,10 +203,7 @@
 
 */
 
-import {
-  HeaderThemeConfiguration,
-  headerPartsList,
-} from "@hashgraph/asset-tokenization-uicomponents/Navigation";
+import { HeaderThemeConfiguration, headerPartsList } from "io-bricks-ui";
 
 export const Header: HeaderThemeConfiguration = {
   parts: headerPartsList,

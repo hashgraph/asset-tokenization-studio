@@ -204,10 +204,8 @@
 */
 
 import { Button, HStack, Stack, VStack } from "@chakra-ui/react";
-import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
+import { Text, DefinitionList, SelectController } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
-import { DefinitionList } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay/DefinitionList";
-import { SelectController } from "@hashgraph/asset-tokenization-uicomponents";
 import { required } from "../../../../utils/rules";
 import { useForm } from "react-hook-form";
 import { SecurityDetails } from "../SecurityDetails";

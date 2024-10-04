@@ -203,10 +203,7 @@
 
 */
 
-import {
-  AvatarThemeConfiguration,
-  avatarPartsList,
-} from "@hashgraph/asset-tokenization-uicomponents/Basic";
+import { AvatarThemeConfiguration, avatarPartsList } from "io-bricks-ui";
 
 export const Avatar: AvatarThemeConfiguration = {
   parts: avatarPartsList,

@@ -3,10 +3,10 @@
 exports[`CreateEquity render correctly 1`] = `
 <DocumentFragment>
   <div
-    class="chakra-stack css-ahthbn"
+    class="chakra-stack css-c097x0"
   >
     <div
-      class="chakra-stack css-1yfjds0"
+      class="chakra-stack css-1qyhq9w"
     >
       <div
         class="css-k5rr6j"
@@ -67,7 +67,7 @@ exports[`CreateEquity render correctly 1`] = `
       </nav>
     </div>
     <div
-      class="chakra-stack css-t8v5g3"
+      class="chakra-stack css-108xwcg"
     >
       <form
         class="css-yobion"
@@ -213,10 +213,10 @@ exports[`CreateEquity render correctly 1`] = `
             </div>
           </div>
           <div
-            class="chakra-stack css-dlb2qh"
+            class="chakra-stack css-1jjeqci"
           >
             <div
-              class="chakra-stack css-2xph3x"
+              class="chakra-stack css-87qygf"
             >
               <p
                 class="css-1mk5tlk"
@@ -253,10 +253,10 @@ exports[`CreateEquity render correctly 1`] = `
               />
             </div>
             <div
-              class="chakra-stack css-ppmla1"
+              class="chakra-stack css-1h0sumw"
             >
               <div
-                class="chakra-stack css-e7xy2r"
+                class="chakra-stack css-1nqqhpy"
               >
                 <p
                   class="css-0"
@@ -294,7 +294,7 @@ exports[`CreateEquity render correctly 1`] = `
                     data-group="true"
                   >
                     <input
-                      class="chakra-input css-o43sva"
+                      class="chakra-input css-ixs4pt"
                       data-testid="name"
                       id="name"
                       name="name"
@@ -306,10 +306,10 @@ exports[`CreateEquity render correctly 1`] = `
               </div>
             </div>
             <div
-              class="chakra-stack css-ppmla1"
+              class="chakra-stack css-1h0sumw"
             >
               <div
-                class="chakra-stack css-e7xy2r"
+                class="chakra-stack css-1nqqhpy"
               >
                 <p
                   class="css-0"
@@ -347,7 +347,7 @@ exports[`CreateEquity render correctly 1`] = `
                     data-group="true"
                   >
                     <input
-                      class="chakra-input css-o43sva"
+                      class="chakra-input css-ixs4pt"
                       data-testid="symbol"
                       id="symbol"
                       name="symbol"
@@ -359,10 +359,10 @@ exports[`CreateEquity render correctly 1`] = `
               </div>
             </div>
             <div
-              class="chakra-stack css-ppmla1"
+              class="chakra-stack css-1h0sumw"
             >
               <div
-                class="chakra-stack css-e7xy2r"
+                class="chakra-stack css-1nqqhpy"
               >
                 <p
                   class="css-0"
@@ -399,7 +399,7 @@ exports[`CreateEquity render correctly 1`] = `
                     data-group="true"
                   >
                     <input
-                      class="chakra-input css-o43sva"
+                      class="chakra-input css-ixs4pt"
                       data-testid="decimals"
                       id="field-:r8:"
                       inputmode="numeric"
@@ -413,10 +413,10 @@ exports[`CreateEquity render correctly 1`] = `
               </div>
             </div>
             <div
-              class="chakra-stack css-ppmla1"
+              class="chakra-stack css-1h0sumw"
             >
               <div
-                class="chakra-stack css-e7xy2r"
+                class="chakra-stack css-1nqqhpy"
               >
                 <p
                   class="css-0"
@@ -454,7 +454,7 @@ exports[`CreateEquity render correctly 1`] = `
                     data-group="true"
                   >
                     <input
-                      class="chakra-input css-o43sva"
+                      class="chakra-input css-ixs4pt"
                       data-testid="isin"
                       id="isin"
                       name="isin"
@@ -484,14 +484,14 @@ exports[`CreateEquity render correctly 1`] = `
               />
             </div>
             <div
-              class="chakra-stack css-1yxzzu5"
+              class="chakra-stack css-b1sb84"
             >
               <div
                 class="chakra-form-control css-1usebt7"
                 role="group"
               >
                 <div
-                  class="chakra-stack css-e7xy2r"
+                  class="chakra-stack css-1nqqhpy"
                 >
                   <div
                     class="chakra-form-control css-1kxonj9"
@@ -555,7 +555,7 @@ exports[`CreateEquity render correctly 1`] = `
                   </div>
                 </div>
                 <div
-                  class="chakra-stack css-e7xy2r"
+                  class="chakra-stack css-1nqqhpy"
                 >
                   <div
                     class="chakra-form-control css-1kxonj9"
@@ -619,7 +619,7 @@ exports[`CreateEquity render correctly 1`] = `
                   </div>
                 </div>
                 <div
-                  class="chakra-stack css-e7xy2r"
+                  class="chakra-stack css-1nqqhpy"
                 >
                   <div
                     class="chakra-form-control css-1kxonj9"
@@ -681,7 +681,7 @@ exports[`CreateEquity render correctly 1`] = `
               </div>
             </div>
             <div
-              class="chakra-stack css-q5mzwg"
+              class="chakra-stack css-10qrfti"
             >
               <a
                 class="chakra-button css-vueqt9"

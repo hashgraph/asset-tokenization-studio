@@ -205,7 +205,7 @@
 
 import { FormStepContainer } from "../FormStepContainer";
 import { render } from "../../test-utils";
-import { Text } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
+import { Text } from "io-bricks-ui";
 
 describe(`${FormStepContainer.name}`, () => {
   test("should render correctly", () => {

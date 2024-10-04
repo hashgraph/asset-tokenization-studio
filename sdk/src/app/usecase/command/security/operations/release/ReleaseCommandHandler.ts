@@ -250,7 +250,9 @@ export class ReleaseCommandHandler implements ICommandHandler<ReleaseCommand> {
       ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
       : new EvmAddress(sourceId);
 
-    const lockIdBd: BigDecimal = BigDecimal.fromString(lockId.toString());
+    const lockIdBd: BigDecimal = BigDecimal.fromString(
+        lockId.toString()
+    );
 
     const res = await handler.release(
       securityEvmAddress,

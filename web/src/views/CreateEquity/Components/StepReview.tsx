@@ -215,16 +215,14 @@ import { PreviousStepButton } from "./PreviousStepButton";
 import {
   PhosphorIcon,
   Text,
-} from "@hashgraph/asset-tokenization-uicomponents/Foundations";
-import { useFormContext } from "react-hook-form";
-import { ICreateEquityFormValues } from "../ICreateEquityFormValues";
-import {
   Button,
   DetailReview,
   DetailReviewProps,
   InfoDivider,
   PopUp,
-} from "@hashgraph/asset-tokenization-uicomponents";
+} from "io-bricks-ui";
+import { useFormContext } from "react-hook-form";
+import { ICreateEquityFormValues } from "../ICreateEquityFormValues";
 import { useCreateEquity } from "../../../hooks/queries/useCreateEquity";
 import { useWalletStore } from "../../../store/walletStore";
 import { CreateEquityRequest } from "@hashgraph/asset-tokenization-sdk";

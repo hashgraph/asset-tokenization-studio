@@ -203,11 +203,8 @@
 
 */
 
-import {
-  CheckboxThemeConfiguration,
-  checkboxPartsList,
-} from "@hashgraph/asset-tokenization-uicomponents/Forms";
-import { BasePlatformTheme } from "@hashgraph/asset-tokenization-uicomponents/Theme";
+import { CheckboxThemeConfiguration, checkboxPartsList } from "io-bricks-ui";
+import { BasePlatformTheme } from "io-bricks-ui/Theme";
 
 export const Checkbox: CheckboxThemeConfiguration = {
   parts: checkboxPartsList,

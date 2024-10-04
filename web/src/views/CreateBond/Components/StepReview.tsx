@@ -212,7 +212,7 @@ import {
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { PreviousStepButton } from "./PreviousStepButton";
-import { PhosphorIcon } from "@hashgraph/asset-tokenization-uicomponents/Foundations";
+import { PhosphorIcon } from "io-bricks-ui";
 import { useFormContext } from "react-hook-form";
 import {
   Button,
@@ -220,7 +220,7 @@ import {
   DetailReviewProps,
   InfoDivider,
   PopUp,
-} from "@hashgraph/asset-tokenization-uicomponents";
+} from "io-bricks-ui";
 import { useCreateBond } from "../../../hooks/queries/useCreateBond";
 import { useWalletStore } from "../../../store/walletStore";
 import { CreateBondRequest } from "@hashgraph/asset-tokenization-sdk";

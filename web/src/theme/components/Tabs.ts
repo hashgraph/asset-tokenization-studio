@@ -203,8 +203,8 @@
 
 */
 
-import { tabsPartsList } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay/Tabs";
-import type { TabsThemeConfiguration } from "@hashgraph/asset-tokenization-uicomponents/DataDisplay/Tabs";
+import { tabsPartsList } from "io-bricks-ui";
+import type { TabsThemeConfiguration } from "io-bricks-ui";
 
 export const Tabs: TabsThemeConfiguration = {
   parts: tabsPartsList,
