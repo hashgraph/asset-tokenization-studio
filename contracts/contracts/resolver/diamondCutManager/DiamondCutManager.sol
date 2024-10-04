@@ -212,6 +212,7 @@ import {DiamondCutManagerWrapper} from './DiamondCutManagerWrapper.sol';
 import {
     IDiamondLoupe
 } from '../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract DiamondCutManager is
@@ -228,25 +229,18 @@ abstract contract DiamondCutManager is
 
     function createConfiguration(
         bytes32 _configurationId,
-        bytes32[] calldata _facetIds,
-        uint256[] calldata _facetVersions
+        FacetConfiguration[] calldata _facetConfigurations
     )
         external
         override
         validConfigurationIdFormat(_configurationId)
-        onlyRole(_getRoleAdmin(_DEFAULT_ADMIN_ROLE))
+        onlyRole(_DEFAULT_ADMIN_ROLE)
         onlyUnpaused
     {
         emit DiamondConfigurationCreated(
             _configurationId,
-            _facetIds,
-            _facetVersions,
-            _createConfiguration(
-                _getDiamondCutManagerStorage(),
-                _configurationId,
-                _facetIds,
-                _facetVersions
-            )
+            _facetConfigurations,
+            _createConfiguration(_configurationId, _facetConfigurations)
         );
     }
 
@@ -344,12 +338,7 @@ abstract contract DiamondCutManager is
         uint256 _version,
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        override
-        returns (IDiamondLoupe.Facet[] memory facets_)
-    {
+    ) external view override returns (IDiamondLoupe.Facet[] memory facets_) {
         facets_ = _getFacetsByConfigurationIdAndVersion(
             _getDiamondCutManagerStorage(),
             _configurationId,

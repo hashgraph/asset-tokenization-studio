@@ -222,7 +222,7 @@ import {IStaticFunctionSelectors} from './IStaticFunctionSelectors.sol';
 interface IDiamondLoupe is IStaticFunctionSelectors {
     struct Facet {
         bytes32 id;
-        address _address;
+        address addr;
         bytes4[] selectors;
         bytes4[] interfaceIds;
     }

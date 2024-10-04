@@ -211,7 +211,7 @@ import {IDiamondLoupe} from '../resolverProxy/IDiamondLoupe.sol';
 
 /// @title Resolver Proxy Manager
 /// @notice This contract is used to manage configurations of resolverProxy's.
-///		 Each resolverProxy must have a resolverProxy configuration id. With it, it could ask to the ResolverProxyCutManger by:
+///		 Each resolverProxy must have a resolverProxy configuration id. It could ask to the ResolverProxyCutManger by:
 ///      * Maintain the list of business logic that forms part of a resolverProxy configuration.
 ///      * Maintain and resolve the list of function selectors by each configuration knowing its business logic address.
 ///      * Maintain and resolve the list of interface ids by each configuration.
@@ -224,6 +224,11 @@ import {IDiamondLoupe} from '../resolverProxy/IDiamondLoupe.sol';
 ///          * list of selectors
 ///          * list of interfaceIds
 interface IDiamondCutManager {
+    struct FacetConfiguration {
+        bytes32 id;
+        uint256 version;
+    }
+
     // @notice Not able to use bytes32(0) with configurationId
     error DefaultValueForConfigurationIdNotPermitted();
 
@@ -242,19 +247,17 @@ interface IDiamondCutManager {
     /// @notice emited when createConfiguration is executed
     event DiamondConfigurationCreated(
         bytes32 configurationId,
-        bytes32[] facetIds,
-        uint256[] facetVersions,
+        FacetConfiguration[] facetConfigurations,
         uint256 version
     );
 
     /// @notice Create a new configuration to the latest version of all facets.
     /// @param _configurationId unused identifier to the configuration.
-    /// @param _facetIds list of business logics to be registered.
-    /// @param _facetVersions list of versions of each _facetIds.
+    /// @param _facetConfigurations.id list of business logics to be registered.
+    /// @param _facetConfigurations.version list of versions of each _facetIds.
     function createConfiguration(
         bytes32 _configurationId,
-        bytes32[] calldata _facetIds,
-        uint256[] calldata _facetVersions
+        FacetConfiguration[] calldata _facetConfigurations
     ) external;
 
     /// @notice Resolve the facet address knowing configuration, version and selector.

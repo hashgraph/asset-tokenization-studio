@@ -221,6 +221,7 @@ import {
 import {
     _DIAMOND_CUT_MANAGER_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract DiamondCutManagerWrapper is
@@ -234,11 +235,11 @@ abstract contract DiamondCutManagerWrapper is
         // keccak256(configurationId, version)
         mapping(bytes32 => bytes32[]) facetIds;
         // keccak256(configurationId, version)
-        mapping(bytes32 => uint256) facetVersions;
+        mapping(bytes32 => uint256[]) facetVersions;
         // keccak256(configurationId, version, selector)
         mapping(bytes32 => address) facetAddress;
         // keccak256(configurationId, version, facetId)
-        mapping(bytes32 => address) _address;
+        mapping(bytes32 => address) addr;
         // keccak256(configurationId, version, facetId)
         mapping(bytes32 => bytes4[]) selectors;
         // keccak256(configurationId, version, selector)
@@ -251,53 +252,76 @@ abstract contract DiamondCutManagerWrapper is
 
     // TODO: Very complex... Perhaps needs protocol with pagination
     function _createConfiguration(
-        DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
-        bytes32[] calldata _facetIds,
-        uint256[] calldata _facetVersions
+        FacetConfiguration[] calldata _facetConfigurations
     ) internal returns (uint256 latestVersion_) {
+        DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
+
         if (!_dcms.activeConfigurations[_configurationId]) {
             _dcms.configurations.push(_configurationId);
             _dcms.activeConfigurations[_configurationId] = true;
         }
-        latestVersion_ = ++_dcms.latestVersion[_configurationId];
-        _dcms.facetIds[
-            _buildHash(_configurationId, latestVersion_)
-        ] = _facetIds;
-        uint256 facetsLength = _facetIds.length;
+
+        unchecked {
+            latestVersion_ = ++_dcms.latestVersion[_configurationId];
+        }
+
+        bytes32 configVersionHash = _buildHash(
+            _configurationId,
+            latestVersion_
+        );
+
+        uint256 facetsLength = _facetConfigurations.length;
+        _dcms.facetIds[configVersionHash] = new bytes32[](facetsLength);
+        _dcms.facetVersions[configVersionHash] = new uint256[](facetsLength);
+
         for (uint256 index; index < facetsLength; ) {
-            bytes32 facetId = _facetIds[index];
-            if (_dcms.facetAddress[_buildHash(_configurationId, latestVersion_, facetId)] != address(0)) {
-                revert DuplicatedFacetInConfiguration(facetId);
-            }
-            address _address = _resolveBusinessLogicByVersion(facetId, _facetVersions[index]);
+            bytes32 facetId = _facetConfigurations[index].id;
+            uint256 facetVersion = _facetConfigurations[index].version;
+            _dcms.facetIds[configVersionHash][index] = facetId;
+            _dcms.facetVersions[configVersionHash][index] = facetVersion;
+            bytes32 configVersionFacetHash = _buildHash(
+                _configurationId,
+                latestVersion_,
+                facetId
+            );
+
+            address addr = _resolveBusinessLogicByVersion(
+                facetId,
+                facetVersion
+            );
+
             // TODO: is better a checkFacetRegistered in BusinessLogicResolverWrapper??
-            if (_address == address(0)) {
+            if (addr == address(0)) {
                 revert FacetIdNotRegistered(_configurationId, facetId);
             }
-            _dcms._address[
-                _buildHash(_configurationId, latestVersion_, facetId)
-            ] = _address;
-            _dcms.facetAddress[
-                _buildHash(_configurationId, latestVersion_, facetId)
-            ] = _address;
+
+            if (_dcms.addr[configVersionFacetHash] != address(0)) {
+                revert DuplicatedFacetInConfiguration(facetId);
+            }
+
+            _dcms.addr[configVersionFacetHash] = addr;
+
             IStaticFunctionSelectors staticFunctionSelectors = IStaticFunctionSelectors(
-                    _address
+                    addr
                 );
+
             _registerSelectors(
                 _dcms,
                 _configurationId,
                 latestVersion_,
                 facetId,
-                staticFunctionSelectors
+                staticFunctionSelectors,
+                configVersionFacetHash
             );
             _registerInterfaceIds(
                 _dcms,
                 _configurationId,
                 latestVersion_,
-                facetId,
-                staticFunctionSelectors
+                staticFunctionSelectors,
+                configVersionFacetHash
             );
+
             unchecked {
                 ++index;
             }
@@ -309,22 +333,22 @@ abstract contract DiamondCutManagerWrapper is
         bytes32 _configurationId,
         uint256 _version,
         bytes32 _facetId,
-        IStaticFunctionSelectors _static
+        IStaticFunctionSelectors _static,
+        bytes32 _configVersionFacetHash
     ) private {
         address selectorAddress = address(_static);
         bytes4[] memory selectors = _static.getStaticFunctionSelectors();
-        _dcms.selectors[
-            _buildHash(_configurationId, _version, _facetId)
-        ] = selectors;
+        _dcms.selectors[_configVersionFacetHash] = selectors;
         uint256 length = selectors.length;
         for (uint256 index; index < length; ) {
             bytes4 selector = selectors[index];
-            _dcms.facetAddress[
-                _buildHashSelector(_configurationId, _version, selector)
-            ] = selectorAddress;
-            _dcms.selectorToFacetId[
-                _buildHashSelector(_configurationId, _version, selector)
-            ] = _facetId;
+            bytes32 configVersionSelectorHash = _buildHashSelector(
+                _configurationId,
+                _version,
+                selector
+            );
+            _dcms.facetAddress[configVersionSelectorHash] = selectorAddress;
+            _dcms.selectorToFacetId[configVersionSelectorHash] = _facetId;
             unchecked {
                 ++index;
             }
@@ -335,13 +359,11 @@ abstract contract DiamondCutManagerWrapper is
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
         uint256 _version,
-        bytes32 _facetId,
-        IStaticFunctionSelectors _static
+        IStaticFunctionSelectors _static,
+        bytes32 _configVersionFacetHash
     ) private {
         bytes4[] memory interfaceIds = _static.getStaticInterfaceIds();
-        _dcms.interfaceIds[
-            _buildHash(_configurationId, _version, _facetId)
-        ] = interfaceIds;
+        _dcms.interfaceIds[_configVersionFacetHash] = interfaceIds;
         uint256 length = interfaceIds.length;
         for (uint256 index; index < length; ) {
             bytes4 interfaceId = interfaceIds[index];
@@ -457,7 +479,12 @@ abstract contract DiamondCutManagerWrapper is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (IDiamondLoupe.Facet[] memory facets_) {
-        bytes32[] memory facetIds = _dcms.facetIds[_configurationId];
+        bytes32[] memory facetIds = _dcms.facetIds[
+            _buildHash(
+                _configurationId,
+                _resolveVersion(_dcms, _configurationId, _version)
+            )
+        ];
         (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
             _pageIndex,
             _pageLength
@@ -543,7 +570,12 @@ abstract contract DiamondCutManagerWrapper is
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view returns (address[] memory facetAddresses_) {
-        bytes32[] memory facetIds = _dcms.facetIds[_configurationId];
+        bytes32[] memory facetIds = _dcms.facetIds[
+            _buildHash(
+                _configurationId,
+                _resolveVersion(_dcms, _configurationId, _version)
+            )
+        ];
         (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
             _pageIndex,
             _pageLength
@@ -551,7 +583,7 @@ abstract contract DiamondCutManagerWrapper is
         uint256 size = LibCommon.getSize(start, end, facetIds.length);
         facetAddresses_ = new address[](size);
         for (uint256 index; index < size; ) {
-            facetAddresses_[index] = _dcms._address[
+            facetAddresses_[index] = _dcms.addr[
                 _buildHash(
                     _configurationId,
                     _resolveVersion(_dcms, _configurationId, _version),
@@ -593,9 +625,9 @@ abstract contract DiamondCutManagerWrapper is
         );
         facet_ = IDiamondLoupe.Facet({
             id: _facetId,
-            _address: _dcms._address[facetIdHash],
+            addr: _dcms.addr[facetIdHash],
             selectors: _dcms.selectors[facetIdHash],
-            interfaceIds: _dcms.selectors[facetIdHash]
+            interfaceIds: _dcms.interfaceIds[facetIdHash]
         });
     }
 
@@ -605,7 +637,7 @@ abstract contract DiamondCutManagerWrapper is
         uint256 _version,
         bytes32 _facetId
     ) internal view returns (address facetAddress_) {
-        facetAddress_ = _dcms._address[
+        facetAddress_ = _dcms.addr[
             _buildHash(
                 _configurationId,
                 _resolveVersion(_dcms, _configurationId, _version),

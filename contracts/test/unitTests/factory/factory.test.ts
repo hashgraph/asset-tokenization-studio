@@ -402,7 +402,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 true,
-                undefined,
                 ADDRESS_0
             )
 
@@ -442,7 +441,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -482,7 +480,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 false,
-                undefined,
                 undefined
             )
 
@@ -522,7 +519,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -567,7 +563,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -612,7 +607,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -710,7 +704,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 ADDRESS_0
             )
 
@@ -747,7 +740,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -784,7 +776,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 false,
-                undefined,
                 undefined
             )
 
@@ -823,7 +814,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -878,7 +868,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -929,7 +918,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -972,7 +960,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -1078,7 +1065,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -1118,7 +1104,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -1164,7 +1149,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 

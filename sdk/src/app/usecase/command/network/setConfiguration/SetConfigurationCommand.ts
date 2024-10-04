@@ -210,9 +210,6 @@ export class SetConfigurationCommandResponse implements CommandResponse {
   constructor(
     public readonly factoryAddress: string,
     public readonly resolverAddress: string,
-    public readonly businessLogicKeysCommon: string[],
-    public readonly businessLogicKeysEquity: string[],
-    public readonly businessLogicKeysBond: string[],
   ) {}
 }
 
@@ -220,9 +217,6 @@ export class SetConfigurationCommand extends Command<SetConfigurationCommandResp
   constructor(
     public readonly factoryAddress: string,
     public readonly resolverAddress: string,
-    public readonly businessLogicKeysCommon: string[],
-    public readonly businessLogicKeysEquity: string[],
-    public readonly businessLogicKeysBond: string[],
   ) {
     super();
   }

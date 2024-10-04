@@ -217,4 +217,6 @@ interface IERC1410 is
     IERC1410Controller,
     IERC1410Operator,
     IERC1410Standard
-{}
+{
+
+}

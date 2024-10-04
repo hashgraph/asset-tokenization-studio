@@ -206,7 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
-    type Diamond,
+    type ResolverProxy,
     type ERC20,
     type ERC1410Snapshot,
     type Pause,
@@ -233,7 +233,7 @@ import { assertObject } from '../../../../assert'
 const amount = 1000
 
 describe('ERC20 Tests', () => {
-    let diamond: Diamond
+    let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
     let signer_C: SignerWithAddress
