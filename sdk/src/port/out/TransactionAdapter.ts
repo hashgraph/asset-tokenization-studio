@@ -243,7 +243,8 @@ interface ITransactionAdapter {
     equityDetails: EquityDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
-    businessLogicKeys: string[],
+    configId: string,
+    configVersion: number,
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse>;
   createBond(
@@ -252,7 +253,8 @@ interface ITransactionAdapter {
     couponDetails: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
-    businessLogicKeys: string[],
+    configId: string,
+    configVersion: number,
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse>;
   init(): Promise<Environment>;
@@ -317,7 +319,10 @@ interface ITransactionAdapter {
     security: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  takeSnapshot(security: EvmAddress, securityId?: ContractId | string,): Promise<TransactionResponse>;
+  takeSnapshot(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
   setDividends(
     security: EvmAddress,
     recordDate: BigDecimal,
@@ -552,7 +557,8 @@ export default abstract class TransactionAdapter
     equityDetails: EquityDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
-    businessLogicKeys: string[],
+    configId: string,
+    configVersion: number,
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
@@ -563,7 +569,8 @@ export default abstract class TransactionAdapter
     couponDetails: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
-    businessLogicKeys: string[],
+    configId: string,
+    configVersion: number,
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
@@ -700,7 +707,10 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
-  takeSnapshot(security: EvmAddress, securityId?: ContractId | string,): Promise<TransactionResponse<any, Error>> {
+  takeSnapshot(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   getAccount(): Account {

@@ -209,7 +209,7 @@ pragma solidity 0.8.18;
 import {IAccessControl} from '../interfaces/accessControl/IAccessControl.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {Common} from '../common/Common.sol';
 import {_ACCESS_CONTROL_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 

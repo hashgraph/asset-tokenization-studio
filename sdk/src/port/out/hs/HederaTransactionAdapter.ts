@@ -296,6 +296,7 @@ import { SecurityData } from '../../../domain/context/factory/SecurityData.js';
 import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
 import { AdditionalSecurityData } from '../../../domain/context/factory/AdditionalSecurityData.js';
 import { Interface } from 'ethers/lib/utils.js';
+import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -353,7 +354,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     equityInfo: EquityDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
-    businessLogicKeys: string[],
+    configId: string,
+    configVersion: number,
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'deployEquity';
@@ -382,10 +384,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         decimals: securityInfo.decimals,
       };
 
+      const resolverProxyConfiguration: ResolverProxyConfiguration = {
+        key: configId,
+        version: configVersion,
+      };
+
       const security: SecurityData = {
         isMultiPartition: securityInfo.isMultiPartition,
         resolver: resolver.toString(),
-        businessLogicKeys: businessLogicKeys,
+        resolverProxyConfiguration: resolverProxyConfiguration,
         rbacs: rbacs,
         isControllable: securityInfo.isControllable,
         isWhiteList: securityInfo.isWhiteList,
@@ -461,7 +468,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     couponInfo: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
-    businessLogicKeys: string[],
+    configId: string,
+    configVersion: number,
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'deployBond';
@@ -490,10 +498,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         decimals: securityInfo.decimals,
       };
 
+      const resolverProxyConfiguration: ResolverProxyConfiguration = {
+        key: configId,
+        version: configVersion,
+      };
+
       const security: SecurityData = {
         isMultiPartition: securityInfo.isMultiPartition,
         resolver: resolver.toString(),
-        businessLogicKeys: businessLogicKeys,
+        resolverProxyConfiguration: resolverProxyConfiguration,
         rbacs: rbacs,
         isControllable: securityInfo.isControllable,
         isWhiteList: securityInfo.isWhiteList,

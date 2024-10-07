@@ -259,7 +259,8 @@ export class CreateBondCommandHandler
       firstCouponDate,
       factory,
       resolver,
-      businessLogicKeys,
+      configId,
+      configVersion,
       diamondOwnerAccount,
     } = command;
 
@@ -271,8 +272,12 @@ export class CreateBondCommandHandler
       throw new InvalidRequest('Resolver not found in request');
     }
 
-    if (!businessLogicKeys) {
-      throw new InvalidRequest('Business Logic Keys not found in request');
+    if (!configId) {
+      throw new InvalidRequest('Config Id not found in request');
+    }
+
+    if (configVersion === undefined) {
+      throw new InvalidRequest('Config Version not found in request');
     }
 
     const diamondOwnerAccountEvmAddress: EvmAddress =
@@ -314,7 +319,8 @@ export class CreateBondCommandHandler
       couponInfo,
       factoryEvmAddress,
       resolverEvmAddress,
-      businessLogicKeys,
+      configId,
+      configVersion,
       diamondOwnerAccountEvmAddress,
     );
 

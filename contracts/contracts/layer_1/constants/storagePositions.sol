@@ -241,8 +241,8 @@ bytes32 constant _ERC1644_STORAGE_POSITION = 0x78da7d6f03fa6ff51457b34dfcf6bc00f
 // keccak256('security.token.standard.erc20.storage');
 bytes32 constant _ERC20_STORAGE_POSITION = 0xd5228ac65cba3eaaef0669de6709c44cfdf33c0f1cce2989d4a133e0214cce57;
 
-// keccak256('security.token.standard.diamond.storage');
-bytes32 constant _DIAMOND_STORAGE_POSITION = 0x7d268947cdef52e017a0d20edcb3dd401f380b008e218dd92620377f21954099;
+// keccak256('security.token.standard.resolverProxy.storage');
+bytes32 constant _RESOLVER_PROXY_STORAGE_POSITION = 0x4833864335c8f29dd85e3f7a36869cb90d5dc7167ae5000f7e1ce4d7c15d14ad;
 
 // keccak256('security.token.standard.snapshot.storage');
 bytes32 constant _SNAPSHOT_STORAGE_POSITION = 0x450898ebb84982a28d8787f0138cfce477c6d811ae3b1db5fdb7ed17e8bda898;
