@@ -210,6 +210,4 @@ import {IDiamondLoupe} from './IDiamondLoupe.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 // solhint-disable-next-line no-empty-blocks
-interface IDiamond is IDiamondCut, IDiamondLoupe {
-
-}
+interface IDiamond is IDiamondCut, IDiamondLoupe {}

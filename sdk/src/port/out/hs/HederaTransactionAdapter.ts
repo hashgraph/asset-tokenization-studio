@@ -1076,9 +1076,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       security.toString(),
     );
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-    );
+    const functionDataEncodedHex =
+      factoryInstance.interface.encodeFunctionData(FUNCTION_NAME);
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -1104,12 +1103,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Setting document: ${name}, with ${uri}, and hash ${hash} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ERC1643__factory().attach(
-      security.toString(),
-    );
+    const factoryInstance = new ERC1643__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME, [name,uri,hash]
+      FUNCTION_NAME,
+      [name, uri, hash],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -1134,12 +1132,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Removing document: ${name} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ERC1643__factory().attach(
-      security.toString(),
-    );
+    const factoryInstance = new ERC1643__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME, [name]
+      FUNCTION_NAME,
+      [name],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -1169,7 +1166,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME, [targetId.toString()]
+      FUNCTION_NAME,
+      [targetId.toString()],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -1199,7 +1197,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME, [targetId.toString()]
+      FUNCTION_NAME,
+      [targetId.toString()],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -1230,7 +1229,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME, [partitionId, targetId.toString()]
+      FUNCTION_NAME,
+      [partitionId, targetId.toString()],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -1261,7 +1261,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME, [partitionId, targetId.toString()]
+      FUNCTION_NAME,
+      [partitionId, targetId.toString()],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -1294,7 +1295,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME, [partitionId, sourceId.toString(), targetId.toString(), amount.toHexString(), '0x', '0x']
+      FUNCTION_NAME,
+      [
+        partitionId,
+        sourceId.toString(),
+        targetId.toString(),
+        amount.toHexString(),
+        '0x',
+        '0x',
+      ],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -1319,12 +1328,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Setting max supply ${maxSupply} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new Cap__factory().attach(
-      security.toString(),
-    );
+    const factoryInstance = new Cap__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME, [maxSupply.toHexString()]
+      FUNCTION_NAME,
+      [maxSupply.toHexString()],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -1352,9 +1360,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       security.toString(),
     );
 
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-    );
+    const functionDataEncodedHex =
+      factoryInstance.interface.encodeFunctionData(FUNCTION_NAME);
 
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -1383,7 +1390,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME, [max.toHexString()]
+      FUNCTION_NAME,
+      [max.toHexString()],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -1410,12 +1418,16 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Locking ${amount} tokens from account ${sourceId.toString()} until ${expirationDate}`,
     );
 
-    const factoryInstance = new Lock__factory().attach(
-      security.toString(),
-    );
+    const factoryInstance = new Lock__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME, [_PARTITION_ID_1, amount.toHexString(), sourceId.toString(), expirationDate.toHexString()]
+      FUNCTION_NAME,
+      [
+        _PARTITION_ID_1,
+        amount.toHexString(),
+        sourceId.toString(),
+        expirationDate.toHexString(),
+      ],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -1441,12 +1453,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Releasing lock ${lockId} from account ${sourceId.toString()}`,
     );
 
-    const factoryInstance = new Lock__factory().attach(
-      security.toString(),
-    );
+    const factoryInstance = new Lock__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME, [_PARTITION_ID_1, lockId.toHexString(), sourceId.toString()]
+      FUNCTION_NAME,
+      [_PARTITION_ID_1, lockId.toHexString(), sourceId.toString()],
     );
 
     const functionDataEncoded = new Uint8Array(
