@@ -304,7 +304,7 @@ export class SDKService {
   };
   static testnetResolverAddress = process.env.REACT_APP_RPC_RESOLVER ?? "0.0.0";
   static testnetFactoryAddress = process.env.REACT_APP_RPC_FACTORY ?? "0.0.0";
-  
+
   static testnetConfiguration = {
     factoryAddress: this.testnetFactoryAddress,
     resolverAddress: this.testnetResolverAddress,
@@ -325,7 +325,6 @@ export class SDKService {
       },
     ],
   };
- 
 
   public static isInit() {
     return !!this.initData;

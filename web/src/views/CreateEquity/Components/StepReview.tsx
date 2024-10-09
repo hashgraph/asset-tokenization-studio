@@ -320,8 +320,10 @@ export const StepReview = () => {
       isCountryControlListWhiteList: countriesListType === 2,
       countries: countriesList.map((country) => country).toString(),
       info: "",
-      configId: process.env.REACT_APP_EQUITY_CONFIG_ID ?? '',
-      configVersion: parseInt(process.env.REACT_APP_EQUITY_CONFIG_VERSION ?? '0'),
+      configId: process.env.REACT_APP_EQUITY_CONFIG_ID ?? "",
+      configVersion: parseInt(
+        process.env.REACT_APP_EQUITY_CONFIG_VERSION ?? "0",
+      ),
     });
 
     createSecurity(request);

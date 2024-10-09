@@ -218,7 +218,7 @@ import { _DEFAULT_ADMIN_ROLE } from '../../../scripts/constants'
 import { FacetConfiguration } from '../../../scripts/resolverDiamondCut.js'
 import { BusinessLogicRegistryData } from '../../../scripts/businessLogicResolverLogic.js'
 
-describe('Diamond Tests', () => {
+describe('ResolverProxy Tests', () => {
     const CONFIG_ID =
         '0x0000000000000000000000000000000000000000000000000000000000000011'
     const CONFIG_ID_2 =
@@ -362,7 +362,7 @@ describe('Diamond Tests', () => {
         await deployContracts()
     })
 
-    it('GIVEN deployed facets WHEN deploy a new diamond with correct keys THEN a new diamond proxy was deployed', async () => {
+    it('GIVEN deployed facets WHEN deploy a new resolverProxy with correct configuration THEN a new resolverProxy proxy was deployed', async () => {
         const businessLogicsRegistryDatas = [
             {
                 businessLogicKey: await diamondFacet.getStaticResolverKey(),
@@ -377,13 +377,13 @@ describe('Diamond Tests', () => {
 
         await setUpResolver(businessLogicsRegistryDatas)
 
-        const diamond = await (
+        const resolverProxy = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, [])
 
         const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            diamond.address
+            resolverProxy.address
         )
 
         const result = await diamondCut.getConfigInfo()
@@ -394,13 +394,13 @@ describe('Diamond Tests', () => {
 
         const diamondLoupe = await ethers.getContractAt(
             'DiamondLoupeFacet',
-            diamond.address
+            resolverProxy.address
         )
 
         await checkFacets(businessLogicsRegistryDatas, diamondLoupe)
     })
 
-    it('GIVEN deployed facets WHEN deploying a diamond and registering Facets to use a non exposed signature THEN raise FunctionNotFound and it is not recognized by supportsInterface', async () => {
+    it('GIVEN deployed facets WHEN deploying a resolverProxy and registering Facets to use a non exposed signature THEN raise FunctionNotFound and it is not recognized by supportsInterface', async () => {
         const businessLogicsRegistryDatas = [
             {
                 businessLogicKey: await diamondFacet.getStaticResolverKey(),
@@ -410,22 +410,22 @@ describe('Diamond Tests', () => {
 
         await setUpResolver(businessLogicsRegistryDatas)
 
-        const diamond = await (
+        const resolverProxy = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, [])
 
         const accessControl = await ethers.getContractAt(
             'AccessControl',
-            diamond.address
+            resolverProxy.address
         )
         const diamondLoupe = await ethers.getContractAt(
             'DiamondLoupeFacet',
-            diamond.address
+            resolverProxy.address
         )
 
         const GRANT_ROLE_SIGNATURE = '0x2f2ff15d'
         await expect(accessControl.grantRole(_DEFAULT_ADMIN_ROLE, account_A))
-            .to.be.revertedWithCustomError(diamond, 'FunctionNotFound')
+            .to.be.revertedWithCustomError(resolverProxy, 'FunctionNotFound')
             .withArgs(GRANT_ROLE_SIGNATURE)
         expect(await diamondLoupe.supportsInterface(GRANT_ROLE_SIGNATURE)).to.be
             .false
@@ -462,22 +462,22 @@ describe('Diamond Tests', () => {
 
         await setUpResolver(businessLogicsRegistryDatas_1)
 
-        const diamond_v1 = await (
+        const resolverProxy_v1 = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, [])
 
-        const diamond_latest = await (
+        const resolverProxy_latest = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 0, [])
 
         const diamondFacet_v1 = await ethers.getContractAt(
             'DiamondFacet',
-            diamond_v1.address
+            resolverProxy_v1.address
         )
 
         const diamondFacet_latest = await ethers.getContractAt(
             'DiamondFacet',
-            diamond_latest.address
+            resolverProxy_latest.address
         )
 
         await checkFacets(businessLogicsRegistryDatas_1, diamondFacet_v1)
@@ -489,7 +489,7 @@ describe('Diamond Tests', () => {
         await checkFacets(businessLogicsRegistryDatas_2, diamondFacet_latest)
     })
 
-    it('GIVEN diamond and non-admin user WHEN updating version THEN fails with AccountHasNoRole', async () => {
+    it('GIVEN resolverProxy and non-admin user WHEN updating version THEN fails with AccountHasNoRole', async () => {
         const businessLogicsRegistryDatas = [
             {
                 businessLogicKey: await diamondFacet.getStaticResolverKey(),
@@ -504,13 +504,13 @@ describe('Diamond Tests', () => {
 
         await setUpResolver(businessLogicsRegistryDatas)
 
-        const diamond = await (
+        const resolverProxy = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, [])
 
         const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            diamond.address
+            resolverProxy.address
         )
 
         await expect(diamondCut.updateConfigVersion(0)).to.be.rejectedWith(
@@ -518,7 +518,7 @@ describe('Diamond Tests', () => {
         )
     })
 
-    it('GIVEN diamond and admin user WHEN updating to non existing version THEN fails with ResolverProxyConfigurationNoRegistered', async () => {
+    it('GIVEN resolverProxy and admin user WHEN updating to non existing version THEN fails with ResolverProxyConfigurationNoRegistered', async () => {
         const businessLogicsRegistryDatas = [
             {
                 businessLogicKey: await diamondFacet.getStaticResolverKey(),
@@ -540,13 +540,13 @@ describe('Diamond Tests', () => {
             },
         ]
 
-        const diamond = await (
+        const resolverProxy = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, rbac)
 
         let diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            diamond.address
+            resolverProxy.address
         )
 
         diamondCut = diamondCut.connect(signer_A)
@@ -556,7 +556,7 @@ describe('Diamond Tests', () => {
         )
     })
 
-    it('GIVEN diamond and admin user WHEN updating version THEN succeeds', async () => {
+    it('GIVEN resolverProxy and admin user WHEN updating version THEN succeeds', async () => {
         const businessLogicsRegistryDatas = [
             {
                 businessLogicKey: await diamondFacet.getStaticResolverKey(),
@@ -580,13 +580,13 @@ describe('Diamond Tests', () => {
 
         const oldVersion = 1
 
-        const diamond = await (
+        const resolverProxy = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac)
 
         let diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            diamond.address
+            resolverProxy.address
         )
 
         let result = await diamondCut.getConfigInfo()
@@ -608,7 +608,7 @@ describe('Diamond Tests', () => {
         expect(result.version_).to.equal(newVersion)
     })
 
-    it('GIVEN diamond and non-admin user WHEN updating configID THEN fails with AccountHasNoRole', async () => {
+    it('GIVEN resolverProxy and non-admin user WHEN updating configID THEN fails with AccountHasNoRole', async () => {
         const businessLogicsRegistryDatas = [
             {
                 businessLogicKey: await diamondFacet.getStaticResolverKey(),
@@ -623,13 +623,13 @@ describe('Diamond Tests', () => {
 
         await setUpResolver(businessLogicsRegistryDatas)
 
-        const diamond = await (
+        const resolverProxy = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, [])
 
         const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            diamond.address
+            resolverProxy.address
         )
 
         await expect(
@@ -637,7 +637,7 @@ describe('Diamond Tests', () => {
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
-    it('GIVEN diamond and admin user WHEN updating to non existing configID THEN fails with ResolverProxyConfigurationNoRegistered', async () => {
+    it('GIVEN resolverProxy and admin user WHEN updating to non existing configID THEN fails with ResolverProxyConfigurationNoRegistered', async () => {
         const businessLogicsRegistryDatas = [
             {
                 businessLogicKey: await diamondFacet.getStaticResolverKey(),
@@ -659,13 +659,13 @@ describe('Diamond Tests', () => {
             },
         ]
 
-        const diamond = await (
+        const resolverProxy = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, rbac)
 
         let diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            diamond.address
+            resolverProxy.address
         )
 
         diamondCut = diamondCut.connect(signer_A)
@@ -675,7 +675,7 @@ describe('Diamond Tests', () => {
         ).to.be.rejectedWith('ResolverProxyConfigurationNoRegistered')
     })
 
-    it('GIVEN diamond and admin user WHEN updating configID THEN succeeds', async () => {
+    it('GIVEN resolverProxy and admin user WHEN updating configID THEN succeeds', async () => {
         const businessLogicsRegistryDatas = [
             {
                 businessLogicKey: await diamondFacet.getStaticResolverKey(),
@@ -700,13 +700,13 @@ describe('Diamond Tests', () => {
 
         const oldVersion = 1
 
-        const diamond = await (
+        const resolverProxy = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac)
 
         let diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            diamond.address
+            resolverProxy.address
         )
 
         let result = await diamondCut.getConfigInfo()
@@ -728,7 +728,7 @@ describe('Diamond Tests', () => {
         expect(result.version_).to.equal(newVersion)
     })
 
-    it('GIVEN diamond and non-admin user WHEN updating resolver THEN fails with AccountHasNoRole', async () => {
+    it('GIVEN resolverProxy and non-admin user WHEN updating resolver THEN fails with AccountHasNoRole', async () => {
         resolver_2 = await deployResolver()
 
         const businessLogicsRegistryDatas = [
@@ -745,13 +745,13 @@ describe('Diamond Tests', () => {
 
         await setUpResolver(businessLogicsRegistryDatas)
 
-        const diamond = await (
+        const resolverProxy = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, [])
 
         const diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            diamond.address
+            resolverProxy.address
         )
 
         await expect(
@@ -759,7 +759,7 @@ describe('Diamond Tests', () => {
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
-    it('GIVEN diamond and admin user WHEN updating to non existing resolver THEN fails with ResolverProxyConfigurationNoRegistered', async () => {
+    it('GIVEN resolverProxy and admin user WHEN updating to non existing resolver THEN fails with ResolverProxyConfigurationNoRegistered', async () => {
         resolver_2 = await deployResolver()
 
         const businessLogicsRegistryDatas = [
@@ -783,13 +783,13 @@ describe('Diamond Tests', () => {
             },
         ]
 
-        const diamond = await (
+        const resolverProxy = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, 1, rbac)
 
         let diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            diamond.address
+            resolverProxy.address
         )
 
         diamondCut = diamondCut.connect(signer_A)
@@ -799,7 +799,7 @@ describe('Diamond Tests', () => {
         ).to.be.rejectedWith('ResolverProxyConfigurationNoRegistered')
     })
 
-    it('GIVEN diamond and admin user WHEN updating resolver THEN succeeds', async () => {
+    it('GIVEN resolverProxy and admin user WHEN updating resolver THEN succeeds', async () => {
         resolver_2 = await deployResolver()
 
         const businessLogicsRegistryDatas = [
@@ -830,13 +830,13 @@ describe('Diamond Tests', () => {
 
         const oldVersion = 1
 
-        const diamond = await (
+        const resolverProxy = await (
             await ethers.getContractFactory('ResolverProxy')
         ).deploy(resolver.address, CONFIG_ID, oldVersion, rbac)
 
         let diamondCut = await ethers.getContractAt(
             'DiamondCutFacet',
-            diamond.address
+            resolverProxy.address
         )
 
         let result = await diamondCut.getConfigInfo()
