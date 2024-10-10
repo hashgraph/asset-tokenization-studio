@@ -251,7 +251,8 @@ export class CreateEquityCommandHandler
       security,
       factory,
       resolver,
-      businessLogicKeys,
+      configId,
+      configVersion,
       diamondOwnerAccount,
       votingRight,
       informationRight,
@@ -273,8 +274,12 @@ export class CreateEquityCommandHandler
       throw new InvalidRequest('Resolver not found in request');
     }
 
-    if (!businessLogicKeys) {
-      throw new InvalidRequest('Business Logic Keys not found in request');
+    if (!configId) {
+      throw new InvalidRequest('Config Id not found in request');
+    }
+
+    if (configVersion === undefined) {
+      throw new InvalidRequest('Config Version not found in request');
     }
 
     const diamondOwnerAccountEvmAddress: EvmAddress =
@@ -315,7 +320,8 @@ export class CreateEquityCommandHandler
       equityInfo,
       factoryEvmAddress,
       resolverEvmAddress,
-      businessLogicKeys,
+      configId,
+      configVersion,
       diamondOwnerAccountEvmAddress,
     );
 

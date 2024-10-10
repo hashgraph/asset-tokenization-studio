@@ -77,9 +77,6 @@ Initialises the SDK.
    - configuration: factory contract Hedera Id, resolver contract Hedera Id, common, equity and bond business logic keys the SDK will connect to. This data must be aligned with the selected “network”.
    - factories: list of factories and their respective environments in case the wallet allows for the network to be switched.
    - resolvers: list of resolvers and their respective environments in case the wallet allows for the network to be switched.
-   - businessLogicKeysCommon: list of common keys and their respective environments in case the wallet allows for the network to be switched.
-   - businessLogicKeysEquity: list of equity keys and their respective environments in case the wallet allows for the network to be switched.
-   - businessLogicKeysBond: list of bond keys and their respective environments in case the wallet allows for the network to be switched.
 
 - Response
    - SupportedWallets: List of supported wallets.
@@ -132,17 +129,11 @@ Sets a new configuration into the SDK.
 - Request
    - factoryAddress: new factory address.
    - resolverAddress: new resolver address.
-   - businessLogicKeysCommon: new list of business common keys.
-   - businessLogicKeysEquity : new list of business equity keys.
-   - businessLogicKeysBond : new list of business bond keys.
 
 - Response
    - ConfigResponse:
       - factoryAddress: new factory address.
       - resolverAddress: new resolver address.
-      - businessLogicKeysCommon: new list of business common keys.
-      - businessLogicKeysEquity : new list of business equity keys.
-      - businessLogicKeysBond : new list of business bond keys.
 
 ## Bond
 

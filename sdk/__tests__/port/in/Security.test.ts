@@ -236,9 +236,6 @@ import {
   CLIENT_ACCOUNT_ECDSA,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
-  BUSINESS_LOGIC_KEYS_COMMON,
-  BUSINESS_LOGIC_KEYS_EQUITY,
-  BUSINESS_LOGIC_KEYS_BOND,
   CLIENT_ACCOUNT_ECDSA_A,
 } from '../../config.js';
 import NetworkService from '../../../src/app/service/NetworkService.js';
@@ -278,6 +275,9 @@ const regulationType = RegulationType.REG_D;
 const regulationSubType = RegulationSubType.B_506;
 const countries = 'AF,HG,BN';
 const info = 'Anything';
+const configId =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const configVersion = 1;
 const mirrorNode: MirrorNode = {
   name: 'testmirrorNode',
   baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
@@ -317,9 +317,6 @@ describe('🧪 Security tests', () => {
     ns.configuration = {
       factoryAddress: FACTORY_ADDRESS,
       resolverAddress: RESOLVER_ADDRESS,
-      businessLogicKeysCommon: BUSINESS_LOGIC_KEYS_COMMON,
-      businessLogicKeysEquity: BUSINESS_LOGIC_KEYS_EQUITY,
-      businessLogicKeysBond: BUSINESS_LOGIC_KEYS_BOND,
     };
     ns.mirrorNode = mirrorNode;
     ns.rpcNode = rpcNode;
@@ -361,6 +358,8 @@ describe('🧪 Security tests', () => {
       isCountryControlListWhiteList: true,
       countries: countries,
       info: info,
+      configId: configId,
+      configVersion: configVersion,
     });
 
     equity = (await Equity.create(requestST)).security;

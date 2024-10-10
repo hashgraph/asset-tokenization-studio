@@ -218,7 +218,7 @@ import {
 } from '../interfaces/scheduledSnapshots/IScheduledSnapshots.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
 contract ScheduledSnapshots is
     IStaticFunctionSelectors,

@@ -206,23 +206,75 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IDiamondCut} from '../../interfaces/diamond/IDiamondCut.sol';
-import {IDiamond} from '../../interfaces/diamond/IDiamond.sol';
-import {DiamondUnstructured} from '../unstructured/DiamondUnstructured.sol';
-import {_DEFAULT_ADMIN_ROLE} from '../../layer_1/constants/roles.sol';
+import {
+    IDiamondCut
+} from '../../../interfaces/resolver/resolverProxy/IDiamondCut.sol';
+import {
+    ResolverProxyUnstructured
+} from '../unstructured/ResolverProxyUnstructured.sol';
+import {
+    IBusinessLogicResolver
+} from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
 import {
     _DIAMOND_CUT_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
+} from '../../../layer_1/constants/resolverKeys.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
+import {_DEFAULT_ADMIN_ROLE} from '../../../layer_1/constants/roles.sol';
 
-// Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
-// The loupe functions are required by the EIP2535 Diamonds standard
-contract DiamondCutFacet is IDiamondCut, DiamondUnstructured {
-    function registerFacets(
-        bytes32[] calldata _facets
-    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
-        _cleanAndRegisterBusinessLogics(_getDiamondStorage(), _facets);
+contract DiamondCutFacet is IDiamondCut, Common, ResolverProxyUnstructured {
+    function updateConfigVersion(
+        uint256 _newVersion
+    ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {
+        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ds.resolver.checkResolverProxyConfigurationRegistered(
+            ds.resolverProxyConfigurationId,
+            _newVersion
+        );
+        _updateVersion(ds, _newVersion);
     }
 
+    function updateConfig(
+        bytes32 _newConfigurationId,
+        uint256 _newVersion
+    ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {
+        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ds.resolver.checkResolverProxyConfigurationRegistered(
+            _newConfigurationId,
+            _newVersion
+        );
+        _updateConfigId(ds, _newConfigurationId);
+        _updateVersion(ds, _newVersion);
+    }
+
+    function updateResolver(
+        IBusinessLogicResolver _newResolver,
+        bytes32 _newConfigurationId,
+        uint256 _newVersion
+    ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {
+        _newResolver.checkResolverProxyConfigurationRegistered(
+            _newConfigurationId,
+            _newVersion
+        );
+        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        _updateResolver(ds, _newResolver);
+        _updateConfigId(ds, _newConfigurationId);
+        _updateVersion(ds, _newVersion);
+    }
+
+    function getConfigInfo()
+        external
+        view
+        returns (address resolver_, bytes32 configurationId_, uint256 version_)
+    {
+        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        return (
+            address(ds.resolver),
+            ds.resolverProxyConfigurationId,
+            ds.version
+        );
+    }
+
+    // This implements ERC-165.
     function getStaticResolverKey()
         external
         pure
@@ -240,11 +292,22 @@ contract DiamondCutFacet is IDiamondCut, DiamondUnstructured {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = IDiamondCut
-            .registerFacets
-            .selector;
+        staticFunctionSelectors_ = new bytes4[](4);
+        uint256 selectorIndex;
+        unchecked {
+            staticFunctionSelectors_[selectorIndex++] = this
+                .updateConfigVersion
+                .selector;
+            staticFunctionSelectors_[selectorIndex++] = this
+                .updateConfig
+                .selector;
+            staticFunctionSelectors_[selectorIndex++] = this
+                .updateResolver
+                .selector;
+            staticFunctionSelectors_[selectorIndex++] = this
+                .getConfigInfo
+                .selector;
+        }
     }
 
     function getStaticInterfaceIds()
@@ -254,9 +317,8 @@ contract DiamondCutFacet is IDiamondCut, DiamondUnstructured {
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {
-        staticInterfaceIds_ = new bytes4[](2);
+        staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IDiamond).interfaceId;
         staticInterfaceIds_[selectorsIndex++] = type(IDiamondCut).interfaceId;
     }
 }

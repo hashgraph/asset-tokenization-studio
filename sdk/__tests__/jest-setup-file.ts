@@ -807,7 +807,8 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       _equityInfo: EquityDetails,
       _factory: EvmAddress,
       _resolver: EvmAddress,
-      _businessLogicKeys: string[],
+      _configId: string,
+      _configVersion: number,
       _diamondOwnerAccount?: EvmAddress,
     ) => {
       securityInfo = _securityInfo;
@@ -847,7 +848,8 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       _couponInfo: CouponDetails,
       _factory: EvmAddress,
       _resolver: EvmAddress,
-      _businessLogicKeys: string[],
+      _configId: string,
+      _configVersion: number,
       _diamondOwnerAccount?: EvmAddress,
     ) => {
       securityInfo = _securityInfo;

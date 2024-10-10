@@ -210,7 +210,7 @@ import {IPause} from '../interfaces/pause/IPause.sol';
 import {_PAUSER_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_PAUSE_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {Common} from '../common/Common.sol';
 

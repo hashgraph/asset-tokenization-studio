@@ -241,9 +241,6 @@ export type NetworkResponse = {
 export type ConfigResponse = {
   factoryAddress: string;
   resolverAddress: string;
-  businessLogicKeysCommon: string[];
-  businessLogicKeysEquity: string[];
-  businessLogicKeysBond: string[];
 };
 
 interface INetworkInPort {
@@ -253,9 +250,6 @@ interface INetworkInPort {
   setConfig(req: SetConfigurationRequest): Promise<ConfigResponse>;
   getFactoryAddress(): string;
   getResolverAddress(): string;
-  getBusinessLogicKeysCommon(): string[];
-  getBusinessLogicKeysEquity(): string[];
-  getBusinessLogicKeysBond(): string[];
   getNetwork(): string;
   isNetworkRecognized(): boolean;
 }
@@ -276,13 +270,7 @@ class NetworkInPort implements INetworkInPort {
     handleValidation('SetConfigurationRequest', req);
 
     const res = await this.commandBus.execute(
-      new SetConfigurationCommand(
-        req.factoryAddress,
-        req.resolverAddress,
-        req.businessLogicKeysCommon,
-        req.businessLogicKeysEquity,
-        req.businessLogicKeysBond,
-      ),
+      new SetConfigurationCommand(req.factoryAddress, req.resolverAddress),
     );
     return res;
   }
@@ -299,27 +287,6 @@ class NetworkInPort implements INetworkInPort {
     return this.networkService.configuration
       ? this.networkService.configuration.resolverAddress
       : '';
-  }
-
-  @LogError
-  public getBusinessLogicKeysCommon(): string[] {
-    return this.networkService.configuration
-      ? this.networkService.configuration.businessLogicKeysCommon
-      : [];
-  }
-
-  @LogError
-  public getBusinessLogicKeysEquity(): string[] {
-    return this.networkService.configuration
-      ? this.networkService.configuration.businessLogicKeysEquity
-      : [];
-  }
-
-  @LogError
-  public getBusinessLogicKeysBond(): string[] {
-    return this.networkService.configuration
-      ? this.networkService.configuration.businessLogicKeysBond
-      : [];
   }
 
   @LogError
@@ -360,20 +327,11 @@ class NetworkInPort implements INetworkInPort {
     );
 
     if (req.configuration)
-      if (
-        req.configuration.factoryAddress &&
-        req.configuration.resolverAddress &&
-        req.configuration.businessLogicKeysCommon &&
-        req.configuration.businessLogicKeysEquity &&
-        req.configuration.businessLogicKeysBond
-      )
+      if (req.configuration.factoryAddress && req.configuration.resolverAddress)
         await this.setConfig(
           new SetConfigurationRequest({
             factoryAddress: req.configuration.factoryAddress,
             resolverAddress: req.configuration.resolverAddress,
-            businessLogicKeysCommon: req.configuration.businessLogicKeysCommon,
-            businessLogicKeysEquity: req.configuration.businessLogicKeysEquity,
-            businessLogicKeysBond: req.configuration.businessLogicKeysBond,
           }),
         );
 
@@ -393,9 +351,6 @@ class NetworkInPort implements INetworkInPort {
         val.setJsonRpcRelays(req.jsonRpcRelays);
         val.setFactories(req.factories);
         val.setResolvers(req.resolvers);
-        val.setBusinessLogicKeysCommon(req.businessLogicKeysCommon);
-        val.setBusinessLogicKeysEquity(req.businessLogicKeysEquity);
-        val.setBusinessLogicKeysBond(req.businessLogicKeysBond);
       }
     }
     return wallets;

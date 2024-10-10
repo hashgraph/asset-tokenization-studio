@@ -206,7 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
-    type Diamond,
+    type ResolverProxy,
     type Pause,
     AccessControl,
 } from '../../../../typechain-types'
@@ -221,7 +221,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
 
 describe('Pause Tests', () => {
-    let diamond: Diamond
+    let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
 

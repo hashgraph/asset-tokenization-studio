@@ -241,6 +241,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   isCountryControlListWhiteList: boolean;
   countries: string;
   info: string;
+  configId: string;
+  configVersion: number;
 
   constructor({
     name,
@@ -264,6 +266,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     isCountryControlListWhiteList,
     countries,
     info,
+    configId,
+    configVersion,
   }: {
     name: string;
     symbol: string;
@@ -286,6 +290,8 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     isCountryControlListWhiteList: boolean;
     countries: string;
     info: string;
+    configId: string;
+    configVersion: number;
   }) {
     super({
       name: (val) => {
@@ -335,6 +341,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
       regulationSubType: (val) => {
         return Factory.checkRegulationSubType(val, this.regulationType);
       },
+      configId: Validation.checkBytes32Format(),
     });
     this.name = name;
     this.symbol = symbol;
@@ -358,5 +365,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.isCountryControlListWhiteList = isCountryControlListWhiteList;
     this.countries = countries;
     this.info = info;
+    this.configId = configId;
+    this.configVersion = configVersion;
   }
 }

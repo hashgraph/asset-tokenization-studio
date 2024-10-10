@@ -253,7 +253,6 @@ export async function deployProxyToBusinessLogicResolver(
         'BusinessLogicResolver',
         transparentUpgradableProxy.address
     )
-
     await businessLogicResolver.initialize_BusinessLogicResolver()
 }
 

@@ -230,17 +230,11 @@ export class SetConfigurationCommandHandler
     this.networkService.configuration = {
       factoryAddress: command.factoryAddress,
       resolverAddress: command.resolverAddress,
-      businessLogicKeysCommon: command.businessLogicKeysCommon,
-      businessLogicKeysEquity: command.businessLogicKeysEquity,
-      businessLogicKeysBond: command.businessLogicKeysBond,
     };
     return Promise.resolve(
       new SetConfigurationCommandResponse(
         this.networkService.configuration.factoryAddress,
         this.networkService.configuration.resolverAddress,
-        this.networkService.configuration.businessLogicKeysCommon,
-        this.networkService.configuration.businessLogicKeysEquity,
-        this.networkService.configuration.businessLogicKeysBond,
       ),
     );
   }

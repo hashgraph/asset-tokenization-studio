@@ -213,6 +213,8 @@ import {
     EquityDeployedEvent,
     _DEFAULT_ADMIN_ROLE,
     BondDeployedEvent,
+    EquityConfigId,
+    BondConfigId,
 } from './constants'
 import { environment } from './deployEnvironmentByRpc'
 
@@ -231,6 +233,11 @@ export async function deployProxyToFactory(
 export interface Rbac {
     role: string
     members: string[]
+}
+
+export interface ResolverProxyConfiguration {
+    key: string
+    version: number
 }
 
 export interface ERC20MetadataInfo {
@@ -285,7 +292,7 @@ export interface CouponDetailsData {
 export interface SecurityData {
     isMultiPartition: boolean
     resolver: string
-    businessLogicKeys: string[]
+    resolverProxyConfiguration: ResolverProxyConfiguration
     rbacs: Rbac[]
     isControllable: boolean
     isWhiteList: boolean
@@ -372,7 +379,6 @@ export async function setEquityData(
     nominalValue: number,
     init_rbacs?: Rbac[],
     addAdmin = true,
-    initBusinessLogicKeys?: string[],
     initResolver?: string
 ) {
     let rbacs: Rbac[] = []
@@ -389,26 +395,11 @@ export async function setEquityData(
         rbacs = rbacs.concat(init_rbacs)
     }
 
-    const businessLogicKeys: string[] = initBusinessLogicKeys
-        ? initBusinessLogicKeys
-        : [
-              await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.accessControl.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.pause.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.controlList.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC20.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1644.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1410ScheduledSnapshot.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1594.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.equityUSA.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.snapshots.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.cap.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.lock.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.transferAndLock.getStaticResolverKey(),
-          ]
+    const resolverProxyConfiguration: ResolverProxyConfiguration = {
+        key: EquityConfigId,
+        version: 1,
+    }
+
     const resolver = initResolver ? initResolver : environment.resolver.address
 
     const erc20MetadataInfo: ERC20MetadataInfo = {
@@ -421,7 +412,7 @@ export async function setEquityData(
     const security: SecurityData = {
         isMultiPartition: isMultiPartition,
         resolver: resolver,
-        businessLogicKeys: businessLogicKeys,
+        resolverProxyConfiguration: resolverProxyConfiguration,
         rbacs: rbacs,
         isControllable: isControllable,
         isWhiteList: isWhiteList,
@@ -469,7 +460,6 @@ export async function setBondData(
     firstCouponDate: number,
     init_rbacs?: Rbac[],
     addAdmin = true,
-    initBusinessLogicKeys?: string[],
     initResolver?: string
 ) {
     let rbacs: Rbac[] = []
@@ -486,25 +476,11 @@ export async function setBondData(
         rbacs = rbacs.concat(init_rbacs)
     }
 
-    const businessLogicKeys: string[] = initBusinessLogicKeys
-        ? initBusinessLogicKeys
-        : [
-              await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.accessControl.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.pause.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.controlList.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC20.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1644.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1410ScheduledSnapshot.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1594.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.bondUSA.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.snapshots.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.cap.getStaticResolverKey(),
-              await environment.deployedBusinessLogics.lock.getStaticResolverKey(),
-          ]
+    const resolverProxyConfiguration: ResolverProxyConfiguration = {
+        key: BondConfigId,
+        version: 1,
+    }
+
     const resolver = initResolver ? initResolver : environment.resolver.address
 
     const erc20MetadataInfo: ERC20MetadataInfo = {
@@ -517,7 +493,7 @@ export async function setBondData(
     const security: SecurityData = {
         isMultiPartition: isMultiPartition,
         resolver: resolver,
-        businessLogicKeys: businessLogicKeys,
+        resolverProxyConfiguration: resolverProxyConfiguration,
         rbacs: rbacs,
         isControllable: isControllable,
         isWhiteList: isWhiteList,
@@ -574,7 +550,6 @@ export async function deployEquityFromFactory(
     info: string,
     init_rbacs?: Rbac[],
     addAdmin = true,
-    initBusinessLogicKeys?: string[],
     initResolver?: string
 ) {
     const equityData = await setEquityData(
@@ -599,7 +574,6 @@ export async function deployEquityFromFactory(
         nominalValue,
         init_rbacs,
         addAdmin,
-        initBusinessLogicKeys,
         initResolver
     )
 
@@ -648,7 +622,6 @@ export async function deployBondFromFactory(
     info: string,
     init_rbacs?: Rbac[],
     addAdmin = true,
-    initBusinessLogicKeys?: string[],
     initResolver?: string
 ) {
     const bondData = await setBondData(
@@ -670,7 +643,6 @@ export async function deployBondFromFactory(
         firstCouponDate,
         init_rbacs,
         addAdmin,
-        initBusinessLogicKeys,
         initResolver
     )
 

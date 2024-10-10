@@ -210,7 +210,7 @@ import {ILock} from '../interfaces/lock/ILock.sol';
 import {_LOCKER_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {Common} from '../common/Common.sol';
 import {LockStorageWrapper} from './LockStorageWrapper.sol';

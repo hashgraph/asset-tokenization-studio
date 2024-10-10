@@ -244,6 +244,8 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   isCountryControlListWhiteList: boolean;
   countries: string;
   info: string;
+  configId: string;
+  configVersion: number;
 
   constructor({
     name,
@@ -270,6 +272,8 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     isCountryControlListWhiteList,
     countries,
     info,
+    configId,
+    configVersion,
   }: {
     name: string;
     symbol: string;
@@ -295,6 +299,8 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     isCountryControlListWhiteList: boolean;
     countries: string;
     info: string;
+    configId: string;
+    configVersion: number;
   }) {
     super({
       name: (val) => {
@@ -322,6 +328,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
       regulationSubType: (val) => {
         return Factory.checkRegulationSubType(val, this.regulationType);
       },
+      configId: Validation.checkBytes32Format(),
     });
     this.name = name;
     this.symbol = symbol;
@@ -348,5 +355,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     this.isCountryControlListWhiteList = isCountryControlListWhiteList;
     this.countries = countries;
     this.info = info;
+    this.configId = configId;
+    this.configVersion = configVersion;
   }
 }

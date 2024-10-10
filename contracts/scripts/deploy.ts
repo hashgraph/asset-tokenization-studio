@@ -242,10 +242,42 @@ import {
 import { contractCall } from './contractsLifeCycle/utils'
 import {
     BusinessLogicRegistryData,
+    createConfiguration,
     getSolidityAddress,
     getStaticResolverKey,
     registerBusinessLogics,
 } from './contractsMethods'
+import { BondConfigId, EquityConfigId } from './constants'
+
+const used_already_deployed = true
+const resolver_proxy_contract: ContractId = ContractId.fromString('0.0.4916112')
+const resolver_proxyAdmin_contract: ContractId =
+    ContractId.fromString('0.0.4916106')
+const resolver_contract: ContractId = ContractId.fromString('0.0.4916103')
+const factory_proxy_contract: ContractId = ContractId.fromString('0.0.4916186')
+const factory_proxyAdmin_contract: ContractId =
+    ContractId.fromString('0.0.4916183')
+const factory_contract: ContractId = ContractId.fromString('0.0.4916173')
+const accessControl_contract: ContractId = ContractId.fromString('0.0.4916115')
+const cap_contract: ContractId = ContractId.fromString('0.0.4916119')
+const controlList_contract: ContractId = ContractId.fromString('0.0.4916121')
+const pause_contract: ContractId = ContractId.fromString('0.0.4916124')
+const erc20_contract: ContractId = ContractId.fromString('0.0.4916132')
+const erc1410_contract: ContractId = ContractId.fromString('0.0.4916136')
+const erc1594_contract: ContractId = ContractId.fromString('0.0.4916138')
+const erc1643_contract: ContractId = ContractId.fromString('0.0.4916141')
+const erc1644_contract: ContractId = ContractId.fromString('0.0.4916146')
+const snapshots_contract: ContractId = ContractId.fromString('0.0.4916149')
+const diamondFacet_contract: ContractId = ContractId.fromString('0.0.4916152')
+const equity_contract: ContractId = ContractId.fromString('0.0.4916156')
+const bond_contract: ContractId = ContractId.fromString('0.0.4916160')
+const scheduledSnapshots_contract: ContractId =
+    ContractId.fromString('0.0.4916164')
+const corporateActionsSecurity_contract: ContractId =
+    ContractId.fromString('0.0.4916166')
+const lock_contract: ContractId = ContractId.fromString('0.0.4916130')
+const transferAndLock_contract: ContractId =
+    ContractId.fromString('0.0.4916168')
 
 export function initializeClient(): [
     Client,
@@ -324,43 +356,99 @@ export async function getProxyImpl(
     console.log('New Implementation' + address[0])
 }
 
-export async function deployassettokenizationFullInfrastructure(
+export async function deployAssettokenizationFullInfrastructure(
     clientOperator: Client,
     privateKey: string,
     isED25519Type: boolean
 ) {
-    const resolverResult = await deployResolver(
-        clientOperator,
-        privateKey,
-        isED25519Type
-    )
-    const resolver = resolverResult[0]
-    const accessControl = await deployAccessControl(clientOperator, privateKey)
-    const cap = await deployCap(clientOperator, privateKey)
-    const controlList = await deployControlList(clientOperator, privateKey)
-    const pause = await deployPause(clientOperator, privateKey)
-    const lock = await deployLock(clientOperator, privateKey)
-    const erc20 = await deployERC20(clientOperator, privateKey)
-    const erc1410 = await deployERC1410(clientOperator, privateKey)
-    const erc1594 = await deployERC1594(clientOperator, privateKey)
-    const erc1643 = await deployERC1643(clientOperator, privateKey)
-    const erc1644 = await deployERC1644(clientOperator, privateKey)
-    const snapshots = await deploySnapshots(clientOperator, privateKey)
-    const diamondFacet = await deployDiamondFacet(clientOperator, privateKey)
-    const equity = await deployEquity(clientOperator, privateKey)
-    const bond = await deployBond(clientOperator, privateKey)
-    const scheduledSnapshots = await deployScheduledSnapshots(
-        clientOperator,
-        privateKey
-    )
-    const corporateActionsSecurity = await deployCorporateActionsSecurity(
-        clientOperator,
-        privateKey
-    )
-    const transferAndLock = await deployTransferAndLock(
-        clientOperator,
-        privateKey
-    )
+    let resolverResult: ContractId[] = []
+    let factoryResult: ContractId[] = []
+    let resolver
+
+    if (used_already_deployed && resolver_contract.num.toString() !== '0') {
+        resolver = resolver_proxy_contract
+        resolverResult.push(resolver_proxy_contract)
+        resolverResult.push(resolver_proxyAdmin_contract)
+        resolverResult.push(resolver_contract)
+    } else {
+        resolverResult = await deployResolver(
+            clientOperator,
+            privateKey,
+            isED25519Type
+        )
+        resolver = resolverResult[0]
+    }
+
+    const accessControl =
+        used_already_deployed && accessControl_contract.num.toString() !== '0'
+            ? accessControl_contract
+            : await deployAccessControl(clientOperator, privateKey)
+    const cap =
+        used_already_deployed && cap_contract.num.toString() !== '0'
+            ? cap_contract
+            : await deployCap(clientOperator, privateKey)
+    const controlList =
+        used_already_deployed && controlList_contract.num.toString() !== '0'
+            ? controlList_contract
+            : await deployControlList(clientOperator, privateKey)
+    const pause =
+        used_already_deployed && pause_contract.num.toString() !== '0'
+            ? pause_contract
+            : await deployPause(clientOperator, privateKey)
+    const lock =
+        used_already_deployed && lock_contract.num.toString() !== '0'
+            ? lock_contract
+            : await deployLock(clientOperator, privateKey)
+    const erc20 =
+        used_already_deployed && erc20_contract.num.toString() !== '0'
+            ? erc20_contract
+            : await deployERC20(clientOperator, privateKey)
+    const erc1410 =
+        used_already_deployed && erc1410_contract.num.toString() !== '0'
+            ? erc1410_contract
+            : await deployERC1410(clientOperator, privateKey)
+    const erc1594 =
+        used_already_deployed && erc1594_contract.num.toString() !== '0'
+            ? erc1594_contract
+            : await deployERC1594(clientOperator, privateKey)
+    const erc1643 =
+        used_already_deployed && erc1643_contract.num.toString() !== '0'
+            ? erc1643_contract
+            : await deployERC1643(clientOperator, privateKey)
+    const erc1644 =
+        used_already_deployed && erc1644_contract.num.toString() !== '0'
+            ? erc1644_contract
+            : await deployERC1644(clientOperator, privateKey)
+    const snapshots =
+        used_already_deployed && snapshots_contract.num.toString() !== '0'
+            ? snapshots_contract
+            : await deploySnapshots(clientOperator, privateKey)
+    const diamondFacet =
+        used_already_deployed && diamondFacet_contract.num.toString() !== '0'
+            ? diamondFacet_contract
+            : await deployDiamondFacet(clientOperator, privateKey)
+    const equity =
+        used_already_deployed && equity_contract.num.toString() !== '0'
+            ? equity_contract
+            : await deployEquity(clientOperator, privateKey)
+    const bond =
+        used_already_deployed && bond_contract.num.toString() !== '0'
+            ? bond_contract
+            : await deployBond(clientOperator, privateKey)
+    const scheduledSnapshots =
+        used_already_deployed &&
+        scheduledSnapshots_contract.num.toString() !== '0'
+            ? scheduledSnapshots_contract
+            : await deployScheduledSnapshots(clientOperator, privateKey)
+    const corporateActionsSecurity =
+        used_already_deployed &&
+        corporateActionsSecurity_contract.num.toString() !== '0'
+            ? corporateActionsSecurity_contract
+            : await deployCorporateActionsSecurity(clientOperator, privateKey)
+    const transferAndLock =
+        used_already_deployed && transferAndLock_contract.num.toString() !== '0'
+            ? transferAndLock_contract
+            : await deployTransferAndLock(clientOperator, privateKey)
 
     const businessLogicRegistries: BusinessLogicRegistryData[] = [
         {
@@ -469,17 +557,74 @@ export async function deployassettokenizationFullInfrastructure(
         },
     ]
 
-    await registerBusinessLogics(
-        businessLogicRegistries,
-        resolver,
-        clientOperator
-    )
+    if (!used_already_deployed || resolver_contract.num.toString() === '0') {
+        await registerBusinessLogics(
+            businessLogicRegistries,
+            resolver,
+            clientOperator
+        )
 
-    const factoryResult = await deployFactory(
-        clientOperator,
-        privateKey,
-        isED25519Type
-    )
+        const facetIdsCommon: string[] = [
+            await getStaticResolverKey(diamondFacet, clientOperator),
+            await getStaticResolverKey(accessControl, clientOperator),
+            await getStaticResolverKey(cap, clientOperator),
+            await getStaticResolverKey(pause, clientOperator),
+            await getStaticResolverKey(controlList, clientOperator),
+            await getStaticResolverKey(erc20, clientOperator),
+            await getStaticResolverKey(erc1644, clientOperator),
+            await getStaticResolverKey(erc1410, clientOperator),
+            await getStaticResolverKey(erc1594, clientOperator),
+            await getStaticResolverKey(erc1643, clientOperator),
+            await getStaticResolverKey(snapshots, clientOperator),
+            await getStaticResolverKey(scheduledSnapshots, clientOperator),
+            await getStaticResolverKey(
+                corporateActionsSecurity,
+                clientOperator
+            ),
+            await getStaticResolverKey(lock, clientOperator),
+            await getStaticResolverKey(transferAndLock, clientOperator),
+        ]
+
+        const facetIdsEquities: string[] = facetIdsCommon.concat(
+            await getStaticResolverKey(equity, clientOperator)
+        )
+
+        const facetVersionsEquities: number[] = facetIdsEquities.map(() => 1)
+
+        const facetIdsBonds: string[] = facetIdsCommon.concat(
+            await getStaticResolverKey(bond, clientOperator)
+        )
+
+        const facetVersionsBonds: number[] = facetIdsBonds.map(() => 1)
+
+        await createConfiguration(
+            EquityConfigId,
+            facetIdsEquities,
+            facetVersionsEquities,
+            resolver,
+            clientOperator
+        )
+
+        await createConfiguration(
+            BondConfigId,
+            facetIdsBonds,
+            facetVersionsBonds,
+            resolver,
+            clientOperator
+        )
+    }
+
+    if (used_already_deployed && factory_contract.num.toString() !== '0') {
+        factoryResult.push(factory_proxy_contract)
+        factoryResult.push(factory_proxyAdmin_contract)
+        factoryResult.push(factory_contract)
+    } else {
+        factoryResult = await deployFactory(
+            clientOperator,
+            privateKey,
+            isED25519Type
+        )
+    }
 
     return [
         resolverResult[0],
@@ -898,7 +1043,7 @@ export async function deployDiamondFacet(
     clientOperator: Client,
     privateKey: string
 ) {
-    // Deploying Diamond cut logic
+    // Deploying Diamond logic
     console.log(`Deploying Diamond Facet. please wait...`)
 
     const diamondFacet = await deployContractSDK(
@@ -908,7 +1053,7 @@ export async function deployDiamondFacet(
     )
 
     console.log(
-        `Diamond Facet deployed ${
+        `Diamond deployed ${
             (await getContractInfo(diamondFacet.toString())).evm_address
         }`
     )

@@ -206,7 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
-    type Diamond,
+    type ResolverProxy,
     type DiamondLoupeFacet,
     type AccessControl,
     type Pause,
@@ -250,7 +250,7 @@ enum VersionStatus {
 }
 
 describe('Demo RedSwam', () => {
-    let diamond: Diamond
+    let diamond: ResolverProxy
 
     it('Demo RedSwam', async () => {
         const [signer_Z, signer_A, signer_B, signer_C, signer_I, signer_P] =
@@ -466,12 +466,6 @@ Deployed contracts:
         ).to.be.equal(
             await environment.deployedBusinessLogics.scheduledSnapshots.address
         )
-        expect(
-            await environment.resolver.resolveBusinessLogicByVersion(
-                await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey(),
-                1
-            )
-        ).to.be.equal(environment.deployedBusinessLogics.diamondFacet.address)
         expect(await environment.resolver.getBusinessLogicCount()).to.be.equal(
             _BUSINESS_LOGIC_COUNT
         )
@@ -504,6 +498,7 @@ Deployed contracts:
         console.log(
             `Business Logic Keys : ${JSON.stringify(businessLogicKeys)}`
         )
+
         //await loadFixture(deployDiamond(signerAddress))
         const TokenName = 'TEST_DEMO'
         const TokenSymbol = 'TD'
@@ -562,95 +557,95 @@ Deployed contracts:
 DiamondResume:
     DiamondLoupe.facets: ${JSON.stringify(await loupeFacet.getFacets())}
     DiamondLoupe.facetFunctionSelectors[diamondFacet]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[accessControl]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.accessControl.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[pause]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.pause.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[controlList]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.controlList.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[corporateActions]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc20]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.eRC20.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc1644]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.eRC1644.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc1410]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.eRC1410ScheduledSnapshot.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc1594]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.eRC1594.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc1643]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[equity]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.equityUSA.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[bond]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.bondUSA.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[snapshots]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.snapshots.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[lock]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.lock.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[transferAndLock]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.transferAndLock.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[scheduledSnapshots]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[cap]: ${JSON.stringify(
-        await loupeFacet.getFacetFunctionSelectors(
+        await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.cap.getStaticResolverKey()
         )
     )}
-    DiamondLoupe.facetKeys: ${JSON.stringify(await loupeFacet.getFacetKeys())}
+    DiamondLoupe.facetKeys: ${JSON.stringify(await loupeFacet.getFacetIds())}
     DiamondLoupe.facetAddresses: ${JSON.stringify(
         await loupeFacet.getFacetAddresses()
     )}
-    DiamondLoupe.facetKey(0xb8fb063e): ${await loupeFacet.getFacetKeyBySelector(
+    DiamondLoupe.facetKey(0xb8fb063e): ${await loupeFacet.getFacetIdBySelector(
         '0xb8fb063e'
     )}
     DiamondLoupe.facet(0xb8fb063e): ${await loupeFacet.getFacet(

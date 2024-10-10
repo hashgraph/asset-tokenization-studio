@@ -294,9 +294,7 @@ import {
   FactoryBondToken,
   FactoryRegulationData,
 } from '../../../domain/context/factory/FactorySecurityToken.js';
-import {
-  ERC20MetadataInfo,
-} from '../../../domain/context/factory/ERC20Metadata.js';
+import { ERC20MetadataInfo } from '../../../domain/context/factory/ERC20Metadata.js';
 import { SigningError } from '../error/SigningError.js';
 import {
   Factory__factory,
@@ -339,6 +337,7 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../../../domain/context/factory/RegulationType.js';
+import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -350,9 +349,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   jsonRpcRelays: JsonRpcRelays;
   factories: Factories;
   resolvers: Resolvers;
-  businessLogicKeysCommon: BusinessLogicKeys;
-  businessLogicKeysEquity: BusinessLogicKeys;
-  businessLogicKeysBond: BusinessLogicKeys;
 
   constructor(
     @lazyInject(MirrorNodeAdapter)
@@ -389,7 +385,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     equityInfo: EquityDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
-    businessLogicKeys: string[],
+    configId: string,
+    configVersion: number,
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     try {
@@ -417,10 +414,15 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         decimals: securityInfo.decimals,
       };
 
+      const resolverProxyConfiguration: ResolverProxyConfiguration = {
+        key: configId,
+        version: configVersion,
+      };
+
       const security: SecurityData = {
         isMultiPartition: securityInfo.isMultiPartition,
         resolver: resolver.toString(),
-        businessLogicKeys: businessLogicKeys,
+        resolverProxyConfiguration: resolverProxyConfiguration,
         rbacs: rbacs,
         isControllable: securityInfo.isControllable,
         isWhiteList: securityInfo.isWhiteList,
@@ -495,7 +497,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     couponInfo: CouponDetails,
     factory: EvmAddress,
     resolver: EvmAddress,
-    businessLogicKeys: string[],
+    configId: string,
+    configVersion: number,
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse> {
     try {
@@ -523,10 +526,15 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         decimals: securityInfo.decimals,
       };
 
+      const resolverProxyConfiguration: ResolverProxyConfiguration = {
+        key: configId,
+        version: configVersion,
+      };
+
       const security: SecurityData = {
         isMultiPartition: securityInfo.isMultiPartition,
         resolver: resolver.toString(),
-        businessLogicKeys: businessLogicKeys,
+        resolverProxyConfiguration: resolverProxyConfiguration,
         rbacs: rbacs,
         isControllable: securityInfo.isControllable,
         isWhiteList: securityInfo.isWhiteList,
@@ -610,22 +618,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   public setResolvers(resolvers?: Resolvers): void {
     if (resolvers) this.resolvers = resolvers;
-  }
-
-  public setBusinessLogicKeysCommon(
-    businessLogicKeys?: BusinessLogicKeys,
-  ): void {
-    if (businessLogicKeys) this.businessLogicKeysCommon = businessLogicKeys;
-  }
-
-  public setBusinessLogicKeysEquity(
-    businessLogicKeys?: BusinessLogicKeys,
-  ): void {
-    if (businessLogicKeys) this.businessLogicKeysEquity = businessLogicKeys;
-  }
-
-  public setBusinessLogicKeysBond(businessLogicKeys?: BusinessLogicKeys): void {
-    if (businessLogicKeys) this.businessLogicKeysBond = businessLogicKeys;
   }
 
   async register(
@@ -736,9 +728,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     let network = unrecognized;
     let factoryId = '';
     let resolverId = '';
-    let businessLogicKeysCommon: string[] = [];
-    let businessLogicKeysEquity: string[] = [];
-    let businessLogicKeysBond: string[] = [];
     let mirrorNode: MirrorNode = {
       baseUrl: '',
       apiKey: '',
@@ -787,51 +776,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           );
         }
       }
-      if (this.businessLogicKeysCommon) {
-        try {
-          const result = this.businessLogicKeysCommon.businesslogicKeys.find(
-            (i: EnvironmentBusinessLogicKeys) =>
-              i.environment === metamaskNetwork.network,
-          );
-          if (result) {
-            businessLogicKeysCommon = result.businesslogicKeys;
-          }
-        } catch (e) {
-          console.error(
-            `Business Logic Keys Common could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
-          );
-        }
-      }
-      if (this.businessLogicKeysEquity) {
-        try {
-          const result = this.businessLogicKeysEquity.businesslogicKeys.find(
-            (i: EnvironmentBusinessLogicKeys) =>
-              i.environment === metamaskNetwork.network,
-          );
-          if (result) {
-            businessLogicKeysEquity = result.businesslogicKeys;
-          }
-        } catch (e) {
-          console.error(
-            `Business Logic Keys Equity could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
-          );
-        }
-      }
-      if (this.businessLogicKeysBond) {
-        try {
-          const result = this.businessLogicKeysBond.businesslogicKeys.find(
-            (i: EnvironmentBusinessLogicKeys) =>
-              i.environment === metamaskNetwork.network,
-          );
-          if (result) {
-            businessLogicKeysBond = result.businesslogicKeys;
-          }
-        } catch (e) {
-          console.error(
-            `Business Logic Keys Common could not be found for environment ${metamaskNetwork.network} in  the initially provided list`,
-          );
-        }
-      }
       if (this.mirrorNodes) {
         try {
           const result = this.mirrorNodes.nodes.find(
@@ -871,13 +815,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       new SetNetworkCommand(network, mirrorNode, rpcNode),
     );
     await this.commandBus.execute(
-      new SetConfigurationCommand(
-        factoryId,
-        resolverId,
-        businessLogicKeysCommon,
-        businessLogicKeysEquity,
-        businessLogicKeysBond,
-      ),
+      new SetConfigurationCommand(factoryId, resolverId),
     );
 
     this.signerOrProvider = new ethers.providers.Web3Provider(
@@ -913,15 +851,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           resolverId: this.networkService.configuration
             ? this.networkService.configuration.resolverAddress
             : '',
-          businessLogicKeysCommon: this.networkService.configuration
-            ? this.networkService.configuration.businessLogicKeysCommon
-            : [],
-          businessLogicKeysEquity: this.networkService.configuration
-            ? this.networkService.configuration.businessLogicKeysEquity
-            : [],
-          businessLogicKeysBond: this.networkService.configuration
-            ? this.networkService.configuration.businessLogicKeysBond
-            : [],
         },
         wallet: SupportedWallets.METAMASK,
       });
@@ -959,12 +888,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
               recognized: this.networkService.environment != unrecognized,
               factoryId: this.networkService.configuration.factoryAddress,
               resolverId: this.networkService.configuration.resolverAddress,
-              businessLogicKeysCommon:
-                this.networkService.configuration.businessLogicKeysCommon,
-              businessLogicKeysEquity:
-                this.networkService.configuration.businessLogicKeysEquity,
-              businessLogicKeysBond:
-                this.networkService.configuration.businessLogicKeysBond,
             },
             wallet: SupportedWallets.METAMASK,
           });
@@ -993,15 +916,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
             resolverId: this.networkService.configuration
               ? this.networkService.configuration.resolverAddress
               : '',
-            businessLogicKeysCommon: this.networkService.configuration
-              ? this.networkService.configuration.businessLogicKeysCommon
-              : [],
-            businessLogicKeysEquity: this.networkService.configuration
-              ? this.networkService.configuration.businessLogicKeysEquity
-              : [],
-            businessLogicKeysBond: this.networkService.configuration
-              ? this.networkService.configuration.businessLogicKeysBond
-              : [],
           },
           wallet: SupportedWallets.METAMASK,
         });
@@ -1095,7 +1009,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async unpause(security: EvmAddress): Promise<TransactionResponse<any, Error>> {
+  async unpause(
+    security: EvmAddress,
+  ): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(`Unpausing security: ${security.toString()}`);
 
     return RPCTransactionResponseAdapter.manageResponse(
@@ -1614,9 +1530,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await Lock__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).releaseByPartition(_PARTITION_ID_1, lockId.toBigNumber(), sourceId.toString(), {
-        gasLimit: RELEASE_GAS,
-      }),
+      ).releaseByPartition(
+        _PARTITION_ID_1,
+        lockId.toBigNumber(),
+        sourceId.toString(),
+        {
+          gasLimit: RELEASE_GAS,
+        },
+      ),
       this.networkService.environment,
     );
   }
