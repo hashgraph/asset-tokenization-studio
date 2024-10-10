@@ -272,13 +272,6 @@ class BondInPort implements IBondInPort {
 
     const securityFactory = this.networkService.configuration.factoryAddress;
     const resolver = this.networkService.configuration.resolverAddress;
-    const businessLogicKeysCommon =
-      this.networkService.configuration.businessLogicKeysCommon;
-    const businessLogicKeysBond =
-      this.networkService.configuration.businessLogicKeysBond;
-    const businessLogicKeys = businessLogicKeysCommon.concat(
-      businessLogicKeysBond,
-    );
 
     const newSecurity: SecurityProps = {
       name: req.name,
@@ -310,7 +303,8 @@ class BondInPort implements IBondInPort {
         req.firstCouponDate,
         securityFactory ? new ContractId(securityFactory) : undefined,
         resolver ? new ContractId(resolver) : undefined,
-        businessLogicKeys ? businessLogicKeys : [],
+        req.configId,
+        req.configVersion,
         diamondOwnerAccount,
       ),
     );

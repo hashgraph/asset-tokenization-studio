@@ -276,9 +276,13 @@ function decodeFunctionResult(
         resultHex
     )
 
-    const jsonParsedArray = JSON.parse(JSON.stringify(result))
+    try {
+        const jsonParsedArray = JSON.parse(JSON.stringify(result))
 
-    return jsonParsedArray
+        return jsonParsedArray
+    } catch (e) {
+        return resultHex
+    }
 }
 
 export function createContractFactory(factory: any): ContractFactory {

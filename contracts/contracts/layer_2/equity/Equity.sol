@@ -218,7 +218,7 @@ import {_CORPORATE_ACTION_ROLE} from '../../layer_1/constants/roles.sol';
 import {EquityStorageWrapper} from './EquityStorageWrapper.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
 abstract contract Equity is
     IEquity,

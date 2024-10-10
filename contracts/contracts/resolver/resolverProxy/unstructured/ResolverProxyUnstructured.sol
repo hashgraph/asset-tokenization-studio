@@ -206,63 +206,49 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IDiamond} from '../../interfaces/diamond/IDiamond.sol';
-import {IDiamondCut} from '../../interfaces/diamond/IDiamondCut.sol';
+import {
+    IResolverProxy
+} from '../../../interfaces/resolver/resolverProxy/IResolverProxy.sol';
 import {
     IBusinessLogicResolver
-} from '../../interfaces/resolver/IBusinessLogicResolver.sol';
+} from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
-import {IDiamondLoupe} from '../../interfaces/diamond/IDiamondLoupe.sol';
+    IDiamondLoupe
+} from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
 import {
     AccessControlStorageWrapper
-} from '../../layer_1/accessControl/AccessControlStorageWrapper.sol';
-import {PauseStorageWrapper} from '../../layer_1/pause/PauseStorageWrapper.sol';
+} from '../../../layer_1/accessControl/AccessControlStorageWrapper.sol';
 import {
-    _DIAMOND_STORAGE_POSITION
-} from '../../layer_1/constants/storagePositions.sol';
+    PauseStorageWrapper
+} from '../../../layer_1/pause/PauseStorageWrapper.sol';
 import {
-    _DIAMOND_CUT_RESOLVER_KEY,
-    _DIAMOND_LOUPE_RESOLVER_KEY,
-    _DIAMOND_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
+    _RESOLVER_PROXY_STORAGE_POSITION
+} from '../../../layer_1/constants/storagePositions.sol';
 
-// Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
-// The loupe functions are required by the EIP2535 Diamonds standard
-abstract contract DiamondUnstructured is
+// Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.
+// The loupe functions are required by the EIP2535 ResolverProxys standard
+abstract contract ResolverProxyUnstructured is
     AccessControlStorageWrapper,
     PauseStorageWrapper
 {
-    struct FacetKeysAndSelectorPosition {
-        bytes32 facetKey;
+    struct FacetIdsAndSelectorPosition {
+        bytes32 facetId;
         uint16 selectorPosition;
     }
 
-    struct DiamondStorage {
+    struct ResolverProxyStorage {
         IBusinessLogicResolver resolver;
-        // function selector => facet address and selector position in selectors array
-        mapping(bytes4 => FacetKeysAndSelectorPosition) facetKeysAndSelectorPosition;
-        bytes32[] facetKeys;
-        bytes4[] selectors;
-        bytes4[] interfaceIds;
-        mapping(bytes4 => bool) supportedInterfaces;
+        bytes32 resolverProxyConfigurationId;
+        uint256 version;
         // AccessControl instead of owned. Only DEFAULT_ADMIN role.
     }
 
-    modifier onlyWithDiamondFacets(bytes32[] memory _facets) {
-        if (_isNotDiamondFacetsIn(_facets)) {
-            revert IDiamond.DiamondFacetsNotFound();
-        }
-        _;
-    }
-
-    function _getDiamondStorage()
+    function _getResolverProxyStorage()
         internal
         pure
-        returns (DiamondStorage storage ds)
+        returns (ResolverProxyStorage storage ds)
     {
-        bytes32 position = _DIAMOND_STORAGE_POSITION;
+        bytes32 position = _RESOLVER_PROXY_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
             ds.slot := position
@@ -271,16 +257,43 @@ abstract contract DiamondUnstructured is
 
     function _initialize(
         IBusinessLogicResolver _resolver,
-        bytes32[] memory _businessLogicKeys,
-        IDiamond.Rbac[] memory _rbacs
+        bytes32 _resolverProxyConfigurationId,
+        uint256 _version,
+        IResolverProxy.Rbac[] memory _rbacs
     ) internal {
-        DiamondStorage storage ds = _getDiamondStorage();
-        ds.resolver = _resolver;
-        _cleanAndRegisterBusinessLogics(ds, _businessLogicKeys);
+        _resolver.checkResolverProxyConfigurationRegistered(
+            _resolverProxyConfigurationId,
+            _version
+        );
+        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        _updateResolver(ds, _resolver);
+        _updateConfigId(ds, _resolverProxyConfigurationId);
+        _updateVersion(ds, _version);
         _assignRbacRoles(_rbacs);
     }
 
-    function _assignRbacRoles(IDiamond.Rbac[] memory _rbacs) internal {
+    function _updateResolver(
+        ResolverProxyStorage storage _ds,
+        IBusinessLogicResolver _resolver
+    ) internal {
+        _ds.resolver = _resolver;
+    }
+
+    function _updateConfigId(
+        ResolverProxyStorage storage _ds,
+        bytes32 _resolverProxyConfigurationId
+    ) internal {
+        _ds.resolverProxyConfigurationId = _resolverProxyConfigurationId;
+    }
+
+    function _updateVersion(
+        ResolverProxyStorage storage _ds,
+        uint256 _version
+    ) internal {
+        _ds.version = _version;
+    }
+
+    function _assignRbacRoles(IResolverProxy.Rbac[] memory _rbacs) internal {
         for (uint256 rbacIndex; rbacIndex < _rbacs.length; rbacIndex++) {
             for (
                 uint256 memberIndex;
@@ -295,245 +308,128 @@ abstract contract DiamondUnstructured is
         }
     }
 
-    function _cleanAndRegisterBusinessLogics(
-        DiamondStorage storage _diamondStorage,
-        bytes32[] memory _businessLogicKeys
-    ) internal onlyWithDiamondFacets(_businessLogicKeys) {
-        _cleanBusinessLogics(_diamondStorage);
-        (
-            bytes4[][] memory selectors,
-            bytes4[][] memory interfaceIds
-        ) = _getSelectorsAndInterfaceIdsByBusinessLogicKeys(
-                _diamondStorage.resolver,
-                _businessLogicKeys
-            );
-        _registerBusinessLogics(
-            _diamondStorage,
-            _businessLogicKeys,
-            selectors,
-            interfaceIds
+    function _getFacetsLength(
+        ResolverProxyStorage storage _ds
+    ) internal view returns (uint256 facetsLength_) {
+        facetsLength_ = _ds.resolver.getFacetsLengthByConfigurationIdAndVersion(
+            _ds.resolverProxyConfigurationId,
+            _ds.version
         );
-    }
-
-    function _cleanBusinessLogics(
-        DiamondStorage storage _diamondStorage
-    ) internal {
-        bytes4 selector;
-        for (; _diamondStorage.interfaceIds.length != 0; ) {
-            _diamondStorage.interfaceIds.pop();
-        }
-        for (; _diamondStorage.selectors.length != 0; ) {
-            selector = _diamondStorage.selectors[
-                _diamondStorage.selectors.length - 1
-            ];
-            delete _diamondStorage.facetKeysAndSelectorPosition[selector];
-            delete _diamondStorage.supportedInterfaces[selector];
-            _diamondStorage.selectors.pop();
-        }
-        for (; _diamondStorage.facetKeys.length != 0; ) {
-            _diamondStorage.facetKeys.pop();
-        }
-    }
-
-    function _registerBusinessLogics(
-        DiamondStorage storage _diamondStorage,
-        bytes32[] memory _facetKeys,
-        bytes4[][] memory _functionSelectors,
-        bytes4[][] memory _interfaceIds
-    ) internal {
-        bytes32 facetKey;
-        bytes4 selector;
-        uint16 selectorPosition = uint16(_diamondStorage.selectors.length);
-        for (
-            uint256 businessLogicKeyIndex;
-            businessLogicKeyIndex < _facetKeys.length;
-            businessLogicKeyIndex++
-        ) {
-            facetKey = _facetKeys[businessLogicKeyIndex];
-            _diamondStorage.facetKeys.push(facetKey);
-            for (
-                uint256 selectorIndex;
-                selectorIndex <
-                _functionSelectors[businessLogicKeyIndex].length;
-                selectorIndex++
-            ) {
-                selector = _functionSelectors[businessLogicKeyIndex][
-                    selectorIndex
-                ];
-                _diamondStorage.facetKeysAndSelectorPosition[
-                    selector
-                ] = FacetKeysAndSelectorPosition({
-                    facetKey: facetKey,
-                    selectorPosition: selectorPosition++
-                });
-                _diamondStorage.selectors.push(selector);
-                _diamondStorage.supportedInterfaces[selector] = true;
-            }
-            for (
-                uint256 interfaceIndex;
-                interfaceIndex < _interfaceIds[businessLogicKeyIndex].length;
-                interfaceIndex++
-            ) {
-                _diamondStorage.supportedInterfaces[
-                    _interfaceIds[businessLogicKeyIndex][interfaceIndex]
-                ] = true;
-                _diamondStorage.interfaceIds.push(
-                    _interfaceIds[businessLogicKeyIndex][interfaceIndex]
-                );
-            }
-        }
-    }
-
-    function _getSelectorsAndInterfaceIdsByBusinessLogicKeys(
-        IBusinessLogicResolver _resolver,
-        bytes32[] memory _businessLogicKeys
-    )
-        internal
-        view
-        returns (bytes4[][] memory selectors_, bytes4[][] memory interfaceIds_)
-    {
-        bytes32 businessLogicKey;
-        selectors_ = new bytes4[][](_businessLogicKeys.length);
-        interfaceIds_ = new bytes4[][](_businessLogicKeys.length);
-        for (
-            uint256 businessLogicKeyIndex;
-            businessLogicKeyIndex < _businessLogicKeys.length;
-            businessLogicKeyIndex++
-        ) {
-            businessLogicKey = _businessLogicKeys[businessLogicKeyIndex];
-            (
-                selectors_[businessLogicKeyIndex],
-                interfaceIds_[businessLogicKeyIndex]
-            ) = _getSelectorsAndInterfaceIdsByBusinessLogicKey(
-                _resolver,
-                businessLogicKey
-            );
-        }
-    }
-
-    function _getSelectorsAndInterfaceIdsByBusinessLogicKey(
-        IBusinessLogicResolver _resolver,
-        bytes32 _businessLogicKey
-    )
-        internal
-        view
-        returns (bytes4[] memory selectors_, bytes4[] memory interfaceIds_)
-    {
-        address businessLogicAddress = _resolver.resolveLatestBusinessLogic(
-            _businessLogicKey
-        );
-        if (businessLogicAddress == address(0)) {
-            revert IDiamondCut.DiamondFacetNotFoundInRegistry(
-                _businessLogicKey
-            );
-        }
-        IStaticFunctionSelectors staticFunctionSelectors = IStaticFunctionSelectors(
-                businessLogicAddress
-            );
-        if (
-            _businessLogicKey != staticFunctionSelectors.getStaticResolverKey()
-        ) {
-            revert IDiamondCut.InvalidBusinessLogicKey(
-                _businessLogicKey,
-                staticFunctionSelectors.getStaticResolverKey(),
-                businessLogicAddress
-            );
-        }
-        selectors_ = staticFunctionSelectors.getStaticFunctionSelectors();
-        interfaceIds_ = staticFunctionSelectors.getStaticInterfaceIds();
     }
 
     function _getFacets(
-        DiamondStorage storage _diamondStorage
+        ResolverProxyStorage storage _ds,
+        uint256 _pageIndex,
+        uint256 _pageLength
     ) internal view returns (IDiamondLoupe.Facet[] memory facets_) {
-        facets_ = new IDiamondLoupe.Facet[](_diamondStorage.facetKeys.length);
-        for (
-            uint256 facetIndex;
-            facetIndex < _diamondStorage.facetKeys.length;
-            facetIndex++
-        ) {
-            facets_[facetIndex] = _getFacet(
-                _diamondStorage,
-                _diamondStorage.facetKeys[facetIndex]
-            );
-        }
+        facets_ = _ds.resolver.getFacetsByConfigurationIdAndVersion(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
+            _pageIndex,
+            _pageLength
+        );
     }
 
-    function _getFacet(
-        DiamondStorage storage _diamondStorage,
-        bytes32 _facetKey
-    ) internal view returns (IDiamondLoupe.Facet memory facet_) {
-        (
-            bytes4[] memory functionSelectors,
-            bytes4[] memory interfaceIds
-        ) = _getSelectorsAndInterfaceIdsByBusinessLogicKey(
-                _diamondStorage.resolver,
-                _facetKey
+    function _getFacetSelectorsLength(
+        ResolverProxyStorage storage _ds,
+        bytes32 _facetId
+    ) internal view returns (uint256 facetSelectorsLength_) {
+        facetSelectorsLength_ = _ds
+            .resolver
+            .getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
+                _ds.resolverProxyConfigurationId,
+                _ds.version,
+                _facetId
             );
-        facet_ = IDiamondLoupe.Facet({
-            facetKey: _facetKey,
-            facetAddress: _diamondStorage.resolver.resolveLatestBusinessLogic(
-                _facetKey
-            ),
-            functionSelectors: functionSelectors,
-            interfaceIds: interfaceIds
-        });
+    }
+
+    function _getFacetSelectors(
+        ResolverProxyStorage storage _ds,
+        bytes32 _facetId,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (bytes4[] memory facetSelectors_) {
+        facetSelectors_ = _ds
+            .resolver
+            .getFacetSelectorsByConfigurationIdVersionAndFacetId(
+                _ds.resolverProxyConfigurationId,
+                _ds.version,
+                _facetId,
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _getFacetIds(
+        ResolverProxyStorage storage _ds,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (bytes32[] memory facetIds_) {
+        facetIds_ = _ds.resolver.getFacetIdsByConfigurationIdAndVersion(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
+            _pageIndex,
+            _pageLength
+        );
     }
 
     function _getFacetAddresses(
-        DiamondStorage storage _diamondStorage
+        ResolverProxyStorage storage _ds,
+        uint256 _pageIndex,
+        uint256 _pageLength
     ) internal view returns (address[] memory facetAddresses_) {
-        facetAddresses_ = new address[](_diamondStorage.facetKeys.length);
-        bytes32 facetKey;
-        for (
-            uint256 facetIndex;
-            facetIndex < _diamondStorage.facetKeys.length;
-            facetIndex++
-        ) {
-            facetKey = _diamondStorage.facetKeys[facetIndex];
-            facetAddresses_[facetIndex] = _diamondStorage
-                .resolver
-                .resolveLatestBusinessLogic(facetKey);
-        }
-    }
-
-    function _getFacetAddress(
-        DiamondStorage storage _diamondStorage,
-        bytes4 _signature
-    ) internal view returns (address) {
-        return
-            _diamondStorage.resolver.resolveLatestBusinessLogic(
-                _diamondStorage
-                    .facetKeysAndSelectorPosition[_signature]
-                    .facetKey
+        facetAddresses_ = _ds
+            .resolver
+            .getFacetAddressesByConfigurationIdAndVersion(
+                _ds.resolverProxyConfigurationId,
+                _ds.version,
+                _pageIndex,
+                _pageLength
             );
     }
 
-    function _isNotDiamondFacetsIn(
-        bytes32[] memory _facets
-    ) internal returns (bool) {
-        bool diamondCutFacetFound;
-        bool diamondLoupeFacetFound;
-        bool diamondFacetFound;
-        for (
-            uint256 facetsIndex;
-            facetsIndex < _facets.length &&
-                (diamondCutFacetFound && diamondLoupeFacetFound) ==
-                diamondFacetFound;
-            facetsIndex++
-        ) {
-            diamondCutFacetFound =
-                diamondCutFacetFound ||
-                (_facets[facetsIndex] == _DIAMOND_CUT_RESOLVER_KEY);
-            diamondLoupeFacetFound =
-                diamondLoupeFacetFound ||
-                (_facets[facetsIndex] == _DIAMOND_LOUPE_RESOLVER_KEY);
-            diamondFacetFound =
-                diamondFacetFound ||
-                _facets[facetsIndex] == _DIAMOND_RESOLVER_KEY;
-        }
+    function _getFacetIdBySelector(
+        ResolverProxyStorage storage _ds,
+        bytes4 _selector
+    ) internal view returns (bytes32 facetId_) {
+        facetId_ = _ds.resolver.getFacetIdByConfigurationIdVersionAndSelector(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
+            _selector
+        );
+    }
+
+    function _getFacet(
+        ResolverProxyStorage storage _ds,
+        bytes32 _facetId
+    ) internal view returns (IDiamondLoupe.Facet memory facet_) {
+        facet_ = _ds.resolver.getFacetByConfigurationIdVersionAndFacetId(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
+            _facetId
+        );
+    }
+
+    function _getFacetAddress(
+        ResolverProxyStorage storage _ds,
+        bytes4 _selector
+    ) internal view returns (address) {
         return
-            (diamondCutFacetFound && diamondLoupeFacetFound) ==
-            diamondFacetFound;
+            _ds.resolver.resolveResolverProxyCall(
+                _ds.resolverProxyConfigurationId,
+                _ds.version,
+                _selector
+            );
+    }
+
+    function _supportsInterface(
+        ResolverProxyStorage storage _ds,
+        bytes4 _interfaceId
+    ) internal view returns (bool isSupported_) {
+        isSupported_ = _ds.resolver.resolveSupportsInterface(
+            _ds.resolverProxyConfigurationId,
+            _ds.version,
+            _interfaceId
+        );
     }
 }

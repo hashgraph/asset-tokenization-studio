@@ -206,7 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
-    type Diamond,
+    type ResolverProxy,
     type Cap,
     AccessControl,
     Pause,
@@ -232,7 +232,7 @@ const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 
 describe('CAP Tests', () => {
-    let diamond: Diamond
+    let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
     let signer_C: SignerWithAddress

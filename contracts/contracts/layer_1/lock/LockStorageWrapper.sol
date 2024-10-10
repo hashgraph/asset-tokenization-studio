@@ -440,7 +440,7 @@ abstract contract LockStorageWrapper is
     ) private view returns (bool) {
         LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
 
-        if (lock.expirationTimestamp > block.timestamp) return false;
+        if (lock.expirationTimestamp > _blockTimestamp()) return false;
 
         return true;
     }

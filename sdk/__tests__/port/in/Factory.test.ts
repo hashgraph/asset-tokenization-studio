@@ -212,9 +212,6 @@ import {
   Factory,
 } from '../../../src/index.js';
 import {
-  BUSINESS_LOGIC_KEYS_COMMON,
-  BUSINESS_LOGIC_KEYS_EQUITY,
-  BUSINESS_LOGIC_KEYS_BOND,
   CLIENT_ACCOUNT_ECDSA,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
@@ -269,9 +266,6 @@ describe('🧪 Factory test', () => {
     ns.configuration = {
       factoryAddress: FACTORY_ADDRESS,
       resolverAddress: RESOLVER_ADDRESS,
-      businessLogicKeysCommon: BUSINESS_LOGIC_KEYS_COMMON,
-      businessLogicKeysEquity: BUSINESS_LOGIC_KEYS_EQUITY,
-      businessLogicKeysBond: BUSINESS_LOGIC_KEYS_BOND,
     };
     ns.mirrorNode = mirrorNode;
     ns.rpcNode = rpcNode;

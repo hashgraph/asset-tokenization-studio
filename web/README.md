@@ -12,9 +12,9 @@
 - **[Yarn Version Compatibility](#yarn-version-compatibility)**<br>
 - **[Installation](#installation)**<br>
 - **[Environment Variables](#environment-variables)**<br>
-    - **[General](#general)**<br>
-    - **[Network](#nework)**<br>
-    - **[Hedera Wallet Connnect](#hedera-wallet-connnect)**<br>
+  - **[General](#general)**<br>
+  - **[Network](#nework)**<br>
+  - **[Hedera Wallet Connnect](#hedera-wallet-connnect)**<br>
 - **[Run](#run)**<br>
 - **[Test](#test)**<br>
 
@@ -69,7 +69,6 @@ Below is a description of which each variable represents.
 - **REACT_APP_DAPP_DESCRIPTION :** Dapps descritpion.
 - **REACT_APP_DAPP_URL :** Dapps url.
 - **REACT_APP_DAPP_ICONS :** Dapps icon image.
-
 
 # Run
 

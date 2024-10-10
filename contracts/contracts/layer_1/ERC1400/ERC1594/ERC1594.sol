@@ -208,7 +208,7 @@ pragma solidity 0.8.18;
 
 import {
     IStaticFunctionSelectors
-} from '../../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {ERC1594StorageWrapper} from './ERC1594StorageWrapper.sol';
 import {_ISSUER_ROLE} from '../../constants/roles.sol';

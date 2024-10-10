@@ -219,7 +219,6 @@ import { BaseRequest } from './BaseRequest.js';
 import ValidatedRequest from './validation/ValidatedRequest.js';
 import { Factories } from '../../../domain/context/factory/Factories.js';
 import { Resolvers } from '../../../domain/context/factory/Resolvers.js';
-import { BusinessLogicKeys } from '../../../domain/context/factory/BusinessLogicKeys.js';
 export { SupportedWallets };
 
 export default class InitializationRequest
@@ -235,9 +234,6 @@ export default class InitializationRequest
   jsonRpcRelays?: JsonRpcRelays;
   factories?: Factories;
   resolvers?: Resolvers;
-  businessLogicKeysCommon?: BusinessLogicKeys;
-  businessLogicKeysEquity?: BusinessLogicKeys;
-  businessLogicKeysBond?: BusinessLogicKeys;
 
   constructor({
     network,
@@ -249,9 +245,6 @@ export default class InitializationRequest
     jsonRpcRelays,
     factories,
     resolvers,
-    businessLogicKeysCommon,
-    businessLogicKeysEquity,
-    businessLogicKeysBond,
   }: {
     network: Environment;
     mirrorNode: MirrorNode;
@@ -262,9 +255,6 @@ export default class InitializationRequest
     jsonRpcRelays?: JsonRpcRelays;
     factories?: Factories;
     resolvers?: Resolvers;
-    businessLogicKeysCommon?: BusinessLogicKeys;
-    businessLogicKeysEquity?: BusinessLogicKeys;
-    businessLogicKeysBond?: BusinessLogicKeys;
   }) {
     super({});
     this.network = network;
@@ -276,8 +266,5 @@ export default class InitializationRequest
     this.jsonRpcRelays = jsonRpcRelays;
     this.factories = factories;
     this.resolvers = resolvers;
-    this.businessLogicKeysCommon = businessLogicKeysCommon;
-    this.businessLogicKeysEquity = businessLogicKeysEquity;
-    this.businessLogicKeysBond = businessLogicKeysBond;
   }
 }

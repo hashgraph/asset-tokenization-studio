@@ -212,7 +212,7 @@ import {_ERC1643_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {Common} from '../../common/Common.sol';
 import {
     IStaticFunctionSelectors
-} from '../../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC1643_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 
 contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {

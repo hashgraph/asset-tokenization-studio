@@ -220,9 +220,6 @@ import {
   SetCouponRequest,
 } from '../../../src/index.js';
 import {
-  BUSINESS_LOGIC_KEYS_COMMON,
-  BUSINESS_LOGIC_KEYS_EQUITY,
-  BUSINESS_LOGIC_KEYS_BOND,
   CLIENT_ACCOUNT_ECDSA,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
@@ -266,6 +263,9 @@ const regulationType = RegulationType.REG_S;
 const regulationSubType = RegulationSubType.NONE;
 const countries = 'AF,HG,BN';
 const info = 'Anything';
+const configId =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const configVersion = 0;
 
 const mirrorNode: MirrorNode = {
   name: 'testmirrorNode',
@@ -297,9 +297,6 @@ describe('🧪 Bond test', () => {
     ns.configuration = {
       factoryAddress: FACTORY_ADDRESS,
       resolverAddress: RESOLVER_ADDRESS,
-      businessLogicKeysCommon: BUSINESS_LOGIC_KEYS_COMMON,
-      businessLogicKeysEquity: BUSINESS_LOGIC_KEYS_EQUITY,
-      businessLogicKeysBond: BUSINESS_LOGIC_KEYS_BOND,
     };
     ns.mirrorNode = mirrorNode;
     ns.rpcNode = rpcNode;
@@ -351,6 +348,8 @@ describe('🧪 Bond test', () => {
       isCountryControlListWhiteList: true,
       countries: countries,
       info: info,
+      configId: configId,
+      configVersion: configVersion,
     });
 
     Injectable.resolveTransactionHandler();

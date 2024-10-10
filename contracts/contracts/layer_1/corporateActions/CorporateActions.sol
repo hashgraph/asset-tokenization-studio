@@ -214,7 +214,7 @@ import {_CORPORATE_ACTION_ROLE} from '../constants/roles.sol';
 import {_CORPORATE_ACTIONS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {
     CorporateActionsStorageWrapper
 } from './CorporateActionsStorageWrapper.sol';

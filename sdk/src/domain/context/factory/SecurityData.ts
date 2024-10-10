@@ -205,11 +205,12 @@
 
 import { ERC20MetadataInfo } from './ERC20Metadata.js';
 import { Rbac } from './Rbac.js';
+import { ResolverProxyConfiguration } from './ResolverProxyConfiguration.js';
 
 export class SecurityData {
   public isMultiPartition: boolean;
   public resolver: string;
-  public businessLogicKeys: string[];
+  public resolverProxyConfiguration: ResolverProxyConfiguration;
   public rbacs: Rbac[];
   public isControllable: boolean;
   public isWhiteList: boolean;
