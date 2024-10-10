@@ -292,7 +292,7 @@ describe('BusinessLogicResolver', () => {
 
     it('Check interface Id', async () => {
         const Id = await businessLogicResolver.getStaticInterfaceIds()
-        expect(Id.length).to.be.equals(3)
+        expect(Id.length).to.be.equals(4)
     })
 
     describe('Paused', () => {

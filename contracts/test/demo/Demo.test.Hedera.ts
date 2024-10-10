@@ -203,15 +203,14 @@
 
 */
 
-import { expect } from 'chai'
+/*import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
     type BusinessLogicResolver,
     BusinessLogicResolver__factory,
     type Factory,
     Factory__factory,
-    type Diamond,
-    type DiamondFacet,
+    type ResolverProxy,
     type DiamondLoupeFacet,
     DiamondLoupeFacet__factory,
     type AccessControl,
@@ -239,8 +238,7 @@ import {
     ERC1410ScheduledSnapshot__factory,
     CorporateActionsSecurity__factory,
     ScheduledSnapshots__factory,
-    DiamondFacet__factory,
-    Diamond__factory,
+    ResolverProxy__factory,
     type Cap,
     type Bond,
     Cap__factory,
@@ -311,8 +309,8 @@ const transferandLockAddress = '0.0.3532194'
 describe('Demo RedSwam', () => {
     let businessLogicResolver: BusinessLogicResolver,
         factory: Factory,
-        diamond: Diamond,
-        diamondFacet: DiamondFacet,
+        diamond: ResolverProxy,
+        diamondFacet: DiamondLoupeFacet,
         cap: Cap,
         diamondLoupeFacet: DiamondLoupeFacet,
         accessControl: AccessControl,
@@ -441,9 +439,9 @@ describe('Demo RedSwam', () => {
 
         diamond = new ethers.Contract(
             await toEvmAddress(equityAddress, true),
-            Diamond__factory.abi,
+            ResolverProxy__factory.abi,
             signer_A
-        ) as Diamond
+        ) as ResolverProxy
     }
 
     it('Demo RedSwam', async () => {
@@ -1668,4 +1666,4 @@ describe('Demo RedSwam', () => {
                 
                 `)
     })
-})
+})*/

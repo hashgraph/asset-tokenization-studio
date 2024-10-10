@@ -204,16 +204,10 @@
 */
 
 pragma solidity 0.8.18;
+import {IDiamondCut} from './IDiamondCut.sol';
+import {IDiamondLoupe} from './IDiamondLoupe.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-interface IDiamond {
-    // When no function exists for function called
-    error FunctionNotFound(bytes4 _functionSelector);
-    error DiamondFacetsNotFound();
-
-    struct Rbac {
-        bytes32 role;
-        address[] members;
-    }
-}
+// solhint-disable-next-line no-empty-blocks
+interface IDiamond is IDiamondCut, IDiamondLoupe {}

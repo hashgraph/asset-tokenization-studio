@@ -209,7 +209,7 @@ pragma solidity 0.8.18;
 import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
 import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
 import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';

@@ -212,7 +212,7 @@ import {_CORPORATE_ACTION_ROLE} from '../../layer_1/constants/roles.sol';
 import {BondStorageWrapper} from './BondStorageWrapper.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
 abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     // solhint-disable func-name-mixedcase

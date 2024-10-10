@@ -243,3 +243,9 @@ export const ADDRESS_0 = '0x0000000000000000000000000000000000000000'
 export const EquityDeployedEvent = 'EquityDeployed'
 
 export const BondDeployedEvent = 'BondDeployed'
+
+export const EquityConfigId =
+    '0x0000000000000000000000000000000000000000000000000000000000000001'
+
+export const BondConfigId =
+    '0x0000000000000000000000000000000000000000000000000000000000000002'

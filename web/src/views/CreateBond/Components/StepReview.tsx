@@ -330,6 +330,8 @@ export const StepReview = () => {
       isCountryControlListWhiteList: countriesListType === 2,
       countries: countriesList.map((country) => country).toString(),
       info: "",
+      configId: process.env.REACT_APP_BOND_CONFIG_ID ?? "",
+      configVersion: parseInt(process.env.REACT_APP_BOND_CONFIG_VERSION ?? "0"),
     });
 
     createBond(request);
