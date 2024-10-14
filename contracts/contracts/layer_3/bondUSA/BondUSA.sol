@@ -288,4 +288,9 @@ contract BondUSA is IBondUSA, Bond, Security {
         staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
         staticInterfaceIds_[selectorsIndex++] = type(IBondUSA).interfaceId;
     }
+
+    // solhint-disable-next-line no-empty-blocks
+    function setMaturityDate(uint256 _maturityDate) external {
+        // TODO: implement
+    }
 }
