@@ -220,8 +220,6 @@ import { CouponDetails } from '../../domain/context/bond/CouponDetails.js';
 import { EquityDetails } from '../../domain/context/equity/EquityDetails.js';
 import HWCSettings from '../../domain/context/walletConnect/HWCSettings';
 import { ContractId } from '@hashgraph/sdk';
-import ContractId from "../../domain/context/contract/ContractId";
-import network from "../in/Network";
 
 export interface InitializationData {
   account?: Account;
