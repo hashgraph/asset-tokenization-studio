@@ -795,4 +795,11 @@ export default abstract class TransactionAdapter
     LogService.logInfo(msg);
     console.log(msg);
   }
+
+  updateConfigVersion(
+      security: EvmAddress,
+      configVersion: string,
+  ): void {
+    throw new Error('Method not implemented.');
+  }
 }

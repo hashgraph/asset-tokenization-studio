@@ -258,7 +258,7 @@ import {
   SET_COUPON_GAS,
   LOCK_GAS,
   RELEASE_GAS,
-  TRANSFER_AND_LOCK_GAS,
+  TRANSFER_AND_LOCK_GAS, UPDATE_CONFIG_VERSION_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -1470,6 +1470,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
+  }
+
+  async updateConfigVersion(): Promise<void> {
+    const FUNCTION_NAME = 'updateConfigVersion';
+    LogService.logTrace(`Updating config version`);
+
+    //TODO: Implement the updateConfigVersion
   }
 
   // * Definition of the abstract methods
