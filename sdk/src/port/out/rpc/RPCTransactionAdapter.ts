@@ -1558,7 +1558,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
     const functionDataEncodedHex = resolverProxy.interface.encodeFunctionData(
         'updateConfigVersion',
-        [configVersion]
+        [configVersion] // or [ethers.BigNumber.from(configVersion)]
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
