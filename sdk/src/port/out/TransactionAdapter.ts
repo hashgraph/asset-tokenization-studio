@@ -806,7 +806,7 @@ export default abstract class TransactionAdapter
   updateConfigVersion(
       security: EvmAddress,
       configVersion: BigDecimal,
-      securityId?: | string
+      securityId?: ContractId | string
   ): Promise<TransactionResponse<any, Error>>  {
     throw new Error('Method not implemented.');
   }
