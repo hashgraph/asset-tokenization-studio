@@ -271,6 +271,8 @@ export const LOCK_GAS = 7000000;
 export const RELEASE_GAS = 7000000;
 
 export const UPDATE_CONFIG_VERSION_GAS = 7000000;
+export const UPDATE_CONFIG_GAS = 7000000;
+export const UPDATE_RESOLVER_GAS = 7000000;
 
 export const _PARTITION_ID_1 =
   '0x0000000000000000000000000000000000000000000000000000000000000001';
@@ -278,7 +280,6 @@ export const _PARTITION_ID_1 =
 export const SET_DIVIDEND_EVENT = 'DividendSet';
 export const SET_VOTING_RIGHTS_EVENT = 'VotingSet';
 export const SET_COUPON_EVENT = 'CouponSet';
-
 
 // * Generic
 export const BYTES_32_LENGTH = 32 * 2;
