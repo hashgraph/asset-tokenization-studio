@@ -220,6 +220,8 @@ import { CouponDetails } from '../../domain/context/bond/CouponDetails.js';
 import { EquityDetails } from '../../domain/context/equity/EquityDetails.js';
 import HWCSettings from '../../domain/context/walletConnect/HWCSettings';
 import { ContractId } from '@hashgraph/sdk';
+import ContractId from "../../domain/context/contract/ContractId";
+import network from "../in/Network";
 
 export interface InitializationData {
   account?: Account;
@@ -468,8 +470,16 @@ interface RoleTransactionAdapter {
   ): Promise<TransactionResponse<number, Error>>;
 }
 
+interface IManagementTransactionAdapter {
+  updateConfigVersion(
+      security: EvmAddress,
+      configVersion: BigDecimal,
+      securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
-  implements ITransactionAdapter, RoleTransactionAdapter
+  implements ITransactionAdapter, RoleTransactionAdapter, IManagementTransactionAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -795,12 +805,11 @@ export default abstract class TransactionAdapter
     LogService.logInfo(msg);
     console.log(msg);
   }
-
   updateConfigVersion(
       security: EvmAddress,
-      configVersion: string,
-      securityId?: ContractId | string,
-  ): Promise<TransactionResponse> {
+      configVersion: BigDecimal,
+      securityId?: | string
+  ): Promise<TransactionResponse<any, Error>>  {
     throw new Error('Method not implemented.');
   }
 }
