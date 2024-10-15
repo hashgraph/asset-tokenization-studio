@@ -284,7 +284,7 @@ import {
   SET_COUPON_GAS,
   LOCK_GAS,
   RELEASE_GAS,
-  TRANSFER_AND_LOCK_GAS,
+  TRANSFER_AND_LOCK_GAS, UPDATE_CONFIG_VERSION_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -305,7 +305,7 @@ import {
   Cap__factory,
   IBond,
   Bond__factory,
-  TransferAndLock__factory,
+  TransferAndLock__factory, ResolverProxy__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -338,6 +338,7 @@ import {
   CastRegulationType,
 } from '../../../domain/context/factory/RegulationType.js';
 import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
+import {ContractId} from "@hashgraph/sdk";
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -1539,6 +1540,33 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         },
       ),
       this.networkService.environment,
+    );
+  }
+
+  async updateConfigVersion(
+      security: EvmAddress,
+      configVersion: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+        `Updating config version ${configVersion} for security ${security.toString()}`,
+    );
+
+    const resolverProxy = ResolverProxy__factory.connect(
+        security.toString(),
+        this.signerOrProvider
+    );
+
+    const functionDataEncodedHex = resolverProxy.interface.encodeFunctionData(
+        'updateConfigVersion',
+        [configVersion]
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+        await resolverProxy.fallback({
+          gasLimit: UPDATE_CONFIG_VERSION_GAS,
+          data: functionDataEncodedHex
+        }),
+        this.networkService.environment,
     );
   }
 }

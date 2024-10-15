@@ -13,6 +13,6 @@ class ManagementInPort implements IManagementInPort {
         const {configVersion, securityId} = request;
         handleValidation('UpdateConfigVersionRequest', request);
 
-        return await
+        return Promise.resolve();
     }
 }

@@ -1,5 +1,5 @@
 import {CommandHandler} from "../../../../../core/decorator/CommandHandlerDecorator";
-import {UpdateConfigVersionCommand} from "./updateConfigVersionCommand";
+import {UpdateConfigVersionCommand, UpdateConfigVersionCommandResponse} from "./updateConfigVersionCommand";
 import {ICommandHandler} from "../../../../../core/command/CommandHandler";
 import {lazyInject} from "../../../../../core/decorator/LazyInjectDecorator";
 import TransactionService from "../../../../service/TransactionService";
@@ -20,7 +20,7 @@ export class UpdateConfigVersionCommandHandler
     ) {
     }
 
-    async execute(command: UpdateConfigVersionCommand): Promise<void> {
+    async execute(command: UpdateConfigVersionCommand): Promise<UpdateConfigVersionCommandResponse> {
         const {configVersion, securityId} = command;
         const handler = this.transactionService.getHandler();
 
@@ -30,9 +30,11 @@ export class UpdateConfigVersionCommandHandler
                 : securityId,
         );
 
-        await handler.updateConfigVersion(securityEvmAddress, configVersion);
+        const res = await handler.updateConfigVersion(securityEvmAddress, configVersion, securityId);
 
-        return Promise.resolve(undefined);
+        return Promise.resolve(
+            new UpdateConfigVersionCommandResponse(res.error === undefined, res.id!),
+        );
     }
 
 }

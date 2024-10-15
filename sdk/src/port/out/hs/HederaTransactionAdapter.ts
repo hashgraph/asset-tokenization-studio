@@ -227,7 +227,7 @@ import {
   ScheduledSnapshots__factory,
   ERC1410Snapshot__factory,
   Cap__factory,
-  Lock__factory,
+  Lock__factory, ResolverProxy__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   TRANSFER_GAS,
@@ -1472,11 +1472,32 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     return this.signAndSendTransaction(transaction);
   }
 
-  async updateConfigVersion(): Promise<void> {
+  async updateConfigVersion(
+      security: EvmAddress,
+      configVersion: string,
+      securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'updateConfigVersion';
     LogService.logTrace(`Updating config version`);
 
-    //TODO: Implement the updateConfigVersion
+    const resolverProxyFactory = new ResolverProxy__factory().attach(security.toString());
+
+    const functionDataEncodedHex = resolverProxyFactory.interface.encodeFunctionData(
+        FUNCTION_NAME,
+        [configVersion],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+        Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+        .setContractId(securityId)
+        .setGas(UPDATE_CONFIG_VERSION_GAS)
+        .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+
   }
 
   // * Definition of the abstract methods
