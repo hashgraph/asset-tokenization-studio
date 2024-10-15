@@ -122,9 +122,6 @@ dist
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
 
-# JetBrains IDEs
-.idea/
-
 # Mac files
 .DS_Store
 
@@ -136,4 +133,3 @@ dist
 .pnp.*
 
 package-lock.json
-/.idea/
