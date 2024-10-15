@@ -1,18 +1,32 @@
-import UpdateConfigVersionRequest from "./request/UpdateConfigVersionRequest";
-import {LogError} from "../../core/decorator/LogErrorDecorator";
-import {handleValidation} from "./Common";
+import UpdateConfigRequest from './request/UpdateConfigRequest';
+import { LogError } from '../../core/decorator/LogErrorDecorator';
+import { handleValidation } from './Common';
+import { UpdateConfigCommand } from '../../app/usecase/command/managment/updateConfig/updateConfigCommand';
+import { QueryBus } from '../../core/query/QueryBus';
+import Injectable from '../../core/Injectable';
+import { CommandBus } from '../../core/command/CommandBus';
 
 interface IManagementInPort {
-    updateConfigVersion(UpdateConfigVersionRequest): Promise<void>;
+  updateConfig(
+    request: UpdateConfigRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class ManagementInPort implements IManagementInPort {
+  constructor(
+    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
+    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
+  ) {}
 
-    @LogError
-    async updateConfigVersion(request: UpdateConfigVersionRequest): Promise<void> {
-        const {configVersion, securityId} = request;
-        handleValidation('UpdateConfigVersionRequest', request);
+  @LogError
+  async updateConfig(
+    request: UpdateConfigRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { configurationId, configVersion, securityId } = request;
+    handleValidation('UpdateConfigRequest', request);
 
-        return Promise.resolve();
-    }
+    return await this.commandBus.execute(
+      new UpdateConfigCommand(configurationId, configVersion, securityId),
+    );
+  }
 }
