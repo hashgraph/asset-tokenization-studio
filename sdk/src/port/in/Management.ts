@@ -7,14 +7,7 @@ interface IManagementInPort {
 }
 
 class ManagementInPort implements IManagementInPort {
-
-    @LogError
-    async updateConfigVersion(request: UpdateConfigVersionRequest): Promise<void> {
-        const {configVersion, securityId} = request;
-        handleValidation('UpdateConfigVersionRequest', request);
-
-        return Promise.resolve();
-    }
+//TODO
 }
 
 const Management = new ManagementInPort();
