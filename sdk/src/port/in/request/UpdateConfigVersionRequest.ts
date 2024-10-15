@@ -218,8 +218,8 @@ export default class UpdateConfigVersionRequest extends ValidatedRequest<UpdateC
         securityId: string;
         }) {
         super({
-            configVersion: Validation.checkHederaIdFormatOrEvmAddress(),
-            securityId: Validation.checkString({max: 10, min: 1}),
+            configVersion: Validation.checkNumber(),
+            securityId: Validation.checkHederaIdFormatOrEvmAddress(),
         });
 
         this.configVersion = configVersion;

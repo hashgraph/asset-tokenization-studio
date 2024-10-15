@@ -214,7 +214,7 @@ import Injectable from "../../core/Injectable";
 import {CommandBus} from "../../core/command/CommandBus";
 
 interface IManagementInPort {
-    updateConfigVersion(UpdateConfigVersionRequest): Promise<{ payload: boolean; transactionId: string }>;
+    updateConfigVersion(request: UpdateConfigVersionRequest): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class ManagementInPort implements IManagementInPort {
