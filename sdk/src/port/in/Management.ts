@@ -16,3 +16,6 @@ class ManagementInPort implements IManagementInPort {
         return Promise.resolve();
     }
 }
+
+const Management = new ManagementInPort();
+export default Management;
