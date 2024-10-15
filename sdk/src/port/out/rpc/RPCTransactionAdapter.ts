@@ -208,137 +208,111 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
-import TransactionAdapter, { InitializationData } from '../TransactionAdapter';
-import { ethers, Signer } from 'ethers';
-import { singleton } from 'tsyringe';
+import TransactionAdapter, {InitializationData} from '../TransactionAdapter';
+import {ethers, Signer} from 'ethers';
+import {singleton} from 'tsyringe';
 import Injectable from '../../../core/Injectable.js';
-import type { Provider } from '@ethersproject/providers';
+import type {Provider} from '@ethersproject/providers';
 import detectEthereumProvider from '@metamask/detect-provider';
-import { RuntimeError } from '../../../core/error/RuntimeError.js';
+import {RuntimeError} from '../../../core/error/RuntimeError.js';
 import Account from '../../../domain/context/account/Account.js';
-import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
-import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
+import {lazyInject} from '../../../core/decorator/LazyInjectDecorator.js';
+import {MirrorNodeAdapter} from '../mirror/MirrorNodeAdapter.js';
 import NetworkService from '../../../app/service/NetworkService.js';
-import { MetaMaskInpageProvider } from '@metamask/providers';
-import { WalletConnectError } from '../../../domain/context/network/error/WalletConnectError.js';
+import {MetaMaskInpageProvider} from '@metamask/providers';
+import {WalletConnectError} from '../../../domain/context/network/error/WalletConnectError.js';
 import EventService from '../../../app/service/event/EventService.js';
-import {
-  ConnectionState,
-  WalletEvents,
-} from '../../../app/service/event/WalletEvent.js';
-import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
+import {ConnectionState, WalletEvents,} from '../../../app/service/event/WalletEvent.js';
+import {SupportedWallets} from '../../../domain/context/network/Wallet.js';
 import LogService from '../../../app/service/LogService.js';
-import { WalletConnectRejectedError } from '../../../domain/context/network/error/WalletConnectRejectedError.js';
+import {WalletConnectRejectedError} from '../../../domain/context/network/error/WalletConnectRejectedError.js';
+import {HederaNetworks, unrecognized,} from '../../../domain/context/network/Environment.js';
+import {CommandBus} from '../../../core/command/CommandBus.js';
+import {SetNetworkCommand} from '../../../app/usecase/command/network/setNetwork/SetNetworkCommand.js';
 import {
-  HederaNetworks,
-  unrecognized,
-} from '../../../domain/context/network/Environment.js';
-import { CommandBus } from '../../../core/command/CommandBus.js';
-import { SetNetworkCommand } from '../../../app/usecase/command/network/setNetwork/SetNetworkCommand.js';
-import { SetConfigurationCommand } from '../../../app/usecase/command/network/setConfiguration/SetConfigurationCommand.js';
-import {
-  EnvironmentMirrorNode,
-  MirrorNode,
-  MirrorNodes,
-} from '../../../domain/context/network/MirrorNode.js';
-import {
-  EnvironmentJsonRpcRelay,
-  JsonRpcRelay,
-  JsonRpcRelays,
-} from '../../../domain/context/network/JsonRpcRelay.js';
-import {
-  EnvironmentFactory,
-  Factories,
-} from '../../../domain/context/factory/Factories.js';
+  SetConfigurationCommand
+} from '../../../app/usecase/command/network/setConfiguration/SetConfigurationCommand.js';
+import {EnvironmentMirrorNode, MirrorNode, MirrorNodes,} from '../../../domain/context/network/MirrorNode.js';
+import {EnvironmentJsonRpcRelay, JsonRpcRelay, JsonRpcRelays,} from '../../../domain/context/network/JsonRpcRelay.js';
+import {EnvironmentFactory, Factories,} from '../../../domain/context/factory/Factories.js';
 import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import { RPCTransactionResponseAdapter } from './RPCTransactionResponseAdapter.js';
+import {RPCTransactionResponseAdapter} from './RPCTransactionResponseAdapter.js';
 import {
-  TRANSFER_GAS,
-  PAUSE_GAS,
-  UNPAUSE_GAS,
-  REDEEM_GAS,
-  CREATE_EQUITY_ST_GAS,
-  CREATE_BOND_ST_GAS,
-  GRANT_ROLES_GAS,
-  MAX_ROLES_GAS,
-  ISSUE_GAS,
-  ADD_TO_CONTROL_LIST_GAS,
-  REMOVE_FROM_CONTROL_LIST_GAS,
-  CONTROLLER_TRANSFER_GAS,
-  CONTROLLER_REDEEM_GAS,
-  SET_DIVIDENDS_GAS,
-  SET_VOTING_RIGHTS_GAS,
-  RENOUNCE_ROLES_GAS,
-  TAKE_SNAPSHOT_GAS,
   _PARTITION_ID_1,
-  SET_DIVIDEND_EVENT,
-  SET_VOTING_RIGHTS_EVENT,
-  SET_DOCUMENT_GAS,
-  REMOVE_DOCUMENT_GAS,
+  ADD_TO_CONTROL_LIST_GAS,
   AUTHORIZE_OPERATOR_GAS,
+  CONTROLLER_REDEEM_GAS,
+  CONTROLLER_TRANSFER_GAS,
+  CREATE_BOND_ST_GAS,
+  CREATE_EQUITY_ST_GAS,
+  GRANT_ROLES_GAS,
+  ISSUE_GAS,
+  LOCK_GAS,
+  MAX_ROLES_GAS,
+  PAUSE_GAS,
+  REDEEM_GAS,
+  RELEASE_GAS,
+  REMOVE_DOCUMENT_GAS,
+  REMOVE_FROM_CONTROL_LIST_GAS,
+  RENOUNCE_ROLES_GAS,
   REVOKE_OPERATOR_GAS,
-  TRANSFER_OPERATOR_GAS,
-  TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
-  SET_MAX_SUPPLY_GAS,
   SET_COUPON_EVENT,
   SET_COUPON_GAS,
-  LOCK_GAS,
-  RELEASE_GAS,
-  TRANSFER_AND_LOCK_GAS, UPDATE_CONFIG_VERSION_GAS,
+  SET_DIVIDEND_EVENT,
+  SET_DIVIDENDS_GAS,
+  SET_DOCUMENT_GAS,
+  SET_MAX_SUPPLY_GAS,
+  SET_VOTING_RIGHTS_EVENT,
+  SET_VOTING_RIGHTS_GAS,
+  TAKE_SNAPSHOT_GAS,
+  TRANSFER_AND_LOCK_GAS,
+  TRANSFER_GAS,
+  TRANSFER_OPERATOR_GAS,
+  TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
+  UNPAUSE_GAS,
+  UPDATE_CONFIG_VERSION_GAS,
 } from '../../../core/Constants.js';
-import { Security } from '../../../domain/context/security/Security.js';
-import { Rbac } from '../../../domain/context/factory/Rbac.js';
-import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
+import {Security} from '../../../domain/context/security/Security.js';
+import {Rbac} from '../../../domain/context/factory/Rbac.js';
+import {SecurityRole} from '../../../domain/context/security/SecurityRole.js';
 import {
-  FactoryEquityToken,
   FactoryBondToken,
+  FactoryEquityToken,
   FactoryRegulationData,
 } from '../../../domain/context/factory/FactorySecurityToken.js';
-import { ERC20MetadataInfo } from '../../../domain/context/factory/ERC20Metadata.js';
-import { SigningError } from '../error/SigningError.js';
+import {ERC20MetadataInfo} from '../../../domain/context/factory/ERC20Metadata.js';
+import {SigningError} from '../error/SigningError.js';
 import {
-  Factory__factory,
-  Pause__factory,
   AccessControl__factory,
-  ERC1410ScheduledSnapshot__factory,
-  ControlList__factory,
-  Cap__factory,
-  IBond,
   Bond__factory,
-  TransferAndLock__factory, ResolverProxy__factory,
-} from '@hashgraph/asset-tokenization-contracts';
-import {
-  EnvironmentResolver,
-  Resolvers,
-} from '../../../domain/context/factory/Resolvers.js';
-import {
-  BusinessLogicKeys,
-  EnvironmentBusinessLogicKeys,
-} from '../../../domain/context/factory/BusinessLogicKeys.js';
-import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
-import {
+  Cap__factory,
+  ControlList__factory,
+  DiamondFacet__factory,
   Equity__factory,
+  ERC1410ScheduledSnapshot__factory,
   ERC1643__factory,
+  Factory__factory,
+  IBond,
   IEquity,
-  Snapshots__factory,
-  ScheduledSnapshots__factory,
   Lock__factory,
+  Pause__factory,
+  ScheduledSnapshots__factory,
+  Snapshots__factory,
+  TransferAndLock__factory
 } from '@hashgraph/asset-tokenization-contracts';
-import { BondDetails } from '../../../domain/context/bond/BondDetails.js';
-import { CouponDetails } from '../../../domain/context/bond/CouponDetails.js';
-import { BondDetailsData } from '../../../domain/context/factory/BondDetailsData.js';
-import { CouponDetailsData } from '../../../domain/context/factory/CouponDetailsData.js';
-import { EquityDetails } from '../../../domain/context/equity/EquityDetails.js';
-import { EquityDetailsData } from '../../../domain/context/factory/EquityDetailsData.js';
-import { SecurityData } from '../../../domain/context/factory/SecurityData.js';
-import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
-import { AdditionalSecurityData } from '../../../domain/context/factory/AdditionalSecurityData.js';
-import {
-  CastRegulationSubType,
-  CastRegulationType,
-} from '../../../domain/context/factory/RegulationType.js';
-import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
-import {ContractId} from "@hashgraph/sdk";
+import {EnvironmentResolver, Resolvers,} from '../../../domain/context/factory/Resolvers.js';
+import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
+import {BondDetails} from '../../../domain/context/bond/BondDetails.js';
+import {CouponDetails} from '../../../domain/context/bond/CouponDetails.js';
+import {BondDetailsData} from '../../../domain/context/factory/BondDetailsData.js';
+import {CouponDetailsData} from '../../../domain/context/factory/CouponDetailsData.js';
+import {EquityDetails} from '../../../domain/context/equity/EquityDetails.js';
+import {EquityDetailsData} from '../../../domain/context/factory/EquityDetailsData.js';
+import {SecurityData} from '../../../domain/context/factory/SecurityData.js';
+import {CastDividendType} from '../../../domain/context/equity/DividendType.js';
+import {AdditionalSecurityData} from '../../../domain/context/factory/AdditionalSecurityData.js';
+import {CastRegulationSubType, CastRegulationType,} from '../../../domain/context/factory/RegulationType.js';
+import {ResolverProxyConfiguration} from '../../../domain/context/factory/ResolverProxyConfiguration.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -1545,26 +1519,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   async updateConfigVersion(
       security: EvmAddress,
-      configVersion: string,
+      configVersion: BigDecimal,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
         `Updating config version ${configVersion} for security ${security.toString()}`,
     );
 
-    const resolverProxy = ResolverProxy__factory.connect(
-        security.toString(),
-        this.signerOrProvider
-    );
-
-    const functionDataEncodedHex = resolverProxy.interface.encodeFunctionData(
-        'updateConfigVersion',
-        [configVersion] // or [ethers.BigNumber.from(configVersion)]
-    );
-
     return RPCTransactionResponseAdapter.manageResponse(
-        await resolverProxy.fallback({
+        await DiamondFacet__factory.connect(
+            security.toString(),
+            this.signerOrProvider,
+        ).updateConfigVersion(configVersion.toBigNumber(), {
           gasLimit: UPDATE_CONFIG_VERSION_GAS,
-          data: functionDataEncodedHex
         }),
         this.networkService.environment,
     );
