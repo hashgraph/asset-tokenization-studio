@@ -1519,7 +1519,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   async updateConfigVersion(
       security: EvmAddress,
-      configVersion: BigDecimal,
+      configVersion: number,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
         `Updating config version ${configVersion} for security ${security.toString()}`,
@@ -1529,7 +1529,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         await DiamondFacet__factory.connect(
             security.toString(),
             this.signerOrProvider,
-        ).updateConfigVersion(configVersion.toBigNumber(), {
+        ).updateConfigVersion(configVersion, {
           gasLimit: UPDATE_CONFIG_VERSION_GAS,
         }),
         this.networkService.environment,

@@ -471,7 +471,7 @@ interface RoleTransactionAdapter {
 interface IManagementTransactionAdapter {
   updateConfigVersion(
       security: EvmAddress,
-      configVersion: BigDecimal,
+      configVersion: number,
       securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
@@ -805,7 +805,7 @@ export default abstract class TransactionAdapter
   }
   updateConfigVersion(
       security: EvmAddress,
-      configVersion: BigDecimal,
+      configVersion: number,
       securityId?: ContractId | string
   ): Promise<TransactionResponse<any, Error>>  {
     throw new Error('Method not implemented.');

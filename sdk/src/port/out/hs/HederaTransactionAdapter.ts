@@ -1474,7 +1474,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
   async updateConfigVersion(
       security: EvmAddress,
-      configVersion: string,
+      configVersion: number,
       securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'updateConfigVersion';

@@ -215,7 +215,7 @@ export class UpdateConfigVersionCommandResponse implements CommandResponse{
 
 export class UpdateConfigVersionCommand extends Command<UpdateConfigVersionCommandResponse> {
   constructor(
-     public readonly configVersion: string,
+     public readonly configVersion: number,
      public readonly securityId: string
   ) {
     super();

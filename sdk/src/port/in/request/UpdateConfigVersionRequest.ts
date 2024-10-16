@@ -207,14 +207,14 @@ import ValidatedRequest from "./validation/ValidatedRequest";
 import Validation from "./validation/Validation";
 
 export default class UpdateConfigVersionRequest extends ValidatedRequest<UpdateConfigVersionRequest>{
-    configVersion: string;
+    configVersion: number;
     securityId: string;
 
     constructor({
         configVersion,
         securityId
         }: {
-        configVersion: string;
+        configVersion: number;
         securityId: string;
         }) {
         super({
