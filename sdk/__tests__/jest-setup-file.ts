@@ -832,6 +832,8 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
       equityInfo = _equityInfo;
 
+      configVersion = _configVersion;
+
       return {
         status: 'success',
         id: transactionId,
@@ -873,6 +875,8 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
       bondInfo = _bondInfo;
       couponInfo = _couponInfo;
+
+      configVersion = _configVersion;
 
       const diff = bondInfo.maturityDate - couponInfo.firstCouponDate;
       const numberOfCoupons = Math.ceil(diff / couponInfo.couponFrequency);
@@ -1349,14 +1353,16 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     return {} as MirrorNodeAdapter;
   });
 
-  singletonInstance.updateConfigVersion = jest.fn(async function (
-    _configVersion: number,
-  ) {
-    return { status: 'success', data: [] } as TransactionResponse<
-      string[],
-      Error
-    >;
-  });
+  singletonInstance.updateConfigVersion = jest.fn(
+    async (_configVersion: number) => {
+      configVersion = _configVersion;
+
+      return { status: 'success', data: [] } as TransactionResponse<
+        string[],
+        Error
+      >;
+    },
+  );
 
   singletonInstance.updateResolver = jest.fn(async function (
     _configVersion: number,
