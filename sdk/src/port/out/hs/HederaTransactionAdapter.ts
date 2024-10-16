@@ -229,6 +229,7 @@ import {
   Cap__factory,
   Lock__factory,
   ResolverProxy__factory,
+  DiamondFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   TRANSFER_GAS,
@@ -1514,12 +1515,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'updateResolver';
     LogService.logTrace(`Updating Resolver`);
 
-    const resolverProxyFactory = new ResolverProxy__factory().attach(
+    const diamondFacetInstance = new DiamondFacet__factory().attach(
       security.toString(),
     );
 
     const functionDataEncodedHex =
-      resolverProxyFactory.interface.encodeFunctionData(FUNCTION_NAME, [
+      diamondFacetInstance.interface.encodeFunctionData(FUNCTION_NAME, [
         resolver.toString(),
         configId,
         configVersion,
