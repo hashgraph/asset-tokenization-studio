@@ -226,7 +226,7 @@ export class UpdateConfigVersionCommandHandler
     }
 
     async execute(command: UpdateConfigVersionCommand): Promise<UpdateConfigVersionCommandResponse> {
-        const {configVersion, securityId} = command;
+        const {securityId, configVersion} = command;
         const handler = this.transactionService.getHandler();
 
         console.log('securityId!!!!!!!!!!!!', securityId);
