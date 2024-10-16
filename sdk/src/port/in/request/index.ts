@@ -306,5 +306,5 @@ export {
   GetLocksIdRequest,
   GetLockRequest,
   TransferAndLockRequest,
-  UpdateConfigVersionRequest
+  UpdateConfigVersionRequest,
 };

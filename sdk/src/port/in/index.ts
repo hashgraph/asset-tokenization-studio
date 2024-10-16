@@ -213,7 +213,17 @@ import Network from './Network.js';
 import Factory from './Factory.js';
 import Management from './Management.js';
 
-export { Security, Equity, Bond, Account, Role, Event, Network, Factory, Management };
+export {
+  Security,
+  Equity,
+  Bond,
+  Account,
+  Role,
+  Event,
+  Network,
+  Factory,
+  Management,
+};
 
 export * from './request';
 export * from './response';

@@ -203,26 +203,26 @@
 
 */
 
-import ValidatedRequest from "./validation/ValidatedRequest";
-import Validation from "./validation/Validation";
+import ValidatedRequest from './validation/ValidatedRequest';
+import Validation from './validation/Validation';
 
-export default class UpdateConfigVersionRequest extends ValidatedRequest<UpdateConfigVersionRequest>{
+export default class UpdateConfigVersionRequest extends ValidatedRequest<UpdateConfigVersionRequest> {
+  configVersion: number;
+  securityId: string;
+
+  constructor({
+    configVersion,
+    securityId,
+  }: {
     configVersion: number;
     securityId: string;
+  }) {
+    super({
+      configVersion: Validation.checkNumber(),
+      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+    });
 
-    constructor({
-        configVersion,
-        securityId
-        }: {
-        configVersion: number;
-        securityId: string;
-        }) {
-        super({
-            configVersion: Validation.checkNumber(),
-            securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-        });
-
-        this.configVersion = configVersion;
-        this.securityId = securityId;
-    }
+    this.configVersion = configVersion;
+    this.securityId = securityId;
+  }
 }

@@ -227,7 +227,8 @@ import {
   ScheduledSnapshots__factory,
   ERC1410Snapshot__factory,
   Cap__factory,
-  Lock__factory, ResolverProxy__factory,
+  Lock__factory,
+  ResolverProxy__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   TRANSFER_GAS,
@@ -258,7 +259,8 @@ import {
   SET_COUPON_GAS,
   LOCK_GAS,
   RELEASE_GAS,
-  TRANSFER_AND_LOCK_GAS, UPDATE_CONFIG_VERSION_GAS,
+  TRANSFER_AND_LOCK_GAS,
+  UPDATE_CONFIG_VERSION_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -1473,31 +1475,32 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async updateConfigVersion(
-      security: EvmAddress,
-      configVersion: number,
-      securityId: ContractId | string,
+    security: EvmAddress,
+    configVersion: number,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'updateConfigVersion';
     LogService.logTrace(`Updating config version`);
 
-    const resolverProxyFactory = new ResolverProxy__factory().attach(security.toString());
-
-    const functionDataEncodedHex = resolverProxyFactory.interface.encodeFunctionData(
-        FUNCTION_NAME,
-        [configVersion],
+    const resolverProxyFactory = new ResolverProxy__factory().attach(
+      security.toString(),
     );
 
+    const functionDataEncodedHex =
+      resolverProxyFactory.interface.encodeFunctionData(FUNCTION_NAME, [
+        configVersion,
+      ]);
+
     const functionDataEncoded = new Uint8Array(
-        Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
-        .setGas(UPDATE_CONFIG_VERSION_GAS)
-        .setFunctionParameters(functionDataEncoded);
+      .setContractId(securityId)
+      .setGas(UPDATE_CONFIG_VERSION_GAS)
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
-
   }
 
   // * Definition of the abstract methods

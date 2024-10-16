@@ -1349,16 +1349,16 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     return {} as MirrorNodeAdapter;
   });
 
-    singletonInstance.updateConfigVersion = jest.fn(
-        async function (_configVersion: undefined) {
-            configVersion = _configVersion;
+  singletonInstance.updateConfigVersion = jest.fn(async function (
+    _configVersion: undefined,
+  ) {
+    configVersion = _configVersion;
 
-            return { status: 'success', data: [] } as TransactionResponse<
-                string[],
-                Error
-            >;
-        },
-    );
+    return { status: 'success', data: [] } as TransactionResponse<
+      string[],
+      Error
+    >;
+  });
 
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),

@@ -470,14 +470,17 @@ interface RoleTransactionAdapter {
 
 interface IManagementTransactionAdapter {
   updateConfigVersion(
-      security: EvmAddress,
-      configVersion: number,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    configVersion: number,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
 
 export default abstract class TransactionAdapter
-  implements ITransactionAdapter, RoleTransactionAdapter, IManagementTransactionAdapter
+  implements
+    ITransactionAdapter,
+    RoleTransactionAdapter,
+    IManagementTransactionAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -804,10 +807,10 @@ export default abstract class TransactionAdapter
     console.log(msg);
   }
   updateConfigVersion(
-      security: EvmAddress,
-      configVersion: number,
-      securityId?: ContractId | string
-  ): Promise<TransactionResponse<any, Error>>  {
+    security: EvmAddress,
+    configVersion: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
 }
