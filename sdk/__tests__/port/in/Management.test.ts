@@ -209,6 +209,7 @@ import {
   LoggerTransports,
   SDK,
   UpdateConfigVersionRequest,
+  UpdateResolverRequest,
 } from '../../../src';
 import {
   CastRegulationSubType,
@@ -352,6 +353,17 @@ describe('🧪 Management tests', () => {
       securityId: equity.evmDiamondAddress!,
     });
     const res = await Management.updateConfigVersion(request);
+    expect(res.payload).toBe(true);
+  }, 600_000);
+
+  it('Update resolver', async () => {
+    const request = new UpdateResolverRequest({
+      configVersion: 2,
+      configId: configId,
+      securityId: equity.evmDiamondAddress!.toString(),
+      resolver: RESOLVER_ADDRESS,
+    });
+    const res = await Management.updateResolver(request);
     expect(res.payload).toBe(true);
   }, 600_000);
 });

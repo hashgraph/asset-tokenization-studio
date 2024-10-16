@@ -218,7 +218,7 @@ import {
   AccessControl__factory,
   BondUSA__factory,
   Cap__factory,
-  ControlList__factory,
+  ControlList__factory, DiamondFacet__factory,
   EquityUSA__factory,
   ERC1410ScheduledSnapshot__factory,
   ERC1410Snapshot__factory,
@@ -260,6 +260,7 @@ import {
   TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
   UNPAUSE_GAS,
   UPDATE_CONFIG_VERSION_GAS,
+  UPDATE_RESOLVER_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -1497,6 +1498,39 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(UPDATE_CONFIG_VERSION_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async updateResolver(
+    security: EvmAddress,
+    resolver: EvmAddress,
+    configVersion: number,
+    configId: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'updateResolver';
+    LogService.logTrace(`Updating Resolver`);
+
+    const diamondFacetInstance = new DiamondFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex =
+      diamondFacetInstance.interface.encodeFunctionData(FUNCTION_NAME, [
+        resolver.toString(),
+        configId,
+        configVersion,
+      ]);
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(UPDATE_RESOLVER_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
