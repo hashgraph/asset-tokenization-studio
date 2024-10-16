@@ -2,17 +2,12 @@
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
-
    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
-
    1. Definitions.
-
       "License" shall mean the terms and conditions for use, reproduction,
       and distribution as defined by Sections 1 through 9 of this document.
-
       "Licensor" shall mean the copyright owner or entity authorized by
       the copyright owner that is granting the License.
-
       "Legal Entity" shall mean the union of the acting entity and all
       other entities that control, are controlled by, or are under common
       control with that entity. For the purposes of this definition,
@@ -20,24 +15,19 @@
       direction or management of such entity, whether by contract or
       otherwise, or (ii) ownership of fifty percent (50%) or more of the
       outstanding shares, or (iii) beneficial ownership of such entity.
-
       "You" (or "Your") shall mean an individual or Legal Entity
       exercising permissions granted by this License.
-
       "Source" form shall mean the preferred form for making modifications,
       including but not limited to software source code, documentation
       source, and configuration files.
-
       "Object" form shall mean any form resulting from mechanical
       transformation or translation of a Source form, including but
       not limited to compiled object code, generated documentation,
       and conversions to other media types.
-
       "Work" shall mean the work of authorship, whether in Source or
       Object form, made available under the License, as indicated by a
       copyright notice that is included in or attached to the work
       (an example is provided in the Appendix below).
-
       "Derivative Works" shall mean any work, whether in Source or Object
       form, that is based on (or derived from) the Work and for which the
       editorial revisions, annotations, elaborations, or other modifications
@@ -45,7 +35,6 @@
       of this License, Derivative Works shall not include works that remain
       separable from, or merely link (or bind by name) to the interfaces of,
       the Work and Derivative Works thereof.
-
       "Contribution" shall mean any work of authorship, including
       the original version of the Work and any modifications or additions
       to that Work or Derivative Works thereof, that is intentionally
@@ -59,18 +48,15 @@
       Licensor for the purpose of discussing and improving the Work, but
       excluding communication that is conspicuously marked or otherwise
       designated in writing by the copyright owner as "Not a Contribution."
-
       "Contributor" shall mean Licensor and any individual or Legal Entity
       on behalf of whom a Contribution has been received by Licensor and
       subsequently incorporated within the Work.
-
    2. Grant of Copyright License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
       copyright license to reproduce, prepare Derivative Works of,
       publicly display, publicly perform, sublicense, and distribute the
       Work and such Derivative Works in Source or Object form.
-
    3. Grant of Patent License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
@@ -86,24 +72,19 @@
       or contributory patent infringement, then any patent licenses
       granted to You under this License for that Work shall terminate
       as of the date such litigation is filed.
-
    4. Redistribution. You may reproduce and distribute copies of the
       Work or Derivative Works thereof in any medium, with or without
       modifications, and in Source or Object form, provided that You
       meet the following conditions:
-
       (a) You must give any other recipients of the Work or
           Derivative Works a copy of this License; and
-
       (b) You must cause any modified files to carry prominent notices
           stating that You changed the files; and
-
       (c) You must retain, in the Source form of any Derivative Works
           that You distribute, all copyright, patent, trademark, and
           attribution notices from the Source form of the Work,
           excluding those notices that do not pertain to any part of
           the Derivative Works; and
-
       (d) If the Work includes a "NOTICE" text file as part of its
           distribution, then any Derivative Works that You distribute must
           include a readable copy of the attribution notices contained
@@ -120,14 +101,12 @@
           or as an addendum to the NOTICE text from the Work, provided
           that such additional attribution notices cannot be construed
           as modifying the License.
-
       You may add Your own copyright statement to Your modifications and
       may provide additional or different license terms and conditions
       for use, reproduction, or distribution of Your modifications, or
       for any such Derivative Works as a whole, provided Your use,
       reproduction, and distribution of the Work otherwise complies with
       the conditions stated in this License.
-
    5. Submission of Contributions. Unless You explicitly state otherwise,
       any Contribution intentionally submitted for inclusion in the Work
       by You to the Licensor shall be under the terms and conditions of
@@ -135,12 +114,10 @@
       Notwithstanding the above, nothing herein shall supersede or modify
       the terms of any separate license agreement you may have executed
       with Licensor regarding such Contributions.
-
    6. Trademarks. This License does not grant permission to use the trade
       names, trademarks, service marks, or product names of the Licensor,
       except as required for reasonable and customary use in describing the
       origin of the Work and reproducing the content of the NOTICE file.
-
    7. Disclaimer of Warranty. Unless required by applicable law or
       agreed to in writing, Licensor provides the Work (and each
       Contributor provides its Contributions) on an "AS IS" BASIS,
@@ -150,7 +127,6 @@
       PARTICULAR PURPOSE. You are solely responsible for determining the
       appropriateness of using or redistributing the Work and assume any
       risks associated with Your exercise of permissions under this License.
-
    8. Limitation of Liability. In no event and under no legal theory,
       whether in tort (including negligence), contract, or otherwise,
       unless required by applicable law (such as deliberate and grossly
@@ -162,7 +138,6 @@
       work stoppage, computer failure or malfunction, or any and all
       other commercial damages or losses), even if such Contributor
       has been advised of the possibility of such damages.
-
    9. Accepting Warranty or Additional Liability. While redistributing
       the Work or Derivative Works thereof, You may choose to offer,
       and charge a fee for, acceptance of support, warranty, indemnity,
@@ -173,11 +148,8 @@
       defend, and hold each Contributor harmless for any liability
       incurred by, or claims asserted against, such Contributor by reason
       of your accepting any such warranty or additional liability.
-
    END OF TERMS AND CONDITIONS
-
    APPENDIX: How to apply the Apache License to your work.
-
       To apply the Apache License to your work, attach the following
       boilerplate notice, with the fields enclosed by brackets "[]"
       replaced with your own identifying information. (Don't include
@@ -186,129 +158,70 @@
       file or class name and description of purpose be included on the
       same "printed page" as the copyright notice for easier
       identification within third-party archives.
-
    Copyright [yyyy] [name of copyright owner]
-
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
-
        http://www.apache.org/licenses/LICENSE-2.0
-
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-
 */
 
-import IssueRequest from './IssueRequest.js';
-import RedeemRequest from './RedeemRequest.js';
-import ForceRedeemRequest from './ForceRedeemRequest.js';
-import CreateEquityRequest from './CreateEquityRequest.js';
-import CreateBondRequest from './CreateBondRequest.js';
-import RoleRequest from './RoleRequest.js';
-import ApplyRolesRequest from './ApplyRolesRequest.js';
-import ValidationResponse from './validation/ValidationResponse.js';
-import TransferRequest from './TransferRequest.js';
-import TransferAndLockRequest from './TransferAndLockRequest.js';
-import ForceTransferRequest from './ForceTransferRequest.js';
-import GetAccountBalanceRequest from './GetAccountBalanceRequest.js';
-import GetAccountInfoRequest from './GetAccountInfoRequest.js';
-import PauseRequest from './PauseRequest.js';
-import ControlListRequest from './ControlListRequest.js';
-import GetControlListCountRequest from './GetControlListCountRequest.js';
-import GetControlListMembersRequest from './GetControlListMembersRequest.js';
-import GetDividendsForRequest from './GetDividendsForRequest.js';
-import GetDividendsRequest from './GetDividendsRequest.js';
-import GetAllDividendsRequest from './GetAllDividendsRequest.js';
-import GetVotingRightsForRequest from './GetVotingRightsForRequest.js';
-import GetVotingRightsRequest from './GetVotingRightsRequest.js';
-import GetAllVotingRightsRequest from './GetAllVotingRightsRequest.js';
-import GetCouponForRequest from './GetCouponForRequest.js';
-import GetCouponRequest from './GetCouponRequest.js';
-import GetAllCouponsRequest from './GetAllCouponsRequest.js';
-import GetRoleCountForRequest from './GetRoleCountForRequest.js';
-import GetRolesForRequest from './GetRolesForRequest.js';
-import GetRoleMemberCountRequest from './GetRoleMemberCountRequest.js';
-import GetRoleMembersRequest from './GetRoleMembersRequest.js';
-import GetSecurityDetailsRequest from './GetSecurityDetailsRequest.js';
-import SetDividendsRequest from './SetDividendsRequest.js';
-import SetCouponRequest from './SetCouponRequest.js';
-import SetVotingRightsRequest from './SetVotingRightsRequest.js';
-import GetCouponDetailsRequest from './GetCouponDetailsRequest.js';
-import GetBondDetailsRequest from './GetBondDetailsRequest.js';
-import GetEquityDetailsRequest from './GetEquityDetailsRequest.js';
-import SetMaxSupplyRequest from './SetMaxSupplyRequest.js';
-import GetMaxSupplyRequest from './GetMaxSupplyRequest.js';
-import GetRegulationDetailsRequest from './GetRegulationDetailsRequest.js';
-import GetLockedBalanceRequest from './GetLockedBalanceRequest.js';
-import LockRequest from './LockRequest.js';
-import ReleaseRequest from './ReleaseRequest.js';
-import GetLockCountRequest from './GetLockCountRequest.js';
-import GetLocksIdRequest from './GetLocksIdRequest.js';
-import GetLockRequest from './GetLockRequest.js';
+import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator';
+import { ICommandHandler } from '../../../../../core/command/CommandHandler';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
+import TransactionService from '../../../../service/TransactionService';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId';
+import {
+  UpdateResolverCommand,
+  UpdateResolverCommandResponse,
+} from './updateResolverCommand';
 
-import GetControlListTypeRequest from './GetControlListTypeRequest.js';
-import InitializationRequest from './InitializationRequest.js';
-import ConnectRequest from './ConnectRequest.js';
-import UpdateConfigRequest from './UpdateConfigRequest.js';
-import UpdateConfigVersionRequest from './UpdateConfigVersionRequest.js';
-import UpdateResolverRequest from './UpdateResolverRequest.js';
+@CommandHandler(UpdateResolverCommand)
+export class UpdateResolverCommandHandler
+  implements ICommandHandler<UpdateResolverCommand>
+{
+  constructor(
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+  ) {}
 
-export * from './BaseRequest.js';
-export {
-  CreateEquityRequest,
-  CreateBondRequest,
-  ValidationResponse,
-  IssueRequest,
-  RedeemRequest,
-  ForceRedeemRequest,
-  RoleRequest,
-  ApplyRolesRequest,
-  TransferRequest,
-  ForceTransferRequest,
-  ControlListRequest,
-  GetControlListCountRequest,
-  GetControlListMembersRequest,
-  GetDividendsForRequest,
-  GetDividendsRequest,
-  GetAllDividendsRequest,
-  GetVotingRightsForRequest,
-  GetVotingRightsRequest,
-  GetAllVotingRightsRequest,
-  GetCouponForRequest,
-  GetCouponRequest,
-  GetAllCouponsRequest,
-  GetRoleCountForRequest,
-  GetRolesForRequest,
-  GetRoleMemberCountRequest,
-  GetRoleMembersRequest,
-  SetDividendsRequest,
-  SetCouponRequest,
-  SetVotingRightsRequest,
-  GetAccountBalanceRequest,
-  GetAccountInfoRequest,
-  PauseRequest,
-  GetControlListTypeRequest,
-  InitializationRequest,
-  ConnectRequest,
-  GetSecurityDetailsRequest,
-  GetCouponDetailsRequest,
-  GetBondDetailsRequest,
-  SetMaxSupplyRequest,
-  GetMaxSupplyRequest,
-  GetEquityDetailsRequest,
-  GetRegulationDetailsRequest,
-  GetLockedBalanceRequest,
-  LockRequest,
-  ReleaseRequest,
-  GetLockCountRequest,
-  GetLocksIdRequest,
-  GetLockRequest,
-  TransferAndLockRequest,
-  UpdateResolverRequest,
-  UpdateConfigVersionRequest,
-  UpdateConfigRequest,
-};
+  async execute(
+    command: UpdateResolverCommand,
+  ): Promise<UpdateResolverCommandResponse> {
+    const { configVersion, securityId, resolver, configId } = command;
+    const handler = this.transactionService.getHandler();
+
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
+
+    const resolverEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(resolver.toString())
+        ? (await this.mirrorNodeAdapter.getContractInfo(resolver.toString()))
+            .evmAddress
+        : resolver.toString(),
+    );
+
+    const res = await handler.updateResolver(
+      securityEvmAddress,
+      resolverEvmAddress,
+      configVersion,
+      configId,
+      securityId,
+    );
+
+    return Promise.resolve(
+      new UpdateResolverCommandResponse(res.error === undefined, res.id!),
+    );
+  }
+}

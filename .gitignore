@@ -133,3 +133,5 @@ dist
 .pnp.*
 
 package-lock.json
+
+asset-tokenization-studio.iml

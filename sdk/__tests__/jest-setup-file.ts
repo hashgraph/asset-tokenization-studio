@@ -294,6 +294,9 @@ let businessLogicKeys: string[];
 let diamondOwnerAccount: EvmAddress | undefined;*/
 const network: Environment = 'testnet';
 let user_account: Account;
+let configVersion;
+let configId;
+let resolver;
 
 function grantRole(account: string, newRole: SecurityRole): void {
   let r = roles.get(account);
@@ -831,6 +834,10 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
       equityInfo = _equityInfo;
 
+      configVersion = _configVersion;
+      configId = _configId;
+      resolver = _resolver;
+
       return {
         status: 'success',
         id: transactionId,
@@ -872,6 +879,10 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
       bondInfo = _bondInfo;
       couponInfo = _couponInfo;
+
+      configVersion = _configVersion;
+      configId = _configId;
+      resolver = _resolver;
 
       const diff = bondInfo.maturityDate - couponInfo.firstCouponDate;
       const numberOfCoupons = Math.ceil(diff / couponInfo.couponFrequency);
@@ -1346,6 +1357,21 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
   singletonInstance.getMirrorNodeAdapter = jest.fn(() => {
     return {} as MirrorNodeAdapter;
+  });
+
+  singletonInstance.updateResolver = jest.fn(async function (
+    _configVersion: number,
+    _configId: string,
+    _resolver: EvmAddress,
+  ) {
+    configVersion = _configVersion;
+    configId = _configId;
+    resolver = _resolver;
+
+    return { status: 'success', data: [] } as TransactionResponse<
+      string[],
+      Error
+    >;
   });
 
   singletonInstance.updateConfigVersion = jest.fn(async function (
