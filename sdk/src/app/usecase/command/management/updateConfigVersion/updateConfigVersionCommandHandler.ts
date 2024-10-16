@@ -226,15 +226,13 @@ export class UpdateConfigVersionCommandHandler
     }
 
     async execute(command: UpdateConfigVersionCommand): Promise<UpdateConfigVersionCommandResponse> {
-        const {securityId, configVersion} = command;
+        const {configVersion, securityId} = command;
         const handler = this.transactionService.getHandler();
 
-        console.log('securityId!!!!!!!!!!!!', securityId);
-
         const securityEvmAddress: EvmAddress = new EvmAddress(
-            HEDERA_FORMAT_ID_REGEX.exec(securityId)
+            HEDERA_FORMAT_ID_REGEX.test(securityId)
                 ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-                : securityId,
+                : securityId.toString(),
         );
 
         const res = await handler.updateConfigVersion(securityEvmAddress, configVersion, securityId);

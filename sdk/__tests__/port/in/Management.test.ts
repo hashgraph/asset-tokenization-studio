@@ -205,6 +205,7 @@ describe('🧪 Management tests', () => {
     }, 900_000);
 
  it('Update configuration id', async () => {
+     console.log(equity)
     const request = new UpdateConfigVersionRequest({
         configVersion: 2,
         securityId: equity.evmDiamondAddress!,
