@@ -346,7 +346,7 @@ describe('🧪 Management tests', () => {
     equity = (await Equity.create(requestST)).security;
   }, 900_000);
 
-  it('Update configuration id', async () => {
+  it('Update version id', async () => {
     const request = new UpdateConfigVersionRequest({
       configVersion: 2,
       securityId: equity.evmDiamondAddress!,
