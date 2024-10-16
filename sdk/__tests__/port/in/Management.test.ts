@@ -207,9 +207,8 @@ import {
   CreateEquityRequest,
   Equity,
   LoggerTransports,
-  Role,
-  RoleRequest,
   SDK,
+  UpdateConfigVersionRequest,
   UpdateResolverRequest,
 } from '../../../src';
 import {
@@ -232,7 +231,6 @@ import {
 } from '../../config';
 import Injectable from '../../../src/core/Injectable';
 import Account from '../../../src/domain/context/account/Account';
-import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
 import Management from '../../../src/port/in/Management';
 import { ethers, Wallet } from 'ethers';
 
@@ -242,7 +240,7 @@ const decimals = 0;
 const name = 'TEST_SECURITY_TOKEN';
 const symbol = 'TEST';
 const isin = 'ABCDE123456Z';
-//const type = 'EQUITY';
+// const type = 'EQUITY';
 const votingRight = true;
 const informationRight = false;
 const liquidationRight = true;
@@ -261,6 +259,7 @@ const info = 'Anything';
 const configId =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 const configVersion = 1;
+
 const mirrorNode: MirrorNode = {
   name: 'testmirrorNode',
   baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
@@ -346,71 +345,16 @@ describe('🧪 Management tests', () => {
     });
 
     equity = (await Equity.create(requestST)).security;
-
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._ISSUER_ROLE,
-      }),
-    );
-
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._CONTROLLER_ROLE,
-      }),
-    );
-
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._PAUSER_ROLE,
-      }),
-    );
-
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._CONTROLLIST_ROLE,
-      }),
-    );
-
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._CORPORATEACTIONS_ROLE,
-      }),
-    );
-
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._DOCUMENTER_ROLE,
-      }),
-    );
-
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._SNAPSHOT_ROLE,
-      }),
-    );
-
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._LOCKER_ROLE,
-      }),
-    );
   }, 900_000);
+
+  it('Update version id', async () => {
+    const request = new UpdateConfigVersionRequest({
+      configVersion: 2,
+      securityId: equity.evmDiamondAddress!,
+    });
+    const res = await Management.updateConfigVersion(request);
+    expect(res.payload).toBe(true);
+  }, 600_000);
 
   it('Update resolver', async () => {
     const request = new UpdateResolverRequest({

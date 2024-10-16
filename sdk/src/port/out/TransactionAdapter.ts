@@ -469,6 +469,11 @@ interface RoleTransactionAdapter {
 }
 
 interface IManagementTransactionAdapter {
+  updateConfigVersion(
+    security: EvmAddress,
+    configVersion: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
   updateResolver(
     security: EvmAddress,
     resolver: EvmAddress,
@@ -807,6 +812,13 @@ export default abstract class TransactionAdapter
     }${id}\n`;
     LogService.logInfo(msg);
     console.log(msg);
+  }
+  updateConfigVersion(
+    security: EvmAddress,
+    configVersion: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    throw new Error('Method not implemented.');
   }
   updateResolver(
     security: EvmAddress,

@@ -281,7 +281,6 @@ export const SET_DIVIDEND_EVENT = 'DividendSet';
 export const SET_VOTING_RIGHTS_EVENT = 'VotingSet';
 export const SET_COUPON_EVENT = 'CouponSet';
 
-
 // * Generic
 export const BYTES_32_LENGTH = 32 * 2;
 export const ADDRESS_LENGTH = 40;

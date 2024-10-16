@@ -294,6 +294,7 @@ let businessLogicKeys: string[];
 let diamondOwnerAccount: EvmAddress | undefined;*/
 const network: Environment = 'testnet';
 let user_account: Account;
+let configVersion;
 
 function grantRole(account: string, newRole: SecurityRole): void {
   let r = roles.get(account);
@@ -1346,6 +1347,15 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
   singletonInstance.getMirrorNodeAdapter = jest.fn(() => {
     return {} as MirrorNodeAdapter;
+  });
+
+  singletonInstance.updateConfigVersion = jest.fn(async function (
+    _configVersion: number,
+  ) {
+    return { status: 'success', data: [] } as TransactionResponse<
+      string[],
+      Error
+    >;
   });
 
   singletonInstance.updateResolver = jest.fn(async function (

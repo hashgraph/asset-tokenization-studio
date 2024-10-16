@@ -203,16 +203,19 @@
 
 */
 
-import { CommandBus } from '../../core/command/CommandBus.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
-import UpdateResolverRequest from './request/UpdateResolverRequest';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import UpdateConfigVersionRequest from './request/UpdateConfigVersionRequest';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
 import { handleValidation } from './Common';
-import { UpdateResolverCommand } from '../../app/usecase/command/management/updateResolver/updateResolverCommand';
-import ContractId from '../../domain/context/contract/ContractId.js';
-import Injectable from '../../core/Injectable.js';
+import { UpdateConfigVersionCommand } from '../../app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
+import { QueryBus } from '../../core/query/QueryBus';
+import Injectable from '../../core/Injectable';
+import { CommandBus } from '../../core/command/CommandBus';
 
 interface IManagementInPort {
+  updateConfigVersion(
+    request: UpdateConfigVersionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
   updateResolver(
     request: UpdateResolverRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
@@ -223,6 +226,18 @@ class ManagementInPort implements IManagementInPort {
     private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
     private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
   ) {}
+
+  @LogError
+  async updateConfigVersion(
+    request: UpdateConfigVersionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { configVersion, securityId } = request;
+    handleValidation('UpdateConfigVersionRequest', request);
+
+    return await this.commandBus.execute(
+      new UpdateConfigVersionCommand(configVersion, securityId),
+    );
+  }
 
   @LogError
   async updateResolver(

@@ -203,38 +203,49 @@
 
 */
 
-import Account from './Account.js';
-import Role from './Role.js';
-import Security from './Security.js';
-import Equity from './Equity.js';
-import Bond from './Bond.js';
-import Event from './Event.js';
-import Network from './Network.js';
-import Factory from './Factory.js';
-import Management from './Management.js';
+import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator';
+import {
+  UpdateConfigVersionCommand,
+  UpdateConfigVersionCommandResponse,
+} from './updateConfigVersionCommand';
+import { ICommandHandler } from '../../../../../core/command/CommandHandler';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
+import TransactionService from '../../../../service/TransactionService';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId';
 
-export {
-  Security,
-  Equity,
-  Bond,
-  Account,
-  Role,
-  Event,
-  Network,
-  Factory,
-  Management,
-};
+@CommandHandler(UpdateConfigVersionCommand)
+export class UpdateConfigVersionCommandHandler
+  implements ICommandHandler<UpdateConfigVersionCommand>
+{
+  constructor(
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+  ) {}
 
-export * from './request';
-export * from './response';
+  async execute(
+    command: UpdateConfigVersionCommand,
+  ): Promise<UpdateConfigVersionCommandResponse> {
+    const { configVersion, securityId } = command;
+    const handler = this.transactionService.getHandler();
 
-export * from './Security.js';
-export * from './Equity.js';
-export * from './Bond.js';
-export * from './Account.js';
-export * from './Role.js';
-export * from './Event.js';
-export * from './Common.js';
-export * from './Network.js';
-export * from './Factory.js';
-export * from './Management.js';
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
+
+    const res = await handler.updateConfigVersion(
+      securityEvmAddress,
+      configVersion,
+      securityId,
+    );
+
+    return Promise.resolve(
+      new UpdateConfigVersionCommandResponse(res.error === undefined, res.id!),
+    );
+  }
+}

@@ -286,6 +286,7 @@ import { GetMaxSupplyQueryHandler } from '../app/usecase/query/security/cap/GetM
 
 import { SDK } from '../port/in/Common.js';
 import { HederaWalletConnectTransactionAdapter } from '../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
+import { UpdateConfigVersionCommandHandler } from '../app/usecase/command/management/updateConfigVersion/updateConfigVersionCommandHandler';
 import { UpdateResolverCommandHandler } from '../app/usecase/command/management/updateResolver/updateResolverCommandHandler.js';
 
 export const TOKENS = {
@@ -406,6 +407,10 @@ const COMMAND_HANDLERS = [
     useClass: SetMaxSupplyCommandHandler,
   },
   // Management Operations
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: UpdateConfigVersionCommandHandler,
+  },
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: UpdateResolverCommandHandler,
