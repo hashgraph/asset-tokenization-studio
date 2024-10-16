@@ -1348,6 +1348,17 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     return {} as MirrorNodeAdapter;
   });
 
+  singletonInstance.updateResolver = jest.fn(async function (
+    _configVersion: number,
+    _configId: string,
+    _resolver: EvmAddress,
+  ) {
+    return { status: 'success', data: [] } as TransactionResponse<
+      string[],
+      Error
+    >;
+  });
+
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),
   };

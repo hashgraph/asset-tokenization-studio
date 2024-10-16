@@ -203,108 +203,223 @@
 
 */
 
-import IssueRequest from './IssueRequest.js';
-import RedeemRequest from './RedeemRequest.js';
-import ForceRedeemRequest from './ForceRedeemRequest.js';
-import CreateEquityRequest from './CreateEquityRequest.js';
-import CreateBondRequest from './CreateBondRequest.js';
-import RoleRequest from './RoleRequest.js';
-import ApplyRolesRequest from './ApplyRolesRequest.js';
-import ValidationResponse from './validation/ValidationResponse.js';
-import TransferRequest from './TransferRequest.js';
-import TransferAndLockRequest from './TransferAndLockRequest.js';
-import ForceTransferRequest from './ForceTransferRequest.js';
-import GetAccountBalanceRequest from './GetAccountBalanceRequest.js';
-import GetAccountInfoRequest from './GetAccountInfoRequest.js';
-import PauseRequest from './PauseRequest.js';
-import ControlListRequest from './ControlListRequest.js';
-import GetControlListCountRequest from './GetControlListCountRequest.js';
-import GetControlListMembersRequest from './GetControlListMembersRequest.js';
-import GetDividendsForRequest from './GetDividendsForRequest.js';
-import GetDividendsRequest from './GetDividendsRequest.js';
-import GetAllDividendsRequest from './GetAllDividendsRequest.js';
-import GetVotingRightsForRequest from './GetVotingRightsForRequest.js';
-import GetVotingRightsRequest from './GetVotingRightsRequest.js';
-import GetAllVotingRightsRequest from './GetAllVotingRightsRequest.js';
-import GetCouponForRequest from './GetCouponForRequest.js';
-import GetCouponRequest from './GetCouponRequest.js';
-import GetAllCouponsRequest from './GetAllCouponsRequest.js';
-import GetRoleCountForRequest from './GetRoleCountForRequest.js';
-import GetRolesForRequest from './GetRolesForRequest.js';
-import GetRoleMemberCountRequest from './GetRoleMemberCountRequest.js';
-import GetRoleMembersRequest from './GetRoleMembersRequest.js';
-import GetSecurityDetailsRequest from './GetSecurityDetailsRequest.js';
-import SetDividendsRequest from './SetDividendsRequest.js';
-import SetCouponRequest from './SetCouponRequest.js';
-import SetVotingRightsRequest from './SetVotingRightsRequest.js';
-import GetCouponDetailsRequest from './GetCouponDetailsRequest.js';
-import GetBondDetailsRequest from './GetBondDetailsRequest.js';
-import GetEquityDetailsRequest from './GetEquityDetailsRequest.js';
-import SetMaxSupplyRequest from './SetMaxSupplyRequest.js';
-import GetMaxSupplyRequest from './GetMaxSupplyRequest.js';
-import GetRegulationDetailsRequest from './GetRegulationDetailsRequest.js';
-import GetLockedBalanceRequest from './GetLockedBalanceRequest.js';
-import LockRequest from './LockRequest.js';
-import ReleaseRequest from './ReleaseRequest.js';
-import GetLockCountRequest from './GetLockCountRequest.js';
-import GetLocksIdRequest from './GetLocksIdRequest.js';
-import GetLockRequest from './GetLockRequest.js';
-
-import GetControlListTypeRequest from './GetControlListTypeRequest.js';
-import InitializationRequest from './InitializationRequest.js';
-import ConnectRequest from './ConnectRequest.js';
-import UpdateResolverRequest from './UpdateResolverRequest.js';
-
-export * from './BaseRequest.js';
-export {
+import {
   CreateEquityRequest,
-  CreateBondRequest,
-  ValidationResponse,
-  IssueRequest,
-  RedeemRequest,
-  ForceRedeemRequest,
+  Equity,
+  LoggerTransports,
+  Role,
   RoleRequest,
-  ApplyRolesRequest,
-  TransferRequest,
-  ForceTransferRequest,
-  ControlListRequest,
-  GetControlListCountRequest,
-  GetControlListMembersRequest,
-  GetDividendsForRequest,
-  GetDividendsRequest,
-  GetAllDividendsRequest,
-  GetVotingRightsForRequest,
-  GetVotingRightsRequest,
-  GetAllVotingRightsRequest,
-  GetCouponForRequest,
-  GetCouponRequest,
-  GetAllCouponsRequest,
-  GetRoleCountForRequest,
-  GetRolesForRequest,
-  GetRoleMemberCountRequest,
-  GetRoleMembersRequest,
-  SetDividendsRequest,
-  SetCouponRequest,
-  SetVotingRightsRequest,
-  GetAccountBalanceRequest,
-  GetAccountInfoRequest,
-  PauseRequest,
-  GetControlListTypeRequest,
-  InitializationRequest,
-  ConnectRequest,
-  GetSecurityDetailsRequest,
-  GetCouponDetailsRequest,
-  GetBondDetailsRequest,
-  SetMaxSupplyRequest,
-  GetMaxSupplyRequest,
-  GetEquityDetailsRequest,
-  GetRegulationDetailsRequest,
-  GetLockedBalanceRequest,
-  LockRequest,
-  ReleaseRequest,
-  GetLockCountRequest,
-  GetLocksIdRequest,
-  GetLockRequest,
-  TransferAndLockRequest,
+  SDK,
   UpdateResolverRequest,
+} from '../../../src';
+import {
+  CastRegulationSubType,
+  CastRegulationType,
+  RegulationSubType,
+  RegulationType,
+} from '../../../src/domain/context/factory/RegulationType';
+import { MirrorNode } from '../../../src/domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay';
+import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter';
+import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter';
+import NetworkService from '../../../src/app/service/NetworkService';
+import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter';
+import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel';
+import {
+  CLIENT_ACCOUNT_ECDSA,
+  FACTORY_ADDRESS,
+  RESOLVER_ADDRESS,
+} from '../../config';
+import Injectable from '../../../src/core/Injectable';
+import Account from '../../../src/domain/context/account/Account';
+import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
+import Management from '../../../src/port/in/Management';
+import { ethers, Wallet } from 'ethers';
+
+SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
+
+const decimals = 0;
+const name = 'TEST_SECURITY_TOKEN';
+const symbol = 'TEST';
+const isin = 'ABCDE123456Z';
+//const type = 'EQUITY';
+const votingRight = true;
+const informationRight = false;
+const liquidationRight = true;
+const subscriptionRight = false;
+const convertionRight = true;
+const redemptionRight = false;
+const putRight = true;
+const dividendRight = 1;
+const currency = '0x345678';
+const numberOfShares = 0;
+const nominalValue = 1000;
+const regulationType = RegulationType.REG_D;
+const regulationSubType = RegulationSubType.B_506;
+const countries = 'AF,HG,BN';
+const info = 'Anything';
+const configId =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const configVersion = 1;
+const mirrorNode: MirrorNode = {
+  name: 'testmirrorNode',
+  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
 };
+
+const rpcNode: JsonRpcRelay = {
+  name: 'testrpcNode',
+  baseUrl: 'http://127.0.0.1:7546/api',
+};
+
+let th: RPCTransactionAdapter;
+let mirrorNodeAdapter: MirrorNodeAdapter;
+
+describe('🧪 Security tests', () => {
+  let ns: NetworkService;
+  let rpcQueryAdapter: RPCQueryAdapter;
+  let equity: SecurityViewModel;
+
+  const url = 'http://127.0.0.1:7546';
+  const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
+
+  const wallet = new Wallet(
+    CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
+    customHttpProvider,
+  );
+
+  beforeAll(async () => {
+    mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
+    mirrorNodeAdapter.set(mirrorNode);
+
+    th = Injectable.resolve(RPCTransactionAdapter);
+    ns = Injectable.resolve(NetworkService);
+    rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
+
+    rpcQueryAdapter.init();
+    ns.environment = 'testnet';
+    ns.configuration = {
+      factoryAddress: FACTORY_ADDRESS,
+      resolverAddress: RESOLVER_ADDRESS,
+    };
+    ns.mirrorNode = mirrorNode;
+    ns.rpcNode = rpcNode;
+
+    await th.init(true);
+    const account = new Account({
+      id: CLIENT_ACCOUNT_ECDSA.id.toString(),
+      evmAddress: CLIENT_ACCOUNT_ECDSA.evmAddress,
+      alias: CLIENT_ACCOUNT_ECDSA.alias,
+      privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
+      publicKey: CLIENT_ACCOUNT_ECDSA.publicKey,
+    });
+    await th.register(account, true);
+
+    th.signerOrProvider = wallet;
+
+    const requestST = new CreateEquityRequest({
+      name: name,
+      symbol: symbol,
+      isin: isin,
+      decimals: decimals,
+      isWhiteList: false,
+      isControllable: true,
+      isMultiPartition: false,
+      diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
+      votingRight: votingRight,
+      informationRight: informationRight,
+      liquidationRight: liquidationRight,
+      subscriptionRight: subscriptionRight,
+      convertionRight: convertionRight,
+      redemptionRight: redemptionRight,
+      putRight: putRight,
+      dividendRight: dividendRight,
+      currency: currency,
+      numberOfShares: numberOfShares.toString(),
+      nominalValue: nominalValue.toString(),
+      regulationType: CastRegulationType.toNumber(regulationType),
+      regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
+      isCountryControlListWhiteList: true,
+      countries: countries,
+      info: info,
+      configId: configId,
+      configVersion: configVersion,
+    });
+
+    equity = (await Equity.create(requestST)).security;
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._ISSUER_ROLE,
+      }),
+    );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CONTROLLER_ROLE,
+      }),
+    );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._PAUSER_ROLE,
+      }),
+    );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CONTROLLIST_ROLE,
+      }),
+    );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._DOCUMENTER_ROLE,
+      }),
+    );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._SNAPSHOT_ROLE,
+      }),
+    );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._LOCKER_ROLE,
+      }),
+    );
+  }, 900_000);
+
+  it('Update resolver', async () => {
+    const request = new UpdateResolverRequest({
+      configVersion: 2,
+      configId: configId,
+      securityId: equity.evmDiamondAddress!.toString(),
+      resolver: RESOLVER_ADDRESS,
+    });
+    const res = await Management.updateResolver(request);
+    expect(res.payload).toBe(true);
+  }, 600_000);
+});

@@ -228,6 +228,7 @@ import {
   ERC1410Snapshot__factory,
   Cap__factory,
   Lock__factory,
+  ResolverProxy__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   TRANSFER_GAS,
@@ -259,6 +260,7 @@ import {
   LOCK_GAS,
   RELEASE_GAS,
   TRANSFER_AND_LOCK_GAS,
+  UPDATE_RESOLVER_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -1467,6 +1469,39 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(RELEASE_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async updateResolver(
+    security: EvmAddress,
+    resolver: EvmAddress,
+    configVersion: number,
+    configId: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'updateResolver';
+    LogService.logTrace(`Updating Resolver`);
+
+    const resolverProxyFactory = new ResolverProxy__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex =
+      resolverProxyFactory.interface.encodeFunctionData(FUNCTION_NAME, [
+        resolver.toString(),
+        configId,
+        configVersion,
+      ]);
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(UPDATE_RESOLVER_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

@@ -285,6 +285,7 @@ import {
   LOCK_GAS,
   RELEASE_GAS,
   TRANSFER_AND_LOCK_GAS,
+  UPDATE_RESOLVER_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -306,6 +307,7 @@ import {
   IBond,
   Bond__factory,
   TransferAndLock__factory,
+  DiamondFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -1538,6 +1540,27 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           gasLimit: RELEASE_GAS,
         },
       ),
+      this.networkService.environment,
+    );
+  }
+
+  async updateResolver(
+    security: EvmAddress,
+    resolver: EvmAddress,
+    configVersion: number,
+    configId: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating resolver ${resolver.toString()} for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await DiamondFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).updateResolver(resolver.toString(), configId, configVersion, {
+        gasLimit: UPDATE_RESOLVER_GAS,
+      }),
       this.networkService.environment,
     );
   }
