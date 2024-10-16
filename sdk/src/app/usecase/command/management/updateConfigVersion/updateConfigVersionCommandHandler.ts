@@ -229,6 +229,8 @@ export class UpdateConfigVersionCommandHandler
         const {configVersion, securityId} = command;
         const handler = this.transactionService.getHandler();
 
+        console.log('securityId!!!!!!!!!!!!', securityId);
+
         const securityEvmAddress: EvmAddress = new EvmAddress(
             HEDERA_FORMAT_ID_REGEX.exec(securityId)
                 ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress

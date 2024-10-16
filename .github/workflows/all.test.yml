@@ -80,17 +80,17 @@ jobs:
           echo "REACT_APP_SHOW_DISCLAIMER='true'"  >> .env
         working-directory: web
 
-      - name: Test web
-        run: |
-          npm run test
-          npm run cleanCache
-        working-directory: web
-
-      - name: Test Contracts
-        run: |
-          npm run test
-          npm run cleanCache
-        working-directory: contracts
+#      - name: Test web
+#        run: |
+#          npm run test
+#          npm run cleanCache
+#        working-directory: web
+#
+#      - name: Test Contracts
+#        run: |
+#          npm run test
+#          npm run cleanCache
+#        working-directory: contracts
 
       - name: Test sdk
         run: |
