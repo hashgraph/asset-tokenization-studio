@@ -286,6 +286,7 @@ import {
   TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
   UNPAUSE_GAS,
   UPDATE_CONFIG_VERSION_GAS,
+  UPDATE_RESOLVER_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';

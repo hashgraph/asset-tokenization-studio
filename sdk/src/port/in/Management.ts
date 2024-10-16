@@ -211,6 +211,9 @@ import { UpdateConfigVersionCommand } from '../../app/usecase/command/management
 import { QueryBus } from '../../core/query/QueryBus';
 import Injectable from '../../core/Injectable';
 import { CommandBus } from '../../core/command/CommandBus';
+import UpdateResolverRequest from './request/UpdateResolverRequest';
+import { UpdateResolverCommand } from '../../app/usecase/command/management/updateResolver/updateResolverCommand';
+import ContractId from '../../domain/context/contract/ContractId.js';
 
 interface IManagementInPort {
   updateConfigVersion(
