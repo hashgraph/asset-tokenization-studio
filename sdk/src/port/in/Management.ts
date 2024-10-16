@@ -217,6 +217,8 @@ interface IManagementInPort {
   updateConfigVersion(
     request: UpdateConfigVersionRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+
+    getConfigInfo(request: GetConfigInfoRequest): Promise<void>;
 }
 
 class ManagementInPort implements IManagementInPort {

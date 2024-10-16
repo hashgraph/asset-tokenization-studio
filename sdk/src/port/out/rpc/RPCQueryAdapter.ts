@@ -240,7 +240,7 @@ import {
   Snapshots__factory,
   Factory__factory,
   Lock__factory,
-  Security__factory,
+  Security__factory, DiamondFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1056,4 +1056,13 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getLockForByPartition(_PARTITION_ID_1, target.toString(), lockId);
   }
+
+  async getConfigInfo(address: EvmAddress): Promise<[EvmAddress, string, number]> {
+  LogService.logTrace(`Getting config info for ${address.toString()}`);
+  const configInfo = await this.connect(
+    DiamondFacet__factory,
+    address.toString(),
+  ).getConfigInfo();
+  return [new EvmAddress(configInfo.resolver_), configInfo.configurationId_, configInfo.version_.toNumber()];
+}
 }

@@ -208,7 +208,7 @@ import {Query} from "../../../../core/query/Query";
 
 export class GetConfigInfoQueryResponse implements QueryResponse {
     constructor(
-        public readonly resolver: string,
+        public readonly resolverAddress: string,
         public readonly configId: string,
         public readonly configVersion: number
     ) {}
