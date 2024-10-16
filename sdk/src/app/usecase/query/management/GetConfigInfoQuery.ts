@@ -203,22 +203,22 @@
 
 */
 
-import ValidatedRequest from './validation/ValidatedRequest.js';
-import Validation from './validation/Validation.js';
+import {QueryResponse} from "../../../../core/query/QueryResponse";
+import {Query} from "../../../../core/query/Query";
 
-export default class GetConfigInfoRequest
-  extends ValidatedRequest<GetConfigInfoRequest>
-{
-  securityId: string;
+export class GetConfigInfoQueryResponse implements QueryResponse {
+    constructor(
+        public readonly resolver: string,
+        public readonly configId: string,
+        public readonly configVersion: number
+    ) {}
+}
 
-  constructor({
-                securityId,
-              }: {
-    securityId: string;
-  }) {
-    super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-    });
-    this.securityId = securityId;
-  }
+export class GetConfigInfoQuery extends Query<GetConfigInfoQueryResponse> {
+    constructor(
+        public readonly securityId: string,
+    ) {
+        super();
+    }
+
 }
