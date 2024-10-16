@@ -218,7 +218,7 @@ import {
   AccessControl__factory,
   BondUSA__factory,
   Cap__factory,
-  ControlList__factory,
+  ControlList__factory, DiamondFacet__factory,
   EquityUSA__factory,
   ERC1410ScheduledSnapshot__factory,
   ERC1410Snapshot__factory,
