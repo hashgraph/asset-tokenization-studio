@@ -202,7 +202,7 @@ export class UpdateResolverCommandHandler
     const securityEvmAddress: EvmAddress = new EvmAddress(
       HEDERA_FORMAT_ID_REGEX.test(securityId)
         ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId,
+        : securityId.toString(),
     );
 
     const resolverEvmAddress: EvmAddress = new EvmAddress(
