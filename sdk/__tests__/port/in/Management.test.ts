@@ -52,6 +52,7 @@ const info = 'Anything';
 const configId =
     '0x0000000000000000000000000000000000000000000000000000000000000000';
 const configVersion = 1;
+
 const mirrorNode: MirrorNode = {
     name: 'testmirrorNode',
     baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
@@ -139,73 +140,9 @@ describe('🧪 Management tests', () => {
 
         equity = (await Equity.create(requestST)).security;
 
-        await Role.grantRole(
-            new RoleRequest({
-                securityId: equity.evmDiamondAddress!,
-                targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-                role: SecurityRole._ISSUER_ROLE,
-            }),
-        );
-
-        await Role.grantRole(
-            new RoleRequest({
-                securityId: equity.evmDiamondAddress!,
-                targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-                role: SecurityRole._CONTROLLER_ROLE,
-            }),
-        );
-
-        await Role.grantRole(
-            new RoleRequest({
-                securityId: equity.evmDiamondAddress!,
-                targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-                role: SecurityRole._PAUSER_ROLE,
-            }),
-        );
-
-        await Role.grantRole(
-            new RoleRequest({
-                securityId: equity.evmDiamondAddress!,
-                targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-                role: SecurityRole._CONTROLLIST_ROLE,
-            }),
-        );
-
-        await Role.grantRole(
-            new RoleRequest({
-                securityId: equity.evmDiamondAddress!,
-                targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-                role: SecurityRole._CORPORATEACTIONS_ROLE,
-            }),
-        );
-
-        await Role.grantRole(
-            new RoleRequest({
-                securityId: equity.evmDiamondAddress!,
-                targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-                role: SecurityRole._DOCUMENTER_ROLE,
-            }),
-        );
-
-        await Role.grantRole(
-            new RoleRequest({
-                securityId: equity.evmDiamondAddress!,
-                targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-                role: SecurityRole._SNAPSHOT_ROLE,
-            }),
-        );
-
-        await Role.grantRole(
-            new RoleRequest({
-                securityId: equity.evmDiamondAddress!,
-                targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-                role: SecurityRole._LOCKER_ROLE,
-            }),
-        );
     }, 900_000);
 
  it('Update configuration id', async () => {
-     console.log(equity)
     const request = new UpdateConfigVersionRequest({
         configVersion: 2,
         securityId: equity.evmDiamondAddress!,
