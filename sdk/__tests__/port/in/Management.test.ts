@@ -357,7 +357,7 @@ describe('🧪 Management tests', () => {
     expect(res.payload).toBe(true);
   }, 600_000);
 
-  it('Update config id', async () => {
+  it('Update config', async () => {
     const request = new UpdateConfigRequest({
       configId: configId,
       configVersion: 2,
