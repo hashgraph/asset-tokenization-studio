@@ -211,10 +211,16 @@ import { UpdateConfigVersionCommand } from '../../app/usecase/command/management
 import { QueryBus } from '../../core/query/QueryBus';
 import Injectable from '../../core/Injectable';
 import { CommandBus } from '../../core/command/CommandBus';
+import UpdateResolverRequest from './request/UpdateResolverRequest';
+import { UpdateResolverCommand } from '../../app/usecase/command/management/updateResolver/updateResolverCommand';
+import ContractId from '../../domain/context/contract/ContractId.js';
 
 interface IManagementInPort {
   updateConfigVersion(
     request: UpdateConfigVersionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  updateResolver(
+    request: UpdateResolverRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
@@ -233,6 +239,23 @@ class ManagementInPort implements IManagementInPort {
 
     return await this.commandBus.execute(
       new UpdateConfigVersionCommand(configVersion, securityId),
+    );
+  }
+
+  @LogError
+  async updateResolver(
+    request: UpdateResolverRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { configId, securityId, resolver, configVersion } = request;
+    handleValidation('UpdateResolverRequest', request);
+
+    return await this.commandBus.execute(
+      new UpdateResolverCommand(
+        configVersion,
+        securityId,
+        configId,
+        new ContractId(resolver),
+      ),
     );
   }
 }
