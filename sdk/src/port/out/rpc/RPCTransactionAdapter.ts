@@ -253,77 +253,73 @@ import {
 import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
 import { RPCTransactionResponseAdapter } from './RPCTransactionResponseAdapter.js';
 import {
-  TRANSFER_GAS,
-  PAUSE_GAS,
-  UNPAUSE_GAS,
-  REDEEM_GAS,
-  CREATE_EQUITY_ST_GAS,
-  CREATE_BOND_ST_GAS,
-  GRANT_ROLES_GAS,
-  MAX_ROLES_GAS,
-  ISSUE_GAS,
-  ADD_TO_CONTROL_LIST_GAS,
-  REMOVE_FROM_CONTROL_LIST_GAS,
-  CONTROLLER_TRANSFER_GAS,
-  CONTROLLER_REDEEM_GAS,
-  SET_DIVIDENDS_GAS,
-  SET_VOTING_RIGHTS_GAS,
-  RENOUNCE_ROLES_GAS,
-  TAKE_SNAPSHOT_GAS,
   _PARTITION_ID_1,
-  SET_DIVIDEND_EVENT,
-  SET_VOTING_RIGHTS_EVENT,
-  SET_DOCUMENT_GAS,
-  REMOVE_DOCUMENT_GAS,
+  ADD_TO_CONTROL_LIST_GAS,
   AUTHORIZE_OPERATOR_GAS,
+  CONTROLLER_REDEEM_GAS,
+  CONTROLLER_TRANSFER_GAS,
+  CREATE_BOND_ST_GAS,
+  CREATE_EQUITY_ST_GAS,
+  GRANT_ROLES_GAS,
+  ISSUE_GAS,
+  LOCK_GAS,
+  MAX_ROLES_GAS,
+  PAUSE_GAS,
+  REDEEM_GAS,
+  RELEASE_GAS,
+  REMOVE_DOCUMENT_GAS,
+  REMOVE_FROM_CONTROL_LIST_GAS,
+  RENOUNCE_ROLES_GAS,
   REVOKE_OPERATOR_GAS,
-  TRANSFER_OPERATOR_GAS,
-  TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
-  SET_MAX_SUPPLY_GAS,
   SET_COUPON_EVENT,
   SET_COUPON_GAS,
-  LOCK_GAS,
-  RELEASE_GAS,
+  SET_DIVIDEND_EVENT,
+  SET_DIVIDENDS_GAS,
+  SET_DOCUMENT_GAS,
+  SET_MAX_SUPPLY_GAS,
+  SET_VOTING_RIGHTS_EVENT,
+  SET_VOTING_RIGHTS_GAS,
+  TAKE_SNAPSHOT_GAS,
   TRANSFER_AND_LOCK_GAS,
+  TRANSFER_GAS,
+  TRANSFER_OPERATOR_GAS,
+  TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
+  UNPAUSE_GAS,
+  UPDATE_CONFIG_VERSION_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
 import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
 import {
-  FactoryEquityToken,
   FactoryBondToken,
+  FactoryEquityToken,
   FactoryRegulationData,
 } from '../../../domain/context/factory/FactorySecurityToken.js';
 import { ERC20MetadataInfo } from '../../../domain/context/factory/ERC20Metadata.js';
 import { SigningError } from '../error/SigningError.js';
 import {
-  Factory__factory,
-  Pause__factory,
   AccessControl__factory,
-  ERC1410ScheduledSnapshot__factory,
-  ControlList__factory,
-  Cap__factory,
-  IBond,
   Bond__factory,
+  Cap__factory,
+  ControlList__factory,
+  DiamondFacet__factory,
+  Equity__factory,
+  ERC1410ScheduledSnapshot__factory,
+  ERC1643__factory,
+  Factory__factory,
+  IBond,
+  IEquity,
+  Lock__factory,
+  Pause__factory,
+  ScheduledSnapshots__factory,
+  Snapshots__factory,
   TransferAndLock__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
   Resolvers,
 } from '../../../domain/context/factory/Resolvers.js';
-import {
-  BusinessLogicKeys,
-  EnvironmentBusinessLogicKeys,
-} from '../../../domain/context/factory/BusinessLogicKeys.js';
 import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
-import {
-  Equity__factory,
-  ERC1643__factory,
-  IEquity,
-  Snapshots__factory,
-  ScheduledSnapshots__factory,
-  Lock__factory,
-} from '@hashgraph/asset-tokenization-contracts';
 import { BondDetails } from '../../../domain/context/bond/BondDetails.js';
 import { CouponDetails } from '../../../domain/context/bond/CouponDetails.js';
 import { BondDetailsData } from '../../../domain/context/factory/BondDetailsData.js';
@@ -1538,6 +1534,25 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           gasLimit: RELEASE_GAS,
         },
       ),
+      this.networkService.environment,
+    );
+  }
+
+  async updateConfigVersion(
+    security: EvmAddress,
+    configVersion: number,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating config version ${configVersion} for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await DiamondFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).updateConfigVersion(configVersion, {
+        gasLimit: UPDATE_CONFIG_VERSION_GAS,
+      }),
       this.networkService.environment,
     );
   }
