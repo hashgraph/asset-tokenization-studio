@@ -208,6 +208,7 @@ import {
   Equity,
   LoggerTransports,
   SDK,
+  UpdateConfigRequest,
   UpdateConfigVersionRequest,
   UpdateResolverRequest,
 } from '../../../src';
@@ -353,6 +354,16 @@ describe('🧪 Management tests', () => {
       securityId: equity.evmDiamondAddress!,
     });
     const res = await Management.updateConfigVersion(request);
+    expect(res.payload).toBe(true);
+  }, 600_000);
+
+  it('Update config id', async () => {
+    const request = new UpdateConfigRequest({
+      configId: configId,
+      configVersion: 2,
+      securityId: equity.evmDiamondAddress!,
+    });
+    const res = await Management.updateConfig(request);
     expect(res.payload).toBe(true);
   }, 600_000);
 
