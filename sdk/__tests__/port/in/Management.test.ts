@@ -3,6 +3,7 @@ import {
   Equity,
   LoggerTransports,
   SDK,
+  UpdateConfigRequest,
   UpdateConfigVersionRequest,
 } from '../../../src';
 import {
@@ -141,12 +142,23 @@ describe('🧪 Management tests', () => {
     equity = (await Equity.create(requestST)).security;
   }, 900_000);
 
-  it('Update configuration id', async () => {
+  it('Update version id', async () => {
     const request = new UpdateConfigVersionRequest({
       configVersion: 2,
       securityId: equity.evmDiamondAddress!,
     });
     const res = await Management.updateConfigVersion(request);
+    expect(res.payload).toBe(true);
+  }, 600_000);
+
+  it('Update configuration id & version', async () => {
+    const request = new UpdateConfigRequest({
+      configId:
+        '0x0000000000000000000000000000000000000000000000000000000000000001',
+      configVersion: 2,
+      securityId: equity.evmDiamondAddress!,
+    });
+    const res = await Management.updateConfig(request);
     expect(res.payload).toBe(true);
   }, 600_000);
 });

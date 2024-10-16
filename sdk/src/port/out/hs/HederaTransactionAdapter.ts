@@ -229,6 +229,7 @@ import {
   Cap__factory,
   Lock__factory,
   ResolverProxy__factory,
+  DiamondFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   TRANSFER_GAS,
@@ -261,6 +262,7 @@ import {
   RELEASE_GAS,
   TRANSFER_AND_LOCK_GAS,
   UPDATE_CONFIG_VERSION_GAS,
+  UPDATE_CONFIG_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -1482,7 +1484,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'updateConfigVersion';
     LogService.logTrace(`Updating config version`);
 
-    const resolverProxyFactory = new ResolverProxy__factory().attach(
+    const resolverProxyFactory = new DiamondFacet__factory().attach(
       security.toString(),
     );
 
@@ -1498,6 +1500,37 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(UPDATE_CONFIG_VERSION_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async updateConfig(
+    security: EvmAddress,
+    configId: string,
+    configVersion: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'updateConfig';
+    LogService.logTrace(`Updating config`);
+
+    const resolverProxyFactory = new DiamondFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex =
+      resolverProxyFactory.interface.encodeFunctionData(FUNCTION_NAME, [
+        configId,
+        configVersion,
+      ]);
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(UPDATE_CONFIG_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

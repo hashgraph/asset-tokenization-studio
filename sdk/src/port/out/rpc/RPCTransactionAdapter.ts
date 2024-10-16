@@ -285,6 +285,7 @@ import {
   TRANSFER_OPERATOR_GAS,
   TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
   UNPAUSE_GAS,
+  UPDATE_CONFIG_GAS,
   UPDATE_CONFIG_VERSION_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
@@ -1552,6 +1553,26 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.signerOrProvider,
       ).updateConfigVersion(configVersion, {
         gasLimit: UPDATE_CONFIG_VERSION_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async updateConfig(
+    security: EvmAddress,
+    configId: string,
+    configVersion: number,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating config id ${configId} & config version ${configVersion} for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await DiamondFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).updateConfig(configId, configVersion, {
+        gasLimit: UPDATE_CONFIG_GAS,
       }),
       this.networkService.environment,
     );

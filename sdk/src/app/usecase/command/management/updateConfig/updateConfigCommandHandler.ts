@@ -203,57 +203,50 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import UpdateConfigVersionRequest from './request/UpdateConfigVersionRequest';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { handleValidation } from './Common';
-import { UpdateConfigVersionCommand } from '../../app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
-import { QueryBus } from '../../core/query/QueryBus';
-import Injectable from '../../core/Injectable';
-import { CommandBus } from '../../core/command/CommandBus';
-import { UpdateConfigCommand } from '../../app/usecase/command/management/updateConfig/updateConfigCommand';
-import UpdateConfigRequest from './request/UpdateConfigRequest';
+import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator';
+import {
+  UpdateConfigCommand,
+  UpdateConfigCommandResponse,
+} from './updateConfigCommand';
+import { ICommandHandler } from '../../../../../core/command/CommandHandler';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
+import TransactionService from '../../../../service/TransactionService';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId';
 
-interface IManagementInPort {
-  updateConfigVersion(
-    request: UpdateConfigVersionRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-
-  updateConfig(
-    request: UpdateConfigRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-}
-
-class ManagementInPort implements IManagementInPort {
+@CommandHandler(UpdateConfigCommand)
+export class UpdateConfigCommandHandler
+  implements ICommandHandler<UpdateConfigCommand>
+{
   constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
   ) {}
 
-  @LogError
-  async updateConfigVersion(
-    request: UpdateConfigVersionRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configVersion, securityId } = request;
-    handleValidation('UpdateConfigVersionRequest', request);
+  async execute(
+    command: UpdateConfigCommand,
+  ): Promise<UpdateConfigCommandResponse> {
+    const { configId, configVersion, securityId } = command;
+    const handler = this.transactionService.getHandler();
 
-    return await this.commandBus.execute(
-      new UpdateConfigVersionCommand(configVersion, securityId),
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
     );
-  }
 
-  @LogError
-  async updateConfig(
-    request: UpdateConfigRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configId, configVersion, securityId } = request;
-    handleValidation('UpdateConfigRequest', request);
+    const res = await handler.updateConfig(
+      securityEvmAddress,
+      configId,
+      configVersion,
+      securityId,
+    );
 
-    return await this.commandBus.execute(
-      new UpdateConfigCommand(configId, configVersion, securityId),
+    return Promise.resolve(
+      new UpdateConfigCommandResponse(res.error === undefined, res.id!),
     );
   }
 }
-
-const Management = new ManagementInPort();
-export default Management;
