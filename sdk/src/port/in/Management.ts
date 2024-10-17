@@ -217,9 +217,9 @@ import { UpdateResolverCommand } from '../../app/usecase/command/management/upda
 import ContractId from '../../domain/context/contract/ContractId.js';
 import { GetConfigInfoQuery } from '../../app/usecase/query/management/GetConfigInfoQuery';
 import ConfigInfoViewModel from './response/ConfigInfoViewModel';
-import {DiamondConfiguration} from "../../domain/context/security/DiamondConfiguration";
-import {MirrorNodeAdapter} from "../out/mirror/MirrorNodeAdapter";
-import {lazyInject} from "../../core/decorator/LazyInjectDecorator";
+import { DiamondConfiguration } from '../../domain/context/security/DiamondConfiguration';
+import { MirrorNodeAdapter } from '../out/mirror/MirrorNodeAdapter';
+import { lazyInject } from '../../core/decorator/LazyInjectDecorator';
 
 interface IManagementInPort {
   updateConfigVersion(
@@ -234,12 +234,12 @@ interface IManagementInPort {
 
 class ManagementInPort implements IManagementInPort {
   constructor(
-      private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-      private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-      @lazyInject(MirrorNodeAdapter)
-      private readonly mirrorNode: MirrorNodeAdapter = Injectable.resolve(
-          MirrorNodeAdapter,
-      ),
+    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
+    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNode: MirrorNodeAdapter = Injectable.resolve(
+      MirrorNodeAdapter,
+    ),
   ) {}
 
   @LogError
@@ -277,16 +277,18 @@ class ManagementInPort implements IManagementInPort {
   ): Promise<ConfigInfoViewModel> {
     handleValidation('GetConfigInfoRequest', request);
 
-    const res = await this.queryBus.execute(new GetConfigInfoQuery(request.securityId));
+    const { payload } = await this.queryBus.execute(
+      new GetConfigInfoQuery(request.securityId),
+    );
+    const { resolverAddress, configId, configVersion } = payload;
 
-    const resolverId = (
-        await this.mirrorNode.getContractInfo(res.payload.resolverAddress)
-    ).id;
+    const resolverId = (await this.mirrorNode.getContractInfo(resolverAddress))
+      .id;
 
     return {
       resolverAddress: resolverId,
-      configId: res.payload.configId,
-      configVersion: res.payload.configVersion,
+      configId,
+      configVersion,
     };
   }
 }
