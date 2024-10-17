@@ -205,7 +205,7 @@
 
 import {
   CreateEquityRequest,
-  Equity,
+  Equity, GetConfigInfoRequest,
   LoggerTransports,
   SDK,
   UpdateConfigVersionRequest,
@@ -347,8 +347,17 @@ describe('🧪 Management tests', () => {
     equity = (await Equity.create(requestST)).security;
   }, 900_000);
 
-  it('Get configInfo', async () => {
-    const request = new UpdateConfigVersionRequest({
+  it('Get configInfo ', async () => {
+    const res = await Management.getConfigInfo(
+        new GetConfigInfoRequest({securityId: equity.evmDiamondAddress!.toString()})
+    );
+    expect(res.configId).toEqual(configId);
+    expect(res.configVersion).toEqual(configVersion);
+    expect(res.resolverAddress).toEqual(RESOLVER_ADDRESS);
+  }, 600_000);
+
+it('Update configVersion', async () => {
+  const request = new UpdateConfigVersionRequest({
       configVersion: 2,
       securityId: equity.evmDiamondAddress!,
     });
