@@ -474,6 +474,13 @@ interface IManagementTransactionAdapter {
     configVersion: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  updateResolver(
+    security: EvmAddress,
+    resolver: EvmAddress,
+    configVersion: number,
+    configId: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 export default abstract class TransactionAdapter
@@ -811,6 +818,15 @@ export default abstract class TransactionAdapter
     configVersion: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
+    throw new Error('Method not implemented.');
+  }
+  updateResolver(
+    security: EvmAddress,
+    resolver: EvmAddress,
+    configVersion: number,
+    configId: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
 }

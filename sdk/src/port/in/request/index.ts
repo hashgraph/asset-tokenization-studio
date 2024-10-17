@@ -255,6 +255,7 @@ import InitializationRequest from './InitializationRequest.js';
 import ConnectRequest from './ConnectRequest.js';
 import GetConfigInfoRequest from './GetConfigInfoRequest.js';
 import UpdateConfigVersionRequest from './UpdateConfigVersionRequest.js';
+import UpdateResolverRequest from './UpdateResolverRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -308,5 +309,6 @@ export {
   GetLockRequest,
   TransferAndLockRequest,
   UpdateConfigVersionRequest,
+  UpdateResolverRequest,
   GetConfigInfoRequest,
 };
