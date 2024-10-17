@@ -793,6 +793,14 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     },
   );
 
+  singletonInstance.getConfigInfo = jest.fn(async (address: EvmAddress) => {
+    return {
+      configVersion,
+      configId,
+      resolverAddress,
+    } as ConfigInfoViewModel;
+  });
+
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
   };
