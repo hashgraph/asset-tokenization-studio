@@ -1060,13 +1060,12 @@ export class RPCQueryAdapter {
 
   async getConfigInfo(address: EvmAddress): Promise<[string, string, number]> {
     LogService.logTrace(`Getting config info for ${address.toString()}`);
-
     const configInfo = await this.connect(
       DiamondFacet__factory,
       address.toString(),
     ).getConfigInfo();
     return [
-      configInfo.resolver_,
+      configInfo.resolver_.toString(),
       configInfo.configurationId_,
       configInfo.version_.toNumber(),
     ];
