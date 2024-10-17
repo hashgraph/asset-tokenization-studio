@@ -218,6 +218,8 @@ import ContractId from '../../domain/context/contract/ContractId.js';
 import { GetConfigInfoQuery } from '../../app/usecase/query/management/GetConfigInfoQuery';
 import ConfigInfoViewModel from './response/ConfigInfoViewModel';
 import {DiamondConfiguration} from "../../domain/context/security/DiamondConfiguration";
+import {MirrorNodeAdapter} from "../out/mirror/MirrorNodeAdapter";
+import {lazyInject} from "../../core/decorator/LazyInjectDecorator";
 
 interface IManagementInPort {
   updateConfigVersion(
@@ -232,8 +234,12 @@ interface IManagementInPort {
 
 class ManagementInPort implements IManagementInPort {
   constructor(
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
+      private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
+      private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
+      @lazyInject(MirrorNodeAdapter)
+      private readonly mirrorNode: MirrorNodeAdapter = Injectable.resolve(
+          MirrorNodeAdapter,
+      ),
   ) {}
 
   @LogError
@@ -273,8 +279,12 @@ class ManagementInPort implements IManagementInPort {
 
     const res = await this.queryBus.execute(new GetConfigInfoQuery(request.securityId));
 
+    const resolverId = (
+        await this.mirrorNode.getContractInfo(res.payload.resolverAddress)
+    ).id;
+
     return {
-      resolverAddress: res.payload.resolverAddress,
+      resolverAddress: resolverId,
       configId: res.payload.configId,
       configVersion: res.payload.configVersion,
     };
