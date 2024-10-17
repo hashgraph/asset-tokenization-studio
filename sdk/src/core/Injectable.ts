@@ -412,10 +412,10 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: UpdateConfigVersionCommandHandler,
   },
-    {
-        token: TOKENS.COMMAND_HANDLER,
-        useClass: UpdateConfigCommandHandler,
-    },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: UpdateConfigCommandHandler,
+  },
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: UpdateResolverCommandHandler,

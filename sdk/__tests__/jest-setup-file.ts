@@ -1375,7 +1375,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
   });
 
   singletonInstance.updateConfigVersion = jest.fn(async function (
-    _configVersion: undefined,
+    _configVersion: number,
   ) {
     return { status: 'success', data: [] } as TransactionResponse<
       string[],
@@ -1384,8 +1384,8 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
   });
 
   singletonInstance.updateConfig = jest.fn(async function (
-    _configId: undefined,
-    _configVersion: undefined,
+    _configId: string,
+    _configVersion: number,
   ) {
     return { status: 'success', data: [] } as TransactionResponse<
       string[],
