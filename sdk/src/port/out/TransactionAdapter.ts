@@ -820,6 +820,14 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
+  updateConfig(
+    security: EvmAddress,
+    configId: string,
+    configVersion: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    throw new Error('Method not implemented.');
+  }
   updateResolver(
     security: EvmAddress,
     resolver: EvmAddress,
