@@ -1064,6 +1064,7 @@ export class RPCQueryAdapter {
       DiamondFacet__factory,
       address.toString(),
     ).getConfigInfo();
+
     return [
       configInfo.resolver_.toString(),
       configInfo.configurationId_,

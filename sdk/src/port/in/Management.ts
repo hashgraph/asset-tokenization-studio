@@ -217,6 +217,7 @@ import { UpdateResolverCommand } from '../../app/usecase/command/management/upda
 import ContractId from '../../domain/context/contract/ContractId.js';
 import { GetConfigInfoQuery } from '../../app/usecase/query/management/GetConfigInfoQuery';
 import ConfigInfoViewModel from './response/ConfigInfoViewModel';
+import {DiamondConfiguration} from "../../domain/context/security/DiamondConfiguration";
 
 interface IManagementInPort {
   updateConfigVersion(
@@ -270,13 +271,12 @@ class ManagementInPort implements IManagementInPort {
   ): Promise<ConfigInfoViewModel> {
     handleValidation('GetConfigInfoRequest', request);
 
-    const { resolverAddress, configId, configVersion } =
-      await this.queryBus.execute(new GetConfigInfoQuery(request.securityId));
+    const res = await this.queryBus.execute(new GetConfigInfoQuery(request.securityId));
 
     return {
-      resolverAddress,
-      configId,
-      configVersion,
+      resolverAddress: res.payload.resolverAddress,
+      configId: res.payload.configId,
+      configVersion: res.payload.configVersion,
     };
   }
 }

@@ -203,18 +203,16 @@
 
 */
 
-import { QueryHandler } from '../../../../core/decorator/QueryHandlerDecorator';
-import {
-  GetConfigInfoQuery,
-  GetConfigInfoQueryResponse,
-} from './GetConfigInfoQuery';
-import { IQueryHandler } from '../../../../core/query/QueryHandler';
-import { lazyInject } from '../../../../core/decorator/LazyInjectDecorator';
-import { MirrorNodeAdapter } from '../../../../port/out/mirror/MirrorNodeAdapter';
-import { RPCQueryAdapter } from '../../../../port/out/rpc/RPCQueryAdapter';
+import {QueryHandler} from '../../../../core/decorator/QueryHandlerDecorator';
+import {GetConfigInfoQuery, GetConfigInfoQueryResponse,} from './GetConfigInfoQuery';
+import {IQueryHandler} from '../../../../core/query/QueryHandler';
+import {lazyInject} from '../../../../core/decorator/LazyInjectDecorator';
+import {MirrorNodeAdapter} from '../../../../port/out/mirror/MirrorNodeAdapter';
+import {RPCQueryAdapter} from '../../../../port/out/rpc/RPCQueryAdapter';
 import SecurityService from '../../../service/SecurityService';
 import EvmAddress from '../../../../domain/context/contract/EvmAddress';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../domain/context/shared/HederaId';
+import {HEDERA_FORMAT_ID_REGEX} from '../../../../domain/context/shared/HederaId';
+import {DiamondConfiguration} from "../../../../domain/context/security/DiamondConfiguration";
 
 @QueryHandler(GetConfigInfoQuery)
 export class GetConfigInfoQueryHandler
@@ -243,10 +241,16 @@ export class GetConfigInfoQueryHandler
         : securityId,
     );
 
-    const res = await this.queryAdapter.getConfigInfo(securityEvmAddress);
+    const [resolverAddress, configId, configVersion] = await this.queryAdapter.getConfigInfo(securityEvmAddress);
 
     return Promise.resolve(
-      new GetConfigInfoQueryResponse(res[0], res[1], res[2]),
+      new GetConfigInfoQueryResponse(
+          new DiamondConfiguration(
+              resolverAddress,
+              configId,
+              configVersion,
+          )
+      ),
     );
   }
 }

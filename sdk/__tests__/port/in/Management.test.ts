@@ -350,9 +350,9 @@ describe('🧪 Management tests', () => {
 
   it('Get configInfo', async () => {
     const res = await Management.getConfigInfo(
-      new GetConfigInfoRequest({
-        securityId: equity.evmDiamondAddress!.toString(),
-      }),
+        new GetConfigInfoRequest({
+          securityId: equity.evmDiamondAddress!.toString(),
+        }),
     );
     expect(res.configId).toEqual(configId);
     expect(res.configVersion).toEqual(configVersion);
