@@ -211,17 +211,19 @@ import { UpdateConfigVersionCommand } from '../../app/usecase/command/management
 import { QueryBus } from '../../core/query/QueryBus';
 import Injectable from '../../core/Injectable';
 import { CommandBus } from '../../core/command/CommandBus';
-import {GetConfigInfoRequest} from "./request";
+import { GetConfigInfoRequest } from './request';
 import UpdateResolverRequest from './request/UpdateResolverRequest';
 import { UpdateResolverCommand } from '../../app/usecase/command/management/updateResolver/updateResolverCommand';
 import ContractId from '../../domain/context/contract/ContractId.js';
+import { GetConfigInfoQuery } from '../../app/usecase/query/management/GetConfigInfoQuery';
+import ConfigInfoViewModel from './response/ConfigInfoViewModel';
 
 interface IManagementInPort {
   updateConfigVersion(
     request: UpdateConfigVersionRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
 
-    getConfigInfo(request: GetConfigInfoRequest): Promise<void>;
+  getConfigInfo(request: GetConfigInfoRequest): Promise<ConfigInfoViewModel>;
   updateResolver(
     request: UpdateResolverRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
@@ -260,6 +262,22 @@ class ManagementInPort implements IManagementInPort {
         new ContractId(resolver),
       ),
     );
+  }
+
+  @LogError
+  async getConfigInfo(
+    request: GetConfigInfoRequest,
+  ): Promise<ConfigInfoViewModel> {
+    handleValidation('GetConfigInfoRequest', request);
+
+    const { resolverAddress, configId, configVersion } =
+      await this.queryBus.execute(new GetConfigInfoQuery(request.securityId));
+
+    return {
+      resolverAddress,
+      configId,
+      configVersion,
+    };
   }
 }
 

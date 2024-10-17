@@ -203,19 +203,10 @@
 
 */
 
-import { QueryResponse } from '../../../../core/query/QueryResponse';
-import { Query } from '../../../../core/query/Query';
+import { QueryResponse } from '../../../core/query/QueryResponse';
 
-export class GetConfigInfoQueryResponse implements QueryResponse {
-  constructor(
-    public readonly resolverAddress: string,
-    public readonly configId: string,
-    public readonly configVersion: number,
-  ) {}
-}
-
-export class GetConfigInfoQuery extends Query<GetConfigInfoQueryResponse> {
-  constructor(public readonly securityId: string) {
-    super();
-  }
+export default interface ConfigInfoViewModel extends QueryResponse {
+  resolverAddress: string;
+  configId: string;
+  configVersion: number;
 }

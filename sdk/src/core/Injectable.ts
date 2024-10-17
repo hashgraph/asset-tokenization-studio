@@ -288,6 +288,7 @@ import { SDK } from '../port/in/Common.js';
 import { HederaWalletConnectTransactionAdapter } from '../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
 import { UpdateConfigVersionCommandHandler } from '../app/usecase/command/management/updateConfigVersion/updateConfigVersionCommandHandler';
 import { UpdateResolverCommandHandler } from '../app/usecase/command/management/updateResolver/updateResolverCommandHandler.js';
+import { GetConfigInfoQueryHandler } from '../app/usecase/query/management/GetConfigInfoQueryHandler';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -553,6 +554,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetMaxSupplyQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetConfigInfoQueryHandler,
   },
 ];
 

@@ -203,43 +203,50 @@
 
 */
 
-import {QueryHandler} from "../../../../core/decorator/QueryHandlerDecorator";
-import {GetConfigInfoQuery, GetConfigInfoQueryResponse} from "./GetConfigInfoQuery";
-import {IQueryHandler} from "../../../../core/query/QueryHandler";
-import {lazyInject} from "../../../../core/decorator/LazyInjectDecorator";
-import {MirrorNodeAdapter} from "../../../../port/out/mirror/MirrorNodeAdapter";
-import {RPCQueryAdapter} from "../../../../port/out/rpc/RPCQueryAdapter";
-import SecurityService from "../../../service/SecurityService";
-import EvmAddress from "../../../../domain/context/contract/EvmAddress";
-import {HEDERA_FORMAT_ID_REGEX} from "../../../../domain/context/shared/HederaId";
+import { QueryHandler } from '../../../../core/decorator/QueryHandlerDecorator';
+import {
+  GetConfigInfoQuery,
+  GetConfigInfoQueryResponse,
+} from './GetConfigInfoQuery';
+import { IQueryHandler } from '../../../../core/query/QueryHandler';
+import { lazyInject } from '../../../../core/decorator/LazyInjectDecorator';
+import { MirrorNodeAdapter } from '../../../../port/out/mirror/MirrorNodeAdapter';
+import { RPCQueryAdapter } from '../../../../port/out/rpc/RPCQueryAdapter';
+import SecurityService from '../../../service/SecurityService';
+import EvmAddress from '../../../../domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../domain/context/shared/HederaId';
 
 @QueryHandler(GetConfigInfoQuery)
-export class GetConfigInfoQueryHandler implements IQueryHandler<GetConfigInfoQuery> {
-    constructor(
-        @lazyInject(SecurityService)
-        public readonly securityService: SecurityService,
-        @lazyInject(MirrorNodeAdapter)
-        public readonly mirrorNodeAdapter: MirrorNodeAdapter,
-        @lazyInject(RPCQueryAdapter)
-        public readonly queryAdapter: RPCQueryAdapter,
-    ) {
-    }
+export class GetConfigInfoQueryHandler
+  implements IQueryHandler<GetConfigInfoQuery>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(MirrorNodeAdapter)
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+  ) {}
 
-    async execute(query: GetConfigInfoQuery): Promise<GetConfigInfoQueryResponse> {
-        const securityId = query.securityId;
+  async execute(
+    query: GetConfigInfoQuery,
+  ): Promise<GetConfigInfoQueryResponse> {
+    const securityId = query.securityId;
 
-        const security = await this.securityService.get(securityId);
-        if (!security.evmDiamondAddress) throw new Error('Invalid security id');
+    const security = await this.securityService.get(securityId);
+    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-        const securityEvmAddress: EvmAddress = new EvmAddress(
-            HEDERA_FORMAT_ID_REGEX.exec(securityId)
-                ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-                : securityId,
-        );
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.exec(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId,
+    );
 
-        const res = await this.queryAdapter.getConfigInfo(securityEvmAddress);
+    const res = await this.queryAdapter.getConfigInfo(securityEvmAddress);
 
-        return Promise.resolve(new GetConfigInfoQueryResponse(res));
-
-    }
+    return Promise.resolve(
+      new GetConfigInfoQueryResponse(res[0], res[1], res[2]),
+    );
+  }
 }

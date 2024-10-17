@@ -206,16 +206,10 @@
 import ValidatedRequest from './validation/ValidatedRequest.js';
 import Validation from './validation/Validation.js';
 
-export default class GetConfigInfoRequest
-  extends ValidatedRequest<GetConfigInfoRequest>
-{
+export default class GetConfigInfoRequest extends ValidatedRequest<GetConfigInfoRequest> {
   securityId: string;
 
-  constructor({
-                securityId,
-              }: {
-    securityId: string;
-  }) {
+  constructor({ securityId }: { securityId: string }) {
     super({
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
     });
