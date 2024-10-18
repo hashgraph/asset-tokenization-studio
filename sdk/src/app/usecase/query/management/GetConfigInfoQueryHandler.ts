@@ -203,112 +203,54 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import UpdateConfigVersionRequest from './request/UpdateConfigVersionRequest';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { handleValidation } from './Common';
-import { UpdateConfigVersionCommand } from '../../app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
-import { QueryBus } from '../../core/query/QueryBus';
-import Injectable from '../../core/Injectable';
-import { CommandBus } from '../../core/command/CommandBus';
-import { GetConfigInfoRequest } from './request';
-import UpdateResolverRequest from './request/UpdateResolverRequest';
-import { UpdateResolverCommand } from '../../app/usecase/command/management/updateResolver/updateResolverCommand';
-import ContractId from '../../domain/context/contract/ContractId.js';
-import { GetConfigInfoQuery } from '../../app/usecase/query/management/GetConfigInfoQuery';
-import ConfigInfoViewModel from './response/ConfigInfoViewModel';
-import { DiamondConfiguration } from '../../domain/context/security/DiamondConfiguration';
-import { MirrorNodeAdapter } from '../out/mirror/MirrorNodeAdapter';
-import { lazyInject } from '../../core/decorator/LazyInjectDecorator';
-import { UpdateConfigRequest } from './request';
-import { UpdateConfigCommand } from '../../app/usecase/command/management/updateConfig/updateConfigCommand';
+import { QueryHandler } from '../../../../core/decorator/QueryHandlerDecorator';
+import {
+  GetConfigInfoQuery,
+  GetConfigInfoQueryResponse,
+} from './GetConfigInfoQuery';
+import { IQueryHandler } from '../../../../core/query/QueryHandler';
+import { lazyInject } from '../../../../core/decorator/LazyInjectDecorator';
+import { MirrorNodeAdapter } from '../../../../port/out/mirror/MirrorNodeAdapter';
+import { RPCQueryAdapter } from '../../../../port/out/rpc/RPCQueryAdapter';
+import SecurityService from '../../../service/SecurityService';
+import EvmAddress from '../../../../domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../domain/context/shared/HederaId';
+import { DiamondConfiguration } from '../../../../domain/context/security/DiamondConfiguration';
 
-interface IManagementInPort {
-  updateConfigVersion(
-    request: UpdateConfigVersionRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  updateConfig(
-    request: UpdateConfigRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-
-  getConfigInfo(request: GetConfigInfoRequest): Promise<ConfigInfoViewModel>;
-  updateResolver(
-    request: UpdateResolverRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-}
-
-class ManagementInPort implements IManagementInPort {
+@QueryHandler(GetConfigInfoQuery)
+export class GetConfigInfoQueryHandler
+  implements IQueryHandler<GetConfigInfoQuery>
+{
   constructor(
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
     @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNode: MirrorNodeAdapter = Injectable.resolve(
-      MirrorNodeAdapter,
-    ),
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
   ) {}
 
-  @LogError
-  async updateConfigVersion(
-    request: UpdateConfigVersionRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configVersion, securityId } = request;
-    handleValidation('UpdateConfigVersionRequest', request);
+  async execute(
+    query: GetConfigInfoQuery,
+  ): Promise<GetConfigInfoQueryResponse> {
+    const securityId = query.securityId;
 
-    return await this.commandBus.execute(
-      new UpdateConfigVersionCommand(configVersion, securityId),
+    const security = await this.securityService.get(securityId);
+    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
+
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.exec(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId,
     );
-  }
 
-  @LogError
-  async updateConfig(
-    request: UpdateConfigRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configId, configVersion, securityId } = request;
-    handleValidation('UpdateConfigRequest', request);
+    const [resolverAddress, configId, configVersion] =
+      await this.queryAdapter.getConfigInfo(securityEvmAddress);
 
-    return await this.commandBus.execute(
-      new UpdateConfigCommand(configId, configVersion, securityId),
-    );
-  }
-
-  @LogError
-  async updateResolver(
-    request: UpdateResolverRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configId, securityId, resolver, configVersion } = request;
-    handleValidation('UpdateResolverRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateResolverCommand(
-        configVersion,
-        securityId,
-        configId,
-        new ContractId(resolver),
+    return Promise.resolve(
+      new GetConfigInfoQueryResponse(
+        new DiamondConfiguration(resolverAddress, configId, configVersion),
       ),
     );
   }
-
-  @LogError
-  async getConfigInfo(
-    request: GetConfigInfoRequest,
-  ): Promise<ConfigInfoViewModel> {
-    handleValidation('GetConfigInfoRequest', request);
-
-    const { payload } = await this.queryBus.execute(
-      new GetConfigInfoQuery(request.securityId),
-    );
-    const { resolverAddress, configId, configVersion } = payload;
-
-    const resolverId = (await this.mirrorNode.getContractInfo(resolverAddress))
-      .id;
-
-    return {
-      resolverAddress: resolverId,
-      configId,
-      configVersion,
-    };
-  }
 }
-
-const Management = new ManagementInPort();
-export default Management;
