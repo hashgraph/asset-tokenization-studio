@@ -235,6 +235,7 @@ import Injectable from '../../../src/core/Injectable';
 import Account from '../../../src/domain/context/account/Account';
 import Management from '../../../src/port/in/Management';
 import { ethers, Wallet } from 'ethers';
+import ConfigInfoViewModel from '../../../src/port/in/response/ConfigInfoViewModel';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -242,7 +243,6 @@ const decimals = 0;
 const name = 'TEST_SECURITY_TOKEN';
 const symbol = 'TEST';
 const isin = 'ABCDE123456Z';
-// const type = 'EQUITY';
 const votingRight = true;
 const informationRight = false;
 const liquidationRight = true;
@@ -289,104 +289,140 @@ describe('🧪 Management tests', () => {
   );
 
   beforeAll(async () => {
-    mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
-    mirrorNodeAdapter.set(mirrorNode);
+    try {
+      mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
+      mirrorNodeAdapter.set(mirrorNode);
 
-    th = Injectable.resolve(RPCTransactionAdapter);
-    ns = Injectable.resolve(NetworkService);
-    rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
+      th = Injectable.resolve(RPCTransactionAdapter);
+      ns = Injectable.resolve(NetworkService);
+      rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
 
-    rpcQueryAdapter.init();
-    ns.environment = 'testnet';
-    ns.configuration = {
-      factoryAddress: FACTORY_ADDRESS,
-      resolverAddress: RESOLVER_ADDRESS,
-    };
-    ns.mirrorNode = mirrorNode;
-    ns.rpcNode = rpcNode;
+      rpcQueryAdapter.init();
+      ns.environment = 'testnet';
+      ns.configuration = {
+        factoryAddress: FACTORY_ADDRESS,
+        resolverAddress: RESOLVER_ADDRESS,
+      };
+      ns.mirrorNode = mirrorNode;
+      ns.rpcNode = rpcNode;
 
-    await th.init(true);
-    const account = new Account({
-      id: CLIENT_ACCOUNT_ECDSA.id.toString(),
-      evmAddress: CLIENT_ACCOUNT_ECDSA.evmAddress,
-      alias: CLIENT_ACCOUNT_ECDSA.alias,
-      privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
-      publicKey: CLIENT_ACCOUNT_ECDSA.publicKey,
-    });
-    await th.register(account, true);
+      await th.init(true);
+      const account = new Account({
+        id: CLIENT_ACCOUNT_ECDSA.id.toString(),
+        evmAddress: CLIENT_ACCOUNT_ECDSA.evmAddress,
+        alias: CLIENT_ACCOUNT_ECDSA.alias,
+        privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
+        publicKey: CLIENT_ACCOUNT_ECDSA.publicKey,
+      });
+      await th.register(account, true);
 
-    th.signerOrProvider = wallet;
+      th.signerOrProvider = wallet;
 
-    const requestST = new CreateEquityRequest({
-      name: name,
-      symbol: symbol,
-      isin: isin,
-      decimals: decimals,
-      isWhiteList: false,
-      isControllable: true,
-      isMultiPartition: false,
-      diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
-      votingRight: votingRight,
-      informationRight: informationRight,
-      liquidationRight: liquidationRight,
-      subscriptionRight: subscriptionRight,
-      convertionRight: convertionRight,
-      redemptionRight: redemptionRight,
-      putRight: putRight,
-      dividendRight: dividendRight,
-      currency: currency,
-      numberOfShares: numberOfShares.toString(),
-      nominalValue: nominalValue.toString(),
-      regulationType: CastRegulationType.toNumber(regulationType),
-      regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
-      isCountryControlListWhiteList: true,
-      countries: countries,
-      info: info,
-      configId: configId,
-      configVersion: configVersion,
-    });
+      const requestST = new CreateEquityRequest({
+        name,
+        symbol,
+        isin,
+        decimals,
+        isWhiteList: false,
+        isControllable: true,
+        isMultiPartition: false,
+        diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        convertionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares: numberOfShares.toString(),
+        nominalValue: nominalValue.toString(),
+        regulationType: CastRegulationType.toNumber(regulationType),
+        regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
+        isCountryControlListWhiteList: true,
+        countries,
+        info,
+        configId,
+        configVersion,
+      });
 
-    equity = (await Equity.create(requestST)).security;
+      equity = (await Equity.create(requestST)).security;
+    } catch (error) {
+      console.error('Error in beforeAll setup:', error);
+    }
   }, 900_000);
 
-  it('Get configInfo', async () => {
+  function checkConfig(
+    resolver: string,
+    configId: string,
+    configVersion: number,
+    configInfo: ConfigInfoViewModel,
+  ) {
+    expect(configInfo.resolverAddress).toEqual(resolver);
+    expect(configInfo.configId).toEqual(configId);
+    expect(configInfo.configVersion).toEqual(configVersion);
+  }
+
+  it('Fetches configInfo successfully', async () => {
     const res = await Management.getConfigInfo(
       new GetConfigInfoRequest({
         securityId: equity.evmDiamondAddress!.toString(),
       }),
     );
-    expect(res.configId).toEqual(configId);
-    expect(res.configVersion).toEqual(configVersion);
-    expect(res.resolverAddress).toEqual(RESOLVER_ADDRESS);
+    checkConfig(RESOLVER_ADDRESS, configId, configVersion, res);
   }, 600_000);
 
-  it('Update configVersion', async () => {
+  it('Updates configVersion correctly', async () => {
+    const newConfigVersion = 2;
     const request = new UpdateConfigVersionRequest({
-      configVersion: 2,
+      configVersion: newConfigVersion,
       securityId: equity.evmDiamondAddress!,
     });
     const res = await Management.updateConfigVersion(request);
+    const configInfo = await Management.getConfigInfo(
+      new GetConfigInfoRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+      }),
+    );
+    checkConfig(RESOLVER_ADDRESS, configId, newConfigVersion, configInfo);
     expect(res.payload).toBe(true);
   }, 600_000);
 
-  it('Update config', async () => {
+  it('Updates config correctly', async () => {
+    const configVersion = 2;
+    const newConfigId = '0x0000000000000000000000000000000000000000000000000000000000000003';
     const request = new UpdateConfigRequest({
-      configId: configId,
-      configVersion: 2,
+      configId: newConfigId,
+      configVersion: configVersion,
       securityId: equity.evmDiamondAddress!,
     });
     const res = await Management.updateConfig(request);
+    const configInfo = await Management.getConfigInfo(
+      new GetConfigInfoRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+      }),
+    );
+    checkConfig(RESOLVER_ADDRESS, newConfigId, configVersion, configInfo);
     expect(res.payload).toBe(true);
   }, 600_000);
 
-  it('Update resolver', async () => {
+  it('Updates resolver correctly', async () => {
+    const configVersion = 3;
+    const newResolver = '0.0.2166987';
     const request = new UpdateResolverRequest({
-      configVersion: 2,
-      configId: configId,
+      configVersion: configVersion,
+      configId,
       securityId: equity.evmDiamondAddress!.toString(),
-      resolver: RESOLVER_ADDRESS,
+      resolver: newResolver,
     });
     const res = await Management.updateResolver(request);
+    const configInfo = await Management.getConfigInfo(
+      new GetConfigInfoRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+      }),
+    );
+    checkConfig(newResolver, configId, configVersion, configInfo);
     expect(res.payload).toBe(true);
   }, 600_000);
 });
