@@ -11,12 +11,15 @@ import { useUpdateSecurityConfigVersion } from "../../../../hooks/mutations/useU
 import { useUpdateSecurityConfigId } from "../../../../hooks/mutations/useUpdateSecurityConfigId";
 import { useUpdateSecurityResolverAddress } from "../../../../hooks/mutations/useUpdateSecurityResolverAddress";
 import {
+  GetConfigInfoRequest,
   UpdateConfigRequest,
   UpdateConfigVersionRequest,
   UpdateResolverRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useGetConfigDetails } from "../../../../hooks/queries/useGetConfigDetails";
+import { collapseText } from "../../../../utils/format";
 
 type ManagementFormSchema = {
   resolverId?: string;
@@ -37,6 +40,19 @@ export const Management = ({ id }: ManagementProps) => {
   const { control, reset, handleSubmit } = useForm<ManagementFormSchema>({
     mode: "onChange",
   });
+
+  const {
+    data: configDetails,
+    isLoading: isLoadingConfigDetails,
+    isFetching: isFetchingConfigDetails,
+  } = useGetConfigDetails(
+    new GetConfigInfoRequest({
+      securityId: id,
+    }),
+    {
+      refetchOnWindowFocus: false,
+    },
+  );
 
   const { mutate: updateSecurityConfigVersion } =
     useUpdateSecurityConfigVersion();
@@ -156,17 +172,21 @@ export const Management = ({ id }: ManagementProps) => {
           items={[
             {
               title: t("details.resolverId"),
-              description: id,
+              description: configDetails?.resolverAddress ?? "",
               canCopy: true,
+              isLoading: isLoadingConfigDetails || isFetchingConfigDetails,
             },
             {
               title: t("details.configId"),
-              description: "0x123451234512345123451234512345",
+              description: collapseText(configDetails?.configId ?? "", 10, 10),
+              valueToCopy: configDetails?.configId ?? "",
               canCopy: true,
+              isLoading: isLoadingConfigDetails || isFetchingConfigDetails,
             },
             {
               title: t("details.configVersion"),
-              description: "1",
+              description: configDetails?.configVersion ?? "",
+              isLoading: isLoadingConfigDetails || isFetchingConfigDetails,
             },
           ]}
         />

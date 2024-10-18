@@ -1,10 +1,12 @@
 import { UpdateResolverRequest } from "@hashgraph/asset-tokenization-sdk";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import SDKService from "../../services/SDKService";
 import { useToast } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
+import { GET_CONFIG_INFO } from "../queries/useGetConfigDetails";
 
 export const useUpdateSecurityResolverAddress = () => {
+  const queryClient = useQueryClient();
   const toast = useToast();
   const { t } = useTranslation("security", {
     keyPrefix: "details.management.messages",
@@ -13,7 +15,11 @@ export const useUpdateSecurityResolverAddress = () => {
   return useMutation(
     (req: UpdateResolverRequest) => SDKService.updateSecurityResolver(req),
     {
-      onSuccess(data) {
+      onSuccess(data, variables) {
+        queryClient.invalidateQueries({
+          queryKey: [GET_CONFIG_INFO(variables.securityId)],
+        });
+
         console.log(
           "SDK message --> Management update resolver success: ",
           data,
