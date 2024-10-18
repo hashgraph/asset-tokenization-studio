@@ -234,6 +234,7 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../src/domain/context/factory/RegulationType.js';
+import ConfigInfoViewModel from '../src/port/in/response/ConfigInfoViewModel';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -289,14 +290,14 @@ let equityInfo: EquityDetails;
 let bondInfo: BondDetails;
 let couponInfo: CouponDetails;
 /*let factory: EvmAddress;
-let resolver: EvmAddress;
+let resolverAddress: EvmAddress;
 let businessLogicKeys: string[];
 let diamondOwnerAccount: EvmAddress | undefined;*/
 const network: Environment = 'testnet';
 let user_account: Account;
-let configVersion;
-let configId;
-let resolver;
+let configVersion: number;
+let configId: string;
+let resolverAddress: string;
 
 function grantRole(account: string, newRole: SecurityRole): void {
   let r = roles.get(account);
@@ -792,6 +793,10 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     },
   );
 
+  singletonInstance.getConfigInfo = jest.fn(async (address: EvmAddress) => {
+    return [resolverAddress, configId, configVersion];
+  });
+
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
   };
@@ -836,7 +841,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
       configVersion = _configVersion;
       configId = _configId;
-      resolver = _resolver;
+      resolverAddress = _resolver.toString();
 
       return {
         status: 'success',
@@ -882,7 +887,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
       configVersion = _configVersion;
       configId = _configId;
-      resolver = _resolver;
+      resolverAddress = _resolver.toString();
 
       const diff = bondInfo.maturityDate - couponInfo.firstCouponDate;
       const numberOfCoupons = Math.ceil(diff / couponInfo.couponFrequency);
@@ -1366,7 +1371,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
   ) {
     configVersion = _configVersion;
     configId = _configId;
-    resolver = _resolver;
+    resolverAddress = _resolver.toString();
 
     return { status: 'success', data: [] } as TransactionResponse<
       string[],
