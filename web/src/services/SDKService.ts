@@ -270,6 +270,10 @@ import {
   VotingRightsForViewModel,
   VotingRightsViewModel,
   WalletEvent,
+  Management,
+  UpdateConfigVersionRequest,
+  UpdateResolverRequest,
+  UpdateConfigRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -668,6 +672,28 @@ export class SDKService {
     req: GetLockedBalanceRequest,
   ): Promise<BalanceViewModel> {
     return await Security.getLockedBalanceOf(req);
+  }
+
+  // MANAGEMENT ////////////////////////////////////////////
+  public static async updateSecurityConfigVersion(
+    req: UpdateConfigVersionRequest,
+  ): Promise<boolean> {
+    const response = await Management.updateConfigVersion(req);
+    return response.payload;
+  }
+
+  public static async updateSecurityConfig(
+    req: UpdateConfigRequest,
+  ): Promise<boolean> {
+    const response = await Management.updateConfig(req);
+    return response.payload;
+  }
+
+  public static async updateSecurityResolver(
+    req: UpdateResolverRequest,
+  ): Promise<boolean> {
+    const response = await Management.updateResolver(req);
+    return response.payload;
   }
 }
 
