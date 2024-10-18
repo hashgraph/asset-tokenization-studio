@@ -203,112 +203,22 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import UpdateConfigVersionRequest from './request/UpdateConfigVersionRequest';
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { handleValidation } from './Common';
-import { UpdateConfigVersionCommand } from '../../app/usecase/command/management/updateConfigVersion/updateConfigVersionCommand';
-import { QueryBus } from '../../core/query/QueryBus';
-import Injectable from '../../core/Injectable';
-import { CommandBus } from '../../core/command/CommandBus';
-import { GetConfigInfoRequest } from './request';
-import UpdateResolverRequest from './request/UpdateResolverRequest';
-import { UpdateResolverCommand } from '../../app/usecase/command/management/updateResolver/updateResolverCommand';
-import ContractId from '../../domain/context/contract/ContractId.js';
-import { GetConfigInfoQuery } from '../../app/usecase/query/management/GetConfigInfoQuery';
-import ConfigInfoViewModel from './response/ConfigInfoViewModel';
-import { DiamondConfiguration } from '../../domain/context/security/DiamondConfiguration';
-import { MirrorNodeAdapter } from '../out/mirror/MirrorNodeAdapter';
-import { lazyInject } from '../../core/decorator/LazyInjectDecorator';
-import { UpdateConfigRequest } from './request';
-import { UpdateConfigCommand } from '../../app/usecase/command/management/updateConfig/updateConfigCommand';
+import { Command } from '../../../../../core/command/Command';
+import { CommandResponse } from '../../../../../core/command/CommandResponse';
 
-interface IManagementInPort {
-  updateConfigVersion(
-    request: UpdateConfigVersionRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  updateConfig(
-    request: UpdateConfigRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-
-  getConfigInfo(request: GetConfigInfoRequest): Promise<ConfigInfoViewModel>;
-  updateResolver(
-    request: UpdateResolverRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-}
-
-class ManagementInPort implements IManagementInPort {
+export class UpdateConfigCommandResponse implements CommandResponse {
   constructor(
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNode: MirrorNodeAdapter = Injectable.resolve(
-      MirrorNodeAdapter,
-    ),
+    public readonly payload: boolean,
+    public readonly transactionId: string,
   ) {}
-
-  @LogError
-  async updateConfigVersion(
-    request: UpdateConfigVersionRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configVersion, securityId } = request;
-    handleValidation('UpdateConfigVersionRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateConfigVersionCommand(configVersion, securityId),
-    );
-  }
-
-  @LogError
-  async updateConfig(
-    request: UpdateConfigRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configId, configVersion, securityId } = request;
-    handleValidation('UpdateConfigRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateConfigCommand(configId, configVersion, securityId),
-    );
-  }
-
-  @LogError
-  async updateResolver(
-    request: UpdateResolverRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { configId, securityId, resolver, configVersion } = request;
-    handleValidation('UpdateResolverRequest', request);
-
-    return await this.commandBus.execute(
-      new UpdateResolverCommand(
-        configVersion,
-        securityId,
-        configId,
-        new ContractId(resolver),
-      ),
-    );
-  }
-
-  @LogError
-  async getConfigInfo(
-    request: GetConfigInfoRequest,
-  ): Promise<ConfigInfoViewModel> {
-    handleValidation('GetConfigInfoRequest', request);
-
-    const { payload } = await this.queryBus.execute(
-      new GetConfigInfoQuery(request.securityId),
-    );
-    const { resolverAddress, configId, configVersion } = payload;
-
-    const resolverId = (await this.mirrorNode.getContractInfo(resolverAddress))
-      .id;
-
-    return {
-      resolverAddress: resolverId,
-      configId,
-      configVersion,
-    };
-  }
 }
 
-const Management = new ManagementInPort();
-export default Management;
+export class UpdateConfigCommand extends Command<UpdateConfigCommandResponse> {
+  constructor(
+    public readonly configId: string,
+    public readonly configVersion: number,
+    public readonly securityId: string,
+  ) {
+    super();
+  }
+}

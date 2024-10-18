@@ -254,6 +254,7 @@ import GetControlListTypeRequest from './GetControlListTypeRequest.js';
 import InitializationRequest from './InitializationRequest.js';
 import ConnectRequest from './ConnectRequest.js';
 import GetConfigInfoRequest from './GetConfigInfoRequest.js';
+import UpdateConfigRequest from './UpdateConfigRequest.js';
 import UpdateConfigVersionRequest from './UpdateConfigVersionRequest.js';
 import UpdateResolverRequest from './UpdateResolverRequest.js';
 
@@ -308,7 +309,8 @@ export {
   GetLocksIdRequest,
   GetLockRequest,
   TransferAndLockRequest,
-  UpdateConfigVersionRequest,
   UpdateResolverRequest,
+  UpdateConfigVersionRequest,
+  UpdateConfigRequest,
   GetConfigInfoRequest,
 };
