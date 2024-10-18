@@ -1366,9 +1366,9 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
   singletonInstance.updateResolver = jest.fn(async function (
     security: EvmAddress,
-    _configId: string,
-    _configVersion: number,
     _resolver: EvmAddress,
+    _configVersion: number,
+    _configId: string,
   ) {
     configVersion = _configVersion;
     configId = _configId;
