@@ -1390,14 +1390,6 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     >;
   });
 
-  singletonInstance.getConfigInfo = jest.fn(async (address: EvmAddress) => {
-    return {
-      configVersion,
-      configId,
-      resolverAddress,
-    } as ConfigInfoViewModel;
-  });
-
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),
   };
