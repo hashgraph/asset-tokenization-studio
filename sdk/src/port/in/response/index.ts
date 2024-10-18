@@ -220,13 +220,11 @@ import VotingRightsForViewModel from './VotingRightsForViewModel.js';
 import VotingRightsViewModel from './VotingRightsViewModel.js';
 import RegulationViewModel from './RegulationViewModel.js';
 import LockViewModel from './LockViewModel.js';
-import ConfigInfoViewModel from './ConfigInfoViewModel.js';
 
 export {
   AccountViewModel,
   BalanceViewModel,
   ContractViewModel,
-  ConfigInfoViewModel,
   DividendsForViewModel,
   DividendsViewModel,
   CouponForViewModel,
