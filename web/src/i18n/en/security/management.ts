@@ -212,6 +212,10 @@ export default {
     configVersion: "Configuration Version",
     clear: "Clear",
     save: "Save",
+    validations: {
+      configIdWhenResolverId:
+        "The Configuration ID is required when the Resolver ID is provided",
+    },
   },
   details: {
     title: "Configuration Details",

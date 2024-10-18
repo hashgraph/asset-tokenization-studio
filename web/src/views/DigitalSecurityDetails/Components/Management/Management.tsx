@@ -20,6 +20,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useGetConfigDetails } from "../../../../hooks/queries/useGetConfigDetails";
 import { collapseText } from "../../../../utils/format";
+import { required } from "../../../../utils/rules";
 
 type ManagementFormSchema = {
   resolverId?: string;
@@ -37,9 +38,11 @@ export const Management = ({ id }: ManagementProps) => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const { control, reset, handleSubmit } = useForm<ManagementFormSchema>({
-    mode: "onChange",
-  });
+  const { control, reset, handleSubmit, watch } = useForm<ManagementFormSchema>(
+    {
+      mode: "onChange",
+    },
+  );
 
   const {
     data: configDetails,
@@ -81,7 +84,7 @@ export const Management = ({ id }: ManagementProps) => {
       return;
     }
 
-    if (configurationId && configurationVersion) {
+    if (!resolverId && configurationId && configurationVersion) {
       const request = new UpdateConfigRequest({
         securityId: id,
         configVersion: Number(configurationVersion),
@@ -95,8 +98,7 @@ export const Management = ({ id }: ManagementProps) => {
       });
       return;
     }
-
-    if (configurationVersion) {
+    if (!resolverId && !configurationId && configurationVersion) {
       const request = new UpdateConfigVersionRequest({
         securityId: id,
         configVersion: Number(configurationVersion),
@@ -131,18 +133,30 @@ export const Management = ({ id }: ManagementProps) => {
               id="resolverId"
               label={t("form.resolverId")}
               placeholder="0.0.1234567"
+              isClearable
             />
             <InputController
               control={control}
               id="configurationId"
               label={t("form.configId")}
               placeholder="0x123451234512345123451234512345"
+              rules={{
+                validate: (value: string) =>
+                  watch("resolverId")
+                    ? !!value || t("form.validations.configIdWhenResolverId")
+                    : true,
+              }}
+              isClearable
             />
             <InputController
               control={control}
               id="configurationVersion"
               label={t("form.configVersion")}
               placeholder="0"
+              rules={{
+                required,
+              }}
+              isClearable
             />
           </VStack>
           <HStack w={"full"} justifyContent={"flex-end"}>
