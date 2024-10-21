@@ -1,0 +1,222 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Management should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-gxzuc9"
+  >
+    <div
+      class="chakra-stack css-1sh166f"
+    >
+      <div
+        class="chakra-stack css-hdrajs"
+      >
+        <div
+          class="chakra-stack css-1v0nxik"
+        >
+          <h2
+            class="css-1mk5tlk"
+          >
+            Edit Configuration
+          </h2>
+          <p
+            class="css-w4vgn5"
+          >
+            Add the new configuration information
+          </p>
+        </div>
+        <div
+          class="chakra-stack css-1nipxvd"
+        >
+          <div
+            class="chakra-form-control css-1kxonj9"
+            role="group"
+          >
+            <label
+              class="css-1fey8w1"
+              for="resolverId"
+            >
+              <span
+                class="css-1o8l9xj"
+                id="label"
+              >
+                Resolver ID
+              </span>
+              <div
+                class="chakra-input__group css-pwmwmr"
+                data-group="true"
+              >
+                <input
+                  class="chakra-input css-ifstuv"
+                  data-testid="resolverId"
+                  id="resolverId"
+                  name="resolverId"
+                  placeholder="0.0.1234567"
+                  value=""
+                />
+              </div>
+            </label>
+          </div>
+          <div
+            class="chakra-form-control css-1kxonj9"
+            role="group"
+          >
+            <label
+              class="css-1fey8w1"
+              for="configurationId"
+            >
+              <span
+                class="css-1o8l9xj"
+                id="label"
+              >
+                Configuration ID
+              </span>
+              <div
+                class="chakra-input__group css-pwmwmr"
+                data-group="true"
+              >
+                <input
+                  class="chakra-input css-ifstuv"
+                  data-testid="configurationId"
+                  id="configurationId"
+                  name="configurationId"
+                  placeholder="0x123451234512345123451234512345"
+                  value=""
+                />
+              </div>
+            </label>
+          </div>
+          <div
+            class="chakra-form-control css-1kxonj9"
+            role="group"
+          >
+            <label
+              class="css-1fey8w1"
+              for="configurationVersion"
+            >
+              <span
+                class="css-1o8l9xj"
+                id="label"
+              >
+                Configuration Version*
+              </span>
+              <div
+                class="chakra-input__group css-pwmwmr"
+                data-group="true"
+              >
+                <input
+                  class="chakra-input css-ifstuv"
+                  data-testid="configurationVersion"
+                  id="configurationVersion"
+                  name="configurationVersion"
+                  placeholder="0"
+                  value=""
+                />
+              </div>
+            </label>
+          </div>
+        </div>
+        <div
+          class="chakra-stack css-15ybjhn"
+        >
+          <button
+            class="chakra-button css-vueqt9"
+            type="button"
+          >
+            <p
+              class="css-15hpv2u"
+            >
+              Clear
+            </p>
+          </button>
+          <button
+            class="chakra-button css-1145i8e"
+            type="button"
+          >
+            <p
+              class="css-15hpv2u"
+            >
+              Save
+            </p>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      class="chakra-stack css-1sh166f"
+    >
+      <div
+        class="chakra-stack css-1yqmcpo"
+      >
+        <div
+          class="css-1dixb64"
+        >
+          <p
+            class="chakra-text css-1an6htx"
+          >
+            Configuration Details
+          </p>
+        </div>
+        <div
+          class="css-tvba8"
+          data-testid="definition-list-item-Resolver ID"
+          tabindex="0"
+        >
+          <p
+            class="chakra-text css-vbc1qe"
+          >
+            Resolver ID
+          </p>
+          <div
+            class="chakra-skeleton__group css-1rr4qq7"
+          >
+            <div
+              class="chakra-skeleton css-5dkehc"
+            />
+          </div>
+        </div>
+        <div
+          class="css-tvba8"
+          data-testid="definition-list-item-Configuration ID"
+          tabindex="0"
+        >
+          <p
+            class="chakra-text css-vbc1qe"
+          >
+            Configuration ID
+          </p>
+          <div
+            class="chakra-skeleton__group css-1rr4qq7"
+          >
+            <div
+              class="chakra-skeleton css-5dkehc"
+            />
+          </div>
+        </div>
+        <div
+          class="css-tvba8"
+          data-testid="definition-list-item-Configuration Version"
+          tabindex="0"
+        >
+          <p
+            class="chakra-text css-vbc1qe"
+          >
+            Configuration Version
+          </p>
+          <div
+            class="chakra-skeleton__group css-1rr4qq7"
+          >
+            <div
+              class="chakra-skeleton css-5dkehc"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
