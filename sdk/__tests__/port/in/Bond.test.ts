@@ -218,7 +218,7 @@ import {
   Role,
   RoleRequest,
   SetCouponRequest,
-  SetMaturityDateRequest,
+  UpdateMaturityDateRequest,
 } from '../../../src/index.js';
 import {
   CLIENT_ACCOUNT_ECDSA,
@@ -452,13 +452,13 @@ describe('🧪 Bond test', () => {
     expect(coupon.executionDate.getTime() / 1000).toEqual(executionTimestamp);
   }, 600_000);
 
-  it('Set bond maturity date correctly', async () => {
+  it('Update bond maturity date correctly', async () => {
     const newMaturityDate = maturityDate + 10;
-    const request = new SetMaturityDateRequest({
+    const request = new UpdateMaturityDateRequest({
       securityId: bond.evmDiamondAddress!.toString(),
       maturityDate: newMaturityDate.toString(),
     });
-    const res = await Bond.setMaturityDate(request);
+    const res = await Bond.updateMaturityDate(request);
 
     const bondDetails = await Bond.getBondDetails(
       new GetBondDetailsRequest({
@@ -471,14 +471,14 @@ describe('🧪 Bond test', () => {
 
   it('Should return error if bond maturity date is earlier than current one', async () => {
     const newMaturityDate = maturityDate - 10;
-    const request = new SetMaturityDateRequest({
+    const request = new UpdateMaturityDateRequest({
       securityId: bond.evmDiamondAddress!.toString(),
       maturityDate: newMaturityDate.toString(),
     });
 
     let thrownError;
     try {
-      await Bond.setMaturityDate(request);
+      await Bond.updateMaturityDate(request);
     } catch (error) {
       thrownError = error;
     }
