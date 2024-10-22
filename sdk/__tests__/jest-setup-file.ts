@@ -234,6 +234,7 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../src/domain/context/factory/RegulationType.js';
+import ConfigInfoViewModel from '../src/port/in/response/ConfigInfoViewModel';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -289,11 +290,14 @@ let equityInfo: EquityDetails;
 let bondInfo: BondDetails;
 let couponInfo: CouponDetails;
 /*let factory: EvmAddress;
-let resolver: EvmAddress;
+let resolverAddress: EvmAddress;
 let businessLogicKeys: string[];
 let diamondOwnerAccount: EvmAddress | undefined;*/
 const network: Environment = 'testnet';
 let user_account: Account;
+let configVersion: number;
+let configId: string;
+let resolverAddress: string;
 
 function grantRole(account: string, newRole: SecurityRole): void {
   let r = roles.get(account);
@@ -789,6 +793,10 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     },
   );
 
+  singletonInstance.getConfigInfo = jest.fn(async (address: EvmAddress) => {
+    return [resolverAddress, configId, configVersion];
+  });
+
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
   };
@@ -831,6 +839,10 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
       equityInfo = _equityInfo;
 
+      configVersion = _configVersion;
+      configId = _configId;
+      resolverAddress = _resolver.toString();
+
       return {
         status: 'success',
         id: transactionId,
@@ -872,6 +884,10 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
       bondInfo = _bondInfo;
       couponInfo = _couponInfo;
+
+      configVersion = _configVersion;
+      configId = _configId;
+      resolverAddress = _resolver.toString();
 
       const diff = bondInfo.maturityDate - couponInfo.firstCouponDate;
       const numberOfCoupons = Math.ceil(diff / couponInfo.couponFrequency);
@@ -1348,11 +1364,53 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     return {} as MirrorNodeAdapter;
   });
 
+  singletonInstance.updateResolver = jest.fn(async function (
+    security: EvmAddress,
+    _resolver: EvmAddress,
+    _configVersion: number,
+    _configId: string,
+  ) {
+    configVersion = _configVersion;
+    configId = _configId;
+    resolverAddress = _resolver.toString();
+
+    return { status: 'success', data: [] } as TransactionResponse<
+      string[],
+      Error
+    >;
+  });
+
+  singletonInstance.updateConfigVersion = jest.fn(async function (
+    security: EvmAddress,
+    _configVersion: number,
+  ) {
+    configVersion = _configVersion;
+
+    return { status: 'success', data: [] } as TransactionResponse<
+      string[],
+      Error
+    >;
+  });
+
+  singletonInstance.updateConfig = jest.fn(async function (
+      security: EvmAddress,
+    _configId: string,
+    _configVersion: number,
+  ) {
+    configVersion = _configVersion;
+    configId = _configId;
+
+    return { status: 'success', data: [] } as TransactionResponse<
+      string[],
+      Error
+    >;
+  });
+
   singletonInstance.setMaturityDate = jest.fn(async function (
     security: EvmAddress,
     _maturityDate: number,
   ) {
-    
+
     bondInfo = {
       ...bondInfo,
       maturityDate: _maturityDate,

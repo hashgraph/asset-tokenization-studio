@@ -210,57 +210,61 @@
 import {
   ContractExecuteTransaction,
   ContractFunctionParameters,
+  ContractId,
   Signer,
   Transaction,
-  ContractId,
 } from '@hashgraph/sdk';
 import {
   AccessControl__factory,
+  BondUSA__factory,
+  Cap__factory,
   ControlList__factory,
+  DiamondFacet__factory,
   EquityUSA__factory,
   ERC1410ScheduledSnapshot__factory,
-  Factory__factory,
-  TransferAndLock__factory,
-  BondUSA__factory,
-  Snapshots__factory,
-  ERC1643__factory,
-  ScheduledSnapshots__factory,
   ERC1410Snapshot__factory,
-  Cap__factory,
+  ERC1643__factory,
+  Factory__factory,
   Lock__factory,
+  ScheduledSnapshots__factory,
+  Snapshots__factory,
+  TransferAndLock__factory,
   Bond__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
-  TRANSFER_GAS,
-  PAUSE_GAS,
-  UNPAUSE_GAS,
-  REDEEM_GAS,
-  CREATE_EQUITY_ST_GAS,
-  CREATE_BOND_ST_GAS,
-  GRANT_ROLES_GAS,
-  MAX_ROLES_GAS,
-  ISSUE_GAS,
-  ADD_TO_CONTROL_LIST_GAS,
-  REMOVE_FROM_CONTROL_LIST_GAS,
-  CONTROLLER_TRANSFER_GAS,
-  CONTROLLER_REDEEM_GAS,
-  SET_DIVIDENDS_GAS,
-  SET_VOTING_RIGHTS_GAS,
-  RENOUNCE_ROLES_GAS,
-  TAKE_SNAPSHOT_GAS,
   _PARTITION_ID_1,
-  SET_DOCUMENT_GAS,
-  REMOVE_DOCUMENT_GAS,
+  ADD_TO_CONTROL_LIST_GAS,
   AUTHORIZE_OPERATOR_GAS,
+  CONTROLLER_REDEEM_GAS,
+  CONTROLLER_TRANSFER_GAS,
+  CREATE_BOND_ST_GAS,
+  CREATE_EQUITY_ST_GAS,
+  GRANT_ROLES_GAS,
+  ISSUE_GAS,
+  LOCK_GAS,
+  MAX_ROLES_GAS,
+  PAUSE_GAS,
+  REDEEM_GAS,
+  RELEASE_GAS,
+  REMOVE_DOCUMENT_GAS,
+  REMOVE_FROM_CONTROL_LIST_GAS,
+  RENOUNCE_ROLES_GAS,
   REVOKE_OPERATOR_GAS,
+  SET_COUPON_GAS,
+  SET_DIVIDENDS_GAS,
+  SET_DOCUMENT_GAS,
+  SET_MAX_SUPPLY_GAS,
+  SET_VOTING_RIGHTS_GAS,
+  TAKE_SNAPSHOT_GAS,
+  TRANSFER_AND_LOCK_GAS,
+  TRANSFER_GAS,
   TRANSFER_OPERATOR_GAS,
   TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
-  SET_MAX_SUPPLY_GAS,
-  SET_COUPON_GAS,
-  LOCK_GAS,
-  RELEASE_GAS,
-  TRANSFER_AND_LOCK_GAS,
-  SET_MATURITY_DATE_GAS,
+  UNPAUSE_GAS,
+  UPDATE_CONFIG_GAS,
+  UPDATE_CONFIG_VERSION_GAS,
+  UPDATE_RESOLVER_GAS,
+    SET_MATURITY_DATE_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -268,8 +272,8 @@ import { SigningError } from '../error/SigningError.js';
 import NetworkService from '../../../app/service/NetworkService.js';
 import LogService from '../../../app/service/LogService.js';
 import {
-  FactoryEquityToken,
   FactoryBondToken,
+  FactoryEquityToken,
   FactoryRegulationData,
 } from '../../../domain/context/factory/FactorySecurityToken.js';
 import {
@@ -1469,6 +1473,99 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(RELEASE_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async updateConfigVersion(
+    security: EvmAddress,
+    configVersion: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'updateConfigVersion';
+    LogService.logTrace(`Updating config version`);
+
+    const resolverProxyFactory = new DiamondFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex =
+      resolverProxyFactory.interface.encodeFunctionData(FUNCTION_NAME, [
+        configVersion,
+      ]);
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(UPDATE_CONFIG_VERSION_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async updateConfig(
+    security: EvmAddress,
+    configId: string,
+    configVersion: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'updateConfig';
+    LogService.logTrace(`Updating config`);
+
+    const resolverProxyFactory = new DiamondFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex =
+      resolverProxyFactory.interface.encodeFunctionData(FUNCTION_NAME, [
+        configId,
+        configVersion,
+      ]);
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(UPDATE_CONFIG_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async updateResolver(
+    security: EvmAddress,
+    resolver: EvmAddress,
+    configVersion: number,
+    configId: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'updateResolver';
+    LogService.logTrace(`Updating Resolver`);
+
+    const diamondFacetInstance = new DiamondFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex =
+      diamondFacetInstance.interface.encodeFunctionData(FUNCTION_NAME, [
+        resolver.toString(),
+        configId,
+        configVersion,
+      ]);
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(UPDATE_RESOLVER_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

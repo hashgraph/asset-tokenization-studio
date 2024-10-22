@@ -203,69 +203,54 @@
 
 */
 
-import dividends from "./dividends";
-import coupons from "./coupons";
-import roleManagement from "./roleManagement";
-import management from "./management";
-import allowedList from "./allowedList";
-import votingRights from "./votingRight";
+import { QueryHandler } from '../../../../core/decorator/QueryHandlerDecorator';
+import {
+  GetConfigInfoQuery,
+  GetConfigInfoQueryResponse,
+} from './GetConfigInfoQuery';
+import { IQueryHandler } from '../../../../core/query/QueryHandler';
+import { lazyInject } from '../../../../core/decorator/LazyInjectDecorator';
+import { MirrorNodeAdapter } from '../../../../port/out/mirror/MirrorNodeAdapter';
+import { RPCQueryAdapter } from '../../../../port/out/rpc/RPCQueryAdapter';
+import SecurityService from '../../../service/SecurityService';
+import EvmAddress from '../../../../domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../domain/context/shared/HederaId';
+import { DiamondConfiguration } from '../../../../domain/context/security/DiamondConfiguration';
 
-export default {
-  header: {
-    title: "Digital security details",
-  },
-  tabs: {
-    balance: "Balance",
-    allowedList: "Allowed list",
-    blockedList: "Blocked list",
-    details: "Details",
-    dividends: "Dividends",
-    coupons: "Coupons",
-    votingRights: "Voting rights",
-    roleManagement: "Role management",
-    management: "Management",
-  },
-  actions: {
-    redeem: "Redeem",
-    transfer: "Transfer",
-    mint: "Mint",
-    forceTransfer: "Force transfer",
-    forceRedeem: "Force redeem",
-    dangerZone: {
-      title: "Danger zone",
-      subtitle: "Pause security token",
-      buttonActive: "Active",
-      buttonInactive: "Inactive",
-    },
-  },
-  dividends,
-  coupons,
-  balance: {
-    search: {
-      title: "Display balances",
-      subtitle: "Add the ID account to preview its balance",
-      placeholder: "0.0.19253",
-      button: "Search ID",
-    },
-    details: {
-      title: "Details",
-    },
-    error: {
-      targetId: "Sorry, there was an error. Probably wrong address",
-    },
-  },
-  roleManagement,
-  management,
-  allowedList,
-  votingRights,
-  benefits: {
-    dividends: "Dividends",
-    coupons: "Coupons",
-    id: "Id",
-    recordDate: "Record date",
-    executionDate: "Execution date",
-    dividendAmount: "Dividend amount",
-    couponRate: "Rate",
-    snapshot: "Snapshot Id",
-  },
-};
+@QueryHandler(GetConfigInfoQuery)
+export class GetConfigInfoQueryHandler
+  implements IQueryHandler<GetConfigInfoQuery>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(MirrorNodeAdapter)
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+  ) {}
+
+  async execute(
+    query: GetConfigInfoQuery,
+  ): Promise<GetConfigInfoQueryResponse> {
+    const securityId = query.securityId;
+
+    const security = await this.securityService.get(securityId);
+    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
+
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.exec(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId,
+    );
+
+    const [resolverAddress, configId, configVersion] =
+      await this.queryAdapter.getConfigInfo(securityEvmAddress);
+
+    return Promise.resolve(
+      new GetConfigInfoQueryResponse(
+        new DiamondConfiguration(resolverAddress, configId, configVersion),
+      ),
+    );
+  }
+}
