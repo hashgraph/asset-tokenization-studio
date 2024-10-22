@@ -215,6 +215,7 @@ import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _CORPORATE_ACTION_ROLE,
     _PAUSER_ROLE,
+    _BOND_MANAGER_ROLE,
 } from '../../../../scripts/constants'
 import {
     Rbac,
@@ -225,6 +226,8 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
+import { bond } from '../../../../typechain-types/contracts/layer_2'
+import { BigNumber } from 'ethers'
 
 const TIME = 30
 const numberOfUnits = 1000
@@ -441,6 +444,36 @@ describe('Bond Tests', () => {
             expect(couponFor.rate).to.equal(couponRate)
             expect(couponFor.tokenBalance).to.equal(0)
             expect(couponFor.recordDateReached).to.equal(false)
+        })
+
+        it('GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds', async () => {
+            // * Arrange
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(_BOND_MANAGER_ROLE, account_C)
+            // Using account C (with role)
+            bondFacet = bondFacet.connect(signer_C)
+            // Get maturity date
+            const maturityDateBefore = (await bondFacet.getBondDetails())
+                .maturityDate
+            // New maturity date
+            const tomorrowInSeconds = BigNumber.from(
+                Math.floor(Date.now() / 1000 + 86400)
+            )
+
+            // * Act
+            // Set maturity date
+            const receipt = await bondFacet.setMaturityDate(tomorrowInSeconds)
+
+            // * Assert
+            const bondDetailsAfter = bondFacet.getBondDetails()
+            await expect(receipt)
+                .to.emit(bondFacet, 'MaturityDateUpdated')
+                .withArgs(bondFacet.address, tomorrowInSeconds)
+            // check date
+            const maturityDateAfter = (await bondDetailsAfter).maturityDate
+            expect(maturityDateAfter.eq(maturityDateBefore)).to.be.false
+            expect(maturityDateAfter.eq(tomorrowInSeconds)).to.be.true
         })
 
         it('Check number of created Coupon', async () => {
