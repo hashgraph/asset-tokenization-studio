@@ -264,7 +264,7 @@ import {
   UPDATE_CONFIG_GAS,
   UPDATE_CONFIG_VERSION_GAS,
   UPDATE_RESOLVER_GAS,
-  SET_MATURITY_DATE_GAS,
+  UPDATE_MATURITY_DATE_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -1571,14 +1571,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     return this.signAndSendTransaction(transaction);
   }
 
-  async setMaturityDate(
+  async updateMaturityDate(
     security: EvmAddress,
     maturityDate: number,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'setMaturityDate';
+    const FUNCTION_NAME = 'updateMaturityDate';
     LogService.logTrace(
-      `Setting bond maturity date ${maturityDate} for security ${security.toString()}`,
+      `Updating bond maturity date ${maturityDate} for security ${security.toString()}`,
     );
 
     const functionDataEncodedHex = new Interface(
@@ -1590,7 +1590,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
-      .setGas(SET_MATURITY_DATE_GAS)
+      .setGas(UPDATE_MATURITY_DATE_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

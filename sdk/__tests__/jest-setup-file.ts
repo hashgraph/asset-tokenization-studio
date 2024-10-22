@@ -1406,7 +1406,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     >;
   });
 
-  singletonInstance.setMaturityDate = jest.fn(async function (
+  singletonInstance.updateMaturityDate = jest.fn(async function (
     security: EvmAddress,
     _maturityDate: number,
   ) {

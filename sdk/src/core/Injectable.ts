@@ -290,7 +290,7 @@ import { UpdateConfigCommandHandler } from '../app/usecase/command/management/up
 import { UpdateConfigVersionCommandHandler } from '../app/usecase/command/management/updateConfigVersion/updateConfigVersionCommandHandler';
 import { UpdateResolverCommandHandler } from '../app/usecase/command/management/updateResolver/updateResolverCommandHandler.js';
 import { GetConfigInfoQueryHandler } from '../app/usecase/query/management/GetConfigInfoQueryHandler';
-import { SetMaturityDateCommandHandler } from '../app/usecase/command/bond/setMaturityDate/SetMaturityDateCommandHandler.js';
+import { UpdateMaturityDateCommandHandler } from '../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -411,7 +411,7 @@ const COMMAND_HANDLERS = [
   },
   {
     token: TOKENS.COMMAND_HANDLER,
-    useClass: SetMaturityDateCommandHandler,
+    useClass: UpdateMaturityDateCommandHandler,
   },
   // Management Operations
   {
