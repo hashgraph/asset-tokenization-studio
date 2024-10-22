@@ -241,6 +241,7 @@ import { useRolesStore } from "../../store/rolesStore";
 import { useSecurityStore } from "../../store/securityStore";
 import { VotingRights } from "./Components/VotingRights/VotingRights";
 import { Coupons } from "./Components/Coupons/Coupons";
+import { Management } from "./Components/Management/Management";
 
 export const DigitalSecurityDetails = () => {
   const { t: tHeader } = useTranslation("security", {
@@ -393,6 +394,12 @@ export const DigitalSecurityDetails = () => {
     if (bondDetails && hasCorporateActionsRole && !isPaused) {
       adminTabs.push({ content: <Coupons />, header: tTabs("coupons") });
     }
+
+    // TODO: check if there are some permissions to display it
+    adminTabs.push({
+      content: <Management id={id} />,
+      header: tTabs("management"),
+    });
 
     return adminTabs;
     // eslint-disable-next-line react-hooks/exhaustive-deps

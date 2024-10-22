@@ -414,6 +414,11 @@ interface ITransactionAdapter {
   ): Promise<TransactionResponse>;
   getAccount(): Account;
   getMirrorNodeAdapter(): MirrorNodeAdapter;
+  setMaturityDate(
+    security: EvmAddress,
+    maturityDate: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 interface RoleTransactionAdapter {
@@ -468,8 +473,26 @@ interface RoleTransactionAdapter {
   ): Promise<TransactionResponse<number, Error>>;
 }
 
+interface IManagementTransactionAdapter {
+  updateConfigVersion(
+    security: EvmAddress,
+    configVersion: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  updateResolver(
+    security: EvmAddress,
+    resolver: EvmAddress,
+    configVersion: number,
+    configId: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
-  implements ITransactionAdapter, RoleTransactionAdapter
+  implements
+    ITransactionAdapter,
+    RoleTransactionAdapter,
+    IManagementTransactionAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -794,5 +817,36 @@ export default abstract class TransactionAdapter
     }${id}\n`;
     LogService.logInfo(msg);
     console.log(msg);
+  }
+  updateConfigVersion(
+    security: EvmAddress,
+    configVersion: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    throw new Error('Method not implemented.');
+  }
+  updateConfig(
+    security: EvmAddress,
+    configId: string,
+    configVersion: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    throw new Error('Method not implemented.');
+  }
+  updateResolver(
+    security: EvmAddress,
+    resolver: EvmAddress,
+    configVersion: number,
+    configId: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setMaturityDate(
+    security: EvmAddress,
+    maturityDate: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
   }
 }

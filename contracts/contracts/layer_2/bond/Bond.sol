@@ -274,21 +274,26 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     }
 
     /**
-     * @dev Sets the maturity date for the bond.
-     * @param _maturityDate The new maturity date to be set.
+     * @dev Updates the maturity date of the bond.
+     * @param _newMaturityDate The new maturity date to be set.
      */
-    function setMaturityDate(
-        uint256 _maturityDate
+    function updateMaturityDate(
+        uint256 _newMaturityDate
     )
         external
         virtual
         override
         onlyUnpaused
         onlyRole(_BOND_MANAGER_ROLE)
+        onlyAfterCurrentMaturityDate(_newMaturityDate)
         returns (bool success_)
     {
-        success_ = _setMaturityDate(_maturityDate);
-        emit MaturityDateUpdated(address(this), _maturityDate);
+        emit MaturityDateUpdated(
+            address(this),
+            _newMaturityDate,
+            _getMaturityDate()
+        );
+        success_ = _setMaturityDate(_newMaturityDate);
         return success_;
     }
 

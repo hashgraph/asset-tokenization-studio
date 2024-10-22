@@ -253,6 +253,11 @@ import GetLockRequest from './GetLockRequest.js';
 import GetControlListTypeRequest from './GetControlListTypeRequest.js';
 import InitializationRequest from './InitializationRequest.js';
 import ConnectRequest from './ConnectRequest.js';
+import GetConfigInfoRequest from './GetConfigInfoRequest.js';
+import UpdateConfigRequest from './UpdateConfigRequest.js';
+import UpdateConfigVersionRequest from './UpdateConfigVersionRequest.js';
+import UpdateResolverRequest from './UpdateResolverRequest.js';
+import SetMaturityDateRequest from './SetMaturityDateRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -305,4 +310,9 @@ export {
   GetLocksIdRequest,
   GetLockRequest,
   TransferAndLockRequest,
+  UpdateResolverRequest,
+  UpdateConfigVersionRequest,
+  UpdateConfigRequest,
+  GetConfigInfoRequest,
+  SetMaturityDateRequest,
 };
