@@ -241,7 +241,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         virtual
         override
         onlyValidKeys(_businessLogics)
-        onlyRole(_getRoleAdmin(_DEFAULT_ADMIN_ROLE))
+        onlyRole(_DEFAULT_ADMIN_ROLE)
         onlyUnpaused
     {
         uint256 latestVersion = _registerBusinessLogics(_businessLogics);
