@@ -203,15 +203,13 @@
 
 */
 
-import { Environment } from './deployEnvironmentByRpc'
-
 export interface FacetConfiguration {
     id: string
     version: number
 }
 
 export async function createResolverConfig(
-    environment: Environment,
+    environment: any,
     configId: string,
     facetIds: string[],
     facetVersions: number[]

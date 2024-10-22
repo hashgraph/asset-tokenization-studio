@@ -228,6 +228,7 @@ import {
   ERC1410Snapshot__factory,
   Cap__factory,
   Lock__factory,
+  Bond__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   TRANSFER_GAS,
@@ -259,6 +260,7 @@ import {
   LOCK_GAS,
   RELEASE_GAS,
   TRANSFER_AND_LOCK_GAS,
+  SET_MATURITY_DATE_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -1467,6 +1469,31 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(RELEASE_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async setMaturityDate(
+    security: EvmAddress,
+    maturityDate: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'setMaturityDate';
+    LogService.logTrace(
+      `Setting bond maturity date ${maturityDate} for security ${security.toString()}`,
+    );
+
+    const functionDataEncodedHex = new Interface(
+      Bond__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [maturityDate]);
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(SET_MATURITY_DATE_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

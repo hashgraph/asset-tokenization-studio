@@ -218,6 +218,7 @@ import {
   Role,
   RoleRequest,
   SetCouponRequest,
+  SetMaturityDateRequest,
 } from '../../../src/index.js';
 import {
   CLIENT_ACCOUNT_ECDSA,
@@ -241,6 +242,7 @@ import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter.js';
 import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter.js';
 import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter.js';
 import { Wallet, ethers } from 'ethers';
+import BaseError from '../../../src/core/error/BaseError.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -448,5 +450,38 @@ describe('🧪 Bond test', () => {
     expect(coupon.couponId).toEqual(numberOfCoupons + 1);
     expect(coupon.recordDate.getTime() / 1000).toEqual(recordTimestamp);
     expect(coupon.executionDate.getTime() / 1000).toEqual(executionTimestamp);
+  }, 600_000);
+
+  it('Set bond maturity date correctly', async () => {
+    const newMaturityDate = maturityDate + 10;
+    const request = new SetMaturityDateRequest({
+      securityId: bond.evmDiamondAddress!.toString(),
+      maturityDate: newMaturityDate.toString(),
+    });
+    const res = await Bond.setMaturityDate(request);
+
+    const bondDetails = await Bond.getBondDetails(
+      new GetBondDetailsRequest({
+        bondId: bond.evmDiamondAddress!.toString(),
+      }),
+    );
+    expect(bondDetails.maturityDate.getTime() / 1000).toEqual(newMaturityDate);
+    expect(res.payload).toBe(true);
+  }, 600_000);
+
+  it('Should return error if bond maturity date is earlier than current one', async () => {
+    const newMaturityDate = maturityDate - 10;
+    const request = new SetMaturityDateRequest({
+      securityId: bond.evmDiamondAddress!.toString(),
+      maturityDate: newMaturityDate.toString(),
+    });
+
+    let thrownError;
+    try {
+      await Bond.setMaturityDate(request);
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError).toBeInstanceOf(BaseError);
   }, 600_000);
 });

@@ -286,6 +286,7 @@ import { GetMaxSupplyQueryHandler } from '../app/usecase/query/security/cap/GetM
 
 import { SDK } from '../port/in/Common.js';
 import { HederaWalletConnectTransactionAdapter } from '../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
+import { SetMaturityDateCommandHandler } from '../app/usecase/command/bond/setMaturityDate/SetMaturityDateCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -403,6 +404,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetMaxSupplyCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetMaturityDateCommandHandler,
   },
 ];
 
