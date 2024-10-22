@@ -287,8 +287,13 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         onlyRole(_BOND_MANAGER_ROLE)
         returns (bool success_)
     {
-        success_ = _setMaturityDate(_maturityDate);
-        emit MaturityDateUpdated(address(this), _maturityDate);
+        uint256 previousMaturityDate;
+        (success_, previousMaturityDate) = _setMaturityDate(_maturityDate);
+        emit MaturityDateUpdated(
+            address(this),
+            _maturityDate,
+            previousMaturityDate
+        );
         return success_;
     }
 
@@ -342,10 +347,5 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         returns (uint256 couponCount_)
     {
         return _getCouponCount();
-    }
-
-    // solhint-disable-next-line no-empty-blocks
-    function setMaturityDate(uint256 _maturityDate) external {
-        // TODO: implement
     }
 }
