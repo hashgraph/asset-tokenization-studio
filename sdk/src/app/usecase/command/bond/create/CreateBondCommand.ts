@@ -230,7 +230,8 @@ export class CreateBondCommand extends Command<CreateBondCommandResponse> {
     public readonly firstCouponDate: string,
     public readonly factory?: ContractId,
     public readonly resolver?: ContractId,
-    public readonly businessLogicKeys?: string[],
+    public readonly configId?: string,
+    public readonly configVersion?: number,
     public readonly diamondOwnerAccount?: string,
   ) {
     super();

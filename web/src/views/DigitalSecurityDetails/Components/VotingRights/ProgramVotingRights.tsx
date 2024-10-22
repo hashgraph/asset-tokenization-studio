@@ -207,7 +207,10 @@ import { Button, Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import {
   CalendarInputController,
   InputController,
-} from "@hashgraph/asset-tokenization-uicomponents/Forms/Controllers";
+  PhosphorIcon,
+  Text,
+  Tooltip,
+} from "io-bricks-ui";
 import { Info } from "@phosphor-icons/react";
 import { required } from "../../../../utils/rules";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -216,11 +219,6 @@ import { useParams } from "react-router-dom";
 import { SetVotingRightsRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useSetVotingRights } from "../../../../hooks/queries/VotingRights";
 import { dateToUnixTimestamp, textToHex } from "../../../../utils/format";
-import {
-  PhosphorIcon,
-  Text,
-  Tooltip,
-} from "@hashgraph/asset-tokenization-uicomponents";
 
 interface ProgramVotingRightsFormValues {
   name: string;

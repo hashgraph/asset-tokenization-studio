@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-contracts",
-  "version": "1.3.2",
+  "version": "1.5.0",
   "main": "./build/typechain-types/index.js",
   "module": "./build/typechain-types/index.js",
   "files": [
@@ -24,7 +24,7 @@
     "test:demo": "npx hardhat test test/demo/Demo.test.ts",
     "test:demo:Hedera": "npx hardhat test test/demo/Demo.test.Hedera.ts",
     "test:factory": "npx hardhat test test/unitTests/factory/factory.test.ts",
-    "test:diamond": "npx hardhat test test/unitTests/diamond/diamond.test.ts",
+    "test:resolverProxy": "npx hardhat test test/unitTests/resolverProxy/resolverProxy.test.ts",
     "test:resolver": "npx hardhat test test/unitTests/resolver/BusinessLogicResolver.test.ts",
     "test:accessControl": "npx hardhat test test/unitTests/layer_1/accessControl/accessControl.test.ts",
     "test:controlList": "npx hardhat test test/unitTests/layer_1/controlList/controlList.test.ts",
@@ -42,6 +42,7 @@
     "test:cap": "npx hardhat test test/unitTests/layer_1/cap/cap.test.ts",
     "test:securityUSA": "npx hardhat test test/unitTests/layer_3/securityUSA/securityUSA.test.ts",
     "test:lock": "npx hardhat test test/unitTests/layer_1/lock/lock.test.ts",
+    "test:diamondCutManager": "npx hardhat test test/unitTests/resolver/diamondCutManager.test.ts",
     "size": "npx hardhat size-contracts",
     "build": "rimraf build && npx tsc -p tsconfig.json",
     "lint:sol": "solhint 'contracts/**/*.sol'",
@@ -100,6 +101,6 @@
     "web3": "^4.2.2"
   },
   "dependencies": {
-    "solidity-coverage": "^0.8.5"
+    "solidity-coverage": "^0.8.12"
   }
 }

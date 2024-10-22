@@ -210,7 +210,7 @@ import {IERC1644} from '../../interfaces/ERC1400/IERC1644.sol';
 import {_DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE} from '../../constants/roles.sol';
 import {
     IStaticFunctionSelectors
-} from '../../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC1644_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {ERC1644StorageWrapper} from './ERC1644StorageWrapper.sol';
 

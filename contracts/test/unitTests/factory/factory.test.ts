@@ -379,7 +379,7 @@ describe('Factory Tests', () => {
     })
 
     describe('Equity tests', () => {
-        it('GIVEN an empty Resolver WHEN deploying a new diamond THEN transaction fails', async () => {
+        it('GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails', async () => {
             const equityData = await setEquityData(
                 account_A,
                 isWhitelist,
@@ -402,7 +402,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 true,
-                undefined,
                 ADDRESS_0
             )
 
@@ -419,7 +418,7 @@ describe('Factory Tests', () => {
             ).to.be.rejectedWith('EmptyResolver')
         })
 
-        it('GIVEN a wrong ISIN WHEN deploying a new diamond THEN transaction fails', async () => {
+        it('GIVEN a wrong ISIN WHEN deploying a new resolverProxy THEN transaction fails', async () => {
             const equityData = await setEquityData(
                 account_A,
                 isWhitelist,
@@ -442,7 +441,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -459,7 +457,7 @@ describe('Factory Tests', () => {
             ).to.be.rejectedWith('WrongISIN')
         })
 
-        it('GIVEN no admin WHEN deploying a new diamond THEN transaction fails', async () => {
+        it('GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails', async () => {
             const equityData = await setEquityData(
                 account_A,
                 isWhitelist,
@@ -482,7 +480,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 false,
-                undefined,
                 undefined
             )
 
@@ -499,7 +496,7 @@ describe('Factory Tests', () => {
             ).to.be.rejectedWith('NoInitialAdmins')
         })
 
-        it('GIVEN wrong regulation type WHEN deploying a new diamond THEN transaction fails', async () => {
+        it('GIVEN wrong regulation type WHEN deploying a new resolverProxy THEN transaction fails', async () => {
             const equityData = await setEquityData(
                 account_A,
                 isWhitelist,
@@ -522,7 +519,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -544,7 +540,7 @@ describe('Factory Tests', () => {
                 .withArgs(RegulationType.NONE, regulationSubType)
         })
 
-        it('GIVEN wrong regulation type & subtype WHEN deploying a new diamond THEN transaction fails', async () => {
+        it('GIVEN wrong regulation type & subtype WHEN deploying a new resolverProxy THEN transaction fails', async () => {
             const equityData = await setEquityData(
                 account_A,
                 isWhitelist,
@@ -567,7 +563,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -589,7 +584,7 @@ describe('Factory Tests', () => {
                 .withArgs(RegulationType.REG_D, RegulationSubType.NONE)
         })
 
-        it('GIVEN the proper information WHEN deploying a new diamond THEN transaction succeeds', async () => {
+        it('GIVEN the proper information WHEN deploying a new resolverProxy THEN transaction succeeds', async () => {
             const equityData = await setEquityData(
                 account_A,
                 isWhitelist,
@@ -612,7 +607,6 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -690,7 +684,7 @@ describe('Factory Tests', () => {
     })
 
     describe('Bond tests', () => {
-        it('GIVEN an empty Resolver WHEN deploying a new diamond THEN transaction fails', async () => {
+        it('GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails', async () => {
             const bondData = await setBondData(
                 account_A,
                 isWhitelist,
@@ -710,7 +704,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 ADDRESS_0
             )
 
@@ -727,7 +720,7 @@ describe('Factory Tests', () => {
             ).to.be.rejectedWith('EmptyResolver')
         })
 
-        it('GIVEN a wrong ISIN WHEN deploying a new diamond THEN transaction fails', async () => {
+        it('GIVEN a wrong ISIN WHEN deploying a new resolverProxy THEN transaction fails', async () => {
             const bondData = await setBondData(
                 account_A,
                 isWhitelist,
@@ -747,7 +740,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -764,7 +756,7 @@ describe('Factory Tests', () => {
             ).to.be.rejectedWith('WrongISIN')
         })
 
-        it('GIVEN no admin WHEN deploying a new diamond THEN transaction fails', async () => {
+        it('GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails', async () => {
             const bondData = await setBondData(
                 account_A,
                 isWhitelist,
@@ -784,7 +776,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 false,
-                undefined,
                 undefined
             )
 
@@ -823,7 +814,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -878,7 +868,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -929,7 +918,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -972,7 +960,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -1058,7 +1045,7 @@ describe('Factory Tests', () => {
             expect(couponCount).to.equal(numberOfCoupon)
         })
 
-        it('GIVEN wrong regulation type WHEN deploying a new diamond THEN transaction fails', async () => {
+        it('GIVEN wrong regulation type WHEN deploying a new resolverProxy THEN transaction fails', async () => {
             const bondData = await setBondData(
                 account_A,
                 isWhitelist,
@@ -1078,7 +1065,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -1098,7 +1084,7 @@ describe('Factory Tests', () => {
                 .withArgs(RegulationType.NONE, regulationSubType)
         })
 
-        it('GIVEN wrong regulation type & subtype WHEN deploying a new diamond THEN transaction fails', async () => {
+        it('GIVEN wrong regulation type & subtype WHEN deploying a new resolverProxy THEN transaction fails', async () => {
             const bondData = await setBondData(
                 account_A,
                 isWhitelist,
@@ -1118,7 +1104,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 
@@ -1164,7 +1149,6 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                undefined,
                 undefined
             )
 

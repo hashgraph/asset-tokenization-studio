@@ -227,9 +227,6 @@ import ConnectRequest, {
 } from '../../../src/port/in/request/ConnectRequest.js';
 import { Wallet, ethers } from 'ethers';
 import {
-  BUSINESS_LOGIC_KEYS_COMMON,
-  BUSINESS_LOGIC_KEYS_EQUITY,
-  BUSINESS_LOGIC_KEYS_BOND,
   CLIENT_ACCOUNT_ECDSA,
   CLIENT_ACCOUNT_ECDSA_A,
   FACTORY_ADDRESS,
@@ -267,6 +264,9 @@ const regulationType = RegulationType.REG_D;
 const regulationSubType = RegulationSubType.C_506;
 const countries = 'AF,HG,BN';
 const info = 'Anything';
+const configId =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const configVersion = 1;
 
 const mirrorNode: MirrorNode = {
   name: 'testmirrorNode',
@@ -303,9 +303,6 @@ describe('🧪 Role test', () => {
     ns.configuration = {
       factoryAddress: FACTORY_ADDRESS,
       resolverAddress: RESOLVER_ADDRESS,
-      businessLogicKeysCommon: BUSINESS_LOGIC_KEYS_COMMON,
-      businessLogicKeysEquity: BUSINESS_LOGIC_KEYS_EQUITY,
-      businessLogicKeysBond: BUSINESS_LOGIC_KEYS_BOND,
     };
     ns.mirrorNode = mirrorNode;
     ns.rpcNode = rpcNode;
@@ -360,6 +357,8 @@ describe('🧪 Role test', () => {
       isCountryControlListWhiteList: true,
       countries: countries,
       info: info,
+      configId: configId,
+      configVersion: configVersion,
     });
 
     equity = (await Equity.create(requestST)).security;

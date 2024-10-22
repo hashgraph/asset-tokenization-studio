@@ -204,7 +204,7 @@
 */
 
 import type { ComponentMultiStyleConfig } from "@chakra-ui/react";
-import { BasePlatformTheme } from "@hashgraph/asset-tokenization-uicomponents/Theme";
+import { BasePlatformTheme } from "io-bricks-ui/Theme";
 
 export const FormError: ComponentMultiStyleConfig = {
   parts: ["text"],

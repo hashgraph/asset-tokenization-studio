@@ -807,7 +807,8 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       _equityInfo: EquityDetails,
       _factory: EvmAddress,
       _resolver: EvmAddress,
-      _businessLogicKeys: string[],
+      _configId: string,
+      _configVersion: number,
       _diamondOwnerAccount?: EvmAddress,
     ) => {
       securityInfo = _securityInfo;
@@ -847,7 +848,8 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       _couponInfo: CouponDetails,
       _factory: EvmAddress,
       _resolver: EvmAddress,
-      _businessLogicKeys: string[],
+      _configId: string,
+      _configVersion: number,
       _diamondOwnerAccount?: EvmAddress,
     ) => {
       securityInfo = _securityInfo;
@@ -1219,8 +1221,9 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
   });
 
   singletonInstance.release = jest.fn(
-    async (address: EvmAddress, sourceId: EvmAddress, lockId: number) => {
+    async (address: EvmAddress, sourceId: EvmAddress, lockIdBd: BigDecimal) => {
       const account = '0x' + sourceId.toString().toUpperCase().substring(2);
+      const lockId = lockIdBd.toBigNumber().toNumber();
 
       const accountLocks = locks.get(account);
       let lockIds = locksIds.get(account);

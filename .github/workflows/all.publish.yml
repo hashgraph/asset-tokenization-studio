@@ -5,8 +5,8 @@ on:
       - published
 jobs:
   publish:
-    name: docker
-    runs-on: token-studio-linux-medium
+    name: Publish NPM Packages
+    runs-on: ubuntu-latest
 
     permissions:
       contents: read
@@ -31,6 +31,9 @@ jobs:
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> .npmrc
           cp .npmrc ./contracts/.npmrc
           cp .npmrc ./sdk/.npmrc
+
+      - name: Change references
+        run: ./changeProjectsReferencesToRepo.sh
 
       - name: Install contracts dependencies
         run: npm run install:contracts

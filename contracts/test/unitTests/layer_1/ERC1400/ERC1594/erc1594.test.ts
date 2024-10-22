@@ -206,7 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
-    type Diamond,
+    type ResolverProxy,
     type Pause,
     type ERC1594,
     type AccessControl,
@@ -244,7 +244,7 @@ const data = '0x1234'
 const maxSupply = 10000000
 
 describe('ERC1594 Tests', () => {
-    let diamond: Diamond
+    let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
     let signer_C: SignerWithAddress

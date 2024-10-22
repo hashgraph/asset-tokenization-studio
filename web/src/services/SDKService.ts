@@ -99,20 +99,10 @@ export class SDKService {
   };
   static testnetResolverAddress = process.env.REACT_APP_RPC_RESOLVER ?? "0.0.0";
   static testnetFactoryAddress = process.env.REACT_APP_RPC_FACTORY ?? "0.0.0";
-  static testnetBusinessLogicKeysCommon =
-    process.env.REACT_APP_BUSINESS_LOGIC_KEYS_COMMON!.split(",");
-  static testnetBusinessLogicKeysEquity = [
-    process.env.REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY ?? "",
-  ];
-  static testnetBusinessLogicKeysBond = [
-    process.env.REACT_APP_BUSINESS_LOGIC_KEYS_BOND ?? "",
-  ];
+
   static testnetConfiguration = {
     factoryAddress: this.testnetFactoryAddress,
     resolverAddress: this.testnetResolverAddress,
-    businessLogicKeysCommon: this.testnetBusinessLogicKeysCommon,
-    businessLogicKeysEquity: this.testnetBusinessLogicKeysEquity,
-    businessLogicKeysBond: this.testnetBusinessLogicKeysBond,
   };
   static factories = {
     factories: [
@@ -126,30 +116,6 @@ export class SDKService {
     resolvers: [
       {
         resolver: this.testnetResolverAddress,
-        environment: this.testnetNetwork,
-      },
-    ],
-  };
-  static businesslogicKeysCommon = {
-    businesslogicKeys: [
-      {
-        businesslogicKeys: this.testnetBusinessLogicKeysCommon,
-        environment: this.testnetNetwork,
-      },
-    ],
-  };
-  static businesslogicKeysEquity = {
-    businesslogicKeys: [
-      {
-        businesslogicKeys: this.testnetBusinessLogicKeysEquity,
-        environment: this.testnetNetwork,
-      },
-    ],
-  };
-  static businesslogicKeysBond = {
-    businesslogicKeys: [
-      {
-        businesslogicKeys: this.testnetBusinessLogicKeysBond,
         environment: this.testnetNetwork,
       },
     ],
@@ -202,9 +168,6 @@ export class SDKService {
         jsonRpcRelays: this.testnetRPCNodes,
         factories: this.factories,
         resolvers: this.resolvers,
-        businessLogicKeysCommon: this.businesslogicKeysCommon,
-        businessLogicKeysEquity: this.businesslogicKeysEquity,
-        businessLogicKeysBond: this.businesslogicKeysBond,
       });
       const init = await Network.init(initReq);
 

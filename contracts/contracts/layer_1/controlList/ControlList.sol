@@ -211,7 +211,7 @@ import {Common} from '../common/Common.sol';
 import {_CONTROL_LIST_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
-} from '../../interfaces/diamond/IStaticFunctionSelectors.sol';
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CONTROL_LIST_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
 contract ControlList is IControlList, IStaticFunctionSelectors, Common {

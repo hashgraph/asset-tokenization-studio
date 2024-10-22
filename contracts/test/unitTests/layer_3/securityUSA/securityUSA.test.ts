@@ -206,7 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
-    type Diamond,
+    type ResolverProxy,
     type EquityUSA,
     type BondUSA,
 } from '../../../../typechain-types'
@@ -237,7 +237,7 @@ let maturityDate = startingDate + numberOfCoupons * frequency
 let firstCouponDate = startingDate + 1
 
 describe('Security USA Tests', () => {
-    let diamond: Diamond
+    let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
 
