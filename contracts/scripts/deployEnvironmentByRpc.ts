@@ -221,7 +221,7 @@ import { proxyAdmin } from './transparentUpgradableProxy'
 import { createResolverConfig } from './resolverDiamondCut'
 import { BondConfigId, EquityConfigId } from './constants'
 
-export interface Environment {
+interface Environment {
     deployedBusinessLogics: DeployedBusinessLogics
     facetIdsEquities: string[]
     facetVersionsEquities: number[]
