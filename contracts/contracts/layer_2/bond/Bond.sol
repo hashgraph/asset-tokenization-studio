@@ -273,6 +273,10 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         );
     }
 
+    /**
+     * @dev Sets the maturity date for the bond.
+     * @param _maturityDate The new maturity date to be set.
+     */
     function setMaturityDate(
         uint256 _maturityDate
     )
