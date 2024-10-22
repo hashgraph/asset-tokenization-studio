@@ -288,7 +288,7 @@ import {
   UPDATE_CONFIG_GAS,
   UPDATE_CONFIG_VERSION_GAS,
   UPDATE_RESOLVER_GAS,
-    SET_MATURITY_DATE_GAS,
+  SET_MATURITY_DATE_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';

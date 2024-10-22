@@ -409,10 +409,10 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetMaxSupplyCommandHandler,
   },
-    {
-        token: TOKENS.COMMAND_HANDLER,
-        useClass: SetMaturityDateCommandHandler,
-    },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetMaturityDateCommandHandler,
+  },
   // Management Operations
   {
     token: TOKENS.COMMAND_HANDLER,
