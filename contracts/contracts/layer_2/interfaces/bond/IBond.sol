@@ -248,6 +248,10 @@ interface IBond {
         Coupon calldata _newCoupon
     ) external returns (bool success_, uint256 couponID_);
 
+    function updateMaturityDate(
+        uint256 _maturityDate
+    ) external returns (bool success_);
+
     function getCouponDetails()
         external
         view
@@ -263,6 +267,4 @@ interface IBond {
     ) external view returns (CouponFor memory couponFor_);
 
     function getCouponCount() external view returns (uint256 couponCount_);
-
-    function setMaturityDate(uint256 _maturityDate) external;
 }

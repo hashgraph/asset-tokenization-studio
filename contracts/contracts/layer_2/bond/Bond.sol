@@ -208,7 +208,10 @@ pragma solidity 0.8.18;
 
 import {IBond} from '../interfaces/bond/IBond.sol';
 import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
-import {_CORPORATE_ACTION_ROLE} from '../../layer_1/constants/roles.sol';
+import {
+    _CORPORATE_ACTION_ROLE,
+    _BOND_MANAGER_ROLE
+} from '../../layer_1/constants/roles.sol';
 import {BondStorageWrapper} from './BondStorageWrapper.sol';
 import {
     IStaticFunctionSelectors
@@ -270,6 +273,30 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         );
     }
 
+    /**
+     * @dev Updates the maturity date of the bond.
+     * @param _newMaturityDate The new maturity date to be set.
+     */
+    function updateMaturityDate(
+        uint256 _newMaturityDate
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_BOND_MANAGER_ROLE)
+        onlyAfterCurrentMaturityDate(_newMaturityDate)
+        returns (bool success_)
+    {
+        emit MaturityDateUpdated(
+            address(this),
+            _newMaturityDate,
+            _getMaturityDate()
+        );
+        success_ = _setMaturityDate(_newMaturityDate);
+        return success_;
+    }
+
     function getCouponDetails()
         external
         view
@@ -320,10 +347,5 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         returns (uint256 couponCount_)
     {
         return _getCouponCount();
-    }
-
-    // solhint-disable-next-line no-empty-blocks
-    function setMaturityDate(uint256 _maturityDate) external {
-        // TODO: implement
     }
 }

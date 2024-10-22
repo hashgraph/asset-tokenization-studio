@@ -225,4 +225,5 @@ interface IBondStorageWrapper {
     error CouponCreationFailed();
     error CouponFirstDateWrong();
     error CouponFrequencyWrong();
+    error BondMaturityDateWrong();
 }
