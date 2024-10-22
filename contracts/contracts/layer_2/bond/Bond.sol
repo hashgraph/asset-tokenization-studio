@@ -208,7 +208,10 @@ pragma solidity 0.8.18;
 
 import {IBond} from '../interfaces/bond/IBond.sol';
 import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
-import {_CORPORATE_ACTION_ROLE} from '../../layer_1/constants/roles.sol';
+import {
+    _CORPORATE_ACTION_ROLE,
+    _BOND_MANAGER_ROLE
+} from '../../layer_1/constants/roles.sol';
 import {BondStorageWrapper} from './BondStorageWrapper.sol';
 import {
     IStaticFunctionSelectors
@@ -268,6 +271,25 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
             _newCoupon.executionDate,
             _newCoupon.rate
         );
+    }
+
+    /**
+     * @dev Sets the maturity date for the bond.
+     * @param _maturityDate The new maturity date to be set.
+     */
+    function setMaturityDate(
+        uint256 _maturityDate
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_BOND_MANAGER_ROLE)
+        returns (bool success_)
+    {
+        success_ = _setMaturityDate(_maturityDate);
+        emit MaturityDateUpdated(address(this), _maturityDate);
+        return success_;
     }
 
     function getCouponDetails()

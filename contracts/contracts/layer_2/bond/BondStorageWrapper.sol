@@ -294,6 +294,20 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
         );
     }
 
+    /**
+     * @dev Internal function to set the maturity date of the bond.
+     * @param _maturityDate The new maturity date to be set.
+     * @return success_ True if the maturity date was set successfully.
+     */
+    function _setMaturityDate(
+        uint256 _maturityDate
+    ) internal returns (bool success_) {
+        if (_maturityDate <= _bondStorage().bondDetail.maturityDate)
+            revert BondMaturityDateWrong();
+        _bondStorage().bondDetail.maturityDate = _maturityDate;
+        return true;
+    }
+
     function _getBondDetails()
         internal
         view
