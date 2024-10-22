@@ -292,44 +292,64 @@ describe('ResolverProxy Tests', () => {
         businessLogicsRegistryDatas: BusinessLogicRegistryData[],
         diamondLoupe: DiamondLoupeFacet
     ) {
-        const expectedFacets = await Promise.all(
-            businessLogicsRegistryDatas.map(async (data) => {
-                const staticFunctionSelectors = await ethers.getContractAt(
-                    'IStaticFunctionSelectors',
-                    data.businessLogicAddress
-                )
-                return {
-                    id: data.businessLogicKey,
-                    addr: data.businessLogicAddress,
-                    selectors:
-                        await staticFunctionSelectors.getStaticFunctionSelectors(),
-                    interfaceIds:
-                        await staticFunctionSelectors.getStaticInterfaceIds(),
-                }
+        const EXPECTED_FACETS: any[] = []
+
+        for (
+            let index = 0;
+            index < businessLogicsRegistryDatas.length;
+            index++
+        ) {
+            const businessLogicsRegistryData =
+                businessLogicsRegistryDatas[index]
+
+            const staticFunctionSelectors = await ethers.getContractAt(
+                'IStaticFunctionSelectors',
+                businessLogicsRegistryData.businessLogicAddress
+            )
+
+            EXPECTED_FACETS.push({
+                id: businessLogicsRegistryData.businessLogicKey,
+                addr: businessLogicsRegistryData.businessLogicAddress,
+                selectors:
+                    await staticFunctionSelectors.getStaticFunctionSelectors(),
+                interfaceIds:
+                    await staticFunctionSelectors.getStaticInterfaceIds(),
             })
-        )
-
-        assertObject(await diamondLoupe.getFacets(), expectedFacets)
-
-        const expectedFacetIds = expectedFacets.map((facet) => facet.id)
-        const expectedFacetAddresses = expectedFacets.map((facet) => facet.addr)
-
-        for (const facet of expectedFacets) {
-            expect(
-                await diamondLoupe.getFacetSelectors(facet.id)
-            ).to.deep.equal(facet.selectors)
-            expect(
-                await diamondLoupe.getFacetIdBySelector(facet.selectors[0])
-            ).to.deep.equal(facet.id)
-            assertObject(await diamondLoupe.getFacet(facet.id), facet)
-            expect(
-                await diamondLoupe.getFacetAddress(facet.selectors[0])
-            ).to.deep.equal(facet.addr)
         }
 
-        expect(await diamondLoupe.getFacetIds()).to.deep.equal(expectedFacetIds)
-        expect(await diamondLoupe.getFacetAddresses()).to.deep.equal(
-            expectedFacetAddresses
+        assertObject(await diamondLoupe.getFacets(), EXPECTED_FACETS)
+
+        const EXPECTED_FACETS_IDS: string[] = []
+        const EXPECTED_FACETS_ADDRS: string[] = []
+
+        for (let index = 0; index < EXPECTED_FACETS.length; index++) {
+            const EXPECTED_FACET = EXPECTED_FACETS[index]
+            expect(
+                await diamondLoupe.getFacetSelectors(EXPECTED_FACET.id)
+            ).to.be.deep.equal(EXPECTED_FACET.selectors)
+            expect(
+                await diamondLoupe.getFacetIdBySelector(
+                    EXPECTED_FACET.selectors[0]
+                )
+            ).to.be.deep.equal(EXPECTED_FACET.id)
+
+            assertObject(
+                await diamondLoupe.getFacet(EXPECTED_FACET.id),
+                EXPECTED_FACET
+            )
+            expect(
+                await diamondLoupe.getFacetAddress(EXPECTED_FACET.selectors[0])
+            ).to.be.deep.equal(EXPECTED_FACET.addr)
+
+            EXPECTED_FACETS_IDS.push(EXPECTED_FACET.id)
+            EXPECTED_FACETS_ADDRS.push(EXPECTED_FACET.addr)
+        }
+
+        expect(await diamondLoupe.getFacetIds()).to.be.deep.equal(
+            EXPECTED_FACETS_IDS
+        )
+        expect(await diamondLoupe.getFacetAddresses()).to.be.deep.equal(
+            EXPECTED_FACETS_ADDRS
         )
     }
 
