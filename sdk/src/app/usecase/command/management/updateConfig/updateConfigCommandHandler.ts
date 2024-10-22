@@ -203,69 +203,50 @@
 
 */
 
-import dividends from "./dividends";
-import coupons from "./coupons";
-import roleManagement from "./roleManagement";
-import management from "./management";
-import allowedList from "./allowedList";
-import votingRights from "./votingRight";
+import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator';
+import {
+  UpdateConfigCommand,
+  UpdateConfigCommandResponse,
+} from './updateConfigCommand';
+import { ICommandHandler } from '../../../../../core/command/CommandHandler';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
+import TransactionService from '../../../../service/TransactionService';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId';
 
-export default {
-  header: {
-    title: "Digital security details",
-  },
-  tabs: {
-    balance: "Balance",
-    allowedList: "Allowed list",
-    blockedList: "Blocked list",
-    details: "Details",
-    dividends: "Dividends",
-    coupons: "Coupons",
-    votingRights: "Voting rights",
-    roleManagement: "Role management",
-    management: "Management",
-  },
-  actions: {
-    redeem: "Redeem",
-    transfer: "Transfer",
-    mint: "Mint",
-    forceTransfer: "Force transfer",
-    forceRedeem: "Force redeem",
-    dangerZone: {
-      title: "Danger zone",
-      subtitle: "Pause security token",
-      buttonActive: "Active",
-      buttonInactive: "Inactive",
-    },
-  },
-  dividends,
-  coupons,
-  balance: {
-    search: {
-      title: "Display balances",
-      subtitle: "Add the ID account to preview its balance",
-      placeholder: "0.0.19253",
-      button: "Search ID",
-    },
-    details: {
-      title: "Details",
-    },
-    error: {
-      targetId: "Sorry, there was an error. Probably wrong address",
-    },
-  },
-  roleManagement,
-  management,
-  allowedList,
-  votingRights,
-  benefits: {
-    dividends: "Dividends",
-    coupons: "Coupons",
-    id: "Id",
-    recordDate: "Record date",
-    executionDate: "Execution date",
-    dividendAmount: "Dividend amount",
-    couponRate: "Rate",
-    snapshot: "Snapshot Id",
-  },
-};
+@CommandHandler(UpdateConfigCommand)
+export class UpdateConfigCommandHandler
+  implements ICommandHandler<UpdateConfigCommand>
+{
+  constructor(
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+  ) {}
+
+  async execute(
+    command: UpdateConfigCommand,
+  ): Promise<UpdateConfigCommandResponse> {
+    const { configId, configVersion, securityId } = command;
+    const handler = this.transactionService.getHandler();
+
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
+
+    const res = await handler.updateConfig(
+      securityEvmAddress,
+      configId,
+      configVersion,
+      securityId,
+    );
+
+    return Promise.resolve(
+      new UpdateConfigCommandResponse(res.error === undefined, res.id!),
+    );
+  }
+}
