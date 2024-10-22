@@ -248,7 +248,7 @@ interface IBond {
         Coupon calldata _newCoupon
     ) external returns (bool success_, uint256 couponID_);
 
-    function setMaturityDate(
+    function updateMaturityDate(
         uint256 _maturityDate
     ) external returns (bool success_);
 

@@ -225,6 +225,16 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
         bool initialized;
     }
 
+    /**
+     * @dev Modifier to ensure that the function is called only after the current maturity date.
+     * @param _maturityDate The maturity date to be checked against the current maturity date.
+     * Reverts with `BondMaturityDateWrong` if the provided maturity date is less than or equal to the current maturity date.
+     */
+    modifier onlyAfterCurrentMaturityDate(uint256 _maturityDate) {
+        if (_maturityDate <= _getMaturityDate()) revert BondMaturityDateWrong();
+        _;
+    }
+
     function _storeBondDetails(
         IBond.BondDetailsData memory _bondDetails
     ) internal returns (bool) {
@@ -298,16 +308,12 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
      * @dev Internal function to set the maturity date of the bond.
      * @param _maturityDate The new maturity date to be set.
      * @return success_ True if the maturity date was set successfully.
-     * @return previousMaturityDate_ The previous maturity date.
      */
     function _setMaturityDate(
         uint256 _maturityDate
-    ) internal returns (bool success_, uint256 previousMaturityDate_) {
-        previousMaturityDate_ = _bondStorage().bondDetail.maturityDate;
-        if (_maturityDate <= previousMaturityDate_)
-            revert BondMaturityDateWrong();
+    ) internal returns (bool success_) {
         _bondStorage().bondDetail.maturityDate = _maturityDate;
-        return (true, previousMaturityDate_);
+        return true;
     }
 
     function _getBondDetails()
@@ -324,6 +330,10 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
         returns (IBond.CouponDetailsData memory couponDetails_)
     {
         couponDetails_ = _bondStorage().couponDetail;
+    }
+
+    function _getMaturityDate() internal view returns (uint256 maturityDate_) {
+        return _bondStorage().bondDetail.maturityDate;
     }
 
     function _getCoupon(
