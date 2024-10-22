@@ -237,6 +237,8 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../../domain/context/factory/RegulationType.js';
+import SetMaturityDateRequest from './request/SetMaturityDateRequest.js';
+import { SetMaturityDateCommand } from '../../app/usecase/command/bond/setMaturityDate/SetMaturityDateCommand.js';
 
 interface IBondInPort {
   create(
@@ -252,6 +254,9 @@ interface IBondInPort {
   getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
   getCoupon(request: GetCouponRequest): Promise<CouponViewModel>;
   getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
+  setMaturityDate(
+    request: SetMaturityDateRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class BondInPort implements IBondInPort {
@@ -450,6 +455,18 @@ class BondInPort implements IBondInPort {
     }
 
     return coupons;
+  }
+
+  @LogError
+  async setMaturityDate(
+    request: SetMaturityDateRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { maturityDate, securityId } = request;
+    handleValidation('SetMaturityDateRequest', request);
+
+    return await this.commandBus.execute(
+      new SetMaturityDateCommand(maturityDate, securityId),
+    );
   }
 }
 
