@@ -321,4 +321,9 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     {
         return _getCouponCount();
     }
+
+    // solhint-disable-next-line no-empty-blocks
+    function setMaturityDate(uint256 _maturityDate) external {
+        // TODO: implement
+    }
 }
