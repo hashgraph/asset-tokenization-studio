@@ -262,6 +262,8 @@ export default {
     currency: "Currency",
     nominalValue: "Nominal Value",
     nominalTotalValue: "Value: $",
+    startingDate: "Starting date",
+    maturityDate: "Maturity date",
     permissions: {
       label: "Permissions",
       controllable: "Controllable",

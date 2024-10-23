@@ -214,75 +214,115 @@ import { formatNumberLocale, toNumber } from "../../../utils/format";
 import { useSecurityStore } from "../../../store/securityStore";
 import { useParams } from "react-router-dom";
 import { Flex } from "@chakra-ui/react";
-
+import { BondDetailsViewModel } from "@hashgraph/asset-tokenization-sdk";
+import { useEffect, useMemo } from "react";
+import { MaturityDateItem } from "./MadurityDateItem";
 interface SecurityDetailsExtended extends Omit<DefinitionListProps, "items"> {
   nominalValue?: number;
+  bondDetailsResponse?: BondDetailsViewModel;
 }
 
 export const SecurityDetailsExtended = ({
   nominalValue,
+  bondDetailsResponse,
   ...props
 }: SecurityDetailsExtended) => {
   const { t: tProperties } = useTranslation("properties");
   const { details } = useSecurityStore();
   const { id } = useParams();
 
+  const defaultItems = useMemo(
+    () => [
+      {
+        title: tProperties("name"),
+        description: details?.name ?? "",
+      },
+      {
+        title: tProperties("symbol"),
+        description: details?.symbol ?? "",
+      },
+      {
+        title: tProperties("decimal"),
+        description: details?.decimals ?? "",
+      },
+      {
+        title: tProperties("isin"),
+        description: details?.isin ?? "",
+      },
+      {
+        title: tProperties("id"),
+        description: (
+          <Flex w="full" align="center">
+            <Text textStyle="ElementsRegularSM">{id}</Text>
+            <ClipboardButton value={id!} />
+            <Text textStyle="ElementsSemiboldXS" ml={4}>
+              {tProperties("copyId")}
+            </Text>
+          </Flex>
+        ),
+      },
+      {
+        title: tProperties("currency"),
+        description: "USD",
+      }, // TODO: - format from ASCII when more currencies are available
+      {
+        title: tProperties("nominalValue"),
+        description: formatNumberLocale(nominalValue, 2),
+      },
+      {
+        title: tProperties("maxSupply"),
+        description: `${details?.maxSupply} ${details?.symbol}`,
+      },
+      {
+        title: tProperties("totalSupply"),
+        description: `${details?.totalSupply} ${details?.symbol}`,
+      },
+      {
+        title: tProperties("pendingToBeMinted"),
+        description: `${
+          toNumber(details?.maxSupply) - toNumber(details?.totalSupply)
+        } ${details?.symbol}`,
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [details],
+  );
+
+  useEffect(() => {
+    if (details && details.type === "BOND") {
+      defaultItems.push({
+        title: tProperties("startingDate"),
+        description: `${new Date(
+          bondDetailsResponse?.startingDate!,
+        ).toLocaleDateString()}`,
+      });
+
+      if (bondDetailsResponse && bondDetailsResponse.maturityDate && id) {
+        defaultItems.push({
+          title: tProperties("maturityDate"),
+          description: (
+            <MaturityDateItem
+              bondDetailsResponse={bondDetailsResponse}
+              securityId={id}
+            />
+          ),
+        });
+      }
+    }
+  }, [
+    bondDetailsResponse,
+    bondDetailsResponse?.startingDate,
+    defaultItems,
+    details,
+    id,
+    tProperties,
+  ]);
+
   return (
     <DefinitionList
       data-testid="security-details"
       isLoading={details === null}
-      items={[
-        {
-          title: tProperties("name"),
-          description: details?.name ?? "",
-        },
-        {
-          title: tProperties("symbol"),
-          description: details?.symbol ?? "",
-        },
-        {
-          title: tProperties("decimal"),
-          description: details?.decimals ?? "",
-        },
-        {
-          title: tProperties("isin"),
-          description: details?.isin ?? "",
-        },
-        {
-          title: tProperties("id"),
-          description: (
-            <Flex w="full" align="center">
-              <Text textStyle="ElementsRegularSM">{id}</Text>
-              <ClipboardButton value={id!} />
-              <Text textStyle="ElementsSemiboldXS" ml={4}>
-                {tProperties("copyId")}
-              </Text>
-            </Flex>
-          ),
-        },
-        {
-          title: tProperties("currency"),
-          description: "USD",
-        }, // TODO: - format from ASCII when more currencies are available
-        {
-          title: tProperties("nominalValue"),
-          description: formatNumberLocale(nominalValue, 2),
-        },
-        {
-          title: tProperties("maxSupply"),
-          description: `${details?.maxSupply} ${details?.symbol}`,
-        },
-        {
-          title: tProperties("totalSupply"),
-          description: `${details?.totalSupply} ${details?.symbol}`,
-        },
-        {
-          title: tProperties("pendingToBeMinted"),
-          description: `${
-            toNumber(details?.maxSupply) - toNumber(details?.totalSupply)
-          } ${details?.symbol}`,
-        },
-      ]}
+      items={defaultItems}
       title="Details"
       {...props}
     />

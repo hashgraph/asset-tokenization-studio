@@ -276,6 +276,7 @@ import {
   UpdateConfigRequest,
   GetConfigInfoRequest,
   ConfigInfoViewModel,
+  UpdateMaturityDateRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -441,6 +442,13 @@ export class SDKService {
     req: GetCouponDetailsRequest,
   ): Promise<CouponDetailsViewModel> {
     return await Bond.getCouponDetails(req);
+  }
+
+  public static async updateBondMaturityDate(
+    req: UpdateMaturityDateRequest,
+  ): Promise<boolean> {
+    const response = await Bond.updateMaturityDate(req);
+    return response.payload;
   }
 
   // COUPONS ////////////////////////////////////////////
