@@ -205,9 +205,12 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { BigNumber } from 'ethers'
+import { time } from '@nomicfoundation/hardhat-network-helpers'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
-    type ResolverProxy,
-    type Bond,
+    ResolverProxy,
+    Bond,
     AccessControl,
     Pause,
 } from '../../../../typechain-types'
@@ -223,11 +226,7 @@ import {
     RegulationSubType,
     RegulationType,
 } from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
-import { bond } from '../../../../typechain-types/contracts/layer_2'
-import { BigNumber } from 'ethers'
 
 const TIME = 30
 const numberOfUnits = 1000
@@ -463,13 +462,19 @@ describe('Bond Tests', () => {
 
             // * Act
             // Set maturity date
-            const receipt = await bondFacet.setMaturityDate(tomorrowInSeconds)
+            const receipt = await bondFacet.updateMaturityDate(
+                tomorrowInSeconds
+            )
 
             // * Assert
             const bondDetailsAfter = bondFacet.getBondDetails()
             await expect(receipt)
                 .to.emit(bondFacet, 'MaturityDateUpdated')
-                .withArgs(bondFacet.address, tomorrowInSeconds)
+                .withArgs(
+                    bondFacet.address,
+                    tomorrowInSeconds,
+                    maturityDateBefore
+                )
             // check date
             const maturityDateAfter = (await bondDetailsAfter).maturityDate
             expect(maturityDateAfter.eq(maturityDateBefore)).to.be.false
