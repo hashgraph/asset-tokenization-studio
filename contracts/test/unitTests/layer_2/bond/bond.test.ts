@@ -467,7 +467,6 @@ describe('Bond Tests', () => {
             )
 
             // * Assert
-            const bondDetailsAfter = bondFacet.getBondDetails()
             await expect(receipt)
                 .to.emit(bondFacet, 'MaturityDateUpdated')
                 .withArgs(
@@ -476,9 +475,10 @@ describe('Bond Tests', () => {
                     maturityDateBefore
                 )
             // check date
-            const maturityDateAfter = (await bondDetailsAfter).maturityDate
-            expect(maturityDateAfter.eq(maturityDateBefore)).to.be.false
-            expect(maturityDateAfter.eq(tomorrowInSeconds)).to.be.true
+            const maturityDateAfter = (await bondFacet.getBondDetails())
+                .maturityDate
+            expect(maturityDateAfter).not.to.be.equal(maturityDateBefore)
+            expect(maturityDateAfter).to.be.equal(tomorrowInSeconds)
         })
 
         it('GIVEN an account with bondManager role WHEN setMaturityDate to earlier date THEN transaction fails', async () => {
@@ -502,9 +502,9 @@ describe('Bond Tests', () => {
                 bondFacet.updateMaturityDate(yesterdayInSeconds)
             ).to.be.rejectedWith('BondMaturityDateWrong')
             // Ensure maturity date is not updated
-            const bondDetailsAfter = await bondFacet.getBondDetails()
-            const maturityDateAfter = bondDetailsAfter.maturityDate
-            expect(maturityDateAfter.eq(maturityDateBefore)).to.be.true
+            const maturityDateAfter = (await bondFacet.getBondDetails())
+                .maturityDate
+            expect(maturityDateAfter).to.be.equal(maturityDateBefore)
         })
 
         it('GIVEN an account without bondManager role WHEN setMaturityDate THEN transaction fails with AccountHasNoRole', async () => {
@@ -525,9 +525,9 @@ describe('Bond Tests', () => {
                 bondFacet.updateMaturityDate(tomorrowInSeconds)
             ).to.be.rejectedWith('AccountHasNoRole')
             // Ensure maturity date is not updated
-            const bondDetailsAfter = await bondFacet.getBondDetails()
-            const maturityDateAfter = bondDetailsAfter.maturityDate
-            expect(maturityDateAfter.eq(maturityDateBefore)).to.be.true
+            const maturityDateAfter = (await bondFacet.getBondDetails())
+                .maturityDate
+            expect(maturityDateAfter).to.be.equal(maturityDateBefore)
         })
 
         it('GIVEN a paused Token WHEN setMaturityDate THEN transaction fails with TokenIsPaused', async () => {
@@ -557,9 +557,9 @@ describe('Bond Tests', () => {
                 bondFacet.updateMaturityDate(tomorrowInSeconds)
             ).to.be.rejectedWith('TokenIsPaused')
             // Ensure maturity date is not updated
-            const bondDetailsAfter = await bondFacet.getBondDetails()
-            const maturityDateAfter = bondDetailsAfter.maturityDate
-            expect(maturityDateAfter.eq(maturityDateBefore)).to.be.true
+            const maturityDateAfter = (await bondFacet.getBondDetails())
+                .maturityDate
+            expect(maturityDateAfter).to.be.equal(maturityDateBefore)
         })
 
         it('Check number of created Coupon', async () => {
