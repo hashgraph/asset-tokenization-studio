@@ -228,8 +228,12 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
     /**
      * @dev Modifier to ensure that the function is called only after the current maturity date.
      * @param _maturityDate The maturity date to be checked against the current maturity date.
+<<<<<<< HEAD
      * Reverts with `BondMaturityDateWrong` if the provided maturity date is less than or equal
      * to the current maturity date.
+=======
+     * Reverts with `BondMaturityDateWrong` if the provided maturity date is less than or equal to the current maturity date.
+>>>>>>> origin/BBND-328
      */
     modifier onlyAfterCurrentMaturityDate(uint256 _maturityDate) {
         if (_maturityDate <= _getMaturityDate()) revert BondMaturityDateWrong();

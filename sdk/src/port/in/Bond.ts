@@ -237,8 +237,8 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../../domain/context/factory/RegulationType.js';
-import SetMaturityDateRequest from './request/SetMaturityDateRequest.js';
-import { SetMaturityDateCommand } from '../../app/usecase/command/bond/setMaturityDate/SetMaturityDateCommand.js';
+import UpdateMaturityDateRequest from './request/UpdateMaturityDateRequest.js';
+import { UpdateMaturityDateCommand } from '../../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand.js';
 
 interface IBondInPort {
   create(
@@ -254,8 +254,8 @@ interface IBondInPort {
   getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
   getCoupon(request: GetCouponRequest): Promise<CouponViewModel>;
   getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
-  setMaturityDate(
-    request: SetMaturityDateRequest,
+  updateMaturityDate(
+    request: UpdateMaturityDateRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
@@ -458,14 +458,14 @@ class BondInPort implements IBondInPort {
   }
 
   @LogError
-  async setMaturityDate(
-    request: SetMaturityDateRequest,
+  async updateMaturityDate(
+    request: UpdateMaturityDateRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
     const { maturityDate, securityId } = request;
-    handleValidation('SetMaturityDateRequest', request);
+    handleValidation('UpdateMaturityDateRequest', request);
 
     return await this.commandBus.execute(
-      new SetMaturityDateCommand(maturityDate, securityId),
+      new UpdateMaturityDateCommand(maturityDate, securityId),
     );
   }
 }

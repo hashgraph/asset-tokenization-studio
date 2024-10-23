@@ -203,29 +203,21 @@
 
 */
 
-import ValidatedRequest from './validation/ValidatedRequest.js';
-import Validation from './validation/Validation.js';
-import { SecurityDate } from '../../../domain/context/shared/SecurityDate.js';
+import { Command } from '../../../../../core/command/Command.js';
+import { CommandResponse } from '../../../../../core/command/CommandResponse.js';
 
-export default class SetMaturityDateRequest extends ValidatedRequest<SetMaturityDateRequest> {
-  securityId: string;
-  maturityDate: string;
+export class UpdateMaturityDateCommandResponse implements CommandResponse {
+  constructor(
+    public readonly payload: boolean,
+    public readonly transactionId: string,
+  ) {}
+}
 
-  constructor({
-    securityId,
-    maturityDate,
-  }: {
-    securityId: string;
-    maturityDate: string;
-  }) {
-    super({
-      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      maturityDate: (val) => {
-        return SecurityDate.checkDateTimestamp(parseInt(val));
-      },
-    });
-
-    this.securityId = securityId;
-    this.maturityDate = maturityDate;
+export class UpdateMaturityDateCommand extends Command<UpdateMaturityDateCommandResponse> {
+  constructor(
+    public readonly maturityDate: string,
+    public readonly securityId: string,
+  ) {
+    super();
   }
 }
