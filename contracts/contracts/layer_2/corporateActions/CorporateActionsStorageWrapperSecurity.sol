@@ -315,10 +315,10 @@ abstract contract CorporateActionsStorageWrapperSecurity is
         uint256 snapShotID,
         bytes memory data
     ) internal virtual override {
-        bytes32 actionId;
-        if (data.length > 0) actionId = abi.decode(data, (bytes32));
-
-        _addSnapshotToAction(actionId, snapShotID);
+        if (data.length > 0) {
+            bytes32 actionId = abi.decode(data, (bytes32));
+            _addSnapshotToAction(actionId, snapShotID);
+        }
     }
 
     function _addSnapshotToAction(
