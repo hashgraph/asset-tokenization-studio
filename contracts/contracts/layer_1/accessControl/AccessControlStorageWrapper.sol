@@ -290,6 +290,26 @@ abstract contract AccessControlStorageWrapper is
                 _remove(roleDataStorage, _roles[index], _account);
             }
         }
+        for (uint256 index2 = 0; index2 < _roles.length; index2++) {
+            if (_actives[index2]) {
+                if (!_has(roleDataStorage, _roles[index2], _account))
+                    revert ApplyRoleContradiction(
+                        _roles,
+                        _actives,
+                        _roles[index2]
+                    );
+                continue;
+            } else {
+                if (_has(roleDataStorage, _roles[index2], _account))
+                    revert ApplyRoleContradiction(
+                        _roles,
+                        _actives,
+                        _roles[index2]
+                    );
+                continue;
+            }
+        }
+
         success_ = true;
     }
 
