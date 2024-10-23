@@ -16,6 +16,8 @@ import {
   Text,
 } from "io-bricks-ui";
 import { Pencil, X, Info, Check } from "@phosphor-icons/react";
+import { useRolesStore } from "../../../store/rolesStore";
+import { SecurityRole } from "../../../utils/SecurityRole";
 
 export const MaturityDateItem = ({
   bondDetailsResponse,
@@ -24,6 +26,8 @@ export const MaturityDateItem = ({
   bondDetailsResponse: BondDetailsViewModel;
   securityId: string;
 }) => {
+  const { roles: accountRoles } = useRolesStore();
+
   const { t } = useTranslation("security", {
     keyPrefix: "details.bond.updateMaturityDate.toast",
   });
@@ -55,9 +59,6 @@ export const MaturityDateItem = ({
       securityId,
       maturityDate: dateToUnixTimestamp(data.maturityDate),
     });
-
-    // TODO: remove when update works
-    console.log("REQUEST", request, data.maturityDate);
 
     updateMaturityDateMutation(request, {
       onSettled() {
@@ -110,13 +111,15 @@ export const MaturityDateItem = ({
             <Text>
               {new Date(bondDetailsResponse.maturityDate).toLocaleDateString()}
             </Text>
-            <IconButton
-              size={"sm"}
-              icon={<PhosphorIcon as={Pencil} />}
-              aria-label="edit button"
-              variant="secondary"
-              onClick={() => setIsEditMode(true)}
-            />
+            {accountRoles.includes(SecurityRole._BOND_MANAGER_ROLE) && (
+              <IconButton
+                size={"sm"}
+                icon={<PhosphorIcon as={Pencil} />}
+                aria-label="edit button"
+                variant="secondary"
+                onClick={() => setIsEditMode(true)}
+              />
+            )}
           </>
         )}
       </Flex>
