@@ -222,6 +222,7 @@ import {
     ICorporateActionsStorageWrapperSecurity
 } from '../interfaces/corporateActions/ICorporateActionsStorageWrapperSecurity.sol';
 import {IEquity} from '../interfaces/equity/IEquity.sol';
+import {IBond} from '../interfaces/bond/IBond.sol';
 import {
     ScheduledSnapshotsStorageWrapper
 } from '../scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
@@ -305,9 +306,9 @@ abstract contract CorporateActionsStorageWrapperSecurity is
             revert CouponCreationFailed();
         }
 
-        uint256 recordDate = abi.decode(_data, (uint256));
+        IBond.Coupon memory newCoupon = abi.decode(_data, (IBond.Coupon));
 
-        _addScheduledSnapshot(recordDate, abi.encode(_actionId));
+        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
     }
 
     function _onScheduledSnapshotTriggered(
