@@ -268,4 +268,21 @@ export default {
     couponRate: "Rate",
     snapshot: "Snapshot Id",
   },
+  bond: {
+    updateMaturityDate: {
+      toast: {
+        title: "Confirmation",
+        subtitle: "Are you sure you want to change the maturity date?",
+        cancelButtonText: "Cancel",
+        confirmButtonText: "Confirm",
+      },
+      messages: {
+        success: "Success: ",
+        updateMaturityDateSuccessful:
+          "Maturity date has been updated successfully",
+        error: "Error: ",
+        updateMaturityDateFailed: "Update maturity date failed",
+      },
+    },
+  },
 };
