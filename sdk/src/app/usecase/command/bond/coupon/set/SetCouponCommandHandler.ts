@@ -245,6 +245,31 @@ export class SetCouponCommandHandler
       address,
     );
 
-    return Promise.resolve(new SetCouponCommandResponse(res.response, res.id!));
+    if (!res.id)
+      throw new Error('Set coupon Command Handler response id empty');
+
+    let couponId: string;
+
+    if (res.response && res.response.couponID) {
+      couponId = res.response.couponID;
+    } else {
+      const numberOfResultsItems = 2;
+
+      // * Recover the new contract ID from Event data from the Mirror Node
+      const results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        numberOfResultsItems,
+      );
+
+      if (!results || results.length !== numberOfResultsItems) {
+        throw new Error('Invalid data structure');
+      }
+
+      couponId = results[1];
+    }
+
+    return Promise.resolve(
+      new SetCouponCommandResponse(parseInt(couponId, 16), res.id!),
+    );
   }
 }
