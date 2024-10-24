@@ -238,7 +238,8 @@ abstract contract CorporateActionsStorageWrapper is
         mapping(bytes32 => bool) corporateActionExists;
     }
 
-    modifier onlyUniqueCorporateActions(bytes32 _actionType, bytes memory _data) {
+    modifier onlyUniqueCorporateActions(bytes32 _actionType, bytes memory _data)
+    {
         _checkCorporateAction(_corporateActionsStorage(), _actionType, _data);
         _;
     }

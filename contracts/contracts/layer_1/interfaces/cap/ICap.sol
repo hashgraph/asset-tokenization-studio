@@ -251,23 +251,6 @@ interface ICap {
     ) external returns (bool success_);
 
     /**
-     * @dev Set a max supply for the token to unlimited
-     *
-     * @return success_ true or false
-     */
-    function setUnlimitedMaxSupply() external returns (bool success_);
-
-    /**
-     * @dev Set unlimited max supply for a partition of the token
-     *
-     * @param _partition to be set the max supply
-     * @return success_ true or false
-     */
-    function setUnlimitedMaxSupplyByPartition(
-        bytes32 _partition
-    ) external returns (bool success_);
-
-    /**
      * @dev returns the max supply for the token
      *
      * @return maxSupply_ max supply amount
