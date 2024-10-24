@@ -374,4 +374,29 @@ describe('Corporate Actions Tests', () => {
             actionData.toUpperCase()
         )
     })
+
+    it(
+        'GIVEN an account with corporateActions role ' +
+            'WHEN addCorporateAction duplicated ' +
+            'THEN transaction fails with CorporateActionDuplicated',
+        async () => {
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(
+                _CORPORATE_ACTION_ROLE,
+                account_C
+            )
+            // Using account C (with role)
+            corporateActionsFacet = corporateActionsFacet.connect(signer_C)
+
+            // add to list
+            await corporateActionsFacet.addCorporateAction(
+                actionType,
+                actionData
+            )
+            await expect(
+                corporateActionsFacet.addCorporateAction(actionType, actionData)
+            ).to.eventually.be.rejectedWith('CorporateActionDuplicated')
+        }
+    )
 })
