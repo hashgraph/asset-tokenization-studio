@@ -234,7 +234,6 @@ contract CorporateActions is
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
-        onlyUniqueCorporateActions(_actionType, _data)
         returns (
             bool success_,
             bytes32 corporateActionId_,

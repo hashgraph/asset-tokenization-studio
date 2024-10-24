@@ -208,7 +208,7 @@ pragma solidity 0.8.18;
 
 interface IERC1594 {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594() external returns (bool success_);
+    function initialize_ERC1594() external;
 
     // Transfers
     function transferWithData(

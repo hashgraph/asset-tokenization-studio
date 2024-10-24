@@ -227,31 +227,29 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
 
     function _storeBondDetails(
         IBond.BondDetailsData memory _bondDetails
-    ) internal returns (bool) {
+    ) internal {
         _bondStorage().bondDetail = _bondDetails;
-        return true;
     }
 
     function _storeCouponDetails(
         IBond.CouponDetailsData memory _couponDetails,
         uint256 _startingDate,
         uint256 _maturityDate
-    ) internal returns (bool) {
+    ) internal {
         _bondStorage().couponDetail = _couponDetails;
-        if (_couponDetails.firstCouponDate == 0) return true;
+        if (_couponDetails.firstCouponDate == 0) return;
         if (
             _couponDetails.firstCouponDate < _startingDate ||
             _couponDetails.firstCouponDate > _maturityDate
         ) revert CouponFirstDateWrong();
         if (_couponDetails.couponFrequency == 0) revert CouponFrequencyWrong();
 
-        return
-            _setFixedCoupons(
-                _couponDetails.firstCouponDate,
-                _couponDetails.couponFrequency,
-                _maturityDate,
-                _couponDetails.couponRate
-            );
+        _setFixedCoupons(
+            _couponDetails.firstCouponDate,
+            _couponDetails.couponFrequency,
+            _maturityDate,
+            _couponDetails.couponRate
+        );
     }
 
     function _setFixedCoupons(

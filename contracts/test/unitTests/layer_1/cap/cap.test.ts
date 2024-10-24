@@ -230,6 +230,8 @@ const maxSupply = 1
 const maxSupplyByPartition = 1
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
+const _UINT256_MAX_VALUE = ethers.BigNumber.from(
+    '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
 )
 
 describe('CAP Tests', () => {
@@ -440,6 +442,41 @@ describe('CAP Tests', () => {
             )
 
             expect(currentMaxSupply).to.equal(maxSupply)
+        })
+    })
+
+    describe('Unlimited Max Supply', () => {
+        it('GIVEN a token WHEN setUnlimitedMaxSupply THEN transaction succeeds', async () => {
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+
+            capFacet = capFacet.connect(signer_C)
+
+            await expect(capFacet.setUnlimitedMaxSupply())
+                .to.emit(capFacet, 'MaxSupplySet')
+                .withArgs(account_C, _UINT256_MAX_VALUE, 0)
+                .to.emit(capFacet, 'UnlimitedMaxSupplySet')
+
+            const currentMaxSupply = await capFacet.getMaxSupply()
+            expect(currentMaxSupply).to.equal(_UINT256_MAX_VALUE)
+        })
+
+        it('GIVEN a token WHEN setUnlimitedMaxSupplyByPartition THEN transaction succeeds', async () => {
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+
+            capFacet = capFacet.connect(signer_C)
+
+            await expect(
+                capFacet.setUnlimitedMaxSupplyByPartition(_PARTITION_ID_1)
+            )
+                .to.emit(capFacet, 'MaxSupplyByPartitionSet')
+                .withArgs(account_C, _PARTITION_ID_1, _UINT256_MAX_VALUE, 0)
+
+            const currentMaxSupply = await capFacet.getMaxSupplyByPartition(
+                _PARTITION_ID_1
+            )
+            expect(currentMaxSupply).to.equal(_UINT256_MAX_VALUE)
         })
     })
 })

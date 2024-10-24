@@ -235,13 +235,6 @@ abstract contract CorporateActionsStorageWrapper is
         EnumerableSet.Bytes32Set actions;
         mapping(bytes32 => ActionData) actionsData;
         mapping(bytes32 => EnumerableSet.Bytes32Set) actionsByType;
-        mapping(bytes32 => bool) corporateActionExists;
-    }
-
-    modifier onlyUniqueCorporateActions(bytes32 _actionType, bytes memory _data)
-    {
-        _checkCorporateAction(_corporateActionsStorage(), _actionType, _data);
-        _;
     }
 
     modifier checkIndexForCorporateActionByType(
@@ -269,7 +262,6 @@ abstract contract CorporateActionsStorageWrapper is
     {
         CorporateActionDataStorage
             storage corporateActions_ = _corporateActionsStorage();
-        _setCorporateActionExists(corporateActions_, _actionType, _data);
         corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
         // TODO: Review when it can return false.
         success_ =
@@ -284,18 +276,6 @@ abstract contract CorporateActionsStorageWrapper is
         corporateActionIndexByType_ = _getCorporateActionCountByType(
             _actionType
         );
-    }
-
-    function _checkCorporateAction(
-        CorporateActionDataStorage storage _corporateActionStorage,
-        bytes32 _actionType,
-        bytes memory _data
-    ) internal {
-        if (
-            _existsCorporateAction(_corporateActionStorage, _actionType, _data)
-        ) {
-            revert CorporateActionDuplicated(_actionType, _data);
-        }
     }
 
     function _getCorporateAction(
@@ -398,34 +378,6 @@ abstract contract CorporateActionsStorageWrapper is
     ) internal view virtual returns (bytes memory) {
         return
             _corporateActionsStorage().actionsData[actionId].results[resultId];
-    }
-
-    function _setCorporateActionExists(
-        CorporateActionDataStorage storage _corporateActionStorage,
-        bytes32 _actionType,
-        bytes memory _data
-    ) private {
-        _corporateActionStorage.corporateActionExists[
-            _buildCorporateActionHash(_actionType, _data)
-        ] = true;
-    }
-
-    function _existsCorporateAction(
-        CorporateActionDataStorage storage _corporateActionStorage,
-        bytes32 _actionType,
-        bytes memory _data
-    ) private view returns (bool exists_) {
-        return
-            _corporateActionStorage.corporateActionExists[
-                _buildCorporateActionHash(_actionType, _data)
-            ];
-    }
-
-    function _buildCorporateActionHash(
-        bytes32 _actionType,
-        bytes memory _data
-    ) private pure returns (bytes32 hash_) {
-        hash_ = keccak256(abi.encode(_actionType, _data));
     }
 
     function _corporateActionsStorage()

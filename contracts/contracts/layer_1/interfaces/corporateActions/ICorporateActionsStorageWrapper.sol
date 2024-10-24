@@ -207,6 +207,5 @@
 pragma solidity 0.8.18;
 
 interface ICorporateActionsStorageWrapper {
-    error CorporateActionDuplicated(bytes32 actionType, bytes data);
     error WrongIndexForAction(uint256 index, bytes32 actionType);
 }

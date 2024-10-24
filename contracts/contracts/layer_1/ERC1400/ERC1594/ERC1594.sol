@@ -227,9 +227,8 @@ contract ERC1594 is
         virtual
         override
         onlyUninitialized(_getErc1594Storage().initialized)
-        returns (bool success_)
     {
-        return super._initialize_ERC1594();
+        super._initialize_ERC1594();
     }
 
     // solhint-disable no-unused-vars

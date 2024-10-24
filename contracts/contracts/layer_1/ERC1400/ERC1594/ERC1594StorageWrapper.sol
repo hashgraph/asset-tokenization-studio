@@ -240,10 +240,9 @@ abstract contract ERC1594StorageWrapper is
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC1594() internal virtual returns (bool success_) {
+    function _initialize_ERC1594() internal virtual {
         _getErc1594Storage().issuance = true;
         _getErc1594Storage().initialized = true;
-        success_ = true;
     }
 
     /**
