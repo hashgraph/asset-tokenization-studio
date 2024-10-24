@@ -208,6 +208,7 @@ import {
   DefinitionListProps,
   ClipboardButton,
   Text,
+  BasicDefinitionListItem,
 } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
 import { formatNumberLocale, toNumber } from "../../../utils/format";
@@ -231,7 +232,7 @@ export const SecurityDetailsExtended = ({
   const { details } = useSecurityStore();
   const { id } = useParams();
 
-  const defaultItems = useMemo(
+  const defaultItems: BasicDefinitionListItem[] = useMemo(
     () => [
       {
         title: tProperties("name"),
@@ -289,7 +290,11 @@ export const SecurityDetailsExtended = ({
   );
 
   useEffect(() => {
-    if (details && details.type === "BOND") {
+    if (
+      details &&
+      details.type === "BOND" &&
+      !defaultItems.find(({ title }) => title === tProperties("startingDate"))
+    ) {
       defaultItems.push({
         title: tProperties("startingDate"),
         description: `${new Date(
@@ -297,15 +302,15 @@ export const SecurityDetailsExtended = ({
         ).toLocaleDateString()}`,
       });
 
-      if (bondDetailsResponse && bondDetailsResponse.maturityDate && id) {
+      if (
+        bondDetailsResponse &&
+        bondDetailsResponse.maturityDate &&
+        id &&
+        !defaultItems.find(({ title }) => title === tProperties("maturityDate"))
+      ) {
         defaultItems.push({
           title: tProperties("maturityDate"),
-          description: (
-            <MaturityDateItem
-              bondDetailsResponse={bondDetailsResponse}
-              securityId={id}
-            />
-          ),
+          description: <MaturityDateItem securityId={id} />,
         });
       }
     }

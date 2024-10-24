@@ -1,5 +1,5 @@
 import {
-  BondDetailsViewModel,
+  GetBondDetailsRequest,
   UpdateMaturityDateRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useEffect, useState } from "react";
@@ -18,14 +18,11 @@ import {
 import { Pencil, X, Info, Check } from "@phosphor-icons/react";
 import { useRolesStore } from "../../../store/rolesStore";
 import { SecurityRole } from "../../../utils/SecurityRole";
+import { useGetBondDetails } from "../../../hooks/queries/useGetSecurityDetails";
+import { useParams } from "react-router-dom";
 
-export const MaturityDateItem = ({
-  bondDetailsResponse,
-  securityId,
-}: {
-  bondDetailsResponse: BondDetailsViewModel;
-  securityId: string;
-}) => {
+export const MaturityDateItem = ({ securityId }: { securityId: string }) => {
+  const { id = "" } = useParams();
   const { roles: accountRoles } = useRolesStore();
 
   const { t } = useTranslation("security", {
@@ -39,6 +36,15 @@ export const MaturityDateItem = ({
   const [isEditMode, setIsEditMode] = useState(false);
   const [showConfirmPopUp, setShowConfirmPopUp] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { data: bondDetailsResponse } = useGetBondDetails(
+    new GetBondDetailsRequest({
+      bondId: id,
+    }),
+    {
+      retry: false,
+    },
+  );
 
   const { mutate: updateMaturityDateMutation } = useUpdateBondMaturityDate();
 
@@ -64,7 +70,7 @@ export const MaturityDateItem = ({
       onSettled() {
         setShowConfirmPopUp(false);
         setIsLoading(false);
-        reset();
+        setIsEditMode(false);
       },
     });
   };
