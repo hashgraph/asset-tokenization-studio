@@ -214,6 +214,7 @@ import {
 import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {Common} from '../common/Common.sol';
 import {CapStorageWrapper} from './CapStorageWrapper.sol';
+import {_UINT256_MAX_VALUE} from '../constants/values.sol';
 
 contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
@@ -272,6 +273,34 @@ contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
         success_ = true;
     }
 
+    function setUnlimitedMaxSupply()
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_CAP_ROLE)
+        returns (bool success_)
+    {
+        _setMaxSupply(_UINT256_MAX_VALUE);
+        emit UnlimitedMaxSupplySet();
+        success_ = true;
+    }
+
+    function setUnlimitedMaxSupplyByPartition(
+        bytes32 _partition
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_CAP_ROLE)
+        returns (bool success_)
+    {
+        _setMaxSupplyByPartition(_partition, _UINT256_MAX_VALUE);
+        emit UnlimitedMaxSupplyByPartitionSet(_partition);
+        success_ = true;
+    }
+
     function getMaxSupply()
         external
         view
@@ -306,13 +335,19 @@ contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_ = new bytes4[](7);
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_Cap
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this.setMaxSupply.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .setMaxSupplyByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .setUnlimitedMaxSupply
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .setUnlimitedMaxSupplyByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this.getMaxSupply.selector;
         staticFunctionSelectors_[selectorIndex++] = this

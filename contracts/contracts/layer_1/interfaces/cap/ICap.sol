@@ -212,6 +212,19 @@ interface ICap {
         uint256 maxSupply;
     }
 
+    /**
+     * @dev Emitted when the token max supply is set to unlimited
+     *
+     */
+    event UnlimitedMaxSupplySet();
+
+    /**
+     * @dev Emitted when the token max supply is set to unlimited for a partition
+     *
+     * @param partition The partition with unlimited max supply.
+     */
+    event UnlimitedMaxSupplyByPartitionSet(bytes32 partition);
+
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(
         uint256 maxSupply,
@@ -228,11 +241,30 @@ interface ICap {
     /**
      * @dev Set a max supply for a partition of the token
      *
+     * @param _partition to be set the max supply
+     * @param _maxSupply to set as maximum value
      * @return success_ true or false
      */
     function setMaxSupplyByPartition(
         bytes32 _partition,
         uint256 _maxSupply
+    ) external returns (bool success_);
+
+    /**
+     * @dev Set a max supply for the token to unlimited
+     *
+     * @return success_ true or false
+     */
+    function setUnlimitedMaxSupply() external returns (bool success_);
+
+    /**
+     * @dev Set unlimited max supply for a partition of the token
+     *
+     * @param _partition to be set the max supply
+     * @return success_ true or false
+     */
+    function setUnlimitedMaxSupplyByPartition(
+        bytes32 _partition
     ) external returns (bool success_);
 
     /**
