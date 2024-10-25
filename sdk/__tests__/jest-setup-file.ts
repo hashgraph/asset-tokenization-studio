@@ -1410,7 +1410,6 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     security: EvmAddress,
     _maturityDate: number,
   ) {
-
     bondInfo = {
       ...bondInfo,
       maturityDate: _maturityDate,

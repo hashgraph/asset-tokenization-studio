@@ -391,7 +391,8 @@ describe('🧪 Management tests', () => {
 
   it('Updates config correctly', async () => {
     const configVersion = 2;
-    const newConfigId = '0x0000000000000000000000000000000000000000000000000000000000000003';
+    const newConfigId =
+      '0x0000000000000000000000000000000000000000000000000000000000000003';
     const request = new UpdateConfigRequest({
       configId: newConfigId,
       configVersion: configVersion,
