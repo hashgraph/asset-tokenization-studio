@@ -216,7 +216,14 @@ interface IBondStorageWrapper {
         uint256 rate
     );
 
+    event MaturityDateUpdated(
+        address indexed bondId,
+        uint256 indexed maturityDate,
+        uint256 indexed previousMaturityDate
+    );
+
     error CouponCreationFailed();
     error CouponFirstDateWrong();
     error CouponFrequencyWrong();
+    error BondMaturityDateWrong();
 }

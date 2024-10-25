@@ -224,7 +224,7 @@ export default {
     },
   },
   messages: {
-    succes: "Success: ",
+    success: "Success: ",
     grantRoleSuccessful: "Grant role was successful",
     revokeRoleSuccessful: "Revoke role was successful",
     applyRoleSuccessful: "The role change has been completed.",

@@ -205,9 +205,12 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { BigNumber } from 'ethers'
+import { time } from '@nomicfoundation/hardhat-network-helpers'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
-    type ResolverProxy,
-    type Bond,
+    ResolverProxy,
+    Bond,
     AccessControl,
     Pause,
 } from '../../../../typechain-types'
@@ -215,6 +218,7 @@ import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _CORPORATE_ACTION_ROLE,
     _PAUSER_ROLE,
+    _BOND_MANAGER_ROLE,
 } from '../../../../scripts/constants'
 import {
     Rbac,
@@ -222,9 +226,7 @@ import {
     RegulationSubType,
     RegulationType,
 } from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
 
 const TIME = 30
 const numberOfUnits = 1000
@@ -441,6 +443,123 @@ describe('Bond Tests', () => {
             expect(couponFor.rate).to.equal(couponRate)
             expect(couponFor.tokenBalance).to.equal(0)
             expect(couponFor.recordDateReached).to.equal(false)
+        })
+
+        it('GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds', async () => {
+            // * Arrange
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(_BOND_MANAGER_ROLE, account_C)
+            // Using account C (with role)
+            bondFacet = bondFacet.connect(signer_C)
+            // Get maturity date
+            const maturityDateBefore = (await bondFacet.getBondDetails())
+                .maturityDate
+            // New maturity date
+            const tomorrowInSeconds = BigNumber.from(
+                Math.floor(Date.now() / 1000 + 86400)
+            )
+
+            // * Act
+            // Set maturity date
+            const receipt = await bondFacet.updateMaturityDate(
+                tomorrowInSeconds
+            )
+
+            // * Assert
+            await expect(receipt)
+                .to.emit(bondFacet, 'MaturityDateUpdated')
+                .withArgs(
+                    bondFacet.address,
+                    tomorrowInSeconds,
+                    maturityDateBefore
+                )
+            // check date
+            const maturityDateAfter = (await bondFacet.getBondDetails())
+                .maturityDate
+            expect(maturityDateAfter).not.to.be.equal(maturityDateBefore)
+            expect(maturityDateAfter).to.be.equal(tomorrowInSeconds)
+        })
+
+        it('GIVEN an account with bondManager role WHEN setMaturityDate to earlier date THEN transaction fails', async () => {
+            // * Arrange
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(_BOND_MANAGER_ROLE, account_C)
+            // Using account C (with role)
+            bondFacet = bondFacet.connect(signer_C)
+            // Get maturity date
+            const maturityDateBefore = (await bondFacet.getBondDetails())
+                .maturityDate
+            // New maturity date (earlier than current)
+            const yesterdayInSeconds = BigNumber.from(
+                Math.floor(Date.now() / 1000 - 86400)
+            )
+
+            // * Act & Assert
+            // Set maturity date
+            await expect(
+                bondFacet.updateMaturityDate(yesterdayInSeconds)
+            ).to.be.rejectedWith('BondMaturityDateWrong')
+            // Ensure maturity date is not updated
+            const maturityDateAfter = (await bondFacet.getBondDetails())
+                .maturityDate
+            expect(maturityDateAfter).to.be.equal(maturityDateBefore)
+        })
+
+        it('GIVEN an account without bondManager role WHEN setMaturityDate THEN transaction fails with AccountHasNoRole', async () => {
+            // * Arrange
+            // Using account C (without role)
+            bondFacet = bondFacet.connect(signer_C)
+            // Get maturity date
+            const maturityDateBefore = (await bondFacet.getBondDetails())
+                .maturityDate
+            // New maturity date
+            const tomorrowInSeconds = BigNumber.from(
+                Math.floor(Date.now() / 1000 + 86400)
+            )
+
+            // * Act & Assert
+            // Set maturity date
+            await expect(
+                bondFacet.updateMaturityDate(tomorrowInSeconds)
+            ).to.be.rejectedWith('AccountHasNoRole')
+            // Ensure maturity date is not updated
+            const maturityDateAfter = (await bondFacet.getBondDetails())
+                .maturityDate
+            expect(maturityDateAfter).to.be.equal(maturityDateBefore)
+        })
+
+        it('GIVEN a paused Token WHEN setMaturityDate THEN transaction fails with TokenIsPaused', async () => {
+            // * Arrange
+            // Granting Role to account C and Pause
+            await grantRoleAndPauseToken(
+                accessControlFacet,
+                pauseFacet,
+                _BOND_MANAGER_ROLE,
+                signer_A,
+                signer_B,
+                account_C
+            )
+            // Using account C (with role)
+            bondFacet = bondFacet.connect(signer_C)
+            // Get maturity date
+            const maturityDateBefore = (await bondFacet.getBondDetails())
+                .maturityDate
+            // New maturity date
+            const tomorrowInSeconds = BigNumber.from(
+                Math.floor(Date.now() / 1000 + 86400)
+            )
+
+            // * Act & Assert
+            // Set maturity date
+            await expect(
+                bondFacet.updateMaturityDate(tomorrowInSeconds)
+            ).to.be.rejectedWith('TokenIsPaused')
+            // Ensure maturity date is not updated
+            const maturityDateAfter = (await bondFacet.getBondDetails())
+                .maturityDate
+            expect(maturityDateAfter).to.be.equal(maturityDateBefore)
         })
 
         it('Check number of created Coupon', async () => {
