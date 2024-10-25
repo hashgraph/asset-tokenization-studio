@@ -1406,6 +1406,22 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     >;
   });
 
+  singletonInstance.updateMaturityDate = jest.fn(async function (
+    security: EvmAddress,
+    _maturityDate: number,
+  ) {
+
+    bondInfo = {
+      ...bondInfo,
+      maturityDate: _maturityDate,
+    };
+
+    return { status: 'success', data: [] } as TransactionResponse<
+      string[],
+      Error
+    >;
+  });
+
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),
   };
