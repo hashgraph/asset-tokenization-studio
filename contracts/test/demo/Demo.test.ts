@@ -517,7 +517,7 @@ Deployed contracts:
         const putRight = true
         const dividendRight = DividendType.PREFERRED
         const currency = '0x455552'
-        const numberOfShares = 200000
+        const numberOfShares = 200000n
         const nominalValue = 100
 
         diamond = await deployEquityFromFactory(

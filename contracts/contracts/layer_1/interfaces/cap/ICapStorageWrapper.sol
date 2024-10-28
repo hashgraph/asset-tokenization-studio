@@ -207,6 +207,11 @@
 pragma solidity 0.8.18;
 
 interface ICapStorageWrapper {
+    struct PartitionCap {
+        bytes32 partition;
+        uint256 maxSupply;
+    }
+
     /**
      * @dev Emitted when the token max supply is set
      *
@@ -249,6 +254,11 @@ interface ICapStorageWrapper {
     error NewMaxSupplyTooLow(uint256 maxSupply, uint256 totalSupply);
 
     /**
+     * @dev Emitted when the new total max supply is set to ZERO
+     */
+    error NewMaxSupplyCannotBeZero();
+
+    /**
      * @dev Emitted when the token new max supply is less than the total supply
      *
      */
@@ -256,5 +266,14 @@ interface ICapStorageWrapper {
         bytes32 partition,
         uint256 maxSupply,
         uint256 totalSupply
+    );
+
+    /**
+     * @dev Emitted when the new total max supply by partition is set to ZERO
+     */
+    error NewMaxSupplyByPartitionTooHigh(
+        bytes32 partition,
+        uint256 newMaxSupplyByPartition,
+        uint256 maxSupply
     );
 }

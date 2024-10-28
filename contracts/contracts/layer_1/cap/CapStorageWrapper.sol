@@ -248,11 +248,23 @@ abstract contract CapStorageWrapper is
         _;
     }
 
-    modifier checkNewMaxSupply(uint256 _newMaxSupply) {
-        uint256 totalSupply = _totalSupply();
-        if (_newMaxSupply != 0 && totalSupply > _newMaxSupply) {
-            revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
+    modifier onlyValidMaxSupplies(
+        uint256 _maxSupply,
+        PartitionCap[] calldata _partitionCap
+    ) {
+        _checkNewMaxSupply(_maxSupply);
+        uint256 length = _partitionCap.length;
+        for (uint256 index; index < length; ) {
+            _checkNewMaxSupplyForPartition(
+                _partitionCap[index].partition,
+                _partitionCap[index].maxSupply
+            );
         }
+        _;
+    }
+
+    modifier checkNewMaxSupply(uint256 _newMaxSupply) {
+        _checkNewMaxSupply(_newMaxSupply);
         _;
     }
 
@@ -260,14 +272,7 @@ abstract contract CapStorageWrapper is
         bytes32 _partition,
         uint256 _newMaxSupply
     ) {
-        uint256 totalSupplyForPartition = _totalSupplyByPartition(_partition);
-        if (_newMaxSupply != 0 && totalSupplyForPartition > _newMaxSupply) {
-            revert NewMaxSupplyForPartitionTooLow(
-                _partition,
-                _newMaxSupply,
-                totalSupplyForPartition
-            );
-        }
+        _checkNewMaxSupplyForPartition(_partition, _newMaxSupply);
         _;
     }
 
@@ -309,10 +314,42 @@ abstract contract CapStorageWrapper is
         return _capStorage().maxSupplyByPartition[_partition];
     }
 
+    function _checkNewMaxSupply(uint256 _newMaxSupply) private view {
+        if (_newMaxSupply == 0) {
+            revert NewMaxSupplyCannotBeZero();
+        }
+        uint256 totalSupply = _totalSupply();
+        if (totalSupply > _newMaxSupply) {
+            revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
+        }
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    ) private view {
+        uint256 totalSupply = _totalSupply();
+        if (totalSupply > _newMaxSupply) {
+            revert NewMaxSupplyForPartitionTooLow(
+                _partition,
+                _newMaxSupply,
+                totalSupply
+            );
+        }
+        uint256 maxSupply = _getMaxSupply();
+        if (_newMaxSupply > maxSupply) {
+            revert NewMaxSupplyByPartitionTooHigh(
+                _partition,
+                _newMaxSupply,
+                maxSupply
+            );
+        }
+    }
+
     function _checkMaxSupply(
         uint256 _amount
     ) internal view virtual returns (bool) {
-        return _checkMaxSupplyCommon(_amount, _capStorage().maxSupply);
+        return _checkMaxSupplyCommon(_amount, 0, _getMaxSupply());
     }
 
     function _checkMaxSupplyByPartition(
@@ -322,17 +359,19 @@ abstract contract CapStorageWrapper is
         return
             _checkMaxSupplyCommon(
                 _amount,
-                _capStorage().maxSupplyByPartition[_partition]
+                _getMaxSupplyByPartition(_partition),
+                _getMaxSupply()
             );
     }
 
     function _checkMaxSupplyCommon(
         uint256 _amount,
+        uint256 _maxSupplyByPartition,
         uint256 _maxSupply
     ) private pure returns (bool) {
-        if (_maxSupply == 0) return true;
-        if (_amount <= _maxSupply) return true;
-        return false;
+        return
+            _amount <=
+            (_maxSupplyByPartition != 0 ? _maxSupplyByPartition : _maxSupply);
     }
 
     function _capStorage()
