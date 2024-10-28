@@ -223,6 +223,7 @@ import { useFormContext, useFormState } from "react-hook-form";
 import { FormStepContainer } from "../../../components/FormStepContainer";
 import { formatNumber } from "../../../utils/format";
 import { Info } from "@phosphor-icons/react";
+import { addDays } from "date-fns";
 
 export const StepConfiguration = () => {
   const { t } = useTranslation("security", { keyPrefix: "createBond" });
@@ -365,7 +366,7 @@ export const StepConfiguration = () => {
         </HStack>
         <CalendarInputController
           control={control}
-          fromDate={new Date(today.setHours(today.getHours() + 24))}
+          fromDate={addDays(today, 1)}
           id="startingDate"
           rules={{
             required,
