@@ -247,8 +247,31 @@ export class SetDividendsCommandHandler
       address,
     );
 
+    if (!res.id)
+      throw new Error('Set dividend Command Handler response id empty');
+
+    let dividendId: string;
+
+    if (res.response && res.response.dividendID) {
+      dividendId = res.response.dividendID;
+    } else {
+      const numberOfResultsItems = 2;
+
+      // * Recover the new contract ID from Event data from the Mirror Node
+      const results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        numberOfResultsItems,
+      );
+
+      if (!results || results.length !== numberOfResultsItems) {
+        throw new Error('Invalid data structure');
+      }
+
+      dividendId = results[1];
+    }
+
     return Promise.resolve(
-      new SetDividendsCommandResponse(res.response, res.id!),
+      new SetDividendsCommandResponse(parseInt(dividendId, 16), res.id!),
     );
   }
 }

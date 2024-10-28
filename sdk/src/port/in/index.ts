@@ -211,8 +211,19 @@ import Bond from './Bond.js';
 import Event from './Event.js';
 import Network from './Network.js';
 import Factory from './Factory.js';
+import Management from './Management.js';
 
-export { Security, Equity, Bond, Account, Role, Event, Network, Factory };
+export {
+  Security,
+  Equity,
+  Bond,
+  Account,
+  Role,
+  Event,
+  Network,
+  Factory,
+  Management,
+};
 
 export * from './request';
 export * from './response';
@@ -226,3 +237,4 @@ export * from './Event.js';
 export * from './Common.js';
 export * from './Network.js';
 export * from './Factory.js';
+export * from './Management.js';
