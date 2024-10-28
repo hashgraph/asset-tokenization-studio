@@ -277,10 +277,10 @@ describe('Factory Tests', () => {
     const redemptionRight = false
     const putRight = true
     const dividendRight = DividendType.PREFERRED
-    const numberOfShares = 2000
+    const numberOfShares = BigInt(2000)
 
     const currency = '0x455552'
-    const numberOfUnits = 1000
+    const numberOfUnits = BigInt(1000)
     const nominalValue = 100
     let startingDate = 999
     let maturityDate = 999

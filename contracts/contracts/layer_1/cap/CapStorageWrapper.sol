@@ -237,6 +237,7 @@ abstract contract CapStorageWrapper is
         uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
             _partition
         ) + _amount;
+
         if (
             !_checkMaxSupplyByPartition(_partition, newTotalSupplyForPartition)
         ) {
@@ -328,20 +329,22 @@ abstract contract CapStorageWrapper is
         bytes32 _partition,
         uint256 _newMaxSupply
     ) private view {
-        uint256 totalSupply = _totalSupply();
-        if (totalSupply > _newMaxSupply) {
+        if (_newMaxSupply == 0) return;
+        uint256 totalSupplyForPartition = _totalSupplyByPartition(_partition);
+        if (totalSupplyForPartition > _newMaxSupply) {
             revert NewMaxSupplyForPartitionTooLow(
                 _partition,
                 _newMaxSupply,
-                totalSupply
+                totalSupplyForPartition
             );
         }
-        uint256 maxSupply = _getMaxSupply();
-        if (_newMaxSupply > maxSupply) {
+        uint256 maxSupplyOverall = _getMaxSupply();
+        if (maxSupplyOverall == 0) return;
+        if (_newMaxSupply > maxSupplyOverall) {
             revert NewMaxSupplyByPartitionTooHigh(
                 _partition,
                 _newMaxSupply,
-                maxSupply
+                maxSupplyOverall
             );
         }
     }
@@ -349,29 +352,16 @@ abstract contract CapStorageWrapper is
     function _checkMaxSupply(
         uint256 _amount
     ) internal view virtual returns (bool) {
-        return _checkMaxSupplyCommon(_amount, 0, _getMaxSupply());
+        return _amount <= _getMaxSupply();
     }
 
     function _checkMaxSupplyByPartition(
         bytes32 _partition,
         uint256 _amount
     ) internal view virtual returns (bool) {
-        return
-            _checkMaxSupplyCommon(
-                _amount,
-                _getMaxSupplyByPartition(_partition),
-                _getMaxSupply()
-            );
-    }
-
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupplyByPartition,
-        uint256 _maxSupply
-    ) private pure returns (bool) {
-        return
-            _amount <=
-            (_maxSupplyByPartition != 0 ? _maxSupplyByPartition : _maxSupply);
+        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(_partition);
+        if (maxSupplyForPartition == 0) return true;
+        return _amount <= maxSupplyForPartition;
     }
 
     function _capStorage()

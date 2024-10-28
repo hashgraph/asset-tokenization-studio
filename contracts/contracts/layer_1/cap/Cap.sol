@@ -264,6 +264,7 @@ contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
+        onlyWithMultiPartition
         checkNewMaxSupplyForPartition(_partition, _maxSupply)
         returns (bool success_)
     {
