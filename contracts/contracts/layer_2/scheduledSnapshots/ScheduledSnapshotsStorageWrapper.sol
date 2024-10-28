@@ -300,7 +300,7 @@ abstract contract ScheduledSnapshotsStorageWrapper is
             _max = scheduledSnapshotsLength;
         }
 
-        for (uint256 j = 1; j <= scheduledSnapshotsLength; j++) {
+        for (uint256 j = 1; j <= _max; j++) {
             uint256 pos = scheduledSnapshotsLength - j;
 
             IScheduledSnapshots.ScheduledSnapshot

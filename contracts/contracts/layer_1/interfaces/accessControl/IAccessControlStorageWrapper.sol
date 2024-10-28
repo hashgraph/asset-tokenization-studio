@@ -240,4 +240,13 @@ interface IAccessControlStorageWrapper {
         uint256 rolesLength,
         uint256 activesLength
     );
+
+    /**
+     * @dev Emitted when the there is a contradiction in the roles to apply, the same role must be granted and revoked
+     *
+     * @param roles This list of roles
+     * @param actives grant or revoke roles
+     * @param role the role for which there is a contradiction
+     */
+    error ApplyRoleContradiction(bytes32[] roles, bool[] actives, bytes32 role);
 }

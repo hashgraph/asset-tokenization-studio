@@ -246,8 +246,31 @@ export class SetVotingRightsCommandHandler
       address,
     );
 
+    if (!res.id)
+      throw new Error('Set voting right Command Handler response id empty');
+
+    let voteId: string;
+
+    if (res.response && res.response.voteId) {
+      voteId = res.response.voteId;
+    } else {
+      const numberOfResultsItems = 2;
+
+      // * Recover the new contract ID from Event data from the Mirror Node
+      const results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        numberOfResultsItems,
+      );
+
+      if (!results || results.length !== numberOfResultsItems) {
+        throw new Error('Invalid data structure');
+      }
+
+      voteId = results[1];
+    }
+
     return Promise.resolve(
-      new SetVotingRightsCommandResponse(res.response, res.id!),
+      new SetVotingRightsCommandResponse(parseInt(voteId, 16), res.id!),
     );
   }
 }

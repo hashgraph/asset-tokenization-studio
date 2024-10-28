@@ -217,6 +217,7 @@ import list from "./list";
 import pause from "./pause";
 import unpause from "./unpause";
 import regulation from "./regulation";
+import management from "./management";
 
 export default {
   add,
@@ -233,4 +234,5 @@ export default {
   pause,
   unpause,
   regulation,
+  management,
 };

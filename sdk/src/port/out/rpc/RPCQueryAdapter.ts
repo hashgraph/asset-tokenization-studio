@@ -241,6 +241,7 @@ import {
   Factory__factory,
   Lock__factory,
   Security__factory,
+  DiamondFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1055,5 +1056,19 @@ export class RPCQueryAdapter {
       Lock__factory,
       address.toString(),
     ).getLockForByPartition(_PARTITION_ID_1, target.toString(), lockId);
+  }
+
+  async getConfigInfo(address: EvmAddress): Promise<[string, string, number]> {
+    LogService.logTrace(`Getting config info for ${address.toString()}`);
+    const configInfo = await this.connect(
+      DiamondFacet__factory,
+      address.toString(),
+    ).getConfigInfo();
+
+    return [
+      configInfo.resolver_.toString(),
+      configInfo.configurationId_,
+      configInfo.version_.toNumber(),
+    ];
   }
 }

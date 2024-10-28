@@ -206,6 +206,7 @@
 import dividends from "./dividends";
 import coupons from "./coupons";
 import roleManagement from "./roleManagement";
+import management from "./management";
 import allowedList from "./allowedList";
 import votingRights from "./votingRight";
 
@@ -222,6 +223,7 @@ export default {
     coupons: "Coupons",
     votingRights: "Voting rights",
     roleManagement: "Role management",
+    management: "Management",
   },
   actions: {
     redeem: "Redeem",
@@ -253,6 +255,7 @@ export default {
     },
   },
   roleManagement,
+  management,
   allowedList,
   votingRights,
   benefits: {
@@ -264,5 +267,22 @@ export default {
     dividendAmount: "Dividend amount",
     couponRate: "Rate",
     snapshot: "Snapshot Id",
+  },
+  bond: {
+    updateMaturityDate: {
+      toast: {
+        title: "Confirmation",
+        subtitle: "Are you sure you want to change the maturity date?",
+        cancelButtonText: "Cancel",
+        confirmButtonText: "Confirm",
+      },
+      messages: {
+        success: "Success: ",
+        updateMaturityDateSuccessful:
+          "Maturity date has been updated successfully",
+        error: "Error: ",
+        updateMaturityDateFailed: "Update maturity date failed",
+      },
+    },
   },
 };

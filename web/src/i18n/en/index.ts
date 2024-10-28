@@ -262,6 +262,8 @@ export default {
     currency: "Currency",
     nominalValue: "Nominal Value",
     nominalTotalValue: "Value: $",
+    startingDate: "Starting date",
+    maturityDate: "Maturity date",
     permissions: {
       label: "Permissions",
       controllable: "Controllable",
@@ -297,6 +299,7 @@ export default {
     corporateActions: "Corporate actions role",
     document: "Document role",
     snapshot: "Snapshot role",
+    bondManager: "Bond Manager role",
   },
   landing,
   routes,
