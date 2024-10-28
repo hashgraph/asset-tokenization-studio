@@ -21,6 +21,14 @@
     "rules": {
         "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/no-non-null-assertion":"off",
-        "@typescript-eslint/no-var-requires":"off"
+        "@typescript-eslint/no-var-requires":"off",
+        "max-len": [
+            "error",
+            {
+              "code": 120,
+              "ignoreStrings": true,  // Ignore string literals (like test descriptions)
+              "ignoreTemplateLiterals": true // Ignore template literals (if used in test descriptions)
+            }
+          ]
     }
 }

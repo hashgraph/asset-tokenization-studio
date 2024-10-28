@@ -1190,7 +1190,8 @@ describe('Demo RedSwam', () => {
         ).to.eventually.be.rejectedWith(Error)
 
         console.log(
-            'Grant issuer, control list, corporate action and controller roles to account "I" using account "Z" => succeeds'
+            'Grant issuer, control list, corporate action 
+            and controller roles to account "I" using account "Z" => succeeds'
         )
         accessControlFacet = accessControlFacet.connect(signer_Z)
         await accessControlFacet.grantRole(_ISSUER_ROLE, account_I)
