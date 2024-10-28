@@ -412,6 +412,7 @@ export const Details = ({
           <SecurityDetailsExtended
             layerStyle="container"
             nominalValue={nominalValue}
+            bondDetailsResponse={bondDetailsResponse}
           />
           {dividends?.map((dividend) => (
             <DefinitionList

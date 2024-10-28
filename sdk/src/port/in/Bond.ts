@@ -237,6 +237,8 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../../domain/context/factory/RegulationType.js';
+import UpdateMaturityDateRequest from './request/UpdateMaturityDateRequest.js';
+import { UpdateMaturityDateCommand } from '../../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommand.js';
 
 interface IBondInPort {
   create(
@@ -252,6 +254,9 @@ interface IBondInPort {
   getCouponFor(request: GetCouponForRequest): Promise<CouponForViewModel>;
   getCoupon(request: GetCouponRequest): Promise<CouponViewModel>;
   getAllCoupons(request: GetAllCouponsRequest): Promise<CouponViewModel[]>;
+  updateMaturityDate(
+    request: UpdateMaturityDateRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class BondInPort implements IBondInPort {
@@ -450,6 +455,18 @@ class BondInPort implements IBondInPort {
     }
 
     return coupons;
+  }
+
+  @LogError
+  async updateMaturityDate(
+    request: UpdateMaturityDateRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { maturityDate, securityId } = request;
+    handleValidation('UpdateMaturityDateRequest', request);
+
+    return await this.commandBus.execute(
+      new UpdateMaturityDateCommand(maturityDate, securityId),
+    );
   }
 }
 

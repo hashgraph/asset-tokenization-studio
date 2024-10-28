@@ -254,11 +254,14 @@ contract BondUSA is IBondUSA, Bond, Security {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](8);
+        staticFunctionSelectors_ = new bytes4[](9);
         staticFunctionSelectors_[selectorIndex++] = this
             ._initialize_bondUSA
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .updateMaturityDate
+            .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getBondDetails
             .selector;
