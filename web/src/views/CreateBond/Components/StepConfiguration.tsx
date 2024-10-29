@@ -391,6 +391,7 @@ export const StepConfiguration = () => {
         <CalendarInputController
           control={control}
           id="maturityDate"
+          fromDate={addDays(new Date(startingDate), 1)}
           rules={{
             required,
             validate: isAfterDate(new Date(startingDate)),
