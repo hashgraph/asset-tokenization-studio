@@ -519,7 +519,10 @@ describe('CAP Tests', () => {
             // add to list fails
             await expect(
                 capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply)
-            ).to.eventually.be.rejectedWith(Error)
+            ).to.be.revertedWithCustomError(
+                capFacet,
+                'OnlyAllowedInMultiPartitionMode'
+            )
         })
     })
 

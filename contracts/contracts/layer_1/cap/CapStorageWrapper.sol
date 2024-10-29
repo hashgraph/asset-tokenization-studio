@@ -249,21 +249,6 @@ abstract contract CapStorageWrapper is
         _;
     }
 
-    modifier onlyValidMaxSupplies(
-        uint256 _maxSupply,
-        PartitionCap[] calldata _partitionCap
-    ) {
-        _checkNewMaxSupply(_maxSupply);
-        uint256 length = _partitionCap.length;
-        for (uint256 index; index < length; ) {
-            _checkNewMaxSupplyForPartition(
-                _partitionCap[index].partition,
-                _partitionCap[index].maxSupply
-            );
-        }
-        _;
-    }
-
     modifier checkNewMaxSupply(uint256 _newMaxSupply) {
         _checkNewMaxSupply(_newMaxSupply);
         _;
@@ -339,7 +324,6 @@ abstract contract CapStorageWrapper is
             );
         }
         uint256 maxSupplyOverall = _getMaxSupply();
-        if (maxSupplyOverall == 0) return;
         if (_newMaxSupply > maxSupplyOverall) {
             revert NewMaxSupplyByPartitionTooHigh(
                 _partition,

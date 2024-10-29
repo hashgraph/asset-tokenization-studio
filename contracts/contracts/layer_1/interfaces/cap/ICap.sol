@@ -210,10 +210,7 @@ import {ICapStorageWrapper} from './ICapStorageWrapper.sol';
 
 interface ICap is ICapStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_Cap(
-        uint256 maxSupply,
-        PartitionCap[] calldata partitionCap
-    ) external;
+    function initialize_Cap(uint256 maxSupply) external;
 
     /**
      * @dev Set a max supply for the token
