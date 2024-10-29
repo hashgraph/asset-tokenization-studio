@@ -251,6 +251,11 @@ export const SecurityDetailsExtended = ({
         description: details?.isin ?? "",
       },
       {
+        title: tProperties("evmAddress"),
+        description: details?.evmDiamondAddress ?? "",
+        canCopy: true,
+      },
+      {
         title: tProperties("id"),
         description: (
           <Flex w="full" align="center">

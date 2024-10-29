@@ -215,6 +215,7 @@ export default {
       name: "Name",
       type: "Type",
       isin: "ISIN",
+      evmAddress: "EVM Address",
       address: "Address",
       role: "Your role",
     },
