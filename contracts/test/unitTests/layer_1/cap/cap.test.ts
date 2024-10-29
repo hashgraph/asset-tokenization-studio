@@ -339,7 +339,7 @@ describe('CAP Tests', () => {
     })
 
     it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {
-        await expect(capFacet.initialize_Cap(5, [])).to.be.rejectedWith(
+        await expect(capFacet.initialize_Cap(5)).to.be.rejectedWith(
             'AlreadyInitialized'
         )
     })

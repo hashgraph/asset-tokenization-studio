@@ -634,7 +634,7 @@ export async function deployBondFromFactory(
         decimals,
         isin,
         currency,
-        numberOfUnits,
+        BigInt(numberOfUnits),
         nominalValue,
         startingDate,
         maturityDate,
