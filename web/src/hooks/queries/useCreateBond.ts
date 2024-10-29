@@ -235,6 +235,7 @@ export const useCreateBond = () => {
           isin: data.security.isin ?? "",
           type: data.security.type,
           address: data.security.diamondAddress?.toString() ?? "",
+          evmAddress: data.security.evmDiamondAddress?.toString() ?? "",
         };
         toast.show({
           duration: 3000,

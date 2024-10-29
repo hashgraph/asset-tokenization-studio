@@ -214,6 +214,7 @@ import {
   Button,
   ClipboardButton,
   Link,
+  Tooltip,
 } from "io-bricks-ui";
 import { CellContext, createColumnHelper } from "@tanstack/react-table";
 import { useParams } from "react-router-dom";
@@ -232,6 +233,7 @@ import { useWalletStore } from "../../store/walletStore";
 import { RouterManager } from "../../router/RouterManager";
 import { RouteName } from "../../router/RouteName";
 import { useTable } from "../../hooks/useTable";
+import { collapseText } from "../../utils/format";
 
 type securitiesSearch = {
   search: string;
@@ -440,6 +442,34 @@ export const DigitalSecuritiesList = () => {
           >
             {address}
           </Button>
+        );
+      },
+    }),
+    columnsHelper.accessor("evmAddress", {
+      header: tTable("fields.evmAddress"),
+      size: 160,
+      enableSorting: false,
+      cell: ({ getValue }) => {
+        const evmAddress = getValue();
+
+        return (
+          <Tooltip label={evmAddress}>
+            <HStack gap={1.5}>
+              <Button
+                as={Link}
+                target="_blank"
+                href={`https://hashscan.io/testnet/contract/${evmAddress}`} //TODO move to env file
+                variant="table"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {collapseText(evmAddress, 4, 8)}
+              </Button>
+              <ClipboardButton
+                sx={{ color: "secondary.500" }}
+                value={evmAddress}
+              />
+            </HStack>
+          </Tooltip>
         );
       },
     }),
