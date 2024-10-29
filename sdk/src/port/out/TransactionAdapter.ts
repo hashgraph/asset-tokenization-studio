@@ -414,6 +414,11 @@ interface ITransactionAdapter {
   ): Promise<TransactionResponse>;
   getAccount(): Account;
   getMirrorNodeAdapter(): MirrorNodeAdapter;
+  updateMaturityDate(
+    security: EvmAddress,
+    maturityDate: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 interface RoleTransactionAdapter {
@@ -833,6 +838,13 @@ export default abstract class TransactionAdapter
     resolver: EvmAddress,
     configVersion: number,
     configId: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  updateMaturityDate(
+    security: EvmAddress,
+    maturityDate: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');

@@ -214,6 +214,11 @@ import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _DEFAULT_ADMIN_ROLE,
     _PAUSER_ROLE,
+    _CAP_ROLE,
+    _CONTROLLER_ROLE,
+    _CORPORATE_ACTION_ROLE,
+    _DOCUMENTER_ROLE,
+    _LOCKER_ROLE,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -325,7 +330,7 @@ describe('Access Control Tests', () => {
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
-    it('GIVEN an account without administrative role WHEN applyRoles THEN transaction fails with RolesAndActivesLengthMismatch', async () => {
+    it('GIVEN a list of roles and actives that is not equally long WHEN applyRoles THEN transaction fails with RolesAndActivesLengthMismatch', async () => {
         // Using account C (non admin)
         accessControlFacet = accessControlFacet.connect(signer_C)
 
@@ -333,6 +338,34 @@ describe('Access Control Tests', () => {
         await expect(
             accessControlFacet.applyRoles([_DEFAULT_ADMIN_ROLE], [], account_B)
         ).to.be.rejectedWith('RolesAndActivesLengthMismatch')
+    })
+
+    it('GIVEN a list of contradictory roles (enable and disbale) role WHEN applyRoles THEN transaction fails with ApplyRoleContradiction', async () => {
+        // Using account C (non admin)
+        accessControlFacet = accessControlFacet.connect(signer_A)
+
+        const Roles_1 = [
+            _DEFAULT_ADMIN_ROLE,
+            _PAUSER_ROLE,
+            _CAP_ROLE,
+            _CONTROLLER_ROLE,
+            _CORPORATE_ACTION_ROLE,
+            _DOCUMENTER_ROLE,
+            _CONTROLLER_ROLE,
+            _LOCKER_ROLE,
+        ]
+
+        const actives_1 = [true, true, true, true, true, true, false, true]
+        const actives_2 = [true, true, true, false, true, true, true, true]
+
+        // revoke role fails
+        await expect(
+            accessControlFacet.applyRoles(Roles_1, actives_1, account_B)
+        ).to.be.rejectedWith('ApplyRoleContradiction')
+
+        await expect(
+            accessControlFacet.applyRoles(Roles_1, actives_2, account_B)
+        ).to.be.rejectedWith('ApplyRoleContradiction')
     })
 
     it('GIVEN a paused Token WHEN grantRole THEN transaction fails with TokenIsPaused', async () => {
@@ -575,5 +608,48 @@ describe('Access Control Tests', () => {
         expect(membersFor_Default[1].toUpperCase()).to.equal(
             account_C.toUpperCase()
         )
+    })
+
+    it('GIVEN an account with administrative role, if roles are duplicated but not contradictory WHEN applyRoles THEN transaction succeeds', async () => {
+        // Using account A (admin)
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        // check that C does not have the role
+        await accessControlFacet.grantRole(_PAUSER_ROLE, account_C)
+
+        // grant Role
+        await expect(
+            accessControlFacet.applyRoles(
+                [_PAUSER_ROLE, _DEFAULT_ADMIN_ROLE, _DEFAULT_ADMIN_ROLE],
+                [true, false, false],
+                account_C
+            )
+        )
+            .to.emit(accessControlFacet, 'RolesApplied')
+            .withArgs(
+                [_PAUSER_ROLE, _DEFAULT_ADMIN_ROLE, _DEFAULT_ADMIN_ROLE],
+                [true, false, false],
+                account_C
+            )
+
+        // check that C has the role
+        expect(
+            await accessControlFacet.hasRole(_PAUSER_ROLE, account_C)
+        ).to.equal(true)
+        expect(
+            await accessControlFacet.hasRole(_DEFAULT_ADMIN_ROLE, account_C)
+        ).to.equal(false)
+        // check roles and members count and lists
+        const roleCountFor_C = await accessControlFacet.getRoleCountFor(
+            account_C
+        )
+        const rolesFor_C = await accessControlFacet.getRolesFor(
+            account_C,
+            0,
+            roleCountFor_C
+        )
+
+        expect(roleCountFor_C).to.equal(1)
+        expect(rolesFor_C.length).to.equal(roleCountFor_C)
+        expect(rolesFor_C[0].toUpperCase()).to.equal(_PAUSER_ROLE.toUpperCase())
     })
 })

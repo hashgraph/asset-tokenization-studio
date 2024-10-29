@@ -1393,12 +1393,27 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
   });
 
   singletonInstance.updateConfig = jest.fn(async function (
-      security: EvmAddress,
+    security: EvmAddress,
     _configId: string,
     _configVersion: number,
   ) {
     configVersion = _configVersion;
     configId = _configId;
+
+    return { status: 'success', data: [] } as TransactionResponse<
+      string[],
+      Error
+    >;
+  });
+
+  singletonInstance.updateMaturityDate = jest.fn(async function (
+    security: EvmAddress,
+    _maturityDate: number,
+  ) {
+    bondInfo = {
+      ...bondInfo,
+      maturityDate: _maturityDate,
+    };
 
     return { status: 'success', data: [] } as TransactionResponse<
       string[],
@@ -1477,6 +1492,17 @@ jest.mock('../src/port/out/mirror/MirrorNodeAdapter', () => {
       const balance = HBAR_balances.get(identifiers(accountId)[1]);
       if (balance) return BigDecimal.fromString(balance, HBAR_DECIMALS);
       return BigDecimal.fromString('0', HBAR_DECIMALS);
+    },
+  );
+
+  MirrorNodeAdapterMock.getContractResults = jest.fn(
+    async (
+      transactionId: string,
+      numberOfResultItems: number,
+      timeout = 15,
+      requestInterval = 2,
+    ) => {
+      return ['123', '1'];
     },
   );
 

@@ -288,6 +288,7 @@ import {
   UPDATE_CONFIG_GAS,
   UPDATE_CONFIG_VERSION_GAS,
   UPDATE_RESOLVER_GAS,
+  UPDATE_MATURITY_DATE_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -1595,6 +1596,25 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.signerOrProvider,
       ).updateResolver(resolver.toString(), configId, configVersion, {
         gasLimit: UPDATE_RESOLVER_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async updateMaturityDate(
+    security: EvmAddress,
+    maturityDate: number,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Updating bond maturity date ${maturityDate} for security ${security.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Bond__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).updateMaturityDate(maturityDate, {
+        gasLimit: UPDATE_MATURITY_DATE_GAS,
       }),
       this.networkService.environment,
     );
