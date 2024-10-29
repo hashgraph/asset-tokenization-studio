@@ -688,7 +688,7 @@ describe('🧪 Security tests', () => {
           }),
         )
       ).payload,
-    ).toBe(true);
+    ).toBe(1);
 
     expect(
       (
