@@ -230,7 +230,7 @@ import {
     deployCap,
     deployBond,
 } from './deploy'
-import { evmToHederaFormat, getClient } from './utils'
+import { evmToHederaFormat, getClient, sleep } from './utils'
 import {
     getProxyImplementation,
     getOwner,
@@ -242,6 +242,7 @@ import {
     getFacetsLengthByConfigurationIdAndVersion,
     getFacetsByConfigurationIdAndVersion,
 } from './contractsMethods'
+import { AccessControl__factory } from '../typechain-types'
 
 interface AccountHedera {
     account: string
@@ -249,6 +250,19 @@ interface AccountHedera {
     privateKey: string
     //isED25519Type: string
 }
+
+task('simpleDeploy', 'Example JSON-RPC deploy without hedera').setAction(
+    async (arguements: any, hre) => {
+        const signer = (await hre.ethers.getSigners())[0]
+        console.log(`
+            Signer: ${signer.address}    
+        `)
+        const accessControl = await new AccessControl__factory(signer).deploy()
+        const receipt = await accessControl.deployTransaction.wait()
+        console.log('Access Control deployed to:', accessControl.address)
+        console.log('Transaction receipt:', receipt)
+    }
+)
 
 task('getProxyAdminconfig', 'Get Proxy Admin owner and implementation')
     .addParam('proxyadmin', 'The proxy admin address')

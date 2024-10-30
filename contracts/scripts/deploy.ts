@@ -249,7 +249,7 @@ import {
 } from './contractsMethods'
 import { BondConfigId, EquityConfigId } from './constants'
 
-const used_already_deployed = true
+const used_already_deployed = false
 const resolver_proxy_contract: ContractId = ContractId.fromString('0.0.4916112')
 const resolver_proxyAdmin_contract: ContractId =
     ContractId.fromString('0.0.4916106')

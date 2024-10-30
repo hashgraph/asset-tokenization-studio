@@ -1,9 +1,12 @@
 import { HardhatUserConfig, task, types } from 'hardhat/config'
 import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-contract-sizer'
+import '@nomicfoundation/hardhat-toolbox'
+import '@nomicfoundation/hardhat-chai-matchers'
+import '@nomiclabs/hardhat-ethers'
 import '@hashgraph/sdk'
-//import '@hashgraph/hardhat-hethers' // remove comment only when working with Hedera DLT
-//import './scripts/hardhatTasks' // remove comment only when deploying in HEdera DLT after compiling
+// import '@hashgraph/hardhat-hethers' // remove comment only when working with Hedera DLT
+import './scripts/hardhatTasks' // remove comment only when deploying in HEdera DLT after compiling
 import * as dotenv from 'dotenv'
 import 'solidity-coverage'
 
@@ -37,85 +40,16 @@ const config: HardhatUserConfig = {
         runOnCompile: true,
         strict: true,
     },
-    //defaultNetwork: 'testnet', // remove comment only when working with Hedera DLT
-    // remove comment only when working with Hedera DLT
-    /*hedera: {
-        gasLimit: 300000,
-        networks: {
-            testnet: {
-                accounts: [
-                    {
-                        account:
-                            process.env['TESTNET_HEDERA_OPERATOR_ACCOUNT'] ??
-                            '',
-                        privateKey:
-                            process.env['TESTNET_HEDERA_OPERATOR_PRIVATEKEY'] ??
-                            '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_1'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_1'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_2'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_2'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_3'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_3'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_4'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_4'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_5'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_5'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_6'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_6'
-                            ] ?? '',
-                    },
-                ],
-            },
+    defaultNetwork: 'hardhat',
+    networks: {
+        // Defines the configuration settings for connecting to Hedera testnet
+        testnet: {
+            // Specifies URL endpoint for Hedera testnet pulled from the .env file
+            url: process.env.JSON_RPC_URL_TESTNET,
+            // Your ECDSA testnet account private key pulled from the .env file
+            accounts: [process.env.PRIVATE_KEY_0!],
         },
-    },*/
+    },
     typechain: {
         outDir: './typechain-types',
     },
