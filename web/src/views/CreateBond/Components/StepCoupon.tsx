@@ -217,7 +217,11 @@ import {
 import { CancelButton } from "../../../components/CancelButton";
 import { NextStepButton } from "./NextStepButton";
 import { PreviousStepButton } from "./PreviousStepButton";
-import { greaterThan, isBetweenDates, required } from "../../../utils/rules";
+import {
+  greaterThan,
+  isBetweenInclusiveDates,
+  required,
+} from "../../../utils/rules";
 import { ICreateBondFormValues } from "../ICreateBondFormValues";
 import { useFormContext, useFormState } from "react-hook-form";
 import { formatDate } from "../../../utils/format";
@@ -380,7 +384,7 @@ export const StepCoupon = () => {
               toDate={new Date(maturityDate)}
               rules={{
                 required,
-                validate: isBetweenDates(
+                validate: isBetweenInclusiveDates(
                   new Date(startingDate),
                   new Date(maturityDate),
                 ),
