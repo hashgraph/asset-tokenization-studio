@@ -250,6 +250,25 @@ interface AccountHedera {
     //isED25519Type: string
 }
 
+interface DeployAllCommand {
+    account?: string
+    privateKey?: string
+    clientIsEd25519: boolean
+    useDeployed: boolean
+}
+
+task('keccak256', 'Prints the keccak256 hash of a string')
+    .addPositionalParam(
+        'input',
+        'The string to be hashed',
+        undefined,
+        types.string
+    )
+    .setAction(async ({ input }: { input: string }, hre) => {
+        const hash = hre.ethers.utils.keccak256(Buffer.from(input, 'utf-8'))
+        console.log(hash)
+    })
+
 task('getProxyAdminconfig', 'Get Proxy Admin owner and implementation')
     .addParam('proxyadmin', 'The proxy admin address')
     .addParam('proxy', 'The proxy address')
@@ -431,13 +450,6 @@ task('updateBusinessLogicKeys', 'Update the address of a business logic key')
             )
         }
     )
-
-interface DeployAllCommand {
-    account?: string
-    privateKey?: string
-    clientIsEd25519: boolean
-    useDeployed: boolean
-}
 
 task(
     'deployAll',
