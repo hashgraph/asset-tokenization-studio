@@ -550,9 +550,9 @@ task(
             'Transfer and Lock Address': transferAndLock,
         }
 
-        console.log('\nDeployed Addresses:')
+        console.log('\n 🟢 Deployed Addresses:')
         for (const [key, value] of Object.entries(addresses)) {
-            console.log(`${key}: \t${value.toString()}`)
+            console.log(`   --> ${key}: ${value.toString()}`)
         }
     })
 

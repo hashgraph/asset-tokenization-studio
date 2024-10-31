@@ -214,6 +214,8 @@ import {
 } from '@hashgraph/sdk'
 import axios from 'axios'
 import { ADDRESS_0 } from './constants'
+import * as dotenv from 'dotenv'
+dotenv.config()
 
 export const getEnvVar = (name: string): string => {
     const value = process.env[name]

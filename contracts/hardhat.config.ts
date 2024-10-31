@@ -1,13 +1,11 @@
-import { HardhatUserConfig, task, types } from 'hardhat/config'
+import { HardhatUserConfig } from 'hardhat/config'
 import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-contract-sizer'
 import '@hashgraph/sdk'
-//import '@hashgraph/hardhat-hethers' // remove comment only when working with Hedera DLT
+// import '@hashgraph/hardhat-hethers' //! Remove comment only when working with Hedera DLT
+// import { getEnvVar } from './scripts/utils' //! Remove comment only when working with Hedera DLT
 import './scripts/hardhatTasks'
-import * as dotenv from 'dotenv'
 import 'solidity-coverage'
-
-dotenv.config()
 
 const config: HardhatUserConfig = {
     solidity: {
@@ -25,85 +23,84 @@ const config: HardhatUserConfig = {
         runOnCompile: true,
         strict: true,
     },
-    //defaultNetwork: 'testnet', // remove comment only when working with Hedera DLT
-    // remove comment only when working with Hedera DLT
-    /*hedera: {
-        gasLimit: 300000,
-        networks: {
-            testnet: {
-                accounts: [
-                    {
-                        account:
-                            process.env['TESTNET_HEDERA_OPERATOR_ACCOUNT'] ??
-                            '',
-                        privateKey:
-                            process.env['TESTNET_HEDERA_OPERATOR_PRIVATEKEY'] ??
-                            '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_1'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_1'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_2'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_2'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_3'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_3'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_4'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_4'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_5'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_5'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_6'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_6'
-                            ] ?? '',
-                    },
-                ],
-            },
-        },
-    },*/
+    //! Remove comment only when working with Hedera DLT
+    // defaultNetwork: 'testnet',
+    // hedera: {
+    //     gasLimit: 300000,
+    //     networks: {
+    //         testnet: {
+    //             accounts: [
+    //                 {
+    //                     account:
+    //                         getEnvVar('TESTNET_HEDERA_OPERATOR_ACCOUNT') ?? '',
+    //                     privateKey:
+    //                         getEnvVar('TESTNET_HEDERA_OPERATOR_PRIVATEKEY') ??
+    //                         '',
+    //                 },
+    //                 {
+    //                     account:
+    //                         getEnvVar(
+    //                             'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_1'
+    //                         ) ?? '',
+    //                     privateKey:
+    //                         getEnvVar(
+    //                             'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_1'
+    //                         ) ?? '',
+    //                 },
+    //                 {
+    //                     account:
+    //                         getEnvVar(
+    //                             'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_2'
+    //                         ) ?? '',
+    //                     privateKey:
+    //                         getEnvVar(
+    //                             'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_2'
+    //                         ) ?? '',
+    //                 },
+    //                 {
+    //                     account:
+    //                         getEnvVar(
+    //                             'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_3'
+    //                         ) ?? '',
+    //                     privateKey:
+    //                         getEnvVar(
+    //                             'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_3'
+    //                         ) ?? '',
+    //                 },
+    //                 {
+    //                     account:
+    //                         getEnvVar(
+    //                             'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_4'
+    //                         ) ?? '',
+    //                     privateKey:
+    //                         getEnvVar(
+    //                             'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_4'
+    //                         ) ?? '',
+    //                 },
+    //                 {
+    //                     account:
+    //                         getEnvVar(
+    //                             'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_5'
+    //                         ) ?? '',
+    //                     privateKey:
+    //                         getEnvVar(
+    //                             'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_5'
+    //                         ) ?? '',
+    //                 },
+    //                 {
+    //                     account:
+    //                         getEnvVar(
+    //                             'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_6'
+    //                         ) ?? '',
+    //                     privateKey:
+    //                         getEnvVar(
+    //                             'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_6'
+    //                         ) ?? '',
+    //                 },
+    //             ],
+    //         },
+    //     },
+    // },
     typechain: {
         outDir: './typechain-types',
     },
