@@ -212,9 +212,16 @@ import {
     ContractId,
     ContractCreateFlow,
 } from '@hashgraph/sdk'
-
 import axios from 'axios'
 import { ADDRESS_0 } from './constants'
+
+export const getEnvVar = (name: string): string => {
+    const value = process.env[name]
+    if (!value) {
+        throw new Error(`Environment variable ${name} is not defined`)
+    }
+    return value
+}
 
 export const sleep = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms))
