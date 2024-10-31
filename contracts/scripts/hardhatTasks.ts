@@ -205,7 +205,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ContractId } from '@hashgraph/sdk'
-import { task } from 'hardhat/config'
+import { task, types } from 'hardhat/config'
 import {
     deployFactory,
     deployResolver,
@@ -223,7 +223,7 @@ import {
     deploySnapshots,
     deployScheduledSnapshots,
     deployCorporateActionsSecurity,
-    deployAssettokenizationFullInfrastructure,
+    deployAtsFullInfrastructure,
     toHashgraphKey,
     updateProxy,
     getProxyImpl,
@@ -432,104 +432,117 @@ task('updateBusinessLogicKeys', 'Update the address of a business logic key')
         }
     )
 
+interface DeployAllCommand {
+    account?: string
+    privateKey?: string
+    clientIsEd25519: boolean
+    useDeployed: boolean
+}
+
 task(
     'deployAll',
     'Deploy new factory, new facet implementation, new resolver and initialize it with the new facet implementations'
-).setAction(async (arguements: any, hre) => {
-    const accounts = hre.network.config
-        .accounts as unknown as Array<AccountHedera>
-    const client = getClient(hre.network.name)
-
-    const client1account: string = accounts[0].account
-    const client1privatekey: string = accounts[0].privateKey
-    const client1isED25519 = false
-
-    console.log(hre.network.name)
-
-    client.setOperator(
-        client1account,
-        toHashgraphKey(client1privatekey, client1isED25519)
+)
+    .addOptionalPositionalParam(
+        'account',
+        'The Hedera account to use for deployment. 0.0.XXXX format',
+        undefined,
+        types.string
     )
-
-    const result = await deployAssettokenizationFullInfrastructure(
-        client,
-        client1privatekey,
-        client1isED25519
+    .addOptionalPositionalParam(
+        'privateKey',
+        'The private key of the account, Raw hexadecimal string',
+        undefined,
+        types.string
     )
-    let i = 0
-    const resolverProxyAddress = result[i++]
-    const resolverProxyAdminAddress = result[i++]
-    const resolverAddress = result[i++]
-    const accessControl = result[i++]
-    const cap = result[i++]
-    const controlList = result[i++]
-    const pause = result[i++]
-    const erc20 = result[i++]
-    const erc1410 = result[i++]
-    const erc1594 = result[i++]
-    const erc1643 = result[i++]
-    const erc1644 = result[i++]
-    const snapshots = result[i++]
-    const diamondFacet = result[i++]
-    const equity = result[i++]
-    const bond = result[i++]
-    const scheduledSnapshot = result[i++]
-    const corporateActions = result[i++]
-    const lock = result[i++]
-    const transferAndLock = result[i++]
-    const factoryProxyAddress = result[i++]
-    const factoryProxyAdminAddress = result[i++]
-    const factoryAddress = result[i++]
-
-    console.log(
-        '\nResolver Proxy Address: \t',
-        resolverProxyAddress.toString(),
-        '\nResolver Proxy Admin Address: \t',
-        resolverProxyAdminAddress.toString(),
-        '\nResolver Address: \t',
-        resolverAddress.toString(),
-        '\nFactory Proxy Address: \t',
-        factoryProxyAddress.toString(),
-        '\nFactory Proxy Admin Address: \t',
-        factoryProxyAdminAddress.toString(),
-        '\nFactory Address: \t',
-        factoryAddress.toString(),
-        '\nAccess Control Address: \t',
-        accessControl.toString(),
-        '\nCap Address: \t',
-        cap.toString(),
-        '\nControl List Address: \t',
-        controlList.toString(),
-        '\nPause Address: \t',
-        pause.toString(),
-        '\nERC20 Address: \t',
-        erc20.toString(),
-        '\nERC1410 Address: \t',
-        erc1410.toString(),
-        '\nERC1594Address: \t',
-        erc1594.toString(),
-        '\nERC1643 Address: \t',
-        erc1643.toString(),
-        '\nERC1644 Address: \t',
-        erc1644.toString(),
-        '\nSnapshots Address: \t',
-        snapshots.toString(),
-        '\nDiamond Facet Address: \t',
-        diamondFacet.toString(),
-        '\nEquity Address: \t',
-        equity.toString(),
-        '\nBond Address: \t',
-        bond.toString(),
-        '\nScheduled Snapshots Address: \t',
-        scheduledSnapshot.toString(),
-        '\nCorporate Actions Address: \t',
-        corporateActions.toString(),
-        '\nLock Address: \t',
-        lock.toString(),
-        '\nTransfer and Lock Address: \t',
-        transferAndLock.toString()
+    .addOptionalParam(
+        'clientIsEd25519',
+        'Client is ED25519 key type',
+        false,
+        types.boolean
     )
-})
+    .addOptionalParam(
+        'useDeployed',
+        'Use already deployed contracts',
+        true,
+        types.boolean
+    )
+    .setAction(async (args: DeployAllCommand, hre) => {
+        console.log(`Executing deployAll on ${hre.network.name} ...`)
+        const accounts = hre.network.config
+            .accounts as unknown as Array<AccountHedera>
+        const client = getClient(hre.network.name)
+        // * Set the operator
+        const account: string = args.account ?? accounts[0].account
+        const privateKey: string = args.privateKey ?? accounts[0].privateKey
+        client.setOperator(
+            account,
+            toHashgraphKey(privateKey, args.clientIsEd25519)
+        )
+        // * Deploy the full infrastructure
+        const [
+            resolverProxyAddress,
+            resolverProxyAdminAddress,
+            resolverAddress,
+            accessControl,
+            cap,
+            controlList,
+            pause,
+            erc20,
+            erc1410,
+            erc1594,
+            erc1643,
+            erc1644,
+            snapshots,
+            diamondFacet,
+            equity,
+            bond,
+            scheduledSnapshot,
+            corporateActions,
+            lock,
+            transferAndLock,
+            factoryProxyAddress,
+            factoryProxyAdminAddress,
+            factoryAddress,
+        ] = await deployAtsFullInfrastructure({
+            clientOperator: client,
+            privateKey: privateKey,
+            isED25519Type: args.clientIsEd25519,
+            useDeployed: args.useDeployed,
+        })
+
+        // * Display the deployed addresses
+        const addresses = {
+            'Resolver Proxy Address': resolverProxyAddress,
+            'Resolver Proxy Admin Address': resolverProxyAdminAddress,
+            'Resolver Address': resolverAddress,
+            'Factory Proxy Address': factoryProxyAddress,
+            'Factory Proxy Admin Address': factoryProxyAdminAddress,
+            'Factory Address': factoryAddress,
+            'Access Control Address': accessControl,
+            'Cap Address': cap,
+            'Control List Address': controlList,
+            'Pause Address': pause,
+            'ERC20 Address': erc20,
+            'ERC1410 Address': erc1410,
+            'ERC1594 Address': erc1594,
+            'ERC1643 Address': erc1643,
+            'ERC1644 Address': erc1644,
+            'Snapshots Address': snapshots,
+            'Diamond Facet Address': diamondFacet,
+            'Equity Address': equity,
+            'Bond Address': bond,
+            'Scheduled Snapshots Address': scheduledSnapshot,
+            'Corporate Actions Address': corporateActions,
+            'Lock Address': lock,
+            'Transfer and Lock Address': transferAndLock,
+        }
+
+        console.log('\nDeployed Addresses:')
+        for (const [key, value] of Object.entries(addresses)) {
+            console.log(`${key}: \t${value.toString()}`)
+        }
+    })
 
 task('getResolverBusinessLogics', 'Get business logics from resolver')
     .addParam('resolver', 'The resolver proxy admin address')

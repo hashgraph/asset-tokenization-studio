@@ -3,7 +3,7 @@ import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-contract-sizer'
 import '@hashgraph/sdk'
 //import '@hashgraph/hardhat-hethers' // remove comment only when working with Hedera DLT
-//import './scripts/hardhatTasks' // remove comment only when deploying in HEdera DLT after compiling
+import './scripts/hardhatTasks'
 import * as dotenv from 'dotenv'
 import 'solidity-coverage'
 
