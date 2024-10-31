@@ -2,8 +2,10 @@ import { HardhatUserConfig } from 'hardhat/config'
 import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-contract-sizer'
 import '@hashgraph/sdk'
-import '@hashgraph/hardhat-hethers'
 import { getEnvVar } from './scripts/utils'
+if (getEnvVar('NETWORK') === 'testnet') {
+    require('@hashgraph/hardhat-hedera')
+}
 import './scripts/hardhatTasks'
 import 'solidity-coverage'
 
@@ -18,13 +20,25 @@ const HEDERA_ACCOUNTS = [
     },
 ]
 
-const config: HardhatUserConfig = {
+// To be able to use both Hedera and Ethereum networks, we need to extend the HardhatUserConfig
+interface ExtendedHardhatUserConfig extends HardhatUserConfig {
+    hedera?: {
+        gasLimit: number
+        networks: {
+            testnet: {
+                accounts: { account: string; privateKey: string }[]
+            }
+        }
+    }
+}
+
+const plainConfig: HardhatUserConfig = {
     solidity: {
         version: '0.8.18',
         settings: {
             optimizer: {
                 enabled: true,
-                runs: 1000,
+                runs: 200,
             },
         },
     },
@@ -34,7 +48,18 @@ const config: HardhatUserConfig = {
         runOnCompile: true,
         strict: true,
     },
-    defaultNetwork: 'hardhat',
+    typechain: {
+        outDir: './typechain-types',
+        target: 'ethers-v5',
+    },
+    mocha: {
+        timeout: 3000000,
+    },
+}
+
+const hederaConfig: ExtendedHardhatUserConfig = {
+    ...plainConfig,
+    defaultNetwork: 'testnet',
     hedera: {
         gasLimit: 300000,
         networks: {
@@ -43,13 +68,6 @@ const config: HardhatUserConfig = {
             },
         },
     },
-    typechain: {
-        outDir: './typechain-types',
-    },
-    mocha: {
-        // Extend the timeout to 60 seconds (adjust as needed)
-        timeout: 3000000,
-    },
 }
 
-export default config
+export default getEnvVar('NETWORK') === 'testnet' ? hederaConfig : plainConfig
