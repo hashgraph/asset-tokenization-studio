@@ -204,12 +204,7 @@
 */
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-    Client,
-    ContractFunctionParameters,
-    ContractId,
-    PrivateKey,
-} from '@hashgraph/sdk'
+import {Client, ContractFunctionParameters, ContractId, PrivateKey,} from '@hashgraph/sdk'
 import {
     AccessControl__factory,
     BondUSA__factory,
@@ -233,13 +228,8 @@ import {
     TransferAndLock__factory,
     TransparentUpgradeableProxy__factory,
 } from '../typechain-types'
-import {
-    deployContractSDK,
-    getClient,
-    getContractInfo,
-    toEvmAddress,
-} from './utils'
-import { contractCall } from './contractsLifeCycle/utils'
+import {deployContractSDK, getClient, getContractInfo, toEvmAddress,} from './utils'
+import {contractCall} from './contractsLifeCycle/utils'
 import {
     BusinessLogicRegistryData,
     createConfiguration,
@@ -247,9 +237,9 @@ import {
     getStaticResolverKey,
     registerBusinessLogics,
 } from './contractsMethods'
-import { BondConfigId, EquityConfigId } from './constants'
+import {BondConfigId, EquityConfigId} from './constants'
 
-const used_already_deployed = false
+const used_already_deployed = true
 const resolver_proxy_contract: ContractId = ContractId.fromString('0.0.4916112')
 const resolver_proxyAdmin_contract: ContractId =
     ContractId.fromString('0.0.4916106')

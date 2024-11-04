@@ -2,8 +2,8 @@ import { HardhatUserConfig, task, types } from 'hardhat/config'
 import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-contract-sizer'
 import '@hashgraph/sdk'
-import '@hashgraph/hardhat-hethers' // remove comment only when working with Hedera DLT
-import './scripts/hardhatTasks' // remove comment only when deploying in HEdera DLT after compiling
+//import '@hashgraph/hardhat-hethers' // remove comment only when working with Hedera DLT
+//import './scripts/hardhatTasks' // remove comment only when deploying in HEdera DLT after compiling
 import * as dotenv from 'dotenv'
 import 'solidity-coverage'
 
@@ -37,9 +37,9 @@ const config: HardhatUserConfig = {
         runOnCompile: true,
         strict: true,
     },
-    defaultNetwork: 'testnet', // remove comment only when working with Hedera DLT
-    //remove comment only when working with Hedera DLT
-    hedera: {
+    //defaultNetwork: 'testnet', // remove comment only when working with Hedera DLT
+    // remove comment only when working with Hedera DLT
+    /*hedera: {
         gasLimit: 300000,
         networks: {
             testnet: {
@@ -115,7 +115,7 @@ const config: HardhatUserConfig = {
                 ],
             },
         },
-    },
+    },*/
     typechain: {
         outDir: './typechain-types',
     },
