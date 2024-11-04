@@ -1,13 +1,14 @@
 import { HardhatUserConfig } from 'hardhat/config'
 import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-contract-sizer'
+import 'solidity-coverage'
 import '@hashgraph/sdk'
 import { getEnvVar } from './scripts/utils'
-if (getEnvVar('NETWORK') === 'testnet') {
-    require('@hashgraph/hardhat-hedera')
-}
 import './scripts/hardhatTasks'
-import 'solidity-coverage'
+
+if (getEnvVar('NETWORK') !== 'hardhat') {
+    require('@hashgraph/hardhat-hethers')
+}
 
 const HEDERA_ACCOUNTS = [
     {
@@ -20,19 +21,22 @@ const HEDERA_ACCOUNTS = [
     },
 ]
 
-// To be able to use both Hedera and Ethereum networks, we need to extend the HardhatUserConfig
+// Needed to be able to use the HederaConfig interface
 interface ExtendedHardhatUserConfig extends HardhatUserConfig {
     hedera?: {
         gasLimit: number
         networks: {
-            testnet: {
-                accounts: { account: string; privateKey: string }[]
+            [key: string]: {
+                accounts: {
+                    account: string
+                    privateKey: string
+                }[]
             }
         }
     }
 }
 
-const plainConfig: HardhatUserConfig = {
+let config: ExtendedHardhatUserConfig = {
     solidity: {
         version: '0.8.18',
         settings: {
@@ -56,18 +60,20 @@ const plainConfig: HardhatUserConfig = {
         timeout: 3000000,
     },
 }
-
-const hederaConfig: ExtendedHardhatUserConfig = {
-    ...plainConfig,
-    defaultNetwork: 'testnet',
-    hedera: {
-        gasLimit: 300000,
-        networks: {
-            testnet: {
-                accounts: HEDERA_ACCOUNTS,
+// If we are not using the hardhat network, we need to add the Hedera accounts
+if (getEnvVar('NETWORK') !== 'hardhat') {
+    config = {
+        ...config,
+        defaultNetwork: 'testnet',
+        hedera: {
+            gasLimit: 300000,
+            networks: {
+                testnet: {
+                    accounts: HEDERA_ACCOUNTS,
+                },
             },
         },
-    },
+    }
 }
 
-export default getEnvVar('NETWORK') === 'testnet' ? hederaConfig : plainConfig
+export default config

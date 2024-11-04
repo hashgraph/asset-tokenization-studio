@@ -243,14 +243,14 @@ export function getClient(network?: string): Client {
     switch (network) {
         case 'previewnet':
             return Client.forPreviewnet()
-            break
-        case 'mainnet':
-            return Client.forMainnet()
-            break
-        default:
         case 'testnet':
             return Client.forTestnet()
-            break
+        case 'mainnet':
+            return Client.forMainnet()
+        default:
+            throw new Error(
+                'Network not supported for Hedera Operations. Check NETWORK env variable'
+            )
     }
 }
 

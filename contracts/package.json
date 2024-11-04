@@ -67,7 +67,7 @@
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@hashgraph/hardhat-hethers": "^1.0.3",
+    "@hashgraph/hardhat-hethers": "^1.0.4",
     "@hashgraph/sdk": "^2.23.0",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.6",
