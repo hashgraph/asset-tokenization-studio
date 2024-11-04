@@ -12,11 +12,11 @@ import 'solidity-coverage'
 const HEDERA_ACCOUNTS = [
     {
         account: getEnvVar('ACCOUNT_0'),
-        privateKey: getEnvVar('PRIVATE_KEY_0'),
+        privateKey: getEnvVar('PRIVATE_KEY_0').replace(/^0x/, ''),
     },
     {
         account: getEnvVar('ACCOUNT_1'),
-        privateKey: getEnvVar('PRIVATE_KEY_1'),
+        privateKey: getEnvVar('PRIVATE_KEY_1').replace(/^0x/, ''),
     },
 ]
 
