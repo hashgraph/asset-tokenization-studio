@@ -358,7 +358,7 @@ describe('🧪 Management tests', () => {
     configId: string,
     configVersion: number,
     configInfo: ConfigInfoViewModel,
-  ) {
+  ) : void {
     expect(configInfo.resolverAddress).toEqual(resolver);
     expect(configInfo.configId).toEqual(configId);
     expect(configInfo.configVersion).toEqual(configVersion);
@@ -370,6 +370,7 @@ describe('🧪 Management tests', () => {
         securityId: equity.evmDiamondAddress!.toString(),
       }),
     );
+    expect(res).toBeDefined();
     checkConfig(RESOLVER_ADDRESS, configId, configVersion, res);
   }, 600_000);
 

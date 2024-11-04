@@ -218,27 +218,19 @@ import {CapStorageWrapper} from './CapStorageWrapper.sol';
 contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(
-        uint256 maxSupply,
-        PartitionCap[] calldata partitionCap
+        uint256 maxSupply
     )
         external
         virtual
         override
         onlyUninitialized(_capStorage().initialized)
-        returns (bool success_)
+        checkNewMaxSupply(maxSupply)
     {
         CapDataStorage storage capStorage = _capStorage();
 
         capStorage.maxSupply = maxSupply;
 
-        for (uint256 i = 0; i < partitionCap.length; i++) {
-            capStorage.maxSupplyByPartition[
-                partitionCap[i].partition
-            ] = partitionCap[i].maxSupply;
-        }
-
         capStorage.initialized = true;
-        success_ = true;
     }
 
     function setMaxSupply(
@@ -265,6 +257,7 @@ contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
+        onlyWithMultiPartition
         checkNewMaxSupplyForPartition(_partition, _maxSupply)
         returns (bool success_)
     {

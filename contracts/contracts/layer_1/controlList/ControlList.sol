@@ -224,12 +224,10 @@ contract ControlList is IControlList, IStaticFunctionSelectors, Common {
         virtual
         override
         onlyUninitialized(_controlListStorage().initialized)
-        returns (bool success_)
     {
         ControlListStorage storage controlListStorage = _controlListStorage();
         controlListStorage.isWhiteList = _isWhiteList;
         controlListStorage.initialized = true;
-        success_ = true;
     }
 
     function addToControlList(

@@ -282,14 +282,14 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
     this.setupDisconnectEventHandler();
   }
 
-  private setupDisconnectEventHandler() {
+  private setupDisconnectEventHandler() : void {
     if (this.dAppConnector?.walletConnectClient) {
       const client = this.dAppConnector.walletConnectClient;
       client.on('session_delete', this.handleDisconnect.bind(this));
     }
   }
 
-  private handleDisconnect() {
+  private handleDisconnect(): void {
     this.stop();
     this.eventService.emit(WalletEvents.walletDisconnect, {
       wallet: SupportedWallets.HWALLETCONNECT,

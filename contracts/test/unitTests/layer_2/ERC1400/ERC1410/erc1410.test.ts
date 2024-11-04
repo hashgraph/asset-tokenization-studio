@@ -239,7 +239,10 @@ import {
 } from '../../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { ADDRESS_0 } from '../../../../../scripts/constants'
-import { grantRoleAndPauseToken } from '../../../../../scripts/testCommon'
+import {
+    grantRoleAndPauseToken,
+    MAX_UINT256,
+} from '../../../../../scripts/testCommon'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -311,7 +314,7 @@ describe('ERC1410 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                BigInt(100000),
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_B,
@@ -729,7 +732,7 @@ describe('ERC1410 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                MAX_UINT256,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_B,
@@ -1613,7 +1616,7 @@ describe('ERC1410 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                MAX_UINT256,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_C,
@@ -1972,7 +1975,7 @@ describe('ERC1410 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                MAX_UINT256,
                 100,
                 RegulationType.REG_S,
                 RegulationSubType.NONE,

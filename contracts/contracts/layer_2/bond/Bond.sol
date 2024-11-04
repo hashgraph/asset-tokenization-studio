@@ -227,17 +227,15 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         internal
         checkDates(_bondDetailsData.startingDate, _bondDetailsData.maturityDate)
         checkTimestamp(_bondDetailsData.startingDate)
-        returns (bool success_)
     {
         BondDataStorage storage bondStorage = _bondStorage();
         bondStorage.initialized = true;
-        success_ =
-            _storeBondDetails(_bondDetailsData) &&
-            _storeCouponDetails(
-                _couponDetailsData,
-                _bondDetailsData.startingDate,
-                _bondDetailsData.maturityDate
-            );
+        _storeBondDetails(_bondDetailsData);
+        _storeCouponDetails(
+            _couponDetailsData,
+            _bondDetailsData.startingDate,
+            _bondDetailsData.maturityDate
+        );
     }
 
     function getBondDetails()

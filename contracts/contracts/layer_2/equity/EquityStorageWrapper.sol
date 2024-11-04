@@ -231,9 +231,8 @@ abstract contract EquityStorageWrapper is
 
     function _storeEquityDetails(
         IEquity.EquityDetailsData memory _equityDetailsData
-    ) internal returns (bool) {
+    ) internal {
         _equityStorage().equityDetailsData = _equityDetailsData;
-        return true;
     }
 
     function _getEquityDetails()

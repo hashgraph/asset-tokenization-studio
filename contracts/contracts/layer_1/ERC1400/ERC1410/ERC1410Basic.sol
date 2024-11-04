@@ -218,11 +218,9 @@ abstract contract ERC1410Basic is IERC1410Basic, ERC1410BasicStorageWrapper {
         virtual
         override
         onlyUninitialized(_getERC1410BasicStorage().initialized)
-        returns (bool success_)
     {
         _getERC1410BasicStorage().multiPartition = _multiPartition;
         _getERC1410BasicStorage().initialized = true;
-        success_ = true;
     }
 
     /// @notice Transfers the ownership of tokens from a specified partition from one address to another address

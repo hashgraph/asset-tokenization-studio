@@ -220,6 +220,7 @@ import {
     RegulationSubType,
 } from '../../../../scripts/factory'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
+import { MAX_UINT256 } from '../../../../scripts/testCommon'
 
 const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
@@ -281,7 +282,7 @@ describe('Security USA Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                MAX_UINT256,
                 100,
                 RegulationType.REG_S,
                 RegulationSubType.NONE,
@@ -352,7 +353,7 @@ describe('Security USA Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                MAX_UINT256,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_B,
@@ -423,7 +424,7 @@ describe('Security USA Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                MAX_UINT256,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_C,

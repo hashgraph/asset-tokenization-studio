@@ -224,7 +224,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, ERC20StorageWrapper {
         virtual
         override
         onlyUninitialized(_getErc20Storage().initialized)
-        returns (bool success_)
     {
         ERC20Storage storage erc20Storage = _getErc20Storage();
         erc20Storage.name = erc20Metadata.info.name;
@@ -233,7 +232,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, ERC20StorageWrapper {
         erc20Storage.decimals = erc20Metadata.info.decimals;
         erc20Storage.securityType = erc20Metadata.securityType;
         erc20Storage.initialized = true;
-        success_ = true;
     }
 
     // solhint-disable no-unused-vars

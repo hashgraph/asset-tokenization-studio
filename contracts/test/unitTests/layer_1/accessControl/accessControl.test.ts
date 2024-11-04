@@ -227,6 +227,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { MAX_UINT256 } from '../../../../scripts/testCommon'
 
 describe('Access Control Tests', () => {
     let diamond: ResolverProxy
@@ -277,7 +278,7 @@ describe('Access Control Tests', () => {
             false,
             1,
             '0x345678',
-            0,
+            MAX_UINT256,
             100,
             RegulationType.REG_S,
             RegulationSubType.NONE,

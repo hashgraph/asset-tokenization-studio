@@ -224,6 +224,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { MAX_UINT256 } from '../../../../scripts/testCommon'
 
 const TIME = 6000
 
@@ -275,7 +276,7 @@ describe('Scheduled Snapshots Tests', () => {
             false,
             1,
             '0x345678',
-            0,
+            MAX_UINT256,
             100,
             RegulationType.REG_D,
             RegulationSubType.REG_D_506_B,

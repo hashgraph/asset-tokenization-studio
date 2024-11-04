@@ -242,6 +242,13 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
         _;
     }
 
+    modifier onlyWithMultiPartition() {
+        if (!_isMultiPartition()) {
+            revert OnlyAllowedInMultiPartitionMode();
+        }
+        _;
+    }
+
     modifier onlyDefaultPartitionWithSinglePartition(bytes32 partition) {
         if (!_isMultiPartition() && partition != _DEFAULT_PARTITION) {
             revert PartitionNotAllowedInSinglePartitionMode(partition);

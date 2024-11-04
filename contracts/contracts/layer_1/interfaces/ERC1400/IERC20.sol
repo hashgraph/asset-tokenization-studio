@@ -225,9 +225,7 @@ interface IERC20 is IERC20StorageWrapper {
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC20(
-        ERC20Metadata calldata erc1594Metadata
-    ) external returns (bool success_);
+    function initialize_ERC20(ERC20Metadata calldata erc1594Metadata) external;
 
     function name() external view returns (string memory);
 

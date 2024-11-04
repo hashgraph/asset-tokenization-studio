@@ -402,10 +402,7 @@ contract Factory is IFactory, LocalContext {
         IERC1594(securityAddress_).initialize_ERC1594();
 
         // configure issue flag
-        ICap(securityAddress_).initialize_Cap(
-            _securityData.maxSupply,
-            new ICap.PartitionCap[](0)
-        );
+        ICap(securityAddress_).initialize_Cap(_securityData.maxSupply);
     }
 
     function getAppliedRegulationData(
