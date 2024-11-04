@@ -5,6 +5,7 @@ import 'solidity-coverage'
 import '@hashgraph/sdk'
 import { getEnvVar } from './scripts/utils'
 import './scripts/hardhatTasks'
+import './tasks/utils'
 
 if (getEnvVar('NETWORK') !== 'hardhat') {
     require('@hashgraph/hardhat-hethers')
@@ -22,7 +23,7 @@ const HEDERA_ACCOUNTS = [
 ]
 
 // Needed to be able to use the HederaConfig interface
-interface ExtendedHardhatUserConfig extends HardhatUserConfig {
+interface ExtendedHardhatUserConfig extends Omit<HardhatUserConfig, 'hedera'> {
     hedera?: {
         gasLimit: number
         networks: {

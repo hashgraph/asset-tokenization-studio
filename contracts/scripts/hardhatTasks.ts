@@ -223,17 +223,15 @@ import {
     deploySnapshots,
     deployScheduledSnapshots,
     deployCorporateActionsSecurity,
-    deployAtsFullInfrastructure,
     toHashgraphKey,
     updateProxy,
     getProxyImpl,
     deployCap,
     deployBond,
+    deployAtsFullInfrastructure,
 } from './deploy'
-import { evmToHederaFormat, getClient } from './utils'
+import { getClient } from './utils'
 import {
-    getProxyImplementation,
-    getOwner,
     getBusinessLogicKeys,
     registerBusinessLogics,
     BusinessLogicRegistryData,
@@ -256,62 +254,6 @@ interface DeployAllCommand {
     clientIsEd25519: boolean
     useDeployed: boolean
 }
-
-task('keccak256', 'Prints the keccak256 hash of a string')
-    .addPositionalParam(
-        'input',
-        'The string to be hashed',
-        undefined,
-        types.string
-    )
-    .setAction(async ({ input }: { input: string }, hre) => {
-        const hash = hre.ethers.utils.keccak256(Buffer.from(input, 'utf-8'))
-        console.log(hash)
-    })
-
-task('getProxyAdminconfig', 'Get Proxy Admin owner and implementation')
-    .addParam('proxyadmin', 'The proxy admin address')
-    .addParam('proxy', 'The proxy address')
-    .setAction(
-        async (
-            {
-                proxyadmin,
-                proxy,
-            }: {
-                proxyadmin: string
-                proxy: string
-            },
-            hre
-        ) => {
-            const accounts = hre.network.config
-                .accounts as unknown as Array<AccountHedera>
-            const client = getClient(hre.network.name)
-            const client1account: string = accounts[0].account
-            const client1privatekey: string = accounts[0].privateKey
-            const client1isED25519 = true
-
-            client.setOperator(
-                client1account,
-                toHashgraphKey(client1privatekey, client1isED25519)
-            )
-            console.log(hre.network.name)
-            const owner = await evmToHederaFormat(
-                await getOwner(ContractId.fromString(proxyadmin), client)
-            )
-
-            const implementation = await evmToHederaFormat(
-                await getProxyImplementation(
-                    ContractId.fromString(proxyadmin),
-                    client,
-                    ContractId.fromString(proxy).toSolidityAddress()
-                )
-            )
-
-            console.log(
-                'Owner : ' + owner + '. Implementation : ' + implementation
-            )
-        }
-    )
 
 task('deployFactory', 'Deploy new factory').setAction(
     async (arguements: any, hre) => {
