@@ -290,7 +290,7 @@ export const Details = ({
     informationRights: equityDetailsResponse.informationRight,
     liquidationRights: equityDetailsResponse.liquidationRight,
     subscriptionRights: equityDetailsResponse.subscriptionRight,
-    conversionRights: equityDetailsResponse.convertionRight,
+    conversionRights: equityDetailsResponse.conversionRight,
     redemptionRights: equityDetailsResponse.redemptionRight,
     putRights: equityDetailsResponse.putRight,
   };

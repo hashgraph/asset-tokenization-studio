@@ -210,7 +210,7 @@ export default interface EquityDetailsViewModel extends QueryResponse {
   informationRight: boolean;
   liquidationRight: boolean;
   subscriptionRight: boolean;
-  convertionRight: boolean;
+  conversionRight: boolean;
   redemptionRight: boolean;
   putRight: boolean;
   dividendRight: number;
