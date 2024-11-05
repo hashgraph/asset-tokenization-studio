@@ -1,7 +1,6 @@
 import { subtask, task, types } from 'hardhat/config'
 import { HederaAccount } from '@hashgraph/hardhat-hethers/src/type-extensions'
-import { evmToHederaFormat, getClient } from '../scripts/utils'
-import { toHashgraphKey } from '../scripts/deploy'
+import { evmToHederaFormat, getClient, toHashgraphKey } from '../scripts/utils'
 import {
     getBusinessLogicKeys,
     getFacetsByConfigurationIdAndVersion,
@@ -50,7 +49,10 @@ subtask('getClient', 'Get the operator of the client')
         }
         const account: string = args.account ?? accounts[0].account
         const privateKey: string = args.privateKey ?? accounts[0].privateKey
-        client.setOperator(account, toHashgraphKey(privateKey, args.isEd25519))
+        client.setOperator(
+            account,
+            toHashgraphKey({ privateKey, isED25519: args.isEd25519 })
+        )
         console.log(`Operator: ${account}`)
         return {
             client: client,

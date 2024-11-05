@@ -223,16 +223,14 @@ import {
     deploySnapshots,
     deployScheduledSnapshots,
     deployCorporateActionsSecurity,
-    toHashgraphKey,
     updateProxy,
     getProxyImpl,
     deployCap,
     deployBond,
     deployAtsFullInfrastructure,
 } from './deploy'
-import { getClient } from './utils'
+import { getClient, toHashgraphKey } from './utils'
 import {
-    getBusinessLogicKeys,
     registerBusinessLogics,
     BusinessLogicRegistryData,
     getStaticResolverKey,
@@ -266,7 +264,10 @@ task('deployFactory', 'Deploy new factory').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployFactory(
@@ -314,7 +315,10 @@ task('updateFactoryVersion', 'Update factory version')
 
             client.setOperator(
                 client1account,
-                toHashgraphKey(client1privatekey, client1isED25519)
+                toHashgraphKey({
+                    privateKey: client1privatekey,
+                    isED25519: client1isED25519,
+                })
             )
             console.log(hre.network.name)
 
@@ -352,7 +356,10 @@ task('updateBusinessLogicKeys', 'Update the address of a business logic key')
 
             client.setOperator(
                 client1account,
-                toHashgraphKey(client1privatekey, client1isED25519)
+                toHashgraphKey({
+                    privateKey: client1privatekey,
+                    isED25519: client1isED25519,
+                })
             )
             console.log(hre.network.name)
 
@@ -428,7 +435,7 @@ task(
         const privateKey: string = args.privateKey ?? accounts[0].privateKey
         client.setOperator(
             account,
-            toHashgraphKey(privateKey, args.clientIsEd25519)
+            toHashgraphKey({ privateKey, isED25519: args.clientIsEd25519 })
         )
         // * Deploy the full infrastructure
         const [
@@ -509,7 +516,10 @@ task('deployResolver', 'Deploy new resolver').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployResolver(
@@ -545,7 +555,10 @@ task('deployAccessControl', 'Deploy new access control').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployAccessControl(client, client1privatekey)
@@ -571,7 +584,10 @@ task('deployCap', 'Deploy new cap').setAction(async (arguements: any, hre) => {
 
     client.setOperator(
         client1account,
-        toHashgraphKey(client1privatekey, client1isED25519)
+        toHashgraphKey({
+            privateKey: client1privatekey,
+            isED25519: client1isED25519,
+        })
     )
 
     const result = await deployCap(client, client1privatekey)
@@ -594,7 +610,10 @@ task('deployControlList', 'Deploy new control list').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployControlList(client, client1privatekey)
@@ -618,7 +637,10 @@ task('deployPause', 'Deploy new pause').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployPause(client, client1privatekey)
@@ -642,7 +664,10 @@ task('deployLock', 'Deploy new lock').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployLock(client, client1privatekey)
@@ -666,7 +691,10 @@ task('deploySnapshot', 'Deploy new snapshot').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deploySnapshots(client, client1privatekey)
@@ -690,7 +718,10 @@ task('deployScheduledSnapshot', 'Deploy new scheduled snapshot').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployScheduledSnapshots(client, client1privatekey)
@@ -717,7 +748,10 @@ task('deployCorporateActions', 'Deploy new corporate actions').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployCorporateActionsSecurity(
@@ -747,7 +781,10 @@ task('deployERC20', 'Deploy new erc20').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployERC20(client, client1privatekey)
@@ -771,7 +808,10 @@ task('deployERC1410', 'Deploy new erc1410').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployERC1410(client, client1privatekey)
@@ -795,7 +835,10 @@ task('deployERC1594', 'Deploy new erc1594').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployERC1594(client, client1privatekey)
@@ -819,7 +862,10 @@ task('deployERC1643', 'Deploy new erc1643').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployERC1643(client, client1privatekey)
@@ -843,7 +889,10 @@ task('deployERC1644', 'Deploy new erc1644').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployERC1644(client, client1privatekey)
@@ -867,7 +916,10 @@ task('deployDiamondFacet', 'Deploy new diamond facet').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployDiamondFacet(client, client1privatekey)
@@ -891,7 +943,10 @@ task('deployEquity', 'Deploy new equity').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployEquity(client, client1privatekey)
@@ -915,7 +970,10 @@ task('deployBond', 'Deploy new bond').setAction(
 
         client.setOperator(
             client1account,
-            toHashgraphKey(client1privatekey, client1isED25519)
+            toHashgraphKey({
+                privateKey: client1privatekey,
+                isED25519: client1isED25519,
+            })
         )
 
         const result = await deployBond(client, client1privatekey)

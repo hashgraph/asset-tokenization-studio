@@ -310,6 +310,26 @@ export async function toEvmAddress(
     }
 }
 
+/**
+ * Converts a private key string to a Hashgraph PrivateKey object.
+ *
+ * @param params - An object containing the private key string and a boolean indicating the key type.
+ * @param params.privateKey - The private key string.
+ * @param params.isED25519 - A boolean indicating whether the key is ED25519 (true) or ECDSA (false).
+ * @returns A Hashgraph PrivateKey object.
+ */
+export function toHashgraphKey({
+    privateKey,
+    isED25519,
+}: {
+    privateKey: string
+    isED25519: boolean
+}): PrivateKey {
+    return isED25519
+        ? PrivateKey.fromStringED25519(privateKey)
+        : PrivateKey.fromStringECDSA(privateKey)
+}
+
 export async function getContractInfo(contractId: string): Promise<IContract> {
     try {
         const URI_BASE = `${getHederaNetworkMirrorNodeURL()}/api/v1/`
