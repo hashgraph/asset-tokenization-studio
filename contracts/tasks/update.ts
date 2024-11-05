@@ -210,13 +210,12 @@ import {
     UpdateBusinessLogicKeysArgs,
     UpdateFactoryVersionArgs,
 } from './Arguments'
+import { BusinessLogicRegistryData } from '../scripts/businessLogicResolverLogic'
+import { getProxyImpl, updateProxy } from '../scripts/deploy'
 import {
     getStaticResolverKey,
     registerBusinessLogics,
-    BusinessLogicRegistryData,
-    getProxyImpl,
-    updateProxy,
-} from '../scripts/index'
+} from '../scripts/contractsMethods'
 
 task('updateFactoryVersion', 'Updates the factory version')
     .addPositionalParam(

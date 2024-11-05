@@ -210,7 +210,8 @@ import {
     IStaticFunctionSelectors__factory,
     DiamondCutManager__factory,
 } from '../typechain-types'
-import { FacetConfiguration, contractCall } from '../scripts/index'
+import { contractCall } from './contractsLifeCycle/utils'
+import { FacetConfiguration } from './resolverDiamondCut'
 
 export async function getProxyImplementation(
     proxyAdminAddress: ContractId,

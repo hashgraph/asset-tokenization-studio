@@ -213,17 +213,15 @@ import {
     GetProxyAdminConfigArgs,
     GetResolverBusinessLogicsArgs,
 } from './Arguments'
+import { evmToHederaFormat, getClient, toHashgraphKey } from '../scripts/utils'
 import {
-    getBusinessLogicKeys,
-    getFacetsByConfigurationIdAndVersion,
-    getFacetsLengthByConfigurationIdAndVersion,
-    getLatestVersionByConfiguration,
     getOwner,
     getProxyImplementation,
-    evmToHederaFormat,
-    getClient,
-    toHashgraphKey,
-} from '../scripts/index'
+    getLatestVersionByConfiguration,
+    getFacetsLengthByConfigurationIdAndVersion,
+    getFacetsByConfigurationIdAndVersion,
+    getBusinessLogicKeys,
+} from '../scripts/contractsMethods'
 
 subtask('getClient', 'Get the operator of the client')
     .addOptionalParam(

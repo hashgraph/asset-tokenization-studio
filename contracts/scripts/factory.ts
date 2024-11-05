@@ -224,10 +224,10 @@ export async function deployProxyToFactory(
     factoryBusinessLogicAddress: string
 ) {
     await deployTransparentUpgradeableProxy(factoryBusinessLogicAddress)
-    factory = await ethers.getContractAt(
+    factory = (await ethers.getContractAt(
         'Factory',
         transparentUpgradableProxy.address
-    )
+    )) as IFactory
 }
 
 export interface Rbac {

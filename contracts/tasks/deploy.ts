@@ -205,7 +205,7 @@
 
 import { task, types } from 'hardhat/config'
 import { DeployAllArgs, DeployArgs, GetClientResult } from './Arguments'
-import { deployAtsFullInfrastructure, deployContract } from '../scripts/index'
+import { deployAtsFullInfrastructure, deployContract } from '../scripts/deploy'
 
 task(
     'deployAll',

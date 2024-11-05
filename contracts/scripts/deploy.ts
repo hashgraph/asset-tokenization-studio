@@ -203,7 +203,6 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Client, ContractFunctionParameters, ContractId } from '@hashgraph/sdk'
 import { ContractFactory } from 'ethers'
 import {
@@ -237,14 +236,15 @@ import {
     toEvmAddress,
     toHashgraphKey,
     IContract,
-    contractCall,
-    BusinessLogicRegistryData,
-    createConfiguration,
+} from '../scripts/utils'
+import { BusinessLogicRegistryData } from './businessLogicResolverLogic'
+import { EquityConfigId, BondConfigId } from './constants'
+import { contractCall } from './contractsLifeCycle/utils'
+import {
     getStaticResolverKey,
+    createConfiguration,
     registerBusinessLogics,
-    BondConfigId,
-    EquityConfigId,
-} from '../scripts/index'
+} from './contractsMethods'
 
 const ExistingContractIds = {
     resolver: {
