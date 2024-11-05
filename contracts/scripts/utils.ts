@@ -212,7 +212,7 @@ import {
     ContractCreateFlow,
 } from '@hashgraph/sdk'
 import axios from 'axios'
-import { ADDRESS_0 } from './constants'
+import { ADDRESS_0, REGEX } from './constants'
 import * as dotenv from 'dotenv'
 dotenv.config()
 
@@ -360,6 +360,14 @@ export function toHashgraphKey({
 
 export async function getContractInfo(contractId: string): Promise<IContract> {
     try {
+        if (
+            !REGEX.contractId.test(contractId) &&
+            !REGEX.address.test(contractId)
+        ) {
+            throw new Error(
+                'Invalid contractId format. It must be like "0.0.XXXX" or "0xhexadecimal".'
+            )
+        }
         const URI_BASE = `${getHederaNetworkMirrorNodeURL()}/api/v1/`
         const url = URI_BASE + 'contracts/' + contractId
 

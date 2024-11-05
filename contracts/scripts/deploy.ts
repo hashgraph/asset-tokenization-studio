@@ -374,7 +374,7 @@ export async function deployAtsFullInfrastructure({
         deployFunction: () => Promise<DeployedContract>
     ): Promise<DeployedContract> => {
         return useDeployed && contract.num.toString() !== '0'
-            ? { contract: await getContractInfo(contract.toSolidityAddress()) }
+            ? { contract: await getContractInfo(contract.num.toString()) }
             : await deployFunction()
     }
 
@@ -707,14 +707,12 @@ export async function deployContract({
     const proxy = await deployTransparentProxy({
         clientOperator,
         privateKey,
-        proxyAdmin: proxyAdmin.contract_id,
-        implementation: contract.contract_id,
+        proxyAdmin: proxyAdmin.evm_address,
+        implementation: contract.evm_address,
     })
 
     console.log(
-        `${contractName} Proxy deployed at ${
-            (await getContractInfo(proxy.toString())).evm_address
-        }(${(await getContractInfo(proxy.toString())).contract_id})`
+        `${contractName} Proxy deployed at ${proxy.evm_address}(${proxy.contract_id})`
     )
 
     return { proxyAdmin, proxy, contract }
