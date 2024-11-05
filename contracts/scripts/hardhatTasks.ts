@@ -236,9 +236,6 @@ import {
     registerBusinessLogics,
     BusinessLogicRegistryData,
     getStaticResolverKey,
-    getLatestVersionByConfiguration,
-    getFacetsLengthByConfigurationIdAndVersion,
-    getFacetsByConfigurationIdAndVersion,
 } from './contractsMethods'
 
 interface AccountHedera {
@@ -497,122 +494,6 @@ task(
             console.log(`   --> ${key}: ${value.toString()}`)
         }
     })
-
-task('getResolverBusinessLogics', 'Get business logics from resolver')
-    .addParam('resolver', 'The resolver proxy admin address')
-    .setAction(
-        async (
-            {
-                resolver,
-            }: {
-                resolver: string
-            },
-            hre
-        ) => {
-            const accounts = hre.network.config
-                .accounts as unknown as Array<AccountHedera>
-            const client = getClient(hre.network.name)
-            const client1account: string = accounts[0].account
-            const client1privatekey: string = accounts[0].privateKey
-            const client1isED25519 = true
-
-            client.setOperator(
-                client1account,
-                toHashgraphKey(client1privatekey, client1isED25519)
-            )
-            console.log(hre.network.name)
-
-            const result = await getBusinessLogicKeys(
-                ContractId.fromString(resolver),
-                client
-            )
-
-            console.log(result)
-        }
-    )
-
-task('getConfigurationInfo', 'Get all info for a given configuration')
-    .addParam('resolver', 'The resolver proxy admin address')
-    .addParam('configid', 'Theconfig Id')
-    .setAction(
-        async (
-            {
-                resolver,
-                configid,
-            }: {
-                resolver: string
-                configid: string
-            },
-            hre
-        ) => {
-            const accounts = hre.network.config
-                .accounts as unknown as Array<AccountHedera>
-            const client = getClient(hre.network.name)
-            const client1account: string = accounts[0].account
-            const client1privatekey: string = accounts[0].privateKey
-            const client1isED25519 = false
-
-            client.setOperator(
-                client1account,
-                toHashgraphKey(client1privatekey, client1isED25519)
-            )
-            console.log(hre.network.name)
-
-            const configVersionLatest = parseInt(
-                await getLatestVersionByConfiguration(
-                    configid,
-                    ContractId.fromString(resolver),
-                    client
-                ),
-                16
-            )
-
-            console.log(
-                `Number of Versions for Config ${configid}: ${configVersionLatest}`
-            )
-
-            for (let i = 0; i < configVersionLatest; i++) {
-                const currentVersion = i + 1
-
-                const facetLength = parseInt(
-                    await getFacetsLengthByConfigurationIdAndVersion(
-                        configid,
-                        currentVersion,
-                        ContractId.fromString(resolver),
-                        client
-                    ),
-                    16
-                )
-
-                console.log(
-                    `Number of Facets for Config ${configid} and Version ${currentVersion}: ${facetLength}`
-                )
-
-                const facets = await getFacetsByConfigurationIdAndVersion(
-                    configid,
-                    currentVersion,
-                    0,
-                    facetLength,
-                    ContractId.fromString(resolver),
-                    client
-                )
-
-                for (let j = 0; j < facets[0].length; j++) {
-                    console.log(`id : ${facets[0][j].id}`)
-                    console.log(`address : ${facets[0][j].addr}`)
-                    console.log(
-                        `selectors : ${JSON.stringify(facets[0][j].selectors)}`
-                    )
-                    console.log(
-                        `interfacesId : ${JSON.stringify(
-                            facets[0][j].interfaceIds
-                        )}`
-                    )
-                    console.log('-------------------------')
-                }
-            }
-        }
-    )
 
 task('deployResolver', 'Deploy new resolver').setAction(
     async (arguements: any, hre) => {
