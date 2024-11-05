@@ -4,8 +4,7 @@ import 'hardhat-contract-sizer'
 import 'solidity-coverage'
 import '@hashgraph/sdk'
 import { getEnvVar } from './scripts/utils'
-import './scripts/hardhatTasks'
-import './tasks/utils'
+import './tasks/index'
 
 if (getEnvVar('NETWORK') !== 'hardhat') {
     require('@hashgraph/hardhat-hethers')

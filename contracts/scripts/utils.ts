@@ -209,13 +209,42 @@ import {
     Client,
     AccountId,
     PrivateKey,
-    ContractId,
     ContractCreateFlow,
 } from '@hashgraph/sdk'
 import axios from 'axios'
 import { ADDRESS_0 } from './constants'
 import * as dotenv from 'dotenv'
 dotenv.config()
+
+interface IAccount {
+    evm_address: string
+    key: IKey
+    account: string
+}
+
+export interface IContract {
+    admin_key: IKey
+    nullable: boolean
+    auto_renew_account: string
+    auto_renew_period: string
+    contract_id: string
+    created_timestamp: string
+    deleted: string
+    evm_address: string
+    expiration_timestamp: string
+    file_id: string
+    max_automatic_token_associations: string
+    memo: string
+    obtainer_id: string
+    permanent_removal: string
+    proxy_account_id: string
+    timestamp: string
+}
+
+interface IKey {
+    _type: string
+    key: string
+}
 
 export const getEnvVar = (name: string): string => {
     const value = process.env[name]
@@ -261,7 +290,7 @@ export async function deployContractSDK(
     constructorParameters?: any,
     adminKey?: PrivateKey,
     contractMemo?: string
-): Promise<ContractId> {
+): Promise<IContract> {
     const transaction = new ContractCreateFlow()
         .setBytecode(factory.bytecode)
         .setGas(15000000)
@@ -285,12 +314,11 @@ export async function deployContractSDK(
     if (!contractId) {
         throw Error('Error deploying contractSDK')
     }
+    const contractInfo = await getContractInfo(contractId.toString())
     console.log(
-        ` ${factory.name} - contractId ${contractId} -contractId ${
-            (await getContractInfo(contractId.toString())).evm_address
-        }   `
+        ` ${factory.name} - contractId ${contractId} -contractId ${contractInfo.contract_id}   `
     )
-    return contractId
+    return contractInfo
 }
 
 export async function toEvmAddress(
@@ -357,36 +385,6 @@ export async function evmToHederaFormat(evmAddress: string): Promise<string> {
     const url = URI_BASE + 'accounts/' + evmAddress
     const res = await axios.get<IAccount>(url)
     return res.data.account
-}
-
-interface IAccount {
-    evm_address: string
-    key: IKey
-    account: string
-}
-
-interface IContract {
-    admin_key: IKey
-    nullable: boolean
-    auto_renew_account: string
-    auto_renew_period: string
-    contract_id: string
-    created_timestamp: string
-    deleted: string
-    evm_address: string
-    expiration_timestamp: string
-    file_id: string
-    max_automatic_token_associations: string
-    memo: string
-    obtainer_id: string
-    permanent_removal: string
-    proxy_account_id: string
-    timestamp: string
-}
-
-interface IKey {
-    _type: string
-    key: string
 }
 
 function getHederaNetworkMirrorNodeURL(network?: string): string {

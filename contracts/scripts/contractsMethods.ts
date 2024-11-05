@@ -204,14 +204,13 @@
 */
 
 import { Client, ContractId } from '@hashgraph/sdk'
-import { contractCall } from './contractsLifeCycle/utils'
 import {
     ProxyAdmin__factory,
     BusinessLogicResolver__factory,
     IStaticFunctionSelectors__factory,
     DiamondCutManager__factory,
 } from '../typechain-types'
-import { FacetConfiguration } from './resolverDiamondCut.js'
+import { FacetConfiguration, contractCall } from '../scripts/index'
 
 export async function getProxyImplementation(
     proxyAdminAddress: ContractId,
