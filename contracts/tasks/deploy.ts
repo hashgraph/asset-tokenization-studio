@@ -246,10 +246,8 @@ task(
             }
         )
         // * Deploy the full infrastructure
-        const [
-            resolverProxyAddress,
-            resolverProxyAdminAddress,
-            resolverAddress,
+        const {
+            resolver,
             accessControl,
             cap,
             controlList,
@@ -263,14 +261,12 @@ task(
             diamondFacet,
             equity,
             bond,
-            scheduledSnapshot,
-            corporateActions,
+            scheduledSnapshots,
+            corporateActionsSecurity,
             lock,
             transferAndLock,
-            factoryProxyAddress,
-            factoryProxyAdminAddress,
-            factoryAddress,
-        ] = await deployAtsFullInfrastructure({
+            factory,
+        } = await deployAtsFullInfrastructure({
             clientOperator: client,
             privateKey: privateKey,
             isED25519: args.isEd25519,
@@ -278,35 +274,37 @@ task(
         })
 
         // * Display the deployed addresses
-        const addresses = {
-            'Resolver Proxy Address': resolverProxyAddress,
-            'Resolver Proxy Admin Address': resolverProxyAdminAddress,
-            'Resolver Address': resolverAddress,
-            'Factory Proxy Address': factoryProxyAddress,
-            'Factory Proxy Admin Address': factoryProxyAdminAddress,
-            'Factory Address': factoryAddress,
-            'Access Control Address': accessControl,
-            'Cap Address': cap,
-            'Control List Address': controlList,
-            'Pause Address': pause,
-            'ERC20 Address': erc20,
-            'ERC1410 Address': erc1410,
-            'ERC1594 Address': erc1594,
-            'ERC1643 Address': erc1643,
-            'ERC1644 Address': erc1644,
-            'Snapshots Address': snapshots,
-            'Diamond Facet Address': diamondFacet,
-            'Equity Address': equity,
-            'Bond Address': bond,
-            'Scheduled Snapshots Address': scheduledSnapshot,
-            'Corporate Actions Address': corporateActions,
-            'Lock Address': lock,
-            'Transfer and Lock Address': transferAndLock,
+        const ids = {
+            'Resolver Proxy': resolver.proxy,
+            'Resolver Proxy Admin': resolver.proxyAdmin,
+            Resolver: resolver.contract,
+            'Factory Proxy': factory.proxy,
+            'Factory Proxy Admin': factory.proxyAdmin,
+            Factory: factory.contract,
+            'Access Control': accessControl.contract,
+            Cap: cap.contract,
+            'Control List': controlList.contract,
+            Pause: pause.contract,
+            ERC20: erc20.contract,
+            ERC1410: erc1410.contract,
+            ERC1594: erc1594.contract,
+            ERC1643: erc1643.contract,
+            ERC1644: erc1644.contract,
+            Snapshots: snapshots.contract,
+            'Diamond Facet': diamondFacet.contract,
+            Equity: equity.contract,
+            Bond: bond.contract,
+            'Scheduled Snapshots': scheduledSnapshots.contract,
+            'Corporate Actions': corporateActionsSecurity.contract,
+            Lock: lock.contract,
+            'Transfer and Lock': transferAndLock.contract,
         }
 
-        console.log('\n 🟢 Deployed Addresses:')
-        for (const [key, value] of Object.entries(addresses)) {
-            console.log(`   --> ${key}: ${value.toString()}`)
+        console.log('\n 🟢 Deployed IDs:')
+        for (const [key, value] of Object.entries(ids)) {
+            console.log(
+                `   --> ${key}: ${value?.contract_id}(${value?.evm_address})`
+            )
         }
     })
 

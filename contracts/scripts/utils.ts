@@ -210,6 +210,7 @@ import {
     AccountId,
     PrivateKey,
     ContractCreateFlow,
+    ContractId,
 } from '@hashgraph/sdk'
 import axios from 'axios'
 import { ADDRESS_0, REGEX } from './constants'
@@ -228,6 +229,7 @@ export interface IContract {
     auto_renew_account: string
     auto_renew_period: string
     contract_id: string
+    contractId: ContractId
     created_timestamp: string
     deleted: string
     evm_address: string
@@ -316,7 +318,7 @@ export async function deployContractSDK(
     }
     const contractInfo = await getContractInfo(contractId.toString())
     console.log(
-        ` ${factory.name} - contractId ${contractId} -contractId ${contractInfo.contract_id}   `
+        `${factory.name} - ${contractInfo.contract_id} - ${contractInfo.evm_address}`
     )
     return contractInfo
 }
@@ -336,6 +338,10 @@ export async function toEvmAddress(
     } catch (error) {
         throw new Error('Error retrieving the Evm Address : ' + error)
     }
+}
+
+export function contractIdToString(contractId: ContractId): string {
+    return `${contractId.shard.toString()}.${contractId.realm.toString()}.${contractId.num.toString()}`
 }
 
 /**
@@ -381,7 +387,10 @@ export async function getContractInfo(contractId: string): Promise<IContract> {
             await sleep(1000)
         } while (res.status !== 200 && i < retry)
 
-        return res.data
+        return {
+            ...res.data,
+            contractId: ContractId.fromString(res.data.contract_id),
+        }
     } catch (error) {
         throw new Error('Error retrieving the Evm Address : ' + error)
     }

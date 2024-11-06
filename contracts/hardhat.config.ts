@@ -4,9 +4,10 @@ import 'hardhat-contract-sizer'
 import 'solidity-coverage'
 import '@hashgraph/sdk'
 import { getEnvVar } from './scripts/utils'
-import './tasks/utils'
-import './tasks/deploy'
-import './tasks/update'
+// ! Uncomment the following lines to be able to use tasks AFTER compiling the project
+// import './tasks/utils'
+// import './tasks/deploy'
+// import './tasks/update'
 
 if (getEnvVar('NETWORK') !== 'hardhat') {
     require('@hashgraph/hardhat-hethers')

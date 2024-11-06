@@ -236,6 +236,7 @@ import {
     toEvmAddress,
     toHashgraphKey,
     IContract,
+    contractIdToString,
 } from '../scripts/utils'
 import { BusinessLogicRegistryData } from './businessLogicResolverLogic'
 import { EquityConfigId, BondConfigId } from './constants'
@@ -370,161 +371,159 @@ export async function deployAtsFullInfrastructure({
     useDeployed?: boolean
 }) {
     const deployOrUseExisting = async (
-        contract: ContractId,
+        existing: {
+            contract: ContractId
+            proxy?: ContractId
+            proxyAdmin?: ContractId
+        },
         deployFunction: () => Promise<DeployedContract>
     ): Promise<DeployedContract> => {
-        return useDeployed && contract.num.toString() !== '0'
-            ? { contract: await getContractInfo(contract.num.toString()) }
-            : await deployFunction()
+        if (useDeployed && existing.contract.num.toString() !== '0') {
+            return {
+                contract: await getContractInfo(
+                    contractIdToString(existing.contract)
+                ),
+                proxy: existing.proxy
+                    ? await getContractInfo(contractIdToString(existing.proxy))
+                    : undefined,
+                proxyAdmin: existing.proxyAdmin
+                    ? await getContractInfo(
+                          contractIdToString(existing.proxyAdmin)
+                      )
+                    : undefined,
+            }
+        }
+        return await deployFunction()
     }
 
-    const resolver = await deployOrUseExisting(
-        ExistingContractIds.resolver.contract,
-        () =>
-            deployContract({
-                clientOperator,
-                privateKey,
-                contractName: 'resolver',
-                isED25519: isED25519,
-            })
-    )
+    const deployContracts = async () => {
+        const contracts = [
+            { name: 'resolver', ids: ExistingContractIds.resolver },
+            {
+                name: 'accesscontrol',
+                ids: { contract: ExistingContractIds.accessControl },
+            },
+            { name: 'cap', ids: { contract: ExistingContractIds.cap } },
+            {
+                name: 'controllist',
+                ids: { contract: ExistingContractIds.controlList },
+            },
+            { name: 'pause', ids: { contract: ExistingContractIds.pause } },
+            { name: 'lock', ids: { contract: ExistingContractIds.lock } },
+            { name: 'erc20', ids: { contract: ExistingContractIds.erc20 } },
+            { name: 'erc1410', ids: { contract: ExistingContractIds.erc1410 } },
+            { name: 'erc1594', ids: { contract: ExistingContractIds.erc1594 } },
+            { name: 'erc1643', ids: { contract: ExistingContractIds.erc1643 } },
+            { name: 'erc1644', ids: { contract: ExistingContractIds.erc1644 } },
+            {
+                name: 'snapshots',
+                ids: { contract: ExistingContractIds.snapshots },
+            },
+            {
+                name: 'diamondfacet',
+                ids: { contract: ExistingContractIds.diamondFacet },
+            },
+            { name: 'equity', ids: { contract: ExistingContractIds.equity } },
+            { name: 'bond', ids: { contract: ExistingContractIds.bond } },
+            {
+                name: 'scheduledsnapshots',
+                ids: { contract: ExistingContractIds.scheduledSnapshots },
+            },
+            {
+                name: 'corporateactionssecurity',
+                ids: { contract: ExistingContractIds.corporateActionsSecurity },
+            },
+            {
+                name: 'transferandlock',
+                ids: { contract: ExistingContractIds.transferAndLock },
+            },
+        ]
+
+        const deployedContracts: { [key: string]: DeployedContract } = {}
+
+        for (const { name, ids } of contracts) {
+            deployedContracts[name] = await deployOrUseExisting(ids, () =>
+                deployContract({
+                    clientOperator,
+                    privateKey,
+                    contractName: name,
+                    isED25519: isED25519,
+                })
+            )
+        }
+
+        return deployedContracts
+    }
+
+    const deployedContracts = await deployContracts()
+
+    const resolver = deployedContracts['resolver']
     if (!resolver.proxy || !resolver.proxyAdmin) {
         throw new Error('Resolver proxy or proxy admin not found')
     }
 
-    const accessControl = await deployOrUseExisting(
-        ExistingContractIds.accessControl,
-        () =>
-            deployContract({
-                clientOperator,
-                privateKey,
-                contractName: 'accesscontrol',
-            })
-    )
-    const cap = await deployOrUseExisting(ExistingContractIds.cap, () =>
-        deployContract({ clientOperator, privateKey, contractName: 'cap' })
-    )
-    const controlList = await deployOrUseExisting(
-        ExistingContractIds.controlList,
-        () =>
-            deployContract({
-                clientOperator,
-                privateKey,
-                contractName: 'controllist',
-            })
-    )
-    const pause = await deployOrUseExisting(ExistingContractIds.pause, () =>
-        deployContract({ clientOperator, privateKey, contractName: 'pause' })
-    )
-    const lock = await deployOrUseExisting(ExistingContractIds.lock, () =>
-        deployContract({ clientOperator, privateKey, contractName: 'lock' })
-    )
-    const erc20 = await deployOrUseExisting(ExistingContractIds.erc20, () =>
-        deployContract({ clientOperator, privateKey, contractName: 'erc20' })
-    )
-    const erc1410 = await deployOrUseExisting(ExistingContractIds.erc1410, () =>
-        deployContract({ clientOperator, privateKey, contractName: 'erc1410' })
-    )
-    const erc1594 = await deployOrUseExisting(ExistingContractIds.erc1594, () =>
-        deployContract({ clientOperator, privateKey, contractName: 'erc1594' })
-    )
-    const erc1643 = await deployOrUseExisting(ExistingContractIds.erc1643, () =>
-        deployContract({ clientOperator, privateKey, contractName: 'erc1643' })
-    )
-    const erc1644 = await deployOrUseExisting(ExistingContractIds.erc1644, () =>
-        deployContract({ clientOperator, privateKey, contractName: 'erc1644' })
-    )
-    const snapshots = await deployOrUseExisting(
-        ExistingContractIds.snapshots,
-        () =>
-            deployContract({
-                clientOperator,
-                privateKey,
-                contractName: 'snapshots',
-            })
-    )
-    const diamondFacet = await deployOrUseExisting(
-        ExistingContractIds.diamondFacet,
-        () =>
-            deployContract({
-                clientOperator,
-                privateKey,
-                contractName: 'diamondfacet',
-            })
-    )
-    const equity = await deployOrUseExisting(ExistingContractIds.equity, () =>
-        deployContract({ clientOperator, privateKey, contractName: 'equity' })
-    )
-    const bond = await deployOrUseExisting(ExistingContractIds.bond, () =>
-        deployContract({ clientOperator, privateKey, contractName: 'bond' })
-    )
-    const scheduledSnapshots = await deployOrUseExisting(
-        ExistingContractIds.scheduledSnapshots,
-        () =>
-            deployContract({
-                clientOperator,
-                privateKey,
-                contractName: 'scheduledsnapshots',
-            })
-    )
-    const corporateActionsSecurity = await deployOrUseExisting(
-        ExistingContractIds.corporateActionsSecurity,
-        () =>
-            deployContract({
-                clientOperator,
-                privateKey,
-                contractName: 'corporateactionssecurity',
-            })
-    )
-    const transferAndLock = await deployOrUseExisting(
-        ExistingContractIds.transferAndLock,
-        () =>
-            deployContract({
-                clientOperator,
-                privateKey,
-                contractName: 'transferandlock',
-            })
-    )
+    const {
+        accesscontrol: accessControl,
+        cap,
+        controllist: controlList,
+        pause,
+        lock,
+        erc20,
+        erc1410,
+        erc1594,
+        erc1643,
+        erc1644,
+        snapshots,
+        diamondfacet: diamondFacet,
+        equity,
+        bond,
+        scheduledsnapshots: scheduledSnapshots,
+        corporateactionssecurity: corporateActionsSecurity,
+        transferandlock: transferAndLock,
+    } = deployedContracts
 
-    const businessLogicRegistries: BusinessLogicRegistryData[] =
-        await Promise.all(
-            [
-                diamondFacet,
-                accessControl,
-                cap,
-                pause,
-                controlList,
-                erc20,
-                erc1644,
-                erc1410,
-                erc1594,
-                erc1643,
-                snapshots,
-                equity,
-                bond,
-                scheduledSnapshots,
-                corporateActionsSecurity,
-                lock,
-                transferAndLock,
-            ].map(async ({ contract }) => ({
-                businessLogicKey: await getStaticResolverKey(
-                    ContractId.fromString(contract.contract_id),
-                    clientOperator
-                ),
-                businessLogicAddress: contract.evm_address,
-            }))
+    const businessLogicRegistries: BusinessLogicRegistryData[] = []
+    for await (const { contract } of [
+        diamondFacet,
+        accessControl,
+        cap,
+        pause,
+        controlList,
+        erc20,
+        erc1644,
+        erc1410,
+        erc1594,
+        erc1643,
+        snapshots,
+        equity,
+        bond,
+        scheduledSnapshots,
+        corporateActionsSecurity,
+        lock,
+        transferAndLock,
+    ]) {
+        const businessLogicKey = await getStaticResolverKey(
+            contract.contractId,
+            clientOperator
         )
+        businessLogicRegistries.push({
+            businessLogicKey,
+            businessLogicAddress: contract.evm_address,
+        })
+    }
 
     if (
         !useDeployed ||
         ExistingContractIds.resolver.contract.num.toString() === '0'
     ) {
+        console.log('Registering business logics. please wait...')
         await registerBusinessLogics(
             businessLogicRegistries,
-            ContractId.fromString(resolver.proxy!.contract_id),
+            resolver.proxy!.contractId,
             clientOperator
         )
 
+        console.log('Creating configurations. please wait...')
         const facetIdsCommon = await Promise.all(
             [
                 diamondFacet,
@@ -543,17 +542,14 @@ export async function deployAtsFullInfrastructure({
                 lock,
                 transferAndLock,
             ].map(({ contract }) =>
-                getStaticResolverKey(
-                    ContractId.fromString(contract.contract_id),
-                    clientOperator
-                )
+                getStaticResolverKey(contract.contractId, clientOperator)
             )
         )
 
         const facetIdsEquities = [
             ...facetIdsCommon,
             await getStaticResolverKey(
-                ContractId.fromString(equity.contract.contract_id),
+                equity.contract.contractId,
                 clientOperator
             ),
         ]
@@ -562,7 +558,7 @@ export async function deployAtsFullInfrastructure({
         const facetIdsBonds = [
             ...facetIdsCommon,
             await getStaticResolverKey(
-                ContractId.fromString(bond.contract.contract_id),
+                bond.contract.contractId,
                 clientOperator
             ),
         ]
@@ -573,7 +569,7 @@ export async function deployAtsFullInfrastructure({
             EquityConfigId,
             facetIdsEquities,
             facetVersionsEquities,
-            ContractId.fromString(resolver.proxy.contract_id),
+            resolver.proxy.contractId,
             clientOperator
         )
         // Create configuration for bonds
@@ -581,13 +577,17 @@ export async function deployAtsFullInfrastructure({
             BondConfigId,
             facetIdsBonds,
             facetVersionsBonds,
-            ContractId.fromString(resolver.proxy.contract_id),
+            resolver.proxy.contractId,
             clientOperator
         )
     }
 
     const factory = await deployOrUseExisting(
-        ExistingContractIds.factory.contract,
+        {
+            contract: ExistingContractIds.factory.contract,
+            proxy: ExistingContractIds.factory.proxy,
+            proxyAdmin: ExistingContractIds.factory.proxyAdmin,
+        },
         () =>
             deployContract({
                 clientOperator,
@@ -597,7 +597,7 @@ export async function deployAtsFullInfrastructure({
             })
     )
 
-    return [
+    return {
         resolver,
         accessControl,
         cap,
@@ -617,7 +617,7 @@ export async function deployAtsFullInfrastructure({
         lock,
         transferAndLock,
         factory,
-    ]
+    }
 }
 
 export async function deployContract({
@@ -661,8 +661,8 @@ export async function deployContract({
         bond: { factory: BondUSA__factory },
         scheduledsnapshots: { factory: ScheduledSnapshots__factory },
         corporateactions: { factory: CorporateActionsSecurity__factory },
-        lock: { factory: Lock__factory },
         transferandlock: { factory: TransferAndLock__factory },
+        lock: { factory: Lock__factory },
     }
 
     const contractKey = Object.keys(contractMap).find((contractType) =>
@@ -683,7 +683,7 @@ export async function deployContract({
     )
 
     console.log(
-        `${contractName} deployed at ${contract.evm_address}(${contract.contract_id})`
+        `${contractName} deployed at ${contract.evm_address} (${contract.contract_id})`
     )
 
     if (!deployProxy) {
