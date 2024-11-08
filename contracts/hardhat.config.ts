@@ -15,12 +15,18 @@ if (getEnvVar({ name: 'NETWORK', defaultValue: 'hardhat' }) !== 'hardhat') {
 
 const HEDERA_ACCOUNTS = [
     {
-        account: getEnvVar({ name: 'ACCOUNT_0' }),
-        privateKey: getEnvVar({ name: 'PRIVATE_KEY_0' }).replace(/^0x/, ''),
+        account: getEnvVar({ name: 'ACCOUNT_0', defaultValue: '0.0.0' }),
+        privateKey: getEnvVar({
+            name: 'PRIVATE_KEY_0',
+            defaultValue: '0x0000',
+        }).replace(/^0x/, ''),
     },
     {
-        account: getEnvVar({ name: 'ACCOUNT_1' }),
-        privateKey: getEnvVar({ name: 'PRIVATE_KEY_1' }).replace(/^0x/, ''),
+        account: getEnvVar({ name: 'ACCOUNT_1', defaultValue: '0.0.0' }),
+        privateKey: getEnvVar({
+            name: 'PRIVATE_KEY_1',
+            defaultValue: '0x0000',
+        }).replace(/^0x/, ''),
     },
 ]
 
