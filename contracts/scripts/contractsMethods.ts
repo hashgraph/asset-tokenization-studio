@@ -282,8 +282,6 @@ export async function createConfiguration(
 
     const params = [configId, facetConfigurations]
 
-    console.log(params)
-
     await contractCall(
         proxyAddress,
         'createConfiguration',

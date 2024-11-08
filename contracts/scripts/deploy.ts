@@ -799,8 +799,8 @@ async function deployTransparentProxy({
     implementation: string
 }): Promise<IContract> {
     const params = new ContractFunctionParameters()
-        .addAddress(proxyAdmin)
         .addAddress(implementation)
+        .addAddress(proxyAdmin)
         .addBytes(new Uint8Array([]))
 
     return await deployContractSDK(
