@@ -249,34 +249,46 @@ import {
 
 const ExistingContractIds = {
     resolver: {
-        proxy: ContractId.fromString(getEnvVar('RESOLVER_PROXY')),
-        proxyAdmin: ContractId.fromString(getEnvVar('RESOLVER_PROXY_ADMIN')),
-        contract: ContractId.fromString(getEnvVar('RESOLVER_CONTRACT')),
+        proxy: ContractId.fromString(getEnvVar({ name: 'RESOLVER_PROXY' })),
+        proxyAdmin: ContractId.fromString(
+            getEnvVar({ name: 'RESOLVER_PROXY_ADMIN' })
+        ),
+        contract: ContractId.fromString(
+            getEnvVar({ name: 'RESOLVER_CONTRACT' })
+        ),
     },
     factory: {
-        proxy: ContractId.fromString(getEnvVar('FACTORY_PROXY')),
-        proxyAdmin: ContractId.fromString(getEnvVar('FACTORY_PROXY_ADMIN')),
-        contract: ContractId.fromString(getEnvVar('FACTORY_CONTRACT')),
+        proxy: ContractId.fromString(getEnvVar({ name: 'FACTORY_PROXY' })),
+        proxyAdmin: ContractId.fromString(
+            getEnvVar({ name: 'FACTORY_PROXY_ADMIN' })
+        ),
+        contract: ContractId.fromString(
+            getEnvVar({ name: 'FACTORY_CONTRACT' })
+        ),
     },
-    accessControl: ContractId.fromString(getEnvVar('ACCESS_CONTROL')),
-    cap: ContractId.fromString(getEnvVar('CAP')),
-    controlList: ContractId.fromString(getEnvVar('CONTROL_LIST')),
-    pause: ContractId.fromString(getEnvVar('PAUSE')),
-    erc20: ContractId.fromString(getEnvVar('ERC20')),
-    erc1410: ContractId.fromString(getEnvVar('ERC1410')),
-    erc1594: ContractId.fromString(getEnvVar('ERC1594')),
-    erc1643: ContractId.fromString(getEnvVar('ERC1643')),
-    erc1644: ContractId.fromString(getEnvVar('ERC1644')),
-    snapshots: ContractId.fromString(getEnvVar('SNAPSHOTS')),
-    diamondFacet: ContractId.fromString(getEnvVar('DIAMOND_FACET')),
-    equity: ContractId.fromString(getEnvVar('EQUITY')),
-    bond: ContractId.fromString(getEnvVar('BOND')),
-    scheduledSnapshots: ContractId.fromString(getEnvVar('SCHEDULED_SNAPSHOTS')),
-    corporateActionsSecurity: ContractId.fromString(
-        getEnvVar('CORPORATE_ACTIONS_SECURITY')
+    accessControl: ContractId.fromString(getEnvVar({ name: 'ACCESS_CONTROL' })),
+    cap: ContractId.fromString(getEnvVar({ name: 'CAP' })),
+    controlList: ContractId.fromString(getEnvVar({ name: 'CONTROL_LIST' })),
+    pause: ContractId.fromString(getEnvVar({ name: 'PAUSE' })),
+    erc20: ContractId.fromString(getEnvVar({ name: 'ERC20' })),
+    erc1410: ContractId.fromString(getEnvVar({ name: 'ERC1410' })),
+    erc1594: ContractId.fromString(getEnvVar({ name: 'ERC1594' })),
+    erc1643: ContractId.fromString(getEnvVar({ name: 'ERC1643' })),
+    erc1644: ContractId.fromString(getEnvVar({ name: 'ERC1644' })),
+    snapshots: ContractId.fromString(getEnvVar({ name: 'SNAPSHOTS' })),
+    diamondFacet: ContractId.fromString(getEnvVar({ name: 'DIAMOND_FACET' })),
+    equity: ContractId.fromString(getEnvVar({ name: 'EQUITY' })),
+    bond: ContractId.fromString(getEnvVar({ name: 'BOND' })),
+    scheduledSnapshots: ContractId.fromString(
+        getEnvVar({ name: 'SCHEDULED_SNAPSHOTS' })
     ),
-    lock: ContractId.fromString(getEnvVar('LOCK')),
-    transferAndLock: ContractId.fromString(getEnvVar('TRANSFER_AND_LOCK')),
+    corporateActionsSecurity: ContractId.fromString(
+        getEnvVar({ name: 'CORPORATE_ACTIONS_SECURITY' })
+    ),
+    lock: ContractId.fromString(getEnvVar({ name: 'LOCK' })),
+    transferAndLock: ContractId.fromString(
+        getEnvVar({ name: 'TRANSFER_AND_LOCK' })
+    ),
 }
 
 export interface DeployedContract {

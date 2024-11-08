@@ -9,18 +9,18 @@ import { getEnvVar } from './scripts/utils'
 // import './tasks/deploy'
 // import './tasks/update'
 
-if (getEnvVar('NETWORK') !== 'hardhat') {
+if (getEnvVar({ name: 'NETWORK', defaultValue: 'hardhat' }) !== 'hardhat') {
     require('@hashgraph/hardhat-hethers')
 }
 
 const HEDERA_ACCOUNTS = [
     {
-        account: getEnvVar('ACCOUNT_0'),
-        privateKey: getEnvVar('PRIVATE_KEY_0').replace(/^0x/, ''),
+        account: getEnvVar({ name: 'ACCOUNT_0' }),
+        privateKey: getEnvVar({ name: 'PRIVATE_KEY_0' }).replace(/^0x/, ''),
     },
     {
-        account: getEnvVar('ACCOUNT_1'),
-        privateKey: getEnvVar('PRIVATE_KEY_1').replace(/^0x/, ''),
+        account: getEnvVar({ name: 'ACCOUNT_1' }),
+        privateKey: getEnvVar({ name: 'PRIVATE_KEY_1' }).replace(/^0x/, ''),
     },
 ]
 
@@ -64,7 +64,7 @@ let config: ExtendedHardhatUserConfig = {
     },
 }
 // If we are not using the hardhat network, we need to add the Hedera accounts
-if (getEnvVar('NETWORK') !== 'hardhat') {
+if (getEnvVar({ name: 'NETWORK', defaultValue: 'hardhat' }) !== 'hardhat') {
     config = {
         ...config,
         defaultNetwork: 'testnet',

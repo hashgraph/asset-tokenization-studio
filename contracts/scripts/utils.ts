@@ -248,12 +248,24 @@ interface IKey {
     key: string
 }
 
-export const getEnvVar = (name: string): string => {
+export function getEnvVar({
+    name,
+    defaultValue,
+}: {
+    name: string
+    defaultValue?: string
+}): string {
     const value = process.env[name]
-    if (!value) {
-        throw new Error(`Environment variable ${name} is not defined`)
+    if (value) {
+        return value
     }
-    return value
+    if (defaultValue) {
+        console.warn(
+            `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
+        )
+        return defaultValue
+    }
+    throw new Error(`Environment variable ${name} is not defined`)
 }
 
 export const sleep = (ms: number) =>
