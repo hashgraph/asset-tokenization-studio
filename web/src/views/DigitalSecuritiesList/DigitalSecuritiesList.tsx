@@ -452,6 +452,8 @@ export const DigitalSecuritiesList = () => {
       cell: ({ getValue }) => {
         const evmAddress = getValue();
 
+        if (!evmAddress) return <Text paddingLeft={4}>-</Text>;
+
         return (
           <Tooltip label={evmAddress}>
             <HStack gap={1.5}>
