@@ -239,7 +239,7 @@ import {
     contractIdToString,
 } from '../scripts/utils'
 import { BusinessLogicRegistryData } from './businessLogicResolverLogic'
-import { EquityConfigId, BondConfigId } from './constants'
+import { EquityConfigId, BondConfigId, _DEFAULT_ADMIN_ROLE } from './constants'
 import { contractCall } from './contractsLifeCycle/utils'
 import {
     getStaticResolverKey,
@@ -508,7 +508,7 @@ export async function deployAtsFullInfrastructure({
         )
         businessLogicRegistries.push({
             businessLogicKey,
-            businessLogicAddress: contract.evm_address,
+            businessLogicAddress: contract.evm_address.replace('0x', ''),
         })
     }
 
@@ -655,11 +655,11 @@ export async function deployContract({
         erc1594: { factory: ERC1594__factory },
         erc1643: { factory: ERC1643__factory },
         erc1644: { factory: ERC1644__factory },
-        snapshots: { factory: Snapshots__factory },
         facet: { factory: DiamondFacet__factory },
         equity: { factory: EquityUSA__factory },
         bond: { factory: BondUSA__factory },
         scheduledsnapshots: { factory: ScheduledSnapshots__factory },
+        snapshots: { factory: Snapshots__factory },
         corporateactions: { factory: CorporateActionsSecurity__factory },
         transferandlock: { factory: TransferAndLock__factory },
         lock: { factory: Lock__factory },
@@ -714,6 +714,30 @@ export async function deployContract({
     console.log(
         `${contractName} Proxy deployed at ${proxy.evm_address}(${proxy.contract_id})`
     )
+    if (contractKey === 'resolver') {
+        console.log('Initializing resolver. please wait...')
+        await contractCall(
+            proxy.contractId,
+            'initialize_BusinessLogicResolver',
+            [],
+            clientOperator,
+            8000000,
+            BusinessLogicResolver__factory.abi
+        )
+
+        console.log('Resolver initialized successfully.')
+
+        const admin = await contractCall(
+            proxy.contractId,
+            'getRoleMembers',
+            [_DEFAULT_ADMIN_ROLE, '0', '1'],
+            clientOperator,
+            130000,
+            BusinessLogicResolver__factory.abi
+        )
+
+        console.log(`Resolver Admin: ${admin[0]}`)
+    }
 
     return { proxyAdmin, proxy, contract }
 }
@@ -775,8 +799,8 @@ async function deployTransparentProxy({
     implementation: string
 }): Promise<IContract> {
     const params = new ContractFunctionParameters()
-        .addAddress(proxyAdmin.replace('0x', ''))
-        .addAddress(implementation.replace('0x', ''))
+        .addAddress(proxyAdmin)
+        .addAddress(implementation)
         .addBytes(new Uint8Array([]))
 
     return await deployContractSDK(
