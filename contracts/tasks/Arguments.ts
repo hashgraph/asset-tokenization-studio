@@ -203,17 +203,54 @@
 
 */
 
-import { QueryResponse } from 'core/query/QueryResponse';
+import { Client } from '@hashgraph/sdk'
 
-export default interface EquityDetailsViewModel extends QueryResponse {
-  votingRight: boolean;
-  informationRight: boolean;
-  liquidationRight: boolean;
-  subscriptionRight: boolean;
-  conversionRight: boolean;
-  redemptionRight: boolean;
-  putRight: boolean;
-  dividendRight: number;
-  currency: string;
-  nominalValue: string;
+export interface GetClientResult {
+    client: Client
+    account: string
+    privateKey: string
+}
+
+interface BasicArgs {
+    account?: string
+    privateKey?: string
+    isEd25519: boolean
+}
+
+export type GetClientArgs = BasicArgs
+
+// * Utils
+export interface GetProxyAdminConfigArgs extends BasicArgs {
+    proxyAdmin: string
+    proxy: string
+}
+
+export interface GetConfigurationInfoArgs extends BasicArgs {
+    resolver: string
+    configId: string
+}
+
+export interface GetResolverBusinessLogicsArgs extends BasicArgs {
+    resolver: string
+}
+
+// * Deploy
+export interface DeployArgs extends BasicArgs {
+    contractName: string
+}
+
+export interface DeployAllArgs extends BasicArgs {
+    useDeployed: boolean
+}
+
+// * Update
+export interface UpdateFactoryVersionArgs extends BasicArgs {
+    proxyAdmin: string
+    proxy: string
+    newImplementation: string
+}
+
+export interface UpdateBusinessLogicKeysArgs extends BasicArgs {
+    resolver: string
+    implementations: string // * Comma separated list
 }

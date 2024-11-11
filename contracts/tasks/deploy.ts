@@ -203,17 +203,163 @@
 
 */
 
-import { QueryResponse } from 'core/query/QueryResponse';
+import { task, types } from 'hardhat/config'
+import { DeployAllArgs, DeployArgs, GetClientResult } from './Arguments'
+import { deployAtsFullInfrastructure, deployContract } from '../scripts/deploy'
 
-export default interface EquityDetailsViewModel extends QueryResponse {
-  votingRight: boolean;
-  informationRight: boolean;
-  liquidationRight: boolean;
-  subscriptionRight: boolean;
-  conversionRight: boolean;
-  redemptionRight: boolean;
-  putRight: boolean;
-  dividendRight: number;
-  currency: string;
-  nominalValue: string;
-}
+task(
+    'deployAll',
+    'Deploy new factory, new facet implementation, new resolver and initialize it with the new facet implementations'
+)
+    .addOptionalPositionalParam(
+        'account',
+        'The Hedera account to use for deployment. 0.0.XXXX format',
+        undefined,
+        types.string
+    )
+    .addOptionalPositionalParam(
+        'privateKey',
+        'The private key of the account, Raw hexadecimal string',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'clientIsEd25519',
+        'Client is ED25519 key type',
+        false,
+        types.boolean
+    )
+    .addOptionalParam(
+        'useDeployed',
+        'Use already deployed contracts',
+        true,
+        types.boolean
+    )
+    .setAction(async (args: DeployAllArgs, hre) => {
+        console.log(`Executing deployAll on ${hre.network.name} ...`)
+        const { client, privateKey }: GetClientResult = await hre.run(
+            'getClient',
+            {
+                account: args.account,
+                privateKey: args.privateKey,
+                isEd25519: args.isEd25519,
+            }
+        )
+        // * Deploy the full infrastructure
+        const {
+            resolver,
+            accessControl,
+            cap,
+            controlList,
+            pause,
+            erc20,
+            erc1410,
+            erc1594,
+            erc1643,
+            erc1644,
+            snapshots,
+            diamondFacet,
+            equity,
+            bond,
+            scheduledSnapshots,
+            corporateActionsSecurity,
+            lock,
+            transferAndLock,
+            factory,
+        } = await deployAtsFullInfrastructure({
+            clientOperator: client,
+            privateKey: privateKey,
+            isED25519: args.isEd25519,
+            useDeployed: args.useDeployed,
+        })
+
+        // * Display the deployed addresses
+        const ids = {
+            'Resolver Proxy': resolver.proxy,
+            'Resolver Proxy Admin': resolver.proxyAdmin,
+            Resolver: resolver.contract,
+            'Factory Proxy': factory.proxy,
+            'Factory Proxy Admin': factory.proxyAdmin,
+            Factory: factory.contract,
+            'Access Control': accessControl.contract,
+            Cap: cap.contract,
+            'Control List': controlList.contract,
+            Pause: pause.contract,
+            ERC20: erc20.contract,
+            ERC1410: erc1410.contract,
+            ERC1594: erc1594.contract,
+            ERC1643: erc1643.contract,
+            ERC1644: erc1644.contract,
+            Snapshots: snapshots.contract,
+            'Diamond Facet': diamondFacet.contract,
+            Equity: equity.contract,
+            Bond: bond.contract,
+            'Scheduled Snapshots': scheduledSnapshots.contract,
+            'Corporate Actions': corporateActionsSecurity.contract,
+            Lock: lock.contract,
+            'Transfer and Lock': transferAndLock.contract,
+        }
+
+        console.log('\n 🟢 Deployed IDs:')
+        for (const [key, value] of Object.entries(ids)) {
+            console.log(
+                `   --> ${key}: ${value?.contract_id}(${value?.evm_address})`
+            )
+        }
+    })
+
+task('deploy', 'Deploy new contract')
+    .addPositionalParam(
+        'contractName',
+        'The name of the contract to deploy',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'account',
+        'The Hedera account to use for deployment. 0.0.XXXX format',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'privateKey',
+        'The private key of the account, Raw hexadecimal string',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'isEd25519',
+        'Client is ED25519 key type',
+        false,
+        types.boolean
+    )
+    .setAction(async (args: DeployArgs, hre) => {
+        console.log(`Executing deploy on ${hre.network.name} ...`)
+        const { client, privateKey }: GetClientResult = await hre.run(
+            'getClient',
+            {
+                account: args.account,
+                privateKey: args.privateKey,
+                isEd25519: args.isEd25519,
+            }
+        )
+        // * Deploy the contract
+        const { proxyAdmin, proxy, contract } = await deployContract({
+            clientOperator: client,
+            privateKey: privateKey,
+            isED25519: args.isEd25519,
+            contractName: args.contractName,
+        })
+
+        if (proxyAdmin) {
+            console.log(
+                `Proxy Admin: ${proxyAdmin.evm_address}(${proxyAdmin.contract_id})`
+            )
+        }
+        if (proxy) {
+            console.log(`Proxy: ${proxy.evm_address}(${proxy.contract_id})`)
+        }
+        console.log(
+            `Implementation: ${contract.evm_address}(${contract.contract_id})`
+        )
+    })

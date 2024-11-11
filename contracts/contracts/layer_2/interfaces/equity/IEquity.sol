@@ -218,7 +218,7 @@ interface IEquity {
         bool informationRight;
         bool liquidationRight;
         bool subscriptionRight;
-        bool convertionRight;
+        bool conversionRight;
         bool redemptionRight;
         bool putRight;
         DividendType dividendRight;

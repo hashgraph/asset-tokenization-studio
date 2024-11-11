@@ -226,7 +226,7 @@ export class CreateEquityCommand extends Command<CreateEquityCommandResponse> {
     public readonly informationRight: boolean,
     public readonly liquidationRight: boolean,
     public readonly subscriptionRight: boolean,
-    public readonly convertionRight: boolean,
+    public readonly conversionRight: boolean,
     public readonly redemptionRight: boolean,
     public readonly putRight: boolean,
     public readonly dividendRight: DividendType,
