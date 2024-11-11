@@ -208,7 +208,7 @@ import { CommandResponse } from '../../../../../../core/command/CommandResponse.
 
 export class TransferAndLockCommandResponse implements CommandResponse {
   constructor(
-    public readonly payload: boolean,
+    public readonly payload: number,
     public readonly transactionId: string,
   ) {}
 }

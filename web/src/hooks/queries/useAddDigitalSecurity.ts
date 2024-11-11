@@ -255,6 +255,7 @@ export const useAddDigitalSecurity = () => {
             isin: data.isin ?? "",
             type: data.type,
             address: data.diamondAddress?.toString() ?? "",
+            evmAddress: data.evmDiamondAddress?.toString() ?? "",
           };
 
           if (

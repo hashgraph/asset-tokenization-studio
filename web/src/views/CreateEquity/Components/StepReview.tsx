@@ -304,7 +304,7 @@ export const StepReview = () => {
       informationRight: rights.informationRights,
       liquidationRight: rights.liquidationRights,
       subscriptionRight: rights.subscriptionRights,
-      convertionRight: rights.conversionRights,
+      conversionRight: rights.conversionRights,
       redemptionRight: rights.redemptionRights,
       putRight: rights.putRights,
       dividendRight: dividendType,

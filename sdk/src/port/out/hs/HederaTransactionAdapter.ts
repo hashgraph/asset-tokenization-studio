@@ -413,7 +413,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         informationRight: equityInfo.informationRight,
         liquidationRight: equityInfo.liquidationRight,
         subscriptionRight: equityInfo.subscriptionRight,
-        convertionRight: equityInfo.convertionRight,
+        conversionRight: equityInfo.conversionRight,
         redemptionRight: equityInfo.redemptionRight,
         putRight: equityInfo.putRight,
         dividendRight: CastDividendType.toNumber(equityInfo.dividendRight),

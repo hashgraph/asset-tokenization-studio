@@ -512,7 +512,7 @@ Deployed contracts:
         const informationRight = false
         const liquidationRight = true
         const subscriptionRight = false
-        const convertionRight = true
+        const conversionRight = true
         const redemptionRight = false
         const putRight = true
         const dividendRight = DividendType.PREFERRED
@@ -533,7 +533,7 @@ Deployed contracts:
             informationRight,
             liquidationRight,
             subscriptionRight,
-            convertionRight,
+            conversionRight,
             redemptionRight,
             putRight,
             dividendRight,
@@ -742,7 +742,7 @@ DiamondResume:
         expect(equityMetadata.informationRight).to.equal(informationRight)
         expect(equityMetadata.liquidationRight).to.equal(liquidationRight)
         expect(equityMetadata.subscriptionRight).to.equal(subscriptionRight)
-        expect(equityMetadata.convertionRight).to.equal(convertionRight)
+        expect(equityMetadata.conversionRight).to.equal(conversionRight)
         expect(equityMetadata.redemptionRight).to.equal(redemptionRight)
         expect(equityMetadata.putRight).to.equal(putRight)
         expect(equityMetadata.dividendRight).to.equal(dividendRight)

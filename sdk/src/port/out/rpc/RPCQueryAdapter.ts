@@ -602,7 +602,7 @@ export class RPCQueryAdapter {
       res.informationRight,
       res.liquidationRight,
       res.subscriptionRight,
-      res.convertionRight,
+      res.conversionRight,
       res.redemptionRight,
       res.putRight,
       CastDividendType.fromNumber(res.dividendRight),

@@ -206,6 +206,7 @@
 import isAfter from "date-fns/isAfter";
 import isBefore from "date-fns/isBefore";
 import isToday from "date-fns/isToday";
+import isEqual from "date-fns/isEqual";
 import i18n from "../i18n";
 import { formatDate, toDate } from "./format";
 
@@ -254,6 +255,15 @@ export const isAfterTodayOrEqualDate = () => (val: string | Date) =>
 export const isBetweenDates =
   (initialDate: Date, maxDate: Date) => (val: string | Date) =>
     (isAfter(toDate(val), initialDate) && isBefore(toDate(val), maxDate)) ||
+    t("dateBetween", {
+      min: formatDate(initialDate, "dd-MM-yyyy"),
+      max: formatDate(maxDate, "dd-MM-yyyy"),
+    });
+
+export const isBetweenInclusiveDates =
+  (initialDate: Date, maxDate: Date) => (val: string | Date) =>
+    ((isAfter(toDate(val), initialDate) || isEqual(toDate(val), initialDate)) &&
+      (isBefore(toDate(val), maxDate) || isEqual(toDate(val), maxDate))) ||
     t("dateBetween", {
       min: formatDate(initialDate, "dd-MM-yyyy"),
       max: formatDate(maxDate, "dd-MM-yyyy"),

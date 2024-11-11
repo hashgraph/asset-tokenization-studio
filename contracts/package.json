@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-contracts",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "main": "./build/typechain-types/index.js",
   "module": "./build/typechain-types/index.js",
   "files": [
@@ -17,6 +17,7 @@
     }
   },
   "scripts": {
+    "typechain": "npx hardhat typechain",
     "compile": "npx hardhat compile",
     "compile:force": "npx hardhat compile --force && npm run build",
     "test-coverage": "npx hardhat coverage --testfiles 'test/unitTests/**/*.ts'",
@@ -67,7 +68,7 @@
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@hashgraph/hardhat-hethers": "^1.0.3",
+    "@hashgraph/hardhat-hethers": "^1.0.4",
     "@hashgraph/sdk": "^2.23.0",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.6",

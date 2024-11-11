@@ -204,14 +204,14 @@
 */
 
 import { Client, ContractId } from '@hashgraph/sdk'
-import { contractCall } from './contractsLifeCycle/utils'
 import {
     ProxyAdmin__factory,
     BusinessLogicResolver__factory,
     IStaticFunctionSelectors__factory,
     DiamondCutManager__factory,
 } from '../typechain-types'
-import { FacetConfiguration } from './resolverDiamondCut.js'
+import { contractCall } from './contractsLifeCycle/utils'
+import { FacetConfiguration } from './resolverDiamondCut'
 
 export async function getProxyImplementation(
     proxyAdminAddress: ContractId,
@@ -281,8 +281,6 @@ export async function createConfiguration(
     )
 
     const params = [configId, facetConfigurations]
-
-    console.log(params)
 
     await contractCall(
         proxyAddress,

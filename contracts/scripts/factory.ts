@@ -224,10 +224,10 @@ export async function deployProxyToFactory(
     factoryBusinessLogicAddress: string
 ) {
     await deployTransparentUpgradeableProxy(factoryBusinessLogicAddress)
-    factory = await ethers.getContractAt(
+    factory = (await ethers.getContractAt(
         'Factory',
         transparentUpgradableProxy.address
-    )
+    )) as IFactory
 }
 
 export interface Rbac {
@@ -268,7 +268,7 @@ export interface EquityDetailsData {
     informationRight: boolean
     liquidationRight: boolean
     subscriptionRight: boolean
-    convertionRight: boolean
+    conversionRight: boolean
     redemptionRight: boolean
     putRight: boolean
     dividendRight: DividendType
@@ -370,7 +370,7 @@ export async function setEquityData(
     informationRight: boolean,
     liquidationRight: boolean,
     subscriptionRight: boolean,
-    convertionRight: boolean,
+    conversionRight: boolean,
     redemptionRight: boolean,
     putRight: boolean,
     dividendRight: DividendType,
@@ -425,7 +425,7 @@ export async function setEquityData(
         informationRight: informationRight,
         liquidationRight: liquidationRight,
         subscriptionRight: subscriptionRight,
-        convertionRight: convertionRight,
+        conversionRight: conversionRight,
         redemptionRight: redemptionRight,
         putRight: putRight,
         dividendRight: dividendRight,
@@ -536,7 +536,7 @@ export async function deployEquityFromFactory(
     informationRight: boolean,
     liquidationRight: boolean,
     subscriptionRight: boolean,
-    convertionRight: boolean,
+    conversionRight: boolean,
     redemptionRight: boolean,
     putRight: boolean,
     dividendRight: DividendType,
@@ -565,7 +565,7 @@ export async function deployEquityFromFactory(
         informationRight,
         liquidationRight,
         subscriptionRight,
-        convertionRight,
+        conversionRight,
         redemptionRight,
         putRight,
         dividendRight,
