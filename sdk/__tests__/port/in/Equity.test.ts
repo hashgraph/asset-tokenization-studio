@@ -254,7 +254,7 @@ const votingRight = true;
 const informationRight = false;
 const liquidationRight = true;
 const subscriptionRight = false;
-const convertionRight = true;
+const conversionRight = true;
 const redemptionRight = false;
 const putRight = true;
 const dividendRight = 1;
@@ -341,7 +341,7 @@ describe('🧪 Equity test', () => {
       informationRight: informationRight,
       liquidationRight: liquidationRight,
       subscriptionRight: subscriptionRight,
-      convertionRight: convertionRight,
+      conversionRight: conversionRight,
       redemptionRight: redemptionRight,
       putRight: putRight,
       dividendRight: dividendRight,
