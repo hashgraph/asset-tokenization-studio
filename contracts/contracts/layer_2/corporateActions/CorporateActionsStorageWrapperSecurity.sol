@@ -226,13 +226,17 @@ import {IBond} from '../interfaces/bond/IBond.sol';
 import {
     ScheduledSnapshotsStorageWrapper
 } from '../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
 
 abstract contract CorporateActionsStorageWrapperSecurity is
     ICorporateActionsStorageWrapperSecurity,
     IEquityStorageWrapper,
     IBondStorageWrapper,
     CorporateActionsStorageWrapper,
-    ScheduledSnapshotsStorageWrapper
+    ScheduledSnapshotsStorageWrapper,
+    ScheduledBalanceAdjustmentsStorageWrapper
 {
     modifier checkDates(uint256 firstDate, uint256 secondDate) {
         if (secondDate < firstDate) {
@@ -314,12 +318,16 @@ abstract contract CorporateActionsStorageWrapperSecurity is
     function _onScheduledSnapshotTriggered(
         uint256 snapShotID,
         bytes memory data
-    ) internal virtual override {
+    ) internal virtual {
         if (data.length > 0) {
             bytes32 actionId = abi.decode(data, (bytes32));
             _addSnapshotToAction(actionId, snapShotID);
         }
     }
+
+    function _onScheduledBalanceAdjustmentTriggered(
+        bytes memory data
+    ) internal virtual {}
 
     function _addSnapshotToAction(
         bytes32 actionId,

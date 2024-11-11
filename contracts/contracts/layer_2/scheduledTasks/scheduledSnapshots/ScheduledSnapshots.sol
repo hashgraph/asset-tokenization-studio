@@ -221,6 +221,7 @@ import {
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 
 contract ScheduledSnapshots is
     IStaticFunctionSelectors,
@@ -228,6 +229,19 @@ contract ScheduledSnapshots is
     CorporateActionsStorageWrapperSecurity
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    function onScheduledSnapshotTriggered(
+        uint256 _pos,
+        uint256 _scheduledTasksLength,
+        bytes memory _data
+    ) external virtual override onlyAutoCalling(_scheduledSnapshotStorage()) {
+        uint256 newSnapShotID;
+        if (_pos == _scheduledTasksLength - 1) {
+            newSnapShotID = _snapshot();
+        } else newSnapShotID = _getCurrentSnapshotId();
+
+        _onScheduledSnapshotTriggered(newSnapShotID, _data);
+    }
 
     function triggerPendingScheduledSnapshots()
         external
@@ -240,9 +254,9 @@ contract ScheduledSnapshots is
     }
 
     function triggerScheduledSnapshots(
-        uint256 max
+        uint256 _max
     ) external virtual override onlyUnpaused returns (uint256) {
-        return _triggerScheduledSnapshots(max);
+        return _triggerScheduledSnapshots(_max);
     }
 
     function scheduledSnapshotCount()
@@ -263,7 +277,7 @@ contract ScheduledSnapshots is
         view
         virtual
         override
-        returns (ScheduledTask[] memory scheduledSnapshot_)
+        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_)
     {
         scheduledSnapshot_ = _getScheduledSnapshots(_pageIndex, _pageLength);
     }
@@ -286,7 +300,7 @@ contract ScheduledSnapshots is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](4);
+        staticFunctionSelectors_ = new bytes4[](5);
         staticFunctionSelectors_[selectorIndex++] = this
             .triggerPendingScheduledSnapshots
             .selector;
@@ -298,6 +312,9 @@ contract ScheduledSnapshots is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getScheduledSnapshots
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .onScheduledSnapshotTriggered
             .selector;
     }
 

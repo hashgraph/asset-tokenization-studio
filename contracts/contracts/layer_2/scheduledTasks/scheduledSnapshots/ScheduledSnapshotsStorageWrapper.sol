@@ -214,25 +214,41 @@ import {
 } from '../../../layer_1/ERC1400/ERC1410//ERC1410SnapshotStorageWrapper.sol';
 
 import {LibCommon} from '../../../layer_1/common/LibCommon.sol';
-import {
-    ScheduledTasksStorageWrapper
-} from '../ScheduledTasksStorageWrapper.sol';
+import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
 
 abstract contract ScheduledSnapshotsStorageWrapper is
-    ScheduledTasksStorageWrapper,
-    ERC1410SnapshotStorageWrapper
+    ERC1410SnapshotStorageWrapper,
+    ScheduledTasksCommon
 {
+    function onScheduledSnapshotTriggered(
+        uint256 _pos,
+        uint256 _scheduledTasksLength,
+        bytes memory _data
+    ) external virtual {
+        revert('This method should never be executed, it should be overriden');
+    }
+
     function _addScheduledSnapshot(
         uint256 _newScheduledTimestamp,
         bytes memory _newData
     ) internal virtual {
-        _addScheduledTask(_newScheduledTimestamp, _newData);
+        ScheduledTasksLib._addScheduledTask(
+            _scheduledSnapshotStorage(),
+            _newScheduledTimestamp,
+            _newData
+        );
     }
 
     function _triggerScheduledSnapshots(
         uint256 _max
     ) internal virtual returns (uint256) {
-        return _triggerScheduledTasks(_max);
+        return
+            ScheduledTasksLib._triggerScheduledTasks(
+                _scheduledSnapshotStorage(),
+                this.onScheduledSnapshotTriggered.selector,
+                _max
+            );
     }
 
     function _getScheduledSnapshotCount()
@@ -241,7 +257,10 @@ abstract contract ScheduledSnapshotsStorageWrapper is
         virtual
         returns (uint256)
     {
-        return _getScheduledTaskCount();
+        return
+            ScheduledTasksLib._getScheduledTaskCount(
+                _scheduledSnapshotStorage()
+            );
     }
 
     function _getScheduledSnapshots(
@@ -251,35 +270,24 @@ abstract contract ScheduledSnapshotsStorageWrapper is
         internal
         view
         virtual
-        returns (ScheduledTask[] memory scheduledSnapshot_)
+        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_)
     {
-        return _getScheduledTasks(_pageIndex, _pageLength);
+        return
+            ScheduledTasksLib._getScheduledTasks(
+                _scheduledSnapshotStorage(),
+                _pageIndex,
+                _pageLength
+            );
     }
 
-    function _onScheduledTaskTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) internal virtual override {
-        uint256 newSnapShotID;
-        if (_pos == _scheduledTasksLength - 1) {
-            newSnapShotID = _snapshot();
-        } else newSnapShotID = _getCurrentSnapshotId();
-
-        _onScheduledSnapshotTriggered(newSnapShotID, _data);
-    }
-
-    function _onScheduledSnapshotTriggered(
-        uint256 snapShotID,
-        bytes memory data
-    ) internal virtual;
-
-    function _scheduledTasksStorage()
+    function _scheduledSnapshotStorage()
         internal
         pure
         virtual
-        override
-        returns (ScheduledTasksDataStorage storage scheduledSnapshots_)
+        returns (
+            ScheduledTasksLib.ScheduledTasksDataStorage
+                storage scheduledSnapshots_
+        )
     {
         bytes32 position = _SCHEDULED_SNAPSHOTS_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly

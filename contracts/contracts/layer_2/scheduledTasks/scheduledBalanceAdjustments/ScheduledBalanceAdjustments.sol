@@ -207,176 +207,133 @@
 pragma solidity 0.8.18;
 
 import {
-    IScheduledTasksStorageWrapper
-} from '../interfaces/scheduledTasks/IScheduledTasksStorageWrapper.sol';
-import {LibCommon} from '../../layer_1/common/LibCommon.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY
+} from '../../constants/resolverKeys.sol';
+import {
+    CorporateActionsStorageWrapperSecurity
+} from '../../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+import {
+    IScheduledBalanceAdjustments
+} from '../../interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 
-abstract contract ScheduledTasksStorageWrapper is
-    IScheduledTasksStorageWrapper,
-    LocalContext
+contract ScheduledBalanceAdjustments is
+    IStaticFunctionSelectors,
+    IScheduledBalanceAdjustments,
+    CorporateActionsStorageWrapperSecurity
 {
-    struct ScheduledTasksDataStorage {
-        mapping(uint256 => ScheduledTask) scheduledTasks;
-        uint256 scheduledTaskCount;
-    }
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    modifier checkTimestamp(uint256 timestamp) {
-        if (timestamp <= _blockTimestamp()) {
-            revert WrongTimestamp(timestamp);
-        }
-        _;
-    }
-
-    function _addScheduledTask(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal virtual {
-        ScheduledTask memory newScheduledTask = ScheduledTask(
-            _newScheduledTimestamp,
-            _newData
-        );
-
-        uint256 scheduledTasksLength = _getScheduledTaskCount();
-
-        uint256 newScheduledTaskId = scheduledTasksLength;
-
-        bool added = false;
-
-        if (scheduledTasksLength > 0) {
-            for (uint256 index = 1; index <= scheduledTasksLength; index++) {
-                uint256 scheduledTaskPosition = scheduledTasksLength - index;
-
-                if (
-                    _scheduledTasksStorage()
-                        .scheduledTasks[scheduledTaskPosition]
-                        .scheduledTimestamp < _newScheduledTimestamp
-                ) {
-                    _slideScheduledTasks(scheduledTaskPosition);
-                } else {
-                    newScheduledTaskId = scheduledTaskPosition + 1;
-                    _insertScheduledTask(newScheduledTaskId, newScheduledTask);
-                    added = true;
-                    break;
-                }
-            }
-        }
-        if (!added) {
-            _insertScheduledTask(0, newScheduledTask);
-        }
-    }
-
-    function _triggerScheduledTasks(
-        uint256 _max
-    ) internal virtual returns (uint256) {
-        uint256 scheduledTasksLength = _getScheduledTaskCount();
-
-        if (scheduledTasksLength == 0) {
-            return 0;
-        }
-
-        uint256 max = _max;
-
-        uint256 newTaskID;
-
-        if (max > scheduledTasksLength || max == 0) {
-            max = scheduledTasksLength;
-        }
-
-        for (uint256 j = 1; j <= max; j++) {
-            uint256 pos = scheduledTasksLength - j;
-
-            ScheduledTask
-                memory currentScheduledTask = _getScheduledTasksByIndex(pos);
-
-            if (currentScheduledTask.scheduledTimestamp < _blockTimestamp()) {
-                _popScheduledTask();
-
-                _onScheduledTaskTriggered(
-                    pos,
-                    scheduledTasksLength,
-                    currentScheduledTask.data
-                );
-            } else {
-                break;
-            }
-        }
-
-        return newTaskID;
-    }
-
-    function _getScheduledTaskCount() internal view virtual returns (uint256) {
-        return _scheduledTasksStorage().scheduledTaskCount;
-    }
-
-    function _getScheduledTasksByIndex(
-        uint256 _index
-    ) internal view virtual returns (ScheduledTask memory) {
-        return _scheduledTasksStorage().scheduledTasks[_index];
-    }
-
-    function _slideScheduledTasks(uint256 _pos) private {
-        _scheduledTasksStorage()
-            .scheduledTasks[_pos + 1]
-            .scheduledTimestamp = _scheduledTasksStorage()
-            .scheduledTasks[_pos]
-            .scheduledTimestamp;
-        _scheduledTasksStorage()
-            .scheduledTasks[_pos + 1]
-            .data = _scheduledTasksStorage().scheduledTasks[_pos].data;
-    }
-
-    function _insertScheduledTask(
-        uint256 _pos,
-        ScheduledTask memory scheduledTaskToInsert
-    ) private {
-        _scheduledTasksStorage()
-            .scheduledTasks[_pos]
-            .scheduledTimestamp = scheduledTaskToInsert.scheduledTimestamp;
-        _scheduledTasksStorage()
-            .scheduledTasks[_pos]
-            .data = scheduledTaskToInsert.data;
-        _scheduledTasksStorage().scheduledTaskCount++;
-    }
-
-    function _popScheduledTask() private {
-        uint256 scheduledTasksLength = _getScheduledTaskCount();
-        if (scheduledTasksLength == 0) {
-            return;
-        }
-        delete (
-            _scheduledTasksStorage().scheduledTasks[scheduledTasksLength - 1]
-        );
-        _scheduledTasksStorage().scheduledTaskCount--;
-    }
-
-    function _getScheduledTasks(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (ScheduledTask[] memory scheduledTask_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
-            _pageIndex,
-            _pageLength
-        );
-
-        scheduledTask_ = new ScheduledTask[](
-            LibCommon.getSize(start, end, _getScheduledTaskCount())
-        );
-
-        for (uint256 i = 0; i < scheduledTask_.length; i++) {
-            scheduledTask_[i] = _getScheduledTasksByIndex(start + i);
-        }
-    }
-
-    function _onScheduledTaskTriggered(
+    function onScheduledBalanceAdjustmentTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    ) internal virtual;
+    )
+        external
+        virtual
+        override
+        onlyAutoCalling(_scheduledBalanceAdjustmentStorage())
+    {
+        _onScheduledBalanceAdjustmentTriggered(_data);
+    }
 
-    function _scheduledTasksStorage()
-        internal
+    function triggerPendingScheduledBalanceAdjustments()
+        external
+        virtual
+        override
+        onlyUnpaused
+        returns (uint256)
+    {
+        return _triggerScheduledBalanceAdjustments(0);
+    }
+
+    function triggerScheduledBalanceAdjustments(
+        uint256 _max
+    ) external virtual override onlyUnpaused returns (uint256) {
+        return _triggerScheduledBalanceAdjustments(_max);
+    }
+
+    function scheduledBalanceAdjustmentCount()
+        external
+        view
+        virtual
+        override
+        returns (uint256)
+    {
+        return _getScheduledBalanceAdjustmentCount();
+    }
+
+    function getScheduledBalanceAdjustments(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        external
+        view
+        virtual
+        override
+        returns (
+            ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
+        )
+    {
+        scheduledBalanceAdjustment_ = _getScheduledBalanceAdjustments(
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function getStaticResolverKey()
+        external
         pure
         virtual
-        returns (ScheduledTasksDataStorage storage scheduledTasks_);
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](4);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .triggerPendingScheduledBalanceAdjustments
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .triggerScheduledBalanceAdjustments
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .scheduledBalanceAdjustmentCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getScheduledBalanceAdjustments
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .onScheduledBalanceAdjustmentTriggered
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(
+            IScheduledBalanceAdjustments
+        ).interfaceId;
+    }
 }

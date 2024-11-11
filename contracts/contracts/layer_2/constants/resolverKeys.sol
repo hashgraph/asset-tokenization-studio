@@ -216,3 +216,6 @@ bytes32 constant _BOND_RESOLVER_KEY = 0x09c1d80a160a7250b5fabc46d06a7fa4067e6d72
 
 // keccak256('security.token.standard.scheduled.snapshots.resolverKey');
 bytes32 constant _SCHEDULED_SNAPSHOTS_RESOLVER_KEY = 0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793;
+
+// keccak256('security.token.standard.scheduled.balanceAdjustments.resolverKey');
+bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0xc418e67a48260d700e5f85863ad6fa6593206a4385728f8baba1572d631535e0;

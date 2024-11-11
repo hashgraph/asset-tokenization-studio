@@ -206,20 +206,24 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {ScheduledTasksLib} from '../../../scheduledTasks/ScheduledTasksLib.sol';
+import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {ScheduledTasksLib} from './ScheduledTasksLib.sol';
 
-interface IScheduledSnapshots {
-    function triggerPendingScheduledSnapshots() external returns (uint256);
+abstract contract ScheduledTasksCommon is LocalContext {
+    error WrongTimestamp(uint256 timeStamp);
+    error NotAutocalling();
 
-    function triggerScheduledSnapshots(uint256 _max) external returns (uint256);
+    modifier checkTimestamp(uint256 timestamp) {
+        if (timestamp <= _blockTimestamp()) {
+            revert WrongTimestamp(timestamp);
+        }
+        _;
+    }
 
-    function scheduledSnapshotCount() external view returns (uint256);
-
-    function getScheduledSnapshots(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    )
-        external
-        view
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_);
+    modifier onlyAutoCalling(
+        ScheduledTasksLib.ScheduledTasksDataStorage storage _scheduledTasks
+    ) {
+        if (!_scheduledTasks.autoCalling) revert NotAutocalling();
+        _;
+    }
 }

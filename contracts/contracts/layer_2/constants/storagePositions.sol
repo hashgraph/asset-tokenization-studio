@@ -210,6 +210,9 @@ pragma solidity 0.8.18;
 // keccak256('security.token.standard.scheduledSnapshots.storage');
 bytes32 constant _SCHEDULED_SNAPSHOTS_STORAGE_POSITION = 0xe5334ddaa6268d55c7efe63975567949a7fb208c02c0bd15007703db04a9ba4f;
 
+// keccak256('security.token.standard.scheduledBalanceAdjustments.storage');
+bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION = 0xaf4aaa3de473ec9b58645d40f5a2fe4e176157e247b2d875db61f1a70935ac68;
+
 // keccak256('security.token.standard.bond.storage');
 bytes32 constant _BOND_STORAGE_POSITION = 0x251123c390edd911567d4210605f2dfb26d83878c58bd871f56946d08ffd1f2b;
 
