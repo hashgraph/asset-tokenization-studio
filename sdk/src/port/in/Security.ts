@@ -301,7 +301,7 @@ interface ISecurityInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   transferAndLock(
     request: TransferAndLockRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
+  ): Promise<{ payload: number; transactionId: string }>;
   controllerTransfer(
     request: ForceTransferRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
@@ -608,7 +608,7 @@ class SecurityInPort implements ISecurityInPort {
   @LogError
   async transferAndLock(
     request: TransferAndLockRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
+  ): Promise<{ payload: number; transactionId: string }> {
     const { securityId, amount, targetId, expirationDate } = request;
     handleValidation('TransferAndLockRequest', request);
 

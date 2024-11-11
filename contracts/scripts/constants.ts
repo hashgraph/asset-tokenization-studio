@@ -251,3 +251,10 @@ export const EquityConfigId =
 
 export const BondConfigId =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
+
+export const REGEX = {
+    contractId: /^0\.0\.\d+$/,
+    address: /^0x[a-fA-F0-9]{40}$/,
+    bytes32: /^0x[a-fA-F0-9]{64}$/,
+    bytes: /^0x[a-fA-F0-9]*$/,
+}

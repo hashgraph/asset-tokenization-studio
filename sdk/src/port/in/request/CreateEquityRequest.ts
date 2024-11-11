@@ -232,7 +232,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   informationRight: boolean;
   liquidationRight: boolean;
   subscriptionRight: boolean;
-  convertionRight: boolean;
+  conversionRight: boolean;
   redemptionRight: boolean;
   putRight: boolean;
   dividendRight: number;
@@ -260,7 +260,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     informationRight,
     liquidationRight,
     subscriptionRight,
-    convertionRight,
+    conversionRight,
     redemptionRight,
     putRight,
     dividendRight,
@@ -287,7 +287,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     informationRight: boolean;
     liquidationRight: boolean;
     subscriptionRight: boolean;
-    convertionRight: boolean;
+    conversionRight: boolean;
     redemptionRight: boolean;
     putRight: boolean;
     dividendRight: number;
@@ -343,7 +343,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     this.informationRight = informationRight;
     this.liquidationRight = liquidationRight;
     this.subscriptionRight = subscriptionRight;
-    this.convertionRight = convertionRight;
+    this.conversionRight = conversionRight;
     this.redemptionRight = redemptionRight;
     this.putRight = putRight;
     this.dividendRight = dividendRight;

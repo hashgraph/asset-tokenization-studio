@@ -208,7 +208,7 @@ export class EquityDetailsData {
   public informationRight: boolean;
   public liquidationRight: boolean;
   public subscriptionRight: boolean;
-  public convertionRight: boolean;
+  public conversionRight: boolean;
   public redemptionRight: boolean;
   public putRight: boolean;
   public dividendRight: number;

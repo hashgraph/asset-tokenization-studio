@@ -343,7 +343,7 @@ describe('Demo RedSwam', () => {
         informationRight: boolean,
         liquidationRight: boolean,
         subscriptionRight: boolean,
-        convertionRight: boolean,
+        conversionRight: boolean,
         redemptionRight: boolean,
         putRight: boolean,
         dividendRight: DividendType,
@@ -399,7 +399,7 @@ describe('Demo RedSwam', () => {
             informationRight: informationRight,
             liquidationRight: liquidationRight,
             subscriptionRight: subscriptionRight,
-            convertionRight: convertionRight,
+            conversionRight: conversionRight,
             redemptionRight: redemptionRight,
             putRight: putRight,
             dividendRight: dividendRight,
@@ -972,7 +972,7 @@ describe('Demo RedSwam', () => {
         const informationRight = false
         const liquidationRight = true
         const subscriptionRight = false
-        const convertionRight = true
+        const conversionRight = true
         const redemptionRight = false
         const putRight = true
         const dividendRight = DividendType.PREFERRED
@@ -994,7 +994,7 @@ describe('Demo RedSwam', () => {
             informationRight,
             liquidationRight,
             subscriptionRight,
-            convertionRight,
+            conversionRight,
             redemptionRight,
             putRight,
             dividendRight,
@@ -1171,7 +1171,7 @@ describe('Demo RedSwam', () => {
         expect(equityMetadata.informationRight).to.equal(informationRight)
         expect(equityMetadata.liquidationRight).to.equal(liquidationRight)
         expect(equityMetadata.subscriptionRight).to.equal(subscriptionRight)
-        expect(equityMetadata.convertionRight).to.equal(convertionRight)
+        expect(equityMetadata.conversionRight).to.equal(conversionRight)
         expect(equityMetadata.redemptionRight).to.equal(redemptionRight)
         expect(equityMetadata.putRight).to.equal(putRight)
         expect(equityMetadata.dividendRight).to.equal(dividendRight)

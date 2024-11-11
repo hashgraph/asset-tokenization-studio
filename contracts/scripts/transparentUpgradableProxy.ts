@@ -211,12 +211,18 @@ export let transparentUpgradableProxy: TransparentUpgradeableProxy
 export let proxyAdmin: ProxyAdmin
 
 export async function deployProxyAdmin() {
-    proxyAdmin = await (await ethers.getContractFactory('ProxyAdmin')).deploy()
+    proxyAdmin = (await (
+        await ethers.getContractFactory('ProxyAdmin')
+    ).deploy()) as ProxyAdmin
 }
 export async function deployTransparentUpgradeableProxy(
     businessLogicAddress: string
 ) {
-    transparentUpgradableProxy = await (
+    transparentUpgradableProxy = (await (
         await ethers.getContractFactory('TransparentUpgradeableProxy')
-    ).deploy(businessLogicAddress, proxyAdmin.address, '0x')
+    ).deploy(
+        businessLogicAddress,
+        proxyAdmin.address,
+        '0x'
+    )) as TransparentUpgradeableProxy
 }

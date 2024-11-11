@@ -203,14 +203,13 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { initializeClient, toHashgraphKey, deployFactory as dp } from './deploy'
+import { initializeClient, deployContract } from './deploy'
 
-import { getClient } from './utils'
+import { getClient, toHashgraphKey } from './utils'
 
 export const deployFactory = async () => {
     const [
-        client,
+        ,
         operatorAccount,
         operatorPriKey,
         //client1publickey,
@@ -221,21 +220,25 @@ export const deployFactory = async () => {
     const clientSdk = getClient()
     clientSdk.setOperator(
         operatorAccount,
-        toHashgraphKey(operatorPriKey, operatorIsE25519)
+        toHashgraphKey({
+            privateKey: operatorPriKey,
+            isED25519: operatorIsE25519,
+        })
     )
 
-    const result = await dp(clientSdk, operatorPriKey, operatorIsE25519)
-
-    const proxyAddress = result[0]
-    const proxyAdminAddress = result[1]
-    const factoryAddress = result[2]
+    const { proxy, proxyAdmin, contract } = await deployContract({
+        clientOperator: clientSdk,
+        privateKey: operatorPriKey,
+        contractName: 'factory',
+        isED25519: operatorIsE25519,
+    })
 
     console.log(
         '\nProxy Address: \t',
-        proxyAddress.toString(),
+        proxy?.evm_address,
         '\nProxy Admin Address: \t',
-        proxyAdminAddress.toString(),
+        proxyAdmin?.evm_address,
         '\nFactory Address: \t',
-        factoryAddress.toString()
+        contract?.evm_address
     )
 }

@@ -209,12 +209,64 @@ import {
     Client,
     AccountId,
     PrivateKey,
-    ContractId,
     ContractCreateFlow,
+    ContractId,
 } from '@hashgraph/sdk'
-
 import axios from 'axios'
-import { ADDRESS_0 } from './constants'
+import { ADDRESS_0, REGEX } from './constants'
+import * as dotenv from 'dotenv'
+dotenv.config()
+
+interface IAccount {
+    evm_address: string
+    key: IKey
+    account: string
+}
+
+export interface IContract {
+    admin_key: IKey
+    nullable: boolean
+    auto_renew_account: string
+    auto_renew_period: string
+    contract_id: string
+    contractId: ContractId
+    created_timestamp: string
+    deleted: string
+    evm_address: string
+    expiration_timestamp: string
+    file_id: string
+    max_automatic_token_associations: string
+    memo: string
+    obtainer_id: string
+    permanent_removal: string
+    proxy_account_id: string
+    timestamp: string
+}
+
+interface IKey {
+    _type: string
+    key: string
+}
+
+export function getEnvVar({
+    name,
+    defaultValue,
+}: {
+    name: string
+    defaultValue?: string
+}): string {
+    const value = process.env[name]
+    if (value) {
+        return value
+    }
+    if (defaultValue) {
+        console.warn(
+            `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
+        )
+        return defaultValue
+    }
+    throw new Error(`Environment variable ${name} is not defined`)
+}
 
 export const sleep = (ms: number) =>
     new Promise((resolve) => setTimeout(resolve, ms))
@@ -234,14 +286,14 @@ export function getClient(network?: string): Client {
     switch (network) {
         case 'previewnet':
             return Client.forPreviewnet()
-            break
-        case 'mainnet':
-            return Client.forMainnet()
-            break
-        default:
         case 'testnet':
             return Client.forTestnet()
-            break
+        case 'mainnet':
+            return Client.forMainnet()
+        default:
+            throw new Error(
+                'Network not supported for Hedera Operations. Check NETWORK env variable'
+            )
     }
 }
 
@@ -252,7 +304,7 @@ export async function deployContractSDK(
     constructorParameters?: any,
     adminKey?: PrivateKey,
     contractMemo?: string
-): Promise<ContractId> {
+): Promise<IContract> {
     const transaction = new ContractCreateFlow()
         .setBytecode(factory.bytecode)
         .setGas(15000000)
@@ -276,12 +328,11 @@ export async function deployContractSDK(
     if (!contractId) {
         throw Error('Error deploying contractSDK')
     }
+    const contractInfo = await getContractInfo(contractId.toString())
     console.log(
-        ` ${factory.name} - contractId ${contractId} -contractId ${
-            (await getContractInfo(contractId.toString())).evm_address
-        }   `
+        `${factory.name} - ${contractInfo.contract_id} - ${contractInfo.evm_address}`
     )
-    return contractId
+    return contractInfo
 }
 
 export async function toEvmAddress(
@@ -301,8 +352,40 @@ export async function toEvmAddress(
     }
 }
 
+export function contractIdToString(contractId: ContractId): string {
+    return `${contractId.shard.toString()}.${contractId.realm.toString()}.${contractId.num.toString()}`
+}
+
+/**
+ * Converts a private key string to a Hashgraph PrivateKey object.
+ *
+ * @param params - An object containing the private key string and a boolean indicating the key type.
+ * @param params.privateKey - The private key string.
+ * @param params.isED25519 - A boolean indicating whether the key is ED25519 (true) or ECDSA (false).
+ * @returns A Hashgraph PrivateKey object.
+ */
+export function toHashgraphKey({
+    privateKey,
+    isED25519,
+}: {
+    privateKey: string
+    isED25519: boolean
+}): PrivateKey {
+    return isED25519
+        ? PrivateKey.fromStringED25519(privateKey)
+        : PrivateKey.fromStringECDSA(privateKey)
+}
+
 export async function getContractInfo(contractId: string): Promise<IContract> {
     try {
+        if (
+            !REGEX.contractId.test(contractId) &&
+            !REGEX.address.test(contractId)
+        ) {
+            throw new Error(
+                'Invalid contractId format. It must be like "0.0.XXXX" or "0xhexadecimal".'
+            )
+        }
         const URI_BASE = `${getHederaNetworkMirrorNodeURL()}/api/v1/`
         const url = URI_BASE + 'contracts/' + contractId
 
@@ -316,7 +399,10 @@ export async function getContractInfo(contractId: string): Promise<IContract> {
             await sleep(1000)
         } while (res.status !== 200 && i < retry)
 
-        return res.data
+        return {
+            ...res.data,
+            contractId: ContractId.fromString(res.data.contract_id),
+        }
     } catch (error) {
         throw new Error('Error retrieving the Evm Address : ' + error)
     }
@@ -328,36 +414,6 @@ export async function evmToHederaFormat(evmAddress: string): Promise<string> {
     const url = URI_BASE + 'accounts/' + evmAddress
     const res = await axios.get<IAccount>(url)
     return res.data.account
-}
-
-interface IAccount {
-    evm_address: string
-    key: IKey
-    account: string
-}
-
-interface IContract {
-    admin_key: IKey
-    nullable: boolean
-    auto_renew_account: string
-    auto_renew_period: string
-    contract_id: string
-    created_timestamp: string
-    deleted: string
-    evm_address: string
-    expiration_timestamp: string
-    file_id: string
-    max_automatic_token_associations: string
-    memo: string
-    obtainer_id: string
-    permanent_removal: string
-    proxy_account_id: string
-    timestamp: string
-}
-
-interface IKey {
-    _type: string
-    key: string
 }
 
 function getHederaNetworkMirrorNodeURL(network?: string): string {

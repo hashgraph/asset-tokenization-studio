@@ -264,7 +264,7 @@ const votingRight = true;
 const informationRight = false;
 const liquidationRight = true;
 const subscriptionRight = false;
-const convertionRight = true;
+const conversionRight = true;
 const redemptionRight = false;
 const putRight = true;
 const dividendRight = 1;
@@ -346,7 +346,7 @@ describe('🧪 Security tests', () => {
       informationRight: informationRight,
       liquidationRight: liquidationRight,
       subscriptionRight: subscriptionRight,
-      convertionRight: convertionRight,
+      conversionRight: conversionRight,
       redemptionRight: redemptionRight,
       putRight: putRight,
       dividendRight: dividendRight,
@@ -688,7 +688,7 @@ describe('🧪 Security tests', () => {
           }),
         )
       ).payload,
-    ).toBe(true);
+    ).toBe(1);
 
     expect(
       (
