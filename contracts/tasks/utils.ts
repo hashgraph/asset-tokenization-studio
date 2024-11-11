@@ -203,58 +203,277 @@
 
 */
 
-export const _DEFAULT_ADMIN_ROLE =
-    '0x0000000000000000000000000000000000000000000000000000000000000000'
-export const _CONTROL_LIST_ROLE =
-    '0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3'
-export const _CORPORATE_ACTION_ROLE =
-    '0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6'
-export const _ISSUER_ROLE =
-    '0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842'
-export const _DOCUMENTER_ROLE =
-    '0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41'
-export const _CONTROLLER_ROLE =
-    '0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f'
-export const _PAUSER_ROLE =
-    '0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb'
-export const _CAP_ROLE =
-    '0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571'
-export const _SNAPSHOT_ROLE =
-    '0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da'
-export const _LOCKER_ROLE =
-    '0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88'
-export const _BOND_MANAGER_ROLE =
-    '0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d'
-export const _DEFAULT_PARTITION =
-    '0x0000000000000000000000000000000000000000000000000000000000000001'
-export const _IS_PAUSED_ERROR_ID = '0x40'
-export const _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = '0x41'
-export const _FROM_ACCOUNT_BLOCKED_ERROR_ID = '0x42'
-export const _TO_ACCOUNT_BLOCKED_ERROR_ID = '0x43'
-export const _FROM_ACCOUNT_NULL_ERROR_ID = '0x44'
-export const _TO_ACCOUNT_NULL_ERROR_ID = '0x45'
-export const _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = '0x46'
-export const _IS_NOT_OPERATOR_ERROR_ID = '0x47'
-export const _WRONG_PARTITION_ERROR_ID = '0x48'
-export const _ALLOWANCE_REACHED_ERROR_ID = '0x49'
+import { subtask, task, types } from 'hardhat/config'
+import { HederaAccount } from '@hashgraph/hardhat-hethers/src/type-extensions'
+import { ContractId } from '@hashgraph/sdk'
+import {
+    GetClientArgs,
+    GetClientResult,
+    GetConfigurationInfoArgs,
+    GetProxyAdminConfigArgs,
+    GetResolverBusinessLogicsArgs,
+} from './Arguments'
+import { evmToHederaFormat, getClient, toHashgraphKey } from '../scripts/utils'
+import {
+    getOwner,
+    getProxyImplementation,
+    getLatestVersionByConfiguration,
+    getFacetsLengthByConfigurationIdAndVersion,
+    getFacetsByConfigurationIdAndVersion,
+    getBusinessLogicKeys,
+} from '../scripts/contractsMethods'
 
-export const _SUCCESS = '0x00'
+subtask('getClient', 'Get the operator of the client')
+    .addOptionalParam(
+        'account',
+        'The Hedera account to use for deployment. 0.0.XXXX format',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'privateKey',
+        'The private key of the account, Raw hexadecimal string',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'isEd25519',
+        'Client is ED25519 key type',
+        false,
+        types.boolean
+    )
+    .setAction(async (args: GetClientArgs, hre) => {
+        console.log(`Executing getOperator on ${hre.network.name} ...`)
+        const accounts = hre.network.config.accounts as HederaAccount[]
+        const client = getClient(hre.network.name)
+        if (!client) {
+            throw new Error('Client not found')
+        }
+        if (accounts.length === 0 || !accounts[0].account) {
+            throw new Error('No accounts found')
+        }
+        const account: string = args.account ?? accounts[0].account
+        const privateKey: string = args.privateKey ?? accounts[0].privateKey
+        client.setOperator(
+            account,
+            toHashgraphKey({ privateKey, isED25519: args.isEd25519 })
+        )
+        console.log(`Operator: ${account}`)
+        return {
+            client: client,
+            account: account,
+            privateKey: privateKey,
+        } as GetClientResult
+    })
 
-export const ADDRESS_0 = '0x0000000000000000000000000000000000000000'
+task('keccak256', 'Prints the keccak256 hash of a string')
+    .addPositionalParam(
+        'input',
+        'The string to be hashed',
+        undefined,
+        types.string
+    )
+    .setAction(async ({ input }: { input: string }, hre) => {
+        const hash = hre.ethers.utils.keccak256(Buffer.from(input, 'utf-8'))
+        console.log(`The keccak256 hash of the input "${input}" is: ${hash}`)
+    })
 
-export const EquityDeployedEvent = 'EquityDeployed'
+task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
+    .addPositionalParam(
+        'proxyAdmin',
+        'The proxy admin contract ID. 0.0.XXXX format',
+        undefined,
+        types.string
+    )
+    .addPositionalParam(
+        'proxy',
+        'The proxy contrac ID. 0.0.XXXX format',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'account',
+        'The Hedera account to use for deployment. 0.0.XXXX format',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'privateKey',
+        'The private key of the account, Raw hexadecimal string',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'isEd25519',
+        'Client is ED25519 key type',
+        false,
+        types.boolean
+    )
+    .setAction(async (args: GetProxyAdminConfigArgs, hre) => {
+        console.log(`Executing getProxyAdminConfig on ${hre.network.name} ...`)
+        const { client } = await hre.run('getClient', {
+            account: args.account,
+            privateKey: args.privateKey,
+            isEd25519: args.isEd25519,
+        })
 
-export const BondDeployedEvent = 'BondDeployed'
+        const owner = await evmToHederaFormat(
+            await getOwner(ContractId.fromString(args.proxyAdmin), client)
+        )
 
-export const EquityConfigId =
-    '0x0000000000000000000000000000000000000000000000000000000000000001'
+        const implementation = await evmToHederaFormat(
+            await getProxyImplementation(
+                ContractId.fromString(args.proxyAdmin),
+                client,
+                ContractId.fromString(args.proxy).toSolidityAddress()
+            )
+        )
 
-export const BondConfigId =
-    '0x0000000000000000000000000000000000000000000000000000000000000002'
+        console.log(`Owner: ${owner}, Implementation: ${implementation}`)
+    })
 
-export const REGEX = {
-    contractId: /^0\.0\.\d+$/,
-    address: /^0x[a-fA-F0-9]{40}$/,
-    bytes32: /^0x[a-fA-F0-9]{64}$/,
-    bytes: /^0x[a-fA-F0-9]*$/,
-}
+task('getConfigurationInfo', 'Get all info for a given configuration')
+    .addPositionalParam(
+        'resolver',
+        'The resolver proxy admin address',
+        undefined,
+        types.string
+    )
+    .addPositionalParam('configId', 'The config ID', undefined, types.string)
+    .addOptionalParam(
+        'account',
+        'The Hedera account to use for deployment. 0.0.XXXX format',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'privateKey',
+        'The private key of the account, Raw hexadecimal string',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'isEd25519',
+        'Client is ED25519 key type',
+        false,
+        types.boolean
+    )
+    .setAction(async (args: GetConfigurationInfoArgs, hre) => {
+        console.log(`Executing getConfigurationInfo on ${hre.network.name} ...`)
+
+        const { client } = await hre.run('getClient', {
+            account: args.account,
+            privateKey: args.privateKey,
+            isEd25519: args.isEd25519,
+        })
+
+        const configVersionLatest = parseInt(
+            await getLatestVersionByConfiguration(
+                args.configId,
+                ContractId.fromString(args.resolver),
+                client
+            ),
+            16
+        )
+
+        console.log(
+            `Number of Versions for Config ${args.configId}: ${configVersionLatest}`
+        )
+
+        for (
+            let currentVersion = 1;
+            currentVersion <= configVersionLatest;
+            currentVersion++
+        ) {
+            const facetLength = parseInt(
+                await getFacetsLengthByConfigurationIdAndVersion(
+                    args.configId,
+                    currentVersion,
+                    ContractId.fromString(args.resolver),
+                    client
+                ),
+                16
+            )
+
+            console.log(
+                `Number of Facets for Config ${args.configId} and Version ${currentVersion}: ${facetLength}`
+            )
+
+            const facets = await getFacetsByConfigurationIdAndVersion(
+                args.configId,
+                currentVersion,
+                0,
+                facetLength,
+                ContractId.fromString(args.resolver),
+                client
+            )
+
+            for (const [index, facet] of facets[0].entries()) {
+                console.log(`Facet ${index + 1}:`)
+                console.log(`  ID: ${facet.id}`)
+                console.log(`  Address: ${facet.addr}`)
+                console.log(
+                    `  Selectors: ${JSON.stringify(facet.selectors, null, 2)}`
+                )
+                console.log(
+                    `  Interface IDs: ${JSON.stringify(
+                        facet.interfaceIds,
+                        null,
+                        2
+                    )}`
+                )
+                console.log('-------------------------')
+            }
+        }
+    })
+
+task('getResolverBusinessLogics', 'Get business logics from resolver')
+    .addPositionalParam(
+        'resolver',
+        'The resolver proxy admin address',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'account',
+        'The Hedera account to use for deployment. 0.0.XXXX format',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'privateKey',
+        'The private key of the account, Raw hexadecimal string',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'isEd25519',
+        'Client is ED25519 key type',
+        false,
+        types.boolean
+    )
+    .setAction(async (args: GetResolverBusinessLogicsArgs, hre) => {
+        console.log(
+            `Executing getResolverBusinessLogics on ${hre.network.name} ...`
+        )
+
+        // Get the client
+        const { client } = await hre.run('getClient', {
+            account: args.account,
+            privateKey: args.privateKey,
+            isEd25519: args.isEd25519,
+        })
+
+        // Fetch business logic keys
+        const result = await getBusinessLogicKeys(
+            ContractId.fromString(args.resolver),
+            client
+        )
+
+        // Log the business logic keys
+        console.log('Business Logic Keys:')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        result.forEach((key: any, index: number) => {
+            console.log(`  Key ${index + 1}: ${key}`)
+        })
+    })
