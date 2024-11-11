@@ -200,7 +200,7 @@ Id of the Hedera transaction. Can be used to track the transaction in any Hedera
    - informationRight: the equity grants information rights to its holders.
    - liquidationRight:  the equity grants liquidation rights to its holders
    - subscriptionright: the equity grants subscription rights to its holders
-   - convertionRight: the equity grants convertion rights to its holders
+   - conversionRight: the equity grants conversion rights to its holders
    - redemptionRight: the equity grants redemption rights to its holders
    - putRight: the equity grants put rights to its holders
    - dividendRight: the equity grants dividend rights to its holders

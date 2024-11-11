@@ -203,13 +203,8 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-    Client,
-    ContractFunctionParameters,
-    ContractId,
-    PrivateKey,
-} from '@hashgraph/sdk'
+import { Client, ContractFunctionParameters, ContractId } from '@hashgraph/sdk'
+import { ContractFactory } from 'ethers'
 import {
     AccessControl__factory,
     BondUSA__factory,
@@ -234,50 +229,73 @@ import {
     TransparentUpgradeableProxy__factory,
 } from '../typechain-types'
 import {
+    getEnvVar,
     deployContractSDK,
     getClient,
     getContractInfo,
     toEvmAddress,
-} from './utils'
+    toHashgraphKey,
+    IContract,
+    contractIdToString,
+} from '../scripts/utils'
+import { BusinessLogicRegistryData } from './businessLogicResolverLogic'
+import { EquityConfigId, BondConfigId, _DEFAULT_ADMIN_ROLE } from './constants'
 import { contractCall } from './contractsLifeCycle/utils'
 import {
-    BusinessLogicRegistryData,
-    createConfiguration,
-    getSolidityAddress,
     getStaticResolverKey,
+    createConfiguration,
     registerBusinessLogics,
 } from './contractsMethods'
-import { BondConfigId, EquityConfigId } from './constants'
 
-const used_already_deployed = true
-const resolver_proxy_contract: ContractId = ContractId.fromString('0.0.4916112')
-const resolver_proxyAdmin_contract: ContractId =
-    ContractId.fromString('0.0.4916106')
-const resolver_contract: ContractId = ContractId.fromString('0.0.4916103')
-const factory_proxy_contract: ContractId = ContractId.fromString('0.0.4916186')
-const factory_proxyAdmin_contract: ContractId =
-    ContractId.fromString('0.0.4916183')
-const factory_contract: ContractId = ContractId.fromString('0.0.4916173')
-const accessControl_contract: ContractId = ContractId.fromString('0.0.4916115')
-const cap_contract: ContractId = ContractId.fromString('0.0.4916119')
-const controlList_contract: ContractId = ContractId.fromString('0.0.4916121')
-const pause_contract: ContractId = ContractId.fromString('0.0.4916124')
-const erc20_contract: ContractId = ContractId.fromString('0.0.4916132')
-const erc1410_contract: ContractId = ContractId.fromString('0.0.4916136')
-const erc1594_contract: ContractId = ContractId.fromString('0.0.4916138')
-const erc1643_contract: ContractId = ContractId.fromString('0.0.4916141')
-const erc1644_contract: ContractId = ContractId.fromString('0.0.4916146')
-const snapshots_contract: ContractId = ContractId.fromString('0.0.4916149')
-const diamondFacet_contract: ContractId = ContractId.fromString('0.0.4916152')
-const equity_contract: ContractId = ContractId.fromString('0.0.4916156')
-const bond_contract: ContractId = ContractId.fromString('0.0.4916160')
-const scheduledSnapshots_contract: ContractId =
-    ContractId.fromString('0.0.4916164')
-const corporateActionsSecurity_contract: ContractId =
-    ContractId.fromString('0.0.4916166')
-const lock_contract: ContractId = ContractId.fromString('0.0.4916130')
-const transferAndLock_contract: ContractId =
-    ContractId.fromString('0.0.4916168')
+const ExistingContractIds = {
+    resolver: {
+        proxy: ContractId.fromString(getEnvVar({ name: 'RESOLVER_PROXY' })),
+        proxyAdmin: ContractId.fromString(
+            getEnvVar({ name: 'RESOLVER_PROXY_ADMIN' })
+        ),
+        contract: ContractId.fromString(
+            getEnvVar({ name: 'RESOLVER_CONTRACT' })
+        ),
+    },
+    factory: {
+        proxy: ContractId.fromString(getEnvVar({ name: 'FACTORY_PROXY' })),
+        proxyAdmin: ContractId.fromString(
+            getEnvVar({ name: 'FACTORY_PROXY_ADMIN' })
+        ),
+        contract: ContractId.fromString(
+            getEnvVar({ name: 'FACTORY_CONTRACT' })
+        ),
+    },
+    accessControl: ContractId.fromString(getEnvVar({ name: 'ACCESS_CONTROL' })),
+    cap: ContractId.fromString(getEnvVar({ name: 'CAP' })),
+    controlList: ContractId.fromString(getEnvVar({ name: 'CONTROL_LIST' })),
+    pause: ContractId.fromString(getEnvVar({ name: 'PAUSE' })),
+    erc20: ContractId.fromString(getEnvVar({ name: 'ERC20' })),
+    erc1410: ContractId.fromString(getEnvVar({ name: 'ERC1410' })),
+    erc1594: ContractId.fromString(getEnvVar({ name: 'ERC1594' })),
+    erc1643: ContractId.fromString(getEnvVar({ name: 'ERC1643' })),
+    erc1644: ContractId.fromString(getEnvVar({ name: 'ERC1644' })),
+    snapshots: ContractId.fromString(getEnvVar({ name: 'SNAPSHOTS' })),
+    diamondFacet: ContractId.fromString(getEnvVar({ name: 'DIAMOND_FACET' })),
+    equity: ContractId.fromString(getEnvVar({ name: 'EQUITY' })),
+    bond: ContractId.fromString(getEnvVar({ name: 'BOND' })),
+    scheduledSnapshots: ContractId.fromString(
+        getEnvVar({ name: 'SCHEDULED_SNAPSHOTS' })
+    ),
+    corporateActionsSecurity: ContractId.fromString(
+        getEnvVar({ name: 'CORPORATE_ACTIONS_SECURITY' })
+    ),
+    lock: ContractId.fromString(getEnvVar({ name: 'LOCK' })),
+    transferAndLock: ContractId.fromString(
+        getEnvVar({ name: 'TRANSFER_AND_LOCK' })
+    ),
+}
+
+export interface DeployedContract {
+    proxyAdmin?: IContract
+    proxy?: IContract
+    contract: IContract
+}
 
 export function initializeClient(): [
     Client,
@@ -295,7 +313,10 @@ export function initializeClient(): [
     const clientsED25519 = true
     client.setOperator(
         clientaccount,
-        toHashgraphKey(clientprivatekey, clientsED25519)
+        toHashgraphKey({
+            privateKey: clientprivatekey,
+            isED25519: clientsED25519,
+        })
     )
 
     return [
@@ -307,29 +328,23 @@ export function initializeClient(): [
     ]
 }
 
-export function toHashgraphKey(privateKey: string, isED25519: boolean) {
-    return isED25519
-        ? PrivateKey.fromStringED25519(privateKey)
-        : PrivateKey.fromStringECDSA(privateKey)
-}
-
 export async function updateProxy(
     clientOperator: Client,
-    proxy: string,
-    transparentproxy: string,
-    newImplementation: string
+    proxy: string, // ContractID
+    transparentProxy: string, // ContractID
+    newImplementation: string // ContractID
 ) {
     // Deploying Factory logic
     console.log(`Upgrading proxy logic. please wait...`)
     console.log('Admin proxy :' + proxy)
-    console.log('Transparent proxy :' + transparentproxy)
+    console.log('Transparent proxy :' + transparentProxy)
     console.log('New Implementation :' + newImplementation)
     console.log(ContractId.fromString(newImplementation).toSolidityAddress())
     await contractCall(
         ContractId.fromString(proxy),
         'upgrade',
         [
-            ContractId.fromString(transparentproxy).toSolidityAddress(),
+            ContractId.fromString(transparentProxy).toSolidityAddress(),
             ContractId.fromString(newImplementation).toSolidityAddress(),
         ],
         clientOperator,
@@ -339,12 +354,12 @@ export async function updateProxy(
 }
 export async function getProxyImpl(
     clientOperator: Client,
-    proxyadmin: string,
-    transparent: string
+    proxyadmin: string, // ContractID
+    transparent: string // ContractID
 ) {
     // Deploying Factory logic
-    console.log(`Getting implementation from proxy please wait...`)
-    console.log('ProxyAdmin :' + proxyadmin)
+    console.log(`Getting implementation from proxy, please wait...`)
+    console.log(`ProxyAdmin: ${proxyadmin}`)
     const address = await contractCall(
         ContractId.fromString(proxyadmin),
         'getProxyImplementation',
@@ -353,283 +368,249 @@ export async function getProxyImpl(
         150000,
         ProxyAdmin__factory.abi
     )
-    console.log('New Implementation' + address[0])
+    console.log(`New Implementation: ${address[0]}`)
 }
 
-export async function deployAssettokenizationFullInfrastructure(
-    clientOperator: Client,
-    privateKey: string,
-    isED25519Type: boolean
-) {
-    let resolverResult: ContractId[] = []
-    let factoryResult: ContractId[] = []
-    let resolver
-
-    if (used_already_deployed && resolver_contract.num.toString() !== '0') {
-        resolver = resolver_proxy_contract
-        resolverResult.push(resolver_proxy_contract)
-        resolverResult.push(resolver_proxyAdmin_contract)
-        resolverResult.push(resolver_contract)
-    } else {
-        resolverResult = await deployResolver(
-            clientOperator,
-            privateKey,
-            isED25519Type
-        )
-        resolver = resolverResult[0]
+export async function deployAtsFullInfrastructure({
+    clientOperator,
+    privateKey,
+    isED25519 = false,
+    useDeployed = true,
+}: {
+    clientOperator: Client
+    privateKey: string
+    isED25519?: boolean
+    useDeployed?: boolean
+}) {
+    const deployOrUseExisting = async (
+        existing: {
+            contract: ContractId
+            proxy?: ContractId
+            proxyAdmin?: ContractId
+        },
+        deployFunction: () => Promise<DeployedContract>
+    ): Promise<DeployedContract> => {
+        if (useDeployed && existing.contract.num.toString() !== '0') {
+            return {
+                contract: await getContractInfo(
+                    contractIdToString(existing.contract)
+                ),
+                proxy: existing.proxy
+                    ? await getContractInfo(contractIdToString(existing.proxy))
+                    : undefined,
+                proxyAdmin: existing.proxyAdmin
+                    ? await getContractInfo(
+                          contractIdToString(existing.proxyAdmin)
+                      )
+                    : undefined,
+            }
+        }
+        return await deployFunction()
     }
 
-    const accessControl =
-        used_already_deployed && accessControl_contract.num.toString() !== '0'
-            ? accessControl_contract
-            : await deployAccessControl(clientOperator, privateKey)
-    const cap =
-        used_already_deployed && cap_contract.num.toString() !== '0'
-            ? cap_contract
-            : await deployCap(clientOperator, privateKey)
-    const controlList =
-        used_already_deployed && controlList_contract.num.toString() !== '0'
-            ? controlList_contract
-            : await deployControlList(clientOperator, privateKey)
-    const pause =
-        used_already_deployed && pause_contract.num.toString() !== '0'
-            ? pause_contract
-            : await deployPause(clientOperator, privateKey)
-    const lock =
-        used_already_deployed && lock_contract.num.toString() !== '0'
-            ? lock_contract
-            : await deployLock(clientOperator, privateKey)
-    const erc20 =
-        used_already_deployed && erc20_contract.num.toString() !== '0'
-            ? erc20_contract
-            : await deployERC20(clientOperator, privateKey)
-    const erc1410 =
-        used_already_deployed && erc1410_contract.num.toString() !== '0'
-            ? erc1410_contract
-            : await deployERC1410(clientOperator, privateKey)
-    const erc1594 =
-        used_already_deployed && erc1594_contract.num.toString() !== '0'
-            ? erc1594_contract
-            : await deployERC1594(clientOperator, privateKey)
-    const erc1643 =
-        used_already_deployed && erc1643_contract.num.toString() !== '0'
-            ? erc1643_contract
-            : await deployERC1643(clientOperator, privateKey)
-    const erc1644 =
-        used_already_deployed && erc1644_contract.num.toString() !== '0'
-            ? erc1644_contract
-            : await deployERC1644(clientOperator, privateKey)
-    const snapshots =
-        used_already_deployed && snapshots_contract.num.toString() !== '0'
-            ? snapshots_contract
-            : await deploySnapshots(clientOperator, privateKey)
-    const diamondFacet =
-        used_already_deployed && diamondFacet_contract.num.toString() !== '0'
-            ? diamondFacet_contract
-            : await deployDiamondFacet(clientOperator, privateKey)
-    const equity =
-        used_already_deployed && equity_contract.num.toString() !== '0'
-            ? equity_contract
-            : await deployEquity(clientOperator, privateKey)
-    const bond =
-        used_already_deployed && bond_contract.num.toString() !== '0'
-            ? bond_contract
-            : await deployBond(clientOperator, privateKey)
-    const scheduledSnapshots =
-        used_already_deployed &&
-        scheduledSnapshots_contract.num.toString() !== '0'
-            ? scheduledSnapshots_contract
-            : await deployScheduledSnapshots(clientOperator, privateKey)
-    const corporateActionsSecurity =
-        used_already_deployed &&
-        corporateActionsSecurity_contract.num.toString() !== '0'
-            ? corporateActionsSecurity_contract
-            : await deployCorporateActionsSecurity(clientOperator, privateKey)
-    const transferAndLock =
-        used_already_deployed && transferAndLock_contract.num.toString() !== '0'
-            ? transferAndLock_contract
-            : await deployTransferAndLock(clientOperator, privateKey)
+    const deployContracts = async () => {
+        const contracts = [
+            { name: 'resolver', ids: ExistingContractIds.resolver },
+            {
+                name: 'accesscontrol',
+                ids: { contract: ExistingContractIds.accessControl },
+            },
+            { name: 'cap', ids: { contract: ExistingContractIds.cap } },
+            {
+                name: 'controllist',
+                ids: { contract: ExistingContractIds.controlList },
+            },
+            { name: 'pause', ids: { contract: ExistingContractIds.pause } },
+            { name: 'lock', ids: { contract: ExistingContractIds.lock } },
+            { name: 'erc20', ids: { contract: ExistingContractIds.erc20 } },
+            { name: 'erc1410', ids: { contract: ExistingContractIds.erc1410 } },
+            { name: 'erc1594', ids: { contract: ExistingContractIds.erc1594 } },
+            { name: 'erc1643', ids: { contract: ExistingContractIds.erc1643 } },
+            { name: 'erc1644', ids: { contract: ExistingContractIds.erc1644 } },
+            {
+                name: 'snapshots',
+                ids: { contract: ExistingContractIds.snapshots },
+            },
+            {
+                name: 'diamondfacet',
+                ids: { contract: ExistingContractIds.diamondFacet },
+            },
+            { name: 'equity', ids: { contract: ExistingContractIds.equity } },
+            { name: 'bond', ids: { contract: ExistingContractIds.bond } },
+            {
+                name: 'scheduledsnapshots',
+                ids: { contract: ExistingContractIds.scheduledSnapshots },
+            },
+            {
+                name: 'corporateactionssecurity',
+                ids: { contract: ExistingContractIds.corporateActionsSecurity },
+            },
+            {
+                name: 'transferandlock',
+                ids: { contract: ExistingContractIds.transferAndLock },
+            },
+        ]
 
-    const businessLogicRegistries: BusinessLogicRegistryData[] = [
-        {
-            businessLogicKey: await getStaticResolverKey(
-                diamondFacet,
-                clientOperator
-            ),
-            businessLogicAddress: getSolidityAddress(diamondFacet),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(
-                accessControl,
-                clientOperator
-            ),
-            businessLogicAddress: getSolidityAddress(accessControl),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(cap, clientOperator),
-            businessLogicAddress: getSolidityAddress(cap),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(pause, clientOperator),
-            businessLogicAddress: getSolidityAddress(pause),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(
-                controlList,
-                clientOperator
-            ),
-            businessLogicAddress: getSolidityAddress(controlList),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(erc20, clientOperator),
-            businessLogicAddress: getSolidityAddress(erc20),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(
-                erc1644,
-                clientOperator
-            ),
-            businessLogicAddress: getSolidityAddress(erc1644),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(
-                erc1410,
-                clientOperator
-            ),
-            businessLogicAddress: getSolidityAddress(erc1410),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(
-                erc1594,
-                clientOperator
-            ),
-            businessLogicAddress: getSolidityAddress(erc1594),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(
-                erc1643,
-                clientOperator
-            ),
-            businessLogicAddress: getSolidityAddress(erc1643),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(
-                snapshots,
-                clientOperator
-            ),
-            businessLogicAddress: getSolidityAddress(snapshots),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(
-                equity,
-                clientOperator
-            ),
-            businessLogicAddress: getSolidityAddress(equity),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(bond, clientOperator),
-            businessLogicAddress: getSolidityAddress(bond),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(
-                scheduledSnapshots,
-                clientOperator
-            ),
-            businessLogicAddress: getSolidityAddress(scheduledSnapshots),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(
-                corporateActionsSecurity,
-                clientOperator
-            ),
-            businessLogicAddress: getSolidityAddress(corporateActionsSecurity),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(lock, clientOperator),
-            businessLogicAddress: getSolidityAddress(lock),
-        },
-        {
-            businessLogicKey: await getStaticResolverKey(
-                transferAndLock,
-                clientOperator
-            ),
-            businessLogicAddress: getSolidityAddress(transferAndLock),
-        },
-    ]
+        const deployedContracts: { [key: string]: DeployedContract } = {}
 
-    if (!used_already_deployed || resolver_contract.num.toString() === '0') {
+        for (const { name, ids } of contracts) {
+            deployedContracts[name] = await deployOrUseExisting(ids, () =>
+                deployContract({
+                    clientOperator,
+                    privateKey,
+                    contractName: name,
+                    isED25519: isED25519,
+                })
+            )
+        }
+
+        return deployedContracts
+    }
+
+    const deployedContracts = await deployContracts()
+
+    const resolver = deployedContracts['resolver']
+    if (!resolver.proxy || !resolver.proxyAdmin) {
+        throw new Error('Resolver proxy or proxy admin not found')
+    }
+
+    const {
+        accesscontrol: accessControl,
+        cap,
+        controllist: controlList,
+        pause,
+        lock,
+        erc20,
+        erc1410,
+        erc1594,
+        erc1643,
+        erc1644,
+        snapshots,
+        diamondfacet: diamondFacet,
+        equity,
+        bond,
+        scheduledsnapshots: scheduledSnapshots,
+        corporateactionssecurity: corporateActionsSecurity,
+        transferandlock: transferAndLock,
+    } = deployedContracts
+
+    const businessLogicRegistries: BusinessLogicRegistryData[] = []
+    for await (const { contract } of [
+        diamondFacet,
+        accessControl,
+        cap,
+        pause,
+        controlList,
+        erc20,
+        erc1644,
+        erc1410,
+        erc1594,
+        erc1643,
+        snapshots,
+        equity,
+        bond,
+        scheduledSnapshots,
+        corporateActionsSecurity,
+        lock,
+        transferAndLock,
+    ]) {
+        const businessLogicKey = await getStaticResolverKey(
+            contract.contractId,
+            clientOperator
+        )
+        businessLogicRegistries.push({
+            businessLogicKey,
+            businessLogicAddress: contract.evm_address.replace('0x', ''),
+        })
+    }
+
+    if (
+        !useDeployed ||
+        ExistingContractIds.resolver.contract.num.toString() === '0'
+    ) {
+        console.log('Registering business logics. please wait...')
         await registerBusinessLogics(
             businessLogicRegistries,
-            resolver,
+            resolver.proxy!.contractId,
             clientOperator
         )
 
-        const facetIdsCommon: string[] = [
-            await getStaticResolverKey(diamondFacet, clientOperator),
-            await getStaticResolverKey(accessControl, clientOperator),
-            await getStaticResolverKey(cap, clientOperator),
-            await getStaticResolverKey(pause, clientOperator),
-            await getStaticResolverKey(controlList, clientOperator),
-            await getStaticResolverKey(erc20, clientOperator),
-            await getStaticResolverKey(erc1644, clientOperator),
-            await getStaticResolverKey(erc1410, clientOperator),
-            await getStaticResolverKey(erc1594, clientOperator),
-            await getStaticResolverKey(erc1643, clientOperator),
-            await getStaticResolverKey(snapshots, clientOperator),
-            await getStaticResolverKey(scheduledSnapshots, clientOperator),
-            await getStaticResolverKey(
+        console.log('Creating configurations. please wait...')
+        const facetIdsCommon = await Promise.all(
+            [
+                diamondFacet,
+                accessControl,
+                cap,
+                pause,
+                controlList,
+                erc20,
+                erc1644,
+                erc1410,
+                erc1594,
+                erc1643,
+                snapshots,
+                scheduledSnapshots,
                 corporateActionsSecurity,
+                lock,
+                transferAndLock,
+            ].map(({ contract }) =>
+                getStaticResolverKey(contract.contractId, clientOperator)
+            )
+        )
+
+        const facetIdsEquities = [
+            ...facetIdsCommon,
+            await getStaticResolverKey(
+                equity.contract.contractId,
                 clientOperator
             ),
-            await getStaticResolverKey(lock, clientOperator),
-            await getStaticResolverKey(transferAndLock, clientOperator),
         ]
+        const facetVersionsEquities = Array(facetIdsEquities.length).fill(1)
 
-        const facetIdsEquities: string[] = facetIdsCommon.concat(
-            await getStaticResolverKey(equity, clientOperator)
-        )
+        const facetIdsBonds = [
+            ...facetIdsCommon,
+            await getStaticResolverKey(
+                bond.contract.contractId,
+                clientOperator
+            ),
+        ]
+        const facetVersionsBonds = Array(facetIdsBonds.length).fill(1)
 
-        const facetVersionsEquities: number[] = facetIdsEquities.map(() => 1)
-
-        const facetIdsBonds: string[] = facetIdsCommon.concat(
-            await getStaticResolverKey(bond, clientOperator)
-        )
-
-        const facetVersionsBonds: number[] = facetIdsBonds.map(() => 1)
-
+        // Create configuration for equities
         await createConfiguration(
             EquityConfigId,
             facetIdsEquities,
             facetVersionsEquities,
-            resolver,
+            resolver.proxy.contractId,
             clientOperator
         )
-
+        // Create configuration for bonds
         await createConfiguration(
             BondConfigId,
             facetIdsBonds,
             facetVersionsBonds,
-            resolver,
+            resolver.proxy.contractId,
             clientOperator
         )
     }
 
-    if (used_already_deployed && factory_contract.num.toString() !== '0') {
-        factoryResult.push(factory_proxy_contract)
-        factoryResult.push(factory_proxyAdmin_contract)
-        factoryResult.push(factory_contract)
-    } else {
-        factoryResult = await deployFactory(
-            clientOperator,
-            privateKey,
-            isED25519Type
-        )
-    }
+    const factory = await deployOrUseExisting(
+        {
+            contract: ExistingContractIds.factory.contract,
+            proxy: ExistingContractIds.factory.proxy,
+            proxyAdmin: ExistingContractIds.factory.proxyAdmin,
+        },
+        () =>
+            deployContract({
+                clientOperator,
+                privateKey,
+                contractName: 'factory',
+                isED25519: isED25519,
+            })
+    )
 
-    return [
-        resolverResult[0],
-        resolverResult[1],
-        resolverResult[2],
+    return {
+        resolver,
         accessControl,
         cap,
         controlList,
@@ -647,17 +628,150 @@ export async function deployAssettokenizationFullInfrastructure(
         corporateActionsSecurity,
         lock,
         transferAndLock,
-        factoryResult[0],
-        factoryResult[1],
-        factoryResult[2],
-    ]
+        factory,
+    }
 }
 
-async function deployProxyAdmin(
-    clientOperator: Client,
-    privateKey: string,
+export async function deployContract({
+    clientOperator,
+    privateKey,
+    contractName,
+    isED25519 = false,
+}: {
+    clientOperator: Client
+    privateKey: string
+    contractName: string
+    isED25519?: boolean
+}): Promise<DeployedContract> {
+    console.log(`Deploying ${contractName}. please wait...`)
+
+    let contractFactory: typeof ContractFactory = ContractFactory
+    let deployProxy = false
+    const contractMap: {
+        [key: string]: {
+            factory: typeof ContractFactory
+            deployProxy?: boolean
+        }
+    } = {
+        factory: { factory: Factory__factory, deployProxy: true },
+        resolver: {
+            factory: BusinessLogicResolver__factory,
+            deployProxy: true,
+        },
+        accesscontrol: { factory: AccessControl__factory },
+        cap: { factory: Cap__factory },
+        controllist: { factory: ControlList__factory },
+        pause: { factory: Pause__factory },
+        erc20: { factory: ERC20__factory },
+        erc1410: { factory: ERC1410ScheduledSnapshot__factory },
+        erc1594: { factory: ERC1594__factory },
+        erc1643: { factory: ERC1643__factory },
+        erc1644: { factory: ERC1644__factory },
+        facet: { factory: DiamondFacet__factory },
+        equity: { factory: EquityUSA__factory },
+        bond: { factory: BondUSA__factory },
+        scheduledsnapshots: { factory: ScheduledSnapshots__factory },
+        snapshots: { factory: Snapshots__factory },
+        corporateactions: { factory: CorporateActionsSecurity__factory },
+        transferandlock: { factory: TransferAndLock__factory },
+        lock: { factory: Lock__factory },
+    }
+
+    const contractKey = Object.keys(contractMap).find((contractType) =>
+        contractName.toLowerCase().includes(contractType)
+    )
+    if (!contractKey) {
+        throw new Error(`Unknown contract type: ${contractName}`)
+    }
+
+    contractName = contractKey.charAt(0).toUpperCase() + contractKey.slice(1)
+    contractFactory = contractMap[contractKey].factory
+    deployProxy = contractMap[contractKey].deployProxy || false
+
+    const contract = await deployContractSDK(
+        contractFactory,
+        privateKey,
+        clientOperator
+    )
+
+    console.log(
+        `${contractName} deployed at ${contract.evm_address} (${contract.contract_id})`
+    )
+
+    if (!deployProxy) {
+        return { contract }
+    }
+
+    console.log(`Deploying ${contractName} Proxy Admin. please wait...`)
+
+    const proxyAdmin = await deployProxyAdmin({
+        clientOperator,
+        privateKey,
+        isED25519Type: isED25519,
+    })
+
+    console.log(
+        `${contractName} Proxy Admin deployed at ${proxyAdmin.evm_address}(${proxyAdmin.contract_id})`
+    )
+
+    console.log(`Deploying ${contractName} Proxy. please wait...`)
+
+    const proxy = await deployTransparentProxy({
+        clientOperator,
+        privateKey,
+        proxyAdmin: proxyAdmin.evm_address,
+        implementation: contract.evm_address,
+    })
+
+    console.log(
+        `${contractName} Proxy deployed at ${proxy.evm_address}(${proxy.contract_id})`
+    )
+    if (contractKey === 'resolver') {
+        console.log('Initializing resolver. please wait...')
+        await contractCall(
+            proxy.contractId,
+            'initialize_BusinessLogicResolver',
+            [],
+            clientOperator,
+            8000000,
+            BusinessLogicResolver__factory.abi
+        )
+
+        console.log('Resolver initialized successfully.')
+
+        const admin = await contractCall(
+            proxy.contractId,
+            'getRoleMembers',
+            [_DEFAULT_ADMIN_ROLE, '0', '1'],
+            clientOperator,
+            130000,
+            BusinessLogicResolver__factory.abi
+        )
+
+        console.log(`Resolver Admin: ${admin[0]}`)
+    }
+
+    return { proxyAdmin, proxy, contract }
+}
+
+/**
+ * Deploys a ProxyAdmin contract using the provided client operator and private key.
+ *
+ * @param params - The parameters for deploying the ProxyAdmin contract.
+ * @param params.clientOperator - The client operator used for deployment.
+ * @param params.privateKey - The private key associated with the client operator.
+ * @param params.isED25519Type - Indicates whether the key type is ED25519.
+ * @returns A promise that resolves to the deployed contract instance.
+ */
+async function deployProxyAdmin({
+    clientOperator,
+    privateKey,
+    isED25519Type,
+}: {
+    clientOperator: Client
+    privateKey: string
     isED25519Type: boolean
-) {
+}): Promise<IContract> {
     const AccountEvmAddress = await toEvmAddress(
         clientOperator.operatorAccountId!.toString(),
         isED25519Type
@@ -675,17 +789,30 @@ async function deployProxyAdmin(
     )
 }
 
-async function deployTransparentProxy(
-    clientOperator: Client,
-    privateKey: string,
-    proxyAdmin: ContractId,
-    implementation: ContractId
-) {
+/**
+ * Deploys a transparent upgradeable proxy contract.
+ *
+ * @param params - The parameters for deploying the proxy.
+ * @param params.clientOperator - The client operator instance.
+ * @param params.privateKey - The private key for deployment.
+ * @param params.proxyAdmin - The address of the proxy admin.
+ * @param params.implementation - The address of the implementation.
+ * @returns A promise that resolves to the deployed contract instance.
+ */
+async function deployTransparentProxy({
+    clientOperator,
+    privateKey,
+    proxyAdmin,
+    implementation,
+}: {
+    clientOperator: Client
+    privateKey: string
+    proxyAdmin: string
+    implementation: string
+}): Promise<IContract> {
     const params = new ContractFunctionParameters()
-        .addAddress(
-            (await getContractInfo(implementation.toString())).evm_address
-        )
-        .addAddress((await getContractInfo(proxyAdmin.toString())).evm_address)
+        .addAddress(implementation)
+        .addAddress(proxyAdmin)
         .addBytes(new Uint8Array([]))
 
     return await deployContractSDK(
@@ -694,489 +821,6 @@ async function deployTransparentProxy(
         clientOperator,
         params,
         undefined,
-        '0x' + proxyAdmin.toSolidityAddress()
+        proxyAdmin
     )
-}
-
-export async function deployFactory(
-    clientOperator: Client,
-    privateKey: string,
-    isED25519Type: boolean
-) {
-    // Deploying Factory logic
-    console.log(`Deploying Contract Factory. please wait...`)
-
-    const factory = await deployContractSDK(
-        Factory__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Contract Factory deployed ${
-            (await getContractInfo(factory.toString())).evm_address
-        }`
-    )
-
-    // Deploying Factory Proxy Admin
-    console.log(`Deploying Contract Factory Proxy Admin. please wait...`)
-
-    const factoryProxyAdmin = await deployProxyAdmin(
-        clientOperator,
-        privateKey,
-        isED25519Type
-    )
-
-    console.log(
-        `Contract Factory Proxy Admin deployed ${
-            (await getContractInfo(factoryProxyAdmin.toString())).evm_address
-        }`
-    )
-
-    // Deploying Factory Proxy
-    console.log(`Deploying Contract Factory Proxy. please wait...`)
-
-    const factoryProxy = await deployTransparentProxy(
-        clientOperator,
-        privateKey,
-        factoryProxyAdmin,
-        factory
-    )
-
-    console.log(
-        `Contract Factory Proxy deployed ${
-            (await getContractInfo(factoryProxyAdmin.toString())).evm_address
-        }`
-    )
-
-    return [factoryProxy, factoryProxyAdmin, factory]
-}
-
-export async function deployResolver(
-    clientOperator: Client,
-    privateKey: string,
-    isED25519Type: boolean
-) {
-    // Deploying Resolver logic
-    console.log(`Deploying Business Resolver. please wait...`)
-
-    const resolver = await deployContractSDK(
-        BusinessLogicResolver__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Resolver deployed ${
-            (await getContractInfo(resolver.toString())).evm_address
-        }`
-    )
-
-    // Deploying Resolver Proxy Admin
-    console.log(`Deploying Resolver Proxy Admin. please wait...`)
-
-    const resolverProxyAdmin = await deployProxyAdmin(
-        clientOperator,
-        privateKey,
-        isED25519Type
-    )
-
-    console.log(
-        `Resolver Proxy Admin deployed ${
-            (await getContractInfo(resolverProxyAdmin.toString())).evm_address
-        }`
-    )
-
-    // Deploying Resolver Proxy
-    console.log(`Deploying Resolver Proxy. please wait...`)
-
-    const resolverProxy = await deployTransparentProxy(
-        clientOperator,
-        privateKey,
-        resolverProxyAdmin,
-        resolver
-    )
-
-    const resolverProxyInfo = await getContractInfo(resolverProxy.toString())
-
-    console.log(`Resolver Proxy deployed ${resolverProxyInfo.evm_address}`)
-
-    await contractCall(
-        resolverProxy,
-        'initialize_BusinessLogicResolver',
-        [],
-        clientOperator,
-        8000000,
-        BusinessLogicResolver__factory.abi
-    )
-
-    console.log('resolver initialized')
-
-    const admin = await contractCall(
-        resolverProxy,
-        'getRoleMembers',
-        [
-            '0x0000000000000000000000000000000000000000000000000000000000000000',
-            '0',
-            '1',
-        ],
-        clientOperator,
-        130000,
-        BusinessLogicResolver__factory.abi
-    )
-
-    console.log(`Resolver Initialized ${admin[0]}`)
-
-    return [resolverProxy, resolverProxyAdmin, resolver]
-}
-
-export async function deployAccessControl(
-    clientOperator: Client,
-    privateKey: string
-) {
-    // Deploying Access Control logic
-    console.log(`Deploying Access Control. please wait...`)
-
-    const accessControl = await deployContractSDK(
-        AccessControl__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Access Control deployed ${
-            (await getContractInfo(accessControl.toString())).evm_address
-        }`
-    )
-
-    return accessControl
-}
-
-export async function deployCap(clientOperator: Client, privateKey: string) {
-    // Deploying Cap logic
-    console.log(`Deploying Cap. please wait...`)
-
-    const cap = await deployContractSDK(
-        Cap__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Cap deployed ${(await getContractInfo(cap.toString())).evm_address}`
-    )
-
-    return cap
-}
-
-export async function deployControlList(
-    clientOperator: Client,
-    privateKey: string
-) {
-    // Deploying Contrl List logic
-    console.log(`Deploying Control List. please wait...`)
-
-    const controlList = await deployContractSDK(
-        ControlList__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Control List deployed ${
-            (await getContractInfo(controlList.toString())).evm_address
-        }`
-    )
-
-    return controlList
-}
-
-export async function deployPause(clientOperator: Client, privateKey: string) {
-    // Deploying Pause logic
-    console.log(`Deploying Pause. please wait...`)
-
-    const pause = await deployContractSDK(
-        Pause__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Pause deployed ${
-            (await getContractInfo(pause.toString())).evm_address
-        }`
-    )
-
-    return pause
-}
-
-export async function deployERC20(clientOperator: Client, privateKey: string) {
-    // Deploying ERC20 logic
-    console.log(`Deploying ERC20. please wait...`)
-
-    const erc20 = await deployContractSDK(
-        ERC20__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `ERC20 deployed ${
-            (await getContractInfo(erc20.toString())).evm_address
-        }`
-    )
-
-    return erc20
-}
-
-export async function deployERC1410(
-    clientOperator: Client,
-    privateKey: string
-) {
-    // Deploying ERC1410 logic
-    console.log(`Deploying ERC1410. please wait...`)
-
-    const erc1410 = await deployContractSDK(
-        ERC1410ScheduledSnapshot__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `ERC1410 deployed ${
-            (await getContractInfo(erc1410.toString())).evm_address
-        }`
-    )
-
-    return erc1410
-}
-
-export async function deployERC1594(
-    clientOperator: Client,
-    privateKey: string
-) {
-    // Deploying ERC1594 logic
-    console.log(`Deploying ERC1594. please wait...`)
-
-    const erc1594 = await deployContractSDK(
-        ERC1594__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `ERC1594 deployed ${
-            (await getContractInfo(erc1594.toString())).evm_address
-        }`
-    )
-
-    return erc1594
-}
-
-export async function deployERC1643(
-    clientOperator: Client,
-    privateKey: string
-) {
-    // Deploying ERC1643 logic
-    console.log(`Deploying ERC1643. please wait...`)
-
-    const erc1643 = await deployContractSDK(
-        ERC1643__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `ERC1643 deployed ${
-            (await getContractInfo(erc1643.toString())).evm_address
-        }`
-    )
-
-    return erc1643
-}
-
-export async function deployERC1644(
-    clientOperator: Client,
-    privateKey: string
-) {
-    // Deploying ERC1644logic
-    console.log(`Deploying ERC1644. please wait...`)
-
-    const erc1644 = await deployContractSDK(
-        ERC1644__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `ERC1644 deployed ${
-            (await getContractInfo(erc1644.toString())).evm_address
-        }`
-    )
-
-    return erc1644
-}
-
-export async function deploySnapshots(
-    clientOperator: Client,
-    privateKey: string
-) {
-    // Deploying Snpashots logic
-    console.log(`Deploying Snapshots. please wait...`)
-
-    const snapshots = await deployContractSDK(
-        Snapshots__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Snapshots deployed ${
-            (await getContractInfo(snapshots.toString())).evm_address
-        }`
-    )
-
-    return snapshots
-}
-
-export async function deployDiamondFacet(
-    clientOperator: Client,
-    privateKey: string
-) {
-    // Deploying Diamond logic
-    console.log(`Deploying Diamond Facet. please wait...`)
-
-    const diamondFacet = await deployContractSDK(
-        DiamondFacet__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Diamond deployed ${
-            (await getContractInfo(diamondFacet.toString())).evm_address
-        }`
-    )
-
-    return diamondFacet
-}
-
-export async function deployEquity(clientOperator: Client, privateKey: string) {
-    // Deploying Equity logic
-    console.log(`Deploying Equity. please wait...`)
-
-    const equity = await deployContractSDK(
-        EquityUSA__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Equity deployed ${
-            (await getContractInfo(equity.toString())).evm_address
-        }`
-    )
-
-    return equity
-}
-
-export async function deployBond(clientOperator: Client, privateKey: string) {
-    // Deploying Equity logic
-    console.log(`Deploying Bond. please wait...`)
-
-    const bond = await deployContractSDK(
-        BondUSA__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Bond deployed ${(await getContractInfo(bond.toString())).evm_address}`
-    )
-
-    return bond
-}
-
-export async function deployScheduledSnapshots(
-    clientOperator: Client,
-    privateKey: string
-) {
-    // Deploying Schedled Snapshots logic
-    console.log(`Deploying Scheduled Snapshots. please wait...`)
-
-    const scheduledSnapshots = await deployContractSDK(
-        ScheduledSnapshots__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Scheudled Snapshots deployed ${
-            (await getContractInfo(scheduledSnapshots.toString())).evm_address
-        }`
-    )
-
-    return scheduledSnapshots
-}
-
-export async function deployCorporateActionsSecurity(
-    clientOperator: Client,
-    privateKey: string
-) {
-    // Deploying Corproate Actions logic
-    console.log(`Deploying Corporate Actions. please wait...`)
-
-    const corporateActionsSecurity = await deployContractSDK(
-        CorporateActionsSecurity__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Corporate Actions deployed ${
-            (await getContractInfo(corporateActionsSecurity.toString()))
-                .evm_address
-        }`
-    )
-
-    return corporateActionsSecurity
-}
-
-export async function deployLock(clientOperator: Client, privateKey: string) {
-    // Deploying Lock logic
-    console.log(`Deploying Lock. please wait...`)
-
-    const lock = await deployContractSDK(
-        Lock__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `Lock deployed ${(await getContractInfo(lock.toString())).evm_address}`
-    )
-
-    return lock
-}
-
-export async function deployTransferAndLock(
-    clientOperator: Client,
-    privateKey: string
-) {
-    // Deploying Lock logic
-    console.log(`Deploying TransferAndLock. please wait...`)
-
-    const transferAndLock = await deployContractSDK(
-        TransferAndLock__factory,
-        privateKey,
-        clientOperator
-    )
-
-    console.log(
-        `TransferAndLock deployed ${
-            (await getContractInfo(transferAndLock.toString())).evm_address
-        }`
-    )
-
-    return transferAndLock
 }

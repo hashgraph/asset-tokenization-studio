@@ -211,7 +211,7 @@ export class EquityDetails {
   informationRight: boolean;
   liquidationRight: boolean;
   subscriptionRight: boolean;
-  convertionRight: boolean;
+  conversionRight: boolean;
   redemptionRight: boolean;
   putRight: boolean;
   dividendRight: DividendType;
@@ -223,7 +223,7 @@ export class EquityDetails {
     informationRight: boolean,
     liquidationRight: boolean,
     subscriptionRight: boolean,
-    convertionRight: boolean,
+    conversionRight: boolean,
     redemptionRight: boolean,
     putRight: boolean,
     dividendRight: DividendType,
@@ -234,7 +234,7 @@ export class EquityDetails {
     this.informationRight = informationRight;
     this.liquidationRight = liquidationRight;
     this.subscriptionRight = subscriptionRight;
-    this.convertionRight = convertionRight;
+    this.conversionRight = conversionRight;
     this.redemptionRight = redemptionRight;
     this.putRight = putRight;
     this.dividendRight = dividendRight;

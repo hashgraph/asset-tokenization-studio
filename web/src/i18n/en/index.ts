@@ -248,6 +248,7 @@ export default {
     symbol: "Symbol",
     decimal: "Decimal",
     isin: "ISIN",
+    evmAddress: "EVM Address",
     id: "ID",
     totalSupply: "Total Supply",
     maxSupply: "Max Supply",

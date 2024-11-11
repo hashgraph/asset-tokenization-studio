@@ -249,17 +249,20 @@ export async function deployProxyToBusinessLogicResolver(
     //await loadFixture(deployProxyAdmin)
     await deployProxyAdmin()
     await deployTransparentUpgradeableProxy(businessLogicResolverLogicAddress)
-    businessLogicResolver = await ethers.getContractAt(
+    businessLogicResolver = (await ethers.getContractAt(
         'BusinessLogicResolver',
         transparentUpgradableProxy.address
-    )
+    )) as IBusinessLogicResolver
     await businessLogicResolver.initialize_BusinessLogicResolver()
 }
 
 async function toStaticFunctionSelectors(
     address: string
 ): Promise<IStaticFunctionSelectors> {
-    return await ethers.getContractAt('IStaticFunctionSelectors', address)
+    return (await ethers.getContractAt(
+        'IStaticFunctionSelectors',
+        address
+    )) as IStaticFunctionSelectors
 }
 
 function capitalizeFirst(str: string) {
