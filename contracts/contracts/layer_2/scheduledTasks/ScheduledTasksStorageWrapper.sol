@@ -207,26 +207,18 @@
 pragma solidity 0.8.18;
 
 import {
-    _SCHEDULED_SNAPSHOTS_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../layer_1/ERC1400/ERC1410//ERC1410SnapshotStorageWrapper.sol';
-import {
-    IScheduledSnapshots
-} from '../interfaces/scheduledSnapshots/IScheduledSnapshots.sol';
+    IScheduledTasksStorageWrapper
+} from '../interfaces/scheduledTasks/IScheduledTasksStorageWrapper.sol';
 import {LibCommon} from '../../layer_1/common/LibCommon.sol';
-import {
-    IScheduledSnapshotsStorageWrapper
-} from '../interfaces/scheduledSnapshots/IScheduledSnapshotsStorageWrapper.sol';
+import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-abstract contract ScheduledSnapshotsStorageWrapper is
-    IScheduledSnapshotsStorageWrapper,
-    ERC1410SnapshotStorageWrapper
+abstract contract ScheduledTasksStorageWrapper is
+    IScheduledTasksStorageWrapper,
+    LocalContext
 {
-    struct ScheduledSnapshotsDataStorage {
-        mapping(uint256 => IScheduledSnapshots.ScheduledSnapshot) scheduledSnapshots;
-        uint256 scheduledSnapshotCount;
+    struct ScheduledTasksDataStorage {
+        mapping(uint256 => ScheduledTask) scheduledTasks;
+        uint256 scheduledTaskCount;
     }
 
     modifier checkTimestamp(uint256 timestamp) {
@@ -236,196 +228,155 @@ abstract contract ScheduledSnapshotsStorageWrapper is
         _;
     }
 
-    function _addScheduledSnapshot(
-        uint256 newScheduledTimestamp,
-        bytes memory newData
+    function _addScheduledTask(
+        uint256 _newScheduledTimestamp,
+        bytes memory _newData
     ) internal virtual {
-        IScheduledSnapshots.ScheduledSnapshot
-            memory newScheduledSnapshot = IScheduledSnapshots.ScheduledSnapshot(
-                newScheduledTimestamp,
-                newData
-            );
+        ScheduledTask memory newScheduledTask = ScheduledTask(
+            _newScheduledTimestamp,
+            _newData
+        );
 
-        uint256 scheduledSnapshotsLength = _getScheduledSnapshotCount();
+        uint256 scheduledTasksLength = _getScheduledTaskCount();
 
-        uint256 newScheduledSnapshotId = scheduledSnapshotsLength;
+        uint256 newScheduledTaskId = scheduledTasksLength;
 
         bool added = false;
 
-        if (scheduledSnapshotsLength > 0) {
-            for (
-                uint256 index = 1;
-                index <= scheduledSnapshotsLength;
-                index++
-            ) {
-                uint256 scheduledSnapshotPosition = scheduledSnapshotsLength -
-                    index;
+        if (scheduledTasksLength > 0) {
+            for (uint256 index = 1; index <= scheduledTasksLength; index++) {
+                uint256 scheduledTaskPosition = scheduledTasksLength - index;
 
                 if (
-                    _scheduledSnapshotsStorage()
-                        .scheduledSnapshots[scheduledSnapshotPosition]
-                        .scheduledTimestamp < newScheduledTimestamp
+                    _scheduledTasksStorage()
+                        .scheduledTasks[scheduledTaskPosition]
+                        .scheduledTimestamp < _newScheduledTimestamp
                 ) {
-                    _slideScheduledSnapshots(scheduledSnapshotPosition);
+                    _slideScheduledTasks(scheduledTaskPosition);
                 } else {
-                    newScheduledSnapshotId = scheduledSnapshotPosition + 1;
-                    _insertScheduledSnapshot(
-                        newScheduledSnapshotId,
-                        newScheduledSnapshot
-                    );
+                    newScheduledTaskId = scheduledTaskPosition + 1;
+                    _insertScheduledTask(newScheduledTaskId, newScheduledTask);
                     added = true;
                     break;
                 }
             }
         }
         if (!added) {
-            _insertScheduledSnapshot(0, newScheduledSnapshot);
+            _insertScheduledTask(0, newScheduledTask);
         }
     }
 
-    function _triggerScheduledSnapshots(
-        uint256 max
+    function _triggerScheduledTasks(
+        uint256 _max
     ) internal virtual returns (uint256) {
-        uint256 scheduledSnapshotsLength = _getScheduledSnapshotCount();
+        uint256 scheduledTasksLength = _getScheduledTaskCount();
 
-        if (scheduledSnapshotsLength == 0) {
+        if (scheduledTasksLength == 0) {
             return 0;
         }
 
-        uint256 _max = max;
+        uint256 max = _max;
 
-        uint256 newSnapShotID;
+        uint256 newTaskID;
 
-        if (max > scheduledSnapshotsLength || max == 0) {
-            _max = scheduledSnapshotsLength;
+        if (max > scheduledTasksLength || max == 0) {
+            max = scheduledTasksLength;
         }
 
-        for (uint256 j = 1; j <= _max; j++) {
-            uint256 pos = scheduledSnapshotsLength - j;
+        for (uint256 j = 1; j <= max; j++) {
+            uint256 pos = scheduledTasksLength - j;
 
-            IScheduledSnapshots.ScheduledSnapshot
-                memory currentScheduledSnapshot = _getScheduledSnapshotsByIndex(
-                    pos
-                );
+            ScheduledTask
+                memory currentScheduledTask = _getScheduledTasksByIndex(pos);
 
-            if (
-                currentScheduledSnapshot.scheduledTimestamp < _blockTimestamp()
-            ) {
-                if (pos == scheduledSnapshotsLength - 1) {
-                    newSnapShotID = _snapshot();
-                }
+            if (currentScheduledTask.scheduledTimestamp < _blockTimestamp()) {
+                _popScheduledTask();
 
-                _popScheduledSnapshot();
-
-                _onScheduledSnapshotTriggered(
-                    newSnapShotID,
-                    currentScheduledSnapshot.data
+                _onScheduledTaskTriggered(
+                    pos,
+                    scheduledTasksLength,
+                    currentScheduledTask.data
                 );
             } else {
                 break;
             }
         }
 
-        return newSnapShotID;
+        return newTaskID;
     }
 
-    function _getScheduledSnapshotCount()
-        internal
-        view
-        virtual
-        returns (uint256)
-    {
-        return _scheduledSnapshotsStorage().scheduledSnapshotCount;
+    function _getScheduledTaskCount() internal view virtual returns (uint256) {
+        return _scheduledTasksStorage().scheduledTaskCount;
     }
 
-    function _getScheduledSnapshotsByIndex(
-        uint256 index
-    )
-        internal
-        view
-        virtual
-        returns (IScheduledSnapshots.ScheduledSnapshot memory)
-    {
-        return _scheduledSnapshotsStorage().scheduledSnapshots[index];
+    function _getScheduledTasksByIndex(
+        uint256 _index
+    ) internal view virtual returns (ScheduledTask memory) {
+        return _scheduledTasksStorage().scheduledTasks[_index];
     }
 
-    function _slideScheduledSnapshots(uint256 pos) private {
-        _scheduledSnapshotsStorage()
-            .scheduledSnapshots[pos + 1]
-            .scheduledTimestamp = _scheduledSnapshotsStorage()
-            .scheduledSnapshots[pos]
+    function _slideScheduledTasks(uint256 _pos) private {
+        _scheduledTasksStorage()
+            .scheduledTasks[_pos + 1]
+            .scheduledTimestamp = _scheduledTasksStorage()
+            .scheduledTasks[_pos]
             .scheduledTimestamp;
-        _scheduledSnapshotsStorage()
-            .scheduledSnapshots[pos + 1]
-            .data = _scheduledSnapshotsStorage().scheduledSnapshots[pos].data;
+        _scheduledTasksStorage()
+            .scheduledTasks[_pos + 1]
+            .data = _scheduledTasksStorage().scheduledTasks[_pos].data;
     }
 
-    function _insertScheduledSnapshot(
-        uint256 pos,
-        IScheduledSnapshots.ScheduledSnapshot memory scheduledSnapshotToInsert
+    function _insertScheduledTask(
+        uint256 _pos,
+        ScheduledTask memory scheduledTaskToInsert
     ) private {
-        _scheduledSnapshotsStorage()
-            .scheduledSnapshots[pos]
-            .scheduledTimestamp = scheduledSnapshotToInsert.scheduledTimestamp;
-        _scheduledSnapshotsStorage()
-            .scheduledSnapshots[pos]
-            .data = scheduledSnapshotToInsert.data;
-        _scheduledSnapshotsStorage().scheduledSnapshotCount++;
+        _scheduledTasksStorage()
+            .scheduledTasks[_pos]
+            .scheduledTimestamp = scheduledTaskToInsert.scheduledTimestamp;
+        _scheduledTasksStorage()
+            .scheduledTasks[_pos]
+            .data = scheduledTaskToInsert.data;
+        _scheduledTasksStorage().scheduledTaskCount++;
     }
 
-    function _popScheduledSnapshot() private {
-        uint256 scheduledSnapshotsLength = _getScheduledSnapshotCount();
-        if (scheduledSnapshotsLength == 0) {
+    function _popScheduledTask() private {
+        uint256 scheduledTasksLength = _getScheduledTaskCount();
+        if (scheduledTasksLength == 0) {
             return;
         }
         delete (
-            _scheduledSnapshotsStorage().scheduledSnapshots[
-                scheduledSnapshotsLength - 1
-            ]
+            _scheduledTasksStorage().scheduledTasks[scheduledTasksLength - 1]
         );
-        _scheduledSnapshotsStorage().scheduledSnapshotCount--;
+        _scheduledTasksStorage().scheduledTaskCount--;
     }
 
-    function _getScheduledSnapshots(
+    function _getScheduledTasks(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        internal
-        view
-        virtual
-        returns (
-            IScheduledSnapshots.ScheduledSnapshot[] memory scheduledSnapshot_
-        )
-    {
+    ) internal view virtual returns (ScheduledTask[] memory scheduledTask_) {
         (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
             _pageIndex,
             _pageLength
         );
 
-        scheduledSnapshot_ = new IScheduledSnapshots.ScheduledSnapshot[](
-            LibCommon.getSize(start, end, _getScheduledSnapshotCount())
+        scheduledTask_ = new ScheduledTask[](
+            LibCommon.getSize(start, end, _getScheduledTaskCount())
         );
 
-        for (uint256 i = 0; i < scheduledSnapshot_.length; i++) {
-            scheduledSnapshot_[i] = _getScheduledSnapshotsByIndex(start + i);
+        for (uint256 i = 0; i < scheduledTask_.length; i++) {
+            scheduledTask_[i] = _getScheduledTasksByIndex(start + i);
         }
     }
 
-    function _onScheduledSnapshotTriggered(
-        uint256 snapShotID,
-        bytes memory data
+    function _onScheduledTaskTriggered(
+        uint256 _pos,
+        uint256 _scheduledTasksLength,
+        bytes memory _data
     ) internal virtual;
 
-    function _scheduledSnapshotsStorage()
+    function _scheduledTasksStorage()
         internal
         pure
         virtual
-        returns (ScheduledSnapshotsDataStorage storage scheduledSnapshots_)
-    {
-        bytes32 position = _SCHEDULED_SNAPSHOTS_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledSnapshots_.slot := position
-        }
-    }
+        returns (ScheduledTasksDataStorage storage scheduledTasks_);
 }
