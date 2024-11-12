@@ -320,6 +320,7 @@ function buildEmptyEnvironment(): Environment {
             bondUSA: {} as IStaticFunctionSelectors,
             snapshots: {} as IStaticFunctionSelectors,
             scheduledSnapshots: {} as IStaticFunctionSelectors,
+            scheduledBalanceAdjustments: {} as IStaticFunctionSelectors,
             cap: {} as IStaticFunctionSelectors,
             lock: {} as IStaticFunctionSelectors,
             transferAndLock: {} as IStaticFunctionSelectors,

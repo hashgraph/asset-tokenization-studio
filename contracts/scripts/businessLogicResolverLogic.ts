@@ -236,6 +236,7 @@ export interface DeployedBusinessLogics {
     bondUSA: IStaticFunctionSelectors
     snapshots: IStaticFunctionSelectors
     scheduledSnapshots: IStaticFunctionSelectors
+    scheduledBalanceAdjustments: IStaticFunctionSelectors
     cap: IStaticFunctionSelectors
     lock: IStaticFunctionSelectors
     transferAndLock: IStaticFunctionSelectors
