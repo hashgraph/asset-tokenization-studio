@@ -213,6 +213,8 @@ import { useParams } from "react-router-dom";
 import { useApplyRoles } from "../../../../hooks/queries/useApplyRoles";
 import { rolesList } from "./rolesList";
 import { SecurityRole } from "../../../../utils/SecurityRole";
+import { useSecurityStore } from "../../../../store/securityStore";
+import { useMemo } from "react";
 
 interface EditRolesFormValues {
   roles: string[];
@@ -235,6 +237,16 @@ export const HandleRoles = ({
   const { t } = useTranslation("security", {
     keyPrefix: "details.roleManagement.edit",
   });
+  const { details: securityDetails } = useSecurityStore();
+
+  const isBond = useMemo(() => {
+    if (securityDetails) {
+      return securityDetails.type === "BOND";
+    }
+
+    return false;
+  }, [securityDetails]);
+
   const { id = "" } = useParams();
 
   const { mutate: applyRoles, isLoading: isLoadingApply } = useApplyRoles();
@@ -282,7 +294,10 @@ export const HandleRoles = ({
         id="roles"
         options={rolesList.map((role) => ({
           value: role.label,
-          label: tRoles(role.label),
+          label:
+            isBond && role.label === "bondManager"
+              ? "Bond " + tRoles(role.label)
+              : tRoles(role.label),
         }))}
         rules={{ required }}
         variant="roles"
