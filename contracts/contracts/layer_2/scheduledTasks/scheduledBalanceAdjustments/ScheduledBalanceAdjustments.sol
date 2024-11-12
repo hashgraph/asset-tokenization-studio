@@ -305,7 +305,7 @@ contract ScheduledBalanceAdjustments is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](4);
+        staticFunctionSelectors_ = new bytes4[](5);
         staticFunctionSelectors_[selectorIndex++] = this
             .triggerPendingScheduledBalanceAdjustments
             .selector;

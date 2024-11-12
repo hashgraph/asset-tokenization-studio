@@ -274,8 +274,12 @@ contract EquityUSA is IEquityUSA, Equity, Security {
         staticFunctionSelectors_[selectorIndex++] = this
             .getVotingCount
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setBalanceAdjustment.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getBalanceAdjustment.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .setBalanceAdjustment
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getBalanceAdjustment
+            .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getBalanceAdjustmentCount
             .selector;
