@@ -209,55 +209,25 @@ import {
     type ResolverProxy,
     type Equity,
     type Pause,
+    type ScheduledBalanceAdjustments,
     type AccessControl,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+} from '../../../../../typechain-types'
+import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
 import {
     _CORPORATE_ACTION_ROLE,
     _PAUSER_ROLE,
-} from '../../../../scripts/constants'
+} from '../../../../../scripts/constants'
 import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
+} from '../../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
 
-const TIME = 10000
-let currentTimeInSeconds = 0
-let dividendsRecordDateInSeconds = 0
-let dividendsExecutionDateInSeconds = 0
-const dividendsAmountPerEquity = 1
+const TIME = 6000
 
-let votingRecordDateInSeconds = 0
-const countriesControlListType = true
-const listOfCountries = 'ES,FR,CH'
-const info = 'info'
-
-let balanceAdjustmentExecutionDateInSeconds = 0
-const balanceAdjustmentFactor = 356
-const balanceAdjustmentDecimals = 2
-
-const voteData = '0x'
-let votingData = {
-    recordDate: votingRecordDateInSeconds.toString(),
-    data: voteData,
-}
-let dividendData = {
-    recordDate: dividendsRecordDateInSeconds.toString(),
-    executionDate: dividendsExecutionDateInSeconds.toString(),
-    amount: dividendsAmountPerEquity,
-}
-let balanceAdjustmentData = {
-    executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
-    factor: balanceAdjustmentFactor,
-    decimals: balanceAdjustmentDecimals,
-}
-
-describe('Equity Tests', () => {
+describe('Scheduled BalanceAdjustments Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -268,39 +238,17 @@ describe('Equity Tests', () => {
     let account_C: string
 
     let equityFacet: Equity
+    let scheduledBalanceAdjustmentsFacet: ScheduledBalanceAdjustments
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
-    before(async () => {
+    beforeEach(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        currentTimeInSeconds = await time.latest()
-        dividendsRecordDateInSeconds = currentTimeInSeconds + TIME
-        dividendsExecutionDateInSeconds = currentTimeInSeconds + 10 * TIME
-        votingRecordDateInSeconds = currentTimeInSeconds + TIME
-        balanceAdjustmentExecutionDateInSeconds = currentTimeInSeconds + TIME
-
-        votingData = {
-            recordDate: votingRecordDateInSeconds.toString(),
-            data: voteData,
-        }
-        dividendData = {
-            recordDate: dividendsRecordDateInSeconds.toString(),
-            executionDate: dividendsExecutionDateInSeconds.toString(),
-            amount: dividendsAmountPerEquity,
-        }
-        balanceAdjustmentData = {
-            executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
-            factor: balanceAdjustmentFactor,
-            decimals: balanceAdjustmentDecimals,
-        }
-    })
-
-    beforeEach(async () => {
         await deployEnvironment()
 
         const rbacPause: Rbac = {
@@ -331,9 +279,9 @@ describe('Equity Tests', () => {
             100,
             RegulationType.REG_D,
             RegulationSubType.REG_D_506_B,
-            countriesControlListType,
-            listOfCountries,
-            info,
+            true,
+            'ES,FR,CH',
+            'nothing',
             init_rbacs
         )
 
@@ -344,264 +292,186 @@ describe('Equity Tests', () => {
 
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
 
+        scheduledBalanceAdjustmentsFacet = await ethers.getContractAt(
+            'ScheduledBalanceAdjustments',
+            diamond.address
+        )
+
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
     })
 
-    describe('Dividends', () => {
-        it('GIVEN an account without corporateActions role WHEN setDividends THEN transaction fails with AccountHasNoRole', async () => {
-            // Using account C (non role)
-            equityFacet = equityFacet.connect(signer_C)
+    it('GIVEN a paused Token WHEN triggerBalanceAdjustments THEN transaction fails with TokenIsPaused', async () => {
+        // Pausing the token
+        pauseFacet = pauseFacet.connect(signer_B)
+        await pauseFacet.pause()
 
-            // set dividend fails
-            await expect(
-                equityFacet.setDividends(dividendData)
-            ).to.be.rejectedWith('AccountHasNoRole')
-        })
+        // Using account C (with role)
+        scheduledBalanceAdjustmentsFacet =
+            scheduledBalanceAdjustmentsFacet.connect(signer_C)
 
-        it('GIVEN a paused Token WHEN setDividends THEN transaction fails with TokenIsPaused', async () => {
-            // Granting Role to account C and Pause
-            await grantRoleAndPauseToken(
-                accessControlFacet,
-                pauseFacet,
-                _CORPORATE_ACTION_ROLE,
-                signer_A,
-                signer_B,
-                account_C
+        // trigger scheduled BalanceAdjustments
+        await expect(
+            scheduledBalanceAdjustmentsFacet.triggerPendingScheduledBalanceAdjustments()
+        ).to.be.rejectedWith('TokenIsPaused')
+        await expect(
+            scheduledBalanceAdjustmentsFacet.triggerScheduledBalanceAdjustments(
+                1
             )
-
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
-
-            // set dividend fails
-            await expect(
-                equityFacet.setDividends(dividendData)
-            ).to.be.rejectedWith('TokenIsPaused')
-        })
-
-        it('GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails', async () => {
-            // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
-
-            // set dividend
-            const wrongDividendData_1 = {
-                recordDate: dividendsExecutionDateInSeconds.toString(),
-                executionDate: dividendsRecordDateInSeconds.toString(),
-                amount: dividendsAmountPerEquity,
-            }
-
-            await expect(
-                equityFacet.setDividends(wrongDividendData_1)
-            ).to.be.rejectedWith('WrongDates')
-
-            const wrongDividendData_2 = {
-                recordDate: (
-                    (await ethers.provider.getBlock('latest')).timestamp - 1
-                ).toString(),
-                executionDate: dividendsExecutionDateInSeconds.toString(),
-                amount: dividendsAmountPerEquity,
-            }
-
-            await expect(
-                equityFacet.setDividends(wrongDividendData_2)
-            ).to.be.rejectedWith('WrongTimestamp')
-        })
-
-        it('GIVEN an account with corporateActions role WHEN setDividends THEN transaction succeeds', async () => {
-            // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
-
-            // set dividend
-            await expect(equityFacet.setDividends(dividendData))
-                .to.emit(equityFacet, 'DividendSet')
-                .withArgs(
-                    '0x0000000000000000000000000000000000000000000000000000000000000001',
-                    1,
-                    account_C,
-                    dividendsRecordDateInSeconds,
-                    dividendsExecutionDateInSeconds,
-                    dividendsAmountPerEquity
-                )
-
-            // check list members
-            await expect(equityFacet.getDividends(1000)).to.be.rejectedWith(
-                'WrongIndexForAction'
-            )
-
-            const listCount = await equityFacet.getDividendsCount()
-            const dividend = await equityFacet.getDividends(1)
-            const dividendFor = await equityFacet.getDividendsFor(1, account_A)
-
-            expect(listCount).to.equal(1)
-            expect(dividend.snapshotId).to.equal(0)
-            expect(dividend.dividend.recordDate).to.equal(
-                dividendsRecordDateInSeconds
-            )
-            expect(dividend.dividend.executionDate).to.equal(
-                dividendsExecutionDateInSeconds
-            )
-            expect(dividend.dividend.amount).to.equal(dividendsAmountPerEquity)
-            expect(dividendFor.recordDate).to.equal(
-                dividendsRecordDateInSeconds
-            )
-            expect(dividendFor.executionDate).to.equal(
-                dividendsExecutionDateInSeconds
-            )
-            expect(dividendFor.amount).to.equal(dividendsAmountPerEquity)
-            expect(dividendFor.tokenBalance).to.equal(0)
-            expect(dividendFor.recordDateReached).to.equal(false)
-        })
+        ).to.be.rejectedWith('TokenIsPaused')
     })
 
-    describe('Voting rights', () => {
-        it('GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole', async () => {
-            // Using account C (non role)
-            equityFacet = equityFacet.connect(signer_C)
+    it('GIVEN a token WHEN triggerBalanceAdjustments THEN transaction succeeds', async () => {
+        // Granting Role to account C
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
+        // Using account C (with role)
+        equityFacet = equityFacet.connect(signer_C)
 
-            // set dividend fails
-            await expect(equityFacet.setVoting(votingData)).to.be.rejectedWith(
-                'AccountHasNoRole'
-            )
-        })
+        // set balanceAdjustment
+        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
+            .timestamp
+        const balanceAdjustmentExecutionDateInSeconds_1 =
+            currentTimeInSeconds + TIME / 1000
+        const balanceAdjustmentExecutionDateInSeconds_2 =
+            currentTimeInSeconds + (2 * TIME) / 1000
+        const balanceAdjustmentExecutionDateInSeconds_3 =
+            currentTimeInSeconds + (3 * TIME) / 1000
 
-        it('GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused', async () => {
-            // Granting Role to account C and Pause
-            await grantRoleAndPauseToken(
-                accessControlFacet,
-                pauseFacet,
-                _CORPORATE_ACTION_ROLE,
-                signer_A,
-                signer_B,
-                account_C
-            )
+        const balanceAdjustmentsFactor = 1
+        const balanceAdjustmentsDecimals = 2
 
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
+        const balanceAdjustmentData_1 = {
+            executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
+            factor: balanceAdjustmentsFactor,
+            decimals: balanceAdjustmentsDecimals,
+        }
+        const balanceAdjustmentData_2 = {
+            executionDate: balanceAdjustmentExecutionDateInSeconds_2.toString(),
+            factor: balanceAdjustmentsFactor,
+            decimals: balanceAdjustmentsDecimals,
+        }
+        const balanceAdjustmentData_3 = {
+            executionDate: balanceAdjustmentExecutionDateInSeconds_3.toString(),
+            factor: balanceAdjustmentsFactor,
+            decimals: balanceAdjustmentsDecimals,
+        }
+        await equityFacet.setBalanceAdjustment(balanceAdjustmentData_2)
+        await equityFacet.setBalanceAdjustment(balanceAdjustmentData_3)
+        await equityFacet.setBalanceAdjustment(balanceAdjustmentData_1)
 
-            // set dividend fails
-            await expect(equityFacet.setVoting(votingData)).to.be.rejectedWith(
-                'TokenIsPaused'
-            )
-        })
+        const balanceAdjustment_2_Id =
+            '0x0000000000000000000000000000000000000000000000000000000000000001'
+        const balanceAdjustment_3_Id =
+            '0x0000000000000000000000000000000000000000000000000000000000000002'
+        const balanceAdjustment_1_Id =
+            '0x0000000000000000000000000000000000000000000000000000000000000003'
 
-        it('GIVEN an account with corporateActions role WHEN setVoting THEN transaction succeeds', async () => {
-            // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
+        // check schedled BalanceAdjustments
+        scheduledBalanceAdjustmentsFacet =
+            scheduledBalanceAdjustmentsFacet.connect(signer_A)
 
-            // set dividend
-            await expect(equityFacet.setVoting(votingData))
-                .to.emit(equityFacet, 'VotingSet')
-                .withArgs(
-                    '0x0000000000000000000000000000000000000000000000000000000000000001',
-                    1,
-                    account_C,
-                    votingRecordDateInSeconds,
-                    voteData
-                )
-
-            // check list members
-            // await expect(equityFacet.getVoting(1000)).to.be.rejectedWith(
-            //     'WrongIndexForAction'
-            // )
-
-            const listCount = await equityFacet.getVotingCount()
-            const voting = await equityFacet.getVoting(1)
-            const votingFor = await equityFacet.getVotingFor(1, account_A)
-
-            expect(listCount).to.equal(1)
-            expect(voting.snapshotId).to.equal(0)
-            expect(voting.voting.recordDate).to.equal(votingRecordDateInSeconds)
-            expect(voting.voting.data).to.equal(voteData)
-            expect(votingFor.recordDate).to.equal(dividendsRecordDateInSeconds)
-            expect(votingFor.data).to.equal(voteData)
-            expect(votingFor.tokenBalance).to.equal(0)
-            expect(votingFor.recordDateReached).to.equal(false)
-        })
-    })
-
-    describe('Balance adjustments', () => {
-        it('GIVEN an account without corporateActions role WHEN setBalanceAdjustment THEN transaction fails with AccountHasNoRole', async () => {
-            // Using account C (non role)
-            equityFacet = equityFacet.connect(signer_C)
-
-            // set dividend fails
-            await expect(
-                equityFacet.setBalanceAdjustment(balanceAdjustmentData)
-            ).to.be.rejectedWith('AccountHasNoRole')
-        })
-
-        it('GIVEN a paused Token WHEN setBalanceAdjustment THEN transaction fails with TokenIsPaused', async () => {
-            // Granting Role to account C and Pause
-            await grantRoleAndPauseToken(
-                accessControlFacet,
-                pauseFacet,
-                _CORPORATE_ACTION_ROLE,
-                signer_A,
-                signer_B,
-                account_C
+        let scheduledBalanceAdjustmentCount =
+            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
+        let scheduledBalanceAdjustments =
+            await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
+                0,
+                100
             )
 
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
+        expect(scheduledBalanceAdjustmentCount).to.equal(3)
+        expect(scheduledBalanceAdjustments.length).to.equal(
+            scheduledBalanceAdjustmentCount
+        )
+        expect(
+            scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3)
+        expect(scheduledBalanceAdjustments[0].data).to.equal(
+            balanceAdjustment_3_Id
+        )
+        expect(
+            scheduledBalanceAdjustments[1].scheduledTimestamp.toNumber()
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_2)
+        expect(scheduledBalanceAdjustments[1].data).to.equal(
+            balanceAdjustment_2_Id
+        )
+        expect(
+            scheduledBalanceAdjustments[2].scheduledTimestamp.toNumber()
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_1)
+        expect(scheduledBalanceAdjustments[2].data).to.equal(
+            balanceAdjustment_1_Id
+        )
 
-            // set dividend fails
-            await expect(
-                equityFacet.setBalanceAdjustment(balanceAdjustmentData)
-            ).to.be.rejectedWith('TokenIsPaused')
-        })
+        // AFTER FIRST SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
+        await new Promise((f) => setTimeout(f, TIME + 1000))
+        await scheduledBalanceAdjustmentsFacet.triggerPendingScheduledBalanceAdjustments()
 
-        it('GIVEN an account with corporateActions role WHEN setBalanceAdjustment THEN transaction succeeds', async () => {
-            // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
+        scheduledBalanceAdjustmentCount =
+            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
+        scheduledBalanceAdjustments =
+            await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
+                0,
+                100
             )
-            // Using account C (with role)
-            equityFacet = equityFacet.connect(signer_C)
 
-            // set dividend
-            await expect(
-                equityFacet.setBalanceAdjustment(balanceAdjustmentData)
-            )
-                .to.emit(equityFacet, 'BalanceAdjustmentSet')
-                .withArgs(
-                    '0x0000000000000000000000000000000000000000000000000000000000000001',
-                    1,
-                    account_C,
-                    balanceAdjustmentExecutionDateInSeconds,
-                    balanceAdjustmentFactor,
-                    balanceAdjustmentDecimals
-                )
+        expect(scheduledBalanceAdjustmentCount).to.equal(2)
+        expect(scheduledBalanceAdjustments.length).to.equal(
+            scheduledBalanceAdjustmentCount
+        )
+        expect(
+            scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3)
+        expect(scheduledBalanceAdjustments[0].data).to.equal(
+            balanceAdjustment_3_Id
+        )
+        expect(
+            scheduledBalanceAdjustments[1].scheduledTimestamp.toNumber()
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_2)
+        expect(scheduledBalanceAdjustments[1].data).to.equal(
+            balanceAdjustment_2_Id
+        )
 
-            const listCount = await equityFacet.getBalanceAdjustmentCount()
-            const balanceAdjustment = await equityFacet.getBalanceAdjustment(1)
+        // AFTER SECOND SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
+        await new Promise((f) => setTimeout(f, TIME + 1000))
+        await scheduledBalanceAdjustmentsFacet.triggerScheduledBalanceAdjustments(
+            100
+        )
 
-            expect(listCount).to.equal(1)
-            expect(balanceAdjustment.executionDate).to.equal(
-                balanceAdjustmentExecutionDateInSeconds
+        scheduledBalanceAdjustmentCount =
+            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
+        scheduledBalanceAdjustments =
+            await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
+                0,
+                100
             )
-            expect(balanceAdjustment.factor).to.equal(balanceAdjustmentFactor)
-            expect(balanceAdjustment.decimals).to.equal(
-                balanceAdjustmentDecimals
+
+        expect(scheduledBalanceAdjustmentCount).to.equal(1)
+        expect(scheduledBalanceAdjustments.length).to.equal(
+            scheduledBalanceAdjustmentCount
+        )
+        expect(
+            scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3)
+        expect(scheduledBalanceAdjustments[0].data).to.equal(
+            balanceAdjustment_3_Id
+        )
+
+        // AFTER SECOND SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
+        await new Promise((f) => setTimeout(f, TIME + 1000))
+        await scheduledBalanceAdjustmentsFacet.triggerScheduledBalanceAdjustments(
+            0
+        )
+
+        scheduledBalanceAdjustmentCount =
+            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
+        scheduledBalanceAdjustments =
+            await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
+                0,
+                100
             )
-        })
+
+        expect(scheduledBalanceAdjustmentCount).to.equal(0)
+        expect(scheduledBalanceAdjustments.length).to.equal(
+            scheduledBalanceAdjustmentCount
+        )
     })
 })

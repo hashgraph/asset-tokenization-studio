@@ -211,18 +211,18 @@ import {
     type Pause,
     type ScheduledSnapshots,
     type AccessControl,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+} from '../../../../../typechain-types'
+import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
 import {
     _CORPORATE_ACTION_ROLE,
     _PAUSER_ROLE,
-} from '../../../../scripts/constants'
+} from '../../../../../scripts/constants'
 import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
+} from '../../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 
 const TIME = 6000
