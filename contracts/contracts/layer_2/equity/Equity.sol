@@ -209,7 +209,8 @@ pragma solidity 0.8.18;
 import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from '../constants/values.sol';
 import {
     EnumerableSet
@@ -393,5 +394,58 @@ abstract contract Equity is
         returns (uint256 votingCount_)
     {
         return _getVotingCount();
+    }
+
+    function setBalanceAdjustment(
+        BalanceAdjustment calldata _newBalanceAdjustment
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        checkTimestamp(_newBalanceAdjustment.executionDate)
+        returns (bool success_, uint256 balanceAdjustmentID_)
+    {
+        bytes32 corporateActionID;
+        (
+            success_,
+            corporateActionID,
+            balanceAdjustmentID_
+        ) = _setBalanceAdjustment(_newBalanceAdjustment);
+        emit BalanceAdjustmentSet(
+            corporateActionID,
+            balanceAdjustmentID_,
+            _msgSender(),
+            _newBalanceAdjustment.executionDate,
+            _newBalanceAdjustment.factor,
+            _newBalanceAdjustment.decimals
+        );
+    }
+
+    function getBalanceAdjustment(
+        uint256 _balanceAdjustmentID
+    )
+        external
+        view
+        virtual
+        override
+        checkIndexForCorporateActionByType(
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            _balanceAdjustmentID - 1
+        )
+        returns (BalanceAdjustment memory balanceAdjustment_)
+    {
+        return _getBalanceAdjusment(_balanceAdjustmentID);
+    }
+
+    function getBalanceAdjustmentCount()
+        external
+        view
+        virtual
+        override
+        returns (uint256 balanceAdjustmentCount_)
+    {
+        return _getBalanceAdjustmentsCount();
     }
 }

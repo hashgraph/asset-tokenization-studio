@@ -213,7 +213,8 @@ import {
 } from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from '../constants/values.sol';
 import {
     EnumerableSet
@@ -391,6 +392,53 @@ abstract contract EquityStorageWrapper is
     {
         return
             _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+    }
+
+    function _setBalanceAdjustment(
+        IEquity.BalanceAdjustment calldata _newBalanceAdjustment
+    )
+        internal
+        virtual
+        returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
+    {
+        (success_, corporateActionId_, voteID_) = _addCorporateAction(
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            abi.encode(_newBalanceAdjustment)
+        );
+    }
+
+    function _getBalanceAdjusment(
+        uint256 _balanceAdjustmentID
+    )
+        internal
+        view
+        virtual
+        returns (IEquity.BalanceAdjustment memory balanceAdjustment_)
+    {
+        bytes32 actionId = _corporateActionsStorage()
+            .actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE]
+            .at(_balanceAdjustmentID - 1);
+
+        (, bytes memory data) = _getCorporateAction(actionId);
+
+        if (data.length > 0) {
+            (balanceAdjustment_) = abi.decode(
+                data,
+                (IEquity.BalanceAdjustment)
+            );
+        }
+    }
+
+    function _getBalanceAdjustmentsCount()
+        internal
+        view
+        virtual
+        returns (uint256 balanceAdjustmentCount_)
+    {
+        return
+            _getCorporateActionCountByType(
+                BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
+            );
     }
 
     function _equityStorage()

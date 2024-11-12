@@ -212,6 +212,7 @@ import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     COUPON_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
     SNAPSHOT_RESULT_ID
 } from '../constants/values.sol';
 import {
@@ -267,6 +268,8 @@ abstract contract CorporateActionsStorageWrapperSecurity is
             _initVotingRights(success_, corporateActionId_, _data);
         } else if (_actionType == COUPON_CORPORATE_ACTION_TYPE) {
             _initCoupon(success_, corporateActionId_, _data);
+        } else if (_actionType == BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE) {
+            _initBalanceAdjustment(success_, corporateActionId_, _data);
         }
     }
 
@@ -313,6 +316,26 @@ abstract contract CorporateActionsStorageWrapperSecurity is
         IBond.Coupon memory newCoupon = abi.decode(_data, (IBond.Coupon));
 
         _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
+    }
+
+    function _initBalanceAdjustment(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        if (!_success) {
+            revert BalanceAdjustmentCreationFailed();
+        }
+
+        IEquity.BalanceAdjustment memory newBalanceAdjustment = abi.decode(
+            _data,
+            (IEquity.BalanceAdjustment)
+        );
+
+        _addScheduledBalanceAdjustment(
+            newBalanceAdjustment.executionDate,
+            abi.encode(_actionId)
+        );
     }
 
     function _onScheduledSnapshotTriggered(
