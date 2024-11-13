@@ -219,8 +219,9 @@ import {
 } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
 import { rolesList } from "./rolesList";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SecurityRole } from "../../../../utils/SecurityRole";
+import { useSecurityStore } from "../../../../store/securityStore";
 
 interface SearchByRoleFieldValue {
   role: { label: string; value: SecurityRole };
@@ -241,6 +242,16 @@ export const SearchByRole = () => {
     keyPrefix: "details.roleManagement.search",
   });
   const { id = "" } = useParams();
+  const { details: securityDetails } = useSecurityStore();
+
+  const isBond = useMemo(() => {
+    if (securityDetails) {
+      return securityDetails.type === "BOND";
+    }
+
+    return false;
+  }, [securityDetails]);
+
   const [roleToSearch, setRoleToSearch] = useState<SecurityRole>();
   const [isRoleMemberCountLoading, setIsRoleMemberCountLoading] =
     useState<boolean>(false);
@@ -329,7 +340,10 @@ export const SearchByRole = () => {
                   id="role"
                   control={control}
                   options={rolesList.map((role) => ({
-                    label: tRoles(role.label),
+                    label:
+                      isBond && role.label === "bondManager"
+                        ? "Bond " + tRoles(role.label)
+                        : tRoles(role.label),
                     value: role.value,
                   }))}
                   size="sm"
