@@ -205,53 +205,181 @@
 
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    _PARTITION_AMOUNT_SLOT_POS,
+    _PARTITION_LABAF_SLOT_POS
+} from '../../layer_1/constants/storagePositions.sol';
 
-// solhint-disable max-line-length
+/**
+    * total = account total balance
+    * t1 = account's partition 1 balance
+    * t2 = account's partition 2 balance
+    * x = factor for total balance
+    * y = factor for partition 2 balance
+    * 
+    * OPTION : First adjusting partition : (y * t2) // adding partition increment diff to total :  total = total + (t2 * (y - 1)) // Finally adjusting total : (x * total)
+    * 
+    * total = t1 + t2;
+    * total = t1 + t2 + (t2 * (y - 1)) = t1 + t2 + y * t2 - t2
+      total = t1 + y * t2;
+      total = x * total = x * (t1 + y * t2)
+    */
 
-// keccak256('security.token.standard.accesscontrol.storage');
-bytes32 constant _ACCESS_CONTROL_STORAGE_POSITION = 0x4765bbd856d800638d39a79262ebc6fdfb5833d0e59f32c5d482fe4c4a3554c1;
+library AdjustBalanceLib {
+    function _adjustTotalBalanceAndPartitionBalanceFor(
+        bytes32 _partition,
+        address _account,
+        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage storage _basicStorage
+    ) internal {
+        uint256 ABAF = _basicStorage.ABAF;
 
-// keccak256('security.token.standard.controllist.storage');
-bytes32 constant _CONTROL_LIST_STORAGE_POSITION = 0xd2a97f6f015eb0ef6e78a5d99ed4baddb1001474ec77117d69e09432533577d3;
+        _adjustPartitionBalanceFor(ABAF, _partition, _account, _basicStorage);
+        _adjustTotalBalanceFor(ABAF, _account, _basicStorage);
+    }
 
-// keccak256('security.token.standard.pause.storage');
-bytes32 constant _PAUSE_STORAGE_POSITION = 0x5a5b295532a8b6e97bc9d45d68fc49b85a099545bac8f91f77706d392a1cea71;
+    function _adjustTotalAndMaxSupplyForPartition(
+        bytes32 _partition,
+        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
+            storage _basicStorage,
+        CapStorageWrapper.CapDataStorage storage _capStorage
+    ) internal {
+        uint256 ABAF = _basicStorage.ABAF;
+        uint256 LABAF = _basicStorage.LABAF_partition[_partition];
 
-// keccak256('security.token.standard.cap.storage');
-bytes32 constant _CAP_STORAGE_POSITION = 0x591561cf73f8f1ca1532449c7ce18338a75e9e17f2894af1e41b36e3b013f951;
+        if (ABAF == LABAF) return;
 
-// keccak256('security.token.standard.corporateactions.storage');
-bytes32 constant _CORPORATE_ACTION_STORAGE_POSITION = 0x9db84024bbea48a7580380e27785cf3e0d08fada233c84760c8a5aff47f86e12;
+        uint256 totalSupplySlot = _getSlotForBytes32MappingKey(
+            _basicStorage.totalSupplyByPartition,
+            _partition
+        );
+        uint256 maxSupplySlot = _getSlotForBytes32MappingKey(
+            _capStorage.maxSupplyByPartition,
+            _partition
+        );
 
-// keccak256('security.token.standard.erc1595.storage');
-bytes32 constant _ERC1594_STORAGE_POSITION = 0x919465d7e15b775c94035d2b592c0808b79e37ecb2e0ceb66bd8c481f998ee9f;
+        _updateBalance(ABAF, LABAF, totalSupplySlot);
 
-// keccak256('security.token.standard.erc1643.storage');
-bytes32 constant _ERC1643_STORAGE_POSITION = 0xf570af0a020d64f3ea72a78716790700daaeb1b83730feca87e92c517de986ef;
+        _updateBalance(ABAF, LABAF, maxSupplySlot);
 
-// keccak256('security.token.standard.erc1410.operator.storage');
-bytes32 constant _ERC1410_OPERATOR_STORAGE_POSITION = 0x319c8795293307b302697a4daf045524536834965f40eb730e6ca085ae32ae00;
+        _updateLABAF(ABAF, _basicStorage.LABAF_partition[_partition]);
+    }
 
-// keccak256('security.token.standard.erc1410.basic.storage');
-bytes32 constant _ERC1410_BASIC_STORAGE_POSITION = 0x67661db80d37d3b9810c430f78991b4b5377bdebd3b71b39fbd3427092c1822a;
+    function _adjustTotalBalanceFor(
+        uint256 _ABAF,
+        address _account,
+        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage storage _basicStorage
+    ) private {
+        uint256 LABAF = _basicStorage.LABAF[_account];
+        if (_ABAF == LABAF) return;
 
-// keccak256('security.token.standard.erc1644.storage');
-bytes32 constant _ERC1644_STORAGE_POSITION = 0x78da7d6f03fa6ff51457b34dfcf6bc00f21877d08759f4b646f714d8f8c539f7;
+        uint256 balanceSlot = _getSlotForAddressMappingKey(
+            _basicStorage.balances,
+            _account
+        );
+        uint256 LABAFSlot = _getSlotForAddressMappingKey(
+            _basicStorage.LABAF,
+            _account
+        );
 
-// keccak256('security.token.standard.erc20.storage');
-bytes32 constant _ERC20_STORAGE_POSITION = 0xd5228ac65cba3eaaef0669de6709c44cfdf33c0f1cce2989d4a133e0214cce57;
+        _updateBalance(_ABAF, LABAF, balanceSlot);
+        _updateLABAF(_ABAF, LABAFSlot);
+    }
 
-// keccak256('security.token.standard.resolverProxy.storage');
-bytes32 constant _RESOLVER_PROXY_STORAGE_POSITION = 0x4833864335c8f29dd85e3f7a36869cb90d5dc7167ae5000f7e1ce4d7c15d14ad;
+    function _adjustPartitionBalanceFor(
+        uint256 _ABAF,
+        bytes32 _partition,
+        address _account,
+        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage storage _basicStorage
+    ) private {
+        uint256 partitionsIndex = _basicStorage.partitionToIndex[_account][
+            _partition
+        ];
 
-// keccak256('security.token.standard.snapshot.storage');
-bytes32 constant _SNAPSHOT_STORAGE_POSITION = 0x450898ebb84982a28d8787f0138cfce477c6d811ae3b1db5fdb7ed17e8bda898;
+        if (partitionsIndex == 0) return;
 
-// keccak256('security.token.standard.lock.storage');
-bytes32 constant _LOCK_STORAGE_POSITION = 0xd15962e60f276260fba4c9b4de7fd05f475afe18b48c917ec6f6fcc71c00bf71;
+        ERC1410BasicStorageWrapperRead.Partition
+            storage partition = _basicStorage.partitions[_account][
+                partitionsIndex - 1
+            ];
+        uint256 LABAF = partition.LABAF;
 
-// ERC1410BasicStorageWrapperRead.Partition.amount.slot
-uint256 constant _PARTITION_AMOUNT_SLOT_POS = 0;
+        if (_ABAF == LABAF) return;
 
-// ERC1410BasicStorageWrapperRead.Partition.LABAF.slot
-uint256 constant _PARTITION_LABAF_SLOT_POS = 2;
+        uint256 partitionBaseSlot;
+        assembly {
+            partitionBaseSlot := partition.slot
+        }
+
+        _updateBalance(
+            _ABAF,
+            LABAF,
+            partitionBaseSlot + _PARTITION_AMOUNT_SLOT_POS
+        );
+        _updateLABAF(_ABAF, partitionBaseSlot + _PARTITION_LABAF_SLOT_POS);
+    }
+
+    function _updateBalance(
+        uint256 _ABAF,
+        uint256 _LABAF,
+        uint256 _balanceSlotPos
+    ) private {
+        uint256 factor = _calculateFactor(_ABAF, _LABAF);
+        uint256 amount;
+
+        assembly {
+            amount := sload(_balanceSlotPos)
+        }
+
+        if (amount == 0) return;
+
+        amount *= factor;
+
+        assembly {
+            sstore(_balanceSlotPos, amount)
+        }
+    }
+
+    function _updateLABAF(uint256 _ABAF, uint256 _LABAFSlotPos) private {
+        assembly {
+            sstore(_LABAFSlotPos, _ABAF)
+        }
+    }
+
+    function _calculateFactor(
+        uint256 _ABAF,
+        uint256 _LABAF
+    ) private pure returns (uint256 factor_) {
+        if (_LABAF == 0) factor_ = _ABAF;
+        else factor_ = _ABAF / _LABAF;
+    }
+
+    function _getSlotForBytes32MappingKey(
+        mapping(bytes32 => uint256) storage _mapping,
+        bytes32 _key
+    ) private pure returns (uint256) {
+        uint256 MappingSlot;
+
+        assembly {
+            MappingSlot := _mapping.slot
+        }
+
+        return uint256(keccak256(abi.encode(_key, MappingSlot)));
+    }
+
+    function _getSlotForAddressMappingKey(
+        mapping(address => uint256) storage _mapping,
+        address _key
+    ) private pure returns (uint256) {
+        uint256 MappingSlot;
+
+        assembly {
+            MappingSlot := _mapping.slot
+        }
+
+        return uint256(keccak256(abi.encode(_key, MappingSlot)));
+    }
+}

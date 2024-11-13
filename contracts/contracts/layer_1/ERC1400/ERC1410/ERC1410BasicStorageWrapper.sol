@@ -236,7 +236,9 @@ abstract contract ERC1410BasicStorageWrapper is
         _beforeTokenTransfer(_partition, _from, _to, _value);
 
         if (!_validPartitionForReceiver(_partition, _to)) {
-            erc1410Storage.partitions[_to].push(Partition(0, _partition));
+            erc1410Storage.partitions[_to].push(
+                Partition(0, _partition, erc1410Storage.ABAF)
+            );
             erc1410Storage.partitionToIndex[_to][
                 _partition
             ] = _getERC1410BasicStorage().partitions[_to].length;

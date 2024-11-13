@@ -399,9 +399,17 @@ abstract contract EquityStorageWrapper is
     )
         internal
         virtual
-        returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 balanceAdjustmentID_
+        )
     {
-        (success_, corporateActionId_, voteID_) = _addCorporateAction(
+        (
+            success_,
+            corporateActionId_,
+            balanceAdjustmentID_
+        ) = _addCorporateAction(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             abi.encode(_newBalanceAdjustment)
         );

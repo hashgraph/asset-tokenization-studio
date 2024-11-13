@@ -265,7 +265,7 @@ interface IEquity {
     struct BalanceAdjustment {
         uint256 executionDate;
         uint256 factor;
-        uint256 decimals;
+        uint8 decimals;
     }
 
     function getEquityDetails()

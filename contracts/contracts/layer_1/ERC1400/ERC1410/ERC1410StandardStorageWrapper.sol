@@ -220,9 +220,11 @@ import {
     _SUCCESS
 } from '../../constants/values.sol';
 import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
+import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
 
 abstract contract ERC1410StandardStorageWrapper is
-    ERC1410OperatorStorageWrapper
+    ERC1410OperatorStorageWrapper,
+    CapStorageWrapper
 {
     function _issueByPartition(
         bytes32 _partition,
@@ -241,7 +243,7 @@ abstract contract ERC1410StandardStorageWrapper is
         ];
         if (index == 0) {
             erc1410Storage.partitions[_tokenHolder].push(
-                Partition(_value, _partition)
+                Partition(_value, _partition, erc1410Storage.ABAF)
             );
             erc1410Storage.partitionToIndex[_tokenHolder][
                 _partition

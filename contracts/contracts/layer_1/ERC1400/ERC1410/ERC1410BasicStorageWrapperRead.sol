@@ -219,6 +219,8 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
     struct Partition {
         uint256 amount;
         bytes32 partition;
+        // Last Aggregated Balance Adjustment per account for partition
+        uint256 LABAF;
     }
 
     struct ERC1410BasicStorage {
@@ -233,6 +235,12 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
         mapping(address => mapping(bytes32 => uint256)) partitionToIndex;
         bool multiPartition;
         bool initialized;
+        // Aggregated Balance Adjustment
+        uint256 ABAF;
+        // Last Aggregated Balance Adjustment per account
+        mapping(address => uint256) LABAF;
+        // Last Aggregated Balance Adjustment per partition
+        mapping(bytes32 => uint256) LABAF_partition;
     }
 
     modifier onlyWithoutMultiPartition() {
