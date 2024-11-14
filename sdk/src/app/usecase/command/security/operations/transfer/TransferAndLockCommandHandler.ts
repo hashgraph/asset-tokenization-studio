@@ -338,8 +338,32 @@ export class TransferAndLockCommandHandler
       BigDecimal.fromString(expirationDate),
       securityId,
     );
+
+    if (!res.id)
+      throw new Error('Transfer and Lock Command Handler response id empty');
+
+    let lockId: string;
+
+    if (res.response && res.response.lockId) {
+      lockId = res.response.lockId;
+    } else {
+      const numberOfResultsItems = 2;
+
+      // * Recover the new contract ID from Event data from the Mirror Node
+      const results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        numberOfResultsItems,
+      );
+
+      if (!results || results.length !== numberOfResultsItems) {
+        throw new Error('Invalid data structure');
+      }
+
+      lockId = results[1];
+    }
+
     return Promise.resolve(
-      new TransferAndLockCommandResponse(res.error === undefined, res.id!),
+      new TransferAndLockCommandResponse(parseInt(lockId, 16), res.id!),
     );
   }
 }

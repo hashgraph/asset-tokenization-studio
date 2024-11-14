@@ -1,21 +1,57 @@
 import { HardhatUserConfig } from 'hardhat/config'
 import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-contract-sizer'
-import '@hashgraph/sdk'
-//import '@hashgraph/hardhat-hethers' // remove comment only when working with Hedera DLT
-//import './scripts/hardhatTasks' // remove comment only when deploying in HEdera DLT after compiling
-import * as dotenv from 'dotenv'
 import 'solidity-coverage'
+import '@hashgraph/sdk'
+import { getEnvVar } from './scripts/utils'
+// ! Uncomment the following lines to be able to use tasks AFTER compiling the project
+// import './tasks/utils'
+// import './tasks/deploy'
+// import './tasks/update'
 
-dotenv.config()
+if (getEnvVar({ name: 'NETWORK', defaultValue: 'hardhat' }) !== 'hardhat') {
+    require('@hashgraph/hardhat-hethers')
+}
 
-const config: HardhatUserConfig = {
+const HEDERA_ACCOUNTS = [
+    {
+        account: getEnvVar({ name: 'ACCOUNT_0', defaultValue: '0.0.0' }),
+        privateKey: getEnvVar({
+            name: 'PRIVATE_KEY_0',
+            defaultValue: '0x0000',
+        }).replace(/^0x/, ''),
+    },
+    {
+        account: getEnvVar({ name: 'ACCOUNT_1', defaultValue: '0.0.0' }),
+        privateKey: getEnvVar({
+            name: 'PRIVATE_KEY_1',
+            defaultValue: '0x0000',
+        }).replace(/^0x/, ''),
+    },
+]
+
+// Needed to be able to use the HederaConfig interface
+interface ExtendedHardhatUserConfig extends Omit<HardhatUserConfig, 'hedera'> {
+    hedera?: {
+        gasLimit: number
+        networks: {
+            [key: string]: {
+                accounts: {
+                    account: string
+                    privateKey: string
+                }[]
+            }
+        }
+    }
+}
+
+let config: ExtendedHardhatUserConfig = {
     solidity: {
         version: '0.8.18',
         settings: {
             optimizer: {
                 enabled: true,
-                runs: 1000,
+                runs: 200,
             },
         },
     },
@@ -25,92 +61,28 @@ const config: HardhatUserConfig = {
         runOnCompile: true,
         strict: true,
     },
-    //defaultNetwork: 'testnet', // remove comment only when working with Hedera DLT
-    // remove comment only when working with Hedera DLT
-    /*hedera: {
-        gasLimit: 300000,
-        networks: {
-            testnet: {
-                accounts: [
-                    {
-                        account:
-                            process.env['TESTNET_HEDERA_OPERATOR_ACCOUNT'] ??
-                            '',
-                        privateKey:
-                            process.env['TESTNET_HEDERA_OPERATOR_PRIVATEKEY'] ??
-                            '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_1'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_1'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_2'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_2'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_3'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_3'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_4'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_4'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_5'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_5'
-                            ] ?? '',
-                    },
-                    {
-                        account:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_ACCOUNT_ECDSA_6'
-                            ] ?? '',
-                        privateKey:
-                            process.env[
-                                'TESTNET_HEDERA_OPERATOR_PRIVATEKEY_ECDSA_6'
-                            ] ?? '',
-                    },
-                ],
-            },
-        },
-    },*/
     typechain: {
         outDir: './typechain-types',
+        target: 'ethers-v5',
     },
     mocha: {
-        // Extend the timeout to 60 seconds (adjust as needed)
         timeout: 3000000,
     },
+}
+// If we are not using the hardhat network, we need to add the Hedera accounts
+if (getEnvVar({ name: 'NETWORK', defaultValue: 'hardhat' }) !== 'hardhat') {
+    config = {
+        ...config,
+        defaultNetwork: 'testnet',
+        hedera: {
+            gasLimit: 300000,
+            networks: {
+                testnet: {
+                    accounts: HEDERA_ACCOUNTS,
+                },
+            },
+        },
+    }
 }
 
 export default config

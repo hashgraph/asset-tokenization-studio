@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-contracts",
-  "version": "1.5.0",
+  "version": "1.6.1",
   "main": "./build/typechain-types/index.js",
   "module": "./build/typechain-types/index.js",
   "files": [
@@ -17,6 +17,7 @@
     }
   },
   "scripts": {
+    "typechain": "npx hardhat typechain",
     "compile": "npx hardhat compile",
     "compile:force": "npx hardhat compile --force && npm run build",
     "test-coverage": "npx hardhat coverage --testfiles 'test/unitTests/**/*.ts'",
@@ -45,6 +46,9 @@
     "test:diamondCutManager": "npx hardhat test test/unitTests/resolver/diamondCutManager.test.ts",
     "size": "npx hardhat size-contracts",
     "build": "rimraf build && npx tsc -p tsconfig.json",
+    "keccak256": "npx hardhat keccak256",
+    "keccak": "npm run keccak256",
+    "hash": "npm run keccak256",
     "lint:sol": "solhint 'contracts/**/*.sol'",
     "lint:ts": "npx eslint . --ext .ts",
     "lint": "npm run lint:sol && npm run lint:ts",
@@ -64,7 +68,7 @@
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@hashgraph/hardhat-hethers": "^1.0.3",
+    "@hashgraph/hardhat-hethers": "^1.0.4",
     "@hashgraph/sdk": "^2.23.0",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.6",

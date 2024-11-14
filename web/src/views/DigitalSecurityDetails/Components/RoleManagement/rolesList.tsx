@@ -238,4 +238,8 @@ export const rolesList = [
     label: "snapshot",
     value: SecurityRole._SNAPSHOT_ROLE,
   },
+  {
+    label: "bondManager",
+    value: SecurityRole._BOND_MANAGER_ROLE,
+  },
 ];
