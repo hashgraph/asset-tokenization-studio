@@ -219,12 +219,26 @@ import {
 } from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
 import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
+import {
+    _ERC1410_BASIC_STORAGE_2_POSITION
+} from '../../constants/storagePositions.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
     ERC1410SnapshotStorageWrapper,
     ScheduledSnapshotsStorageWrapper,
     ScheduledBalanceAdjustmentsStorageWrapper
 {
+    struct ERC1410BasicStorage_2 {
+        // Mapping from investor to their partitions LABAF
+        mapping(address => uint256[]) LABAF_user_partition;
+        // Aggregated Balance Adjustment
+        uint256 ABAF;
+        // Last Aggregated Balance Adjustment per account
+        mapping(address => uint256) LABAF;
+        // Last Aggregated Balance Adjustment per partition
+        mapping(bytes32 => uint256) LABAF_partition;
+    }
+
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
@@ -234,29 +248,62 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         _triggerScheduledSnapshots(0);
         _triggerScheduledBalanceAdjustments(0);
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+        ERC1410BasicStorage_2
+            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
         CapDataStorage storage capStorage = _capStorage();
 
         // adjust the total supply for the partition
         AdjustBalanceLib._adjustTotalAndMaxSupplyForPartition(
             partition,
             erc1410Storage,
-            capStorage
+            capStorage,
+            erc1410Storage_2
         );
 
         // adjust "from" total and partition balance
         AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
             partition,
             from,
-            erc1410Storage
+            erc1410Storage,
+            erc1410Storage_2
         );
 
         // adjust "to" total and partition balance
         AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
             partition,
             to,
-            erc1410Storage
+            erc1410Storage,
+            erc1410Storage_2
         );
 
         super._beforeTokenTransfer(partition, from, to, amount);
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    ) internal virtual override {
+        ERC1410BasicStorage_2
+            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
+
+        erc1410Storage_2.LABAF_user_partition[_account].push(
+            erc1410Storage_2.ABAF
+        );
+
+        super._addPartitionTo(_value, _account, _partition);
+    }
+
+    function _getERC1410BasicStorage_2()
+        internal
+        pure
+        virtual
+        returns (ERC1410BasicStorage_2 storage erc1410BasicStorage_2_)
+    {
+        bytes32 position = _ERC1410_BASIC_STORAGE_2_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1410BasicStorage_2_.slot := position
+        }
     }
 }

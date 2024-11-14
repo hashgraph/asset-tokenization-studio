@@ -321,11 +321,11 @@ Deployed contracts:
         )},
     ERC1410: 
         address: ${
-            environment.deployedBusinessLogics.ERC1410ScheduledTasks.address
+            environment.deployedBusinessLogics.eRC1410ScheduledTasks.address
         },
-        key: ${await environment.deployedBusinessLogics.ERC1410ScheduledTasks.getStaticResolverKey()},
+        key: ${await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.ERC1410ScheduledTasks.getStaticFunctionSelectors()
+            await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticFunctionSelectors()
         )},
     ERC1594: 
         address: ${environment.deployedBusinessLogics.eRC1594.address},
@@ -418,10 +418,10 @@ Deployed contracts:
         ).to.be.equal(environment.deployedBusinessLogics.eRC1644.address)
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.ERC1410ScheduledTasks.getStaticResolverKey()
+                await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticResolverKey()
             )
         ).to.be.equal(
-            environment.deployedBusinessLogics.ERC1410ScheduledTasks.address
+            environment.deployedBusinessLogics.eRC1410ScheduledTasks.address
         )
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
@@ -483,7 +483,7 @@ Deployed contracts:
                 await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.eRC20.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.eRC1644.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.ERC1410ScheduledTasks.getStaticResolverKey(),
+                await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.eRC1594.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.equityUSA.getStaticResolverKey(),
@@ -593,7 +593,7 @@ DiamondResume:
     )}
     DiamondLoupe.facetFunctionSelectors[erc1410]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.ERC1410ScheduledTasks.getStaticResolverKey()
+            await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc1594]: ${JSON.stringify(

@@ -227,13 +227,15 @@ abstract contract AdjustBalancesStorageWrapper is
         uint8 _decimals
     ) internal virtual {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+        ERC1410BasicStorage_2
+            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
         ERC20Storage storage erc20Storage = _getErc20Storage();
         CapDataStorage storage capStorage = _capStorage();
 
         erc1410Storage.totalSupply *= _factor;
 
-        if (erc1410Storage.ABAF == 0) erc1410Storage.ABAF = _factor;
-        else erc1410Storage.ABAF *= _factor;
+        if (erc1410Storage_2.ABAF == 0) erc1410Storage_2.ABAF = _factor;
+        else erc1410Storage_2.ABAF *= _factor;
 
         erc20Storage.decimals += _decimals;
         capStorage.maxSupply *= _factor;

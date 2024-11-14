@@ -242,12 +242,7 @@ abstract contract ERC1410StandardStorageWrapper is
             _partition
         ];
         if (index == 0) {
-            erc1410Storage.partitions[_tokenHolder].push(
-                Partition(_value, _partition, erc1410Storage.ABAF)
-            );
-            erc1410Storage.partitionToIndex[_tokenHolder][
-                _partition
-            ] = erc1410Storage.partitions[_tokenHolder].length;
+            _addPartitionTo(_value, _tokenHolder, _partition);
         } else {
             erc1410Storage.partitions[_tokenHolder][index - 1].amount += _value;
         }

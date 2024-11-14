@@ -206,8 +206,12 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
     ERC1410BasicStorageWrapperRead
 } from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+
 import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
 import {
     _PARTITION_AMOUNT_SLOT_POS,
@@ -233,22 +237,33 @@ library AdjustBalanceLib {
     function _adjustTotalBalanceAndPartitionBalanceFor(
         bytes32 _partition,
         address _account,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage storage _basicStorage
+        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
+            storage _basicStorage,
+        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
+            storage _basicStorage_2
     ) internal {
-        uint256 ABAF = _basicStorage.ABAF;
+        uint256 ABAF = _basicStorage_2.ABAF;
 
-        _adjustPartitionBalanceFor(ABAF, _partition, _account, _basicStorage);
-        _adjustTotalBalanceFor(ABAF, _account, _basicStorage);
+        _adjustPartitionBalanceFor(
+            ABAF,
+            _partition,
+            _account,
+            _basicStorage,
+            _basicStorage_2
+        );
+        _adjustTotalBalanceFor(ABAF, _account, _basicStorage, _basicStorage_2);
     }
 
     function _adjustTotalAndMaxSupplyForPartition(
         bytes32 _partition,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        CapStorageWrapper.CapDataStorage storage _capStorage
+        CapStorageWrapper.CapDataStorage storage _capStorage,
+        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
+            storage _basicStorage_2
     ) internal {
-        uint256 ABAF = _basicStorage.ABAF;
-        uint256 LABAF = _basicStorage.LABAF_partition[_partition];
+        uint256 ABAF = _basicStorage_2.ABAF;
+        uint256 LABAF = _basicStorage_2.LABAF_partition[_partition];
 
         if (ABAF == LABAF) return;
 
@@ -260,20 +275,27 @@ library AdjustBalanceLib {
             _capStorage.maxSupplyByPartition,
             _partition
         );
+        uint256 LABAFSlot = _getSlotForBytes32MappingKey(
+            _basicStorage_2.LABAF_partition,
+            _partition
+        );
 
         _updateBalance(ABAF, LABAF, totalSupplySlot);
 
         _updateBalance(ABAF, LABAF, maxSupplySlot);
 
-        _updateLABAF(ABAF, _basicStorage.LABAF_partition[_partition]);
+        _updateLABAF(ABAF, LABAFSlot);
     }
 
     function _adjustTotalBalanceFor(
         uint256 _ABAF,
         address _account,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage storage _basicStorage
+        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
+            storage _basicStorage,
+        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
+            storage _basicStorage_2
     ) private {
-        uint256 LABAF = _basicStorage.LABAF[_account];
+        uint256 LABAF = _basicStorage_2.LABAF[_account];
         if (_ABAF == LABAF) return;
 
         uint256 balanceSlot = _getSlotForAddressMappingKey(
@@ -281,7 +303,7 @@ library AdjustBalanceLib {
             _account
         );
         uint256 LABAFSlot = _getSlotForAddressMappingKey(
-            _basicStorage.LABAF,
+            _basicStorage_2.LABAF,
             _account
         );
 
@@ -293,7 +315,10 @@ library AdjustBalanceLib {
         uint256 _ABAF,
         bytes32 _partition,
         address _account,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage storage _basicStorage
+        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
+            storage _basicStorage,
+        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
+            storage _basicStorage_2
     ) private {
         uint256 partitionsIndex = _basicStorage.partitionToIndex[_account][
             _partition
@@ -301,18 +326,17 @@ library AdjustBalanceLib {
 
         if (partitionsIndex == 0) return;
 
-        ERC1410BasicStorageWrapperRead.Partition
-            storage partition = _basicStorage.partitions[_account][
-                partitionsIndex - 1
-            ];
-        uint256 LABAF = partition.LABAF;
+        uint256 LABAF = _basicStorage_2.LABAF_user_partition[_account][
+            partitionsIndex - 1
+        ];
 
         if (_ABAF == LABAF) return;
 
-        uint256 partitionBaseSlot;
-        assembly {
-            partitionBaseSlot := partition.slot
-        }
+        uint256 partitionBaseSlot = _getSlotForAddressMappingKey(
+            _basicStorage_2.LABAF_user_partition,
+            _account
+        );
+        partitionBaseSlot += partitionsIndex;
 
         _updateBalance(
             _ABAF,
@@ -372,6 +396,19 @@ library AdjustBalanceLib {
 
     function _getSlotForAddressMappingKey(
         mapping(address => uint256) storage _mapping,
+        address _key
+    ) private pure returns (uint256) {
+        uint256 MappingSlot;
+
+        assembly {
+            MappingSlot := _mapping.slot
+        }
+
+        return uint256(keccak256(abi.encode(_key, MappingSlot)));
+    }
+
+    function _getSlotForAddressMappingKey(
+        mapping(address => uint256[]) storage _mapping,
         address _key
     ) private pure returns (uint256) {
         uint256 MappingSlot;
