@@ -207,15 +207,15 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ERC1410ScheduledSnapshotStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledSnapshotStorageWrapper.sol';
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 import {
     IAdjustBalancesStorageWrapper
 } from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
 
 abstract contract AdjustBalancesStorageWrapper is
     IAdjustBalancesStorageWrapper,
-    ERC1410ScheduledSnapshotStorageWrapper
+    ERC1410ScheduledTasksStorageWrapper
 {
     modifier checkFactor(uint256 _factor) {
         if (_factor == 0) revert FactorIsZero();

@@ -209,41 +209,54 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410ScheduledSnapshotStorageWrapper
-} from './ERC1410ScheduledSnapshotStorageWrapper.sol';
-import {
-    ERC1410Snapshot
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410Snapshot.sol';
-import {
     ERC1410SnapshotStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
 import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+    ScheduledSnapshotsStorageWrapper
+} from '../../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
 
-contract ERC1410ScheduledSnapshot is
-    ERC1410Snapshot,
-    ERC1410ScheduledSnapshotStorageWrapper
+abstract contract ERC1410ScheduledTasksStorageWrapper is
+    ERC1410SnapshotStorageWrapper,
+    ScheduledSnapshotsStorageWrapper,
+    ScheduledBalanceAdjustmentsStorageWrapper
 {
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
         address to,
         uint256 amount
-    )
-        internal
-        virtual
-        override(
-            ERC1410BasicStorageWrapper,
-            ERC1410ScheduledSnapshotStorageWrapper,
-            ERC1410SnapshotStorageWrapper
-        )
-    {
-        ERC1410ScheduledSnapshotStorageWrapper._beforeTokenTransfer(
+    ) internal virtual override {
+        _triggerScheduledSnapshots(0);
+        _triggerScheduledBalanceAdjustments(0);
+        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+        CapDataStorage storage capStorage = _capStorage();
+
+        // adjust the total supply for the partition
+        AdjustBalanceLib._adjustTotalAndMaxSupplyForPartition(
+            partition,
+            erc1410Storage,
+            capStorage
+        );
+
+        // adjust "from" total and partition balance
+        AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
             partition,
             from,
-            to,
-            amount
+            erc1410Storage
         );
+
+        // adjust "to" total and partition balance
+        AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
+            partition,
+            to,
+            erc1410Storage
+        );
+
+        super._beforeTokenTransfer(partition, from, to, amount);
     }
 }

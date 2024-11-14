@@ -313,7 +313,7 @@ function buildEmptyEnvironment(): Environment {
             pause: {} as IStaticFunctionSelectors,
             eRC20: {} as IStaticFunctionSelectors,
             eRC1644: {} as IStaticFunctionSelectors,
-            eRC1410ScheduledSnapshot: {} as IStaticFunctionSelectors,
+            eRC1410ScheduledTasks: {} as IStaticFunctionSelectors,
             eRC1594: {} as IStaticFunctionSelectors,
             eRC1643: {} as IStaticFunctionSelectors,
             equityUSA: {} as IStaticFunctionSelectors,

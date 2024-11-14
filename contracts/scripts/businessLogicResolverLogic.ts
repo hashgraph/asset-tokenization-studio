@@ -229,7 +229,7 @@ export interface DeployedBusinessLogics {
     pause: IStaticFunctionSelectors
     eRC20: IStaticFunctionSelectors
     eRC1644: IStaticFunctionSelectors
-    eRC1410ScheduledSnapshot: IStaticFunctionSelectors
+    eRC1410ScheduledTasks: IStaticFunctionSelectors
     eRC1594: IStaticFunctionSelectors
     eRC1643: IStaticFunctionSelectors
     equityUSA: IStaticFunctionSelectors

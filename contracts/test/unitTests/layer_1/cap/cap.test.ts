@@ -210,7 +210,7 @@ import {
     type Cap,
     AccessControl,
     Pause,
-    ERC1410ScheduledSnapshot,
+    ERC1410ScheduledTasks,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
@@ -244,7 +244,7 @@ describe('CAP Tests', () => {
     let capFacet: Cap
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledSnapshot
+    let erc1410Facet: ERC1410ScheduledTasks
 
     beforeEach(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -296,7 +296,7 @@ describe('CAP Tests', () => {
         )
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
         erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledSnapshot',
+            'ERC1410ScheduledTasks',
             diamond.address
         )
     })

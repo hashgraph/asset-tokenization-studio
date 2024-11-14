@@ -214,7 +214,7 @@ import {
     CorporateActionsSecurity__factory,
     DiamondFacet__factory,
     EquityUSA__factory,
-    ERC1410ScheduledSnapshot__factory,
+    ERC1410ScheduledTasks__factory,
     ERC1594__factory,
     ERC1643__factory,
     ERC1644__factory,
@@ -247,7 +247,7 @@ import {
     createConfiguration,
     registerBusinessLogics,
 } from './contractsMethods'
-import { adjustBalances } from '../typechain-types/contracts/layer_2/index.js'
+//import { adjustBalances } from '../typechain-types/contracts/layer_2/index.js'
 
 const ExistingContractIds = {
     resolver: {
@@ -689,7 +689,7 @@ export async function deployContract({
         controllist: { factory: ControlList__factory },
         pause: { factory: Pause__factory },
         erc20: { factory: ERC20__factory },
-        erc1410: { factory: ERC1410ScheduledSnapshot__factory },
+        erc1410: { factory: ERC1410ScheduledTasks__factory },
         erc1594: { factory: ERC1594__factory },
         erc1643: { factory: ERC1643__factory },
         erc1644: { factory: ERC1644__factory },

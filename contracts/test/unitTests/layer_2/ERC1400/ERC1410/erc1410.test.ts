@@ -208,7 +208,7 @@ import { ethers } from 'hardhat'
 import {
     type ResolverProxy,
     type Pause,
-    type ERC1410ScheduledSnapshot,
+    type ERC1410ScheduledTasks,
     type AccessControl,
     type Equity,
     type ControlList,
@@ -267,7 +267,7 @@ describe('ERC1410 Tests', () => {
     let account_D: string
     let account_E: string
 
-    let erc1410Facet: ERC1410ScheduledSnapshot
+    let erc1410Facet: ERC1410ScheduledTasks
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let equityFacet: Equity
@@ -327,7 +327,7 @@ describe('ERC1410 Tests', () => {
             )
 
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledSnapshot',
+                'ERC1410ScheduledTasks',
                 diamond.address
             )
 
@@ -744,7 +744,7 @@ describe('ERC1410 Tests', () => {
             )
 
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledSnapshot',
+                'ERC1410ScheduledTasks',
                 newDiamond.address
             )
 
@@ -1628,7 +1628,7 @@ describe('ERC1410 Tests', () => {
             )
 
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledSnapshot',
+                'ERC1410ScheduledTasks',
                 newDiamond.address
             )
 
@@ -1988,7 +1988,7 @@ describe('ERC1410 Tests', () => {
             )
 
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledSnapshot',
+                'ERC1410ScheduledTasks',
                 diamond.address
             )
 

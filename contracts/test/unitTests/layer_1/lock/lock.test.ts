@@ -209,7 +209,7 @@ import {
     type ResolverProxy,
     type Lock,
     Pause,
-    ERC1410ScheduledSnapshot,
+    ERC1410ScheduledTasks,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
@@ -247,7 +247,7 @@ describe('Lock Tests', () => {
 
     let lockFacet: Lock
     let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledSnapshot
+    let erc1410Facet: ERC1410ScheduledTasks
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -332,7 +332,7 @@ describe('Lock Tests', () => {
                 signer_D
             )
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledSnapshot',
+                'ERC1410ScheduledTasks',
                 diamond.address,
                 signer_B
             )
@@ -733,7 +733,7 @@ describe('Lock Tests', () => {
                 signer_D
             )
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledSnapshot',
+                'ERC1410ScheduledTasks',
                 diamond.address,
                 signer_B
             )
