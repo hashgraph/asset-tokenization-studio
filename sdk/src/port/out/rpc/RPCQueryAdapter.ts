@@ -231,7 +231,7 @@ import {
   ControlList__factory,
   Pause__factory,
   ERC20__factory,
-  ERC1410ScheduledSnapshot__factory,
+  ERC1410ScheduledTasks__factory,
   Bond__factory,
   Cap__factory,
   ERC1643__factory,
@@ -306,7 +306,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).balanceOf(target.toString());
   }
@@ -321,7 +321,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).balanceOfByPartition(partitionId, target.toString());
   }
@@ -370,7 +370,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).partitionsOf(targetId.toString());
   }
@@ -396,7 +396,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).totalSupply();
   }
@@ -500,7 +500,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getERC20Metadata();
     const totalSupply = await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).totalSupply();
     const maxSupply = await this.connect(
@@ -516,7 +516,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).isControllable();
     const isMultiPartition = await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).isMultiPartition();
     const isIssuable = await this.connect(
@@ -845,7 +845,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Checking can transfer`);
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).canTransferByPartition(
       sourceId.toString(),
@@ -868,7 +868,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Checking can redeem`);
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).canRedeemByPartition(
       sourceId.toString(),
@@ -910,7 +910,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).isOperatorForPartition(
       partitionId,
@@ -929,7 +929,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).isOperator(operator.toString(), target.toString());
   }

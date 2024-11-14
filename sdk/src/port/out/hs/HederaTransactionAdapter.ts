@@ -221,7 +221,7 @@ import {
   ControlList__factory,
   DiamondFacet__factory,
   EquityUSA__factory,
-  ERC1410ScheduledSnapshot__factory,
+  ERC1410ScheduledTasks__factory,
   ERC1410Snapshot__factory,
   ERC1643__factory,
   Factory__factory,
@@ -592,7 +592,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
@@ -656,7 +656,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Redeeming ${amount} securities from account ${security.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
@@ -830,7 +830,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Issue ${amount} ${security} to account: ${targetId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
@@ -916,7 +916,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Force transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
@@ -952,7 +952,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Force redeem ${amount} tokens from account ${sourceId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
