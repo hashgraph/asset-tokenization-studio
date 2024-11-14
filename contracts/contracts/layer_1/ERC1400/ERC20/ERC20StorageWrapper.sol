@@ -218,8 +218,8 @@ import {
 import {IFactory} from '../../../interfaces/factory/IFactory.sol';
 
 abstract contract ERC20StorageWrapper is
-    ERC1410StandardStorageWrapper,
-    IERC20StorageWrapper
+    IERC20StorageWrapper,
+    ERC1410StandardStorageWrapper
 {
     struct ERC20Storage {
         string name;

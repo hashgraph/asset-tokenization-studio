@@ -209,9 +209,6 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410SnapshotStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {
     ScheduledSnapshotsStorageWrapper
 } from '../../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
 import {
@@ -222,6 +219,9 @@ import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
 import {
     _ERC1410_BASIC_STORAGE_2_POSITION
 } from '../../constants/storagePositions.sol';
+import {
+    ERC1410SnapshotStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410//ERC1410SnapshotStorageWrapper.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
     ERC1410SnapshotStorageWrapper,
@@ -245,8 +245,26 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         address to,
         uint256 amount
     ) internal virtual override {
+        _triggerAndSyncAll(partition, from, to);
+
+        super._beforeTokenTransfer(partition, from, to, amount);
+    }
+
+    function _triggerAndSyncAll(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) internal virtual {
         _triggerScheduledSnapshots(0);
         _triggerScheduledBalanceAdjustments(0);
+        _syncBalanceAdjustments(_partition, _from, _to);
+    }
+
+    function _syncBalanceAdjustments(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) internal virtual {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
         ERC1410BasicStorage_2
             storage erc1410Storage_2 = _getERC1410BasicStorage_2();
@@ -254,29 +272,29 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
 
         // adjust the total supply for the partition
         AdjustBalanceLib._adjustTotalAndMaxSupplyForPartition(
-            partition,
+            _partition,
             erc1410Storage,
             capStorage,
             erc1410Storage_2
         );
 
         // adjust "from" total and partition balance
-        AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
-            partition,
-            from,
-            erc1410Storage,
-            erc1410Storage_2
-        );
+        if (_from != address(0))
+            AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
+                _partition,
+                _from,
+                erc1410Storage,
+                erc1410Storage_2
+            );
 
         // adjust "to" total and partition balance
-        AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
-            partition,
-            to,
-            erc1410Storage,
-            erc1410Storage_2
-        );
-
-        super._beforeTokenTransfer(partition, from, to, amount);
+        if (_to != address(0))
+            AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
+                _partition,
+                _to,
+                erc1410Storage,
+                erc1410Storage_2
+            );
     }
 
     function _addPartitionTo(

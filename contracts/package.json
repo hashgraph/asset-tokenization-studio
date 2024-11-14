@@ -19,6 +19,7 @@
   "scripts": {
     "typechain": "npx hardhat typechain",
     "compile": "npx hardhat compile",
+    "compile:traces": "npx hardhat --show-stack-traces compile",
     "compile:force": "npx hardhat compile --force && npm run build",
     "test-coverage": "npx hardhat coverage --testfiles 'test/unitTests/**/*.ts'",
     "test": "npx hardhat test test/unitTests/**/*.ts test/unitTests/*/**/*.ts test/unitTests/*/*/**/*.ts",

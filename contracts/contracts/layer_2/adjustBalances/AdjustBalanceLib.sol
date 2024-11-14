@@ -294,7 +294,7 @@ library AdjustBalanceLib {
             storage _basicStorage,
         ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
             storage _basicStorage_2
-    ) private {
+    ) internal {
         uint256 LABAF = _basicStorage_2.LABAF[_account];
         if (_ABAF == LABAF) return;
 
@@ -319,7 +319,7 @@ library AdjustBalanceLib {
             storage _basicStorage,
         ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
             storage _basicStorage_2
-    ) private {
+    ) internal {
         uint256 partitionsIndex = _basicStorage.partitionToIndex[_account][
             _partition
         ];
@@ -350,7 +350,7 @@ library AdjustBalanceLib {
         uint256 _ABAF,
         uint256 _LABAF,
         uint256 _balanceSlotPos
-    ) private {
+    ) internal {
         uint256 factor = _calculateFactor(_ABAF, _LABAF);
         uint256 amount;
 
@@ -367,7 +367,7 @@ library AdjustBalanceLib {
         }
     }
 
-    function _updateLABAF(uint256 _ABAF, uint256 _LABAFSlotPos) private {
+    function _updateLABAF(uint256 _ABAF, uint256 _LABAFSlotPos) internal {
         assembly {
             sstore(_LABAFSlotPos, _ABAF)
         }
@@ -376,7 +376,7 @@ library AdjustBalanceLib {
     function _calculateFactor(
         uint256 _ABAF,
         uint256 _LABAF
-    ) private pure returns (uint256 factor_) {
+    ) internal pure returns (uint256 factor_) {
         if (_LABAF == 0) factor_ = _ABAF;
         else factor_ = _ABAF / _LABAF;
     }
@@ -384,7 +384,7 @@ library AdjustBalanceLib {
     function _getSlotForBytes32MappingKey(
         mapping(bytes32 => uint256) storage _mapping,
         bytes32 _key
-    ) private pure returns (uint256) {
+    ) internal pure returns (uint256) {
         uint256 MappingSlot;
 
         assembly {

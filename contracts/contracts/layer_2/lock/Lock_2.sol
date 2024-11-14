@@ -207,6 +207,59 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {LockStorageWrapper_2} from './LockStorageWrapper_2.sol';
+import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
 import {Lock} from '../../layer_1/lock/Lock.sol';
 
-contract Lock_2 is Lock, LockStorageWrapper_2 {}
+contract Lock_2 is Lock, LockStorageWrapper_2 {
+    function _lockByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _tokenHolder,
+        uint256 _expirationTimestamp
+    )
+        internal
+        virtual
+        override(LockStorageWrapper, LockStorageWrapper_2)
+        returns (bool success_, uint256 lockId_)
+    {
+        return
+            LockStorageWrapper_2._lockByPartition(
+                _partition,
+                _amount,
+                _tokenHolder,
+                _expirationTimestamp
+            );
+    }
+
+    function _releaseByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    )
+        internal
+        virtual
+        override(LockStorageWrapper, LockStorageWrapper_2)
+        returns (bool success_)
+    {
+        return
+            LockStorageWrapper_2._releaseByPartition(
+                _partition,
+                _lockId,
+                _tokenHolder
+            );
+    }
+
+    function _setLockAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex,
+        LockData memory _lock
+    ) internal virtual override(LockStorageWrapper, LockStorageWrapper_2) {
+        LockStorageWrapper_2._setLockAtIndex(
+            _partition,
+            _tokenHolder,
+            _lockIndex,
+            _lock
+        );
+    }
+}

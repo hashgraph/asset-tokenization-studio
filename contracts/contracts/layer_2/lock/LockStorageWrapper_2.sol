@@ -206,4 +206,133 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract LockStorageWrapper_2 {}
+//import {AdjustBalancesStorageWrapper} from '../adjustBalances/AdjustBalancesStorageWrapper.sol';
+import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
+import {_LOCK_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
+
+abstract contract LockStorageWrapper_2 is
+    LockStorageWrapper,
+    ERC1410ScheduledTasksStorageWrapper
+{
+    struct LockDataStorage_2 {
+        mapping(address => mapping(bytes32 => uint256[])) LABAF_locks;
+    }
+
+    function _lockByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _tokenHolder,
+        uint256 _expirationTimestamp
+    ) internal virtual override returns (bool success_, uint256 lockId_) {
+        LockDataStorage_2 storage lockStorage_2 = _lockStorage_2();
+        ERC1410BasicStorage_2
+            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
+
+        _triggerAndSyncAll(_partition, _tokenHolder, address(0));
+
+        lockStorage_2.LABAF_locks[_tokenHolder][_partition].push(
+            erc1410Storage_2.ABAF
+        );
+
+        return
+            super._lockByPartition(
+                _partition,
+                _amount,
+                _tokenHolder,
+                _expirationTimestamp
+            );
+    }
+
+    function _releaseByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) internal virtual override returns (bool success_) {
+        LockDataStorage_2 storage lockStorage_2 = _lockStorage_2();
+        ERC1410BasicStorage_2
+            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
+
+        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
+
+        uint256 lock_LABAF = _getLockLABAFByIndex(
+            _partition,
+            _tokenHolder,
+            lockIndex
+        );
+
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            erc1410Storage_2.ABAF,
+            lock_LABAF
+        );
+
+        _updateLockAmountByIndex(_partition, lockIndex, _tokenHolder, factor);
+
+        success_ = super._releaseByPartition(_partition, _lockId, _tokenHolder);
+
+        lockStorage_2.LABAF_locks[_tokenHolder][_partition].pop();
+    }
+
+    function _setLockAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex,
+        LockData memory _lock
+    ) internal virtual override {
+        // TODO
+        LockDataStorage_2 storage lockStorage_2 = _lockStorage_2();
+        uint256 lockIndex_lock = _getLockIndex(
+            _partition,
+            _tokenHolder,
+            _lock.id
+        );
+        uint256 LABAF = lockStorage_2.LABAF_locks[_tokenHolder][_partition][
+            lockIndex_lock - 1
+        ];
+
+        lockStorage_2.LABAF_locks[_tokenHolder][_partition][
+            _lockIndex - 1
+        ] = LABAF;
+
+        return
+            super._setLockAtIndex(_partition, _tokenHolder, _lockIndex, _lock);
+    }
+
+    function _updateLockAmountByIndex(
+        bytes32 _partition,
+        uint256 _lockIndex,
+        address _tokenHolder,
+        uint256 _factor
+    ) internal virtual {
+        if (_factor == 1) return;
+        LockDataStorage storage lockStorage = _lockStorage();
+        lockStorage
+        .locks[_tokenHolder][_partition][_lockIndex - 1].amount *= _factor;
+    }
+
+    function _getLockLABAFByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex
+    ) internal virtual returns (uint256) {
+        LockDataStorage_2 storage lockStorage_2 = _lockStorage_2();
+        return
+            lockStorage_2.LABAF_locks[_tokenHolder][_partition][_lockIndex - 1];
+    }
+
+    function _lockStorage_2()
+        internal
+        pure
+        virtual
+        returns (LockDataStorage_2 storage lock_2_)
+    {
+        bytes32 position = _LOCK_2_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            lock_2_.slot := position
+        }
+    }
+}

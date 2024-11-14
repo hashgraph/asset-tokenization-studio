@@ -221,3 +221,6 @@ bytes32 constant _EQUITY_STORAGE_POSITION = 0xa5469e676cbd7933388e0b85a29d440832
 
 // keccak256('security.token.standard.erc1410.basic.2.storage');
 bytes32 constant _ERC1410_BASIC_STORAGE_2_POSITION = 0x0b7c7c3086877579769ac0bef31a4e31f19775fa999bf5053bae0d03195b0d62;
+
+// keccak256('security.token.standard.lock.2.storage');
+bytes32 constant _LOCK_2_STORAGE_POSITION = 0x80a0b31b5fd604012f7499bdf0f4b16f83f6969068a25c5183f6c442d3d70b78;

@@ -216,8 +216,8 @@ import {
 
 abstract contract ERC1410BasicStorageWrapper is
     IERC1410StorageWrapper,
-    Common,
-    ERC1410BasicStorageWrapperRead
+    ERC1410BasicStorageWrapperRead,
+    Common
 {
     function _transferByPartition(
         address _from,

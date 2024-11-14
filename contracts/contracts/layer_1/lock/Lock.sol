@@ -216,7 +216,7 @@ import {Common} from '../common/Common.sol';
 import {LockStorageWrapper} from './LockStorageWrapper.sol';
 import {_DEFAULT_PARTITION} from '../constants/values.sol';
 
-contract Lock is ILock, IStaticFunctionSelectors, Common, LockStorageWrapper {
+contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper, Common {
     function lockByPartition(
         bytes32 _partition,
         uint256 _amount,
