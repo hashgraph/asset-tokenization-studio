@@ -262,7 +262,7 @@ interface IEquity {
         bool recordDateReached;
     }
 
-    struct BalanceAdjustment {
+    struct ScheduledBalanceAdjustment {
         uint256 executionDate;
         uint256 factor;
         uint8 decimals;
@@ -303,15 +303,18 @@ interface IEquity {
 
     function getVotingCount() external view returns (uint256 votingCount_);
 
-    function setBalanceAdjustment(
-        BalanceAdjustment calldata _newBalanceAdjustment
+    function setScheduledBalanceAdjustment(
+        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     ) external returns (bool success_, uint256 balanceAdjustmentID_);
 
-    function getBalanceAdjustment(
+    function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
-    ) external view returns (BalanceAdjustment memory balanceAdjustment_);
+    )
+        external
+        view
+        returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
 
-    function getBalanceAdjustmentCount()
+    function getScheduledBalanceAdjustmentCount()
         external
         view
         returns (uint256 balanceAdjustmentCount_);

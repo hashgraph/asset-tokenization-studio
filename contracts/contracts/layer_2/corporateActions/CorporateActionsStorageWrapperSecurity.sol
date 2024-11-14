@@ -323,10 +323,8 @@ abstract contract CorporateActionsStorageWrapperSecurity is
             revert BalanceAdjustmentCreationFailed();
         }
 
-        IEquity.BalanceAdjustment memory newBalanceAdjustment = abi.decode(
-            _data,
-            (IEquity.BalanceAdjustment)
-        );
+        IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
+            .decode(_data, (IEquity.ScheduledBalanceAdjustment));
 
         _addScheduledBalanceAdjustment(
             newBalanceAdjustment.executionDate,
@@ -354,10 +352,11 @@ abstract contract CorporateActionsStorageWrapperSecurity is
             );
 
             if (balanceAdjustmentData.length > 0) {
-                IEquity.BalanceAdjustment memory balanceAdjustment = abi.decode(
-                    balanceAdjustmentData,
-                    (IEquity.BalanceAdjustment)
-                );
+                IEquity.ScheduledBalanceAdjustment
+                    memory balanceAdjustment = abi.decode(
+                        balanceAdjustmentData,
+                        (IEquity.ScheduledBalanceAdjustment)
+                    );
 
                 _adjustBalances(
                     balanceAdjustment.factor,

@@ -355,9 +355,9 @@ describe('Scheduled BalanceAdjustments Tests', () => {
             factor: balanceAdjustmentsFactor,
             decimals: balanceAdjustmentsDecimals,
         }
-        await equityFacet.setBalanceAdjustment(balanceAdjustmentData_2)
-        await equityFacet.setBalanceAdjustment(balanceAdjustmentData_3)
-        await equityFacet.setBalanceAdjustment(balanceAdjustmentData_1)
+        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
+        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_3)
+        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
 
         const balanceAdjustment_2_Id =
             '0x0000000000000000000000000000000000000000000000000000000000000001'

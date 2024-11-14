@@ -266,6 +266,7 @@ task(
             corporateActionsSecurity,
             lock,
             transferAndLock,
+            adjustBalances,
             factory,
         } = await deployAtsFullInfrastructure({
             clientOperator: client,
@@ -301,6 +302,7 @@ task(
             'Corporate Actions': corporateActionsSecurity.contract,
             Lock: lock.contract,
             'Transfer and Lock': transferAndLock.contract,
+            'Adjust Balances': adjustBalances.contract,
         }
 
         console.log('\n 🟢 Deployed IDs:')

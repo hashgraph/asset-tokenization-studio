@@ -203,123 +203,73 @@
 
 */
 
-//import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ethers } from 'hardhat'
-import { IBusinessLogicResolver } from '../typechain-types'
-import { IStaticFunctionSelectors } from '../typechain-types'
+pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 import {
-    transparentUpgradableProxy,
-    deployProxyAdmin,
-    deployTransparentUpgradeableProxy,
-} from './transparentUpgradableProxy'
-import { expect } from 'chai'
+    IAdjustBalances
+} from '../interfaces/adjustBalances/IAdjustBalances.sol';
+import {AdjustBalancesStorageWrapper} from './AdjustBalancesStorageWrapper.sol';
+import {_BALANCE_ADJUSTMENTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
-export interface BusinessLogicRegistryData {
-    businessLogicKey: string
-    businessLogicAddress: string
-}
-
-export interface DeployedBusinessLogics {
-    businessLogicResolver: IStaticFunctionSelectors
-    factory: IStaticFunctionSelectors
-    diamondFacet: IStaticFunctionSelectors
-    accessControl: IStaticFunctionSelectors
-    controlList: IStaticFunctionSelectors
-    corporateActionsSecurity: IStaticFunctionSelectors
-    pause: IStaticFunctionSelectors
-    eRC20: IStaticFunctionSelectors
-    eRC1644: IStaticFunctionSelectors
-    eRC1410ScheduledSnapshot: IStaticFunctionSelectors
-    eRC1594: IStaticFunctionSelectors
-    eRC1643: IStaticFunctionSelectors
-    equityUSA: IStaticFunctionSelectors
-    bondUSA: IStaticFunctionSelectors
-    snapshots: IStaticFunctionSelectors
-    scheduledSnapshots: IStaticFunctionSelectors
-    scheduledBalanceAdjustments: IStaticFunctionSelectors
-    cap: IStaticFunctionSelectors
-    lock: IStaticFunctionSelectors
-    transferAndLock: IStaticFunctionSelectors
-    adjustBalances: IStaticFunctionSelectors
-}
-
-export let businessLogicResolver: IBusinessLogicResolver
-
-export async function deployProxyToBusinessLogicResolver(
-    businessLogicResolverLogicAddress: string
-) {
-    //await loadFixture(deployProxyAdmin)
-    await deployProxyAdmin()
-    await deployTransparentUpgradeableProxy(businessLogicResolverLogicAddress)
-    businessLogicResolver = (await ethers.getContractAt(
-        'BusinessLogicResolver',
-        transparentUpgradableProxy.address
-    )) as IBusinessLogicResolver
-    await businessLogicResolver.initialize_BusinessLogicResolver()
-}
-
-async function toStaticFunctionSelectors(
-    address: string
-): Promise<IStaticFunctionSelectors> {
-    return (await ethers.getContractAt(
-        'IStaticFunctionSelectors',
-        address
-    )) as IStaticFunctionSelectors
-}
-
-function capitalizeFirst(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-}
-
-function uncapitalizeFirst(str: string) {
-    return str.charAt(0).toLowerCase() + str.slice(1)
-}
-
-export async function deployBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    async function deployContractAndAssignIt(
-        deployedAndRegisteredBusinessLogics: DeployedBusinessLogics,
-        contractToDeploy: string
-    ) {
-        async function deployContract() {
-            return await (
-                await ethers.getContractFactory(contractToDeploy)
-            ).deploy()
-        }
-        //await loadFixture(deployContract)
-        const deployedContract = await deployContract()
-        const deployedAndRegisteredBusinessLogics_Property =
-            uncapitalizeFirst(contractToDeploy)
-        deployedAndRegisteredBusinessLogics[
-            deployedAndRegisteredBusinessLogics_Property as keyof DeployedBusinessLogics
-        ] = await toStaticFunctionSelectors(deployedContract.address)
+contract AdjustBalances is
+    IAdjustBalances,
+    IStaticFunctionSelectors,
+    AdjustBalancesStorageWrapper
+{
+    function adjustBalances(
+        uint256 factor,
+        uint8 decimals
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_ADJUSTMENT_BALANCE_ROLE)
+        checkFactor(factor)
+        returns (bool success_)
+    {
+        _adjustBalances(factor, decimals);
+        success_ = true;
     }
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        await deployContractAndAssignIt(
-            deployedAndRegisteredBusinessLogics,
-            capitalizeFirst(key)
-        )
-    }
-}
 
-export async function registerBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    const businessLogicsData: BusinessLogicRegistryData[] = []
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        if (key === 'businessLogicResolver' || key === 'factory') {
-            continue
-        }
-        const businessLogic = deployedAndRegisteredBusinessLogics[key]
-        businessLogicsData.push({
-            businessLogicKey: await businessLogic.getStaticResolverKey(),
-            businessLogicAddress: businessLogic.address,
-        })
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _BALANCE_ADJUSTMENTS_RESOLVER_KEY;
     }
-    await expect(
-        businessLogicResolver.registerBusinessLogics(businessLogicsData)
-    ).to.emit(businessLogicResolver, 'BusinessLogicsRegistered')
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](1);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .adjustBalances
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IAdjustBalances)
+            .interfaceId;
+    }
 }

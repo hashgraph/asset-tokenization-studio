@@ -209,10 +209,19 @@ pragma solidity 0.8.18;
 import {
     ERC1410ScheduledSnapshotStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ScheduledSnapshotStorageWrapper.sol';
+import {
+    IAdjustBalancesStorageWrapper
+} from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
 
 abstract contract AdjustBalancesStorageWrapper is
+    IAdjustBalancesStorageWrapper,
     ERC1410ScheduledSnapshotStorageWrapper
 {
+    modifier checkFactor(uint256 _factor) {
+        if (_factor == 0) revert FactorIsZero();
+        _;
+    }
+
     function _adjustBalances(
         uint256 _factor,
         uint8 _decimals
@@ -228,6 +237,8 @@ abstract contract AdjustBalancesStorageWrapper is
 
         erc20Storage.decimals += _decimals;
         capStorage.maxSupply *= _factor;
+
+        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
     }
 
     function _adjustBalancesByPartition(

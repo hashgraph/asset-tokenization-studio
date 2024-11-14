@@ -543,7 +543,7 @@ describe('Equity Tests', () => {
 
             // set dividend fails
             await expect(
-                equityFacet.setBalanceAdjustment(balanceAdjustmentData)
+                equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
             ).to.be.rejectedWith('AccountHasNoRole')
         })
 
@@ -563,7 +563,7 @@ describe('Equity Tests', () => {
 
             // set dividend fails
             await expect(
-                equityFacet.setBalanceAdjustment(balanceAdjustmentData)
+                equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
             ).to.be.rejectedWith('TokenIsPaused')
         })
 
@@ -579,9 +579,9 @@ describe('Equity Tests', () => {
 
             // set dividend
             await expect(
-                equityFacet.setBalanceAdjustment(balanceAdjustmentData)
+                equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
             )
-                .to.emit(equityFacet, 'BalanceAdjustmentSet')
+                .to.emit(equityFacet, 'ScheduledBalanceAdjustmentSet')
                 .withArgs(
                     '0x0000000000000000000000000000000000000000000000000000000000000001',
                     1,
@@ -591,8 +591,10 @@ describe('Equity Tests', () => {
                     balanceAdjustmentDecimals
                 )
 
-            const listCount = await equityFacet.getBalanceAdjustmentCount()
-            const balanceAdjustment = await equityFacet.getBalanceAdjustment(1)
+            const listCount =
+                await equityFacet.getScheduledBalanceAdjustmentCount()
+            const balanceAdjustment =
+                await equityFacet.getScheduledBalanceAdjustment(1)
 
             expect(listCount).to.equal(1)
             expect(balanceAdjustment.executionDate).to.equal(

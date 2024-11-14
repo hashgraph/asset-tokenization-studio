@@ -247,6 +247,7 @@ import {
     createConfiguration,
     registerBusinessLogics,
 } from './contractsMethods'
+import { adjustBalances } from '../typechain-types/contracts/layer_2/index.js'
 
 const ExistingContractIds = {
     resolver: {
@@ -292,6 +293,9 @@ const ExistingContractIds = {
     lock: ContractId.fromString(getEnvVar({ name: 'LOCK' })),
     transferAndLock: ContractId.fromString(
         getEnvVar({ name: 'TRANSFER_AND_LOCK' })
+    ),
+    adjustBalances: ContractId.fromString(
+        getEnvVar({ name: 'ADJUST_BALANCES' })
     ),
 }
 
@@ -459,6 +463,10 @@ export async function deployAtsFullInfrastructure({
                 name: 'transferandlock',
                 ids: { contract: ExistingContractIds.transferAndLock },
             },
+            {
+                name: 'adjustbalances',
+                ids: { contract: ExistingContractIds.adjustBalances },
+            },
         ]
 
         const deployedContracts: { [key: string]: DeployedContract } = {}
@@ -503,6 +511,7 @@ export async function deployAtsFullInfrastructure({
         scheduledBalanceAdjustments: scheduledBalanceAdjustments,
         corporateactionssecurity: corporateActionsSecurity,
         transferandlock: transferAndLock,
+        adjustbalances: adjustBalances,
     } = deployedContracts
 
     const businessLogicRegistries: BusinessLogicRegistryData[] = []
@@ -525,6 +534,7 @@ export async function deployAtsFullInfrastructure({
         corporateActionsSecurity,
         lock,
         transferAndLock,
+        adjustBalances,
     ]) {
         const businessLogicKey = await getStaticResolverKey(
             contract.contractId,
@@ -566,6 +576,7 @@ export async function deployAtsFullInfrastructure({
                 corporateActionsSecurity,
                 lock,
                 transferAndLock,
+                adjustBalances,
             ].map(({ contract }) =>
                 getStaticResolverKey(contract.contractId, clientOperator)
             )
@@ -642,6 +653,7 @@ export async function deployAtsFullInfrastructure({
         corporateActionsSecurity,
         lock,
         transferAndLock,
+        adjustBalances,
         factory,
     }
 }

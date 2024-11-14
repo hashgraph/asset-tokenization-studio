@@ -394,8 +394,8 @@ abstract contract EquityStorageWrapper is
             _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
     }
 
-    function _setBalanceAdjustment(
-        IEquity.BalanceAdjustment calldata _newBalanceAdjustment
+    function _setScheduledBalanceAdjustment(
+        IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     )
         internal
         virtual
@@ -415,13 +415,13 @@ abstract contract EquityStorageWrapper is
         );
     }
 
-    function _getBalanceAdjusment(
+    function _getScheduledBalanceAdjusment(
         uint256 _balanceAdjustmentID
     )
         internal
         view
         virtual
-        returns (IEquity.BalanceAdjustment memory balanceAdjustment_)
+        returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_)
     {
         bytes32 actionId = _corporateActionsStorage()
             .actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE]
@@ -432,12 +432,12 @@ abstract contract EquityStorageWrapper is
         if (data.length > 0) {
             (balanceAdjustment_) = abi.decode(
                 data,
-                (IEquity.BalanceAdjustment)
+                (IEquity.ScheduledBalanceAdjustment)
             );
         }
     }
 
-    function _getBalanceAdjustmentsCount()
+    function _getScheduledBalanceAdjustmentsCount()
         internal
         view
         virtual

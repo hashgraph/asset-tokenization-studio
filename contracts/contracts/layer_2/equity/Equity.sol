@@ -396,8 +396,8 @@ abstract contract Equity is
         return _getVotingCount();
     }
 
-    function setBalanceAdjustment(
-        BalanceAdjustment calldata _newBalanceAdjustment
+    function setScheduledBalanceAdjustment(
+        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     )
         external
         virtual
@@ -405,6 +405,7 @@ abstract contract Equity is
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
         checkTimestamp(_newBalanceAdjustment.executionDate)
+        checkFactor(_newBalanceAdjustment.factor)
         returns (bool success_, uint256 balanceAdjustmentID_)
     {
         bytes32 corporateActionID;
@@ -412,8 +413,8 @@ abstract contract Equity is
             success_,
             corporateActionID,
             balanceAdjustmentID_
-        ) = _setBalanceAdjustment(_newBalanceAdjustment);
-        emit BalanceAdjustmentSet(
+        ) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);
+        emit ScheduledBalanceAdjustmentSet(
             corporateActionID,
             balanceAdjustmentID_,
             _msgSender(),
@@ -423,7 +424,7 @@ abstract contract Equity is
         );
     }
 
-    function getBalanceAdjustment(
+    function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID
     )
         external
@@ -434,18 +435,18 @@ abstract contract Equity is
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             _balanceAdjustmentID - 1
         )
-        returns (BalanceAdjustment memory balanceAdjustment_)
+        returns (ScheduledBalanceAdjustment memory balanceAdjustment_)
     {
-        return _getBalanceAdjusment(_balanceAdjustmentID);
+        return _getScheduledBalanceAdjusment(_balanceAdjustmentID);
     }
 
-    function getBalanceAdjustmentCount()
+    function getScheduledBalanceAdjustmentCount()
         external
         view
         virtual
         override
         returns (uint256 balanceAdjustmentCount_)
     {
-        return _getBalanceAdjustmentsCount();
+        return _getScheduledBalanceAdjustmentsCount();
     }
 }
