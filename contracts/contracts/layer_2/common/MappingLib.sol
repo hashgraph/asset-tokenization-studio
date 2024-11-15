@@ -205,195 +205,62 @@
 
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+
 import {
     ERC1410BasicStorageWrapperRead
 } from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {MappingLib} from '../common/MappingLib.sol';
-import {ArrayLib} from '../common/ArrayLib.sol';
-import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
-import {
-    _PARTITION_AMOUNT_OFFSET,
-    _PARTITION_SIZE
-} from '../../layer_1/constants/storagePositions.sol';
 
-/**
-    * total = account total balance
-    * t1 = account's partition 1 balance
-    * t2 = account's partition 2 balance
-    * x = factor for total balance
-    * y = factor for partition 2 balance
-    * 
-    * OPTION : First adjusting partition : (y * t2) // adding partition increment diff to total :  total = total + (t2 * (y - 1)) // Finally adjusting total : (x * total)
-    * 
-    * total = t1 + t2;
-    * total = t1 + t2 + (t2 * (y - 1)) = t1 + t2 + y * t2 - t2
-      total = t1 + y * t2;
-      total = x * total = x * (t1 + y * t2)
-    */
-
-library AdjustBalanceLib {
-    function _adjustTotalBalanceAndPartitionBalanceFor(
-        bytes32 _partition,
-        address _account,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
-            storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
-            storage _basicStorage_2
-    ) internal {
-        uint256 ABAF = _basicStorage_2.ABAF;
-
-        _adjustPartitionBalanceFor(
-            ABAF,
-            _partition,
-            _account,
-            _basicStorage,
-            _basicStorage_2
-        );
-        _adjustTotalBalanceFor(ABAF, _account, _basicStorage, _basicStorage_2);
-    }
-
-    function _adjustTotalAndMaxSupplyForPartition(
-        bytes32 _partition,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
-            storage _basicStorage,
-        CapStorageWrapper.CapDataStorage storage _capStorage,
-        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
-            storage _basicStorage_2
-    ) internal {
-        uint256 ABAF = _basicStorage_2.ABAF;
-        uint256 LABAF = _basicStorage_2.LABAF_partition[_partition];
-
-        if (ABAF == LABAF) return;
-
-        uint256 totalSupplySlot = MappingLib._getSlotForBytes32MappingKey(
-            _basicStorage.totalSupplyByPartition,
-            _partition
-        );
-        uint256 maxSupplySlot = MappingLib._getSlotForBytes32MappingKey(
-            _capStorage.maxSupplyByPartition,
-            _partition
-        );
-        uint256 LABAFSlot = MappingLib._getSlotForBytes32MappingKey(
-            _basicStorage_2.LABAF_partition,
-            _partition
-        );
-
-        _updateBalance(ABAF, LABAF, totalSupplySlot);
-
-        _updateBalance(ABAF, LABAF, maxSupplySlot);
-
-        _updateLABAF(ABAF, LABAFSlot);
-    }
-
-    function _adjustTotalBalanceFor(
-        uint256 _ABAF,
-        address _account,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
-            storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
-            storage _basicStorage_2
-    ) internal {
-        uint256 LABAF = _basicStorage_2.LABAF[_account];
-        if (_ABAF == LABAF) return;
-
-        uint256 balanceSlot = MappingLib._getSlotForAddressMappingKey(
-            _basicStorage.balances,
-            _account
-        );
-        uint256 LABAFSlot = MappingLib._getSlotForAddressMappingKey(
-            _basicStorage_2.LABAF,
-            _account
-        );
-
-        _updateBalance(_ABAF, LABAF, balanceSlot);
-        _updateLABAF(_ABAF, LABAFSlot);
-    }
-
-    function _adjustPartitionBalanceFor(
-        uint256 _ABAF,
-        bytes32 _partition,
-        address _account,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
-            storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
-            storage _basicStorage_2
-    ) internal {
-        uint256 partitionsIndex = _basicStorage.partitionToIndex[_account][
-            _partition
-        ];
-
-        if (partitionsIndex == 0) return;
-
-        uint256 LABAF = _basicStorage_2.LABAF_user_partition[_account][
-            partitionsIndex - 1
-        ];
-
-        if (_ABAF == LABAF) return;
-
-        uint256 partitionsBaseSlot = MappingLib._getSlotForAddressMappingKey(
-            _basicStorage.partitions,
-            _account
-        );
-        uint256 partitionsLABAFBaseSlot = MappingLib
-            ._getSlotForAddressMappingKey(
-                _basicStorage_2.LABAF_user_partition,
-                _account
-            );
-
-        uint256 partitionBaseSlot = ArrayLib._getSlotForDynamicArrayItem(
-            partitionsBaseSlot,
-            (partitionsIndex - 1),
-            _PARTITION_SIZE
-        );
-        uint256 partitionLABAFBaseSlot = ArrayLib._getSlotForDynamicArrayItem(
-            partitionsLABAFBaseSlot,
-            (partitionsIndex - 1),
-            1
-        );
-
-        _updateBalance(
-            _ABAF,
-            LABAF,
-            partitionBaseSlot + _PARTITION_AMOUNT_OFFSET
-        );
-        _updateLABAF(_ABAF, partitionLABAFBaseSlot);
-    }
-
-    function _updateBalance(
-        uint256 _ABAF,
-        uint256 _LABAF,
-        uint256 _balanceSlotPos
-    ) internal {
-        uint256 factor = _calculateFactor(_ABAF, _LABAF);
-        uint256 amount;
+library MappingLib {
+    function _getSlotForBytes32MappingKey(
+        mapping(bytes32 => uint256) storage _mapping,
+        bytes32 _key
+    ) internal pure returns (uint256) {
+        uint256 MappingSlot;
 
         assembly {
-            amount := sload(_balanceSlotPos)
+            MappingSlot := _mapping.slot
         }
 
-        if (amount == 0) return;
-
-        amount *= factor;
-
-        assembly {
-            sstore(_balanceSlotPos, amount)
-        }
+        return uint256(keccak256(abi.encode(_key, MappingSlot)));
     }
 
-    function _updateLABAF(uint256 _ABAF, uint256 _LABAFSlotPos) internal {
+    function _getSlotForAddressMappingKey(
+        mapping(address => uint256) storage _mapping,
+        address _key
+    ) internal pure returns (uint256) {
+        uint256 MappingSlot;
+
         assembly {
-            sstore(_LABAFSlotPos, _ABAF)
+            MappingSlot := _mapping.slot
         }
+
+        return uint256(keccak256(abi.encode(_key, MappingSlot)));
     }
 
-    function _calculateFactor(
-        uint256 _ABAF,
-        uint256 _LABAF
-    ) internal pure returns (uint256 factor_) {
-        if (_LABAF == 0) factor_ = _ABAF;
-        else factor_ = _ABAF / _LABAF;
+    function _getSlotForAddressMappingKey(
+        mapping(address => uint256[]) storage _mapping,
+        address _key
+    ) internal pure returns (uint256) {
+        uint256 MappingSlot;
+
+        assembly {
+            MappingSlot := _mapping.slot
+        }
+
+        return uint256(keccak256(abi.encode(_key, MappingSlot)));
+    }
+
+    function _getSlotForAddressMappingKey(
+        mapping(address => ERC1410BasicStorageWrapperRead.Partition[])
+            storage _mapping,
+        address _key
+    ) internal pure returns (uint256) {
+        uint256 MappingSlot;
+
+        assembly {
+            MappingSlot := _mapping.slot
+        }
+
+        return uint256(keccak256(abi.encode(_key, MappingSlot)));
     }
 }
