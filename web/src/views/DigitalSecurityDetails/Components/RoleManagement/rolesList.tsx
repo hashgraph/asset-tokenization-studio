@@ -205,41 +205,58 @@
 
 import { SecurityRole } from "../../../../utils/SecurityRole";
 
-export const rolesList = [
+export type TSecurityType = "BOND" | "EQUITY";
+
+export type TRole = {
+  label: string;
+  value: SecurityRole;
+  allowedSecurities: TSecurityType[];
+};
+
+export const rolesList: TRole[] = [
   {
     label: "admin",
     value: SecurityRole._DEFAULT_ADMIN_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
     label: "minter",
     value: SecurityRole._ISSUER_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
     label: "controller",
     value: SecurityRole._CONTROLLER_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
     label: "pause",
     value: SecurityRole._PAUSER_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
     label: "controlList",
     value: SecurityRole._CONTROLLIST_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
     label: "corporateActions",
     value: SecurityRole._CORPORATEACTIONS_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
     label: "document",
     value: SecurityRole._DOCUMENTER_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
     label: "snapshot",
     value: SecurityRole._SNAPSHOT_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
   },
   {
     label: "bondManager",
     value: SecurityRole._BOND_MANAGER_ROLE,
+    allowedSecurities: ["BOND"],
   },
 ];
