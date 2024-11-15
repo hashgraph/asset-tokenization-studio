@@ -223,6 +223,7 @@ import {
   SetScheduledBalanceAdjustmentRequest,
   PauseRequest,
   Security,
+  GetScheduledBalanceAdjustmentRequest,
 } from '../../../src/index.js';
 import {
   CLIENT_ACCOUNT_ECDSA,
@@ -483,7 +484,7 @@ describe('🧪 Equity test', () => {
     );
   }, 60_000);
 
-  it('Set scheduled balance adjustment correctly', async () => {
+  it('Should set and get scheduled balance adjustment correctly', async () => {
     await Role.grantRole(
       new RoleRequest({
         securityId: equity.evmDiamondAddress!.toString(),
@@ -492,17 +493,29 @@ describe('🧪 Equity test', () => {
       }),
     );
 
+    await Equity.setScheduledBalanceAdjustment(
+      new SetScheduledBalanceAdjustmentRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        executionDate: recordTimestamp.toString(),
+        factor,
+        decimals: decimals.toString(),
+      }),
+    );
+
     const scheduledBalanceAdjustment =
-      await Equity.setScheduledBalanceAdjustment(
-        new SetScheduledBalanceAdjustmentRequest({
+      await Equity.getScheduledBalanceAdjustment(
+        new GetScheduledBalanceAdjustmentRequest({
           securityId: equity.evmDiamondAddress!.toString(),
-          executionDate: recordTimestamp.toString(),
-          factor,
-          decimals: decimals.toString(),
+          balanceAdjustmentId: 1,
         }),
       );
 
-    expect(scheduledBalanceAdjustment.transactionId).toBeDefined();
+    expect(scheduledBalanceAdjustment.id).toEqual(1);
+    expect(scheduledBalanceAdjustment.executionDate.getTime() / 1000).toEqual(
+      recordTimestamp,
+    );
+    expect(scheduledBalanceAdjustment.factor).toEqual(factor);
+    expect(scheduledBalanceAdjustment.decimals).toEqual(decimals.toString());
 
     await Role.revokeRole(
       new RoleRequest({

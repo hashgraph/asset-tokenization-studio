@@ -292,6 +292,7 @@ import { UpdateResolverCommandHandler } from '../app/usecase/command/management/
 import { GetConfigInfoQueryHandler } from '../app/usecase/query/management/GetConfigInfoQueryHandler';
 import { UpdateMaturityDateCommandHandler } from '../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommandHandler.js';
 import { SetScheduledBalanceAdjustmentCommandHandler } from '../app/usecase/command/equity/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommandHandler.js';
+import { GetScheduledBalanceAdjustmentQueryHandler } from '../app/usecase/query/equity/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -573,6 +574,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetConfigInfoQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetScheduledBalanceAdjustmentQueryHandler,
   },
 ];
 
