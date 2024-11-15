@@ -265,6 +265,7 @@ import {
   UPDATE_CONFIG_VERSION_GAS,
   UPDATE_RESOLVER_GAS,
   UPDATE_MATURITY_DATE_GAS,
+  SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -1591,6 +1592,41 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(UPDATE_MATURITY_DATE_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async setScheduledBalanceAdjustment(
+    security: EvmAddress,
+    executionDate: BigDecimal,
+    factor: BigDecimal,
+    decimals: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'setScheduledBalanceAdjustment';
+    LogService.logTrace(
+      `equity: ${security} ,
+      executionDate :${executionDate} , 
+      factor: ${factor},
+      decimals : ${decimals}  `,
+    );
+
+    const scheduleBalanceAdjustment = {
+      executionDate: executionDate.toHexString(),
+      factor: factor.toHexString(),
+      decimals: decimals.toHexString(),
+    };
+
+    const functionDataEncodedHex = new Interface(
+      EquityUSA__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [scheduleBalanceAdjustment]);
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

@@ -235,6 +235,7 @@ import {
   CastRegulationType,
 } from '../src/domain/context/factory/RegulationType.js';
 import ConfigInfoViewModel from '../src/port/in/response/ConfigInfoViewModel';
+import { ScheduledBalanceAdjustment } from '../src/domain/context/equity/ScheduledBalanceAdjustment.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -298,6 +299,7 @@ let user_account: Account;
 let configVersion: number;
 let configId: string;
 let resolverAddress: string;
+let scheduledBalanceAdjustment: ScheduledBalanceAdjustment;
 
 function grantRole(account: string, newRole: SecurityRole): void {
   let r = roles.get(account);
@@ -1419,6 +1421,23 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       string[],
       Error
     >;
+  });
+
+  singletonInstance.setScheduledBalanceAdjustment = jest.fn(async function (
+    security: EvmAddress,
+    _executionDate: number,
+    _factor: number,
+    _decimals: number,
+  ) {
+    scheduledBalanceAdjustment = new ScheduledBalanceAdjustment(
+      parseInt(_executionDate.toString()),
+      parseInt(_factor.toString()),
+      parseInt(_decimals.toString()),
+    );
+    return {
+      status: 'success',
+      id: transactionId,
+    } as TransactionResponse;
   });
 
   return {
