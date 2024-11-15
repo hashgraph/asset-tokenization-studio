@@ -211,6 +211,7 @@ import { SetVotingRightsCommand } from '../../app/usecase/command/equity/votingR
 import { GetVotingQuery } from '../../app/usecase/query/equity/votingRights/getVoting/GetVotingQuery.js';
 import { GetVotingCountQuery } from '../../app/usecase/query/equity/votingRights/getVotingCount/GetVotingCountQuery.js';
 import { GetVotingForQuery } from '../../app/usecase/query/equity/votingRights/getVotingFor/GetVotingForQuery.js';
+import { SetScheduledBalanceAdjustmentCommand } from '../../app/usecase/command/equity/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand.js';
 import Injectable from '../../core/Injectable.js';
 import { CommandBus } from '../../core/command/CommandBus.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
@@ -245,6 +246,7 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../../domain/context/factory/RegulationType.js';
+import SetScheduledBalanceAdjustmentRequest from './request/SetScheduledBalanceAdjustmentRequest.js';
 
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{
@@ -276,6 +278,9 @@ interface IEquityInPort {
   getAllVotingRights(
     request: GetAllVotingRightsRequest,
   ): Promise<VotingRightsViewModel[]>;
+  setScheduledBalanceAdjustment(
+    request: SetScheduledBalanceAdjustmentRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
 }
 
 class EquityInPort implements IEquityInPort {
@@ -560,6 +565,23 @@ class EquityInPort implements IEquityInPort {
     }
 
     return dividends;
+  }
+
+  @LogError
+  async setScheduledBalanceAdjustment(
+    request: SetScheduledBalanceAdjustmentRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const { executionDate, factor, decimals, securityId } = request;
+    handleValidation('SetScheduledBalanceAdjustmentRequest', request);
+
+    return await this.commandBus.execute(
+      new SetScheduledBalanceAdjustmentCommand(
+        securityId,
+        executionDate,
+        factor,
+        decimals,
+      ),
+    );
   }
 }
 
