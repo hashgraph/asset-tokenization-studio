@@ -218,8 +218,8 @@ import {
   GetRoleMembersRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
-import { rolesList } from "./rolesList";
-import { useEffect, useMemo, useState } from "react";
+import { rolesList, TSecurityType } from "./rolesList";
+import { useEffect, useState } from "react";
 import { SecurityRole } from "../../../../utils/SecurityRole";
 import { useSecurityStore } from "../../../../store/securityStore";
 
@@ -243,14 +243,6 @@ export const SearchByRole = () => {
   });
   const { id = "" } = useParams();
   const { details: securityDetails } = useSecurityStore();
-
-  const isBond = useMemo(() => {
-    if (securityDetails) {
-      return securityDetails.type === "BOND";
-    }
-
-    return false;
-  }, [securityDetails]);
 
   const [roleToSearch, setRoleToSearch] = useState<SecurityRole>();
   const [isRoleMemberCountLoading, setIsRoleMemberCountLoading] =
@@ -339,13 +331,18 @@ export const SearchByRole = () => {
                 <SelectController
                   id="role"
                   control={control}
-                  options={rolesList.map((role) => ({
-                    label:
-                      isBond && role.label === "bondManager"
-                        ? "Bond " + tRoles(role.label)
-                        : tRoles(role.label),
-                    value: role.value,
-                  }))}
+                  options={rolesList
+                    .filter((role) => {
+                      if (!securityDetails) return role;
+
+                      return role.allowedSecurities.includes(
+                        securityDetails.type as TSecurityType,
+                      );
+                    })
+                    .map((role) => ({
+                      value: role.label,
+                      label: tRoles(role.label),
+                    }))}
                   size="sm"
                   setsFullOption
                   rules={{ required }}

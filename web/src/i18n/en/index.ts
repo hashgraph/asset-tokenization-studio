@@ -300,7 +300,7 @@ export default {
     corporateActions: "Corporate actions role",
     document: "Document role",
     snapshot: "Snapshot role",
-    bondManager: "Manager role",
+    bondManager: "Bond Manager role",
   },
   landing,
   routes,
