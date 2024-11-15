@@ -1428,7 +1428,7 @@ describe('Adjust Balances Tests', () => {
     })
 
     describe('Locks', () => {
-        it.only('GIVEN a lock WHEN adjustBalances THEN lock amount gets updated succeeds', async () => {
+        it('GIVEN a lock WHEN adjustBalances THEN lock amount gets updated succeeds', async () => {
             await setPreBalanceAdjustment()
 
             const balance_Before = await erc1410Facet.balanceOf(account_A)

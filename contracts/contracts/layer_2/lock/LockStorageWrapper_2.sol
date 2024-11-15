@@ -219,6 +219,7 @@ abstract contract LockStorageWrapper_2 is
     ERC1410ScheduledTasksStorageWrapper
 {
     struct LockDataStorage_2 {
+        mapping(address => mapping(bytes32 => uint256)) LABAFs;
         mapping(address => mapping(bytes32 => uint256[])) LABAF_locks;
     }
 
@@ -234,9 +235,17 @@ abstract contract LockStorageWrapper_2 is
 
         _triggerAndSyncAll(_partition, _tokenHolder, address(0));
 
-        lockStorage_2.LABAF_locks[_tokenHolder][_partition].push(
-            erc1410Storage_2.ABAF
-        );
+        uint256 ABAF = erc1410Storage_2.ABAF;
+
+        uint256 LABAF = lockStorage_2.LABAFs[_tokenHolder][_partition];
+
+        if (ABAF != LABAF) {
+            uint256 factor = AdjustBalanceLib._calculateFactor(ABAF, LABAF);
+
+            _updateLockTotalAmount(_partition, _tokenHolder, factor);
+        }
+
+        lockStorage_2.LABAF_locks[_tokenHolder][_partition].push(ABAF);
 
         return
             super._lockByPartition(
@@ -266,12 +275,29 @@ abstract contract LockStorageWrapper_2 is
             lockIndex
         );
 
-        uint256 factor = AdjustBalanceLib._calculateFactor(
-            erc1410Storage_2.ABAF,
-            lock_LABAF
-        );
+        uint256 LABAF = lockStorage_2.LABAFs[_tokenHolder][_partition];
 
-        _updateLockAmountByIndex(_partition, lockIndex, _tokenHolder, factor);
+        uint256 ABAF = erc1410Storage_2.ABAF;
+
+        if (ABAF != LABAF) {
+            uint256 factor = AdjustBalanceLib._calculateFactor(ABAF, LABAF);
+
+            _updateLockTotalAmount(_partition, _tokenHolder, factor);
+        }
+
+        if (ABAF != lock_LABAF) {
+            uint256 factor_lock = AdjustBalanceLib._calculateFactor(
+                ABAF,
+                lock_LABAF
+            );
+
+            _updateLockAmountByIndex(
+                _partition,
+                lockIndex,
+                _tokenHolder,
+                factor_lock
+            );
+        }
 
         success_ = super._releaseByPartition(_partition, _lockId, _tokenHolder);
 
@@ -311,8 +337,22 @@ abstract contract LockStorageWrapper_2 is
     ) internal virtual {
         if (_factor == 1) return;
         LockDataStorage storage lockStorage = _lockStorage();
+
         lockStorage
         .locks[_tokenHolder][_partition][_lockIndex - 1].amount *= _factor;
+    }
+
+    function _updateLockTotalAmount(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _factor
+    ) internal virtual {
+        if (_factor == 1) return;
+        LockDataStorage storage lockStorage = _lockStorage();
+        LockDataStorage_2 storage lockStorage_2 = _lockStorage_2();
+
+        lockStorage.lockedAmount[_tokenHolder][_partition] *= _factor;
+        lockStorage_2.LABAFs[_tokenHolder][_partition] *= _factor;
     }
 
     function _getLockLABAFByIndex(

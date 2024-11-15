@@ -393,6 +393,7 @@ library AdjustBalanceLib {
         uint256 _ABAF,
         uint256 _LABAF
     ) internal pure returns (uint256 factor_) {
+        if (_ABAF == 0) return 1;
         if (_LABAF == 0) factor_ = _ABAF;
         else factor_ = _ABAF / _LABAF;
     }
