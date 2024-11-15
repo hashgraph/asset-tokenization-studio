@@ -289,6 +289,8 @@ import {
   UPDATE_CONFIG_VERSION_GAS,
   UPDATE_RESOLVER_GAS,
   UPDATE_MATURITY_DATE_GAS,
+  SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
+  SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -1617,6 +1619,36 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         gasLimit: UPDATE_MATURITY_DATE_GAS,
       }),
       this.networkService.environment,
+    );
+  }
+
+  async setScheduledBalanceAdjustment(
+    security: EvmAddress,
+    executionDate: BigDecimal,
+    factor: BigDecimal,
+    decimals: BigDecimal,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `equity: ${security} ,
+      executionDate :${executionDate} , 
+      factor: ${factor},
+      decimals : ${decimals}  `,
+    );
+    const scheduledBalanceAdjustmentStruct: IEquity.ScheduledBalanceAdjustmentStruct =
+      {
+        executionDate: executionDate.toBigNumber(),
+        factor: factor.toBigNumber(),
+        decimals: decimals.toBigNumber(),
+      };
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Equity__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setScheduledBalanceAdjustment(scheduledBalanceAdjustmentStruct, {
+        gasLimit: SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS,
+      }),
+      this.networkService.environment,
+      SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
     );
   }
 }
