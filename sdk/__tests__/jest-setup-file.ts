@@ -283,6 +283,7 @@ const accounts_with_roles = new Map<string, string[]>();
 const locksIds = new Map<string, number[]>();
 const locks = new Map<string, lock>();
 const lastLockIds = new Map<string, number>();
+const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
 
 let controlList: string[] = [];
 
@@ -1434,11 +1435,20 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       parseInt(_factor.toString()),
       parseInt(_decimals.toString()),
     );
+
+    scheduledBalanceAdjustments.push(singletonInstance);
+
     return {
       status: 'success',
       id: transactionId,
     } as TransactionResponse;
   });
+
+  singletonInstance.getScheduledBalanceAdjustmentCount = jest.fn(
+    async function (security: EvmAddress) {
+      return scheduledBalanceAdjustments.length;
+    },
+  );
 
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),

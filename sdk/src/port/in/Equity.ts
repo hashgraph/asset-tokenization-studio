@@ -247,6 +247,8 @@ import {
   CastRegulationType,
 } from '../../domain/context/factory/RegulationType.js';
 import SetScheduledBalanceAdjustmentRequest from './request/SetScheduledBalanceAdjustmentRequest.js';
+import GetScheduledBalanceAdjustmentCountRequest from './request/GetScheduledBalanceAdjustmentsCountRequest';
+import { GetScheduledBalanceAdjustmentCountQuery } from '../../app/usecase/query/equity/scheduleBalanceAdjustment/getCount/GetScheduledBalanceAdjustmentsCountQuery';
 
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{
@@ -281,6 +283,9 @@ interface IEquityInPort {
   setScheduledBalanceAdjustment(
     request: SetScheduledBalanceAdjustmentRequest,
   ): Promise<{ payload: number; transactionId: string }>;
+  getScheduledBalanceAdjustmentsCount(
+    request: GetScheduledBalanceAdjustmentCountRequest,
+  ): Promise<number>;
 }
 
 class EquityInPort implements IEquityInPort {
@@ -582,6 +587,21 @@ class EquityInPort implements IEquityInPort {
         decimals,
       ),
     );
+  }
+
+  @LogError
+  async getScheduledBalanceAdjustmentsCount(
+    request: GetScheduledBalanceAdjustmentCountRequest,
+  ): Promise<number> {
+    const { securityId } = request;
+    handleValidation('GetScheduledBalanceAdjustmentCountRequest', request);
+
+    const getScheduledBalanceAdjustmentCountQueryResponse =
+      await this.queryBus.execute(
+        new GetScheduledBalanceAdjustmentCountQuery(securityId),
+      );
+
+    return getScheduledBalanceAdjustmentCountQueryResponse.payload;
   }
 }
 

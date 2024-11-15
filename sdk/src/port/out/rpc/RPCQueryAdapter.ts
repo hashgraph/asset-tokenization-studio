@@ -1071,4 +1071,17 @@ export class RPCQueryAdapter {
       configInfo.version_.toNumber(),
     ];
   }
+
+  async getScheduledBalanceAdjustmentCount(
+    address: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(`Getting scheduled balance adjustment count`);
+
+    const scheduledBalanceAdjustmentCount = await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getScheduledBalanceAdjustmentCount();
+
+    return scheduledBalanceAdjustmentCount.toNumber();
+  }
 }

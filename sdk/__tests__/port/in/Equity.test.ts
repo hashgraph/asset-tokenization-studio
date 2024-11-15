@@ -246,6 +246,7 @@ import {
   RegulationSubType,
   RegulationType,
 } from '../../../src/domain/context/factory/RegulationType.js';
+import { GetScheduledBalanceAdjustmentCountRequest } from '../../../src';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -559,5 +560,86 @@ describe('🧪 Equity test', () => {
       thrownError = error;
     }
     expect(thrownError).toBeInstanceOf(Error);
+
+    await Security.unpause(
+      new PauseRequest({
+        securityId: equity.evmDiamondAddress!,
+      }),
+    );
+  }, 600_000);
+
+  it('Should return scheduled balance adjustments count correctly', async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    const count = await Equity.getScheduledBalanceAdjustmentsCount(
+      new GetScheduledBalanceAdjustmentCountRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+      }),
+    );
+
+    expect(count).toBeDefined();
+    expect(typeof count).toBe('number');
+
+    await Role.revokeRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+  }, 60_000);
+
+  it('Should return error if try to get scheduled balance adjustments count without the required role', async () => {
+    let thrownError;
+    try {
+      await Equity.getScheduledBalanceAdjustmentsCount(
+        new GetScheduledBalanceAdjustmentCountRequest({
+          securityId: equity.evmDiamondAddress!.toString(),
+        }),
+      );
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError).toBeInstanceOf(Error);
+  }, 600_000);
+
+  it('Should return error if try to get scheduled balance adjustments count when the token is paused', async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._PAUSER_ROLE,
+      }),
+    );
+
+    await Security.pause(
+      new PauseRequest({
+        securityId: equity.evmDiamondAddress!,
+      }),
+    );
+
+    let thrownError;
+    try {
+      await Equity.getScheduledBalanceAdjustmentsCount(
+        new GetScheduledBalanceAdjustmentCountRequest({
+          securityId: equity.evmDiamondAddress!.toString(),
+        }),
+      );
+    } catch (error) {
+      thrownError = error;
+    }
+    expect(thrownError).toBeInstanceOf(Error);
+
+    await Security.unpause(
+      new PauseRequest({
+        securityId: equity.evmDiamondAddress!,
+      }),
+    );
   }, 600_000);
 });
