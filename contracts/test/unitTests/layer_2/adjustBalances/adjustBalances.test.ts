@@ -224,6 +224,7 @@ import {
     _ISSUER_ROLE,
     _CAP_ROLE,
     _CONTROLLER_ROLE,
+    _LOCKER_ROLE,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -233,6 +234,7 @@ import {
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+import { time } from '@nomicfoundation/hardhat-network-helpers'
 
 const amount = 1
 const balanceOf_A_Original = [amount, 10 * amount]
@@ -275,6 +277,7 @@ describe('Adjust Balances Tests', () => {
         await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
         await accessControlFacet.grantRole(_CAP_ROLE, account_A)
         await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_A)
+        await accessControlFacet.grantRole(_LOCKER_ROLE, account_A)
 
         // Using account C (with role)
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -1424,5 +1427,109 @@ describe('Adjust Balances Tests', () => {
         })
     })
 
-    // Test if adjustments are done for locks
+    describe('Locks', () => {
+        it.only('GIVEN a lock WHEN adjustBalances THEN lock amount gets updated succeeds', async () => {
+            await setPreBalanceAdjustment()
+
+            const balance_Before = await erc1410Facet.balanceOf(account_A)
+            const balance_Before_Partition_1 =
+                await erc1410Facet.balanceOfByPartition(
+                    _PARTITION_ID_1,
+                    account_A
+                )
+
+            // lock
+            const currentTimestamp = (await ethers.provider.getBlock('latest'))
+                .timestamp
+            const ONE_SECOND = 1
+
+            lockFacet = lockFacet.connect(signer_A)
+            await lockFacet.lockByPartition(
+                _PARTITION_ID_1,
+                amount,
+                account_A,
+                currentTimestamp + ONE_SECOND
+            )
+
+            const lock_TotalAmount_Before = await lockFacet.getLockedAmountFor(
+                account_A
+            )
+            const lock_TotalAmount_Before_Partition_1 =
+                await lockFacet.getLockedAmountForByPartition(
+                    _PARTITION_ID_1,
+                    account_A
+                )
+            const lock_Before = await lockFacet.getLockForByPartition(
+                _PARTITION_ID_1,
+                account_A,
+                1
+            )
+
+            // adjustBalances
+            await adjustBalancesFacet.adjustBalances(
+                adjustFactor,
+                adjustDecimals
+            )
+
+            const lock_TotalAmount_After = await lockFacet.getLockedAmountFor(
+                account_A
+            )
+            const lock_TotalAmount_After_Partition_1 =
+                await lockFacet.getLockedAmountForByPartition(
+                    _PARTITION_ID_1,
+                    account_A
+                )
+            const lock_After = await lockFacet.getLockForByPartition(
+                _PARTITION_ID_1,
+                account_A,
+                1
+            )
+            const balance_After = await erc1410Facet.balanceOf(account_A)
+            const balance_After_Partition_1 =
+                await erc1410Facet.balanceOfByPartition(
+                    _PARTITION_ID_1,
+                    account_A
+                )
+
+            /*console.log(lock_TotalAmount_Before)
+            console.log(lock_TotalAmount_Before_Partition_1)
+            console.log(lock_Before.amount_)
+
+            console.log("----------------")
+
+            console.log(lock_TotalAmount_After)
+            console.log(lock_TotalAmount_After_Partition_1)
+            console.log(lock_After.amount_)
+            console.log(balance_After)
+            console.log(balance_After_Partition_1)*/
+
+            // RELEASE LOCK
+            await time.setNextBlockTimestamp(
+                (await ethers.provider.getBlock('latest')).timestamp +
+                    2 * ONE_SECOND
+            )
+            await lockFacet.releaseByPartition(_PARTITION_ID_1, 1, account_A)
+
+            const balance_After_Release = await erc1410Facet.balanceOf(
+                account_A
+            )
+            const balance_After_Release_Partition_1 =
+                await erc1410Facet.balanceOfByPartition(
+                    _PARTITION_ID_1,
+                    account_A
+                )
+
+            console.log(balance_Before)
+            console.log(balance_Before_Partition_1)
+            console.log(balance_After_Release)
+            console.log(balance_After_Release_Partition_1)
+
+            expect(balance_After_Release).to.be.equal(
+                balance_Before.mul(adjustFactor)
+            )
+            expect(balance_After_Release_Partition_1).to.be.equal(
+                balance_Before_Partition_1.mul(adjustFactor)
+            )
+        })
+    })
 })

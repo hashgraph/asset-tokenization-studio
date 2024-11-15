@@ -256,6 +256,8 @@ abstract contract LockStorageWrapper_2 is
         ERC1410BasicStorage_2
             storage erc1410Storage_2 = _getERC1410BasicStorage_2();
 
+        _triggerAndSyncAll(_partition, address(0), _tokenHolder);
+
         uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
 
         uint256 lock_LABAF = _getLockLABAFByIndex(
