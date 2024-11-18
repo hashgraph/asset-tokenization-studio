@@ -211,10 +211,12 @@ import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {CorporateActionsStorageWrapperSecurity} from "../corporateActions/CorporateActionsStorageWrapperSecurity.sol";
 
 abstract contract CapStorageWrapper_2 is
     CapStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper // TODO: ERC1410ScheduledTasksStorageWrapperREAD.sol
+    ERC1410ScheduledTasksStorageWrapper, // TODO: ERC1410ScheduledTasksStorageWrapperREAD.sol
+    CorporateActionsStorageWrapperSecurity
 {
     function _getMaxSupply()
         internal
@@ -241,13 +243,13 @@ abstract contract CapStorageWrapper_2 is
         factor *= combinedFactor;
 
         // Calcular el supply máximo ajustado
-        uint256 maxSupply = _capStorage().maxSupply;
-        maxSupply_ = maxSupply * factor;
+        maxSupply_ = super._getMaxSupply() * factor;
     }
 
-    function _calculateCombinedFactorForPartition(bytes32 partition_) internal view returns (uint256) {
+    function _calculateCombinedFactorForPartition(bytes32 partition_) internal view returns (uint256 combinedFactor_, uint256 combinedDecimals_) {
         uint256 scheduledTasksLength = _getScheduledBalanceAdjustmentCount();
-        uint256 combinedFactor = 1;
+        combinedFactor_ = 1;
+        combinedDecimals_ = 0;
 
         for (uint256 i = 0; i < scheduledTasksLength; i++) {
             ScheduledTasksLib.ScheduledTask memory task = ScheduledTasksLib._getScheduledTasksByIndex(
@@ -255,22 +257,16 @@ abstract contract CapStorageWrapper_2 is
                 i
             );
 
-//            bytes32 actionId = abi.decode(task, (bytes32));
-//            (,bytes memory balanceAdjustmentData) = _getCorporateAction(actionId);
-//            IEquity.ScheduledBalanceAdjustment memory balanceAdjustment =
-//                abi.decode(balanceAdjustmentData,(IEquity.ScheduledBalanceAdjustment)
-//            );
-//            combinedFactor *= balanceAdjustment
+            bytes32 actionId = abi.decode(task, (bytes32));
+            (,bytes memory balanceAdjustmentData) = _getCorporateAction(actionId);
+            IEquity.ScheduledBalanceAdjustment memory balanceAdjustment =
+                abi.decode(balanceAdjustmentData,(IEquity.ScheduledBalanceAdjustment)
+            );
+            combinedFactor_ *= balanceAdjustment.factor;
+            combinedDecimals_ += balanceAdjustment.decimals;
 
-            if (task.scheduledTimestamp <= block.timestamp) {
-                (bytes32 taskPartition, uint256 taskABAF) = abi.decode(task.data, (bytes32, uint256));
-
-                if (taskPartition == partition_) {
-                    combinedFactor *= taskABAF;
-                }
-            }
         }
 
-        return combinedFactor;
+        return (combinedFactor_, combinedDecimals_);
     }
 }
