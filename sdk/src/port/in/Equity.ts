@@ -252,6 +252,8 @@ import ScheduledBalanceAdjustmentViewModel from './response/ScheduledBalanceAdju
 import { GetScheduledBalanceAdjustmentQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery.js';
 import GetScheduledBalanceAdjustmentCountRequest from './request/GetScheduledBalanceAdjustmentsCountRequest';
 import { GetScheduledBalanceAdjustmentCountQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
+import GetLastAggregatedBalanceAdjustmentFactorForRequest from './request/GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
+import { GetLastAggregatedBalanceAdjustmentFactorForQuery } from '../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQuery.js';
 
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{
@@ -292,6 +294,9 @@ interface IEquityInPort {
   getScheduledBalanceAdjustment(
     request: GetScheduledBalanceAdjustmentRequest,
   ): Promise<ScheduledBalanceAdjustmentViewModel>;
+  getLastAggregatedBalanceAdjustmentFactorFor(
+    request: GetLastAggregatedBalanceAdjustmentFactorForRequest,
+  ): Promise<number>;
 }
 
 class EquityInPort implements IEquityInPort {
@@ -633,6 +638,26 @@ class EquityInPort implements IEquityInPort {
       );
 
     return getScheduledBalanceAdjustmentCountQueryResponse.payload;
+  }
+
+  @LogError
+  async getLastAggregatedBalanceAdjustmentFactorFor(
+    request: GetLastAggregatedBalanceAdjustmentFactorForRequest,
+  ): Promise<number> {
+    handleValidation(
+      'GetLastAggregatedBalanceAdjustmentFactorForRequest',
+      request,
+    );
+
+    const getLastAggregatedBalanceAdjustmentFactorForQueryResponse =
+      await this.queryBus.execute(
+        new GetLastAggregatedBalanceAdjustmentFactorForQuery(
+          request.securityId,
+          request.targetId,
+        ),
+      );
+
+    return getLastAggregatedBalanceAdjustmentFactorForQueryResponse.payload;
   }
 }
 
