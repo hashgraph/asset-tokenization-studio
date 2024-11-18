@@ -211,7 +211,7 @@ import { SetVotingRightsCommand } from '../../app/usecase/command/equity/votingR
 import { GetVotingQuery } from '../../app/usecase/query/equity/votingRights/getVoting/GetVotingQuery.js';
 import { GetVotingCountQuery } from '../../app/usecase/query/equity/votingRights/getVotingCount/GetVotingCountQuery.js';
 import { GetVotingForQuery } from '../../app/usecase/query/equity/votingRights/getVotingFor/GetVotingForQuery.js';
-import { SetScheduledBalanceAdjustmentCommand } from '../../app/usecase/command/equity/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand.js';
+import { SetScheduledBalanceAdjustmentCommand } from '../../app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand.js';
 import Injectable from '../../core/Injectable.js';
 import { CommandBus } from '../../core/command/CommandBus.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
@@ -249,7 +249,7 @@ import {
 import SetScheduledBalanceAdjustmentRequest from './request/SetScheduledBalanceAdjustmentRequest.js';
 import GetScheduledBalanceAdjustmentRequest from './request/GetScheduledBalanceAdjustmentRequest.js';
 import ScheduledBalanceAdjustmentViewModel from './response/ScheduledBalanceAdjustmentViewModel.js';
-import { GetScheduledBalanceAdjustmentQuery } from '../../app/usecase/query/equity/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery.js';
+import { GetScheduledBalanceAdjustmentQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery.js';
 
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{

@@ -203,22 +203,22 @@
 
 */
 
-import { ScheduledBalanceAdjustment } from '../../../../../domain/context/equity/ScheduledBalanceAdjustment.js';
-import { Query } from '../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../core/query/QueryResponse.js';
+import { Command } from '../../../../../../core/command/Command.js';
+import { CommandResponse } from '../../../../../../core/command/CommandResponse.js';
 
-export class GetScheduledBalanceAdjustmentQueryResponse
-  implements QueryResponse
-{
+export class SetScheduledBalanceAdjustmentCommandResponse implements CommandResponse {
   constructor(
-    public readonly scheduleBalanceAdjustment: ScheduledBalanceAdjustment,
+    public readonly payload: number,
+    public readonly transactionId: string,
   ) {}
 }
 
-export class GetScheduledBalanceAdjustmentQuery extends Query<GetScheduledBalanceAdjustmentQueryResponse> {
+export class SetScheduledBalanceAdjustmentCommand extends Command<SetScheduledBalanceAdjustmentCommandResponse> {
   constructor(
     public readonly securityId: string,
-    public readonly balanceAdjustmentId: number,
+    public readonly executionDate: string,
+    public readonly factor: string,
+    public readonly decimals: string,
   ) {
     super();
   }
