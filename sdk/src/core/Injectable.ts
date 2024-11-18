@@ -582,6 +582,10 @@ const QUERY_HANDLERS = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
+    useClass: GetScheduledBalanceAdjustmentQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
     useClass: GetScheduledBalanceAdjustmentCountQueryHandler,
   },
 ];

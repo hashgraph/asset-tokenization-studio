@@ -320,5 +320,6 @@ export {
   UpdateMaturityDateRequest,
   SetScheduledBalanceAdjustmentRequest,
   GetScheduledBalanceAdjustmentRequest,
-  GetScheduledBalanceAdjustmentCountRequest,
+    GetScheduledBalanceAdjustmentCountRequest,
+
 };

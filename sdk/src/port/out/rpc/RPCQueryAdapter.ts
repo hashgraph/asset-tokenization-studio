@@ -1091,16 +1091,16 @@ export class RPCQueryAdapter {
     );
   }
 
-  async getScheduledBalanceAdjustmentCount(
-    address: EvmAddress,
-  ): Promise<number> {
-    LogService.logTrace(`Getting scheduled balance adjustment count`);
+    async getScheduledBalanceAdjustmentCount(
+        address: EvmAddress,
+    ): Promise<number> {
+        LogService.logTrace(`Getting scheduled balance adjustment count`);
 
-    const scheduledBalanceAdjustmentCount = await this.connect(
-      Equity__factory,
-      address.toString(),
-    ).getScheduledBalanceAdjustmentCount();
+        const scheduledBalanceAdjustmentCount = await this.connect(
+            Equity__factory,
+            address.toString(),
+        ).getScheduledBalanceAdjustmentCount();
 
-    return scheduledBalanceAdjustmentCount.toNumber();
-  }
+        return scheduledBalanceAdjustmentCount.toNumber();
+    }
 }

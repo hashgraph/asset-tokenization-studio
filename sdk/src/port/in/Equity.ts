@@ -246,7 +246,6 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../../domain/context/factory/RegulationType.js';
-
 import SetScheduledBalanceAdjustmentRequest from './request/SetScheduledBalanceAdjustmentRequest.js';
 import GetScheduledBalanceAdjustmentRequest from './request/GetScheduledBalanceAdjustmentRequest.js';
 import ScheduledBalanceAdjustmentViewModel from './response/ScheduledBalanceAdjustmentViewModel.js';
@@ -287,12 +286,9 @@ interface IEquityInPort {
   setScheduledBalanceAdjustment(
     request: SetScheduledBalanceAdjustmentRequest,
   ): Promise<{ payload: number; transactionId: string }>;
-  getScheduledBalanceAdjustmentsCount(
-    request: GetScheduledBalanceAdjustmentCountRequest,
-  ): Promise<number>;
-  setScheduledBalanceAdjustment(
-    request: SetScheduledBalanceAdjustmentRequest,
-  ): Promise<{ payload: number; transactionId: string }>;
+    getScheduledBalanceAdjustmentsCount(
+        request: GetScheduledBalanceAdjustmentCountRequest,
+    ): Promise<number>;
 }
 
 class EquityInPort implements IEquityInPort {
@@ -597,21 +593,6 @@ class EquityInPort implements IEquityInPort {
   }
 
   @LogError
-  async getScheduledBalanceAdjustmentsCount(
-    request: GetScheduledBalanceAdjustmentCountRequest,
-  ): Promise<number> {
-    const { securityId } = request;
-    handleValidation('GetScheduledBalanceAdjustmentCountRequest', request);
-
-    const getScheduledBalanceAdjustmentCountQueryResponse =
-      await this.queryBus.execute(
-        new GetScheduledBalanceAdjustmentCountQuery(securityId),
-      );
-
-    return getScheduledBalanceAdjustmentCountQueryResponse.payload;
-  }
-
-  @LogError
   async getScheduledBalanceAdjustment(
     request: GetScheduledBalanceAdjustmentRequest,
   ): Promise<ScheduledBalanceAdjustmentViewModel> {
@@ -635,6 +616,21 @@ class EquityInPort implements IEquityInPort {
 
     return scheduledBalanceAdjustment;
   }
+
+    @LogError
+    async getScheduledBalanceAdjustmentsCount(
+        request: GetScheduledBalanceAdjustmentCountRequest,
+    ): Promise<number> {
+        const { securityId } = request;
+        handleValidation('GetScheduledBalanceAdjustmentCountRequest', request);
+
+        const getScheduledBalanceAdjustmentCountQueryResponse =
+            await this.queryBus.execute(
+                new GetScheduledBalanceAdjustmentCountQuery(securityId),
+            );
+
+        return getScheduledBalanceAdjustmentCountQueryResponse.payload;
+    }
 }
 
 const EquityToken = new EquityInPort();
