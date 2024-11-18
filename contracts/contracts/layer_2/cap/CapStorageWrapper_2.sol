@@ -247,7 +247,7 @@ abstract contract CapStorageWrapper_2 is
 
     function _calculateCombinedFactorForPartition(bytes32 partition_) internal view returns (uint256) {
         uint256 scheduledTasksLength = _getScheduledBalanceAdjustmentCount();
-        uint256 combinedFactor = 0;
+        uint256 combinedFactor = 1;
 
         for (uint256 i = 0; i < scheduledTasksLength; i++) {
             ScheduledTasksLib.ScheduledTask memory task = ScheduledTasksLib._getScheduledTasksByIndex(
@@ -255,9 +255,19 @@ abstract contract CapStorageWrapper_2 is
                 i
             );
 
+//            bytes32 actionId = abi.decode(task, (bytes32));
+//            (,bytes memory balanceAdjustmentData) = _getCorporateAction(actionId);
+//            IEquity.ScheduledBalanceAdjustment memory balanceAdjustment =
+//                abi.decode(balanceAdjustmentData,(IEquity.ScheduledBalanceAdjustment)
+//            );
+//            combinedFactor *= balanceAdjustment
+
             if (task.scheduledTimestamp <= block.timestamp) {
-                (uint256 taskABAF) = abi.decode(task.data, (uint256));
+                (bytes32 taskPartition, uint256 taskABAF) = abi.decode(task.data, (bytes32, uint256));
+
+                if (taskPartition == partition_) {
                     combinedFactor *= taskABAF;
+                }
             }
         }
 
