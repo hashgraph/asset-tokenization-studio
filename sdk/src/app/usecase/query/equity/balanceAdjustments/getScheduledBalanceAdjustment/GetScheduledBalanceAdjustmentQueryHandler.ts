@@ -203,43 +203,39 @@
 
 */
 
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import {
-  SetScheduledBalanceAdjustmentCommand,
-  SetScheduledBalanceAdjustmentCommandResponse,
-} from './SetScheduledBalanceAdjustmentCommand.js';
-import TransactionService from '../../../../service/TransactionService.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import BigDecimal from '../../../../../domain/context/shared/BigDecimal.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import AccountService from '../../../../service/AccountService.js';
-import { SecurityRole } from '../../../../../domain/context/security/SecurityRole.js';
+  GetScheduledBalanceAdjustmentQuery,
+  GetScheduledBalanceAdjustmentQueryResponse,
+} from './GetScheduledBalanceAdjustmentQuery.js';
 
-@CommandHandler(SetScheduledBalanceAdjustmentCommand)
-export class SetScheduledBalanceAdjustmentCommandHandler
-  implements ICommandHandler<SetScheduledBalanceAdjustmentCommand>
+@QueryHandler(GetScheduledBalanceAdjustmentQuery)
+export class GetScheduledBalanceAdjustmentQueryHandler
+  implements IQueryHandler<GetScheduledBalanceAdjustmentQuery>
 {
   constructor(
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
     @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
   ) {}
 
   async execute(
-    command: SetScheduledBalanceAdjustmentCommand,
-  ): Promise<SetScheduledBalanceAdjustmentCommandResponse> {
-    const { securityId, executionDate, factor, decimals } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
+    query: GetScheduledBalanceAdjustmentQuery,
+  ): Promise<GetScheduledBalanceAdjustmentQueryResponse> {
+    const { securityId, balanceAdjustmentId } = query;
+
+    const security = await this.securityService.get(securityId);
+    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
       HEDERA_FORMAT_ID_REGEX.exec(securityId)
@@ -247,61 +243,11 @@ export class SetScheduledBalanceAdjustmentCommandHandler
         : securityId,
     );
 
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new Error('The security is currently paused');
-    }
-
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._CORPORATEACTIONS_ROLE,
-      ))
-    ) {
-      throw new Error(
-        `The account trying to perform the operation doesn't have the needed role (${SecurityRole._CORPORATEACTIONS_ROLE})`,
-      );
-    }
-
-    const res = await handler.setScheduledBalanceAdjustment(
+    const res = await this.queryAdapter.getScheduledBalanceAdjustment(
       securityEvmAddress,
-      BigDecimal.fromString(executionDate),
-      BigDecimal.fromString(factor),
-      BigDecimal.fromString(decimals),
-      securityId,
+      balanceAdjustmentId,
     );
 
-    if (!res.id)
-      throw new Error(
-        'Set Scheduler Balance Adjustment Command Handler response id empty',
-      );
-
-    let balanceAdjustmentId: string;
-
-    if (res.response && res.response.balanceAdjustmentID) {
-      balanceAdjustmentId = res.response.balanceAdjustmentID;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
-      }
-
-      balanceAdjustmentId = results[1];
-    }
-
-    return Promise.resolve(
-      new SetScheduledBalanceAdjustmentCommandResponse(
-        parseInt(balanceAdjustmentId, 16),
-        res.id!,
-      ),
-    );
+    return Promise.resolve(new GetScheduledBalanceAdjustmentQueryResponse(res));
   }
 }

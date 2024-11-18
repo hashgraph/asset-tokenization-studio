@@ -203,23 +203,29 @@
 
 */
 
-import { Command } from '../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../core/command/CommandResponse.js';
+import { MIN_ID } from '../../../domain/context/security/CorporateAction.js';
+import ValidatedRequest from './validation/ValidatedRequest.js';
+import Validation from './validation/Validation.js';
 
-export class SetScheduledBalanceAdjustmentCommandResponse implements CommandResponse {
-  constructor(
-    public readonly payload: number,
-    public readonly transactionId: string,
-  ) {}
-}
+export default class GetScheduledBalanceAdjustmentRequest extends ValidatedRequest<GetScheduledBalanceAdjustmentRequest> {
+  securityId: string;
+  balanceAdjustmentId: number;
 
-export class SetScheduledBalanceAdjustmentCommand extends Command<SetScheduledBalanceAdjustmentCommandResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly executionDate: string,
-    public readonly factor: string,
-    public readonly decimals: string,
-  ) {
-    super();
+  constructor({
+    securityId,
+    balanceAdjustmentId,
+  }: {
+    securityId: string;
+    balanceAdjustmentId: number;
+  }) {
+    super({
+      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      balanceAdjustmentId: Validation.checkNumber({
+        max: undefined,
+        min: MIN_ID,
+      }),
+    });
+    this.securityId = securityId;
+    this.balanceAdjustmentId = balanceAdjustmentId;
   }
 }
