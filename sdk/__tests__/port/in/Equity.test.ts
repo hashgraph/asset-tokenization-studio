@@ -249,6 +249,7 @@ import {
   RegulationSubType,
   RegulationType,
 } from '../../../src/domain/context/factory/RegulationType.js';
+import { GetAllScheduledBalanceAdjustmentsRequest } from '../../../src';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -599,6 +600,51 @@ describe('🧪 Equity test', () => {
 
     expect(count).toBeDefined();
     expect(typeof count).toBe('number');
+
+    await Role.revokeRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+  }, 60_000);
+
+  it('Get All Scheduled Balance Adjustments', async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    const decimals = '2';
+    const recordTimestamp = Math.ceil(new Date().getTime() / 1000) + 1000;
+    const executionTimestamp = recordTimestamp + 1000;
+
+    await Equity.setScheduledBalanceAdjustment(
+      new SetScheduledBalanceAdjustmentRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        executionDate: executionTimestamp.toString(),
+        factor,
+        decimals,
+      }),
+    );
+
+    const allScheduledAdjustments =
+      await Equity.getAllScheduledBalanceAdjustments(
+        new GetAllScheduledBalanceAdjustmentsRequest({
+          securityId: equity.evmDiamondAddress!.toString(),
+        }),
+      );
+
+    expect(allScheduledAdjustments.length).toEqual(1);
+    expect(allScheduledAdjustments[0].factor).toEqual(factor);
+    expect(allScheduledAdjustments[0].decimals).toEqual(decimals);
+    expect(allScheduledAdjustments[0].executionDate.getTime() / 1000).toEqual(
+      executionTimestamp,
+    );
 
     await Role.revokeRole(
       new RoleRequest({

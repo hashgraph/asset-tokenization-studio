@@ -252,6 +252,7 @@ import ScheduledBalanceAdjustmentViewModel from './response/ScheduledBalanceAdju
 import { GetScheduledBalanceAdjustmentQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery.js';
 import GetScheduledBalanceAdjustmentCountRequest from './request/GetScheduledBalanceAdjustmentsCountRequest';
 import { GetScheduledBalanceAdjustmentCountQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
+import { GetAllScheduledBalanceAdjustmentsRequest } from './request';
 import GetLastAggregatedBalanceAdjustmentFactorForRequest from './request/GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
 import { GetLastAggregatedBalanceAdjustmentFactorForQuery } from '../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQuery.js';
 
@@ -294,6 +295,9 @@ interface IEquityInPort {
   getScheduledBalanceAdjustment(
     request: GetScheduledBalanceAdjustmentRequest,
   ): Promise<ScheduledBalanceAdjustmentViewModel>;
+  getAllScheduledBalanceAdjustments(
+    request: GetAllScheduledBalanceAdjustmentsRequest,
+  ): Promise<ScheduledBalanceAdjustmentViewModel[]>;
   getLastAggregatedBalanceAdjustmentFactorFor(
     request: GetLastAggregatedBalanceAdjustmentFactorForRequest,
   ): Promise<number>;
@@ -638,6 +642,41 @@ class EquityInPort implements IEquityInPort {
       );
 
     return getScheduledBalanceAdjustmentCountQueryResponse.payload;
+  }
+
+  @LogError
+  async getAllScheduledBalanceAdjustments(
+    request: GetAllScheduledBalanceAdjustmentsRequest,
+  ): Promise<ScheduledBalanceAdjustmentViewModel[]> {
+    handleValidation('GetAllScheduledBalanceAdjustmentsRequest', request);
+
+    const count = await this.queryBus.execute(
+      new GetScheduledBalanceAdjustmentCountQuery(request.securityId),
+    );
+
+    if (count.payload == 0) return [];
+
+    const scheduledBalanceAdjustments: ScheduledBalanceAdjustmentViewModel[] =
+      [];
+
+    for (let i = 1; i <= count.payload; i++) {
+      const res = await this.queryBus.execute(
+        new GetScheduledBalanceAdjustmentQuery(request.securityId, i),
+      );
+
+      const scheduledBalanceAdjustment: ScheduledBalanceAdjustmentViewModel = {
+        id: i,
+        executionDate: new Date(
+          res.scheduleBalanceAdjustment.executionTimeStamp * ONE_THOUSAND,
+        ),
+        factor: res.scheduleBalanceAdjustment.factor.toString(),
+        decimals: res.scheduleBalanceAdjustment.decimals.toString(),
+      };
+
+      scheduledBalanceAdjustments.push(scheduledBalanceAdjustment);
+    }
+
+    return scheduledBalanceAdjustments;
   }
 
   @LogError
