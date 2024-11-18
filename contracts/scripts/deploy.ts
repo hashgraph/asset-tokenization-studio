@@ -220,7 +220,6 @@ import {
     ERC1644__factory,
     ERC20__factory,
     Factory__factory,
-    Lock__factory,
     Pause__factory,
     ProxyAdmin__factory,
     ScheduledSnapshots__factory,
@@ -228,6 +227,7 @@ import {
     Snapshots__factory,
     TransferAndLock__factory,
     TransparentUpgradeableProxy__factory,
+    Lock_2__factory,
 } from '../typechain-types'
 import {
     getEnvVar,
@@ -703,7 +703,7 @@ export async function deployContract({
         snapshots: { factory: Snapshots__factory },
         corporateactions: { factory: CorporateActionsSecurity__factory },
         transferandlock: { factory: TransferAndLock__factory },
-        lock: { factory: Lock__factory },
+        lock: { factory: Lock_2__factory },
     }
 
     const contractKey = Object.keys(contractMap).find((contractType) =>
