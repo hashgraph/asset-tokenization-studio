@@ -289,6 +289,9 @@ interface IEquityInPort {
   getScheduledBalanceAdjustmentsCount(
     request: GetScheduledBalanceAdjustmentCountRequest,
   ): Promise<number>;
+  getScheduledBalanceAdjustment(
+    request: GetScheduledBalanceAdjustmentRequest,
+  ): Promise<ScheduledBalanceAdjustmentViewModel>;
 }
 
 class EquityInPort implements IEquityInPort {
