@@ -228,10 +228,39 @@ abstract contract CapStorageWrapper_2 is
     function _getMaxSupplyByPartition(
         bytes32 partition_
     ) internal view override returns (uint256 maxSupply_) {
+
+        // Se actualiza porque estaran desincronizados (o no)
         uint256 factor = AdjustBalanceLib._calculateFactor(
             _getERC1410BasicStorage_2().ABAF,
             _getERC1410BasicStorage_2().LABAF_partition[partition_]
         );
-        return _capStorage().maxSupply * factor;
+        // Obtener el factor combinado a partir de las tareas programadas
+        uint256 combinedFactor = _calculateCombinedFactorForPartition(partition_);
+
+        // Multiplicar el factor inicial por el factor combinado
+        factor *= combinedFactor;
+
+        // Calcular el supply máximo ajustado
+        uint256 maxSupply = _capStorage().maxSupply;
+        maxSupply_ = maxSupply * factor;
+    }
+
+    function _calculateCombinedFactorForPartition(bytes32 partition_) internal view returns (uint256) {
+        uint256 scheduledTasksLength = _getScheduledBalanceAdjustmentCount();
+        uint256 combinedFactor = 0;
+
+        for (uint256 i = 0; i < scheduledTasksLength; i++) {
+            ScheduledTasksLib.ScheduledTask memory task = ScheduledTasksLib._getScheduledTasksByIndex(
+                _scheduledBalanceAdjustmentStorage(),
+                i
+            );
+
+            if (task.scheduledTimestamp <= block.timestamp) {
+                (uint256 taskABAF) = abi.decode(task.data, (uint256));
+                    combinedFactor *= taskABAF;
+            }
+        }
+
+        return combinedFactor;
     }
 }
