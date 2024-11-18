@@ -1449,6 +1449,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       parseInt(_decimals.toString()),
     );
 
+    scheduledBalanceAdjustments.pop();
     scheduledBalanceAdjustments.push(scheduledBalanceAdjustment);
 
     return {
