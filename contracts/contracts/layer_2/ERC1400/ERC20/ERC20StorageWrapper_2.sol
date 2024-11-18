@@ -203,168 +203,120 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LockStorageWrapper_2} from './LockStorageWrapper_2.sol';
-import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
-import {Lock} from '../../layer_1/lock/Lock.sol';
-import {ILock_2} from '../interfaces/lock/ILock_2.sol';
-import {ILock} from '../../layer_1/interfaces/lock/ILock.sol';
-import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
-import {_LOCK_RESOLVER_KEY} from '../../layer_1/constants/resolverKeys.sol';
+import {
+    ERC20StorageWrapper
+} from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {_DEFAULT_PARTITION} from '../../../layer_1/constants/values.sol';
+import {_ERC20_2_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
 
-contract Lock_2 is ILock_2, Lock, LockStorageWrapper_2 {
-    function getTotalLockLABAFByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view virtual returns (uint256 LABAF_) {
-        return _getTotalLockLABAFByPartition(_partition, _tokenHolder);
+abstract contract ERC20StorageWrapper_2 is
+    ERC20StorageWrapper,
+    ERC1410ScheduledTasksStorageWrapper
+{
+    struct ERC20Storage_2 {
+        mapping(address => mapping(address => uint256)) LABAFs_allowances;
     }
 
-    function getLockLABAFByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) external view virtual returns (uint256 LABAF_) {
-        return _getLockLABAFByPartition(_partition, _lockId, _tokenHolder);
-    }
-
-    function getTotalLockLABAF(
-        address _tokenHolder
-    ) external view virtual onlyWithoutMultiPartition returns (uint256 LABAF_) {
-        return _getTotalLockLABAFByPartition(_DEFAULT_PARTITION, _tokenHolder);
-    }
-
-    function getLockLABAF(
-        uint256 _lockId,
-        address _tokenHolder
-    ) external view virtual onlyWithoutMultiPartition returns (uint256 LABAF_) {
-        return
-            _getLockLABAFByPartition(_DEFAULT_PARTITION, _lockId, _tokenHolder);
-    }
-
-    function _lockByPartition(
-        bytes32 _partition,
-        uint256 _amount,
-        address _tokenHolder,
-        uint256 _expirationTimestamp
+    function _beforeTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
     )
         internal
         virtual
-        override(LockStorageWrapper, LockStorageWrapper_2)
-        returns (bool success_, uint256 lockId_)
+        override(
+            ERC1410BasicStorageWrapper,
+            ERC1410ScheduledTasksStorageWrapper
+        )
     {
-        return
-            LockStorageWrapper_2._lockByPartition(
-                _partition,
-                _amount,
-                _tokenHolder,
-                _expirationTimestamp
-            );
-    }
-
-    function _releaseByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    )
-        internal
-        virtual
-        override(LockStorageWrapper, LockStorageWrapper_2)
-        returns (bool success_)
-    {
-        return
-            LockStorageWrapper_2._releaseByPartition(
-                _partition,
-                _lockId,
-                _tokenHolder
-            );
-    }
-
-    function _setLockAtIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockIndex,
-        LockData memory _lock
-    ) internal virtual override(LockStorageWrapper, LockStorageWrapper_2) {
-        LockStorageWrapper_2._setLockAtIndex(
-            _partition,
-            _tokenHolder,
-            _lockIndex,
-            _lock
+        ERC1410ScheduledTasksStorageWrapper._beforeTokenTransfer(
+            partition,
+            from,
+            to,
+            amount
         );
     }
 
-    function getStaticResolverKey()
-        external
-        pure
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
         virtual
-        override
-        returns (bytes32 staticResolverKey_)
+        override(
+            ERC1410BasicStorageWrapper,
+            ERC1410ScheduledTasksStorageWrapper
+        )
     {
-        staticResolverKey_ = _LOCK_RESOLVER_KEY;
+        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](16);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .releaseByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockedAmountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockCountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLocksIdForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.lock.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.release.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockedAmountFor
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockCountFor
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getLocksIdFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getLockFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLABAFByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockLABAFByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLABAF
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getLockLABAF.selector;
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
+        uint256 _amount,
+        bool _isIncrease
+    ) internal virtual override {
+        _triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
+
+        _updateAllowanceAndLABAF(_owner, _spender);
+
+        super._beforeAllowanceUpdate(_owner, _spender, _amount, _isIncrease);
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
+    function _updateAllowanceAndLABAF(
+        address _owner,
+        address _spender
+    ) internal virtual {
+        ERC1410BasicStorage_2
+            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
+        ERC20Storage_2 storage erc20Storage_2 = _getErc20Storage_2();
+
+        uint256 ABAF = erc1410Storage_2.ABAF;
+        uint256 LABAF = _getAllowanceLABAF(_owner, _spender);
+
+        if (ABAF == LABAF) return;
+
+        uint256 factor = AdjustBalanceLib._calculateFactor(ABAF, LABAF);
+
+        _getErc20Storage().allowed[_owner][_spender] *= factor;
+        erc20Storage_2.LABAFs_allowances[_owner][_spender] = ABAF;
+    }
+
+    function _getAllowanceLABAF(
+        address _owner,
+        address _spender
+    ) internal view virtual returns (uint256) {
+        ERC20Storage_2 storage erc20Storage_2 = _getErc20Storage_2();
+        return erc20Storage_2.LABAFs_allowances[_owner][_spender];
+    }
+
+    function _getErc20Storage_2()
+        internal
+        view
         virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
+        returns (ERC20Storage_2 storage erc20Storage_2_)
     {
-        staticInterfaceIds_ = new bytes4[](2);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ILock).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(ILock_2).interfaceId;
+        bytes32 position = _ERC20_2_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc20Storage_2_.slot := position
+        }
     }
 }

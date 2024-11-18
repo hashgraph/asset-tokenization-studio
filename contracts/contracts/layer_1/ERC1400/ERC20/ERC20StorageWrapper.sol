@@ -269,6 +269,7 @@ abstract contract ERC20StorageWrapper is
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
+        _beforeAllowanceUpdate(_msgSender(), spender, addedValue, true);
 
         _getErc20Storage().allowed[_msgSender()][spender] += addedValue;
         emit Approval(
@@ -387,8 +388,17 @@ abstract contract ERC20StorageWrapper is
         if (value > erc20Storage.allowed[from][spender]) {
             revert InsufficientAllowance(spender, from);
         }
+        _beforeAllowanceUpdate(_msgSender(), spender, value, false);
+
         erc20Storage.allowed[from][spender] -= value;
     }
+
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
+        uint256 _amount,
+        bool _isIncrease
+    ) internal virtual {}
 
     function _emitTransferEvent(
         address from,

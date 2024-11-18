@@ -211,7 +211,7 @@ import {
     type AccessControl,
     type Pause,
     type ControlList,
-    type ERC20,
+    type ERC20_2,
     type ERC1410ScheduledTasks,
     type Equity,
     type Snapshots,
@@ -239,7 +239,7 @@ import {
 } from '../../scripts/factory'
 
 const _MINUTE_1 = 6000
-const _BUSINESS_LOGIC_COUNT = 17
+const _BUSINESS_LOGIC_COUNT = 19
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 
@@ -308,16 +308,16 @@ Deployed contracts:
             await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticFunctionSelectors()
         )},
     ERC20: 
-        address: ${environment.deployedBusinessLogics.eRC20.address},
-        key: ${await environment.deployedBusinessLogics.eRC20.getStaticResolverKey()},
+        address: ${environment.deployedBusinessLogics.eRC20_2.address},
+        key: ${await environment.deployedBusinessLogics.eRC20_2.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.eRC20.getStaticFunctionSelectors()
+            await environment.deployedBusinessLogics.eRC20_2.getStaticFunctionSelectors()
         )},
     ERC1644: 
-        address: ${environment.deployedBusinessLogics.eRC1644.address},
-        key: ${await environment.deployedBusinessLogics.eRC1644.getStaticResolverKey()},
+        address: ${environment.deployedBusinessLogics.eRC1644_2.address},
+        key: ${await environment.deployedBusinessLogics.eRC1644_2.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.eRC1644.getStaticFunctionSelectors()
+            await environment.deployedBusinessLogics.eRC1644_2.getStaticFunctionSelectors()
         )},
     ERC1410: 
         address: ${
@@ -328,10 +328,10 @@ Deployed contracts:
             await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticFunctionSelectors()
         )},
     ERC1594: 
-        address: ${environment.deployedBusinessLogics.eRC1594.address},
-        key: ${await environment.deployedBusinessLogics.eRC1594.getStaticResolverKey()},
+        address: ${environment.deployedBusinessLogics.eRC1594_2.address},
+        key: ${await environment.deployedBusinessLogics.eRC1594_2.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.eRC1594.getStaticFunctionSelectors()
+            await environment.deployedBusinessLogics.eRC1594_2.getStaticFunctionSelectors()
         )},
     ERC1643: 
         address: ${environment.deployedBusinessLogics.eRC1643.address},
@@ -371,7 +371,21 @@ Deployed contracts:
         selectors: ${JSON.stringify(
             await environment.deployedBusinessLogics.scheduledSnapshots.getStaticFunctionSelectors()
         )},
-        
+    ScheduledBalanceAdjustments: 
+        address: ${
+            environment.deployedBusinessLogics.scheduledBalanceAdjustments
+                .address
+        },
+        key: ${await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticResolverKey()},
+        selectors: ${JSON.stringify(
+            await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticFunctionSelectors()
+        )},
+    AdjustBalances: 
+        address: ${environment.deployedBusinessLogics.adjustBalances.address},
+        key: ${await environment.deployedBusinessLogics.adjustBalances.getStaticResolverKey()},
+        selectors: ${JSON.stringify(
+            await environment.deployedBusinessLogics.adjustBalances.getStaticFunctionSelectors()
+        )},
         `)
 
         expect(await environment.resolver.getVersionStatus(1)).to.be.equal(
@@ -408,14 +422,14 @@ Deployed contracts:
         )
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.eRC20.getStaticResolverKey()
+                await environment.deployedBusinessLogics.eRC20_2.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.eRC20.address)
+        ).to.be.equal(environment.deployedBusinessLogics.eRC20_2.address)
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.eRC1644.getStaticResolverKey()
+                await environment.deployedBusinessLogics.eRC1644_2.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.eRC1644.address)
+        ).to.be.equal(environment.deployedBusinessLogics.eRC1644_2.address)
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticResolverKey()
@@ -425,9 +439,9 @@ Deployed contracts:
         )
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.eRC1594.getStaticResolverKey()
+                await environment.deployedBusinessLogics.eRC1594_2.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.eRC1594.address)
+        ).to.be.equal(environment.deployedBusinessLogics.eRC1594_2.address)
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey()
@@ -466,6 +480,21 @@ Deployed contracts:
         ).to.be.equal(
             await environment.deployedBusinessLogics.scheduledSnapshots.address
         )
+        expect(
+            await environment.resolver.resolveLatestBusinessLogic(
+                await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticResolverKey()
+            )
+        ).to.be.equal(
+            await environment.deployedBusinessLogics.scheduledBalanceAdjustments
+                .address
+        )
+        expect(
+            await environment.resolver.resolveLatestBusinessLogic(
+                await environment.deployedBusinessLogics.adjustBalances.getStaticResolverKey()
+            )
+        ).to.be.equal(
+            await environment.deployedBusinessLogics.adjustBalances.address
+        )
         expect(await environment.resolver.getBusinessLogicCount()).to.be.equal(
             _BUSINESS_LOGIC_COUNT
         )
@@ -481,10 +510,10 @@ Deployed contracts:
                 await environment.deployedBusinessLogics.pause.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.controlList.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.eRC20.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.eRC1644.getStaticResolverKey(),
+                await environment.deployedBusinessLogics.eRC20_2.getStaticResolverKey(),
+                await environment.deployedBusinessLogics.eRC1644_2.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.eRC1594.getStaticResolverKey(),
+                await environment.deployedBusinessLogics.eRC1594_2.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.equityUSA.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.bondUSA.getStaticResolverKey(),
@@ -493,6 +522,8 @@ Deployed contracts:
                 await environment.deployedBusinessLogics.cap.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.lock_2.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.transferAndLock.getStaticResolverKey(),
+                await environment.deployedBusinessLogics.adjustBalances.getStaticResolverKey(),
+                await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticResolverKey(),
             ].sort()
         )
         console.log(
@@ -583,12 +614,12 @@ DiamondResume:
     )}
     DiamondLoupe.facetFunctionSelectors[erc20]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.eRC20.getStaticResolverKey()
+            await environment.deployedBusinessLogics.eRC20_2.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc1644]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.eRC1644.getStaticResolverKey()
+            await environment.deployedBusinessLogics.eRC1644_2.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc1410]: ${JSON.stringify(
@@ -598,7 +629,7 @@ DiamondResume:
     )}
     DiamondLoupe.facetFunctionSelectors[erc1594]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.eRC1594.getStaticResolverKey()
+            await environment.deployedBusinessLogics.eRC1594_2.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc1643]: ${JSON.stringify(
@@ -678,8 +709,8 @@ DiamondResume:
             diamond.address
         )
 
-        const erc20Facet: ERC20 = await ethers.getContractAt(
-            'ERC20',
+        const erc20Facet: ERC20_2 = await ethers.getContractAt(
+            'ERC20_2',
             await diamond.address
         )
 
