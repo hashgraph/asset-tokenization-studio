@@ -228,13 +228,8 @@ abstract contract CapStorageWrapper_2 is
         override
         returns (uint256 maxSupply_)
     {
-        return _capStorage().maxSupply * _getERC1410BasicStorage_2().ABAF;
-    }
-
-    function _getMaxSupplyByPartition(
-        bytes32 partition_
-    ) internal view override returns (uint256 maxSupply_) {
-        uint256 preAdjustmentAbaf = _getERC1410BasicStorage_2().ABAF;
+        // Get current ABAF witout scheduled tasks
+        uint256 finalAbaf = _getERC1410BasicStorage_2().ABAF;
         uint256 scheduledCount = _getScheduledBalanceAdjustmentCount();
         if (scheduledCount > 0) {
             // calculate pages of 50 items per page
@@ -275,15 +270,70 @@ abstract contract CapStorageWrapper_2 is
                                     balanceAdjustmentData,
                                     (IEquity.ScheduledBalanceAdjustment)
                                 );
+                            // Update ABAF iteratively
+                            finalAbaf *= balanceAdjustment.factor;
+                        }
+                    }
+                }
+            }
+        }
+        return _capStorage().maxSupply * finalAbaf;
+    }
 
-                            preAdjustmentAbaf *= balanceAdjustment.factor;
+    function _getMaxSupplyByPartition(
+        bytes32 partition_
+    ) internal view override returns (uint256 maxSupply_) {
+        // Get current ABAF witout scheduled tasks
+        uint256 finalAbaf = _getERC1410BasicStorage_2().ABAF;
+        uint256 scheduledCount = _getScheduledBalanceAdjustmentCount();
+        if (scheduledCount > 0) {
+            // calculate pages of 50 items per page
+            uint256 pageCount = scheduledCount / 50;
+            uint256 pageCountRemainder = scheduledCount % 50;
+            if (pageCountRemainder > 0) {
+                pageCount++;
+            }
+            for (uint256 i = 0; i < pageCount; i++) {
+                // Get scheduled tasks for page
+                ScheduledTasksLib.ScheduledTask[] memory scheduledTasks;
+                if (i == pageCount - 1) {
+                    scheduledTasks = _getScheduledBalanceAdjustments(
+                        i,
+                        pageCountRemainder
+                    );
+                } else {
+                    scheduledTasks = _getScheduledBalanceAdjustments(i, 50);
+                }
+                // Within the page, iterate through the scheduled tasks
+                for (uint256 j = 0; j < scheduledTasks.length; j++) {
+                    if (
+                        scheduledTasks[j].scheduledTimestamp <=
+                        block.timestamp &&
+                        scheduledTasks[j].data.length > 0
+                    ) {
+                        bytes32 actionId = abi.decode(
+                            scheduledTasks[j].data,
+                            (bytes32)
+                        );
+                        (
+                            ,
+                            bytes memory balanceAdjustmentData
+                        ) = _getCorporateAction(actionId);
+                        if (balanceAdjustmentData.length > 0) {
+                            IEquity.ScheduledBalanceAdjustment
+                                memory balanceAdjustment = abi.decode(
+                                    balanceAdjustmentData,
+                                    (IEquity.ScheduledBalanceAdjustment)
+                                );
+                            // Update ABAF iteratively
+                            finalAbaf *= balanceAdjustment.factor;
                         }
                     }
                 }
             }
         }
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            preAdjustmentAbaf,
+            finalAbaf,
             _getERC1410BasicStorage_2().LABAF_partition[partition_]
         );
         return _capStorage().maxSupply * factor;
