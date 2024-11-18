@@ -300,7 +300,6 @@ let user_account: Account;
 let configVersion: number;
 let configId: string;
 let resolverAddress: string;
-let scheduledBalanceAdjustment: ScheduledBalanceAdjustment;
 
 function grantRole(account: string, newRole: SecurityRole): void {
   let r = roles.get(account);
@@ -802,7 +801,9 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
 
   singletonInstance.getScheduledBalanceAdjustment = jest.fn(
     async (address: EvmAddress, balanceAdjustmentId: number) => {
-      return scheduledBalanceAdjustment;
+      if (balanceAdjustmentId > scheduledBalanceAdjustments.length)
+        return undefined;
+      return scheduledBalanceAdjustments[balanceAdjustmentId - 1];
     },
   );
 
@@ -1442,13 +1443,13 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     _factor: number,
     _decimals: number,
   ) {
-    scheduledBalanceAdjustment = new ScheduledBalanceAdjustment(
+    const scheduledBalanceAdjustment = new ScheduledBalanceAdjustment(
       parseInt(_executionDate.toString()),
       parseInt(_factor.toString()),
       parseInt(_decimals.toString()),
     );
 
-    scheduledBalanceAdjustments.push(singletonInstance);
+    scheduledBalanceAdjustments.push(scheduledBalanceAdjustment);
 
     return {
       status: 'success',
