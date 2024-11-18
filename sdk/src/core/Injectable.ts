@@ -294,6 +294,7 @@ import { UpdateMaturityDateCommandHandler } from '../app/usecase/command/bond/up
 import { SetScheduledBalanceAdjustmentCommandHandler } from '../app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommandHandler.js';
 import { GetScheduledBalanceAdjustmentQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQueryHandler.js';
 import { GetScheduledBalanceAdjustmentCountQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQueryHandler';
+import { GetLastAggregatedBalanceAdjustmentFactorForQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -587,6 +588,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetScheduledBalanceAdjustmentCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetLastAggregatedBalanceAdjustmentFactorForQueryHandler,
   },
 ];
 

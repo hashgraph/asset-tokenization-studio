@@ -225,6 +225,7 @@ import {
   Security,
   GetScheduledBalanceAdjustmentRequest,
   GetScheduledBalanceAdjustmentCountRequest,
+  GetLastAggregatedBalanceAdjustmentFactorForRequest,
 } from '../../../src/index.js';
 import {
   CLIENT_ACCOUNT_ECDSA,
@@ -652,5 +653,17 @@ describe('🧪 Equity test', () => {
         role: SecurityRole._CORPORATEACTIONS_ROLE,
       }),
     );
+  }, 60_000);
+
+  it('Should return last aggregated balance adjustment factor for correctly', async () => {
+    const count = await Equity.getLastAggregatedBalanceAdjustmentFactorFor(
+      new GetLastAggregatedBalanceAdjustmentFactorForRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+      }),
+    );
+
+    expect(count).toBeDefined();
+    expect(typeof count).toBe('number');
   }, 60_000);
 });
