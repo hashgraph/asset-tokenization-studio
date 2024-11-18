@@ -206,15 +206,21 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
 import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
+import {ScheduledTasksLib} from '../scheduledTasks/ScheduledTasksLib.sol';
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
+    CorporateActionsStorageWrapper
+} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
 
 abstract contract CapStorageWrapper_2 is
     CapStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper // TODO: ERC1410ScheduledTasksStorageWrapperREAD.sol
+    ERC1410ScheduledTasksStorageWrapper, // TODO: ERC1410ScheduledTasksStorageWrapperREAD.sol
+    CorporateActionsStorageWrapper
 {
     function _getMaxSupply()
         internal
@@ -228,8 +234,56 @@ abstract contract CapStorageWrapper_2 is
     function _getMaxSupplyByPartition(
         bytes32 partition_
     ) internal view override returns (uint256 maxSupply_) {
+        uint256 preAdjustmentAbaf = _getERC1410BasicStorage_2().ABAF;
+        uint256 scheduledCount = _getScheduledBalanceAdjustmentCount();
+        if (scheduledCount > 0) {
+            // calculate pages of 50 items per page
+            uint256 pageCount = scheduledCount / 50;
+            uint256 pageCountRemainder = scheduledCount % 50;
+            if (pageCountRemainder > 0) {
+                pageCount++;
+            }
+            for (uint256 i = 0; i < pageCount; i++) {
+                // Get scheduled tasks for page
+                ScheduledTasksLib.ScheduledTask[] memory scheduledTasks;
+                if (i == pageCount - 1) {
+                    scheduledTasks = _getScheduledBalanceAdjustments(
+                        i,
+                        pageCountRemainder
+                    );
+                } else {
+                    scheduledTasks = _getScheduledBalanceAdjustments(i, 50);
+                }
+                // Within the page, iterate through the scheduled tasks
+                for (uint256 j = 0; j < scheduledTasks.length; j++) {
+                    if (
+                        scheduledTasks[j].scheduledTimestamp <=
+                        block.timestamp &&
+                        scheduledTasks[j].data.length > 0
+                    ) {
+                        bytes32 actionId = abi.decode(
+                            scheduledTasks[j].data,
+                            (bytes32)
+                        );
+                        (
+                            ,
+                            bytes memory balanceAdjustmentData
+                        ) = _getCorporateAction(actionId);
+                        if (balanceAdjustmentData.length > 0) {
+                            IEquity.ScheduledBalanceAdjustment
+                                memory balanceAdjustment = abi.decode(
+                                    balanceAdjustmentData,
+                                    (IEquity.ScheduledBalanceAdjustment)
+                                );
+
+                            preAdjustmentAbaf *= balanceAdjustment.factor;
+                        }
+                    }
+                }
+            }
+        }
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getERC1410BasicStorage_2().ABAF,
+            preAdjustmentAbaf,
             _getERC1410BasicStorage_2().LABAF_partition[partition_]
         );
         return _capStorage().maxSupply * factor;
