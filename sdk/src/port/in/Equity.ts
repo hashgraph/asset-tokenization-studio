@@ -286,9 +286,9 @@ interface IEquityInPort {
   setScheduledBalanceAdjustment(
     request: SetScheduledBalanceAdjustmentRequest,
   ): Promise<{ payload: number; transactionId: string }>;
-    getScheduledBalanceAdjustmentsCount(
-        request: GetScheduledBalanceAdjustmentCountRequest,
-    ): Promise<number>;
+  getScheduledBalanceAdjustmentsCount(
+    request: GetScheduledBalanceAdjustmentCountRequest,
+  ): Promise<number>;
 }
 
 class EquityInPort implements IEquityInPort {
@@ -617,20 +617,20 @@ class EquityInPort implements IEquityInPort {
     return scheduledBalanceAdjustment;
   }
 
-    @LogError
-    async getScheduledBalanceAdjustmentsCount(
-        request: GetScheduledBalanceAdjustmentCountRequest,
-    ): Promise<number> {
-        const { securityId } = request;
-        handleValidation('GetScheduledBalanceAdjustmentCountRequest', request);
+  @LogError
+  async getScheduledBalanceAdjustmentsCount(
+    request: GetScheduledBalanceAdjustmentCountRequest,
+  ): Promise<number> {
+    const { securityId } = request;
+    handleValidation('GetScheduledBalanceAdjustmentCountRequest', request);
 
-        const getScheduledBalanceAdjustmentCountQueryResponse =
-            await this.queryBus.execute(
-                new GetScheduledBalanceAdjustmentCountQuery(securityId),
-            );
+    const getScheduledBalanceAdjustmentCountQueryResponse =
+      await this.queryBus.execute(
+        new GetScheduledBalanceAdjustmentCountQuery(securityId),
+      );
 
-        return getScheduledBalanceAdjustmentCountQueryResponse.payload;
-    }
+    return getScheduledBalanceAdjustmentCountQueryResponse.payload;
+  }
 }
 
 const EquityToken = new EquityInPort();
