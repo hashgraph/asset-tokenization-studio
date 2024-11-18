@@ -291,8 +291,9 @@ import { UpdateConfigVersionCommandHandler } from '../app/usecase/command/manage
 import { UpdateResolverCommandHandler } from '../app/usecase/command/management/updateResolver/updateResolverCommandHandler.js';
 import { GetConfigInfoQueryHandler } from '../app/usecase/query/management/GetConfigInfoQueryHandler';
 import { UpdateMaturityDateCommandHandler } from '../app/usecase/command/bond/updateMaturityDate/UpdateMaturityDateCommandHandler.js';
-import { SetScheduledBalanceAdjustmentCommandHandler } from '../app/usecase/command/equity/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommandHandler.js';
-import { GetScheduledBalanceAdjustmentCountQueryHandler } from '../app/usecase/query/equity/scheduleBalanceAdjustment/getCount/GetScheduledBalanceAdjustmentsCountQueryHandler';
+import { SetScheduledBalanceAdjustmentCommandHandler } from '../app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommandHandler.js';
+import { GetScheduledBalanceAdjustmentQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQueryHandler.js';
+import { GetScheduledBalanceAdjustmentCountQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQueryHandler';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -574,6 +575,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetConfigInfoQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetScheduledBalanceAdjustmentQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,

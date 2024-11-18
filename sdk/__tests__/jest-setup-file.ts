@@ -800,6 +800,12 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     return [resolverAddress, configId, configVersion];
   });
 
+  singletonInstance.getScheduledBalanceAdjustment = jest.fn(
+    async (address: EvmAddress, balanceAdjustmentId: number) => {
+      return scheduledBalanceAdjustment;
+    },
+  );
+
   singletonInstance.getScheduledBalanceAdjustmentCount = jest.fn(
     async function (security: EvmAddress) {
       return scheduledBalanceAdjustments.length;

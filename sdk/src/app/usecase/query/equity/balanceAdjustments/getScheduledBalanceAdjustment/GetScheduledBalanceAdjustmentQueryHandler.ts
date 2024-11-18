@@ -203,50 +203,51 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../../service/SecurityService.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import {
-  GetScheduledBalanceAdjustmentCountQuery,
-  GetScheduledBalanceAdjustmentCountQueryResponse,
-} from './GetScheduledBalanceAdjustmentsCountQuery';
+  GetScheduledBalanceAdjustmentQuery,
+  GetScheduledBalanceAdjustmentQueryResponse,
+} from './GetScheduledBalanceAdjustmentQuery.js';
 
-@QueryHandler(GetScheduledBalanceAdjustmentCountQuery)
-export class GetScheduledBalanceAdjustmentCountQueryHandler
-  implements IQueryHandler<GetScheduledBalanceAdjustmentCountQuery>
+@QueryHandler(GetScheduledBalanceAdjustmentQuery)
+export class GetScheduledBalanceAdjustmentQueryHandler
+  implements IQueryHandler<GetScheduledBalanceAdjustmentQuery>
 {
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
   ) {}
 
   async execute(
-    query: GetScheduledBalanceAdjustmentCountQuery,
-  ): Promise<GetScheduledBalanceAdjustmentCountQueryResponse> {
-    const { securityId } = query;
+    query: GetScheduledBalanceAdjustmentQuery,
+  ): Promise<GetScheduledBalanceAdjustmentQueryResponse> {
+    const { securityId, balanceAdjustmentId } = query;
+
     const security = await this.securityService.get(securityId);
     if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
+      HEDERA_FORMAT_ID_REGEX.exec(securityId)
         ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
+        : securityId,
     );
 
-    const res =
-      await this.queryAdapter.getScheduledBalanceAdjustmentCount(
-        securityEvmAddress,
-      );
+    const res = await this.queryAdapter.getScheduledBalanceAdjustment(
+      securityEvmAddress,
+      balanceAdjustmentId,
+    );
 
-    return new GetScheduledBalanceAdjustmentCountQueryResponse(res);
+    return Promise.resolve(new GetScheduledBalanceAdjustmentQueryResponse(res));
   }
 }

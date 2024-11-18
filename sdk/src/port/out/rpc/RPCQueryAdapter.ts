@@ -259,6 +259,7 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../../../domain/context/factory/RegulationType.js';
+import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -1070,6 +1071,24 @@ export class RPCQueryAdapter {
       configInfo.configurationId_,
       configInfo.version_.toNumber(),
     ];
+  }
+
+  async getScheduledBalanceAdjustment(
+    address: EvmAddress,
+    balanceAdjustmentId: number,
+  ): Promise<ScheduledBalanceAdjustment> {
+    LogService.logTrace(`Getting scheduled balance adjustment`);
+
+    const scheduledBalanceAdjustmentInfo = await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getScheduledBalanceAdjustment(balanceAdjustmentId);
+
+    return new ScheduledBalanceAdjustment(
+      scheduledBalanceAdjustmentInfo.executionDate.toNumber(),
+      scheduledBalanceAdjustmentInfo.factor.toNumber(),
+      scheduledBalanceAdjustmentInfo.decimals,
+    );
   }
 
   async getScheduledBalanceAdjustmentCount(

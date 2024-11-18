@@ -211,7 +211,7 @@ import { SetVotingRightsCommand } from '../../app/usecase/command/equity/votingR
 import { GetVotingQuery } from '../../app/usecase/query/equity/votingRights/getVoting/GetVotingQuery.js';
 import { GetVotingCountQuery } from '../../app/usecase/query/equity/votingRights/getVotingCount/GetVotingCountQuery.js';
 import { GetVotingForQuery } from '../../app/usecase/query/equity/votingRights/getVotingFor/GetVotingForQuery.js';
-import { SetScheduledBalanceAdjustmentCommand } from '../../app/usecase/command/equity/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand.js';
+import { SetScheduledBalanceAdjustmentCommand } from '../../app/usecase/command/equity/balanceAdjustments/setScheduledBalanceAdjustment/SetScheduledBalanceAdjustmentCommand.js';
 import Injectable from '../../core/Injectable.js';
 import { CommandBus } from '../../core/command/CommandBus.js';
 import { LogError } from '../../core/decorator/LogErrorDecorator.js';
@@ -246,9 +246,13 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../../domain/context/factory/RegulationType.js';
+
 import SetScheduledBalanceAdjustmentRequest from './request/SetScheduledBalanceAdjustmentRequest.js';
+import GetScheduledBalanceAdjustmentRequest from './request/GetScheduledBalanceAdjustmentRequest.js';
+import ScheduledBalanceAdjustmentViewModel from './response/ScheduledBalanceAdjustmentViewModel.js';
+import { GetScheduledBalanceAdjustmentQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery.js';
 import GetScheduledBalanceAdjustmentCountRequest from './request/GetScheduledBalanceAdjustmentsCountRequest';
-import { GetScheduledBalanceAdjustmentCountQuery } from '../../app/usecase/query/equity/scheduleBalanceAdjustment/getCount/GetScheduledBalanceAdjustmentsCountQuery';
+import { GetScheduledBalanceAdjustmentCountQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
 
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{
@@ -286,6 +290,9 @@ interface IEquityInPort {
   getScheduledBalanceAdjustmentsCount(
     request: GetScheduledBalanceAdjustmentCountRequest,
   ): Promise<number>;
+  setScheduledBalanceAdjustment(
+    request: SetScheduledBalanceAdjustmentRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
 }
 
 class EquityInPort implements IEquityInPort {
@@ -602,6 +609,31 @@ class EquityInPort implements IEquityInPort {
       );
 
     return getScheduledBalanceAdjustmentCountQueryResponse.payload;
+  }
+
+  @LogError
+  async getScheduledBalanceAdjustment(
+    request: GetScheduledBalanceAdjustmentRequest,
+  ): Promise<ScheduledBalanceAdjustmentViewModel> {
+    handleValidation('GetScheduledBalanceAdjustmentRequest', request);
+
+    const res = await this.queryBus.execute(
+      new GetScheduledBalanceAdjustmentQuery(
+        request.securityId,
+        request.balanceAdjustmentId,
+      ),
+    );
+
+    const scheduledBalanceAdjustment: ScheduledBalanceAdjustmentViewModel = {
+      id: request.balanceAdjustmentId,
+      executionDate: new Date(
+        res.scheduleBalanceAdjustment.executionTimeStamp * ONE_THOUSAND,
+      ),
+      factor: res.scheduleBalanceAdjustment.factor.toString(),
+      decimals: res.scheduleBalanceAdjustment.decimals.toString(),
+    };
+
+    return scheduledBalanceAdjustment;
   }
 }
 
