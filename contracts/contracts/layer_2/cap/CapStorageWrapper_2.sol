@@ -214,13 +214,13 @@ import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 import {
-    CorporateActionsStorageWrapper
-} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+    CorporateActionsStorageWrapperSecurity
+} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
 
 abstract contract CapStorageWrapper_2 is
     CapStorageWrapper,
     ERC1410ScheduledTasksStorageWrapper, // TODO: ERC1410ScheduledTasksStorageWrapperREAD.sol
-    CorporateActionsStorageWrapper
+    CorporateActionsStorageWrapperSecurity
 {
     function _getMaxSupply()
         internal
@@ -228,9 +228,13 @@ abstract contract CapStorageWrapper_2 is
         override
         returns (uint256 maxSupply_)
     {
-        uint256 finalAbaf = _getERC1410BasicStorage_2().ABAF;
-        finalAbaf = _applyScheduledBalanceAdjustments(finalAbaf);
-        return _capStorage().maxSupply * finalAbaf;
+        uint256 initialAbaf = _getERC1410BasicStorage_2().ABAF;
+        uint256 finalAbaf = _applyScheduledBalanceAdjustments(initialAbaf);
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            finalAbaf,
+            initialAbaf
+        );
+        return super._getMaxSupply() * factor;
     }
 
     function _getMaxSupplyByPartition(
@@ -242,7 +246,7 @@ abstract contract CapStorageWrapper_2 is
             finalAbaf,
             _getERC1410BasicStorage_2().LABAF_partition[partition_]
         );
-        return _capStorage().maxSupply * factor;
+        return super._getMaxSupplyByPartition(partition_) * factor;
     }
 
     function _applyScheduledBalanceAdjustments(
