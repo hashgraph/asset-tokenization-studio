@@ -224,6 +224,7 @@ import {
   PauseRequest,
   Security,
   GetScheduledBalanceAdjustmentRequest,
+  GetScheduledBalanceAdjustmentCountRequest,
 } from '../../../src/index.js';
 import {
   CLIENT_ACCOUNT_ECDSA,
@@ -572,5 +573,38 @@ describe('🧪 Equity test', () => {
       thrownError = error;
     }
     expect(thrownError).toBeInstanceOf(Error);
+
+    await Security.unpause(
+      new PauseRequest({
+        securityId: equity.evmDiamondAddress!,
+      }),
+    );
   }, 600_000);
+
+  it('Should return scheduled balance adjustments count correctly', async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+
+    const count = await Equity.getScheduledBalanceAdjustmentsCount(
+      new GetScheduledBalanceAdjustmentCountRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+      }),
+    );
+
+    expect(count).toBeDefined();
+    expect(typeof count).toBe('number');
+
+    await Role.revokeRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CORPORATEACTIONS_ROLE,
+      }),
+    );
+  }, 60_000);
 });

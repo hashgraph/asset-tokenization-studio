@@ -250,6 +250,8 @@ import SetScheduledBalanceAdjustmentRequest from './request/SetScheduledBalanceA
 import GetScheduledBalanceAdjustmentRequest from './request/GetScheduledBalanceAdjustmentRequest.js';
 import ScheduledBalanceAdjustmentViewModel from './response/ScheduledBalanceAdjustmentViewModel.js';
 import { GetScheduledBalanceAdjustmentQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery.js';
+import GetScheduledBalanceAdjustmentCountRequest from './request/GetScheduledBalanceAdjustmentsCountRequest';
+import { GetScheduledBalanceAdjustmentCountQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
 
 interface IEquityInPort {
   create(request: CreateEquityRequest): Promise<{
@@ -284,6 +286,9 @@ interface IEquityInPort {
   setScheduledBalanceAdjustment(
     request: SetScheduledBalanceAdjustmentRequest,
   ): Promise<{ payload: number; transactionId: string }>;
+  getScheduledBalanceAdjustmentsCount(
+    request: GetScheduledBalanceAdjustmentCountRequest,
+  ): Promise<number>;
 }
 
 class EquityInPort implements IEquityInPort {
@@ -610,6 +615,21 @@ class EquityInPort implements IEquityInPort {
     };
 
     return scheduledBalanceAdjustment;
+  }
+
+  @LogError
+  async getScheduledBalanceAdjustmentsCount(
+    request: GetScheduledBalanceAdjustmentCountRequest,
+  ): Promise<number> {
+    const { securityId } = request;
+    handleValidation('GetScheduledBalanceAdjustmentCountRequest', request);
+
+    const getScheduledBalanceAdjustmentCountQueryResponse =
+      await this.queryBus.execute(
+        new GetScheduledBalanceAdjustmentCountQuery(securityId),
+      );
+
+    return getScheduledBalanceAdjustmentCountQueryResponse.payload;
   }
 }
 
