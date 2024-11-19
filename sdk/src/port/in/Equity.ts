@@ -252,9 +252,13 @@ import ScheduledBalanceAdjustmentViewModel from './response/ScheduledBalanceAdju
 import { GetScheduledBalanceAdjustmentQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQuery.js';
 import GetScheduledBalanceAdjustmentCountRequest from './request/GetScheduledBalanceAdjustmentsCountRequest';
 import { GetScheduledBalanceAdjustmentCountQuery } from '../../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQuery';
-import { GetAllScheduledBalanceAdjustmentsRequest } from './request';
+import {
+  GetAggregatedBalanceAdjustmentFactorRequest,
+  GetAllScheduledBalanceAdjustmentsRequest,
+} from './request';
 import GetLastAggregatedBalanceAdjustmentFactorForRequest from './request/GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
 import { GetLastAggregatedBalanceAdjustmentFactorForQuery } from '../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQuery.js';
+import { GetAggregatedBalanceAdjustmentFactorQuery } from '../../app/usecase/query/equity/balanceAdjustments/getAggregatedBalanceAdjustmentFactor/GetAggregatedBalanceAdjustmentFactorQuery';
 import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from './request/GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest.js';
 import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery } from '../../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQuery.js';
 
@@ -302,6 +306,9 @@ interface IEquityInPort {
   ): Promise<ScheduledBalanceAdjustmentViewModel[]>;
   getLastAggregatedBalanceAdjustmentFactorFor(
     request: GetLastAggregatedBalanceAdjustmentFactorForRequest,
+  ): Promise<number>;
+  getAggregatedBalanceAdjustmentFactor(
+    request: GetAggregatedBalanceAdjustmentFactorRequest,
   ): Promise<number>;
   getLastAggregatedBalanceAdjustmentFactorForByPartition(
     request: GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
@@ -702,6 +709,20 @@ class EquityInPort implements IEquityInPort {
       );
 
     return getLastAggregatedBalanceAdjustmentFactorForQueryResponse.payload;
+  }
+
+  @LogError
+  async getAggregatedBalanceAdjustmentFactor(
+    request: GetAggregatedBalanceAdjustmentFactorRequest,
+  ): Promise<number> {
+    handleValidation('GetAggregatedBalanceAdjustmentFactorRequest', request);
+
+    const getAggregatedBalanceAdjustmentFactorQueryResponse =
+      await this.queryBus.execute(
+        new GetAggregatedBalanceAdjustmentFactorQuery(request.securityId),
+      );
+
+    return getAggregatedBalanceAdjustmentFactorQueryResponse.payload;
   }
 
   @LogError

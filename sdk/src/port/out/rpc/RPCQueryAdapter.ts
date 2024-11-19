@@ -1115,6 +1115,14 @@ export class RPCQueryAdapter {
     return 1;
   }
 
+  async getAggregatedBalanceAdjustmentFactor(
+    address: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(`Getting last aggregated balance adjustment factor}`);
+    //TODO implement factory to call the method
+    return 1;
+  }
+
   async getLastAggregatedBalanceAdjustmentFactorForByPartition(
     address: EvmAddress,
     target: EvmAddress,

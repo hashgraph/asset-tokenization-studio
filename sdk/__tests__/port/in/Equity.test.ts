@@ -251,6 +251,7 @@ import {
   RegulationType,
 } from '../../../src/domain/context/factory/RegulationType.js';
 import { GetAllScheduledBalanceAdjustmentsRequest } from '../../../src';
+import GetAggregatedBalanceAdjustmentFactorRequest from '../../../src/port/in/request/GetAggregatedBalanceAdjustmentFactorRequest';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -661,6 +662,17 @@ describe('🧪 Equity test', () => {
       new GetLastAggregatedBalanceAdjustmentFactorForRequest({
         securityId: equity.evmDiamondAddress!.toString(),
         targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+      }),
+    );
+
+    expect(count).toBeDefined();
+    expect(typeof count).toBe('number');
+  }, 60_000);
+
+  it('Should return aggregated balance adjustment factor correctly', async () => {
+    const count = await Equity.getAggregatedBalanceAdjustmentFactor(
+      new GetAggregatedBalanceAdjustmentFactorRequest({
+        securityId: equity.evmDiamondAddress!.toString(),
       }),
     );
 
