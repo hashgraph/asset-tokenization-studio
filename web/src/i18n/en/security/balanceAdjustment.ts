@@ -204,11 +204,8 @@
 */
 
 export default {
-  tabs: {
-    program: "Program Balance Adjustment",
-    see: "See Balance Adjustment",
-  },
   program: {
+    title: "Program Balance Adjustment",
     form: {
       executionDate: {
         label: "Execution date",
@@ -224,25 +221,6 @@ export default {
         label: "Decimals",
         placeholder: "Decimals",
       },
-    },
-  },
-  see: {
-    form: {
-      balanceAdjustmentId: {
-        label: "Balance Adjustment ID",
-        placeholder: "Add ID",
-        tooltip: "ID of the balance adjustment to display.",
-      },
-    },
-    error: {
-      general:
-        "Sorry, there was an error. Please check data and try again, please",
-    },
-    details: {
-      title: "Detail",
-      executionDate: "Execution date",
-      factor: "Factor",
-      decimals: "Decimals",
     },
   },
   messages: {

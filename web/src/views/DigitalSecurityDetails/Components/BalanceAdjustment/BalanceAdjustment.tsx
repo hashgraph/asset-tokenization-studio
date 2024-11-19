@@ -204,25 +204,12 @@
 */
 
 import { Stack } from "@chakra-ui/react";
-import { Tabs } from "io-bricks-ui";
-import { useTranslation } from "react-i18next";
 import { ProgramBalanceAdjustment } from "./ProgramBalanceAdjustment";
-import { SeeBalanceAdjustment } from "./SeeBalanceAdjustment";
 
 export const BalanceAdjustment = () => {
-  const { t: tTabs } = useTranslation("security", {
-    keyPrefix: "details.balanceAdjustment.tabs",
-  });
-
   return (
     <Stack w="full" h="full" layerStyle="container">
-      <Tabs
-        tabs={[
-          { content: <ProgramBalanceAdjustment />, header: tTabs("program") },
-          { content: <SeeBalanceAdjustment />, header: tTabs("see") },
-        ]}
-        isFitted
-      />
+      <ProgramBalanceAdjustment />
     </Stack>
   );
 };

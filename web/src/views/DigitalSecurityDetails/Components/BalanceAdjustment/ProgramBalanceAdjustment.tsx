@@ -207,6 +207,7 @@ import { Center, HStack, Stack, VStack } from "@chakra-ui/react";
 import {
   Button,
   CalendarInputController,
+  Heading,
   InputNumberController,
   PhosphorIcon,
   Text,
@@ -231,6 +232,9 @@ interface ProgramBalanceAdjustmentFormValues {
 export const ProgramBalanceAdjustment = () => {
   const { id: securityId } = useParams();
 
+  const { t: tProgram } = useTranslation("security", {
+    keyPrefix: "details.balanceAdjustment.program",
+  });
   const { t: tForm } = useTranslation("security", {
     keyPrefix: "details.balanceAdjustment.program.form",
   });
@@ -266,69 +270,75 @@ export const ProgramBalanceAdjustment = () => {
 
   return (
     <Center h="full" bg="neutral.dark.600">
-      <VStack
-        as="form"
-        onSubmit={handleSubmit(onSubmit)}
-        w="500px"
-        gap={6}
-        py={6}
-        data-testid="balance-adjustment-form"
-      >
-        <Stack w="full">
-          <HStack justifySelf="flex-start">
-            <Text textStyle="BodyTextRegularSM">
-              {tForm("executionDate.label")}*
-            </Text>
-            <Tooltip label={tForm("executionDate.tooltip")} placement="right">
-              <PhosphorIcon as={Info} />
-            </Tooltip>
-          </HStack>
-          <CalendarInputController
-            control={control}
-            id="executionDate"
-            rules={{ required }}
-            fromDate={new Date()}
-            placeholder={tForm("executionDate.placeholder")}
-            withTimeInput
-          />
-        </Stack>
-        <Stack w="full">
-          <HStack justifySelf="flex-start">
-            <Text textStyle="BodyTextRegularSM">{tForm("factor.label")}*</Text>
-          </HStack>
-          <InputNumberController
-            autoFocus
-            control={control}
-            id="factor"
-            rules={{ required, min: min(0) }}
-            placeholder={tForm("factor.placeholder")}
-          />
-        </Stack>
-        <Stack w="full">
-          <HStack justifySelf="flex-start">
-            <Text textStyle="BodyTextRegularSM">
-              {tForm("decimals.label")}*
-            </Text>
-          </HStack>
-          <InputNumberController
-            autoFocus
-            control={control}
-            id="decimals"
-            rules={{ required, min: min(0) }}
-            placeholder={tForm("decimals.placeholder")}
-          />
-        </Stack>
-        <Button
-          data-testid="create-balance-adjustment-button"
-          alignSelf="flex-end"
-          data-tesdtid="send-button"
-          isLoading={isLoading}
-          isDisabled={!formState.isValid}
-          type="submit"
+      <Stack w="500px">
+        <Heading textStyle="HeadingMediumLG">{tProgram("title")}</Heading>
+
+        <VStack
+          as="form"
+          onSubmit={handleSubmit(onSubmit)}
+          w="500px"
+          gap={6}
+          py={6}
+          data-testid="balance-adjustment-form"
         >
-          {tGlobal("send")}
-        </Button>
-      </VStack>
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">
+                {tForm("executionDate.label")}*
+              </Text>
+              <Tooltip label={tForm("executionDate.tooltip")} placement="right">
+                <PhosphorIcon as={Info} />
+              </Tooltip>
+            </HStack>
+            <CalendarInputController
+              control={control}
+              id="executionDate"
+              rules={{ required }}
+              fromDate={new Date()}
+              placeholder={tForm("executionDate.placeholder")}
+              withTimeInput
+            />
+          </Stack>
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">
+                {tForm("factor.label")}*
+              </Text>
+            </HStack>
+            <InputNumberController
+              autoFocus
+              control={control}
+              id="factor"
+              rules={{ required, min: min(0) }}
+              placeholder={tForm("factor.placeholder")}
+            />
+          </Stack>
+          <Stack w="full">
+            <HStack justifySelf="flex-start">
+              <Text textStyle="BodyTextRegularSM">
+                {tForm("decimals.label")}*
+              </Text>
+            </HStack>
+            <InputNumberController
+              autoFocus
+              control={control}
+              id="decimals"
+              rules={{ required, min: min(0) }}
+              placeholder={tForm("decimals.placeholder")}
+            />
+          </Stack>
+          <Button
+            data-testid="create-balance-adjustment-button"
+            alignSelf="flex-end"
+            data-tesdtid="send-button"
+            isLoading={isLoading}
+            isDisabled={!formState.isValid}
+            type="submit"
+          >
+            {tGlobal("send")}
+          </Button>
+        </VStack>
+      </Stack>
     </Center>
   );
 };
