@@ -206,100 +206,40 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
 import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
-import {ScheduledTasksLib} from '../scheduledTasks/ScheduledTasksLib.sol';
-import {
-    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {
-    CorporateActionsStorageWrapperSecurity
-} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
 
 abstract contract CapStorageWrapper_2 is
     CapStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper, // TODO: ERC1410ScheduledTasksStorageWrapperREAD.sol
-    CorporateActionsStorageWrapperSecurity
+    ERC1410ScheduledTasksStorageWrapper
 {
-    // function _getMaxSupply()
-    //     internal
-    //     view
-    //     override
-    //     returns (uint256 maxSupply_)
-    // {
-    //     uint256 initialAbaf = _getERC1410BasicStorage_2().ABAF;
-    //     // uint256 finalAbaf = _calculateScheduledBalanceAdjustments(initialAbaf);
-    //     uint256 factor = AdjustBalanceLib._calculateFactor(
-    //         finalAbaf,
-    //         initialAbaf
-    //     );
-    //     return super._getMaxSupply() * factor;
-    // }
+    function _getMaxSupply()
+        internal
+        view
+        override
+        returns (uint256 maxSupply_)
+    {
+        (uint256 factor, ) = AdjustBalanceLib
+            ._calculateScheduledBalanceAdjustments(
+                _getERC1410BasicStorage_2().ABAF,
+                0,
+                0
+            );
+        return super._getMaxSupply() * factor;
+    }
 
-    // function _getMaxSupplyByPartition(
-    //     bytes32 partition_
-    // ) internal view override returns (uint256 maxSupply_) {
-    //     uint256 finalAbaf = _getERC1410BasicStorage_2().ABAF;
-    //     // finalAbaf = _calculateScheduledBalanceAdjustments(finalAbaf);
-    //     uint256 factor = AdjustBalanceLib._calculateFactor(
-    //         finalAbaf,
-    //         _getERC1410BasicStorage_2().LABAF_partition[partition_]
-    //     );
-    //     return super._getMaxSupplyByPartition(partition_) * factor;
-    // }
-
-    function _calculateScheduledBalanceAdjustments(
-        uint256 _initialFactor,
-        uint256 _labaf,
-        uint256 _initialDecimals
-    ) internal view returns (uint256 updatedFactor_, uint256 updatedDecimals_) {
-        // * Initialization
-        _initialFactor = _initialFactor > 0 ? _initialFactor : 1;
-        _labaf = _labaf > 0 ? _labaf : _initialFactor;
-        updatedFactor_ = _initialFactor;
-        updatedDecimals_ = _initialDecimals;
-        // *
-        bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
-        ScheduledTasksLib.ScheduledTasksDataStorage
-            storage scheduledBalanceAdjustments_;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledBalanceAdjustments_.slot := position
-        }
-        uint256 scheduledTaskCount = ScheduledTasksLib._getScheduledTaskCount(
-            scheduledBalanceAdjustments_
-        );
-        for (uint256 i = 0; i < scheduledTaskCount; i++) {
-            ScheduledTasksLib.ScheduledTask
-                memory scheduledTask = ScheduledTasksLib
-                    ._getScheduledTasksByIndex(scheduledBalanceAdjustments_, i);
-            if (
-                scheduledTask.scheduledTimestamp <= block.timestamp &&
-                scheduledTask.data.length > 0
-            ) {
-                bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
-                (, bytes memory balanceAdjustmentData) = _getCorporateAction(
-                    actionId
-                );
-                if (balanceAdjustmentData.length > 0) {
-                    IEquity.ScheduledBalanceAdjustment
-                        memory balanceAdjustment = abi.decode(
-                            balanceAdjustmentData,
-                            (IEquity.ScheduledBalanceAdjustment)
-                        );
-                    updatedFactor_ *= balanceAdjustment.factor;
-                    updatedDecimals_ += balanceAdjustment.decimals;
-                }
-            }
-        }
-        updatedFactor_ = AdjustBalanceLib._calculateFactor(
-            updatedFactor_,
-            _labaf
-        );
-        return (updatedFactor_, updatedDecimals_);
+    function _getMaxSupplyByPartition(
+        bytes32 partition_
+    ) internal view override returns (uint256 maxSupply_) {
+        (uint256 factor, ) = AdjustBalanceLib
+            ._calculateScheduledBalanceAdjustments(
+                _getERC1410BasicStorage_2().ABAF,
+                _getERC1410BasicStorage_2().LABAF_partition[partition_],
+                0
+            );
+        return super._getMaxSupplyByPartition(partition_) * factor;
     }
 }
