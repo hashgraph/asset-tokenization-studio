@@ -277,6 +277,10 @@ import {
   GetConfigInfoRequest,
   ConfigInfoViewModel,
   UpdateMaturityDateRequest,
+  SetScheduledBalanceAdjustmentRequest,
+  GetScheduledBalanceAdjustmentRequest,
+  ScheduledBalanceAdjustmentViewModel,
+  GetAllScheduledBalanceAdjustmentsRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -597,6 +601,26 @@ export class SDKService {
     req: GetAllDividendsRequest,
   ): Promise<DividendsViewModel[]> {
     return await Equity.getAllDividends(req);
+  }
+
+  // SPLIT & REVERSE SPLIT ////////////////////////////////////////////
+  public static async setScheduledBalanceAdjustmentRequest(
+    req: SetScheduledBalanceAdjustmentRequest,
+  ): Promise<number> {
+    const response = await Equity.setScheduledBalanceAdjustment(req);
+    return response.payload;
+  }
+
+  public static async getScheduledBalanceAdjustmentRequest(
+    req: GetScheduledBalanceAdjustmentRequest,
+  ): Promise<ScheduledBalanceAdjustmentViewModel> {
+    return await Equity.getScheduledBalanceAdjustment(req);
+  }
+
+  public static async getAllScheduledBalanceAdjustmentRequest(
+    req: GetAllScheduledBalanceAdjustmentsRequest,
+  ): Promise<ScheduledBalanceAdjustmentViewModel[]> {
+    return await Equity.getAllScheduledBalanceAdjustments(req);
   }
 
   // CONTROLLER ////////////////////////////////////////////
