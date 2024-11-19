@@ -1114,4 +1114,16 @@ export class RPCQueryAdapter {
     //TODO implement factory to call the method
     return 1;
   }
+
+  async getLastAggregatedBalanceAdjustmentFactorForByPartition(
+    address: EvmAddress,
+    target: EvmAddress,
+    partitionId: string,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting last aggregated balance adjustment factor for the account ${target.toString()} and partition ${partitionId}`,
+    );
+    //TODO implement factory to call the method
+    return 1;
+  }
 }

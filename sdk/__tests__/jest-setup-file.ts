@@ -819,6 +819,15 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     },
   );
 
+  singletonInstance.getLastAggregatedBalanceAdjustmentFactorForByPartition =
+    jest.fn(async function (
+      security: EvmAddress,
+      target: EvmAddress,
+      partitionId: string,
+    ) {
+      return Math.random();
+    });
+
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
   };

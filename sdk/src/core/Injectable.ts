@@ -295,6 +295,7 @@ import { SetScheduledBalanceAdjustmentCommandHandler } from '../app/usecase/comm
 import { GetScheduledBalanceAdjustmentQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustment/GetScheduledBalanceAdjustmentQueryHandler.js';
 import { GetScheduledBalanceAdjustmentCountQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getScheduledBalanceAdjustmentCount/GetScheduledBalanceAdjustmentsCountQueryHandler';
 import { GetLastAggregatedBalanceAdjustmentFactorForQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQueryHandler.js';
+import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -592,6 +593,11 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetLastAggregatedBalanceAdjustmentFactorForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass:
+      GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler,
   },
 ];
 
