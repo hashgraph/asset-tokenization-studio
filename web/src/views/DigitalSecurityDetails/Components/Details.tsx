@@ -231,10 +231,7 @@ import { SecurityDetailsExtended } from "./SecurityDetailsExtended";
 import { useGetAllCoupons } from "../../../hooks/queries/useCoupons";
 import { CountriesList } from "../../CreateSecurityCommons/CountriesList";
 import _capitalize from "lodash/capitalize";
-import {
-  useGetAllBalanceAdjustments,
-  useGetBalanceAdjustments,
-} from "../../../hooks/queries/useBalanceAdjustment";
+import { useGetAllBalanceAdjustments } from "../../../hooks/queries/useBalanceAdjustment";
 
 interface DetailsProps {
   id?: string;
