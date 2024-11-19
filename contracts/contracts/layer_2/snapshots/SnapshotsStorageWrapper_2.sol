@@ -268,11 +268,9 @@ abstract contract SnapshotsStorageWrapper_2 is
     ) internal virtual override {
         uint256 currentSnapshotId = _getCurrentSnapshotId();
 
-        if(currentSnapshotId == 0) return;
+        if (currentSnapshotId == 0) return;
 
-        uint256 ABAFAtCurrentSnapshot = _ABAFAtSnapshot(
-            currentSnapshotId
-        );
+        uint256 ABAFAtCurrentSnapshot = _ABAFAtSnapshot(currentSnapshotId);
         uint256 ABAF = _getABAF();
 
         if (ABAF == ABAFAtCurrentSnapshot) {

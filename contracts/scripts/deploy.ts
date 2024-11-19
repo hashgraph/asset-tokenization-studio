@@ -228,6 +228,7 @@ import {
     Lock_2__factory,
     ERC1594_2__factory,
     ERC20_2__factory,
+    ScheduledTasks__factory,
 } from '../typechain-types'
 import {
     getEnvVar,
@@ -286,6 +287,9 @@ const ExistingContractIds = {
     ),
     scheduledBalanceAdjustments: ContractId.fromString(
         getEnvVar({ name: 'SCHEDULED_BALANCE_ADJUSTMENTS' })
+    ),
+    scheduledTasks: ContractId.fromString(
+        getEnvVar({ name: 'SCHEDULED_TASKS' })
     ),
     corporateActionsSecurity: ContractId.fromString(
         getEnvVar({ name: 'CORPORATE_ACTIONS_SECURITY' })
@@ -456,6 +460,12 @@ export async function deployAtsFullInfrastructure({
                 },
             },
             {
+                name: 'scheduledTasks',
+                ids: {
+                    contract: ExistingContractIds.scheduledTasks,
+                },
+            },
+            {
                 name: 'corporateactionssecurity',
                 ids: { contract: ExistingContractIds.corporateActionsSecurity },
             },
@@ -509,6 +519,7 @@ export async function deployAtsFullInfrastructure({
         bond,
         scheduledsnapshots: scheduledSnapshots,
         scheduledBalanceAdjustments: scheduledBalanceAdjustments,
+        scheduledTasks: scheduledTasks,
         corporateactionssecurity: corporateActionsSecurity,
         transferandlock: transferAndLock,
         adjustbalances: adjustBalances,
@@ -531,6 +542,7 @@ export async function deployAtsFullInfrastructure({
         bond,
         scheduledSnapshots,
         scheduledBalanceAdjustments,
+        scheduledTasks,
         corporateActionsSecurity,
         lock,
         transferAndLock,
@@ -573,6 +585,7 @@ export async function deployAtsFullInfrastructure({
                 snapshots,
                 scheduledSnapshots,
                 scheduledBalanceAdjustments,
+                scheduledTasks,
                 corporateActionsSecurity,
                 lock,
                 transferAndLock,
@@ -650,6 +663,7 @@ export async function deployAtsFullInfrastructure({
         bond,
         scheduledSnapshots,
         scheduledBalanceAdjustments,
+        scheduledTasks,
         corporateActionsSecurity,
         lock,
         transferAndLock,
@@ -699,6 +713,9 @@ export async function deployContract({
         scheduledsnapshots: { factory: ScheduledSnapshots__factory },
         scheduledBalanceAdjustments: {
             factory: ScheduledBalanceAdjustments__factory,
+        },
+        scheduledTasks: {
+            factory: ScheduledTasks__factory,
         },
         snapshots: { factory: Snapshots_2__factory },
         corporateactions: { factory: CorporateActionsSecurity__factory },

@@ -216,6 +216,7 @@ import {
     type Equity,
     type Snapshots,
     type ScheduledSnapshots,
+    type ScheduledTasks,
     type Cap,
 } from '../../typechain-types'
 import {
@@ -239,7 +240,7 @@ import {
 } from '../../scripts/factory'
 
 const _MINUTE_1 = 6000
-const _BUSINESS_LOGIC_COUNT = 19
+const _BUSINESS_LOGIC_COUNT = 20
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 
@@ -376,9 +377,11 @@ Deployed contracts:
             environment.deployedBusinessLogics.scheduledBalanceAdjustments
                 .address
         },
-        key: ${await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticResolverKey()},
+    ScheduledTasks: 
+        address: ${environment.deployedBusinessLogics.scheduledTasks.address},
+        key: ${await environment.deployedBusinessLogics.scheduledTasks.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticFunctionSelectors()
+            await environment.deployedBusinessLogics.scheduledTasks.getStaticFunctionSelectors()
         )},
     AdjustBalances: 
         address: ${environment.deployedBusinessLogics.adjustBalances.address},
@@ -490,6 +493,13 @@ Deployed contracts:
         )
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
+                await environment.deployedBusinessLogics.scheduledTasks.getStaticResolverKey()
+            )
+        ).to.be.equal(
+            await environment.deployedBusinessLogics.scheduledTasks.address
+        )
+        expect(
+            await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.adjustBalances.getStaticResolverKey()
             )
         ).to.be.equal(
@@ -524,6 +534,7 @@ Deployed contracts:
                 await environment.deployedBusinessLogics.transferAndLock.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.adjustBalances.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticResolverKey(),
+                await environment.deployedBusinessLogics.scheduledTasks.getStaticResolverKey(),
             ].sort()
         )
         console.log(
@@ -665,6 +676,16 @@ DiamondResume:
     DiamondLoupe.facetFunctionSelectors[scheduledSnapshots]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
             await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey()
+        )
+    )}
+    DiamondLoupe.facetFunctionSelectors[scheduledBalanceAdjustments]: ${JSON.stringify(
+        await loupeFacet.getFacetSelectors(
+            await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticResolverKey()
+        )
+    )}
+    DiamondLoupe.facetFunctionSelectors[scheduledTasks]: ${JSON.stringify(
+        await loupeFacet.getFacetSelectors(
+            await environment.deployedBusinessLogics.scheduledTasks.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[cap]: ${JSON.stringify(

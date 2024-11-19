@@ -321,6 +321,7 @@ function buildEmptyEnvironment(): Environment {
             snapshots_2: {} as IStaticFunctionSelectors,
             scheduledSnapshots: {} as IStaticFunctionSelectors,
             scheduledBalanceAdjustments: {} as IStaticFunctionSelectors,
+            scheduledTasks: {} as IStaticFunctionSelectors,
             cap: {} as IStaticFunctionSelectors,
             lock_2: {} as IStaticFunctionSelectors,
             transferAndLock: {} as IStaticFunctionSelectors,

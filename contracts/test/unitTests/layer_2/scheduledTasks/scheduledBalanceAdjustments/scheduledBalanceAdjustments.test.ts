@@ -211,6 +211,7 @@ import {
     type Pause,
     type ScheduledBalanceAdjustments,
     type AccessControl,
+    ScheduledTasks,
 } from '../../../../../typechain-types'
 import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
 import {
@@ -239,6 +240,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
 
     let equityFacet: Equity
     let scheduledBalanceAdjustmentsFacet: ScheduledBalanceAdjustments
+    let scheduledTasksFacet: ScheduledTasks
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
@@ -296,6 +298,10 @@ describe('Scheduled BalanceAdjustments Tests', () => {
             'ScheduledBalanceAdjustments',
             diamond.address
         )
+        scheduledTasksFacet = await ethers.getContractAt(
+            'ScheduledTasks',
+            diamond.address
+        )
 
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
     })
@@ -306,17 +312,14 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         await pauseFacet.pause()
 
         // Using account C (with role)
-        scheduledBalanceAdjustmentsFacet =
-            scheduledBalanceAdjustmentsFacet.connect(signer_C)
+        scheduledTasksFacet = scheduledTasksFacet.connect(signer_C)
 
         // trigger scheduled BalanceAdjustments
         await expect(
-            scheduledBalanceAdjustmentsFacet.triggerPendingScheduledBalanceAdjustments()
+            scheduledTasksFacet.triggerPendingScheduledTasks()
         ).to.be.rejectedWith('TokenIsPaused')
         await expect(
-            scheduledBalanceAdjustmentsFacet.triggerScheduledBalanceAdjustments(
-                1
-            )
+            scheduledTasksFacet.triggerScheduledTasks(1)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
@@ -402,8 +405,9 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         )
 
         // AFTER FIRST SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
+        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
         await new Promise((f) => setTimeout(f, TIME + 1000))
-        await scheduledBalanceAdjustmentsFacet.triggerPendingScheduledBalanceAdjustments()
+        await scheduledTasksFacet.triggerPendingScheduledTasks()
 
         scheduledBalanceAdjustmentCount =
             await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
@@ -432,9 +436,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
 
         // AFTER SECOND SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
         await new Promise((f) => setTimeout(f, TIME + 1000))
-        await scheduledBalanceAdjustmentsFacet.triggerScheduledBalanceAdjustments(
-            100
-        )
+        await scheduledTasksFacet.triggerScheduledTasks(100)
 
         scheduledBalanceAdjustmentCount =
             await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
@@ -457,9 +459,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
 
         // AFTER SECOND SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
         await new Promise((f) => setTimeout(f, TIME + 1000))
-        await scheduledBalanceAdjustmentsFacet.triggerScheduledBalanceAdjustments(
-            0
-        )
+        await scheduledTasksFacet.triggerScheduledTasks(0)
 
         scheduledBalanceAdjustmentCount =
             await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()

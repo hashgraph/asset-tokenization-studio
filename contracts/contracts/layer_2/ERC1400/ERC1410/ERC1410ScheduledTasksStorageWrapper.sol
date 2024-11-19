@@ -214,6 +214,9 @@ import {
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+import {
+    ScheduledTasksStorageWrapper
+} from '../../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
 import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
 import {
@@ -229,7 +232,8 @@ import {
 abstract contract ERC1410ScheduledTasksStorageWrapper is
     SnapshotsStorageWrapper_2,
     ScheduledSnapshotsStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper
+    ScheduledBalanceAdjustmentsStorageWrapper,
+    ScheduledTasksStorageWrapper
 {
     function _beforeTokenTransfer(
         bytes32 partition,
@@ -247,8 +251,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         address _from,
         address _to
     ) internal virtual {
-        _triggerScheduledSnapshots(0);
-        _triggerScheduledBalanceAdjustments(0);
+        _triggerScheduledTasks(0);
         _syncBalanceAdjustments(_partition, _from, _to);
     }
 
