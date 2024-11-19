@@ -203,65 +203,236 @@
 
 */
 
-export const _DEFAULT_ADMIN_ROLE =
-    '0x0000000000000000000000000000000000000000000000000000000000000000'
-export const _CONTROL_LIST_ROLE =
-    '0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3'
-export const _CORPORATE_ACTION_ROLE =
-    '0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6'
-export const _ISSUER_ROLE =
-    '0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842'
-export const _DOCUMENTER_ROLE =
-    '0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41'
-export const _CONTROLLER_ROLE =
-    '0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f'
-export const _PAUSER_ROLE =
-    '0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb'
-export const _CAP_ROLE =
-    '0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571'
-export const _SNAPSHOT_ROLE =
-    '0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da'
-export const _LOCKER_ROLE =
-    '0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88'
-export const _ADJUSTMENT_BALANCE_ROLE =
-    '0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9'
-export const _BOND_MANAGER_ROLE =
-    '0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d'
-export const _DEFAULT_PARTITION =
-    '0x0000000000000000000000000000000000000000000000000000000000000001'
-export const _IS_PAUSED_ERROR_ID = '0x40'
-export const _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = '0x41'
-export const _FROM_ACCOUNT_BLOCKED_ERROR_ID = '0x42'
-export const _TO_ACCOUNT_BLOCKED_ERROR_ID = '0x43'
-export const _FROM_ACCOUNT_NULL_ERROR_ID = '0x44'
-export const _TO_ACCOUNT_NULL_ERROR_ID = '0x45'
-export const _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = '0x46'
-export const _IS_NOT_OPERATOR_ERROR_ID = '0x47'
-export const _WRONG_PARTITION_ERROR_ID = '0x48'
-export const _ALLOWANCE_REACHED_ERROR_ID = '0x49'
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import {
+    type ResolverProxy,
+    type Equity,
+    type Pause,
+    type ScheduledSnapshots,
+    type AccessControl,
+    ScheduledTasks,
+} from '../../../../../typechain-types'
+import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
+import {
+    _CORPORATE_ACTION_ROLE,
+    _PAUSER_ROLE,
+    _SNAPSHOT_TASK_TYPE,
+    _BALANCE_ADJUSTMENT_TASK_TYPE,
+} from '../../../../../scripts/constants'
+import {
+    deployEquityFromFactory,
+    Rbac,
+    RegulationSubType,
+    RegulationType,
+} from '../../../../../scripts/factory'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 
-export const _SUCCESS = '0x00'
+const TIME = 6000
 
-export const ADDRESS_0 = '0x0000000000000000000000000000000000000000'
+describe('Scheduled Tasks Tests', () => {
+    let diamond: ResolverProxy
+    let signer_A: SignerWithAddress
+    let signer_B: SignerWithAddress
+    let signer_C: SignerWithAddress
 
-export const EquityDeployedEvent = 'EquityDeployed'
+    let account_A: string
+    let account_B: string
+    let account_C: string
 
-export const BondDeployedEvent = 'BondDeployed'
+    let equityFacet: Equity
+    let scheduledSnapshotsFacet: ScheduledSnapshots
+    let scheduledTasksFacet: ScheduledTasks
+    let accessControlFacet: AccessControl
+    let pauseFacet: Pause
 
-export const EquityConfigId =
-    '0x0000000000000000000000000000000000000000000000000000000000000001'
+    beforeEach(async () => {
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
 
-export const BondConfigId =
-    '0x0000000000000000000000000000000000000000000000000000000000000002'
+        await deployEnvironment()
 
-export const REGEX = {
-    contractId: /^0\.0\.\d+$/,
-    address: /^0x[a-fA-F0-9]{40}$/,
-    bytes32: /^0x[a-fA-F0-9]{64}$/,
-    bytes: /^0x[a-fA-F0-9]*$/,
-}
+        const rbacPause: Rbac = {
+            role: _PAUSER_ROLE,
+            members: [account_B],
+        }
+        const init_rbacs: Rbac[] = [rbacPause]
 
-export const _BALANCE_ADJUSTMENT_TASK_TYPE =
-    '0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d'
-export const _SNAPSHOT_TASK_TYPE =
-    '0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c'
+        diamond = await deployEquityFromFactory(
+            account_A,
+            false,
+            true,
+            false,
+            'TEST_AccessControl',
+            'TAC',
+            6,
+            'ABCDEF123456',
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            false,
+            1,
+            '0x345678',
+            0,
+            100,
+            RegulationType.REG_D,
+            RegulationSubType.REG_D_506_B,
+            true,
+            'ES,FR,CH',
+            'nothing',
+            init_rbacs
+        )
+
+        accessControlFacet = await ethers.getContractAt(
+            'AccessControl',
+            diamond.address
+        )
+
+        equityFacet = await ethers.getContractAt('Equity', diamond.address)
+
+        scheduledSnapshotsFacet = await ethers.getContractAt(
+            'ScheduledSnapshots',
+            diamond.address
+        )
+        scheduledTasksFacet = await ethers.getContractAt(
+            'ScheduledTasks',
+            diamond.address
+        )
+
+        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+    })
+
+    it('GIVEN a paused Token WHEN triggerTasks THEN transaction fails with TokenIsPaused', async () => {
+        // Pausing the token
+        pauseFacet = pauseFacet.connect(signer_B)
+        await pauseFacet.pause()
+
+        // Using account C (with role)
+        scheduledTasksFacet = scheduledTasksFacet.connect(signer_C)
+
+        // trigger scheduled snapshots
+        await expect(
+            scheduledTasksFacet.triggerPendingScheduledTasks()
+        ).to.be.rejectedWith('TokenIsPaused')
+        await expect(
+            scheduledTasksFacet.triggerScheduledTasks(1)
+        ).to.be.rejectedWith('TokenIsPaused')
+    })
+
+    it('GIVEN a token WHEN triggerTasks THEN transaction succeeds', async () => {
+        // Granting Role to account C
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
+        // Using account C (with role)
+        equityFacet = equityFacet.connect(signer_C)
+
+        // set dividend
+        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
+            .timestamp
+        const dividendsRecordDateInSeconds_1 =
+            currentTimeInSeconds + TIME / 1000
+        const dividendsRecordDateInSeconds_2 =
+            currentTimeInSeconds + (2 * TIME) / 1000
+        const dividendsExecutionDateInSeconds =
+            currentTimeInSeconds + (10 * TIME) / 1000
+        const dividendsAmountPerEquity = 1
+        const dividendData_1 = {
+            recordDate: dividendsRecordDateInSeconds_1.toString(),
+            executionDate: dividendsExecutionDateInSeconds.toString(),
+            amount: dividendsAmountPerEquity,
+        }
+        const dividendData_2 = {
+            recordDate: dividendsRecordDateInSeconds_2.toString(),
+            executionDate: dividendsExecutionDateInSeconds.toString(),
+            amount: dividendsAmountPerEquity,
+        }
+        await equityFacet.setDividends(dividendData_2)
+        await equityFacet.setDividends(dividendData_1)
+
+        const balanceAdjustmentExecutionDateInSeconds_1 =
+            currentTimeInSeconds + TIME / 1000 + 1
+        const balanceAdjustmentExecutionDateInSeconds_2 =
+            currentTimeInSeconds + (2 * TIME) / 1000 + 1
+        const balanceAdjustmentsFactor_1 = 1
+        const balanceAdjustmentsDecimals_1 = 2
+        const balanceAdjustmentsFactor_2 = 1
+        const balanceAdjustmentsDecimals_2 = 2
+
+        const balanceAdjustmentData_1 = {
+            executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
+            factor: balanceAdjustmentsFactor_1,
+            decimals: balanceAdjustmentsDecimals_1,
+        }
+        const balanceAdjustmentData_2 = {
+            executionDate: balanceAdjustmentExecutionDateInSeconds_2.toString(),
+            factor: balanceAdjustmentsFactor_2,
+            decimals: balanceAdjustmentsDecimals_2,
+        }
+
+        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
+        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+
+        // check schedled tasks
+        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
+
+        let scheduledTasksCount = await scheduledTasksFacet.scheduledTaskCount()
+        let scheduledTasks = await scheduledTasksFacet.getScheduledTasks(0, 100)
+
+        expect(scheduledTasksCount).to.equal(4)
+        expect(scheduledTasks.length).to.equal(scheduledTasksCount)
+        expect(scheduledTasks[0].scheduledTimestamp.toNumber()).to.equal(
+            balanceAdjustmentExecutionDateInSeconds_2
+        )
+        expect(scheduledTasks[1].scheduledTimestamp.toNumber()).to.equal(
+            dividendsRecordDateInSeconds_2
+        )
+        expect(scheduledTasks[2].scheduledTimestamp.toNumber()).to.equal(
+            balanceAdjustmentExecutionDateInSeconds_1
+        )
+        expect(scheduledTasks[3].scheduledTimestamp.toNumber()).to.equal(
+            dividendsRecordDateInSeconds_1
+        )
+        expect(scheduledTasks[0].data).to.equal(_BALANCE_ADJUSTMENT_TASK_TYPE)
+        expect(scheduledTasks[1].data).to.equal(_SNAPSHOT_TASK_TYPE)
+        expect(scheduledTasks[2].data).to.equal(_BALANCE_ADJUSTMENT_TASK_TYPE)
+        expect(scheduledTasks[3].data).to.equal(_SNAPSHOT_TASK_TYPE)
+
+        // AFTER FIRST SCHEDULED TASKS ------------------------------------------------------------------
+        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
+
+        await new Promise((f) => setTimeout(f, TIME + 1000 + 1))
+        await scheduledTasksFacet.triggerPendingScheduledTasks()
+
+        scheduledTasksCount = await scheduledTasksFacet.scheduledTaskCount()
+
+        scheduledTasks = await scheduledTasksFacet.getScheduledTasks(0, 100)
+
+        expect(scheduledTasksCount).to.equal(2)
+        expect(scheduledTasks.length).to.equal(scheduledTasksCount)
+        expect(scheduledTasks[0].scheduledTimestamp.toNumber()).to.equal(
+            balanceAdjustmentExecutionDateInSeconds_2
+        )
+        expect(scheduledTasks[1].scheduledTimestamp.toNumber()).to.equal(
+            dividendsRecordDateInSeconds_2
+        )
+        expect(scheduledTasks[0].data).to.equal(_BALANCE_ADJUSTMENT_TASK_TYPE)
+        expect(scheduledTasks[1].data).to.equal(_SNAPSHOT_TASK_TYPE)
+
+        // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
+        await new Promise((f) => setTimeout(f, TIME + 1000 + 1))
+        await scheduledTasksFacet.triggerScheduledTasks(100)
+
+        scheduledTasksCount = await scheduledTasksFacet.scheduledTaskCount()
+
+        scheduledTasks = await scheduledTasksFacet.getScheduledTasks(0, 100)
+
+        expect(scheduledTasksCount).to.equal(0)
+        expect(scheduledTasks.length).to.equal(scheduledTasksCount)
+    })
+})

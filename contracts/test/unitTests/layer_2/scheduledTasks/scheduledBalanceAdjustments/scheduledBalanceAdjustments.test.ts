@@ -306,23 +306,6 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
     })
 
-    it('GIVEN a paused Token WHEN triggerBalanceAdjustments THEN transaction fails with TokenIsPaused', async () => {
-        // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
-        await pauseFacet.pause()
-
-        // Using account C (with role)
-        scheduledTasksFacet = scheduledTasksFacet.connect(signer_C)
-
-        // trigger scheduled BalanceAdjustments
-        await expect(
-            scheduledTasksFacet.triggerPendingScheduledTasks()
-        ).to.be.rejectedWith('TokenIsPaused')
-        await expect(
-            scheduledTasksFacet.triggerScheduledTasks(1)
-        ).to.be.rejectedWith('TokenIsPaused')
-    })
-
     it('GIVEN a token WHEN triggerBalanceAdjustments THEN transaction succeeds', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
