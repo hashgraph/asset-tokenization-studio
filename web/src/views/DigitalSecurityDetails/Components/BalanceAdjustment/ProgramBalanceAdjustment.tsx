@@ -203,92 +203,132 @@
 
 */
 
-import dividends from "./dividends";
-import coupons from "./coupons";
-import roleManagement from "./roleManagement";
-import management from "./management";
-import allowedList from "./allowedList";
-import votingRights from "./votingRight";
-import balanceAdjustment from "./balanceAdjustment";
+import { Center, HStack, Stack, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  CalendarInputController,
+  InputNumberController,
+  PhosphorIcon,
+  Text,
+  Tooltip,
+} from "io-bricks-ui";
+import { useTranslation } from "react-i18next";
+import { Info } from "@phosphor-icons/react";
+import { useForm } from "react-hook-form";
+import { required, min } from "../../../../utils/rules";
+import { useParams } from "react-router-dom";
+import { useBalanceAdjustment } from "../../../../hooks/queries/useBalanceAdjustment";
+import { dateToUnixTimestamp } from "../../../../utils/format";
+import { useState } from "react";
+import { SetScheduledBalanceAdjustmentRequest } from "@hashgraph/asset-tokenization-sdk";
 
-export default {
-  header: {
-    title: "Digital security details",
-  },
-  tabs: {
-    balance: "Balance",
-    allowedList: "Allowed list",
-    blockedList: "Blocked list",
-    details: "Details",
-    dividends: "Dividends",
-    balanceAdjustment: "Balance Adjustment",
-    coupons: "Coupons",
-    votingRights: "Voting rights",
-    roleManagement: "Role management",
-    management: "Management",
-  },
-  actions: {
-    redeem: "Redeem",
-    transfer: "Transfer",
-    mint: "Mint",
-    forceTransfer: "Force transfer",
-    forceRedeem: "Force redeem",
-    dangerZone: {
-      title: "Danger zone",
-      subtitle: "Pause security token",
-      buttonActive: "Active",
-      buttonInactive: "Inactive",
-    },
-  },
-  dividends,
-  balanceAdjustment,
-  coupons,
-  balance: {
-    search: {
-      title: "Display balances",
-      subtitle: "Add the ID account to preview its balance",
-      placeholder: "0.0.19253",
-      button: "Search ID",
-    },
-    details: {
-      title: "Details",
-    },
-    error: {
-      targetId: "Sorry, there was an error. Probably wrong address",
-    },
-  },
-  roleManagement,
-  management,
-  allowedList,
-  votingRights,
-  benefits: {
-    dividends: "Dividends",
-    balanceAdjustments: "Balance Adjustments",
-    coupons: "Coupons",
-    id: "Id",
-    recordDate: "Record date",
-    executionDate: "Execution date",
-    dividendAmount: "Dividend amount",
-    couponRate: "Rate",
-    snapshot: "Snapshot Id",
-    factor: "Factor",
-    decimals: "Decimals",
-  },
-  bond: {
-    updateMaturityDate: {
-      toast: {
-        title: "Confirmation",
-        subtitle: "Are you sure you want to change the maturity date?",
-        cancelButtonText: "Cancel",
-        confirmButtonText: "Confirm",
+interface ProgramBalanceAdjustmentFormValues {
+  executionDate: string;
+  factor: string;
+  decimals: string;
+}
+
+export const ProgramBalanceAdjustment = () => {
+  const { id: securityId } = useParams();
+
+  const { t: tForm } = useTranslation("security", {
+    keyPrefix: "details.balanceAdjustment.program.form",
+  });
+  const { t: tGlobal } = useTranslation("globals");
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const { mutate: createBalanceAdjustment } = useBalanceAdjustment();
+
+  const { control, formState, handleSubmit, reset } =
+    useForm<ProgramBalanceAdjustmentFormValues>({
+      mode: "all",
+    });
+
+  const onSubmit = (data: ProgramBalanceAdjustmentFormValues) => {
+    setIsLoading(true);
+
+    const request = new SetScheduledBalanceAdjustmentRequest({
+      securityId: securityId ?? "",
+      executionDate: dateToUnixTimestamp(data.executionDate),
+      factor: data.factor.toString(),
+      decimals: data.decimals.toString(),
+    });
+
+    createBalanceAdjustment(request, {
+      onSuccess: () => {
+        reset();
       },
-      messages: {
-        success: "Success: ",
-        updateMaturityDateSuccessful:
-          "Maturity date has been updated successfully",
-        error: "Error: ",
-        updateMaturityDateFailed: "Update maturity date failed",
-      },
-    },
-  },
+    });
+
+    setIsLoading(false);
+  };
+
+  return (
+    <Center h="full" bg="neutral.dark.600">
+      <VStack
+        as="form"
+        onSubmit={handleSubmit(onSubmit)}
+        w="500px"
+        gap={6}
+        py={6}
+        data-testid="balance-adjustment-form"
+      >
+        <Stack w="full">
+          <HStack justifySelf="flex-start">
+            <Text textStyle="BodyTextRegularSM">
+              {tForm("executionDate.label")}*
+            </Text>
+            <Tooltip label={tForm("executionDate.tooltip")} placement="right">
+              <PhosphorIcon as={Info} />
+            </Tooltip>
+          </HStack>
+          <CalendarInputController
+            control={control}
+            id="executionDate"
+            rules={{ required }}
+            fromDate={new Date()}
+            placeholder={tForm("executionDate.placeholder")}
+            withTimeInput
+          />
+        </Stack>
+        <Stack w="full">
+          <HStack justifySelf="flex-start">
+            <Text textStyle="BodyTextRegularSM">{tForm("factor.label")}*</Text>
+          </HStack>
+          <InputNumberController
+            autoFocus
+            control={control}
+            id="factor"
+            rules={{ required, min: min(0) }}
+            placeholder={tForm("factor.placeholder")}
+          />
+        </Stack>
+        <Stack w="full">
+          <HStack justifySelf="flex-start">
+            <Text textStyle="BodyTextRegularSM">
+              {tForm("decimals.label")}*
+            </Text>
+          </HStack>
+          <InputNumberController
+            autoFocus
+            control={control}
+            id="decimals"
+            rules={{ required, min: min(0) }}
+            placeholder={tForm("decimals.placeholder")}
+          />
+        </Stack>
+        <Button
+          data-testid="create-balance-adjustment-button"
+          alignSelf="flex-end"
+          data-tesdtid="send-button"
+          isLoading={isLoading}
+          isDisabled={!formState.isValid}
+          type="submit"
+        >
+          {tGlobal("send")}
+        </Button>
+      </VStack>
+    </Center>
+  );
 };

@@ -203,92 +203,159 @@
 
 */
 
-import dividends from "./dividends";
-import coupons from "./coupons";
-import roleManagement from "./roleManagement";
-import management from "./management";
-import allowedList from "./allowedList";
-import votingRights from "./votingRight";
-import balanceAdjustment from "./balanceAdjustment";
+import { Center, HStack, Stack, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  DefinitionList,
+  InputNumberController,
+  Text,
+  useToast,
+} from "io-bricks-ui";
+import { useTranslation } from "react-i18next";
+import { useForm } from "react-hook-form";
+import { required, min } from "../../../../utils/rules";
+import { useParams } from "react-router-dom";
+import { GetScheduledBalanceAdjustmentRequest } from "@hashgraph/asset-tokenization-sdk";
+import { useGetBalanceAdjustments } from "../../../../hooks/queries/useBalanceAdjustment";
+import { useEffect, useState } from "react";
 
-export default {
-  header: {
-    title: "Digital security details",
-  },
-  tabs: {
-    balance: "Balance",
-    allowedList: "Allowed list",
-    blockedList: "Blocked list",
-    details: "Details",
-    dividends: "Dividends",
-    balanceAdjustment: "Balance Adjustment",
-    coupons: "Coupons",
-    votingRights: "Voting rights",
-    roleManagement: "Role management",
-    management: "Management",
-  },
-  actions: {
-    redeem: "Redeem",
-    transfer: "Transfer",
-    mint: "Mint",
-    forceTransfer: "Force transfer",
-    forceRedeem: "Force redeem",
-    dangerZone: {
-      title: "Danger zone",
-      subtitle: "Pause security token",
-      buttonActive: "Active",
-      buttonInactive: "Inactive",
+const defaultScheduledBalanceAdjustmentRequest =
+  new GetScheduledBalanceAdjustmentRequest({
+    securityId: "",
+    balanceAdjustmentId: 0,
+  });
+
+interface SeeBalanceAdjustmentFormValues {
+  balanceAdjustmentId: number;
+}
+
+export const SeeBalanceAdjustment = () => {
+  const { id: securityId = "" } = useParams();
+
+  const toast = useToast();
+
+  const { t: tForm } = useTranslation("security", {
+    keyPrefix: "details.balanceAdjustment.see.form",
+  });
+  const { t: tError } = useTranslation("security", {
+    keyPrefix: "details.balanceAdjustment.see.error",
+  });
+  const { t: tDetail } = useTranslation("security", {
+    keyPrefix: "details.balanceAdjustment.see.details",
+  });
+  const { t: tGlobal } = useTranslation("globals");
+
+  const [
+    isScheduledBalanceAdjustmentLoading,
+    setIsScheduledBalanceAdjustmentLoading,
+  ] = useState<boolean>(false);
+  const [
+    scheduledBalanceAdjustmentRequest,
+    setScheduledBalanceAdjustmentRequest,
+  ] = useState<GetScheduledBalanceAdjustmentRequest>();
+
+  const {
+    data: scheduledBalanceAdjustment,
+    refetch: refetchScheduledBalanceAdjustment,
+  } = useGetBalanceAdjustments(defaultScheduledBalanceAdjustmentRequest, {
+    enabled: false,
+    onSuccess: () => {
+      setIsScheduledBalanceAdjustmentLoading(false);
     },
-  },
-  dividends,
-  balanceAdjustment,
-  coupons,
-  balance: {
-    search: {
-      title: "Display balances",
-      subtitle: "Add the ID account to preview its balance",
-      placeholder: "0.0.19253",
-      button: "Search ID",
+    onError: () => {
+      setIsScheduledBalanceAdjustmentLoading(false);
+      toast.show({
+        duration: 3000,
+        title: tError("general"),
+        status: "error",
+      });
     },
-    details: {
-      title: "Details",
-    },
-    error: {
-      targetId: "Sorry, there was an error. Probably wrong address",
-    },
-  },
-  roleManagement,
-  management,
-  allowedList,
-  votingRights,
-  benefits: {
-    dividends: "Dividends",
-    balanceAdjustments: "Balance Adjustments",
-    coupons: "Coupons",
-    id: "Id",
-    recordDate: "Record date",
-    executionDate: "Execution date",
-    dividendAmount: "Dividend amount",
-    couponRate: "Rate",
-    snapshot: "Snapshot Id",
-    factor: "Factor",
-    decimals: "Decimals",
-  },
-  bond: {
-    updateMaturityDate: {
-      toast: {
-        title: "Confirmation",
-        subtitle: "Are you sure you want to change the maturity date?",
-        cancelButtonText: "Cancel",
-        confirmButtonText: "Confirm",
-      },
-      messages: {
-        success: "Success: ",
-        updateMaturityDateSuccessful:
-          "Maturity date has been updated successfully",
-        error: "Error: ",
-        updateMaturityDateFailed: "Update maturity date failed",
-      },
-    },
-  },
+  });
+
+  const {
+    control,
+    formState: { isValid },
+    handleSubmit,
+  } = useForm<SeeBalanceAdjustmentFormValues>({
+    mode: "all",
+  });
+
+  useEffect(() => {
+    if (scheduledBalanceAdjustmentRequest) {
+      refetchScheduledBalanceAdjustment();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scheduledBalanceAdjustmentRequest]);
+
+  const onSubmit = ({
+    balanceAdjustmentId,
+  }: SeeBalanceAdjustmentFormValues) => {
+    setIsScheduledBalanceAdjustmentLoading(true);
+
+    const scheduledBalanceAdjustmentRequest =
+      new GetScheduledBalanceAdjustmentRequest({
+        balanceAdjustmentId,
+        securityId,
+      });
+    setScheduledBalanceAdjustmentRequest(scheduledBalanceAdjustmentRequest);
+  };
+
+  return (
+    <Center h="full" bg="neutral.dark.600">
+      <VStack
+        as="form"
+        onSubmit={handleSubmit(onSubmit)}
+        w="500px"
+        gap={6}
+        py={6}
+        data-testid="see-balance-adjustment-form"
+      >
+        <Stack w="full">
+          <HStack justifySelf="flex-start">
+            <Text textStyle="BodyTextRegularSM">
+              {tForm("balanceAdjustmentId.label")}*
+            </Text>
+          </HStack>
+          <InputNumberController
+            autoFocus
+            control={control}
+            id="balanceAdjustmentId"
+            rules={{ required, min: min(0) }}
+            placeholder={tForm("balanceAdjustmentId.placeholder")}
+          />
+        </Stack>
+        <Button
+          alignSelf="flex-end"
+          data-tesdtid="send-button"
+          isDisabled={!isValid}
+          isLoading={isScheduledBalanceAdjustmentLoading}
+          type="submit"
+        >
+          {tGlobal("check")}
+        </Button>
+      </VStack>
+      {scheduledBalanceAdjustment && (
+        <DefinitionList
+          items={[
+            {
+              title: tDetail("executionDate"),
+              description:
+                new Date(
+                  scheduledBalanceAdjustment.executionDate.getTime(),
+                ).toLocaleDateString() ?? "",
+            },
+            {
+              title: tDetail("factor"),
+              description: scheduledBalanceAdjustment.factor ?? "",
+            },
+            {
+              title: tDetail("decimals"),
+              description: scheduledBalanceAdjustment.decimals ?? "",
+            },
+          ]}
+          title={tDetail("title")}
+        />
+      )}
+    </Center>
+  );
 };

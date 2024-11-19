@@ -203,92 +203,118 @@
 
 */
 
-import dividends from "./dividends";
-import coupons from "./coupons";
-import roleManagement from "./roleManagement";
-import management from "./management";
-import allowedList from "./allowedList";
-import votingRights from "./votingRight";
-import balanceAdjustment from "./balanceAdjustment";
+import { UseQueryOptions, useMutation, useQuery } from "@tanstack/react-query";
+import { SDKService } from "../../services/SDKService";
+import { useToast } from "io-bricks-ui";
+import { useTranslation } from "react-i18next";
+import {
+  ScheduledBalanceAdjustmentViewModel,
+  GetScheduledBalanceAdjustmentRequest,
+  SetScheduledBalanceAdjustmentRequest,
+  GetAllScheduledBalanceAdjustmentsRequest,
+} from "@hashgraph/asset-tokenization-sdk";
 
-export default {
-  header: {
-    title: "Digital security details",
-  },
-  tabs: {
-    balance: "Balance",
-    allowedList: "Allowed list",
-    blockedList: "Blocked list",
-    details: "Details",
-    dividends: "Dividends",
-    balanceAdjustment: "Balance Adjustment",
-    coupons: "Coupons",
-    votingRights: "Voting rights",
-    roleManagement: "Role management",
-    management: "Management",
-  },
-  actions: {
-    redeem: "Redeem",
-    transfer: "Transfer",
-    mint: "Mint",
-    forceTransfer: "Force transfer",
-    forceRedeem: "Force redeem",
-    dangerZone: {
-      title: "Danger zone",
-      subtitle: "Pause security token",
-      buttonActive: "Active",
-      buttonInactive: "Inactive",
-    },
-  },
-  dividends,
-  balanceAdjustment,
-  coupons,
-  balance: {
-    search: {
-      title: "Display balances",
-      subtitle: "Add the ID account to preview its balance",
-      placeholder: "0.0.19253",
-      button: "Search ID",
-    },
-    details: {
-      title: "Details",
-    },
-    error: {
-      targetId: "Sorry, there was an error. Probably wrong address",
-    },
-  },
-  roleManagement,
-  management,
-  allowedList,
-  votingRights,
-  benefits: {
-    dividends: "Dividends",
-    balanceAdjustments: "Balance Adjustments",
-    coupons: "Coupons",
-    id: "Id",
-    recordDate: "Record date",
-    executionDate: "Execution date",
-    dividendAmount: "Dividend amount",
-    couponRate: "Rate",
-    snapshot: "Snapshot Id",
-    factor: "Factor",
-    decimals: "Decimals",
-  },
-  bond: {
-    updateMaturityDate: {
-      toast: {
-        title: "Confirmation",
-        subtitle: "Are you sure you want to change the maturity date?",
-        cancelButtonText: "Cancel",
-        confirmButtonText: "Confirm",
+export const GET_SECURITY_BALANCE_ADJUSTMENT_FOR = (
+  securityId: string,
+  balanceAdjustmentId: number,
+  targetId: string,
+) =>
+  `GET_SECURITY_BALANCE_ADJUSTMENT_${securityId}_${balanceAdjustmentId}_${targetId}`;
+
+export const GET_SECURITY_BALANCE_ADJUSTMENT = (
+  securityId: string,
+  balanceAdjustmentId: number,
+) => `GET_SECURITY_BALANCE_ADJUSTMENT_${securityId}_${balanceAdjustmentId}`;
+
+export const GET_SECURITY_ALL_BALANCE_ADJUSTMENT = (securityId: string) =>
+  `GET_SECURITY_ALL_BALANCE_ADJUSTMENT_${securityId}`;
+
+export const useBalanceAdjustment = () => {
+  const toast = useToast();
+  const { t } = useTranslation("security", {
+    keyPrefix: "details.balanceAdjustment",
+  });
+
+  return useMutation(
+    (
+      setScheduledBalanceAdjustmentRequest: SetScheduledBalanceAdjustmentRequest,
+    ) =>
+      SDKService.setScheduledBalanceAdjustmentRequest(
+        setScheduledBalanceAdjustmentRequest,
+      ),
+    {
+      onSuccess: (data) => {
+        console.log(
+          "SDK message --> Scheduled balance adjustment success: ",
+          data,
+        );
+
+        if (!data) return;
+
+        toast.show({
+          duration: 3000,
+          title: t("messages.success"),
+          description: t("messages.creationSuccessful"),
+          variant: "subtle",
+          status: "success",
+        });
       },
-      messages: {
-        success: "Success: ",
-        updateMaturityDateSuccessful:
-          "Maturity date has been updated successfully",
-        error: "Error: ",
-        updateMaturityDateFailed: "Update maturity date failed",
+      onError: (error) => {
+        console.log(
+          "SDK message --> Scheduled balance adjustment creation error: ",
+          error,
+        );
+        toast.show({
+          duration: 3000,
+          title: t("messages.error"),
+          description: t("messages.creationFailed"),
+          variant: "subtle",
+          status: "error",
+        });
       },
     },
-  },
+  );
+};
+
+export const useGetAllBalanceAdjustments = <
+  TError,
+  TData = ScheduledBalanceAdjustmentViewModel[],
+>(
+  params: GetAllScheduledBalanceAdjustmentsRequest,
+  options?: UseQueryOptions<
+    ScheduledBalanceAdjustmentViewModel[],
+    TError,
+    TData,
+    [string]
+  >,
+) => {
+  return useQuery(
+    [GET_SECURITY_ALL_BALANCE_ADJUSTMENT(params.securityId)],
+    () => SDKService.getAllScheduledBalanceAdjustmentRequest(params),
+    options,
+  );
+};
+
+export const useGetBalanceAdjustments = <
+  TError,
+  TData = ScheduledBalanceAdjustmentViewModel,
+>(
+  params: GetScheduledBalanceAdjustmentRequest,
+  options: UseQueryOptions<
+    ScheduledBalanceAdjustmentViewModel,
+    TError,
+    TData,
+    [string]
+  >,
+) => {
+  return useQuery(
+    [
+      GET_SECURITY_BALANCE_ADJUSTMENT(
+        params.securityId,
+        params.balanceAdjustmentId,
+      ),
+    ],
+    () => SDKService.getScheduledBalanceAdjustmentRequest(params),
+    options,
+  );
 };

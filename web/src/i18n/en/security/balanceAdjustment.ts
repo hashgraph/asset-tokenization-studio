@@ -203,92 +203,52 @@
 
 */
 
-import dividends from "./dividends";
-import coupons from "./coupons";
-import roleManagement from "./roleManagement";
-import management from "./management";
-import allowedList from "./allowedList";
-import votingRights from "./votingRight";
-import balanceAdjustment from "./balanceAdjustment";
-
 export default {
-  header: {
-    title: "Digital security details",
-  },
   tabs: {
-    balance: "Balance",
-    allowedList: "Allowed list",
-    blockedList: "Blocked list",
-    details: "Details",
-    dividends: "Dividends",
-    balanceAdjustment: "Balance Adjustment",
-    coupons: "Coupons",
-    votingRights: "Voting rights",
-    roleManagement: "Role management",
-    management: "Management",
+    program: "Program Balance Adjustment",
+    see: "See Balance Adjustment",
   },
-  actions: {
-    redeem: "Redeem",
-    transfer: "Transfer",
-    mint: "Mint",
-    forceTransfer: "Force transfer",
-    forceRedeem: "Force redeem",
-    dangerZone: {
-      title: "Danger zone",
-      subtitle: "Pause security token",
-      buttonActive: "Active",
-      buttonInactive: "Inactive",
+  program: {
+    form: {
+      executionDate: {
+        label: "Execution date",
+        placeholder: "Select execution date",
+        tooltip:
+          "Dividend’s record date.  A snapshot of Equity holder’s balances will be triggered on this date.",
+      },
+      factor: {
+        label: "Factor",
+        placeholder: "Factor",
+      },
+      decimals: {
+        label: "Decimals",
+        placeholder: "Decimals",
+      },
     },
   },
-  dividends,
-  balanceAdjustment,
-  coupons,
-  balance: {
-    search: {
-      title: "Display balances",
-      subtitle: "Add the ID account to preview its balance",
-      placeholder: "0.0.19253",
-      button: "Search ID",
-    },
-    details: {
-      title: "Details",
+  see: {
+    form: {
+      balanceAdjustmentId: {
+        label: "Balance Adjustment ID",
+        placeholder: "Add ID",
+        tooltip: "ID of the balance adjustment to display.",
+      },
     },
     error: {
-      targetId: "Sorry, there was an error. Probably wrong address",
+      general:
+        "Sorry, there was an error. Please check data and try again, please",
+    },
+    details: {
+      title: "Detail",
+      executionDate: "Execution date",
+      factor: "Factor",
+      decimals: "Decimals",
     },
   },
-  roleManagement,
-  management,
-  allowedList,
-  votingRights,
-  benefits: {
-    dividends: "Dividends",
-    balanceAdjustments: "Balance Adjustments",
-    coupons: "Coupons",
-    id: "Id",
-    recordDate: "Record date",
-    executionDate: "Execution date",
-    dividendAmount: "Dividend amount",
-    couponRate: "Rate",
-    snapshot: "Snapshot Id",
-    factor: "Factor",
-    decimals: "Decimals",
-  },
-  bond: {
-    updateMaturityDate: {
-      toast: {
-        title: "Confirmation",
-        subtitle: "Are you sure you want to change the maturity date?",
-        cancelButtonText: "Cancel",
-        confirmButtonText: "Confirm",
-      },
-      messages: {
-        success: "Success: ",
-        updateMaturityDateSuccessful:
-          "Maturity date has been updated successfully",
-        error: "Error: ",
-        updateMaturityDateFailed: "Update maturity date failed",
-      },
-    },
+  messages: {
+    success: "Success: ",
+    creationSuccessful: "The schedule for balance adjustment was successful",
+    error: "Error: ",
+    creationFailed: "The schedule for balance adjustment failed",
   },
 };

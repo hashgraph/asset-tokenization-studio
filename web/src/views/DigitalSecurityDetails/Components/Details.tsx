@@ -214,6 +214,7 @@ import {
   GetAccountBalanceRequest,
   GetAllCouponsRequest,
   GetAllDividendsRequest,
+  GetAllScheduledBalanceAdjustmentsRequest,
   SecurityViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
 import { formatNumberLocale, toNumber } from "../../../utils/format";
@@ -230,6 +231,10 @@ import { SecurityDetailsExtended } from "./SecurityDetailsExtended";
 import { useGetAllCoupons } from "../../../hooks/queries/useCoupons";
 import { CountriesList } from "../../CreateSecurityCommons/CountriesList";
 import _capitalize from "lodash/capitalize";
+import {
+  useGetAllBalanceAdjustments,
+  useGetBalanceAdjustments,
+} from "../../../hooks/queries/useBalanceAdjustment";
 
 interface DetailsProps {
   id?: string;
@@ -274,6 +279,15 @@ export const Details = ({
     isLoading: isLoadingDividends,
     isFetching: isFetchingDividends,
   } = useGetAllDividends(dividendsRequest);
+
+  // BALANCE ADJUSTMENTS
+  const scheduledBalanceAdjustmentsRequest =
+    new GetAllScheduledBalanceAdjustmentsRequest({
+      securityId: id,
+    });
+  const { data: balanceAdjustments } = useGetAllBalanceAdjustments(
+    scheduledBalanceAdjustmentsRequest,
+  );
 
   // COUPONS
   const couponsRequest = new GetAllCouponsRequest({
@@ -575,6 +589,31 @@ export const Details = ({
             title={tRegulations("label")}
             layerStyle="container"
           />
+
+          {balanceAdjustments?.map((balanceAdjustment) => (
+            <DefinitionList
+              key={balanceAdjustment.id}
+              items={[
+                {
+                  title: tBenefits("executionDate"),
+                  description:
+                    new Date(
+                      balanceAdjustment.executionDate.getTime(),
+                    ).toLocaleDateString() ?? "",
+                },
+                {
+                  title: tBenefits("factor"),
+                  description: balanceAdjustment.factor ?? "",
+                },
+                {
+                  title: tBenefits("decimals"),
+                  description: balanceAdjustment.decimals ?? "",
+                },
+              ]}
+              title={tBenefits("balanceAdjustments")}
+              layerStyle="container"
+            />
+          ))}
         </VStack>
       </HStack>
     </VStack>
