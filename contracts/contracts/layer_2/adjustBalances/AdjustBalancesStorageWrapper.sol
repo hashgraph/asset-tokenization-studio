@@ -226,6 +226,8 @@ abstract contract AdjustBalancesStorageWrapper is
         uint256 _factor,
         uint8 _decimals
     ) internal virtual {
+        _beforeBalanceAdjustment(_factor, _decimals);
+        
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
         ERC1410BasicStorage_2
             storage erc1410Storage_2 = _getERC1410BasicStorage_2();
@@ -234,7 +236,7 @@ abstract contract AdjustBalancesStorageWrapper is
 
         erc1410Storage.totalSupply *= _factor;
 
-        if (erc1410Storage_2.ABAF == 0) erc1410Storage_2.ABAF = _factor;
+        if (_getABAF() == 0) erc1410Storage_2.ABAF = _factor;
         else erc1410Storage_2.ABAF *= _factor;
 
         erc20Storage.decimals += _decimals;
@@ -249,5 +251,14 @@ abstract contract AdjustBalancesStorageWrapper is
         uint8 _decimals
     ) internal virtual {
         // TODO : When balance adjustment for specific partitions are included
+    }
+
+    function _beforeBalanceAdjustment(
+        uint256 _factor,
+        uint8 _decimals
+    ) internal virtual {
+        _updateDecimalsSnapshot();
+        _updateABAFSnapshot();
+        _updateTotalSupplySnapshot();
     }
 }

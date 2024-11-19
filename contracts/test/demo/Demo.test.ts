@@ -346,10 +346,10 @@ Deployed contracts:
             await environment.deployedBusinessLogics.equityUSA.getStaticFunctionSelectors()
         )},
     Snapshots: 
-        address: ${environment.deployedBusinessLogics.snapshots.address},
-        key: ${await environment.deployedBusinessLogics.snapshots.getStaticResolverKey()},
+        address: ${environment.deployedBusinessLogics.snapshots_2.address},
+        key: ${await environment.deployedBusinessLogics.snapshots_2.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.snapshots.getStaticFunctionSelectors()
+            await environment.deployedBusinessLogics.snapshots_2.getStaticFunctionSelectors()
         )},
     Lock: 
         address: ${environment.deployedBusinessLogics.lock_2.address},
@@ -456,10 +456,10 @@ Deployed contracts:
         )
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.snapshots.getStaticResolverKey()
+                await environment.deployedBusinessLogics.snapshots_2.getStaticResolverKey()
             )
         ).to.be.equal(
-            await environment.deployedBusinessLogics.snapshots.address
+            await environment.deployedBusinessLogics.snapshots_2.address
         )
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
@@ -517,7 +517,7 @@ Deployed contracts:
                 await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.equityUSA.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.bondUSA.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.snapshots.getStaticResolverKey(),
+                await environment.deployedBusinessLogics.snapshots_2.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.cap.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.lock_2.getStaticResolverKey(),
@@ -649,7 +649,7 @@ DiamondResume:
     )}
     DiamondLoupe.facetFunctionSelectors[snapshots]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.snapshots.getStaticResolverKey()
+            await environment.deployedBusinessLogics.snapshots_2.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[lock]: ${JSON.stringify(

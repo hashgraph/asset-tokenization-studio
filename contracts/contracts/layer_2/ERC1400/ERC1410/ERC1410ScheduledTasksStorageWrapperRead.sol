@@ -203,123 +203,54 @@
 
 */
 
-//import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ethers } from 'hardhat'
-import { IBusinessLogicResolver } from '../typechain-types'
-import { IStaticFunctionSelectors } from '../typechain-types'
+// SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
+pragma solidity 0.8.18;
+
 import {
-    transparentUpgradableProxy,
-    deployProxyAdmin,
-    deployTransparentUpgradeableProxy,
-} from './transparentUpgradableProxy'
-import { expect } from 'chai'
+    ScheduledSnapshotsStorageWrapper
+} from '../../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
+import {
+    _ERC1410_BASIC_STORAGE_2_POSITION
+} from '../../constants/storagePositions.sol';
+import {
+    ERC1410SnapshotStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410//ERC1410SnapshotStorageWrapper.sol';
 
-export interface BusinessLogicRegistryData {
-    businessLogicKey: string
-    businessLogicAddress: string
-}
+abstract contract ERC1410ScheduledTasksStorageWrapperRead is
+    ERC1410SnapshotStorageWrapper
+{
+    struct ERC1410BasicStorage_2 {
+        // Mapping from investor to their partitions LABAF
+        mapping(address => uint256[]) LABAF_user_partition;
+        // Aggregated Balance Adjustment
+        uint256 ABAF;
+        // Last Aggregated Balance Adjustment per account
+        mapping(address => uint256) LABAF;
+        // Last Aggregated Balance Adjustment per partition
+        mapping(bytes32 => uint256) LABAF_partition;
+    }
 
-export interface DeployedBusinessLogics {
-    businessLogicResolver: IStaticFunctionSelectors
-    factory: IStaticFunctionSelectors
-    diamondFacet: IStaticFunctionSelectors
-    accessControl: IStaticFunctionSelectors
-    controlList: IStaticFunctionSelectors
-    corporateActionsSecurity: IStaticFunctionSelectors
-    pause: IStaticFunctionSelectors
-    eRC20_2: IStaticFunctionSelectors
-    eRC1644_2: IStaticFunctionSelectors
-    eRC1410ScheduledTasks: IStaticFunctionSelectors
-    eRC1594_2: IStaticFunctionSelectors
-    eRC1643: IStaticFunctionSelectors
-    equityUSA: IStaticFunctionSelectors
-    bondUSA: IStaticFunctionSelectors
-    snapshots_2: IStaticFunctionSelectors
-    scheduledSnapshots: IStaticFunctionSelectors
-    scheduledBalanceAdjustments: IStaticFunctionSelectors
-    cap: IStaticFunctionSelectors
-    lock_2: IStaticFunctionSelectors
-    transferAndLock: IStaticFunctionSelectors
-    adjustBalances: IStaticFunctionSelectors
-}
+    function _getABAF() internal view virtual returns (uint256) {
+        return _getERC1410BasicStorage_2().ABAF;
+    }
 
-export let businessLogicResolver: IBusinessLogicResolver
-
-export async function deployProxyToBusinessLogicResolver(
-    businessLogicResolverLogicAddress: string
-) {
-    //await loadFixture(deployProxyAdmin)
-    await deployProxyAdmin()
-    await deployTransparentUpgradeableProxy(businessLogicResolverLogicAddress)
-    businessLogicResolver = (await ethers.getContractAt(
-        'BusinessLogicResolver',
-        transparentUpgradableProxy.address
-    )) as IBusinessLogicResolver
-    await businessLogicResolver.initialize_BusinessLogicResolver()
-}
-
-async function toStaticFunctionSelectors(
-    address: string
-): Promise<IStaticFunctionSelectors> {
-    return (await ethers.getContractAt(
-        'IStaticFunctionSelectors',
-        address
-    )) as IStaticFunctionSelectors
-}
-
-function capitalizeFirst(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-}
-
-function uncapitalizeFirst(str: string) {
-    return str.charAt(0).toLowerCase() + str.slice(1)
-}
-
-export async function deployBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    async function deployContractAndAssignIt(
-        deployedAndRegisteredBusinessLogics: DeployedBusinessLogics,
-        contractToDeploy: string
-    ) {
-        async function deployContract() {
-            return await (
-                await ethers.getContractFactory(contractToDeploy)
-            ).deploy()
+    function _getERC1410BasicStorage_2()
+        internal
+        pure
+        virtual
+        returns (ERC1410BasicStorage_2 storage erc1410BasicStorage_2_)
+    {
+        bytes32 position = _ERC1410_BASIC_STORAGE_2_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1410BasicStorage_2_.slot := position
         }
-        //await loadFixture(deployContract)
-        const deployedContract = await deployContract()
-        const deployedAndRegisteredBusinessLogics_Property =
-            uncapitalizeFirst(contractToDeploy)
-        deployedAndRegisteredBusinessLogics[
-            deployedAndRegisteredBusinessLogics_Property as keyof DeployedBusinessLogics
-        ] = await toStaticFunctionSelectors(deployedContract.address)
     }
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        await deployContractAndAssignIt(
-            deployedAndRegisteredBusinessLogics,
-            capitalizeFirst(key)
-        )
-    }
-}
-
-export async function registerBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    const businessLogicsData: BusinessLogicRegistryData[] = []
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        if (key === 'businessLogicResolver' || key === 'factory') {
-            continue
-        }
-        const businessLogic = deployedAndRegisteredBusinessLogics[key]
-        businessLogicsData.push({
-            businessLogicKey: await businessLogic.getStaticResolverKey(),
-            businessLogicAddress: businessLogic.address,
-        })
-    }
-    await expect(
-        businessLogicResolver.registerBusinessLogics(businessLogicsData)
-    ).to.emit(businessLogicResolver, 'BusinessLogicsRegistered')
 }

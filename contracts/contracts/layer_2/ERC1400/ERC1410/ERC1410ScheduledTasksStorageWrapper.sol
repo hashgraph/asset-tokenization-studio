@@ -222,23 +222,15 @@ import {
 import {
     ERC1410SnapshotStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410//ERC1410SnapshotStorageWrapper.sol';
+import {
+    SnapshotsStorageWrapper_2
+} from '../../snapshots/SnapshotsStorageWrapper_2.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
-    ERC1410SnapshotStorageWrapper,
+    SnapshotsStorageWrapper_2,
     ScheduledSnapshotsStorageWrapper,
     ScheduledBalanceAdjustmentsStorageWrapper
 {
-    struct ERC1410BasicStorage_2 {
-        // Mapping from investor to their partitions LABAF
-        mapping(address => uint256[]) LABAF_user_partition;
-        // Aggregated Balance Adjustment
-        uint256 ABAF;
-        // Last Aggregated Balance Adjustment per account
-        mapping(address => uint256) LABAF;
-        // Last Aggregated Balance Adjustment per partition
-        mapping(bytes32 => uint256) LABAF_partition;
-    }
-
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
@@ -305,23 +297,8 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         ERC1410BasicStorage_2
             storage erc1410Storage_2 = _getERC1410BasicStorage_2();
 
-        erc1410Storage_2.LABAF_user_partition[_account].push(
-            erc1410Storage_2.ABAF
-        );
+        erc1410Storage_2.LABAF_user_partition[_account].push(_getABAF());
 
         super._addPartitionTo(_value, _account, _partition);
-    }
-
-    function _getERC1410BasicStorage_2()
-        internal
-        pure
-        virtual
-        returns (ERC1410BasicStorage_2 storage erc1410BasicStorage_2_)
-    {
-        bytes32 position = _ERC1410_BASIC_STORAGE_2_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1410BasicStorage_2_.slot := position
-        }
     }
 }

@@ -348,10 +348,7 @@ abstract contract LockStorageWrapper_2 is
         address _tokenHolder,
         LockDataStorage_2 storage lockStorage_2
     ) internal returns (uint256 ABAF_) {
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
-
-        ABAF_ = erc1410Storage_2.ABAF;
+        ABAF_ = _getABAF();
 
         uint256 LABAF = _getTotalLockLABAFByPartition(_partition, _tokenHolder);
 

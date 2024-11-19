@@ -203,123 +203,159 @@
 
 */
 
-//import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ethers } from 'hardhat'
-import { IBusinessLogicResolver } from '../typechain-types'
-import { IStaticFunctionSelectors } from '../typechain-types'
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.18;
+
 import {
-    transparentUpgradableProxy,
-    deployProxyAdmin,
-    deployTransparentUpgradeableProxy,
-} from './transparentUpgradableProxy'
-import { expect } from 'chai'
+    SnapshotsStorageWrapper
+} from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
+import {_SNAPSHOT_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapperRead
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol';
+import {
+    ERC1410BasicStorageWrapper
+} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
 
-export interface BusinessLogicRegistryData {
-    businessLogicKey: string
-    businessLogicAddress: string
-}
+abstract contract SnapshotsStorageWrapper_2 is
+    SnapshotsStorageWrapper,
+    ERC1410ScheduledTasksStorageWrapperRead
+{
+    struct SnapshotStorage_2 {
+        Snapshots ABAFSnapshots;
+        Snapshots decimals;
+    }
 
-export interface DeployedBusinessLogics {
-    businessLogicResolver: IStaticFunctionSelectors
-    factory: IStaticFunctionSelectors
-    diamondFacet: IStaticFunctionSelectors
-    accessControl: IStaticFunctionSelectors
-    controlList: IStaticFunctionSelectors
-    corporateActionsSecurity: IStaticFunctionSelectors
-    pause: IStaticFunctionSelectors
-    eRC20_2: IStaticFunctionSelectors
-    eRC1644_2: IStaticFunctionSelectors
-    eRC1410ScheduledTasks: IStaticFunctionSelectors
-    eRC1594_2: IStaticFunctionSelectors
-    eRC1643: IStaticFunctionSelectors
-    equityUSA: IStaticFunctionSelectors
-    bondUSA: IStaticFunctionSelectors
-    snapshots_2: IStaticFunctionSelectors
-    scheduledSnapshots: IStaticFunctionSelectors
-    scheduledBalanceAdjustments: IStaticFunctionSelectors
-    cap: IStaticFunctionSelectors
-    lock_2: IStaticFunctionSelectors
-    transferAndLock: IStaticFunctionSelectors
-    adjustBalances: IStaticFunctionSelectors
-}
+    function _updateABAFSnapshot() internal virtual {
+        uint256 ABAF = _getABAF();
+        if (ABAF == 0) ABAF = 1;
+        _updateSnapshot(_snapshotStorage_2().ABAFSnapshots, ABAF);
+    }
 
-export let businessLogicResolver: IBusinessLogicResolver
+    function _updateDecimalsSnapshot() internal virtual {
+        ERC20Storage storage erc20Storage = _getErc20Storage();
 
-export async function deployProxyToBusinessLogicResolver(
-    businessLogicResolverLogicAddress: string
-) {
-    //await loadFixture(deployProxyAdmin)
-    await deployProxyAdmin()
-    await deployTransparentUpgradeableProxy(businessLogicResolverLogicAddress)
-    businessLogicResolver = (await ethers.getContractAt(
-        'BusinessLogicResolver',
-        transparentUpgradableProxy.address
-    )) as IBusinessLogicResolver
-    await businessLogicResolver.initialize_BusinessLogicResolver()
-}
+        _updateSnapshot(_snapshotStorage_2().decimals, erc20Storage.decimals);
+    }
 
-async function toStaticFunctionSelectors(
-    address: string
-): Promise<IStaticFunctionSelectors> {
-    return (await ethers.getContractAt(
-        'IStaticFunctionSelectors',
-        address
-    )) as IStaticFunctionSelectors
-}
+    function _ABAFAtSnapshot(
+        uint256 _snapshotID
+    ) internal view returns (uint256 ABAF_) {
+        (bool snapshotted, uint256 value) = _valueAt(
+            _snapshotID,
+            _snapshotStorage_2().ABAFSnapshots
+        );
 
-function capitalizeFirst(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-}
+        return snapshotted ? value : _getABAF();
+    }
 
-function uncapitalizeFirst(str: string) {
-    return str.charAt(0).toLowerCase() + str.slice(1)
-}
+    function _decimalsAtSnapshot(
+        uint256 _snapshotID
+    ) internal view returns (uint256 decimals_) {
+        ERC20Storage storage erc20Storage = _getErc20Storage();
 
-export async function deployBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    async function deployContractAndAssignIt(
-        deployedAndRegisteredBusinessLogics: DeployedBusinessLogics,
-        contractToDeploy: string
-    ) {
-        async function deployContract() {
-            return await (
-                await ethers.getContractFactory(contractToDeploy)
-            ).deploy()
+        (bool snapshotted, uint256 value) = _valueAt(
+            _snapshotID,
+            _snapshotStorage_2().decimals
+        );
+
+        return snapshotted ? value : erc20Storage.decimals;
+    }
+
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual override {
+        uint256 currentSnapshotId = _getCurrentSnapshotId();
+
+        if(currentSnapshotId == 0) return;
+
+        uint256 ABAFAtCurrentSnapshot = _ABAFAtSnapshot(
+            currentSnapshotId
+        );
+        uint256 ABAF = _getABAF();
+
+        if (ABAF == ABAFAtCurrentSnapshot) {
+            super._updateAccountSnapshot(account, partition);
+            return;
         }
-        //await loadFixture(deployContract)
-        const deployedContract = await deployContract()
-        const deployedAndRegisteredBusinessLogics_Property =
-            uncapitalizeFirst(contractToDeploy)
-        deployedAndRegisteredBusinessLogics[
-            deployedAndRegisteredBusinessLogics_Property as keyof DeployedBusinessLogics
-        ] = await toStaticFunctionSelectors(deployedContract.address)
-    }
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        await deployContractAndAssignIt(
-            deployedAndRegisteredBusinessLogics,
-            capitalizeFirst(key)
-        )
-    }
-}
 
-export async function registerBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    const businessLogicsData: BusinessLogicRegistryData[] = []
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        if (key === 'businessLogicResolver' || key === 'factory') {
-            continue
-        }
-        const businessLogic = deployedAndRegisteredBusinessLogics[key]
-        businessLogicsData.push({
-            businessLogicKey: await businessLogic.getStaticResolverKey(),
-            businessLogicAddress: businessLogic.address,
-        })
+        uint256 balance = _balanceOf(account);
+        uint256 balanceForPartition = _balanceOfByPartition(partition, account);
+        uint256 factor = ABAF / ABAFAtCurrentSnapshot;
+
+        balance /= factor;
+        balanceForPartition /= factor;
+
+        _updateSnapshot(
+            _snapshotStorage().accountBalanceSnapshots[account],
+            balance
+        );
+        _updateSnapshotPartitions(
+            _snapshotStorage().accountPartitionBalanceSnapshots[account][
+                partition
+            ],
+            _snapshotStorage().accountPartitionSnapshots[account],
+            balanceForPartition,
+            _partitionsOf(account)
+        );
     }
-    await expect(
-        businessLogicResolver.registerBusinessLogics(businessLogicsData)
-    ).to.emit(businessLogicResolver, 'BusinessLogicsRegistered')
+
+    function _balanceOfAt(
+        address account,
+        uint256 snapshotId
+    ) internal view virtual override returns (uint256) {
+        return
+            _balanceOfAt_Adjusted(
+                snapshotId,
+                _snapshotStorage().accountBalanceSnapshots[account],
+                _balanceOf(account)
+            );
+    }
+
+    function _balanceOfAtByPartition(
+        bytes32 _partition,
+        address account,
+        uint256 snapshotId
+    ) internal view virtual override returns (uint256) {
+        return
+            _balanceOfAt_Adjusted(
+                snapshotId,
+                _snapshotStorage().accountPartitionBalanceSnapshots[account][
+                    _partition
+                ],
+                _balanceOfByPartition(_partition, account)
+            );
+    }
+
+    function _balanceOfAt_Adjusted(
+        uint256 _snapshotId,
+        Snapshots storage _snapshots,
+        uint256 _currentBalance
+    ) internal view virtual returns (uint256) {
+        (bool snapshotted, uint256 value) = _valueAt(_snapshotId, _snapshots);
+        if (snapshotted) return value;
+
+        uint256 ABAFAtSnapshot = _ABAFAtSnapshot(_snapshotId);
+        uint256 ABAF = _getABAF();
+
+        if (ABAFAtSnapshot == ABAF) return _currentBalance;
+
+        uint256 factor = ABAF / ABAFAtSnapshot;
+
+        return _currentBalance / factor;
+    }
+
+    function _snapshotStorage_2()
+        internal
+        pure
+        virtual
+        returns (SnapshotStorage_2 storage snapshotStorage_2_)
+    {
+        bytes32 position = _SNAPSHOT_2_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            snapshotStorage_2_.slot := position
+        }
+    }
 }

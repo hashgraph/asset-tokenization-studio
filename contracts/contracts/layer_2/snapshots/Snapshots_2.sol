@@ -203,123 +203,139 @@
 
 */
 
-//import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ethers } from 'hardhat'
-import { IBusinessLogicResolver } from '../typechain-types'
-import { IStaticFunctionSelectors } from '../typechain-types'
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.18;
+
+import {SnapshotsStorageWrapper_2} from './SnapshotsStorageWrapper_2.sol';
 import {
-    transparentUpgradableProxy,
-    deployProxyAdmin,
-    deployTransparentUpgradeableProxy,
-} from './transparentUpgradableProxy'
-import { expect } from 'chai'
+    SnapshotsStorageWrapper
+} from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
+import {Snapshots} from '../../layer_1/snapshots/Snapshots.sol';
+import {
+    ERC1410BasicStorageWrapper
+} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {
+    ERC1410SnapshotStorageWrapper
+} from '../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
+    _SNAPSHOTS_RESOLVER_KEY
+} from '../../layer_1/constants/resolverKeys.sol';
+import {ISnapshots} from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
+import {ISnapshots_2} from '../interfaces/snapshots/ISnapshots_2.sol';
 
-export interface BusinessLogicRegistryData {
-    businessLogicKey: string
-    businessLogicAddress: string
-}
-
-export interface DeployedBusinessLogics {
-    businessLogicResolver: IStaticFunctionSelectors
-    factory: IStaticFunctionSelectors
-    diamondFacet: IStaticFunctionSelectors
-    accessControl: IStaticFunctionSelectors
-    controlList: IStaticFunctionSelectors
-    corporateActionsSecurity: IStaticFunctionSelectors
-    pause: IStaticFunctionSelectors
-    eRC20_2: IStaticFunctionSelectors
-    eRC1644_2: IStaticFunctionSelectors
-    eRC1410ScheduledTasks: IStaticFunctionSelectors
-    eRC1594_2: IStaticFunctionSelectors
-    eRC1643: IStaticFunctionSelectors
-    equityUSA: IStaticFunctionSelectors
-    bondUSA: IStaticFunctionSelectors
-    snapshots_2: IStaticFunctionSelectors
-    scheduledSnapshots: IStaticFunctionSelectors
-    scheduledBalanceAdjustments: IStaticFunctionSelectors
-    cap: IStaticFunctionSelectors
-    lock_2: IStaticFunctionSelectors
-    transferAndLock: IStaticFunctionSelectors
-    adjustBalances: IStaticFunctionSelectors
-}
-
-export let businessLogicResolver: IBusinessLogicResolver
-
-export async function deployProxyToBusinessLogicResolver(
-    businessLogicResolverLogicAddress: string
-) {
-    //await loadFixture(deployProxyAdmin)
-    await deployProxyAdmin()
-    await deployTransparentUpgradeableProxy(businessLogicResolverLogicAddress)
-    businessLogicResolver = (await ethers.getContractAt(
-        'BusinessLogicResolver',
-        transparentUpgradableProxy.address
-    )) as IBusinessLogicResolver
-    await businessLogicResolver.initialize_BusinessLogicResolver()
-}
-
-async function toStaticFunctionSelectors(
-    address: string
-): Promise<IStaticFunctionSelectors> {
-    return (await ethers.getContractAt(
-        'IStaticFunctionSelectors',
-        address
-    )) as IStaticFunctionSelectors
-}
-
-function capitalizeFirst(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-}
-
-function uncapitalizeFirst(str: string) {
-    return str.charAt(0).toLowerCase() + str.slice(1)
-}
-
-export async function deployBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    async function deployContractAndAssignIt(
-        deployedAndRegisteredBusinessLogics: DeployedBusinessLogics,
-        contractToDeploy: string
-    ) {
-        async function deployContract() {
-            return await (
-                await ethers.getContractFactory(contractToDeploy)
-            ).deploy()
-        }
-        //await loadFixture(deployContract)
-        const deployedContract = await deployContract()
-        const deployedAndRegisteredBusinessLogics_Property =
-            uncapitalizeFirst(contractToDeploy)
-        deployedAndRegisteredBusinessLogics[
-            deployedAndRegisteredBusinessLogics_Property as keyof DeployedBusinessLogics
-        ] = await toStaticFunctionSelectors(deployedContract.address)
+contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
+    function ABAFAtSnapshot(
+        uint256 _snapshotID
+    ) external view returns (uint256 ABAF_) {
+        return _ABAFAtSnapshot(_snapshotID);
     }
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        await deployContractAndAssignIt(
-            deployedAndRegisteredBusinessLogics,
-            capitalizeFirst(key)
-        )
-    }
-}
 
-export async function registerBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    const businessLogicsData: BusinessLogicRegistryData[] = []
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        if (key === 'businessLogicResolver' || key === 'factory') {
-            continue
-        }
-        const businessLogic = deployedAndRegisteredBusinessLogics[key]
-        businessLogicsData.push({
-            businessLogicKey: await businessLogic.getStaticResolverKey(),
-            businessLogicAddress: businessLogic.address,
-        })
+    function decimalsAtSnapshot(
+        uint256 _snapshotID
+    ) external view returns (uint256 decimals_) {
+        return _decimalsAtSnapshot(_snapshotID);
     }
-    await expect(
-        businessLogicResolver.registerBusinessLogics(businessLogicsData)
-    ).to.emit(businessLogicResolver, 'BusinessLogicsRegistered')
+
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    )
+        internal
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+    {
+        return
+            SnapshotsStorageWrapper_2._updateAccountSnapshot(
+                account,
+                partition
+            );
+    }
+
+    function _balanceOfAt(
+        address account,
+        uint256 snapshotId
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256)
+    {
+        return SnapshotsStorageWrapper_2._balanceOfAt(account, snapshotId);
+    }
+
+    function _balanceOfAtByPartition(
+        bytes32 _partition,
+        address account,
+        uint256 snapshotId
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256)
+    {
+        return
+            SnapshotsStorageWrapper_2._balanceOfAtByPartition(
+                _partition,
+                account,
+                snapshotId
+            );
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfAtSnapshotByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .partitionsOfAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .ABAFAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .decimalsAtSnapshot
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](2);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots_2).interfaceId;
+    }
 }

@@ -284,11 +284,9 @@ abstract contract ERC20StorageWrapper_2 is
         address _owner,
         address _spender
     ) internal virtual {
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
         ERC20Storage_2 storage erc20Storage_2 = _getErc20Storage_2();
 
-        uint256 ABAF = erc1410Storage_2.ABAF;
+        uint256 ABAF = _getABAF();
         uint256 LABAF = _getAllowanceLABAF(_owner, _spender);
 
         if (ABAF == LABAF) return;

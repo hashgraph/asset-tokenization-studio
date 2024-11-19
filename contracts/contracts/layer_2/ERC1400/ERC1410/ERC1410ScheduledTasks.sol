@@ -220,6 +220,12 @@ import {
 import {
     ERC1410BasicStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {
+    SnapshotsStorageWrapper
+} from '../../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
+import {
+    SnapshotsStorageWrapper_2
+} from '../../snapshots/SnapshotsStorageWrapper_2.sol';
 
 contract ERC1410ScheduledTasks is
     ERC1410Snapshot,
@@ -264,5 +270,52 @@ contract ERC1410ScheduledTasks is
             _account,
             _partition
         );
+    }
+
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    )
+        internal
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+    {
+        return
+            SnapshotsStorageWrapper_2._updateAccountSnapshot(
+                account,
+                partition
+            );
+    }
+
+    function _balanceOfAt(
+        address account,
+        uint256 snapshotId
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256)
+    {
+        return SnapshotsStorageWrapper_2._balanceOfAt(account, snapshotId);
+    }
+
+    function _balanceOfAtByPartition(
+        bytes32 _partition,
+        address account,
+        uint256 snapshotId
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256)
+    {
+        return
+            SnapshotsStorageWrapper_2._balanceOfAtByPartition(
+                _partition,
+                account,
+                snapshotId
+            );
     }
 }

@@ -227,3 +227,6 @@ bytes32 constant _LOCK_2_STORAGE_POSITION = 0x80a0b31b5fd604012f7499bdf0f4b16f83
 
 // keccak256('security.token.standard.erc20.2.storage');
 bytes32 constant _ERC20_2_STORAGE_POSITION = 0xd9e01023f6efb8d6fd07b486ce7d576973b42ff2c201a7ad9b018c2103b5d0c6;
+
+// keccak256('security.token.standard.snapshot.2.storage');
+bytes32 constant _SNAPSHOT_2_STORAGE_POSITION = 0x7fa31c0dfd7893e990d22efcc9d48c475631ab02fa1ab34086c54e7f6d9d9b10;

@@ -206,8 +206,8 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+    ERC1410ScheduledTasksStorageWrapperRead
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
@@ -240,7 +240,7 @@ library AdjustBalanceLib {
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
+        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
     ) internal {
         uint256 ABAF = _basicStorage_2.ABAF;
@@ -260,7 +260,7 @@ library AdjustBalanceLib {
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
         CapStorageWrapper.CapDataStorage storage _capStorage,
-        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
+        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
     ) internal {
         uint256 ABAF = _basicStorage_2.ABAF;
@@ -293,7 +293,7 @@ library AdjustBalanceLib {
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
+        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
     ) internal {
         uint256 LABAF = _basicStorage_2.LABAF[_account];
@@ -318,7 +318,7 @@ library AdjustBalanceLib {
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
+        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
     ) internal {
         uint256 partitionsIndex = _basicStorage.partitionToIndex[_account][

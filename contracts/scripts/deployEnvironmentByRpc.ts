@@ -318,7 +318,7 @@ function buildEmptyEnvironment(): Environment {
             eRC1643: {} as IStaticFunctionSelectors,
             equityUSA: {} as IStaticFunctionSelectors,
             bondUSA: {} as IStaticFunctionSelectors,
-            snapshots: {} as IStaticFunctionSelectors,
+            snapshots_2: {} as IStaticFunctionSelectors,
             scheduledSnapshots: {} as IStaticFunctionSelectors,
             scheduledBalanceAdjustments: {} as IStaticFunctionSelectors,
             cap: {} as IStaticFunctionSelectors,

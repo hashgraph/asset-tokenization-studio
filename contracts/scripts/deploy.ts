@@ -222,7 +222,7 @@ import {
     ProxyAdmin__factory,
     ScheduledSnapshots__factory,
     ScheduledBalanceAdjustments__factory,
-    Snapshots__factory,
+    Snapshots_2__factory,
     TransferAndLock__factory,
     TransparentUpgradeableProxy__factory,
     Lock_2__factory,
@@ -700,7 +700,7 @@ export async function deployContract({
         scheduledBalanceAdjustments: {
             factory: ScheduledBalanceAdjustments__factory,
         },
-        snapshots: { factory: Snapshots__factory },
+        snapshots: { factory: Snapshots_2__factory },
         corporateactions: { factory: CorporateActionsSecurity__factory },
         transferandlock: { factory: TransferAndLock__factory },
         lock: { factory: Lock_2__factory },
