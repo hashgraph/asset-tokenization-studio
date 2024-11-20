@@ -38,7 +38,7 @@
     "elliptic": "^6.5.5",
     "ethers": "^5.7.2",
     "rimraf": "^4.1.1",
-    "serverless": "^3.34.0"
+    "serverless": "^4.4.11"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.2.0",
