@@ -217,7 +217,7 @@ import {
     type Snapshots,
     type ScheduledSnapshots,
     type ScheduledTasks,
-    type Cap,
+    type Cap_2,
 } from '../../typechain-types'
 import {
     deployEnvironment,
@@ -307,6 +307,12 @@ Deployed contracts:
         key: ${await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey()},
         selectors: ${JSON.stringify(
             await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticFunctionSelectors()
+        )},
+    CAP: 
+        address: ${environment.deployedBusinessLogics.cap_2.address},
+        key: ${await environment.deployedBusinessLogics.cap_2.getStaticResolverKey()},
+        selectors: ${JSON.stringify(
+            await environment.deployedBusinessLogics.cap_2.getStaticFunctionSelectors()
         )},
     ERC20: 
         address: ${environment.deployedBusinessLogics.eRC20_2.address},
@@ -425,6 +431,11 @@ Deployed contracts:
         )
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
+                await environment.deployedBusinessLogics.cap_2.getStaticResolverKey()
+            )
+        ).to.be.equal(environment.deployedBusinessLogics.cap_2.address)
+        expect(
+            await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.eRC20_2.getStaticResolverKey()
             )
         ).to.be.equal(environment.deployedBusinessLogics.eRC20_2.address)
@@ -529,7 +540,7 @@ Deployed contracts:
                 await environment.deployedBusinessLogics.bondUSA.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.snapshots_2.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.cap.getStaticResolverKey(),
+                await environment.deployedBusinessLogics.cap_2.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.lock_2.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.transferAndLock.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.adjustBalances.getStaticResolverKey(),
@@ -690,7 +701,7 @@ DiamondResume:
     )}
     DiamondLoupe.facetFunctionSelectors[cap]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.cap.getStaticResolverKey()
+            await environment.deployedBusinessLogics.cap_2.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetKeys: ${JSON.stringify(await loupeFacet.getFacetIds())}
@@ -715,8 +726,8 @@ DiamondResume:
             diamond.address
         )
 
-        const capFacet: Cap = await ethers.getContractAt(
-            'Cap',
+        const capFacet: Cap_2 = await ethers.getContractAt(
+            'Cap_2',
             await diamond.address
         )
 

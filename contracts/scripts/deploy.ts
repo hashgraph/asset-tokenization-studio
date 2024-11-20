@@ -209,7 +209,6 @@ import {
     AccessControl__factory,
     BondUSA__factory,
     BusinessLogicResolver__factory,
-    Cap__factory,
     ControlList__factory,
     CorporateActionsSecurity__factory,
     DiamondFacet__factory,
@@ -229,6 +228,7 @@ import {
     ERC1594_2__factory,
     ERC20_2__factory,
     ScheduledTasks__factory,
+    Cap_2__factory,
 } from '../typechain-types'
 import {
     getEnvVar,
@@ -699,7 +699,7 @@ export async function deployContract({
             deployProxy: true,
         },
         accesscontrol: { factory: AccessControl__factory },
-        cap: { factory: Cap__factory },
+        cap: { factory: Cap_2__factory },
         controllist: { factory: ControlList__factory },
         pause: { factory: Pause__factory },
         erc20: { factory: ERC20_2__factory },

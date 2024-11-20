@@ -219,6 +219,7 @@ abstract contract CapStorageWrapper_2 is
     function _getMaxSupply()
         internal
         view
+        virtual
         override
         returns (uint256 maxSupply_)
     {
@@ -233,7 +234,7 @@ abstract contract CapStorageWrapper_2 is
 
     function _getMaxSupplyByPartition(
         bytes32 _partition
-    ) internal view override returns (uint256 maxSupply_) {
+    ) internal view virtual override returns (uint256 maxSupply_) {
         (uint256 factor, ) = AdjustBalanceLib
             ._calculateScheduledBalanceAdjustments(
                 _getERC1410BasicStorage_2().ABAF,

@@ -207,5 +207,29 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {CapStorageWrapper_2} from './CapStorageWrapper_2.sol';
+import {Cap} from '../../layer_1/cap/Cap.sol';
+import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
 
-contract Cap_2 is CapStorageWrapper_2 {}
+contract Cap_2 is Cap, CapStorageWrapper_2 {
+    function _getMaxSupply()
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, CapStorageWrapper_2)
+        returns (uint256 maxSupply_)
+    {
+        return CapStorageWrapper_2._getMaxSupply();
+    }
+
+    function _getMaxSupplyByPartition(
+        bytes32 _partition
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, CapStorageWrapper_2)
+        returns (uint256 maxSupply_)
+    {
+        return CapStorageWrapper_2._getMaxSupplyByPartition(_partition);
+    }
+}

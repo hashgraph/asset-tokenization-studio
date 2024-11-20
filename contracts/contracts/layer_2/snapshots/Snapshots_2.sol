@@ -230,11 +230,11 @@ import {
     ScheduledTasksStorageWrapper
 } from '../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
 
-contract Snapshots_2 is 
-ISnapshots_2, 
-ScheduledTasksStorageWrapper,
-Snapshots, 
-SnapshotsStorageWrapper_2
+contract Snapshots_2 is
+    ISnapshots_2,
+    ScheduledTasksStorageWrapper,
+    Snapshots,
+    SnapshotsStorageWrapper_2
 {
     function takeSnapshot()
         external
