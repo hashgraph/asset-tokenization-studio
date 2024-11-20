@@ -603,12 +603,12 @@ describe('Adjust Balances Tests', () => {
         )
         //expect(balanceOf_A_Partition_2_After).to.be.equal(balanceOf_A_Partition_2_Before.mul(adjustFactor))
 
-        /*expect(balanceOf_B_After).to.be.equal(
-            balanceOf_B_Before.mul(adjustFactor).add(added_Amount)
-        )
-        expect(balanceOf_B_Partition_1_After).to.be.equal(
-            balanceOf_B_Partition_1_Before.mul(adjustFactor).add(added_Amount)
-        )*/
+        // expect(balanceOf_B_After).to.be.equal(
+        //     balanceOf_B_Before.mul(adjustFactor).add(added_Amount)
+        // )
+        // expect(balanceOf_B_Partition_1_After).to.be.equal(
+        //     balanceOf_B_Partition_1_Before.mul(adjustFactor).add(added_Amount)
+        // )
         //expect(balanceOf_B_Partition_2_After).to.be.equal(balanceOf_B_Partition_2_Before.mul(adjustFactor))
 
         expect(decimals_After).to.be.equal(decimals_Before + adjustDecimals)

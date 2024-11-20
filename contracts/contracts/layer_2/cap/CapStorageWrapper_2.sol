@@ -232,14 +232,14 @@ abstract contract CapStorageWrapper_2 is
     }
 
     function _getMaxSupplyByPartition(
-        bytes32 partition_
+        bytes32 _partition
     ) internal view override returns (uint256 maxSupply_) {
         (uint256 factor, ) = AdjustBalanceLib
             ._calculateScheduledBalanceAdjustments(
                 _getERC1410BasicStorage_2().ABAF,
-                _getERC1410BasicStorage_2().LABAF_partition[partition_],
+                _getERC1410BasicStorage_2().LABAF_partition[_partition],
                 0
             );
-        return super._getMaxSupplyByPartition(partition_) * factor;
+        return super._getMaxSupplyByPartition(_partition) * factor;
     }
 }
