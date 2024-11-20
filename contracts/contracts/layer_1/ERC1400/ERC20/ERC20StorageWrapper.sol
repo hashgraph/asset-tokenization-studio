@@ -409,6 +409,10 @@ abstract contract ERC20StorageWrapper is
         return true;
     }
 
+    function _decimals() internal view virtual returns (uint8) {
+        return _getERC20Metadata().info.decimals;
+    }
+
     function _getERC20Metadata()
         internal
         view

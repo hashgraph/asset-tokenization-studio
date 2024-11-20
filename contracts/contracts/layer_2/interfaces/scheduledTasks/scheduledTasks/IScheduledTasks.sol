@@ -203,62 +203,23 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {
-    IAdjustBalancesStorageWrapper
-} from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+import {ScheduledTasksLib} from '../../../scheduledTasks/ScheduledTasksLib.sol';
 
-abstract contract AdjustBalancesStorageWrapper is
-    IAdjustBalancesStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
-{
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
-        _;
-    }
+interface IScheduledTasks {
+    function triggerPendingScheduledTasks() external returns (uint256);
 
-    function _adjustBalances(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _beforeBalanceAdjustment(_factor, _decimals);
+    function triggerScheduledTasks(uint256 _max) external returns (uint256);
 
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-        CapDataStorage storage capStorage = _capStorage();
+    function scheduledTaskCount() external view returns (uint256);
 
-        erc1410Storage.totalSupply *= _factor;
-
-        if (_getABAF() == 0) erc1410Storage_2.ABAF = _factor;
-        else erc1410Storage_2.ABAF *= _factor;
-
-        erc20Storage.decimals += _decimals;
-        capStorage.maxSupply *= _factor;
-
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
-    }
-
-    function _adjustBalancesByPartition(
-        bytes32 _partition,
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        // TODO : When balance adjustment for specific partitions are included
-    }
-
-    function _beforeBalanceAdjustment(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _updateDecimalsSnapshot();
-        _updateABAFSnapshot();
-        _updateTotalSupplySnapshot();
-    }
+    function getScheduledTasks(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        external
+        view
+        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_);
 }

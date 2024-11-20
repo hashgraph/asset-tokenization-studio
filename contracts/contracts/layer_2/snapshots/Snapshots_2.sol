@@ -203,62 +203,160 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {SnapshotsStorageWrapper_2} from './SnapshotsStorageWrapper_2.sol';
+import {
+    SnapshotsStorageWrapper
+} from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
+import {Snapshots} from '../../layer_1/snapshots/Snapshots.sol';
+import {
+    ERC1410BasicStorageWrapper
+} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {
+    ERC1410SnapshotStorageWrapper
+} from '../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 import {
-    IAdjustBalancesStorageWrapper
-} from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+    _SNAPSHOTS_RESOLVER_KEY
+} from '../../layer_1/constants/resolverKeys.sol';
+import {ISnapshots} from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
+import {ISnapshots_2} from '../interfaces/snapshots/ISnapshots_2.sol';
+import {_SNAPSHOT_ROLE} from '../../layer_1/constants/roles.sol';
+import {
+    ScheduledTasksStorageWrapper
+} from '../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
 
-abstract contract AdjustBalancesStorageWrapper is
-    IAdjustBalancesStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
+contract Snapshots_2 is
+    ISnapshots_2,
+    ScheduledTasksStorageWrapper,
+    Snapshots,
+    SnapshotsStorageWrapper_2
 {
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
-        _;
+    function takeSnapshot()
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_SNAPSHOT_ROLE)
+        returns (uint256 snapshotID)
+    {
+        _triggerScheduledTasks(0);
+        return _takeSnapshot();
     }
 
-    function _adjustBalances(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _beforeBalanceAdjustment(_factor, _decimals);
-
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-        CapDataStorage storage capStorage = _capStorage();
-
-        erc1410Storage.totalSupply *= _factor;
-
-        if (_getABAF() == 0) erc1410Storage_2.ABAF = _factor;
-        else erc1410Storage_2.ABAF *= _factor;
-
-        erc20Storage.decimals += _decimals;
-        capStorage.maxSupply *= _factor;
-
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
+    function ABAFAtSnapshot(
+        uint256 _snapshotID
+    ) external view returns (uint256 ABAF_) {
+        return _ABAFAtSnapshot(_snapshotID);
     }
 
-    function _adjustBalancesByPartition(
+    function decimalsAtSnapshot(
+        uint256 _snapshotID
+    ) external view returns (uint256 decimals_) {
+        return _decimalsAtSnapshot(_snapshotID);
+    }
+
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    )
+        internal
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+    {
+        return
+            SnapshotsStorageWrapper_2._updateAccountSnapshot(
+                account,
+                partition
+            );
+    }
+
+    function _balanceOfAt(
+        address account,
+        uint256 snapshotId
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256)
+    {
+        return SnapshotsStorageWrapper_2._balanceOfAt(account, snapshotId);
+    }
+
+    function _balanceOfAtByPartition(
         bytes32 _partition,
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        // TODO : When balance adjustment for specific partitions are included
+        address account,
+        uint256 snapshotId
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256)
+    {
+        return
+            SnapshotsStorageWrapper_2._balanceOfAtByPartition(
+                _partition,
+                account,
+                snapshotId
+            );
     }
 
-    function _beforeBalanceAdjustment(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _updateDecimalsSnapshot();
-        _updateABAFSnapshot();
-        _updateTotalSupplySnapshot();
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfAtSnapshotByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .partitionsOfAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .ABAFAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .decimalsAtSnapshot
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](2);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots_2).interfaceId;
     }
 }

@@ -209,7 +209,6 @@ import {
     AccessControl__factory,
     BondUSA__factory,
     BusinessLogicResolver__factory,
-    Cap__factory,
     ControlList__factory,
     CorporateActionsSecurity__factory,
     DiamondFacet__factory,
@@ -222,12 +221,14 @@ import {
     ProxyAdmin__factory,
     ScheduledSnapshots__factory,
     ScheduledBalanceAdjustments__factory,
-    Snapshots__factory,
+    Snapshots_2__factory,
     TransferAndLock__factory,
     TransparentUpgradeableProxy__factory,
     Lock_2__factory,
     ERC1594_2__factory,
     ERC20_2__factory,
+    ScheduledTasks__factory,
+    Cap_2__factory,
 } from '../typechain-types'
 import {
     getEnvVar,
@@ -286,6 +287,9 @@ const ExistingContractIds = {
     ),
     scheduledBalanceAdjustments: ContractId.fromString(
         getEnvVar({ name: 'SCHEDULED_BALANCE_ADJUSTMENTS' })
+    ),
+    scheduledTasks: ContractId.fromString(
+        getEnvVar({ name: 'SCHEDULED_TASKS' })
     ),
     corporateActionsSecurity: ContractId.fromString(
         getEnvVar({ name: 'CORPORATE_ACTIONS_SECURITY' })
@@ -456,6 +460,12 @@ export async function deployAtsFullInfrastructure({
                 },
             },
             {
+                name: 'scheduledTasks',
+                ids: {
+                    contract: ExistingContractIds.scheduledTasks,
+                },
+            },
+            {
                 name: 'corporateactionssecurity',
                 ids: { contract: ExistingContractIds.corporateActionsSecurity },
             },
@@ -509,6 +519,7 @@ export async function deployAtsFullInfrastructure({
         bond,
         scheduledsnapshots: scheduledSnapshots,
         scheduledBalanceAdjustments: scheduledBalanceAdjustments,
+        scheduledTasks: scheduledTasks,
         corporateactionssecurity: corporateActionsSecurity,
         transferandlock: transferAndLock,
         adjustbalances: adjustBalances,
@@ -531,6 +542,7 @@ export async function deployAtsFullInfrastructure({
         bond,
         scheduledSnapshots,
         scheduledBalanceAdjustments,
+        scheduledTasks,
         corporateActionsSecurity,
         lock,
         transferAndLock,
@@ -573,6 +585,7 @@ export async function deployAtsFullInfrastructure({
                 snapshots,
                 scheduledSnapshots,
                 scheduledBalanceAdjustments,
+                scheduledTasks,
                 corporateActionsSecurity,
                 lock,
                 transferAndLock,
@@ -650,6 +663,7 @@ export async function deployAtsFullInfrastructure({
         bond,
         scheduledSnapshots,
         scheduledBalanceAdjustments,
+        scheduledTasks,
         corporateActionsSecurity,
         lock,
         transferAndLock,
@@ -685,7 +699,7 @@ export async function deployContract({
             deployProxy: true,
         },
         accesscontrol: { factory: AccessControl__factory },
-        cap: { factory: Cap__factory },
+        cap: { factory: Cap_2__factory },
         controllist: { factory: ControlList__factory },
         pause: { factory: Pause__factory },
         erc20: { factory: ERC20_2__factory },
@@ -700,7 +714,10 @@ export async function deployContract({
         scheduledBalanceAdjustments: {
             factory: ScheduledBalanceAdjustments__factory,
         },
-        snapshots: { factory: Snapshots__factory },
+        scheduledTasks: {
+            factory: ScheduledTasks__factory,
+        },
+        snapshots: { factory: Snapshots_2__factory },
         corporateactions: { factory: CorporateActionsSecurity__factory },
         transferandlock: { factory: TransferAndLock__factory },
         lock: { factory: Lock_2__factory },

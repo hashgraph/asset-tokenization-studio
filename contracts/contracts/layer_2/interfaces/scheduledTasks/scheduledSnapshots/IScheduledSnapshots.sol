@@ -209,10 +209,6 @@ pragma solidity 0.8.18;
 import {ScheduledTasksLib} from '../../../scheduledTasks/ScheduledTasksLib.sol';
 
 interface IScheduledSnapshots {
-    function triggerPendingScheduledSnapshots() external returns (uint256);
-
-    function triggerScheduledSnapshots(uint256 _max) external returns (uint256);
-
     function scheduledSnapshotCount() external view returns (uint256);
 
     function getScheduledSnapshots(

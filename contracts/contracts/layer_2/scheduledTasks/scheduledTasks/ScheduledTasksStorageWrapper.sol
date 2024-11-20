@@ -203,62 +203,82 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {
-    IAdjustBalancesStorageWrapper
-} from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+    _SCHEDULED_TASKS_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
 
-abstract contract AdjustBalancesStorageWrapper is
-    IAdjustBalancesStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
-{
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
-        _;
+import {LibCommon} from '../../../layer_1/common/LibCommon.sol';
+import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+
+abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
+    function onScheduledTaskTriggered(
+        uint256 _pos,
+        uint256 _scheduledTasksLength,
+        bytes memory _data
+    ) external virtual {
+        revert('This method should never be executed, it should be overriden');
     }
 
-    function _adjustBalances(
-        uint256 _factor,
-        uint8 _decimals
+    function _addScheduledTask(
+        uint256 _newScheduledTimestamp,
+        bytes memory _newData
     ) internal virtual {
-        _beforeBalanceAdjustment(_factor, _decimals);
-
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-        CapDataStorage storage capStorage = _capStorage();
-
-        erc1410Storage.totalSupply *= _factor;
-
-        if (_getABAF() == 0) erc1410Storage_2.ABAF = _factor;
-        else erc1410Storage_2.ABAF *= _factor;
-
-        erc20Storage.decimals += _decimals;
-        capStorage.maxSupply *= _factor;
-
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
+        ScheduledTasksLib._addScheduledTask(
+            _scheduledTaskStorage(),
+            _newScheduledTimestamp,
+            _newData
+        );
     }
 
-    function _adjustBalancesByPartition(
-        bytes32 _partition,
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        // TODO : When balance adjustment for specific partitions are included
+    function _triggerScheduledTasks(
+        uint256 _max
+    ) internal virtual returns (uint256) {
+        return
+            ScheduledTasksLib._triggerScheduledTasks(
+                _scheduledTaskStorage(),
+                this.onScheduledTaskTriggered.selector,
+                _max
+            );
     }
 
-    function _beforeBalanceAdjustment(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _updateDecimalsSnapshot();
-        _updateABAFSnapshot();
-        _updateTotalSupplySnapshot();
+    function _getScheduledTaskCount() internal view virtual returns (uint256) {
+        return
+            ScheduledTasksLib._getScheduledTaskCount(_scheduledTaskStorage());
+    }
+
+    function _getScheduledTasks(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        internal
+        view
+        virtual
+        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
+    {
+        return
+            ScheduledTasksLib._getScheduledTasks(
+                _scheduledTaskStorage(),
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _scheduledTaskStorage()
+        internal
+        pure
+        virtual
+        returns (
+            ScheduledTasksLib.ScheduledTasksDataStorage storage scheduledTasks_
+        )
+    {
+        bytes32 position = _SCHEDULED_TASKS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            scheduledTasks_.slot := position
+        }
     }
 }

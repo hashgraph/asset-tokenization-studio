@@ -203,62 +203,159 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+    SnapshotsStorageWrapper
+} from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
+import {_SNAPSHOT_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
-    IAdjustBalancesStorageWrapper
-} from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+    ERC1410ScheduledTasksStorageWrapperRead
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol';
+import {
+    ERC1410BasicStorageWrapper
+} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
 
-abstract contract AdjustBalancesStorageWrapper is
-    IAdjustBalancesStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
+abstract contract SnapshotsStorageWrapper_2 is
+    SnapshotsStorageWrapper,
+    ERC1410ScheduledTasksStorageWrapperRead
 {
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
-        _;
+    struct SnapshotStorage_2 {
+        Snapshots ABAFSnapshots;
+        Snapshots decimals;
     }
 
-    function _adjustBalances(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _beforeBalanceAdjustment(_factor, _decimals);
+    function _updateABAFSnapshot() internal virtual {
+        uint256 ABAF = _getABAF();
+        if (ABAF == 0) ABAF = 1;
+        _updateSnapshot(_snapshotStorage_2().ABAFSnapshots, ABAF);
+    }
 
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
+    function _updateDecimalsSnapshot() internal virtual {
         ERC20Storage storage erc20Storage = _getErc20Storage();
-        CapDataStorage storage capStorage = _capStorage();
 
-        erc1410Storage.totalSupply *= _factor;
-
-        if (_getABAF() == 0) erc1410Storage_2.ABAF = _factor;
-        else erc1410Storage_2.ABAF *= _factor;
-
-        erc20Storage.decimals += _decimals;
-        capStorage.maxSupply *= _factor;
-
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
+        _updateSnapshot(_snapshotStorage_2().decimals, erc20Storage.decimals);
     }
 
-    function _adjustBalancesByPartition(
+    function _ABAFAtSnapshot(
+        uint256 _snapshotID
+    ) internal view returns (uint256 ABAF_) {
+        (bool snapshotted, uint256 value) = _valueAt(
+            _snapshotID,
+            _snapshotStorage_2().ABAFSnapshots
+        );
+
+        return snapshotted ? value : _getABAF();
+    }
+
+    function _decimalsAtSnapshot(
+        uint256 _snapshotID
+    ) internal view returns (uint256 decimals_) {
+        ERC20Storage storage erc20Storage = _getErc20Storage();
+
+        (bool snapshotted, uint256 value) = _valueAt(
+            _snapshotID,
+            _snapshotStorage_2().decimals
+        );
+
+        return snapshotted ? value : erc20Storage.decimals;
+    }
+
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual override {
+        uint256 currentSnapshotId = _getCurrentSnapshotId();
+
+        if (currentSnapshotId == 0) return;
+
+        uint256 ABAFAtCurrentSnapshot = _ABAFAtSnapshot(currentSnapshotId);
+        uint256 ABAF = _getABAF();
+
+        if (ABAF == ABAFAtCurrentSnapshot) {
+            super._updateAccountSnapshot(account, partition);
+            return;
+        }
+        if (ABAFAtCurrentSnapshot == 0) ABAFAtCurrentSnapshot = 1;
+
+        uint256 balance = _balanceOf(account);
+        uint256 balanceForPartition = _balanceOfByPartition(partition, account);
+        uint256 factor = ABAF / ABAFAtCurrentSnapshot;
+
+        balance /= factor;
+        balanceForPartition /= factor;
+
+        _updateSnapshot(
+            _snapshotStorage().accountBalanceSnapshots[account],
+            balance
+        );
+        _updateSnapshotPartitions(
+            _snapshotStorage().accountPartitionBalanceSnapshots[account][
+                partition
+            ],
+            _snapshotStorage().accountPartitionSnapshots[account],
+            balanceForPartition,
+            _partitionsOf(account)
+        );
+    }
+
+    function _balanceOfAt(
+        address account,
+        uint256 snapshotId
+    ) internal view virtual override returns (uint256) {
+        return
+            _balanceOfAt_Adjusted(
+                snapshotId,
+                _snapshotStorage().accountBalanceSnapshots[account],
+                _balanceOf(account)
+            );
+    }
+
+    function _balanceOfAtByPartition(
         bytes32 _partition,
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        // TODO : When balance adjustment for specific partitions are included
+        address account,
+        uint256 snapshotId
+    ) internal view virtual override returns (uint256) {
+        return
+            _balanceOfAt_Adjusted(
+                snapshotId,
+                _snapshotStorage().accountPartitionBalanceSnapshots[account][
+                    _partition
+                ],
+                _balanceOfByPartition(_partition, account)
+            );
     }
 
-    function _beforeBalanceAdjustment(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _updateDecimalsSnapshot();
-        _updateABAFSnapshot();
-        _updateTotalSupplySnapshot();
+    function _balanceOfAt_Adjusted(
+        uint256 _snapshotId,
+        Snapshots storage _snapshots,
+        uint256 _currentBalance
+    ) internal view virtual returns (uint256) {
+        (bool snapshotted, uint256 value) = _valueAt(_snapshotId, _snapshots);
+        if (snapshotted) return value;
+
+        uint256 ABAFAtSnapshot = _ABAFAtSnapshot(_snapshotId);
+        uint256 ABAF = _getABAF();
+
+        if (ABAFAtSnapshot == ABAF) return _currentBalance;
+        if (ABAFAtSnapshot == 0) ABAFAtSnapshot = 1;
+
+        uint256 factor = ABAF / ABAFAtSnapshot;
+
+        return _currentBalance / factor;
+    }
+
+    function _snapshotStorage_2()
+        internal
+        pure
+        virtual
+        returns (SnapshotStorage_2 storage snapshotStorage_2_)
+    {
+        bytes32 position = _SNAPSHOT_2_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            snapshotStorage_2_.slot := position
+        }
     }
 }

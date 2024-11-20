@@ -213,16 +213,18 @@ import {
     CountersUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
 import {
-    ERC1410ControllerStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
+    ERC1410BasicStorageWrapperRead
+} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 import {
     ISnapshotsStorageWrapper
 } from '../interfaces/snapshots/ISnapshotsStorageWrapper.sol';
 import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {Common} from '../common/Common.sol';
 
 abstract contract SnapshotsStorageWrapper is
     ISnapshotsStorageWrapper,
-    ERC1410ControllerStorageWrapper
+    ERC1410BasicStorageWrapperRead,
+    Common
 {
     using ArraysUpgradeable for uint256[];
     using CountersUpgradeable for CountersUpgradeable.Counter;

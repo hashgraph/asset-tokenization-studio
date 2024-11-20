@@ -243,22 +243,6 @@ contract ScheduledBalanceAdjustments is
         _onScheduledBalanceAdjustmentTriggered(_data);
     }
 
-    function triggerPendingScheduledBalanceAdjustments()
-        external
-        virtual
-        override
-        onlyUnpaused
-        returns (uint256)
-    {
-        return _triggerScheduledBalanceAdjustments(0);
-    }
-
-    function triggerScheduledBalanceAdjustments(
-        uint256 _max
-    ) external virtual override onlyUnpaused returns (uint256) {
-        return _triggerScheduledBalanceAdjustments(_max);
-    }
-
     function scheduledBalanceAdjustmentCount()
         external
         view
@@ -305,13 +289,7 @@ contract ScheduledBalanceAdjustments is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerPendingScheduledBalanceAdjustments
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerScheduledBalanceAdjustments
-            .selector;
+        staticFunctionSelectors_ = new bytes4[](3);
         staticFunctionSelectors_[selectorIndex++] = this
             .scheduledBalanceAdjustmentCount
             .selector;

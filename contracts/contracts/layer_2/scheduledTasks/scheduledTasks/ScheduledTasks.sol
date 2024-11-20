@@ -203,62 +203,124 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {_SCHEDULED_TASKS_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {
-    IAdjustBalancesStorageWrapper
-} from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+    CorporateActionsStorageWrapperSecurity
+} from '../../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+import {
+    IScheduledTasks
+} from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 
-abstract contract AdjustBalancesStorageWrapper is
-    IAdjustBalancesStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
+contract ScheduledTasks is
+    IStaticFunctionSelectors,
+    IScheduledTasks,
+    CorporateActionsStorageWrapperSecurity
 {
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
-        _;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    function onScheduledTaskTriggered(
+        uint256 _pos,
+        uint256 _scheduledTasksLength,
+        bytes memory _data
+    ) external virtual override onlyAutoCalling(_scheduledTaskStorage()) {
+        _onScheduledTaskTriggered(_data);
     }
 
-    function _adjustBalances(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _beforeBalanceAdjustment(_factor, _decimals);
-
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-        CapDataStorage storage capStorage = _capStorage();
-
-        erc1410Storage.totalSupply *= _factor;
-
-        if (_getABAF() == 0) erc1410Storage_2.ABAF = _factor;
-        else erc1410Storage_2.ABAF *= _factor;
-
-        erc20Storage.decimals += _decimals;
-        capStorage.maxSupply *= _factor;
-
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
+    function triggerPendingScheduledTasks()
+        external
+        virtual
+        override
+        onlyUnpaused
+        returns (uint256)
+    {
+        return _triggerScheduledTasks(0);
     }
 
-    function _adjustBalancesByPartition(
-        bytes32 _partition,
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        // TODO : When balance adjustment for specific partitions are included
+    function triggerScheduledTasks(
+        uint256 _max
+    ) external virtual override onlyUnpaused returns (uint256) {
+        return _triggerScheduledTasks(_max);
     }
 
-    function _beforeBalanceAdjustment(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _updateDecimalsSnapshot();
-        _updateABAFSnapshot();
-        _updateTotalSupplySnapshot();
+    function scheduledTaskCount()
+        external
+        view
+        virtual
+        override
+        returns (uint256)
+    {
+        return _getScheduledTaskCount();
+    }
+
+    function getScheduledTasks(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        external
+        view
+        virtual
+        override
+        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
+    {
+        scheduledTask_ = _getScheduledTasks(_pageIndex, _pageLength);
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _SCHEDULED_TASKS_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .triggerPendingScheduledTasks
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .triggerScheduledTasks
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .scheduledTaskCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getScheduledTasks
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .onScheduledTaskTriggered
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IScheduledTasks)
+            .interfaceId;
     }
 }

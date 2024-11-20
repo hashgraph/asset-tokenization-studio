@@ -227,6 +227,17 @@ import {_ERC20_RESOLVER_KEY} from '../../../layer_1/constants/resolverKeys.sol';
 import {IERC20_2} from '../../interfaces/ERC1400/IERC20_2.sol';
 
 contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
+    function allowance(
+        address owner,
+        address spender
+    ) external view virtual override returns (uint256) {
+        return _allowanceAdjusted(owner, spender);
+    }
+
+    function decimals() external view override returns (uint8) {
+        return _decimalsAdjusted();
+    }
+
     function getAllowanceLABAF(
         address _owner,
         address _spender

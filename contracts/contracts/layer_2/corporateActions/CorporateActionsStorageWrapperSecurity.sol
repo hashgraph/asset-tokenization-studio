@@ -213,7 +213,9 @@ import {
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     COUPON_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-    SNAPSHOT_RESULT_ID
+    SNAPSHOT_RESULT_ID,
+    SNAPSHOT_TASK_TYPE,
+    BALANCE_ADJUSTMENT_TASK_TYPE
 } from '../constants/values.sol';
 import {
     IEquityStorageWrapper
@@ -283,6 +285,10 @@ abstract contract CorporateActionsStorageWrapperSecurity is
             (IEquity.Dividend)
         );
 
+        _addScheduledTask(
+            newDividend.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
         _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));
     }
 
@@ -297,6 +303,7 @@ abstract contract CorporateActionsStorageWrapperSecurity is
 
         IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
 
+        _addScheduledTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
         _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));
     }
 
@@ -311,6 +318,7 @@ abstract contract CorporateActionsStorageWrapperSecurity is
 
         IBond.Coupon memory newCoupon = abi.decode(_data, (IBond.Coupon));
 
+        _addScheduledTask(newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
         _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
     }
 
@@ -326,10 +334,26 @@ abstract contract CorporateActionsStorageWrapperSecurity is
         IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
             .decode(_data, (IEquity.ScheduledBalanceAdjustment));
 
+        _addScheduledTask(
+            newBalanceAdjustment.executionDate,
+            abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
+        );
         _addScheduledBalanceAdjustment(
             newBalanceAdjustment.executionDate,
             abi.encode(_actionId)
         );
+    }
+
+    function _onScheduledTaskTriggered(bytes memory _data) internal virtual {
+        // TODO
+        if (_data.length > 0) {
+            bytes32 taskType = abi.decode(_data, (bytes32));
+            if (taskType == SNAPSHOT_TASK_TYPE) {
+                _triggerScheduledSnapshots(1);
+            } else if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
+                _triggerScheduledBalanceAdjustments(1);
+            }
+        }
     }
 
     function _onScheduledSnapshotTriggered(

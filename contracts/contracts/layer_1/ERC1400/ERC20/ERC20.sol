@@ -336,8 +336,8 @@ abstract contract ERC20 is
         return _getERC20Metadata().info.symbol;
     }
 
-    function decimals() external view returns (uint8) {
-        return _getERC20Metadata().info.decimals;
+    function decimals() external view virtual returns (uint8) {
+        return _decimals();
     }
 
     // solhint-disable no-empty-blocks

@@ -205,9 +205,21 @@
 
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+import {ScheduledTasksLib} from '../scheduledTasks/ScheduledTasksLib.sol';
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+    _CORPORATE_ACTION_STORAGE_POSITION
+} from '../../layer_1/constants/storagePositions.sol';
+import {
+    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {
+    CorporateActionDataStorage
+} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
+import {IEquity} from '../interfaces/equity/IEquity.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapperRead
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
@@ -240,7 +252,7 @@ library AdjustBalanceLib {
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
+        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
     ) internal {
         uint256 ABAF = _basicStorage_2.ABAF;
@@ -260,7 +272,7 @@ library AdjustBalanceLib {
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
         CapStorageWrapper.CapDataStorage storage _capStorage,
-        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
+        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
     ) internal {
         uint256 ABAF = _basicStorage_2.ABAF;
@@ -293,7 +305,7 @@ library AdjustBalanceLib {
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
+        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
     ) internal {
         uint256 LABAF = _basicStorage_2.LABAF[_account];
@@ -318,7 +330,7 @@ library AdjustBalanceLib {
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapper.ERC1410BasicStorage_2
+        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
     ) internal {
         uint256 partitionsIndex = _basicStorage.partitionToIndex[_account][
@@ -394,7 +406,50 @@ library AdjustBalanceLib {
         uint256 _LABAF
     ) internal pure returns (uint256 factor_) {
         if (_ABAF == 0) return 1;
-        if (_LABAF == 0) factor_ = _ABAF;
-        else factor_ = _ABAF / _LABAF;
+        if (_LABAF == 0) return _ABAF;
+        factor_ = _ABAF / _LABAF;
+    }
+
+    function _getPendingScheduledBalanceAdjustments(
+        ScheduledTasksLib.ScheduledTasksDataStorage
+            storage _scheduledBalanceAdjustments,
+        CorporateActionDataStorage storage _corporateActions
+    ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
+        // * Initialization
+        pendingABAF_ = 1;
+        pendingDecimals_ = 0;
+
+        uint256 scheduledTaskCount = ScheduledTasksLib._getScheduledTaskCount(
+            _scheduledBalanceAdjustments
+        );
+
+        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
+            uint256 pos = scheduledTaskCount - i;
+
+            ScheduledTasksLib.ScheduledTask
+                memory scheduledTask = ScheduledTasksLib
+                    ._getScheduledTasksByIndex(
+                        _scheduledBalanceAdjustments,
+                        pos
+                    );
+
+            if (scheduledTask.scheduledTimestamp < block.timestamp) {
+                bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
+
+                bytes memory balanceAdjustmentData = _corporateActions
+                    .actionsData[actionId]
+                    .data;
+
+                IEquity.ScheduledBalanceAdjustment
+                    memory balanceAdjustment = abi.decode(
+                        balanceAdjustmentData,
+                        (IEquity.ScheduledBalanceAdjustment)
+                    );
+                pendingABAF_ *= balanceAdjustment.factor;
+                pendingDecimals_ += balanceAdjustment.decimals;
+            } else {
+                break;
+            }
+        }
     }
 }

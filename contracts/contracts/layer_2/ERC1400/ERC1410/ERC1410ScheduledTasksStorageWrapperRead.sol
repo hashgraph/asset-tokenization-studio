@@ -203,62 +203,81 @@
 
 */
 
+// SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+    ScheduledSnapshotsStorageWrapper
+} from '../../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
 import {
-    IAdjustBalancesStorageWrapper
-} from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
+import {
+    _ERC1410_BASIC_STORAGE_2_POSITION
+} from '../../constants/storagePositions.sol';
+import {
+    ERC1410SnapshotStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410//ERC1410SnapshotStorageWrapper.sol';
 
-abstract contract AdjustBalancesStorageWrapper is
-    IAdjustBalancesStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
+abstract contract ERC1410ScheduledTasksStorageWrapperRead is
+    ERC1410SnapshotStorageWrapper
 {
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
-        _;
+    struct ERC1410BasicStorage_2 {
+        // Mapping from investor to their partitions LABAF
+        mapping(address => uint256[]) LABAF_user_partition;
+        // Aggregated Balance Adjustment
+        uint256 ABAF;
+        // Last Aggregated Balance Adjustment per account
+        mapping(address => uint256) LABAF;
+        // Last Aggregated Balance Adjustment per partition
+        mapping(bytes32 => uint256) LABAF_partition;
     }
 
-    function _adjustBalances(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _beforeBalanceAdjustment(_factor, _decimals);
-
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-        CapDataStorage storage capStorage = _capStorage();
-
-        erc1410Storage.totalSupply *= _factor;
-
-        if (_getABAF() == 0) erc1410Storage_2.ABAF = _factor;
-        else erc1410Storage_2.ABAF *= _factor;
-
-        erc20Storage.decimals += _decimals;
-        capStorage.maxSupply *= _factor;
-
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
+    function _getABAF() internal view virtual returns (uint256) {
+        return _getERC1410BasicStorage_2().ABAF;
     }
 
-    function _adjustBalancesByPartition(
+    function _getLABAFForUser(
+        address _account
+    ) internal view virtual returns (uint256) {
+        return _getERC1410BasicStorage_2().LABAF[_account];
+    }
+
+    function _getLABAFForPartition(
+        bytes32 _partition
+    ) internal view virtual returns (uint256) {
+        return _getERC1410BasicStorage_2().LABAF_partition[_partition];
+    }
+
+    function _getLABAFForUserAndPartition(
         bytes32 _partition,
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        // TODO : When balance adjustment for specific partitions are included
+        address _account
+    ) internal view virtual returns (uint256) {
+        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
+            _account
+        ][_partition];
+
+        if (partitionsIndex == 0) return 0;
+        return
+            _getERC1410BasicStorage_2().LABAF_user_partition[_account][
+                partitionsIndex - 1
+            ];
     }
 
-    function _beforeBalanceAdjustment(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _updateDecimalsSnapshot();
-        _updateABAFSnapshot();
-        _updateTotalSupplySnapshot();
+    function _getERC1410BasicStorage_2()
+        internal
+        pure
+        virtual
+        returns (ERC1410BasicStorage_2 storage erc1410BasicStorage_2_)
+    {
+        bytes32 position = _ERC1410_BASIC_STORAGE_2_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1410BasicStorage_2_.slot := position
+        }
     }
 }

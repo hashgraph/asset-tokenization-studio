@@ -209,14 +209,6 @@ pragma solidity 0.8.18;
 import {ScheduledTasksLib} from '../../../scheduledTasks/ScheduledTasksLib.sol';
 
 interface IScheduledBalanceAdjustments {
-    function triggerPendingScheduledBalanceAdjustments()
-        external
-        returns (uint256);
-
-    function triggerScheduledBalanceAdjustments(
-        uint256 _max
-    ) external returns (uint256);
-
     function scheduledBalanceAdjustmentCount() external view returns (uint256);
 
     function getScheduledBalanceAdjustments(

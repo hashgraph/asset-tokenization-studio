@@ -214,6 +214,9 @@ import {
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+import {
+    ScheduledTasksStorageWrapper
+} from '../../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
 import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
 import {
@@ -222,23 +225,34 @@ import {
 import {
     ERC1410SnapshotStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410//ERC1410SnapshotStorageWrapper.sol';
+import {
+    SnapshotsStorageWrapper_2
+} from '../../snapshots/SnapshotsStorageWrapper_2.sol';
+import {
+    CorporateActionsStorageWrapper
+} from '../../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+import {
+    _IS_PAUSED_ERROR_ID,
+    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
+    _FROM_ACCOUNT_NULL_ERROR_ID,
+    _TO_ACCOUNT_NULL_ERROR_ID,
+    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
+    _TO_ACCOUNT_BLOCKED_ERROR_ID,
+    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+    _IS_NOT_OPERATOR_ERROR_ID,
+    _WRONG_PARTITION_ERROR_ID,
+    _SUCCESS
+} from '../../../layer_1/constants/values.sol';
+
+import {_CONTROLLER_ROLE} from '../../../layer_1/constants/roles.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
-    ERC1410SnapshotStorageWrapper,
+    CorporateActionsStorageWrapper,
+    SnapshotsStorageWrapper_2,
     ScheduledSnapshotsStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper
+    ScheduledBalanceAdjustmentsStorageWrapper,
+    ScheduledTasksStorageWrapper
 {
-    struct ERC1410BasicStorage_2 {
-        // Mapping from investor to their partitions LABAF
-        mapping(address => uint256[]) LABAF_user_partition;
-        // Aggregated Balance Adjustment
-        uint256 ABAF;
-        // Last Aggregated Balance Adjustment per account
-        mapping(address => uint256) LABAF;
-        // Last Aggregated Balance Adjustment per partition
-        mapping(bytes32 => uint256) LABAF_partition;
-    }
-
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
@@ -255,8 +269,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         address _from,
         address _to
     ) internal virtual {
-        _triggerScheduledSnapshots(0);
-        _triggerScheduledBalanceAdjustments(0);
+        _triggerScheduledTasks(0);
         _syncBalanceAdjustments(_partition, _from, _to);
     }
 
@@ -305,23 +318,103 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         ERC1410BasicStorage_2
             storage erc1410Storage_2 = _getERC1410BasicStorage_2();
 
-        erc1410Storage_2.LABAF_user_partition[_account].push(
-            erc1410Storage_2.ABAF
-        );
+        erc1410Storage_2.LABAF_user_partition[_account].push(_getABAF());
 
         super._addPartitionTo(_value, _account, _partition);
     }
 
-    function _getERC1410BasicStorage_2()
-        internal
-        pure
-        virtual
-        returns (ERC1410BasicStorage_2 storage erc1410BasicStorage_2_)
-    {
-        bytes32 position = _ERC1410_BASIC_STORAGE_2_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1410BasicStorage_2_.slot := position
+    function _totalSupplyAdjusted() internal view virtual returns (uint256) {
+        (uint256 pendingABAF, ) = AdjustBalanceLib
+            ._getPendingScheduledBalanceAdjustments(
+                _scheduledBalanceAdjustmentStorage(),
+                _corporateActionsStorage()
+            );
+        return _totalSupply() * pendingABAF;
+    }
+
+    function _totalSupplyByPartitionAdjusted(
+        bytes32 _partition
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            _getABAFAdjusted(),
+            _getLABAFForPartition(_partition)
+        );
+        return _totalSupplyByPartition(_partition) * factor;
+    }
+
+    function _balanceOfAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            _getABAFAdjusted(),
+            _getLABAFForUser(_tokenHolder)
+        );
+        return _balanceOf(_tokenHolder) * factor;
+    }
+
+    function _balanceOfByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            _getABAFAdjusted(),
+            _getLABAFForUserAndPartition(_partition, _tokenHolder)
+        );
+        return _balanceOfByPartition(_partition, _tokenHolder) * factor;
+    }
+
+    function _getABAFAdjusted() internal view virtual returns (uint256) {
+        uint256 ABAF = _getABAF();
+        if (ABAF == 0) ABAF = 1;
+        (uint256 pendingABAF, ) = AdjustBalanceLib
+            ._getPendingScheduledBalanceAdjustments(
+                _scheduledBalanceAdjustmentStorage(),
+                _corporateActionsStorage()
+            );
+        return ABAF * pendingABAF;
+    }
+
+    function _canTransferByPartition(
+        address _from,
+        address _to,
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data, // solhint-disable-line no-unused-vars
+        bytes calldata _operatorData // solhint-disable-line no-unused-vars
+    ) internal view virtual override returns (bool, bytes1, bytes32) {
+        if (_isPaused()) {
+            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
+        if (_from == address(0)) {
+            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (_to == address(0)) {
+            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_msgSender())) {
+            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_from)) {
+            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_to)) {
+            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_validPartition(_partition, _from)) {
+            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
+        }
+        if (_balanceOfByPartitionAdjusted(_partition, _from) < _value) {
+            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        // TODO: Better to check all in one boolean expression defined in a different pure function.
+        if (
+            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
+        ) {
+            if (!_isAuthorized(_partition, _msgSender(), _from)) {
+                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
+            }
+        }
+
+        return (true, _SUCCESS, bytes32(0));
     }
 }

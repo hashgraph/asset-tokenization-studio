@@ -218,14 +218,26 @@ import {
 import {
     ERC1410BasicStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {ERC1594StorageWrapper_2} from './ERC1594StorageWrapper_2.sol';
+import {
+    ERC1594StorageWrapper
+} from '../../../layer_1/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
+import {
+    ERC20StorageWrapper
+} from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
+import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
 
-contract ERC1594_2 is ERC1594, ERC1410ScheduledTasksStorageWrapper {
+contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
         address to,
         uint256 amount
-    ) internal virtual override(ERC1594, ERC1410ScheduledTasksStorageWrapper) {
+    )
+        internal
+        virtual
+        override(ERC1410BasicStorageWrapper, ERC1594, ERC20StorageWrapper_2)
+    {
         ERC1410ScheduledTasksStorageWrapper._beforeTokenTransfer(
             partition,
             from,
@@ -241,15 +253,52 @@ contract ERC1594_2 is ERC1594, ERC1410ScheduledTasksStorageWrapper {
     )
         internal
         virtual
-        override(
-            ERC1410BasicStorageWrapper,
-            ERC1410ScheduledTasksStorageWrapper
-        )
+        override(ERC1410BasicStorageWrapper, ERC1594StorageWrapper_2)
     {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
+        ERC1594StorageWrapper_2._addPartitionTo(_value, _account, _partition);
+    }
+
+    function _canTransfer(
+        address _to,
+        uint256 _value,
+        bytes calldata _data // solhint-disable-line no-unused-vars
+    )
+        internal
+        view
+        virtual
+        override(ERC1594StorageWrapper, ERC1594StorageWrapper_2)
+        returns (bool, bytes1, bytes32)
+    {
+        return ERC1594StorageWrapper_2._canTransfer(_to, _value, _data);
+    }
+
+    function _canTransferFrom(
+        address _from,
+        address _to,
+        uint256 _value,
+        bytes calldata _data // solhint-disable-line no-unused-vars
+    )
+        internal
+        view
+        virtual
+        override(ERC1594StorageWrapper, ERC1594StorageWrapper_2)
+        returns (bool, bytes1, bytes32)
+    {
+        return
+            ERC1594StorageWrapper_2._canTransferFrom(_from, _to, _value, _data);
+    }
+
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
+        uint256 _amount,
+        bool _isIncrease
+    ) internal virtual override(ERC1594StorageWrapper_2, ERC20StorageWrapper) {
+        ERC1594StorageWrapper_2._beforeAllowanceUpdate(
+            _owner,
+            _spender,
+            _amount,
+            _isIncrease
         );
     }
 }

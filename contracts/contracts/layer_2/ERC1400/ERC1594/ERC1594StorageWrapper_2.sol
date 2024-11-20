@@ -203,62 +203,123 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+    ERC1594StorageWrapper
+} from '../../../layer_1/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
 import {
-    IAdjustBalancesStorageWrapper
-} from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
-
-abstract contract AdjustBalancesStorageWrapper is
-    IAdjustBalancesStorageWrapper,
     ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
+    _IS_PAUSED_ERROR_ID,
+    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
+    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
+    _FROM_ACCOUNT_NULL_ERROR_ID,
+    _TO_ACCOUNT_BLOCKED_ERROR_ID,
+    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+    _TO_ACCOUNT_NULL_ERROR_ID,
+    _ALLOWANCE_REACHED_ERROR_ID,
+    _SUCCESS
+} from '../../../layer_1/constants/values.sol';
+import {
+    ERC1410BasicStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
+import {
+    ERC20StorageWrapper
+} from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
+
+abstract contract ERC1594StorageWrapper_2 is
+    ERC1594StorageWrapper,
+    ERC20StorageWrapper_2
 {
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
-        _;
+    function _canTransfer(
+        address _to,
+        uint256 _value,
+        bytes calldata _data // solhint-disable-line no-unused-vars
+    ) internal view virtual override returns (bool, bytes1, bytes32) {
+        if (_isPaused()) {
+            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+        }
+        if (_to == address(0)) {
+            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_msgSender())) {
+            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_to)) {
+            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (_balanceOfAdjusted(_msgSender()) < _value) {
+            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
+
+        return (true, _SUCCESS, bytes32(0));
     }
 
-    function _adjustBalances(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _beforeBalanceAdjustment(_factor, _decimals);
+    function _canTransferFrom(
+        address _from,
+        address _to,
+        uint256 _value,
+        bytes calldata _data // solhint-disable-line no-unused-vars
+    ) internal view virtual override returns (bool, bytes1, bytes32) {
+        if (_isPaused()) {
+            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+        }
+        if (_to == address(0)) {
+            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (_from == address(0)) {
+            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_msgSender())) {
+            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_from)) {
+            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_to)) {
+            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (_allowanceAdjusted(_from, _msgSender()) < _value) {
+            return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
+        }
+        if (_balanceOfAdjusted(_from) < _value) {
+            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
 
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-        CapDataStorage storage capStorage = _capStorage();
-
-        erc1410Storage.totalSupply *= _factor;
-
-        if (_getABAF() == 0) erc1410Storage_2.ABAF = _factor;
-        else erc1410Storage_2.ABAF *= _factor;
-
-        erc20Storage.decimals += _decimals;
-        capStorage.maxSupply *= _factor;
-
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
+        return (true, _SUCCESS, bytes32(0));
     }
 
-    function _adjustBalancesByPartition(
-        bytes32 _partition,
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        // TODO : When balance adjustment for specific partitions are included
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(ERC1410BasicStorageWrapper, ERC20StorageWrapper_2)
+    {
+        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
     }
 
-    function _beforeBalanceAdjustment(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _updateDecimalsSnapshot();
-        _updateABAFSnapshot();
-        _updateTotalSupplySnapshot();
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
+        uint256 _amount,
+        bool _isIncrease
+    ) internal virtual override(ERC20StorageWrapper, ERC20StorageWrapper_2) {
+        ERC20StorageWrapper_2._beforeAllowanceUpdate(
+            _owner,
+            _spender,
+            _amount,
+            _isIncrease
+        );
     }
 }

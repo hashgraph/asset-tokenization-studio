@@ -220,11 +220,43 @@ import {
 import {
     ERC1410BasicStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {
+    SnapshotsStorageWrapper
+} from '../../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
+import {
+    SnapshotsStorageWrapper_2
+} from '../../snapshots/SnapshotsStorageWrapper_2.sol';
+import {
+    ERC1410ControllerStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
 
 contract ERC1410ScheduledTasks is
     ERC1410Snapshot,
     ERC1410ScheduledTasksStorageWrapper
 {
+    function totalSupply() external view virtual override returns (uint256) {
+        return _totalSupplyAdjusted();
+    }
+
+    function totalSupplyByPartition(
+        bytes32 _partition
+    ) external view virtual override returns (uint256) {
+        return _totalSupplyByPartitionAdjusted(_partition);
+    }
+
+    function balanceOf(
+        address _tokenHolder
+    ) external view virtual override returns (uint256) {
+        return _balanceOfAdjusted(_tokenHolder);
+    }
+
+    function balanceOfByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256) {
+        return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
@@ -264,5 +296,80 @@ contract ERC1410ScheduledTasks is
             _account,
             _partition
         );
+    }
+
+    function _canTransferByPartition(
+        address _from,
+        address _to,
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data, // solhint-disable-line no-unused-vars
+        bytes calldata _operatorData // solhint-disable-line no-unused-vars
+    )
+        internal
+        view
+        virtual
+        override(
+            ERC1410ControllerStorageWrapper,
+            ERC1410ScheduledTasksStorageWrapper
+        )
+        returns (bool, bytes1, bytes32)
+    {
+        return
+            ERC1410ScheduledTasksStorageWrapper._canTransferByPartition(
+                _from,
+                _to,
+                _partition,
+                _value,
+                _data,
+                _operatorData
+            );
+    }
+
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    )
+        internal
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+    {
+        return
+            SnapshotsStorageWrapper_2._updateAccountSnapshot(
+                account,
+                partition
+            );
+    }
+
+    function _balanceOfAt(
+        address account,
+        uint256 snapshotId
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256)
+    {
+        return SnapshotsStorageWrapper_2._balanceOfAt(account, snapshotId);
+    }
+
+    function _balanceOfAtByPartition(
+        bytes32 _partition,
+        address account,
+        uint256 snapshotId
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256)
+    {
+        return
+            SnapshotsStorageWrapper_2._balanceOfAtByPartition(
+                _partition,
+                account,
+                snapshotId
+            );
     }
 }
