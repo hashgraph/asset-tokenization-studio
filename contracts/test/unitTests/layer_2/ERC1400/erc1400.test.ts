@@ -441,20 +441,38 @@ describe('ERC1400 Tests', () => {
         )
 
         expect(totalSupply_After).to.be.equal(
-            totalSupply_Before.mul(adjustFactor)
+            totalSupply_Before.mul(adjustFactor * adjustFactor)
         )
-        //expect(totalSupply_Partition_1_After).to.be.equal(totalSupply_Partition_1_Before.mul(adjustFactor))
-        //expect(totalSupply_Partition_2_After).to.be.equal(totalSupply_Partition_2_Before.mul(adjustFactor))
+        expect(totalSupply_Partition_1_After).to.be.equal(
+            totalSupply_Partition_1_Before.mul(adjustFactor * adjustFactor)
+        )
+        expect(totalSupply_Partition_2_After).to.be.equal(
+            totalSupply_Partition_2_Before.mul(adjustFactor * adjustFactor)
+        )
 
-        /*expect(balanceOf_A_After).to.be.equal(balanceOf_A_Before.mul(adjustFactor))
-        expect(balanceOf_A_Partition_1_After).to.be.equal(balanceOf_A_Partition_1_Before.mul(adjustFactor))
-        expect(balanceOf_A_Partition_2_After).to.be.equal(balanceOf_A_Partition_2_Before.mul(adjustFactor))
+        expect(balanceOf_A_After).to.be.equal(
+            balanceOf_A_Before.mul(adjustFactor * adjustFactor)
+        )
+        expect(balanceOf_A_Partition_1_After).to.be.equal(
+            balanceOf_A_Partition_1_Before.mul(adjustFactor * adjustFactor)
+        )
+        expect(balanceOf_A_Partition_2_After).to.be.equal(
+            balanceOf_A_Partition_2_Before.mul(adjustFactor * adjustFactor)
+        )
 
-        expect(balanceOf_B_After).to.be.equal(balanceOf_B_Before.mul(adjustFactor).add(amount))
-        expect(balanceOf_B_Partition_1_After).to.be.equal(balanceOf_B_Partition_1_Before.mul(adjustFactor))
-        expect(balanceOf_B_Partition_2_After).to.be.equal(balanceOf_B_Partition_2_Before.mul(adjustFactor))*/
+        expect(balanceOf_B_After).to.be.equal(
+            balanceOf_B_Before.mul(adjustFactor * adjustFactor)
+        )
+        expect(balanceOf_B_Partition_1_After).to.be.equal(
+            balanceOf_B_Partition_1_Before.mul(adjustFactor * adjustFactor)
+        )
+        expect(balanceOf_B_Partition_2_After).to.be.equal(
+            balanceOf_B_Partition_2_Before.mul(adjustFactor * adjustFactor)
+        )
 
-        expect(decimals_After).to.be.equal(decimals_Before + adjustDecimals)
+        expect(decimals_After).to.be.equal(
+            decimals_Before + adjustDecimals + adjustDecimals
+        )
     }
 
     async function checkAdjustmentsAfterTransfer(
@@ -625,7 +643,9 @@ describe('ERC1400 Tests', () => {
                 .mul(adjustFactor)
                 .sub(balanceReduction)
         )
-        //expect(totalSupply_Partition_2_After).to.be.equal(totalSupply_Partition_2_Before.mul(adjustFactor))
+        expect(totalSupply_Partition_2_After).to.be.equal(
+            totalSupply_Partition_2_Before.mul(adjustFactor)
+        )
 
         expect(balanceOf_A_After).to.be.equal(
             balanceOf_A_Before.mul(adjustFactor).sub(subustracted_Amount)
@@ -635,15 +655,19 @@ describe('ERC1400 Tests', () => {
                 .mul(adjustFactor)
                 .sub(subustracted_Amount)
         )
-        //expect(balanceOf_A_Partition_2_After).to.be.equal(balanceOf_A_Partition_2_Before.mul(adjustFactor))
+        expect(balanceOf_A_Partition_2_After).to.be.equal(
+            balanceOf_A_Partition_2_Before.mul(adjustFactor)
+        )
 
-        /*expect(balanceOf_B_After).to.be.equal(
+        expect(balanceOf_B_After).to.be.equal(
             balanceOf_B_Before.mul(adjustFactor).add(added_Amount)
         )
         expect(balanceOf_B_Partition_1_After).to.be.equal(
             balanceOf_B_Partition_1_Before.mul(adjustFactor).add(added_Amount)
-        )*/
-        //expect(balanceOf_B_Partition_2_After).to.be.equal(balanceOf_B_Partition_2_Before.mul(adjustFactor))
+        )
+        expect(balanceOf_B_Partition_2_After).to.be.equal(
+            balanceOf_B_Partition_2_Before.mul(adjustFactor)
+        )
 
         expect(decimals_After).to.be.equal(decimals_Before + adjustDecimals)
     }
@@ -3352,7 +3376,7 @@ describe('ERC1400 Tests', () => {
                 )
             })
 
-            it.skip('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransfer succeeds', async () => {
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransfer succeeds', async () => {
                 await deployAsset(false)
 
                 await setPreBalanceAdjustment(true)
@@ -3374,10 +3398,36 @@ describe('ERC1400 Tests', () => {
                 ).to.be.deep.equal([true, _SUCCESS, ethers.constants.HashZero])
             })
 
-            it.skip('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferFrom succeeds', async () => {
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferByPartition succeeds', async () => {
                 await deployAsset(false)
 
                 await setPreBalanceAdjustment(true)
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                expect(
+                    await erc1410Facet.canTransferByPartition(
+                        account_A,
+                        account_B,
+                        _PARTITION_ID_1,
+                        adjustFactor * amount,
+                        '0x',
+                        '0x'
+                    )
+                ).to.be.deep.equal([true, _SUCCESS, ethers.constants.HashZero])
+            })
+
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferFrom succeeds', async () => {
+                await deployAsset(false)
+
+                await setPreBalanceAdjustment(true)
+
+                erc20Facet = erc20Facet.connect(signer_A)
+                await erc20Facet.approve(account_A, amount)
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -4052,7 +4102,7 @@ describe('ERC1400 Tests', () => {
         })
 
         describe('Allowances', () => {
-            it.skip('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 allowance succeeds', async () => {
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 allowance succeeds', async () => {
                 await deployAsset(false)
 
                 await setPreBalanceAdjustment(true)

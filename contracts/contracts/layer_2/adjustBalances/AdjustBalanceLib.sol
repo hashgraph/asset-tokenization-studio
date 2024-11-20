@@ -414,7 +414,7 @@ library AdjustBalanceLib {
         ScheduledTasksLib.ScheduledTasksDataStorage
             storage _scheduledBalanceAdjustments,
         CorporateActionDataStorage storage _corporateActions
-    ) internal view returns (uint256 pendingABAF_, uint256 pendingDecimals_) {
+    ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
         // * Initialization
         pendingABAF_ = 1;
         pendingDecimals_ = 0;

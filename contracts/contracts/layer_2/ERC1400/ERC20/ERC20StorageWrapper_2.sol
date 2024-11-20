@@ -305,6 +305,27 @@ abstract contract ERC20StorageWrapper_2 is
         return erc20Storage_2.LABAFs_allowances[_owner][_spender];
     }
 
+    function _decimalsAdjusted() internal view virtual returns (uint8) {
+        (, uint8 pendingDecimals) = AdjustBalanceLib
+            ._getPendingScheduledBalanceAdjustments(
+                _scheduledBalanceAdjustmentStorage(),
+                _corporateActionsStorage()
+            );
+
+        return _decimals() + pendingDecimals;
+    }
+
+    function _allowanceAdjusted(
+        address _owner,
+        address _spender
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            _getABAFAdjusted(),
+            _getAllowanceLABAF(_owner, _spender)
+        );
+        return _allowance(_owner, _spender) * factor;
+    }
+
     function _getErc20Storage_2()
         internal
         view

@@ -241,7 +241,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
         return _getERC1410BasicStorage_2().ABAF;
     }
 
-    function _getLABAFForAccount(
+    function _getLABAFForUser(
         address _account
     ) internal view virtual returns (uint256) {
         return _getERC1410BasicStorage_2().LABAF[_account];
@@ -251,6 +251,21 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
         bytes32 _partition
     ) internal view virtual returns (uint256) {
         return _getERC1410BasicStorage_2().LABAF_partition[_partition];
+    }
+
+    function _getLABAFForUserAndPartition(
+        bytes32 _partition,
+        address _account
+    ) internal view virtual returns (uint256) {
+        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
+            _account
+        ][_partition];
+
+        if (partitionsIndex == 0) return 0;
+        return
+            _getERC1410BasicStorage_2().LABAF_user_partition[_account][
+                partitionsIndex - 1
+            ];
     }
 
     function _getERC1410BasicStorage_2()

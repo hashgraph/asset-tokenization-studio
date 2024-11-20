@@ -204,192 +204,75 @@
 */
 
 // SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
 
 import {
-    ScheduledSnapshotsStorageWrapper
-} from '../../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
+    ERC1594StorageWrapper
+} from '../../../layer_1/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
 import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
-import {
-    ScheduledTasksStorageWrapper
-} from '../../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
-import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
-import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
-import {
-    _ERC1410_BASIC_STORAGE_2_POSITION
-} from '../../constants/storagePositions.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410//ERC1410SnapshotStorageWrapper.sol';
-import {
-    SnapshotsStorageWrapper_2
-} from '../../snapshots/SnapshotsStorageWrapper_2.sol';
-import {
-    CorporateActionsStorageWrapper
-} from '../../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 import {
     _IS_PAUSED_ERROR_ID,
     _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
     _FROM_ACCOUNT_BLOCKED_ERROR_ID,
+    _FROM_ACCOUNT_NULL_ERROR_ID,
     _TO_ACCOUNT_BLOCKED_ERROR_ID,
     _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
+    _TO_ACCOUNT_NULL_ERROR_ID,
+    _ALLOWANCE_REACHED_ERROR_ID,
     _SUCCESS
 } from '../../../layer_1/constants/values.sol';
+import {
+    ERC1410BasicStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
+import {
+    ERC20StorageWrapper
+} from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
 
-import {_CONTROLLER_ROLE} from '../../../layer_1/constants/roles.sol';
-
-abstract contract ERC1410ScheduledTasksStorageWrapper is
-    CorporateActionsStorageWrapper,
-    SnapshotsStorageWrapper_2,
-    ScheduledSnapshotsStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper,
-    ScheduledTasksStorageWrapper
+abstract contract ERC1594StorageWrapper_2 is
+    ERC1594StorageWrapper,
+    ERC20StorageWrapper_2
 {
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override {
-        _triggerAndSyncAll(partition, from, to);
-
-        super._beforeTokenTransfer(partition, from, to, amount);
-    }
-
-    function _triggerAndSyncAll(
-        bytes32 _partition,
-        address _from,
-        address _to
-    ) internal virtual {
-        _triggerScheduledTasks(0);
-        _syncBalanceAdjustments(_partition, _from, _to);
-    }
-
-    function _syncBalanceAdjustments(
-        bytes32 _partition,
-        address _from,
-        address _to
-    ) internal virtual {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
-        CapDataStorage storage capStorage = _capStorage();
-
-        // adjust the total supply for the partition
-        AdjustBalanceLib._adjustTotalAndMaxSupplyForPartition(
-            _partition,
-            erc1410Storage,
-            capStorage,
-            erc1410Storage_2
-        );
-
-        // adjust "from" total and partition balance
-        if (_from != address(0))
-            AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
-                _partition,
-                _from,
-                erc1410Storage,
-                erc1410Storage_2
-            );
-
-        // adjust "to" total and partition balance
-        if (_to != address(0))
-            AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
-                _partition,
-                _to,
-                erc1410Storage,
-                erc1410Storage_2
-            );
-    }
-
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    ) internal virtual override {
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
-
-        erc1410Storage_2.LABAF_user_partition[_account].push(_getABAF());
-
-        super._addPartitionTo(_value, _account, _partition);
-    }
-
-    function _totalSupplyAdjusted() internal view virtual returns (uint256) {
-        (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
-                _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
-            );
-        return _totalSupply() * pendingABAF;
-    }
-
-    function _totalSupplyByPartitionAdjusted(
-        bytes32 _partition
-    ) internal view virtual returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
-            _getLABAFForPartition(_partition)
-        );
-        return _totalSupplyByPartition(_partition) * factor;
-    }
-
-    function _balanceOfAdjusted(
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
-            _getLABAFForUser(_tokenHolder)
-        );
-        return _balanceOf(_tokenHolder) * factor;
-    }
-
-    function _balanceOfByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
-            _getLABAFForUserAndPartition(_partition, _tokenHolder)
-        );
-        return _balanceOfByPartition(_partition, _tokenHolder) * factor;
-    }
-
-    function _getABAFAdjusted() internal view virtual returns (uint256) {
-        uint256 ABAF = _getABAF();
-        if (ABAF == 0) ABAF = 1;
-        (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
-                _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
-            );
-        return ABAF * pendingABAF;
-    }
-
-    function _canTransferByPartition(
-        address _from,
+    function _canTransfer(
         address _to,
-        bytes32 _partition,
         uint256 _value,
-        bytes calldata _data, // solhint-disable-line no-unused-vars
-        bytes calldata _operatorData // solhint-disable-line no-unused-vars
+        bytes calldata _data // solhint-disable-line no-unused-vars
     ) internal view virtual override returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        if (_to == address(0)) {
+            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_msgSender())) {
+            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_to)) {
+            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (_balanceOfAdjusted(_msgSender()) < _value) {
+            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
+
+        return (true, _SUCCESS, bytes32(0));
+    }
+
+    function _canTransferFrom(
+        address _from,
+        address _to,
+        uint256 _value,
+        bytes calldata _data // solhint-disable-line no-unused-vars
+    ) internal view virtual override returns (bool, bytes1, bytes32) {
+        if (_isPaused()) {
+            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
         if (_to == address(0)) {
             return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (_from == address(0)) {
+            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
         }
         if (!_checkControlList(_msgSender())) {
             return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
@@ -400,21 +283,43 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         if (!_checkControlList(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_validPartition(_partition, _from)) {
-            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
+        if (_allowanceAdjusted(_from, _msgSender()) < _value) {
+            return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
         }
-        if (_balanceOfByPartitionAdjusted(_partition, _from) < _value) {
+        if (_balanceOfAdjusted(_from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        // TODO: Better to check all in one boolean expression defined in a different pure function.
-        if (
-            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
-        ) {
-            if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-            }
         }
 
         return (true, _SUCCESS, bytes32(0));
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(ERC1410BasicStorageWrapper, ERC20StorageWrapper_2)
+    {
+        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
+    }
+
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
+        uint256 _amount,
+        bool _isIncrease
+    ) internal virtual override(ERC20StorageWrapper, ERC20StorageWrapper_2) {
+        ERC20StorageWrapper_2._beforeAllowanceUpdate(
+            _owner,
+            _spender,
+            _amount,
+            _isIncrease
+        );
     }
 }

@@ -273,7 +273,7 @@ abstract contract ERC1410StandardStorageWrapper is
             revert InvalidPartition(_from, _partition);
         }
 
-        uint256 balance = _getBalanceForByPartition(_partition, _from);
+        uint256 balance = _balanceOfByPartition(_partition, _from);
 
         if (balance < _value) {
             revert InsufficientBalance(_from, balance, _value, _partition);
@@ -355,7 +355,7 @@ abstract contract ERC1410StandardStorageWrapper is
             return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
         }
 
-        uint256 balance = _getBalanceForByPartition(_partition, _from);
+        uint256 balance = _balanceOfByPartition(_partition, _from);
 
         if (balance < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));

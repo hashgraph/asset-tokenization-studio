@@ -238,15 +238,9 @@ abstract contract CapStorageWrapper_2 is
         bytes32 _partition
     ) internal view virtual returns (uint256 maxSupply_) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAF(),
+            _getABAFAdjusted(),
             _getLABAFForPartition(_partition)
         );
-        (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
-                _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
-            );
-        factor *= pendingABAF;
         return _getMaxSupplyByPartition(_partition) * factor;
     }
 }
