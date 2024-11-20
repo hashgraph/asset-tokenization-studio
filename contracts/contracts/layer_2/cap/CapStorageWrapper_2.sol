@@ -220,11 +220,10 @@ abstract contract CapStorageWrapper_2 is
     CapStorageWrapper,
     ERC1410ScheduledTasksStorageWrapper
 {
-    function _getMaxSupply()
+    function _getMaxSupplyAdjusted()
         internal
         view
         virtual
-        override
         returns (uint256 maxSupply_)
     {
         (uint256 pendingABAF, ) = AdjustBalanceLib
@@ -232,12 +231,12 @@ abstract contract CapStorageWrapper_2 is
                 _scheduledBalanceAdjustmentStorage(),
                 _corporateActionsStorage()
             );
-        return super._getMaxSupply() * pendingABAF;
+        return _getMaxSupply() * pendingABAF;
     }
 
-    function _getMaxSupplyByPartition(
+    function _getMaxSupplyByPartitionAdjusted(
         bytes32 _partition
-    ) internal view virtual override returns (uint256 maxSupply_) {
+    ) internal view virtual returns (uint256 maxSupply_) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
             _getABAF(),
             _getLABAFForPartition(_partition)
@@ -248,6 +247,6 @@ abstract contract CapStorageWrapper_2 is
                 _corporateActionsStorage()
             );
         factor *= pendingABAF;
-        return super._getMaxSupplyByPartition(_partition) * factor;
+        return _getMaxSupplyByPartition(_partition) * factor;
     }
 }

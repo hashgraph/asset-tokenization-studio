@@ -277,22 +277,6 @@ abstract contract Cap is
         success_ = true;
     }
 
-    function getMaxSupply()
-        external
-        view
-        virtual
-        override
-        returns (uint256 maxSupply_)
-    {
-        return _getMaxSupply();
-    }
-
-    function getMaxSupplyByPartition(
-        bytes32 _partition
-    ) external view virtual override returns (uint256 maxSupply_) {
-        return _getMaxSupplyByPartition(_partition);
-    }
-
     function getStaticResolverKey()
         external
         pure

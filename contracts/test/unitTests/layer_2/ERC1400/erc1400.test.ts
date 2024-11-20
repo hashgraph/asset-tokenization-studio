@@ -2611,7 +2611,7 @@ describe('ERC1400 Tests', () => {
             await deployAsset(true)
         })
 
-        it.only('GIVEN an account with adjustBalances role WHEN adjustBalances THEN transaction succeeds', async () => {
+        it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN transaction succeeds', async () => {
             await setPreBalanceAdjustment()
 
             // Before Values
