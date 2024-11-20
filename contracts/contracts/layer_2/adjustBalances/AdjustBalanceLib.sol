@@ -406,65 +406,50 @@ library AdjustBalanceLib {
         uint256 _LABAF
     ) internal pure returns (uint256 factor_) {
         if (_ABAF == 0) return 1;
-        if (_LABAF == 0) factor_ = _ABAF;
-        else factor_ = _ABAF / _LABAF;
+        if (_LABAF == 0) return _ABAF;
+        factor_ = _ABAF / _LABAF;
     }
 
-    function _calculateScheduledBalanceAdjustments(
-        uint256 _initialFactor,
-        uint256 _labaf,
-        uint256 _initialDecimals
-    ) internal view returns (uint256 updatedFactor_, uint256 updatedDecimals_) {
-        // * Initialization
-        _initialFactor = _initialFactor > 0 ? _initialFactor : 1;
-        _labaf = _labaf > 0 ? _labaf : _initialFactor;
-        updatedFactor_ = _initialFactor;
-        updatedDecimals_ = _initialDecimals;
-        // * Iterating through scheduled balance adjustments
+    function _getPendingScheduledBalanceAdjustments(
         ScheduledTasksLib.ScheduledTasksDataStorage
-            storage scheduledBalanceAdjustments_;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledBalanceAdjustments_.slot := _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
-        }
+            storage _scheduledBalanceAdjustments,
+        CorporateActionDataStorage storage _corporateActions
+    ) internal view returns (uint256 pendingABAF_, uint256 pendingDecimals_) {
+        // * Initialization
+        pendingABAF_ = 1;
+        pendingDecimals_ = 0;
+
         uint256 scheduledTaskCount = ScheduledTasksLib._getScheduledTaskCount(
-            scheduledBalanceAdjustments_
+            _scheduledBalanceAdjustments
         );
-        for (uint256 i = 0; i < scheduledTaskCount; i++) {
+
+        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
+            uint256 pos = scheduledTaskCount - i;
+
             ScheduledTasksLib.ScheduledTask
                 memory scheduledTask = ScheduledTasksLib
-                    ._getScheduledTasksByIndex(scheduledBalanceAdjustments_, i);
-            if (
-                scheduledTask.scheduledTimestamp <= block.timestamp &&
-                scheduledTask.data.length > 0
-            ) {
+                    ._getScheduledTasksByIndex(
+                        _scheduledBalanceAdjustments,
+                        pos
+                    );
+
+            if (scheduledTask.scheduledTimestamp < block.timestamp) {
                 bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
 
-                CorporateActionDataStorage storage corporateActions;
-                // solhint-disable-next-line no-inline-assembly
-                assembly {
-                    corporateActions.slot := _CORPORATE_ACTION_STORAGE_POSITION
-                }
-
-                bytes memory balanceAdjustmentData = corporateActions
+                bytes memory balanceAdjustmentData = _corporateActions
                     .actionsData[actionId]
                     .data;
 
-                if (balanceAdjustmentData.length > 0) {
-                    IEquity.ScheduledBalanceAdjustment
-                        memory balanceAdjustment = abi.decode(
-                            balanceAdjustmentData,
-                            (IEquity.ScheduledBalanceAdjustment)
-                        );
-                    updatedFactor_ *= balanceAdjustment.factor;
-                    updatedDecimals_ += balanceAdjustment.decimals;
-                }
+                IEquity.ScheduledBalanceAdjustment
+                    memory balanceAdjustment = abi.decode(
+                        balanceAdjustmentData,
+                        (IEquity.ScheduledBalanceAdjustment)
+                    );
+                pendingABAF_ *= balanceAdjustment.factor;
+                pendingDecimals_ += balanceAdjustment.decimals;
+            } else {
+                break;
             }
         }
-        updatedFactor_ = AdjustBalanceLib._calculateFactor(
-            updatedFactor_,
-            _labaf
-        );
-        return (updatedFactor_, updatedDecimals_);
     }
 }

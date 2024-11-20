@@ -212,12 +212,13 @@ import {
     type AccessControl,
     type Equity,
     type ControlList,
-    type Cap,
     ERC20_2,
     ERC1594,
     ERC1644,
     Lock_2,
     AdjustBalances,
+    Cap_2,
+    ScheduledBalanceAdjustments,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
@@ -288,11 +289,10 @@ describe('ERC1400 Tests', () => {
     let pauseFacet: Pause
     let equityFacet: Equity
     let controlList: ControlList
-    let capFacet: Cap
+    let capFacet: Cap_2
     let erc20Facet: ERC20_2
     let erc1594Facet: ERC1594
     let erc1644Facet: ERC1644
-    let lockFacet: Lock_2
     let adjustBalancesFacet: AdjustBalances
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
@@ -430,9 +430,15 @@ describe('ERC1400 Tests', () => {
         balanceOf_B_Partition_2_Before: any,
         decimals_Before: any
     ) {
-        expect(maxSupply_After).to.be.equal(maxSupply_Before.mul(adjustFactor))
-        //expect(maxSupply_Partition_1_After).to.be.equal(maxSupply_Partition_1_Before.mul(adjustFactor))
-        //expect(maxSupply_Partition_2_After).to.be.equal(maxSupply_Partition_2_Before.mul(adjustFactor))
+        expect(maxSupply_After).to.be.equal(
+            maxSupply_Before.mul(adjustFactor * adjustFactor)
+        )
+        expect(maxSupply_Partition_1_After).to.be.equal(
+            maxSupply_Partition_1_Before.mul(adjustFactor * adjustFactor)
+        )
+        expect(maxSupply_Partition_2_After).to.be.equal(
+            maxSupply_Partition_2_Before.mul(adjustFactor * adjustFactor)
+        )
 
         expect(totalSupply_After).to.be.equal(
             totalSupply_Before.mul(adjustFactor)
@@ -607,9 +613,9 @@ describe('ERC1400 Tests', () => {
         expect(maxSupply_Partition_1_After).to.be.equal(
             maxSupply_Partition_1_Before.mul(adjustFactor)
         )
-        /*expect(maxSupply_Partition_2_After).to.be.equal(
+        expect(maxSupply_Partition_2_After).to.be.equal(
             maxSupply_Partition_2_Before.mul(adjustFactor)
-        )*/
+        )
 
         expect(totalSupply_After).to.be.equal(
             totalSupply_Before.mul(adjustFactor).sub(balanceReduction)
@@ -694,7 +700,7 @@ describe('ERC1400 Tests', () => {
 
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
-        capFacet = await ethers.getContractAt('Cap', diamond.address)
+        capFacet = await ethers.getContractAt('Cap_2', diamond.address)
 
         erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
 
@@ -702,7 +708,7 @@ describe('ERC1400 Tests', () => {
 
         erc1644Facet = await ethers.getContractAt('ERC1644', diamond.address)
 
-        lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
+        equityFacet = await ethers.getContractAt('Equity', diamond.address)
     }
 
     function set_initRbacs(): Rbac[] {
@@ -710,7 +716,11 @@ describe('ERC1400 Tests', () => {
             role: _PAUSER_ROLE,
             members: [account_B],
         }
-        return [rbacPause]
+        const corporateActionPause: Rbac = {
+            role: _CORPORATE_ACTION_ROLE,
+            members: [account_B],
+        }
+        return [rbacPause, corporateActionPause]
     }
 
     describe('Multi partition ', () => {
@@ -1722,7 +1732,7 @@ describe('ERC1400 Tests', () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(_CAP_ROLE, account_A)
             erc1410Facet = erc1410Facet.connect(signer_A)
-            capFacet = await ethers.getContractAt('Cap', diamond.address)
+            capFacet = await ethers.getContractAt('Cap_2', diamond.address)
             capFacet = capFacet.connect(signer_A)
             await capFacet.setMaxSupply(
                 balanceOf_C_Original + balanceOf_E_Original + 2 * amount
@@ -1829,7 +1839,7 @@ describe('ERC1400 Tests', () => {
             // Set Max supplies to test
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(_CAP_ROLE, account_A)
-            capFacet = await ethers.getContractAt('Cap', diamond.address)
+            capFacet = await ethers.getContractAt('Cap_2', diamond.address)
             capFacet = capFacet.connect(signer_A)
             await capFacet.setMaxSupply(
                 balanceOf_C_Original + balanceOf_E_Original + 100 * amount
@@ -2601,7 +2611,7 @@ describe('ERC1400 Tests', () => {
             await deployAsset(true)
         })
 
-        it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN transaction succeeds', async () => {
+        it.only('GIVEN an account with adjustBalances role WHEN adjustBalances THEN transaction succeeds', async () => {
             await setPreBalanceAdjustment()
 
             // Before Values
@@ -2626,6 +2636,35 @@ describe('ERC1400 Tests', () => {
                 adjustFactor,
                 adjustDecimals
             )
+
+            // scheduled two balance updates
+            equityFacet = equityFacet.connect(signer_B)
+
+            const currentTimeInSeconds = (
+                await ethers.provider.getBlock('latest')
+            ).timestamp
+
+            const balanceAdjustmentData = {
+                executionDate: (currentTimeInSeconds + 2).toString(),
+                factor: adjustFactor,
+                decimals: adjustDecimals,
+            }
+
+            const balanceAdjustmentData_2 = {
+                executionDate: (currentTimeInSeconds + 1000).toString(),
+                factor: adjustFactor,
+                decimals: adjustDecimals,
+            }
+            await equityFacet.setScheduledBalanceAdjustment(
+                balanceAdjustmentData
+            )
+            await equityFacet.setScheduledBalanceAdjustment(
+                balanceAdjustmentData_2
+            )
+
+            // wait for first scheduled balance adjustment only (run DUMB transaction)
+            await new Promise((f) => setTimeout(f, 3000))
+            await accessControlFacet.grantRole(_PAUSER_ROLE, account_C) // DUMB transaction
 
             // After Values Before Transaction
             const [

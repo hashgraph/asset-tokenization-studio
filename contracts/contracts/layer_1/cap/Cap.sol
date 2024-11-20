@@ -215,7 +215,12 @@ import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {Common} from '../common/Common.sol';
 import {CapStorageWrapper} from './CapStorageWrapper.sol';
 
-contract Cap is ICap, IStaticFunctionSelectors, CapStorageWrapper, Common {
+abstract contract Cap is
+    ICap,
+    IStaticFunctionSelectors,
+    CapStorageWrapper,
+    Common
+{
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(
         uint256 maxSupply,

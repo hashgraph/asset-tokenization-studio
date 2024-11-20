@@ -277,6 +277,7 @@ abstract contract SnapshotsStorageWrapper_2 is
             super._updateAccountSnapshot(account, partition);
             return;
         }
+        if (ABAFAtCurrentSnapshot == 0) ABAFAtCurrentSnapshot = 1;
 
         uint256 balance = _balanceOf(account);
         uint256 balanceForPartition = _balanceOfByPartition(partition, account);
@@ -338,6 +339,7 @@ abstract contract SnapshotsStorageWrapper_2 is
         uint256 ABAF = _getABAF();
 
         if (ABAFAtSnapshot == ABAF) return _currentBalance;
+        if (ABAFAtSnapshot == 0) ABAFAtSnapshot = 1;
 
         uint256 factor = ABAF / ABAFAtSnapshot;
 
