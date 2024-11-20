@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 10
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    ignore:
+      # For all packages, ignore all minor & patch updates
+      - dependency-name: "*"
+        update-types:
+          [ "version-update:semver-minor", "version-update:semver-patch" ]
