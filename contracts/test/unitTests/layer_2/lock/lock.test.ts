@@ -208,14 +208,11 @@ import { ethers } from 'hardhat'
 import {
     type ResolverProxy,
     type AdjustBalances,
-    type Pause,
     type ERC1410ScheduledTasks,
     type AccessControl,
-    Cap,
-    ERC20,
-    ERC1594,
-    ERC1644,
     Lock_2,
+    Equity,
+    Cap_2,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
@@ -225,6 +222,7 @@ import {
     _CAP_ROLE,
     _CONTROLLER_ROLE,
     _LOCKER_ROLE,
+    _CORPORATE_ACTION_ROLE,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -233,7 +231,6 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
 
 const amount = 1
@@ -264,11 +261,8 @@ describe('Locks Layer 2 Tests', () => {
     let erc1410Facet: ERC1410ScheduledTasks
     let adjustBalancesFacet: AdjustBalances
     let accessControlFacet: AccessControl
-    let pauseFacet: Pause
-    let capFacet: Cap
-    let erc20Facet: ERC20
-    let erc1594Facet: ERC1594
-    let erc1644Facet: ERC1644
+    let capFacet: Cap_2
+    let equityFacet: Equity
     let lockFacet: Lock_2
 
     async function deployAsset(multiPartition: boolean) {
@@ -321,17 +315,11 @@ describe('Locks Layer 2 Tests', () => {
             diamond.address
         )
 
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-
-        capFacet = await ethers.getContractAt('Cap', diamond.address)
-
-        erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
-
-        erc1594Facet = await ethers.getContractAt('ERC1594', diamond.address)
-
-        erc1644Facet = await ethers.getContractAt('ERC1644', diamond.address)
+        capFacet = await ethers.getContractAt('Cap_2', diamond.address)
 
         lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
+
+        equityFacet = await ethers.getContractAt('Equity', diamond.address)
     }
 
     function set_initRbacs(): Rbac[] {
@@ -339,7 +327,11 @@ describe('Locks Layer 2 Tests', () => {
             role: _PAUSER_ROLE,
             members: [account_B],
         }
-        return [rbacPause]
+        const corporateActionPause: Rbac = {
+            role: _CORPORATE_ACTION_ROLE,
+            members: [account_B],
+        }
+        return [rbacPause, corporateActionPause]
     }
 
     async function setPreBalanceAdjustment() {
@@ -404,7 +396,7 @@ describe('Locks Layer 2 Tests', () => {
         await deployAsset(true)
     })
 
-    it.skip('GIVEN a lock WHEN adjustBalances THEN lock amount gets updated succeeds', async () => {
+    it('GIVEN a lock WHEN adjustBalances THEN lock amount gets updated succeeds', async () => {
         await setPreBalanceAdjustment()
 
         const balance_Before = await erc1410Facet.balanceOf(account_A)
@@ -441,6 +433,30 @@ describe('Locks Layer 2 Tests', () => {
         // adjustBalances
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
 
+        // scheduled two balance updates
+        equityFacet = equityFacet.connect(signer_B)
+
+        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
+            .timestamp
+
+        const balanceAdjustmentData = {
+            executionDate: (currentTimeInSeconds + 2).toString(),
+            factor: adjustFactor,
+            decimals: adjustDecimals,
+        }
+
+        const balanceAdjustmentData_2 = {
+            executionDate: (currentTimeInSeconds + 1000).toString(),
+            factor: adjustFactor,
+            decimals: adjustDecimals,
+        }
+        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
+        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
+
+        // wait for first scheduled balance adjustment only (run DUMB transaction)
+        await new Promise((f) => setTimeout(f, 3000))
+        await accessControlFacet.grantRole(_PAUSER_ROLE, account_C) // DUMB transaction
+
         const lock_TotalAmount_After = await lockFacet.getLockedAmountFor(
             account_A
         )
@@ -459,20 +475,24 @@ describe('Locks Layer 2 Tests', () => {
             await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
 
         expect(lock_TotalAmount_After).to.be.equal(
-            lock_TotalAmount_Before.mul(adjustFactor)
+            lock_TotalAmount_Before.mul(adjustFactor * adjustFactor)
         )
         expect(lock_TotalAmount_After_Partition_1).to.be.equal(
-            lock_TotalAmount_Before_Partition_1.mul(adjustFactor)
+            lock_TotalAmount_Before_Partition_1.mul(adjustFactor * adjustFactor)
         )
-        expect(balance_After).to.be.equal(balance_Before.mul(adjustFactor))
+        expect(balance_After).to.be.equal(
+            balance_Before.sub(amount).mul(adjustFactor * adjustFactor)
+        )
         expect(lock_TotalAmount_After).to.be.equal(
-            lock_TotalAmount_Before.mul(adjustFactor)
+            lock_TotalAmount_Before.mul(adjustFactor * adjustFactor)
         )
         expect(balance_After_Partition_1).to.be.equal(
-            balance_Before_Partition_1.mul(adjustFactor)
+            balance_Before_Partition_1
+                .sub(amount)
+                .mul(adjustFactor * adjustFactor)
         )
         expect(lock_After.amount_).to.be.equal(
-            lock_Before.amount_.mul(adjustFactor)
+            lock_Before.amount_.mul(adjustFactor * adjustFactor)
         )
     })
 

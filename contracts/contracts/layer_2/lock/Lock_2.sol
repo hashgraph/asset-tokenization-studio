@@ -215,6 +215,56 @@ import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
 import {_LOCK_RESOLVER_KEY} from '../../layer_1/constants/resolverKeys.sol';
 
 contract Lock_2 is ILock_2, Lock, LockStorageWrapper_2 {
+    function getLockedAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 amount_) {
+        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function getLockForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    )
+        external
+        view
+        virtual
+        override
+        returns (uint256 amount_, uint256 expirationTimestamp_)
+    {
+        return
+            _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
+    }
+
+    function getLockedAmountFor(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 amount_) {
+        return
+            _getLockedAmountForByPartitionAdjusted(
+                _DEFAULT_PARTITION,
+                _tokenHolder
+            );
+    }
+
+    function getLockFor(
+        address _tokenHolder,
+        uint256 _lockId
+    )
+        external
+        view
+        virtual
+        override
+        returns (uint256 amount_, uint256 expirationTimestamp_)
+    {
+        return
+            _getLockForByPartitionAdjusted(
+                _DEFAULT_PARTITION,
+                _tokenHolder,
+                _lockId
+            );
+    }
+
     function getTotalLockLABAFByPartition(
         bytes32 _partition,
         address _tokenHolder

@@ -379,6 +379,41 @@ abstract contract LockStorageWrapper_2 is
         lockStorage_2.LABAFs_TotalLocked[_tokenHolder][_partition] = _ABAF;
     }
 
+    function _getLockedAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            _getABAFAdjusted(),
+            _getTotalLockLABAFByPartition(_partition, _tokenHolder)
+        );
+        return
+            _getLockedAmountForByPartition(_partition, _tokenHolder) * factor;
+    }
+
+    function _getLockForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    )
+        internal
+        view
+        virtual
+        returns (uint256 amount_, uint256 expirationTimestamp_)
+    {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            _getABAFAdjusted(),
+            _getLockLABAFByPartition(_partition, _lockId, _tokenHolder)
+        );
+
+        (amount_, expirationTimestamp_) = _getLockForByPartition(
+            _partition,
+            _tokenHolder,
+            _lockId
+        );
+        amount_ *= factor;
+    }
+
     function _getTotalLockLABAFByPartition(
         bytes32 _partition,
         address _tokenHolder
@@ -394,7 +429,7 @@ abstract contract LockStorageWrapper_2 is
         address _tokenHolder
     ) internal view virtual returns (uint256) {
         uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
-
+        if (lockIndex == 0) return 0;
         return _getLockLABAFByIndex(_partition, _tokenHolder, lockIndex);
     }
 
