@@ -225,8 +225,29 @@ import {
 } from '../../layer_1/constants/resolverKeys.sol';
 import {ISnapshots} from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
 import {ISnapshots_2} from '../interfaces/snapshots/ISnapshots_2.sol';
+import {_SNAPSHOT_ROLE} from '../../layer_1/constants/roles.sol';
+import {
+    ScheduledTasksStorageWrapper
+} from '../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
 
-contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
+contract Snapshots_2 is 
+ISnapshots_2, 
+ScheduledTasksStorageWrapper,
+Snapshots, 
+SnapshotsStorageWrapper_2
+{
+    function takeSnapshot()
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_SNAPSHOT_ROLE)
+        returns (uint256 snapshotID)
+    {
+        _triggerScheduledTasks(0);
+        return _takeSnapshot();
+    }
+
     function ABAFAtSnapshot(
         uint256 _snapshotID
     ) external view returns (uint256 ABAF_) {
