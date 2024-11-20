@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@commitlint/cli": "^19.2.0",
-    "@commitlint/config-conventional": "^19.1.0",
+    "@commitlint/config-conventional": "^19.6.0",
     "dotenv": "^16.3.1",
     "fs": "^0.0.1-security",
     "husky": "^9.0.11"
