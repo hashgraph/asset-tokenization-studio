@@ -34,7 +34,7 @@
   "author": "",
   "license": "Apache-2.0",
   "dependencies": {
-    "concurrently": "^7.6.0",
+    "concurrently": "^9.1.0",
     "elliptic": "^6.5.5",
     "ethers": "^5.7.2",
     "rimraf": "^4.1.1",
