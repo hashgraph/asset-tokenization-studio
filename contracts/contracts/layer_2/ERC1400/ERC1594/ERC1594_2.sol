@@ -203,112 +203,102 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {_SCHEDULED_SNAPSHOTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {ERC1594} from '../../../layer_1/ERC1400/ERC1594/ERC1594.sol';
 import {
-    CorporateActionsStorageWrapperSecurity
-} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+    ERC1410SnapshotStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
 import {
-    IScheduledSnapshots
-} from '../interfaces/scheduledSnapshots/IScheduledSnapshots.sol';
+    ERC1410BasicStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {ERC1594StorageWrapper_2} from './ERC1594StorageWrapper_2.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+    ERC1594StorageWrapper
+} from '../../../layer_1/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
+import {
+    ERC20StorageWrapper
+} from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
+import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
 
-contract ScheduledSnapshots is
-    IStaticFunctionSelectors,
-    IScheduledSnapshots,
-    CorporateActionsStorageWrapperSecurity
-{
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    function triggerPendingScheduledSnapshots()
-        external
-        virtual
-        override
-        onlyUnpaused
-        returns (uint256)
-    {
-        return _triggerScheduledSnapshots(0);
-    }
-
-    function triggerScheduledSnapshots(
-        uint256 max
-    ) external virtual override onlyUnpaused returns (uint256) {
-        return _triggerScheduledSnapshots(max);
-    }
-
-    function scheduledSnapshotCount()
-        external
-        view
-        virtual
-        override
-        returns (uint256)
-    {
-        return _getScheduledSnapshotCount();
-    }
-
-    function getScheduledSnapshots(
-        uint256 _pageIndex,
-        uint256 _pageLength
+contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
+    function _beforeTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
     )
-        external
+        internal
+        virtual
+        override(ERC1410BasicStorageWrapper, ERC1594, ERC20StorageWrapper_2)
+    {
+        ERC1410ScheduledTasksStorageWrapper._beforeTokenTransfer(
+            partition,
+            from,
+            to,
+            amount
+        );
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(ERC1410BasicStorageWrapper, ERC1594StorageWrapper_2)
+    {
+        ERC1594StorageWrapper_2._addPartitionTo(_value, _account, _partition);
+    }
+
+    function _canTransfer(
+        address _to,
+        uint256 _value,
+        bytes calldata _data // solhint-disable-line no-unused-vars
+    )
+        internal
         view
         virtual
-        override
-        returns (ScheduledSnapshot[] memory scheduledSnapshot_)
+        override(ERC1594StorageWrapper, ERC1594StorageWrapper_2)
+        returns (bool, bytes1, bytes32)
     {
-        scheduledSnapshot_ = _getScheduledSnapshots(_pageIndex, _pageLength);
+        return ERC1594StorageWrapper_2._canTransfer(_to, _value, _data);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
+    function _canTransferFrom(
+        address _from,
+        address _to,
+        uint256 _value,
+        bytes calldata _data // solhint-disable-line no-unused-vars
+    )
+        internal
+        view
         virtual
-        override
-        returns (bytes32 staticResolverKey_)
+        override(ERC1594StorageWrapper, ERC1594StorageWrapper_2)
+        returns (bool, bytes1, bytes32)
     {
-        staticResolverKey_ = _SCHEDULED_SNAPSHOTS_RESOLVER_KEY;
+        return
+            ERC1594StorageWrapper_2._canTransferFrom(_from, _to, _value, _data);
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](4);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerPendingScheduledSnapshots
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerScheduledSnapshots
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .scheduledSnapshotCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getScheduledSnapshots
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IScheduledSnapshots)
-            .interfaceId;
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
+        uint256 _amount,
+        bool _isIncrease
+    ) internal virtual override(ERC1594StorageWrapper_2, ERC20StorageWrapper) {
+        ERC1594StorageWrapper_2._beforeAllowanceUpdate(
+            _owner,
+            _spender,
+            _amount,
+            _isIncrease
+        );
     }
 }

@@ -211,12 +211,10 @@ import {
     ERC1410StandardStorageWrapper
 } from './ERC1410StandardStorageWrapper.sol';
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
-import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
 
 abstract contract ERC1410Standard is
     IERC1410Standard,
-    ERC1410StandardStorageWrapper,
-    CapStorageWrapper
+    ERC1410StandardStorageWrapper
 {
     /// @notice Increases totalSupply and the corresponding amount of the specified owners partition
     /// @param _partition The partition to allocate the increase in balance

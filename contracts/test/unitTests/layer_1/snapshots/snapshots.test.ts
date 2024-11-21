@@ -209,7 +209,7 @@ import {
     type ResolverProxy,
     type Snapshots,
     type Pause,
-    type ERC1410ScheduledSnapshot,
+    type ERC1410ScheduledTasks,
     type AccessControl,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
@@ -243,7 +243,7 @@ describe('Snapshots Tests', () => {
     let account_B: string
     let account_C: string
 
-    let erc1410Facet: ERC1410ScheduledSnapshot
+    let erc1410Facet: ERC1410ScheduledTasks
     let snapshotFacet: Snapshots
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
@@ -297,7 +297,7 @@ describe('Snapshots Tests', () => {
         )
 
         erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledSnapshot',
+            'ERC1410ScheduledTasks',
             diamond.address
         )
 

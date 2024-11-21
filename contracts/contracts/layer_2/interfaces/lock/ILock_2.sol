@@ -203,23 +203,27 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface IScheduledSnapshots {
-    struct ScheduledSnapshot {
-        uint256 scheduledTimestamp;
-        bytes data;
-    }
+interface ILock_2 {
+    function getTotalLockLABAF(
+        address _tokenHolder
+    ) external returns (uint256 LABAF_);
 
-    function triggerPendingScheduledSnapshots() external returns (uint256);
+    function getTotalLockLABAFByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external returns (uint256 LABAF_);
 
-    function triggerScheduledSnapshots(uint256 max) external returns (uint256);
+    function getLockLABAFByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) external returns (uint256 LABAF_);
 
-    function scheduledSnapshotCount() external view returns (uint256);
-
-    function getScheduledSnapshots(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (ScheduledSnapshot[] memory scheduledSnapshot_);
+    function getLockLABAF(
+        uint256 _lockId,
+        address _tokenHolder
+    ) external returns (uint256 LABAF_);
 }

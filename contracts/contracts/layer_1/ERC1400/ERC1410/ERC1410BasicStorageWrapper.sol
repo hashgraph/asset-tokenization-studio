@@ -216,8 +216,8 @@ import {
 
 abstract contract ERC1410BasicStorageWrapper is
     IERC1410StorageWrapper,
-    Common,
-    ERC1410BasicStorageWrapperRead
+    ERC1410BasicStorageWrapperRead,
+    Common
 {
     function _transferByPartition(
         address _from,
@@ -236,10 +236,7 @@ abstract contract ERC1410BasicStorageWrapper is
         _beforeTokenTransfer(_partition, _from, _to, _value);
 
         if (!_validPartitionForReceiver(_partition, _to)) {
-            erc1410Storage.partitions[_to].push(Partition(0, _partition));
-            erc1410Storage.partitionToIndex[_to][
-                _partition
-            ] = _getERC1410BasicStorage().partitions[_to].length;
+            _addPartitionTo(0, _to, _partition);
         }
 
         // Changing the state values
@@ -256,6 +253,19 @@ abstract contract ERC1410BasicStorageWrapper is
             _data,
             _operatorData
         );
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    ) internal virtual {
+        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+
+        erc1410Storage.partitions[_account].push(Partition(_value, _partition));
+        erc1410Storage.partitionToIndex[_account][
+            _partition
+        ] = _getERC1410BasicStorage().partitions[_account].length;
     }
 
     function _beforeTokenTransfer(
