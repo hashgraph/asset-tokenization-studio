@@ -216,6 +216,8 @@ import {
     ERC1594,
     ERC1644,
     Lock_2,
+    Equity,
+    ScheduledTasks,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
@@ -225,6 +227,7 @@ import {
     _CAP_ROLE,
     _CONTROLLER_ROLE,
     _LOCKER_ROLE,
+    _CORPORATE_ACTION_ROLE,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -250,6 +253,7 @@ const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
 const ONE_SECOND = 1
+const TIME = 6000
 
 describe('Adjust Balances Tests', () => {
     let diamond: ResolverProxy
@@ -265,11 +269,8 @@ describe('Adjust Balances Tests', () => {
     let adjustBalancesFacet: AdjustBalances
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let capFacet: Cap
-    let erc20Facet: ERC20
-    let erc1594Facet: ERC1594
-    let erc1644Facet: ERC1644
-    let lockFacet: Lock_2
+    let equityFacet: Equity
+    let scheduledTasksFacet: ScheduledTasks
 
     async function deployAsset(multiPartition: boolean) {
         const init_rbacs: Rbac[] = set_initRbacs()
@@ -323,15 +324,12 @@ describe('Adjust Balances Tests', () => {
 
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
-        capFacet = await ethers.getContractAt('Cap', diamond.address)
+        equityFacet = await ethers.getContractAt('Equity', diamond.address)
 
-        erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
-
-        erc1594Facet = await ethers.getContractAt('ERC1594', diamond.address)
-
-        erc1644Facet = await ethers.getContractAt('ERC1644', diamond.address)
-
-        lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
+        scheduledTasksFacet = await ethers.getContractAt(
+            'ScheduledTasks',
+            diamond.address
+        )
     }
 
     function set_initRbacs(): Rbac[] {
@@ -396,5 +394,67 @@ describe('Adjust Balances Tests', () => {
         await expect(
             adjustBalancesFacet.adjustBalances(0, adjustDecimals)
         ).to.be.rejectedWith(Error)
+    })
+
+    it('GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds', async () => {
+        // Granting Role to account C
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_A)
+        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_A)
+
+        erc1410Facet = erc1410Facet.connect(signer_A)
+        equityFacet = equityFacet.connect(signer_A)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
+
+        await erc1410Facet.issueByPartition(
+            _PARTITION_ID_2,
+            account_B,
+            balanceOf_B_Original,
+            '0x'
+        )
+
+        // schedule tasks
+        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
+            .timestamp
+
+        const dividendsRecordDateInSeconds_1 =
+            currentTimeInSeconds + TIME / 1000
+        const dividendsExecutionDateInSeconds =
+            currentTimeInSeconds + (10 * TIME) / 1000
+        const dividendsAmountPerEquity = 1
+        const dividendData_1 = {
+            recordDate: dividendsRecordDateInSeconds_1.toString(),
+            executionDate: dividendsExecutionDateInSeconds.toString(),
+            amount: dividendsAmountPerEquity,
+        }
+
+        await equityFacet.setDividends(dividendData_1)
+
+        const balanceAdjustmentExecutionDateInSeconds_1 =
+            currentTimeInSeconds + TIME / 1000 + 1
+
+        const balanceAdjustmentData_1 = {
+            executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
+            factor: adjustFactor,
+            decimals: adjustDecimals,
+        }
+
+        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+
+        const tasks_count_Before =
+            await scheduledTasksFacet.scheduledTaskCount()
+
+        //-------------------------
+        await new Promise((f) => setTimeout(f, TIME + 2))
+
+        // balance adjustment
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
+        await adjustBalancesFacet.adjustBalances(1, 0)
+
+        const tasks_count_After = await scheduledTasksFacet.scheduledTaskCount()
+
+        expect(tasks_count_Before).to.be.equal(2)
+        expect(tasks_count_After).to.be.equal(0)
     })
 })
