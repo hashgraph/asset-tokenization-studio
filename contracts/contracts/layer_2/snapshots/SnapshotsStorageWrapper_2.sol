@@ -227,15 +227,11 @@ abstract contract SnapshotsStorageWrapper_2 is
     }
 
     function _updateABAFSnapshot() internal virtual {
-        uint256 ABAF = _getABAF();
-        if (ABAF == 0) ABAF = 1;
-        _updateSnapshot(_snapshotStorage_2().ABAFSnapshots, ABAF);
+        _updateSnapshot(_snapshotStorage_2().ABAFSnapshots, _getABAF());
     }
 
     function _updateDecimalsSnapshot() internal virtual {
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-
-        _updateSnapshot(_snapshotStorage_2().decimals, erc20Storage.decimals);
+        _updateSnapshot(_snapshotStorage_2().decimals, _decimals());
     }
 
     function _ABAFAtSnapshot(
@@ -252,14 +248,12 @@ abstract contract SnapshotsStorageWrapper_2 is
     function _decimalsAtSnapshot(
         uint256 _snapshotID
     ) internal view returns (uint256 decimals_) {
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-
         (bool snapshotted, uint256 value) = _valueAt(
             _snapshotID,
             _snapshotStorage_2().decimals
         );
 
-        return snapshotted ? value : erc20Storage.decimals;
+        return snapshotted ? value : _decimals();
     }
 
     function _updateAccountSnapshot(
@@ -271,7 +265,7 @@ abstract contract SnapshotsStorageWrapper_2 is
         if (currentSnapshotId == 0) return;
 
         uint256 ABAFAtCurrentSnapshot = _ABAFAtSnapshot(currentSnapshotId);
-        uint256 ABAF = _getABAF();
+        uint256 ABAF = _getABAFAdjusted();
 
         if (ABAF == ABAFAtCurrentSnapshot) {
             super._updateAccountSnapshot(account, partition);
@@ -279,8 +273,11 @@ abstract contract SnapshotsStorageWrapper_2 is
         }
         if (ABAFAtCurrentSnapshot == 0) ABAFAtCurrentSnapshot = 1;
 
-        uint256 balance = _balanceOf(account);
-        uint256 balanceForPartition = _balanceOfByPartition(partition, account);
+        uint256 balance = _balanceOfAdjusted(account);
+        uint256 balanceForPartition = _balanceOfByPartitionAdjusted(
+            partition,
+            account
+        );
         uint256 factor = ABAF / ABAFAtCurrentSnapshot;
 
         balance /= factor;

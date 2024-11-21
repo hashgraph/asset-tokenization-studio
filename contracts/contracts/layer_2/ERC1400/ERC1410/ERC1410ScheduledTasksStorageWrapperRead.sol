@@ -222,8 +222,13 @@ import {
 import {
     ERC1410SnapshotStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410//ERC1410SnapshotStorageWrapper.sol';
+import {
+    CorporateActionsStorageWrapper
+} from '../../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapperRead is
+    CorporateActionsStorageWrapper,
+    ScheduledBalanceAdjustmentsStorageWrapper,
     ERC1410SnapshotStorageWrapper
 {
     struct ERC1410BasicStorage_2 {
@@ -239,6 +244,17 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
 
     function _getABAF() internal view virtual returns (uint256) {
         return _getERC1410BasicStorage_2().ABAF;
+    }
+
+    function _getABAFAdjusted() internal view virtual returns (uint256) {
+        uint256 ABAF = _getABAF();
+        if (ABAF == 0) ABAF = 1;
+        (uint256 pendingABAF, ) = AdjustBalanceLib
+            ._getPendingScheduledBalanceAdjustments(
+                _scheduledBalanceAdjustmentStorage(),
+                _corporateActionsStorage()
+            );
+        return ABAF * pendingABAF;
     }
 
     function _getLABAFForUser(
@@ -266,6 +282,27 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
             _getERC1410BasicStorage_2().LABAF_user_partition[_account][
                 partitionsIndex - 1
             ];
+    }
+
+    function _balanceOfAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            _getABAFAdjusted(),
+            _getLABAFForUser(_tokenHolder)
+        );
+        return _balanceOf(_tokenHolder) * factor;
+    }
+
+    function _balanceOfByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            _getABAFAdjusted(),
+            _getLABAFForUserAndPartition(_partition, _tokenHolder)
+        );
+        return _balanceOfByPartition(_partition, _tokenHolder) * factor;
     }
 
     function _getERC1410BasicStorage_2()

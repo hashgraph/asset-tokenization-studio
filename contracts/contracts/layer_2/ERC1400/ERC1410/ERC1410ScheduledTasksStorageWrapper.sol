@@ -212,9 +212,6 @@ import {
     ScheduledSnapshotsStorageWrapper
 } from '../../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
 import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
-import {
     ScheduledTasksStorageWrapper
 } from '../../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
 import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
@@ -228,9 +225,6 @@ import {
 import {
     SnapshotsStorageWrapper_2
 } from '../../snapshots/SnapshotsStorageWrapper_2.sol';
-import {
-    CorporateActionsStorageWrapper
-} from '../../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
 import {
     _IS_PAUSED_ERROR_ID,
     _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
@@ -247,10 +241,8 @@ import {
 import {_CONTROLLER_ROLE} from '../../../layer_1/constants/roles.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
-    CorporateActionsStorageWrapper,
     SnapshotsStorageWrapper_2,
     ScheduledSnapshotsStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper,
     ScheduledTasksStorageWrapper
 {
     function _beforeTokenTransfer(
@@ -340,38 +332,6 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
             _getLABAFForPartition(_partition)
         );
         return _totalSupplyByPartition(_partition) * factor;
-    }
-
-    function _balanceOfAdjusted(
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
-            _getLABAFForUser(_tokenHolder)
-        );
-        return _balanceOf(_tokenHolder) * factor;
-    }
-
-    function _balanceOfByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
-            _getLABAFForUserAndPartition(_partition, _tokenHolder)
-        );
-        return _balanceOfByPartition(_partition, _tokenHolder) * factor;
-    }
-
-    function _getABAFAdjusted() internal view virtual returns (uint256) {
-        uint256 ABAF = _getABAF();
-        if (ABAF == 0) ABAF = 1;
-        (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
-                _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
-            );
-        return ABAF * pendingABAF;
     }
 
     function _canTransferByPartition(
