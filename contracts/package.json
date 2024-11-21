@@ -46,6 +46,7 @@
     "test:scheduledBalanceAdjustments": "npx hardhat test test/unitTests/layer_2/scheduledTasks/scheduledBalanceAdjustments/scheduledBalanceAdjustments.test.ts",
     "test:scheduledTasks": "npx hardhat test test/unitTests/layer_2/scheduledTasks/scheduledTasks/scheduledTasks.test.ts",
     "test:cap": "npx hardhat test test/unitTests/layer_1/cap/cap.test.ts",
+    "test:cap_2": "npx hardhat test test/unitTests/layer_2/cap/cap.test.ts",
     "test:securityUSA": "npx hardhat test test/unitTests/layer_3/securityUSA/securityUSA.test.ts",
     "test:lock": "npx hardhat test test/unitTests/layer_1/lock/lock.test.ts",
     "test:lock_2": "npx hardhat test test/unitTests/layer_2/lock/lock.test.ts",
