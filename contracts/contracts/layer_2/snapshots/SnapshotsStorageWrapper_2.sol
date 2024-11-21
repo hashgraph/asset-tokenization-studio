@@ -305,7 +305,7 @@ abstract contract SnapshotsStorageWrapper_2 is
             _balanceOfAt_Adjusted(
                 snapshotId,
                 _snapshotStorage().accountBalanceSnapshots[account],
-                _balanceOf(account)
+                _balanceOfAdjusted(account)
             );
     }
 
@@ -320,14 +320,14 @@ abstract contract SnapshotsStorageWrapper_2 is
                 _snapshotStorage().accountPartitionBalanceSnapshots[account][
                     _partition
                 ],
-                _balanceOfByPartition(_partition, account)
+                _balanceOfByPartitionAdjusted(_partition, account)
             );
     }
 
     function _balanceOfAt_Adjusted(
         uint256 _snapshotId,
         Snapshots storage _snapshots,
-        uint256 _currentBalance
+        uint256 _currentBalanceAdjusted
     ) internal view virtual returns (uint256) {
         (bool snapshotted, uint256 value) = _valueAt(_snapshotId, _snapshots);
         if (snapshotted) return value;
@@ -335,12 +335,12 @@ abstract contract SnapshotsStorageWrapper_2 is
         uint256 ABAFAtSnapshot = _ABAFAtSnapshot(_snapshotId);
         uint256 ABAF = _getABAF();
 
-        if (ABAFAtSnapshot == ABAF) return _currentBalance;
+        if (ABAFAtSnapshot == ABAF) return _currentBalanceAdjusted;
         if (ABAFAtSnapshot == 0) ABAFAtSnapshot = 1;
 
         uint256 factor = ABAF / ABAFAtSnapshot;
 
-        return _currentBalance / factor;
+        return _currentBalanceAdjusted / factor;
     }
 
     function _snapshotStorage_2()

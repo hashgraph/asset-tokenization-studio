@@ -38,6 +38,7 @@
     "test:erc1400": "npx hardhat test test/unitTests/layer_2/ERC1400/erc1400.test.ts",
     "test:erc20": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC20/erc20.test.ts",
     "test:snapshots": "npx hardhat test test/unitTests/layer_1/snapshots/snapshots.test.ts",
+    "test:snapshots_2": "npx hardhat test test/unitTests/layer_2/snapshots/snapshots.test.ts",
     "test:adjustBalances": "npx hardhat test test/unitTests/layer_2/adjustBalances/adjustBalances.test.ts",
     "test:equity": "npx hardhat test test/unitTests/layer_2/equity/equity.test.ts",
     "test:bond": "npx hardhat test test/unitTests/layer_2/bond/bond.test.ts",
