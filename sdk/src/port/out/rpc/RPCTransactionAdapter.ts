@@ -316,7 +316,7 @@ import {
   IEquity,
   Lock__factory,
   Pause__factory,
-  ScheduledSnapshots__factory,
+  ScheduledTasks__factory,
   Snapshots__factory,
   TransferAndLock__factory,
 } from '@hashgraph/asset-tokenization-contracts';
@@ -1463,10 +1463,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ScheduledSnapshots__factory.connect(
+      await ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).triggerPendingScheduledSnapshots({
+      ).triggerPendingScheduledTasks({
         gasLimit: TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
       }),
       this.networkService.environment,
@@ -1481,10 +1481,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await ScheduledSnapshots__factory.connect(
+      await ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).triggerScheduledSnapshots(max.toBigNumber(), {
+      ).triggerScheduledTasks(max.toBigNumber(), {
         gasLimit: TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
       }),
       this.networkService.environment,
