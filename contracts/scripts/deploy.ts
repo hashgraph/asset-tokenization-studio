@@ -455,13 +455,13 @@ export async function deployAtsFullInfrastructure({
                 ids: { contract: ExistingContractIds.scheduledSnapshots },
             },
             {
-                name: 'scheduledBalanceAdjustments',
+                name: 'scheduledbalanceadjustments',
                 ids: {
                     contract: ExistingContractIds.scheduledBalanceAdjustments,
                 },
             },
             {
-                name: 'scheduledTasks',
+                name: 'scheduledtasks',
                 ids: {
                     contract: ExistingContractIds.scheduledTasks,
                 },
