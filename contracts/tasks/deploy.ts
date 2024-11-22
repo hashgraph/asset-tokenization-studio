@@ -263,6 +263,7 @@ task(
             bond,
             scheduledSnapshots,
             scheduledBalanceAdjustments,
+            scheduledTasks,
             corporateActionsSecurity,
             lock,
             transferAndLock,
@@ -299,6 +300,7 @@ task(
             'Scheduled Snapshots': scheduledSnapshots.contract,
             'Scheduled Balance Adjustments':
                 scheduledBalanceAdjustments.contract,
+            'Scheduled Tasks': scheduledTasks.contract,
             'Corporate Actions': corporateActionsSecurity.contract,
             Lock: lock.contract,
             'Transfer and Lock': transferAndLock.contract,

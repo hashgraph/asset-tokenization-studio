@@ -229,6 +229,7 @@ import {
     ERC20_2__factory,
     ScheduledTasks__factory,
     Cap_2__factory,
+    AdjustBalances__factory,
 } from '../typechain-types'
 import {
     getEnvVar,
@@ -518,8 +519,8 @@ export async function deployAtsFullInfrastructure({
         equity,
         bond,
         scheduledsnapshots: scheduledSnapshots,
-        scheduledBalanceAdjustments: scheduledBalanceAdjustments,
-        scheduledTasks: scheduledTasks,
+        scheduledbalanceadjustments: scheduledBalanceAdjustments,
+        scheduledtasks: scheduledTasks,
         corporateactionssecurity: corporateActionsSecurity,
         transferandlock: transferAndLock,
         adjustbalances: adjustBalances,
@@ -711,16 +712,17 @@ export async function deployContract({
         equity: { factory: EquityUSA__factory },
         bond: { factory: BondUSA__factory },
         scheduledsnapshots: { factory: ScheduledSnapshots__factory },
-        scheduledBalanceAdjustments: {
+        scheduledbalanceadjustments: {
             factory: ScheduledBalanceAdjustments__factory,
         },
-        scheduledTasks: {
+        scheduledtasks: {
             factory: ScheduledTasks__factory,
         },
         snapshots: { factory: Snapshots_2__factory },
         corporateactions: { factory: CorporateActionsSecurity__factory },
         transferandlock: { factory: TransferAndLock__factory },
         lock: { factory: Lock_2__factory },
+        adjustbalances: { factory: AdjustBalances__factory },
     }
 
     const contractKey = Object.keys(contractMap).find((contractType) =>
