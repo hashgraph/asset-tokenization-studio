@@ -217,7 +217,7 @@ import {
 import {
   AccessControl__factory,
   BondUSA__factory,
-  Cap__factory,
+  Cap_2__factory,
   ControlList__factory,
   DiamondFacet__factory,
   EquityUSA__factory,
@@ -225,9 +225,9 @@ import {
   ERC1410Snapshot__factory,
   ERC1643__factory,
   Factory__factory,
-  Lock__factory,
-  ScheduledSnapshots__factory,
-  Snapshots__factory,
+  Lock_2__factory,
+  ScheduledTasks__factory,
+  Snapshots_2__factory,
   TransferAndLock__factory,
   Bond__factory,
 } from '@hashgraph/asset-tokenization-contracts';
@@ -1079,7 +1079,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'takeSnapshot';
     LogService.logTrace(`Take snapshot of: ${security.toString()}`);
 
-    const factoryInstance = new Snapshots__factory().attach(
+    const factoryInstance = new Snapshots_2__factory().attach(
       security.toString(),
     );
 
@@ -1335,7 +1335,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Setting max supply ${maxSupply} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new Cap__factory().attach(security.toString());
+    const factoryInstance = new Cap_2__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -1358,12 +1358,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'triggerPendingScheduledSnapshots';
+    const FUNCTION_NAME = 'triggerPendingScheduledTasks';
     LogService.logTrace(
       `Triggering pending scheduled snapshots for ${security.toString()}`,
     );
 
-    const factoryInstance = new ScheduledSnapshots__factory().attach(
+    const factoryInstance = new ScheduledTasks__factory().attach(
       security.toString(),
     );
 
@@ -1387,12 +1387,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     max: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'triggerScheduledSnapshots';
+    const FUNCTION_NAME = 'triggerScheduledTasks';
     LogService.logTrace(
       `Triggering up to ${max.toString()} pending scheduled snapshots for ${security.toString()}`,
     );
 
-    const factoryInstance = new ScheduledSnapshots__factory().attach(
+    const factoryInstance = new ScheduledTasks__factory().attach(
       security.toString(),
     );
 
@@ -1425,7 +1425,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Locking ${amount} tokens from account ${sourceId.toString()} until ${expirationDate}`,
     );
 
-    const factoryInstance = new Lock__factory().attach(security.toString());
+    const factoryInstance = new Lock_2__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -1460,7 +1460,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Releasing lock ${lockId} from account ${sourceId.toString()}`,
     );
 
-    const factoryInstance = new Lock__factory().attach(security.toString());
+    const factoryInstance = new Lock_2__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
