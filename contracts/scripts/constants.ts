@@ -260,3 +260,8 @@ export const REGEX = {
     bytes32: /^0x[a-fA-F0-9]{64}$/,
     bytes: /^0x[a-fA-F0-9]*$/,
 }
+
+export const _BALANCE_ADJUSTMENT_TASK_TYPE =
+    '0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d'
+export const _SNAPSHOT_TASK_TYPE =
+    '0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c'

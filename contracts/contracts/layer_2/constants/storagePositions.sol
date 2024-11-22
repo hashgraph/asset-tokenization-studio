@@ -213,6 +213,9 @@ bytes32 constant _SCHEDULED_SNAPSHOTS_STORAGE_POSITION = 0xe5334ddaa6268d55c7efe
 // keccak256('security.token.standard.scheduledBalanceAdjustments.storage');
 bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION = 0xaf4aaa3de473ec9b58645d40f5a2fe4e176157e247b2d875db61f1a70935ac68;
 
+// keccak256('security.token.standard.scheduledTasks.storage');
+bytes32 constant _SCHEDULED_TASKS_STORAGE_POSITION = 0x2352c39c61abb4e922588a7d46fb5c925b9a205577be135537479031648c86fe;
+
 // keccak256('security.token.standard.bond.storage');
 bytes32 constant _BOND_STORAGE_POSITION = 0x251123c390edd911567d4210605f2dfb26d83878c58bd871f56946d08ffd1f2b;
 
@@ -221,3 +224,12 @@ bytes32 constant _EQUITY_STORAGE_POSITION = 0xa5469e676cbd7933388e0b85a29d440832
 
 // keccak256('security.token.standard.erc1410.basic.2.storage');
 bytes32 constant _ERC1410_BASIC_STORAGE_2_POSITION = 0x0b7c7c3086877579769ac0bef31a4e31f19775fa999bf5053bae0d03195b0d62;
+
+// keccak256('security.token.standard.lock.2.storage');
+bytes32 constant _LOCK_2_STORAGE_POSITION = 0x80a0b31b5fd604012f7499bdf0f4b16f83f6969068a25c5183f6c442d3d70b78;
+
+// keccak256('security.token.standard.erc20.2.storage');
+bytes32 constant _ERC20_2_STORAGE_POSITION = 0xd9e01023f6efb8d6fd07b486ce7d576973b42ff2c201a7ad9b018c2103b5d0c6;
+
+// keccak256('security.token.standard.snapshot.2.storage');
+bytes32 constant _SNAPSHOT_2_STORAGE_POSITION = 0x7fa31c0dfd7893e990d22efcc9d48c475631ab02fa1ab34086c54e7f6d9d9b10;

@@ -243,22 +243,6 @@ contract ScheduledSnapshots is
         _onScheduledSnapshotTriggered(newSnapShotID, _data);
     }
 
-    function triggerPendingScheduledSnapshots()
-        external
-        virtual
-        override
-        onlyUnpaused
-        returns (uint256)
-    {
-        return _triggerScheduledSnapshots(0);
-    }
-
-    function triggerScheduledSnapshots(
-        uint256 _max
-    ) external virtual override onlyUnpaused returns (uint256) {
-        return _triggerScheduledSnapshots(_max);
-    }
-
     function scheduledSnapshotCount()
         external
         view
@@ -300,13 +284,7 @@ contract ScheduledSnapshots is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerPendingScheduledSnapshots
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerScheduledSnapshots
-            .selector;
+        staticFunctionSelectors_ = new bytes4[](3);
         staticFunctionSelectors_[selectorIndex++] = this
             .scheduledSnapshotCount
             .selector;

@@ -227,18 +227,19 @@ export interface DeployedBusinessLogics {
     controlList: IStaticFunctionSelectors
     corporateActionsSecurity: IStaticFunctionSelectors
     pause: IStaticFunctionSelectors
-    eRC20: IStaticFunctionSelectors
-    eRC1644: IStaticFunctionSelectors
+    eRC20_2: IStaticFunctionSelectors
+    eRC1644_2: IStaticFunctionSelectors
     eRC1410ScheduledTasks: IStaticFunctionSelectors
-    eRC1594: IStaticFunctionSelectors
+    eRC1594_2: IStaticFunctionSelectors
     eRC1643: IStaticFunctionSelectors
     equityUSA: IStaticFunctionSelectors
     bondUSA: IStaticFunctionSelectors
-    snapshots: IStaticFunctionSelectors
+    snapshots_2: IStaticFunctionSelectors
     scheduledSnapshots: IStaticFunctionSelectors
     scheduledBalanceAdjustments: IStaticFunctionSelectors
-    cap: IStaticFunctionSelectors
-    lock: IStaticFunctionSelectors
+    scheduledTasks: IStaticFunctionSelectors
+    cap_2: IStaticFunctionSelectors
+    lock_2: IStaticFunctionSelectors
     transferAndLock: IStaticFunctionSelectors
     adjustBalances: IStaticFunctionSelectors
 }

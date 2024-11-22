@@ -211,6 +211,7 @@ import {
     type Pause,
     type ScheduledSnapshots,
     type AccessControl,
+    ScheduledTasks,
 } from '../../../../../typechain-types'
 import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
 import {
@@ -239,6 +240,7 @@ describe('Scheduled Snapshots Tests', () => {
 
     let equityFacet: Equity
     let scheduledSnapshotsFacet: ScheduledSnapshots
+    let scheduledTasksFacet: ScheduledTasks
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
@@ -296,25 +298,12 @@ describe('Scheduled Snapshots Tests', () => {
             'ScheduledSnapshots',
             diamond.address
         )
+        scheduledTasksFacet = await ethers.getContractAt(
+            'ScheduledTasks',
+            diamond.address
+        )
 
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-    })
-
-    it('GIVEN a paused Token WHEN triggerSnapshots THEN transaction fails with TokenIsPaused', async () => {
-        // Pausing the token
-        pauseFacet = pauseFacet.connect(signer_B)
-        await pauseFacet.pause()
-
-        // Using account C (with role)
-        scheduledSnapshotsFacet = scheduledSnapshotsFacet.connect(signer_C)
-
-        // trigger scheduled snapshots
-        await expect(
-            scheduledSnapshotsFacet.triggerPendingScheduledSnapshots()
-        ).to.be.rejectedWith('TokenIsPaused')
-        await expect(
-            scheduledSnapshotsFacet.triggerScheduledSnapshots(1)
-        ).to.be.rejectedWith('TokenIsPaused')
     })
 
     it('GIVEN a token WHEN triggerSnapshots THEN transaction succeeds', async () => {
@@ -386,8 +375,10 @@ describe('Scheduled Snapshots Tests', () => {
         expect(scheduledSnapshots[2].data).to.equal(dividend_1_Id)
 
         // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
+        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
+
         await new Promise((f) => setTimeout(f, TIME + 1000))
-        await expect(scheduledSnapshotsFacet.triggerPendingScheduledSnapshots())
+        await expect(scheduledTasksFacet.triggerPendingScheduledTasks())
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
             .withArgs(account_A, 1)
 
@@ -409,7 +400,7 @@ describe('Scheduled Snapshots Tests', () => {
 
         // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
         await new Promise((f) => setTimeout(f, TIME + 1000))
-        await expect(scheduledSnapshotsFacet.triggerScheduledSnapshots(100))
+        await expect(scheduledTasksFacet.triggerScheduledTasks(100))
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
             .withArgs(account_A, 2)
 
@@ -427,7 +418,7 @@ describe('Scheduled Snapshots Tests', () => {
 
         // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
         await new Promise((f) => setTimeout(f, TIME + 1000))
-        await expect(scheduledSnapshotsFacet.triggerScheduledSnapshots(0))
+        await expect(scheduledTasksFacet.triggerScheduledTasks(0))
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
             .withArgs(account_A, 3)
 

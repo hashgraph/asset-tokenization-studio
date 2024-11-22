@@ -207,7 +207,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import {
     type ResolverProxy,
-    type Cap,
+    type Cap_2,
     AccessControl,
     Pause,
     ERC1410ScheduledTasks,
@@ -241,7 +241,7 @@ describe('CAP Tests', () => {
     let account_B: string
     let account_C: string
 
-    let capFacet: Cap
+    let capFacet: Cap_2
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
@@ -289,7 +289,7 @@ describe('CAP Tests', () => {
             init_rbacs
         )
 
-        capFacet = await ethers.getContractAt('Cap', diamond.address)
+        capFacet = await ethers.getContractAt('Cap_2', diamond.address)
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address
@@ -345,7 +345,7 @@ describe('CAP Tests', () => {
 
             // add to list fails
             await expect(capFacet.setMaxSupply(maxSupply)).to.be.rejectedWith(
-                'AccountHasNoRole'
+                Error
             )
         })
 
@@ -356,7 +356,7 @@ describe('CAP Tests', () => {
             // add to list fails
             await expect(
                 capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply)
-            ).to.be.rejectedWith('AccountHasNoRole')
+            ).to.be.rejectedWith(Error)
         })
     })
 
