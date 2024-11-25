@@ -218,8 +218,8 @@ import {
 import {IFactory} from '../../../interfaces/factory/IFactory.sol';
 
 abstract contract ERC20StorageWrapper is
-    ERC1410StandardStorageWrapper,
-    IERC20StorageWrapper
+    IERC20StorageWrapper,
+    ERC1410StandardStorageWrapper
 {
     struct ERC20Storage {
         string name;
@@ -269,6 +269,7 @@ abstract contract ERC20StorageWrapper is
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
+        _beforeAllowanceUpdate(_msgSender(), spender, addedValue, true);
 
         _getErc20Storage().allowed[_msgSender()][spender] += addedValue;
         emit Approval(
@@ -387,8 +388,17 @@ abstract contract ERC20StorageWrapper is
         if (value > erc20Storage.allowed[from][spender]) {
             revert InsufficientAllowance(spender, from);
         }
+        _beforeAllowanceUpdate(_msgSender(), spender, value, false);
+
         erc20Storage.allowed[from][spender] -= value;
     }
+
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
+        uint256 _amount,
+        bool _isIncrease
+    ) internal virtual {}
 
     function _emitTransferEvent(
         address from,
@@ -397,6 +407,10 @@ abstract contract ERC20StorageWrapper is
     ) private returns (bool) {
         emit Transfer(from, to, value);
         return true;
+    }
+
+    function _decimals() internal view virtual returns (uint8) {
+        return _getERC20Metadata().info.decimals;
     }
 
     function _getERC20Metadata()

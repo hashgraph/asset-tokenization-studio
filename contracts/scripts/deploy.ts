@@ -209,24 +209,27 @@ import {
     AccessControl__factory,
     BondUSA__factory,
     BusinessLogicResolver__factory,
-    Cap__factory,
     ControlList__factory,
     CorporateActionsSecurity__factory,
     DiamondFacet__factory,
     EquityUSA__factory,
-    ERC1410ScheduledSnapshot__factory,
-    ERC1594__factory,
+    ERC1410ScheduledTasks__factory,
     ERC1643__factory,
-    ERC1644__factory,
-    ERC20__factory,
+    ERC1644_2__factory,
     Factory__factory,
-    Lock__factory,
     Pause__factory,
     ProxyAdmin__factory,
     ScheduledSnapshots__factory,
-    Snapshots__factory,
+    ScheduledBalanceAdjustments__factory,
+    Snapshots_2__factory,
     TransferAndLock__factory,
     TransparentUpgradeableProxy__factory,
+    Lock_2__factory,
+    ERC1594_2__factory,
+    ERC20_2__factory,
+    ScheduledTasks__factory,
+    Cap_2__factory,
+    AdjustBalances__factory,
 } from '../typechain-types'
 import {
     getEnvVar,
@@ -246,6 +249,7 @@ import {
     createConfiguration,
     registerBusinessLogics,
 } from './contractsMethods'
+//import { adjustBalances } from '../typechain-types/contracts/layer_2/index.js'
 
 const used_already_deployed = false
 const resolver_proxy_contract: ContractId = ContractId.fromString('0.0.4916112')
@@ -422,12 +426,28 @@ export async function deployAtsFullInfrastructure({
                 ids: { contract: ExistingContractIds.scheduledSnapshots },
             },
             {
+                name: 'scheduledbalanceadjustments',
+                ids: {
+                    contract: ExistingContractIds.scheduledBalanceAdjustments,
+                },
+            },
+            {
+                name: 'scheduledtasks',
+                ids: {
+                    contract: ExistingContractIds.scheduledTasks,
+                },
+            },
+            {
                 name: 'corporateactionssecurity',
                 ids: { contract: ExistingContractIds.corporateActionsSecurity },
             },
             {
                 name: 'transferandlock',
                 ids: { contract: ExistingContractIds.transferAndLock },
+            },
+            {
+                name: 'adjustbalances',
+                ids: { contract: ExistingContractIds.adjustBalances },
             },
         ]
 
@@ -470,8 +490,11 @@ export async function deployAtsFullInfrastructure({
         equity,
         bond,
         scheduledsnapshots: scheduledSnapshots,
+        scheduledbalanceadjustments: scheduledBalanceAdjustments,
+        scheduledtasks: scheduledTasks,
         corporateactionssecurity: corporateActionsSecurity,
         transferandlock: transferAndLock,
+        adjustbalances: adjustBalances,
     } = deployedContracts
 
     const businessLogicRegistries: BusinessLogicRegistryData[] = []
@@ -490,9 +513,12 @@ export async function deployAtsFullInfrastructure({
         equity,
         bond,
         scheduledSnapshots,
+        scheduledBalanceAdjustments,
+        scheduledTasks,
         corporateActionsSecurity,
         lock,
         transferAndLock,
+        adjustBalances,
     ]) {
         const businessLogicKey = await getStaticResolverKey(
             contract.contractId,
@@ -530,9 +556,12 @@ export async function deployAtsFullInfrastructure({
                 erc1643,
                 snapshots,
                 scheduledSnapshots,
+                scheduledBalanceAdjustments,
+                scheduledTasks,
                 corporateActionsSecurity,
                 lock,
                 transferAndLock,
+                adjustBalances,
             ].map(({ contract }) =>
                 getStaticResolverKey(contract.contractId, clientOperator)
             )
@@ -605,9 +634,12 @@ export async function deployAtsFullInfrastructure({
         equity,
         bond,
         scheduledSnapshots,
+        scheduledBalanceAdjustments,
+        scheduledTasks,
         corporateActionsSecurity,
         lock,
         transferAndLock,
+        adjustBalances,
         factory,
     }
 }
@@ -639,22 +671,29 @@ export async function deployContract({
             deployProxy: true,
         },
         accesscontrol: { factory: AccessControl__factory },
-        cap: { factory: Cap__factory },
+        cap: { factory: Cap_2__factory },
         controllist: { factory: ControlList__factory },
         pause: { factory: Pause__factory },
-        erc20: { factory: ERC20__factory },
-        erc1410: { factory: ERC1410ScheduledSnapshot__factory },
-        erc1594: { factory: ERC1594__factory },
+        erc20: { factory: ERC20_2__factory },
+        erc1410: { factory: ERC1410ScheduledTasks__factory },
+        erc1594: { factory: ERC1594_2__factory },
         erc1643: { factory: ERC1643__factory },
-        erc1644: { factory: ERC1644__factory },
+        erc1644: { factory: ERC1644_2__factory },
         facet: { factory: DiamondFacet__factory },
         equity: { factory: EquityUSA__factory },
         bond: { factory: BondUSA__factory },
         scheduledsnapshots: { factory: ScheduledSnapshots__factory },
-        snapshots: { factory: Snapshots__factory },
+        scheduledbalanceadjustments: {
+            factory: ScheduledBalanceAdjustments__factory,
+        },
+        scheduledtasks: {
+            factory: ScheduledTasks__factory,
+        },
+        snapshots: { factory: Snapshots_2__factory },
         corporateactions: { factory: CorporateActionsSecurity__factory },
         transferandlock: { factory: TransferAndLock__factory },
-        lock: { factory: Lock__factory },
+        lock: { factory: Lock_2__factory },
+        adjustbalances: { factory: AdjustBalances__factory },
     }
 
     const contractKey = Object.keys(contractMap).find((contractType) =>

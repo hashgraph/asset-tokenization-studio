@@ -220,8 +220,10 @@ import {
     _SUCCESS
 } from '../../constants/values.sol';
 import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
+import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
 
 abstract contract ERC1410StandardStorageWrapper is
+    CapStorageWrapper,
     ERC1410OperatorStorageWrapper
 {
     function _issueByPartition(
@@ -240,12 +242,7 @@ abstract contract ERC1410StandardStorageWrapper is
             _partition
         ];
         if (index == 0) {
-            erc1410Storage.partitions[_tokenHolder].push(
-                Partition(_value, _partition)
-            );
-            erc1410Storage.partitionToIndex[_tokenHolder][
-                _partition
-            ] = erc1410Storage.partitions[_tokenHolder].length;
+            _addPartitionTo(_value, _tokenHolder, _partition);
         } else {
             erc1410Storage.partitions[_tokenHolder][index - 1].amount += _value;
         }
@@ -276,7 +273,7 @@ abstract contract ERC1410StandardStorageWrapper is
             revert InvalidPartition(_from, _partition);
         }
 
-        uint256 balance = _getBalanceForByPartition(_partition, _from);
+        uint256 balance = _balanceOfByPartition(_partition, _from);
 
         if (balance < _value) {
             revert InsufficientBalance(_from, balance, _value, _partition);
@@ -358,7 +355,7 @@ abstract contract ERC1410StandardStorageWrapper is
             return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
         }
 
-        uint256 balance = _getBalanceForByPartition(_partition, _from);
+        uint256 balance = _balanceOfByPartition(_partition, _from);
 
         if (balance < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
