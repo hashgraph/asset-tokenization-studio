@@ -209,6 +209,7 @@ import roleManagement from "./roleManagement";
 import management from "./management";
 import allowedList from "./allowedList";
 import votingRights from "./votingRight";
+import balanceAdjustment from "./balanceAdjustment";
 
 export default {
   header: {
@@ -220,6 +221,7 @@ export default {
     blockedList: "Blocked list",
     details: "Details",
     dividends: "Dividends",
+    balanceAdjustment: "Balance Adjustment",
     coupons: "Coupons",
     votingRights: "Voting rights",
     roleManagement: "Role management",
@@ -239,6 +241,7 @@ export default {
     },
   },
   dividends,
+  balanceAdjustment,
   coupons,
   balance: {
     search: {
@@ -260,6 +263,7 @@ export default {
   votingRights,
   benefits: {
     dividends: "Dividends",
+    balanceAdjustments: "Balance Adjustments",
     coupons: "Coupons",
     id: "Id",
     recordDate: "Record date",
@@ -267,6 +271,8 @@ export default {
     dividendAmount: "Dividend amount",
     couponRate: "Rate",
     snapshot: "Snapshot Id",
+    factor: "Factor",
+    decimals: "Decimals",
   },
   bond: {
     updateMaturityDate: {

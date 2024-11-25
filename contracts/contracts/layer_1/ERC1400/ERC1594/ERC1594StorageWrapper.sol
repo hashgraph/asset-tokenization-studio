@@ -337,7 +337,7 @@ abstract contract ERC1594StorageWrapper is
         if (!_checkControlList(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (_getERC1410BasicStorage().balances[_msgSender()] < _value) {
+        if (_balanceOf(_msgSender()) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
 
@@ -380,10 +380,10 @@ abstract contract ERC1594StorageWrapper is
         if (!_checkControlList(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (_getErc20Storage().allowed[_from][_msgSender()] < _value) {
+        if (_allowance(_from, _msgSender()) < _value) {
             return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
         }
-        if (_getERC1410BasicStorage().balances[_from] < _value) {
+        if (_balanceOf(_from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
 
