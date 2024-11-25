@@ -219,14 +219,16 @@ import { useForm } from "react-hook-form";
 import { required, min } from "../../../../utils/rules";
 import { useParams } from "react-router-dom";
 import { useBalanceAdjustment } from "../../../../hooks/queries/useBalanceAdjustment";
-import { dateToUnixTimestamp } from "../../../../utils/format";
-import { useState } from "react";
+import {
+  calculateFactorDecimals,
+  dateToUnixTimestamp,
+} from "../../../../utils/format";
 import { SetScheduledBalanceAdjustmentRequest } from "@hashgraph/asset-tokenization-sdk";
+import { addDays } from "date-fns";
 
 interface ProgramBalanceAdjustmentFormValues {
   executionDate: string;
   factor: string;
-  decimals: string;
 }
 
 export const ProgramBalanceAdjustment = () => {
@@ -240,9 +242,7 @@ export const ProgramBalanceAdjustment = () => {
   });
   const { t: tGlobal } = useTranslation("globals");
 
-  const [isLoading, setIsLoading] = useState(false);
-
-  const { mutate: createBalanceAdjustment } = useBalanceAdjustment();
+  const { mutate: createBalanceAdjustment, isLoading } = useBalanceAdjustment();
 
   const { control, formState, handleSubmit, reset } =
     useForm<ProgramBalanceAdjustmentFormValues>({
@@ -250,13 +250,13 @@ export const ProgramBalanceAdjustment = () => {
     });
 
   const onSubmit = (data: ProgramBalanceAdjustmentFormValues) => {
-    setIsLoading(true);
+    const { factor, decimals } = calculateFactorDecimals(Number(data.factor));
 
     const request = new SetScheduledBalanceAdjustmentRequest({
       securityId: securityId ?? "",
       executionDate: dateToUnixTimestamp(data.executionDate),
-      factor: data.factor.toString(),
-      decimals: data.decimals.toString(),
+      factor: factor.toString(),
+      decimals: decimals.toString(),
     });
 
     createBalanceAdjustment(request, {
@@ -264,8 +264,6 @@ export const ProgramBalanceAdjustment = () => {
         reset();
       },
     });
-
-    setIsLoading(false);
   };
 
   return (
@@ -294,7 +292,7 @@ export const ProgramBalanceAdjustment = () => {
               control={control}
               id="executionDate"
               rules={{ required }}
-              fromDate={new Date()}
+              fromDate={addDays(new Date(), 1)}
               placeholder={tForm("executionDate.placeholder")}
               withTimeInput
             />
@@ -311,20 +309,6 @@ export const ProgramBalanceAdjustment = () => {
               id="factor"
               rules={{ required, min: min(0) }}
               placeholder={tForm("factor.placeholder")}
-            />
-          </Stack>
-          <Stack w="full">
-            <HStack justifySelf="flex-start">
-              <Text textStyle="BodyTextRegularSM">
-                {tForm("decimals.label")}*
-              </Text>
-            </HStack>
-            <InputNumberController
-              autoFocus
-              control={control}
-              id="decimals"
-              rules={{ required, min: min(0) }}
-              placeholder={tForm("decimals.placeholder")}
             />
           </Stack>
           <Button

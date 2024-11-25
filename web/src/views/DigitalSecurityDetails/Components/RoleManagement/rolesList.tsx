@@ -242,4 +242,8 @@ export const rolesList = [
     label: "bondManager",
     value: SecurityRole._BOND_MANAGER_ROLE,
   },
+  {
+    label: "adjustmentBalance",
+    value: SecurityRole._ADJUSTMENT_BALANCE_ROLE,
+  },
 ];
