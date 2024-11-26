@@ -335,4 +335,13 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         staticInterfaceIds_[selectorsIndex++] = type(IERC20).interfaceId;
         staticInterfaceIds_[selectorsIndex++] = type(IERC20_2).interfaceId;
     }
+
+    function getERC20Metadata()
+        external
+        view
+        override
+        returns (ERC20Metadata memory)
+    {
+        return _getERC20MetadataAdjusted();
+    }
 }
