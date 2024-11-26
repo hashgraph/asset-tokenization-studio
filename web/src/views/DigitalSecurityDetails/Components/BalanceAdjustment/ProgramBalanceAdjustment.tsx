@@ -292,11 +292,12 @@ export const ProgramBalanceAdjustment = () => {
               id="executionDate"
               rules={{
                 required,
-                validate: isAfterDate(new Date(), "dd-MM-yyyy HH:mm"),
+                validate: isAfterDate(new Date(), "dd-MM-yyyy HH:mm:ss"),
               }}
               fromDate={new Date()}
               placeholder={tForm("executionDate.placeholder")}
               withTimeInput
+              format="dd:MM:yyyy HH:mm:ss"
             />
           </Stack>
           <Stack w="full">
