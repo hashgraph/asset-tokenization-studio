@@ -211,6 +211,7 @@ export interface SecurityStore {
   name: string;
   symbol: string;
   isin: string;
+  evmAddress: string;
   securityType?: string;
   address: string;
   type?: string;

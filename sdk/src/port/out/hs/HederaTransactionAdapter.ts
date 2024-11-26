@@ -217,17 +217,17 @@ import {
 import {
   AccessControl__factory,
   BondUSA__factory,
-  Cap__factory,
+  Cap_2__factory,
   ControlList__factory,
   DiamondFacet__factory,
   EquityUSA__factory,
-  ERC1410ScheduledSnapshot__factory,
+  ERC1410ScheduledTasks__factory,
   ERC1410Snapshot__factory,
   ERC1643__factory,
   Factory__factory,
-  Lock__factory,
-  ScheduledSnapshots__factory,
-  Snapshots__factory,
+  Lock_2__factory,
+  ScheduledTasks__factory,
+  Snapshots_2__factory,
   TransferAndLock__factory,
   Bond__factory,
 } from '@hashgraph/asset-tokenization-contracts';
@@ -265,6 +265,7 @@ import {
   UPDATE_CONFIG_VERSION_GAS,
   UPDATE_RESOLVER_GAS,
   UPDATE_MATURITY_DATE_GAS,
+  SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -413,7 +414,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         informationRight: equityInfo.informationRight,
         liquidationRight: equityInfo.liquidationRight,
         subscriptionRight: equityInfo.subscriptionRight,
-        convertionRight: equityInfo.convertionRight,
+        conversionRight: equityInfo.conversionRight,
         redemptionRight: equityInfo.redemptionRight,
         putRight: equityInfo.putRight,
         dividendRight: CastDividendType.toNumber(equityInfo.dividendRight),
@@ -592,7 +593,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
@@ -656,7 +657,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Redeeming ${amount} securities from account ${security.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
@@ -830,7 +831,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Issue ${amount} ${security} to account: ${targetId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
@@ -916,7 +917,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Force transfer ${amount} tokens from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
@@ -952,7 +953,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Force redeem ${amount} tokens from account ${sourceId.toString()}`,
     );
 
-    const factoryInstance = new ERC1410ScheduledSnapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
@@ -1078,7 +1079,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'takeSnapshot';
     LogService.logTrace(`Take snapshot of: ${security.toString()}`);
 
-    const factoryInstance = new Snapshots__factory().attach(
+    const factoryInstance = new Snapshots_2__factory().attach(
       security.toString(),
     );
 
@@ -1334,7 +1335,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Setting max supply ${maxSupply} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new Cap__factory().attach(security.toString());
+    const factoryInstance = new Cap_2__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -1357,12 +1358,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'triggerPendingScheduledSnapshots';
+    const FUNCTION_NAME = 'triggerPendingScheduledTasks';
     LogService.logTrace(
       `Triggering pending scheduled snapshots for ${security.toString()}`,
     );
 
-    const factoryInstance = new ScheduledSnapshots__factory().attach(
+    const factoryInstance = new ScheduledTasks__factory().attach(
       security.toString(),
     );
 
@@ -1386,12 +1387,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     max: BigDecimal,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
-    const FUNCTION_NAME = 'triggerScheduledSnapshots';
+    const FUNCTION_NAME = 'triggerScheduledTasks';
     LogService.logTrace(
       `Triggering up to ${max.toString()} pending scheduled snapshots for ${security.toString()}`,
     );
 
-    const factoryInstance = new ScheduledSnapshots__factory().attach(
+    const factoryInstance = new ScheduledTasks__factory().attach(
       security.toString(),
     );
 
@@ -1424,7 +1425,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Locking ${amount} tokens from account ${sourceId.toString()} until ${expirationDate}`,
     );
 
-    const factoryInstance = new Lock__factory().attach(security.toString());
+    const factoryInstance = new Lock_2__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -1459,7 +1460,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Releasing lock ${lockId} from account ${sourceId.toString()}`,
     );
 
-    const factoryInstance = new Lock__factory().attach(security.toString());
+    const factoryInstance = new Lock_2__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -1591,6 +1592,41 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(UPDATE_MATURITY_DATE_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async setScheduledBalanceAdjustment(
+    security: EvmAddress,
+    executionDate: BigDecimal,
+    factor: BigDecimal,
+    decimals: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'setScheduledBalanceAdjustment';
+    LogService.logTrace(
+      `equity: ${security} ,
+      executionDate :${executionDate} , 
+      factor: ${factor},
+      decimals : ${decimals}  `,
+    );
+
+    const scheduleBalanceAdjustment = {
+      executionDate: executionDate.toHexString(),
+      factor: factor.toHexString(),
+      decimals: decimals.toHexString(),
+    };
+
+    const functionDataEncodedHex = new Interface(
+      EquityUSA__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [scheduleBalanceAdjustment]);
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

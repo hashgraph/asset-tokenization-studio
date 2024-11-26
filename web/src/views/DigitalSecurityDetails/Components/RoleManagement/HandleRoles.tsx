@@ -211,8 +211,9 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { ApplyRolesRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
 import { useApplyRoles } from "../../../../hooks/queries/useApplyRoles";
-import { rolesList } from "./rolesList";
+import { rolesList, TSecurityType } from "./rolesList";
 import { SecurityRole } from "../../../../utils/SecurityRole";
+import { useSecurityStore } from "../../../../store/securityStore";
 
 interface EditRolesFormValues {
   roles: string[];
@@ -235,6 +236,8 @@ export const HandleRoles = ({
   const { t } = useTranslation("security", {
     keyPrefix: "details.roleManagement.edit",
   });
+  const { details: securityDetails } = useSecurityStore();
+
   const { id = "" } = useParams();
 
   const { mutate: applyRoles, isLoading: isLoadingApply } = useApplyRoles();
@@ -280,10 +283,18 @@ export const HandleRoles = ({
         control={controlRoles}
         flexDirection={"column"}
         id="roles"
-        options={rolesList.map((role) => ({
-          value: role.label,
-          label: tRoles(role.label),
-        }))}
+        options={rolesList
+          .filter((role) => {
+            if (!securityDetails) return role;
+
+            return role.allowedSecurities.includes(
+              securityDetails.type as TSecurityType,
+            );
+          })
+          .map((role) => ({
+            value: role.label,
+            label: tRoles(role.label),
+          }))}
         rules={{ required }}
         variant="roles"
         gap={4}

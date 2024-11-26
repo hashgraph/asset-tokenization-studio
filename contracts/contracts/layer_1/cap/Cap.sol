@@ -215,7 +215,12 @@ import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {Common} from '../common/Common.sol';
 import {CapStorageWrapper} from './CapStorageWrapper.sol';
 
-contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
+abstract contract Cap is
+    ICap,
+    IStaticFunctionSelectors,
+    CapStorageWrapper,
+    Common
+{
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(
         uint256 maxSupply
@@ -263,22 +268,6 @@ contract Cap is ICap, IStaticFunctionSelectors, Common, CapStorageWrapper {
     {
         _setMaxSupplyByPartition(_partition, _maxSupply);
         success_ = true;
-    }
-
-    function getMaxSupply()
-        external
-        view
-        virtual
-        override
-        returns (uint256 maxSupply_)
-    {
-        return _getMaxSupply();
-    }
-
-    function getMaxSupplyByPartition(
-        bytes32 _partition
-    ) external view virtual override returns (uint256 maxSupply_) {
-        return _getMaxSupplyByPartition(_partition);
     }
 
     function getStaticResolverKey()

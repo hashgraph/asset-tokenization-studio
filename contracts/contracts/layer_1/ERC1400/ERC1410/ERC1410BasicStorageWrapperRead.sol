@@ -270,7 +270,7 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
             revert InvalidPartition(_from, _partition);
         }
 
-        uint256 balance = _getBalanceForByPartition(_partition, _from);
+        uint256 balance = _balanceOfByPartition(_partition, _from);
 
         if (balance < _value) {
             revert InsufficientBalance(_from, balance, _value, _partition);
@@ -400,15 +400,5 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
         if (account == address(0)) {
             revert ZeroAddressNotAllowed();
         }
-    }
-
-    function _getBalanceForByPartition(
-        bytes32 _partition,
-        address _from
-    ) internal view virtual returns (uint256) {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-
-        uint256 index = erc1410Storage.partitionToIndex[_from][_partition] - 1;
-        return erc1410Storage.partitions[_from][index].amount;
     }
 }

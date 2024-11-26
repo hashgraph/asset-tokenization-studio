@@ -212,7 +212,10 @@ import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     COUPON_CORPORATE_ACTION_TYPE,
-    SNAPSHOT_RESULT_ID
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+    SNAPSHOT_RESULT_ID,
+    SNAPSHOT_TASK_TYPE,
+    BALANCE_ADJUSTMENT_TASK_TYPE
 } from '../constants/values.sol';
 import {
     IEquityStorageWrapper
@@ -224,15 +227,15 @@ import {
 import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {IBond} from '../interfaces/bond/IBond.sol';
 import {
-    ScheduledSnapshotsStorageWrapper
-} from '../scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
+    AdjustBalancesStorageWrapper
+} from '../adjustBalances/AdjustBalancesStorageWrapper.sol';
 
 abstract contract CorporateActionsStorageWrapperSecurity is
     ICorporateActionsStorageWrapperSecurity,
     IEquityStorageWrapper,
     IBondStorageWrapper,
     CorporateActionsStorageWrapper,
-    ScheduledSnapshotsStorageWrapper
+    AdjustBalancesStorageWrapper
 {
     modifier checkDates(uint256 firstDate, uint256 secondDate) {
         if (secondDate < firstDate) {
@@ -263,6 +266,8 @@ abstract contract CorporateActionsStorageWrapperSecurity is
             _initVotingRights(success_, corporateActionId_, _data);
         } else if (_actionType == COUPON_CORPORATE_ACTION_TYPE) {
             _initCoupon(success_, corporateActionId_, _data);
+        } else if (_actionType == BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE) {
+            _initBalanceAdjustment(success_, corporateActionId_, _data);
         }
     }
 
@@ -280,6 +285,10 @@ abstract contract CorporateActionsStorageWrapperSecurity is
             (IEquity.Dividend)
         );
 
+        _addScheduledTask(
+            newDividend.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
         _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));
     }
 
@@ -294,6 +303,7 @@ abstract contract CorporateActionsStorageWrapperSecurity is
 
         IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
 
+        _addScheduledTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
         _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));
     }
 
@@ -308,32 +318,91 @@ abstract contract CorporateActionsStorageWrapperSecurity is
 
         IBond.Coupon memory newCoupon = abi.decode(_data, (IBond.Coupon));
 
+        _addScheduledTask(newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
         _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
     }
 
+    function _initBalanceAdjustment(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        if (!_success) {
+            revert BalanceAdjustmentCreationFailed();
+        }
+
+        IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
+            .decode(_data, (IEquity.ScheduledBalanceAdjustment));
+
+        _addScheduledTask(
+            newBalanceAdjustment.executionDate,
+            abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
+        );
+        _addScheduledBalanceAdjustment(
+            newBalanceAdjustment.executionDate,
+            abi.encode(_actionId)
+        );
+    }
+
+    function _onScheduledTaskTriggered(bytes memory _data) internal virtual {
+        // TODO
+        if (_data.length > 0) {
+            bytes32 taskType = abi.decode(_data, (bytes32));
+            if (taskType == SNAPSHOT_TASK_TYPE) {
+                _triggerScheduledSnapshots(1);
+            } else if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
+                _triggerScheduledBalanceAdjustments(1);
+            }
+        }
+    }
+
     function _onScheduledSnapshotTriggered(
-        uint256 snapShotID,
-        bytes memory data
-    ) internal virtual override {
-        if (data.length > 0) {
-            bytes32 actionId = abi.decode(data, (bytes32));
-            _addSnapshotToAction(actionId, snapShotID);
+        uint256 _snapShotID,
+        bytes memory _data
+    ) internal virtual {
+        if (_data.length > 0) {
+            bytes32 actionId = abi.decode(_data, (bytes32));
+            _addSnapshotToAction(actionId, _snapShotID);
+        }
+    }
+
+    function _onScheduledBalanceAdjustmentTriggered(
+        bytes memory _data
+    ) internal virtual {
+        if (_data.length > 0) {
+            bytes32 actionId = abi.decode(_data, (bytes32));
+            (, bytes memory balanceAdjustmentData) = _getCorporateAction(
+                actionId
+            );
+
+            if (balanceAdjustmentData.length > 0) {
+                IEquity.ScheduledBalanceAdjustment
+                    memory balanceAdjustment = abi.decode(
+                        balanceAdjustmentData,
+                        (IEquity.ScheduledBalanceAdjustment)
+                    );
+
+                _adjustBalances(
+                    balanceAdjustment.factor,
+                    balanceAdjustment.decimals
+                );
+            }
         }
     }
 
     function _addSnapshotToAction(
-        bytes32 actionId,
-        uint256 snapshotId
+        bytes32 _actionId,
+        uint256 _snapshotId
     ) internal virtual {
-        bytes memory result = abi.encodePacked(snapshotId);
+        bytes memory result = abi.encodePacked(_snapshotId);
 
-        _updateCorporateActionResult(actionId, SNAPSHOT_RESULT_ID, result);
+        _updateCorporateActionResult(_actionId, SNAPSHOT_RESULT_ID, result);
     }
 
     function _getSnapshotID(
-        bytes32 actionId
+        bytes32 _actionId
     ) internal view virtual returns (uint256) {
-        bytes memory data = _getResult(actionId, SNAPSHOT_RESULT_ID);
+        bytes memory data = _getResult(_actionId, SNAPSHOT_RESULT_ID);
 
         uint256 bytesLength = data.length;
 

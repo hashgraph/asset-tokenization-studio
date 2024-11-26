@@ -203,8 +203,8 @@
 
 */
 
-import { Box, Center, HStack, VStack } from "@chakra-ui/react";
-import { Text, DefinitionList } from "io-bricks-ui";
+import { Box, Center, Flex, HStack, VStack } from "@chakra-ui/react";
+import { Text, DefinitionList, Spinner } from "io-bricks-ui";
 import { Panel } from "../../../components/Panel";
 import { useTranslation } from "react-i18next";
 import { ActionsButtons } from "./ActionsButtons";
@@ -214,6 +214,7 @@ import {
   GetAccountBalanceRequest,
   GetAllCouponsRequest,
   GetAllDividendsRequest,
+  GetAllScheduledBalanceAdjustmentsRequest,
   SecurityViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
 import { formatNumberLocale, toNumber } from "../../../utils/format";
@@ -230,6 +231,7 @@ import { SecurityDetailsExtended } from "./SecurityDetailsExtended";
 import { useGetAllCoupons } from "../../../hooks/queries/useCoupons";
 import { CountriesList } from "../../CreateSecurityCommons/CountriesList";
 import _capitalize from "lodash/capitalize";
+import { useGetAllBalanceAdjustments } from "../../../hooks/queries/useBalanceAdjustment";
 
 interface DetailsProps {
   id?: string;
@@ -242,6 +244,7 @@ export const Details = ({
   id = "",
   equityDetailsResponse,
   bondDetailsResponse,
+  detailsResponse,
 }: DetailsProps) => {
   const { t: tProperties } = useTranslation("properties");
   const { t: tPermissions } = useTranslation("properties", {
@@ -268,20 +271,37 @@ export const Details = ({
   const dividendsRequest = new GetAllDividendsRequest({
     securityId: id,
   });
-  const { data: dividends } = useGetAllDividends(dividendsRequest);
+  const {
+    data: dividends,
+    isLoading: isLoadingDividends,
+    isFetching: isFetchingDividends,
+  } = useGetAllDividends(dividendsRequest);
+
+  // BALANCE ADJUSTMENTS
+  const scheduledBalanceAdjustmentsRequest =
+    new GetAllScheduledBalanceAdjustmentsRequest({
+      securityId: id,
+    });
+  const { data: balanceAdjustments } = useGetAllBalanceAdjustments(
+    scheduledBalanceAdjustmentsRequest,
+  );
 
   // COUPONS
   const couponsRequest = new GetAllCouponsRequest({
     securityId: id,
   });
-  const { data: coupons } = useGetAllCoupons(couponsRequest);
+  const {
+    data: coupons,
+    isLoading: isLoadingCoupons,
+    isFetching: isFetchingCoupons,
+  } = useGetAllCoupons(couponsRequest);
 
   const rightsAndPrivileges = {
     votingRights: equityDetailsResponse.votingRight,
     informationRights: equityDetailsResponse.informationRight,
     liquidationRights: equityDetailsResponse.liquidationRight,
     subscriptionRights: equityDetailsResponse.subscriptionRight,
-    conversionRights: equityDetailsResponse.convertionRight,
+    conversionRights: equityDetailsResponse.conversionRight,
     redemptionRights: equityDetailsResponse.redemptionRight,
     putRights: equityDetailsResponse.putRight,
   };
@@ -414,6 +434,14 @@ export const Details = ({
             nominalValue={nominalValue}
             bondDetailsResponse={bondDetailsResponse}
           />
+          {(isLoadingDividends || isFetchingDividends) &&
+            !dividends &&
+            detailsResponse.type === "EQUITY" && (
+              <Flex gap={4} alignItems={"center"}>
+                <Spinner />
+                <Text>Checking for dividends...</Text>
+              </Flex>
+            )}
           {dividends?.map((dividend) => (
             <DefinitionList
               key={dividend.dividendId}
@@ -453,6 +481,14 @@ export const Details = ({
               layerStyle="container"
             />
           ))}
+          {(isLoadingCoupons || isFetchingCoupons) &&
+            !coupons &&
+            detailsResponse.type === "BOND" && (
+              <Flex gap={4} alignItems={"center"}>
+                <Spinner />
+                <Text>Checking for coupons...</Text>
+              </Flex>
+            )}
           {coupons?.map((coupon) => (
             <DefinitionList
               key={coupon.couponId}
@@ -550,6 +586,31 @@ export const Details = ({
             title={tRegulations("label")}
             layerStyle="container"
           />
+
+          {balanceAdjustments?.map((balanceAdjustment) => (
+            <DefinitionList
+              key={balanceAdjustment.id}
+              items={[
+                {
+                  title: tBenefits("executionDate"),
+                  description:
+                    new Date(
+                      balanceAdjustment.executionDate.getTime(),
+                    ).toLocaleDateString() ?? "",
+                },
+                {
+                  title: tBenefits("factor"),
+                  description: balanceAdjustment.factor ?? "",
+                },
+                {
+                  title: tBenefits("decimals"),
+                  description: balanceAdjustment.decimals ?? "",
+                },
+              ]}
+              title={tBenefits("balanceAdjustments")}
+              layerStyle="container"
+            />
+          ))}
         </VStack>
       </HStack>
     </VStack>

@@ -11,7 +11,8 @@ module.exports = {
   },
   testMatch: ['**/__tests__/**/*.(test|spec).[jt]s?(x)'],
   testPathIgnorePatterns: ['/build/', '/src_old/'],
-  coverageDirectory: 'coverage',
+  collectCoverage: true,
+  coverageDirectory: '../coverage/sdk',
   collectCoverageFrom: [
     'src/**/*.ts',
     'src/**/*.mts',

@@ -215,7 +215,11 @@ import {
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC20_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 
-contract ERC20 is IERC20, IStaticFunctionSelectors, ERC20StorageWrapper {
+abstract contract ERC20 is
+    IERC20,
+    IStaticFunctionSelectors,
+    ERC20StorageWrapper
+{
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(
         ERC20Metadata calldata erc20Metadata
@@ -330,8 +334,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, ERC20StorageWrapper {
         return _getERC20Metadata().info.symbol;
     }
 
-    function decimals() external view returns (uint8) {
-        return _getERC20Metadata().info.decimals;
+    function decimals() external view virtual returns (uint8) {
+        return _decimals();
     }
 
     // solhint-disable no-empty-blocks
@@ -352,57 +356,5 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, ERC20StorageWrapper {
         returns (ERC20Metadata memory)
     {
         return _getERC20Metadata();
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ERC20_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](11);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC20
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.approve.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.transfer.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.transferFrom.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .increaseAllowance
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .decreaseAllowance
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.allowance.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .getERC20Metadata
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.name.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.symbol.selector;
-        staticFunctionSelectors_[selectorsIndex++] = this.decimals.selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC20).interfaceId;
     }
 }

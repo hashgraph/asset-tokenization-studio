@@ -227,7 +227,7 @@ const listOfCountries = 'ES,FR,CH'
 const info = 'info'
 const init_rbacs: Rbac[] = []
 
-const TIME = 30
+const TIME = 1000
 const numberOfUnits = 1000
 let currentTimeInSeconds = 0
 let startingDate = 0
@@ -249,13 +249,24 @@ describe('Security USA Tests', () => {
 
     before(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B] = await ethers.getSigners()
+        [signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
 
         currentTimeInSeconds = await time.latest()
+        console.log("Current Time (seconds):", currentTimeInSeconds)
+
         startingDate = currentTimeInSeconds + TIME
+        console.log("Starting Date:", startingDate)
+
         maturityDate = startingDate + numberOfCoupons * frequency
+        console.log("Maturity Date:", maturityDate)
+
         firstCouponDate = startingDate + 1
+        console.log("First Coupon Date:", firstCouponDate)
+
+        expect(startingDate).to.be.gt(currentTimeInSeconds)
+        expect(maturityDate).to.be.gt(startingDate)
+        expect(firstCouponDate).to.be.gt(startingDate)
     })
 
     beforeEach(async () => {

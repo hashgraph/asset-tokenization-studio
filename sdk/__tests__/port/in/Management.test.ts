@@ -247,7 +247,7 @@ const votingRight = true;
 const informationRight = false;
 const liquidationRight = true;
 const subscriptionRight = false;
-const convertionRight = true;
+const conversionRight = true;
 const redemptionRight = false;
 const putRight = true;
 const dividendRight = 1;
@@ -331,7 +331,7 @@ describe('🧪 Management tests', () => {
         informationRight,
         liquidationRight,
         subscriptionRight,
-        convertionRight,
+        conversionRight,
         redemptionRight,
         putRight,
         dividendRight,
