@@ -243,9 +243,10 @@ export const greaterThan = (min: number) => (val: number) =>
 export const greaterOrEqualThan = (min: number) => (val: number) =>
   val >= min || t("greaterOrEqualThan", { min });
 
-export const isAfterDate = (initialDate: Date) => (val: string | Date) =>
-  isAfter(toDate(val), initialDate) ||
-  t("dateAfter", { date: formatDate(initialDate, "dd-MM-yyyy") });
+export const isAfterDate =
+  (initialDate: Date, format?: string) => (val: string | Date) =>
+    isAfter(toDate(val), initialDate) ||
+    t("dateAfter", { date: formatDate(initialDate, format ?? "dd-MM-yyyy") });
 
 export const isAfterTodayOrEqualDate = () => (val: string | Date) =>
   isAfter(toDate(val), new Date()) ||
