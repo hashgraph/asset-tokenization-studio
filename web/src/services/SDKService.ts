@@ -155,11 +155,13 @@ export class SDKService {
         };
       }
     }
+    console.log(hwcSettings); // Placeholder usage to avoid TS6133
     this.initData = await Network.connect(
       new ConnectRequest({
         network: this.testnetNetwork,
         mirrorNode: this.testnetMirrorNode,
         rpcNode: this.testnetRPCNode,
+        hwcSettings,
         wallet,
       }),
     );
