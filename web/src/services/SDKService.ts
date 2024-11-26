@@ -137,7 +137,8 @@ export class SDKService {
   }
 
   public static async connectWallet(wallet: SupportedWallets) {
-    let hwcSettings;
+      //TODO: Review, ref commit bc4d73448fb87c95fe99021aee3d7987c6dccb69
+    let hwcSettings = undefined;
     if (wallet === SupportedWallets.HWALLETCONNECT) {
       const projectId = process.env.REACT_APP_PROJECT_ID ?? "";
       const dappName = process.env.REACT_APP_DAPP_NAME ?? "";
@@ -155,6 +156,7 @@ export class SDKService {
         };
       }
     }
+    console.log(hwcSettings); // Placeholder usage to avoid TS6133
     this.initData = await Network.connect(
       new ConnectRequest({
         network: this.testnetNetwork,
