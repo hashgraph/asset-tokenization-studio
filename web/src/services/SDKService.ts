@@ -137,8 +137,7 @@ export class SDKService {
   }
 
   public static async connectWallet(wallet: SupportedWallets) {
-      //TODO: Review, ref commit bc4d73448fb87c95fe99021aee3d7987c6dccb69
-    let hwcSettings = undefined;
+    let hwcSettings;
     if (wallet === SupportedWallets.HWALLETCONNECT) {
       const projectId = process.env.REACT_APP_PROJECT_ID ?? "";
       const dappName = process.env.REACT_APP_DAPP_NAME ?? "";
@@ -162,6 +161,7 @@ export class SDKService {
         network: this.testnetNetwork,
         mirrorNode: this.testnetMirrorNode,
         rpcNode: this.testnetRPCNode,
+        hwcSettings,
         wallet,
       }),
     );
