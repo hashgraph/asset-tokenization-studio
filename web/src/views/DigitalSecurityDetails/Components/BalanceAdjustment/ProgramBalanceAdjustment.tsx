@@ -216,7 +216,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Info } from "@phosphor-icons/react";
 import { useForm } from "react-hook-form";
-import { required, min } from "../../../../utils/rules";
+import { required, min, isAfterDate } from "../../../../utils/rules";
 import { useParams } from "react-router-dom";
 import { useBalanceAdjustment } from "../../../../hooks/queries/useBalanceAdjustment";
 import {
@@ -224,7 +224,6 @@ import {
   dateToUnixTimestamp,
 } from "../../../../utils/format";
 import { SetScheduledBalanceAdjustmentRequest } from "@hashgraph/asset-tokenization-sdk";
-import { addDays } from "date-fns";
 
 interface ProgramBalanceAdjustmentFormValues {
   executionDate: string;
@@ -291,10 +290,14 @@ export const ProgramBalanceAdjustment = () => {
             <CalendarInputController
               control={control}
               id="executionDate"
-              rules={{ required }}
-              fromDate={addDays(new Date(), 1)}
+              rules={{
+                required,
+                validate: isAfterDate(new Date(), "dd-MM-yyyy HH:mm:ss"),
+              }}
+              fromDate={new Date()}
               placeholder={tForm("executionDate.placeholder")}
               withTimeInput
+              format="dd:MM:yyyy HH:mm:ss"
             />
           </Stack>
           <Stack w="full">
