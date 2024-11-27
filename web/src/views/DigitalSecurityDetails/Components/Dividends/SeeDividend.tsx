@@ -228,7 +228,8 @@ import {
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useSecurityStore } from "../../../../store/securityStore";
-import { formatNumberLocale } from "../../../../utils/format";
+import { formatDate, formatNumberLocale } from "../../../../utils/format";
+import { DATE_TIME_FORMAT } from "../../../../utils/constants";
 
 interface SeeDividendFormValues {
   dividendId: number;
@@ -415,7 +416,7 @@ export const SeeDividend = () => {
             items={[
               {
                 title: tDetail("paymentDay"),
-                description: dividendsPaymentDay,
+                description: formatDate(dividendsPaymentDay, DATE_TIME_FORMAT),
                 canCopy: true,
                 valueToCopy: dividendsPaymentDay,
               },
