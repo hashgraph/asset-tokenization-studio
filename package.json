@@ -35,7 +35,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "concurrently": "^7.6.0",
-    "elliptic": "^6.5.5",
+    "elliptic": "^6.6.1",
     "ethers": "^5.7.2",
     "rimraf": "^4.1.1",
     "serverless": "^3.34.0"
