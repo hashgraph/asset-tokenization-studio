@@ -232,6 +232,7 @@ import {
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
+import { MAX_UINT256 } from '../../../../scripts/testCommon'
 
 const amount = 1
 const balanceOf_A_Original = [10 * amount, 100 * amount]
@@ -286,7 +287,7 @@ describe('Locks Layer 2 Tests', () => {
             false,
             1,
             '0x345678',
-            0,
+            MAX_UINT256,
             100,
             RegulationType.REG_D,
             RegulationSubType.REG_D_506_B,
