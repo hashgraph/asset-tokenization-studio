@@ -1,4 +1,4 @@
-import { singleton } from 'tsyringe';
+import {singleton} from 'tsyringe';
 import {
   AccountId,
   LedgerId,
@@ -7,8 +7,9 @@ import {
   TransactionResponse as HTransactionResponse,
   TransactionResponseJSON,
 } from '@hashgraph/sdk';
-import { NetworkName } from '@hashgraph/sdk/lib/client/Client';
+import {NetworkName} from '@hashgraph/sdk/lib/client/Client';
 import {
+  base64StringToSignatureMap,
   DAppConnector,
   HederaChainId,
   SignAndExecuteTransactionParams,
@@ -16,34 +17,24 @@ import {
   transactionBodyToBase64String,
   transactionToBase64String,
   transactionToTransactionBody,
-  base64StringToSignatureMap,
 } from '@hashgraph/hedera-wallet-connect';
-import { SignClientTypes } from '@walletconnect/types';
-import { HederaTransactionAdapter } from '../HederaTransactionAdapter';
-import { HederaTransactionResponseAdapter } from '../HederaTransactionResponseAdapter';
-import { SigningError } from '../error/SigningError';
-import { InitializationData } from '../../TransactionAdapter';
-import { MirrorNodeAdapter } from '../../mirror/MirrorNodeAdapter';
-import {
-  WalletEvents,
-  WalletPairedEvent,
-} from '../../../../app/service/event/WalletEvent';
+import {SignClientTypes} from '@walletconnect/types';
+import {HederaTransactionAdapter} from '../HederaTransactionAdapter';
+import {HederaTransactionResponseAdapter} from '../HederaTransactionResponseAdapter';
+import {SigningError} from '../error/SigningError';
+import {InitializationData} from '../../TransactionAdapter';
+import {MirrorNodeAdapter} from '../../mirror/MirrorNodeAdapter';
+import {WalletEvents, WalletPairedEvent,} from '../../../../app/service/event/WalletEvent';
 import LogService from '../../../../app/service/LogService';
 import EventService from '../../../../app/service/event/EventService';
 import NetworkService from '../../../../app/service/NetworkService';
-import { lazyInject } from '../../../../core/decorator/LazyInjectDecorator';
+import {lazyInject} from '../../../../core/decorator/LazyInjectDecorator';
 import Injectable from '../../../../core/Injectable';
-import { QueryBus } from '../../../../core/query/QueryBus';
 import Hex from '../../../../core/Hex';
 import Account from '../../../../domain/context/account/Account';
 import TransactionResponse from '../../../../domain/context/transaction/TransactionResponse.js';
-import {
-  Environment,
-  mainnet,
-  previewnet,
-  testnet,
-} from '../../../../domain/context/network/Environment';
-import { SupportedWallets } from '../../../../domain/context/network/Wallet';
+import {Environment, mainnet, previewnet, testnet,} from '../../../../domain/context/network/Environment';
+import {SupportedWallets} from '../../../../domain/context/network/Wallet';
 import HWCSettings from '../../../../domain/context/walletConnect/HWCSettings';
 
 @singleton()
@@ -66,8 +57,6 @@ export class HederaWalletConnectTransactionAdapter extends HederaTransactionAdap
     public readonly networkService: NetworkService,
     @lazyInject(MirrorNodeAdapter)
     public readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(QueryBus)
-    public readonly queryBus: QueryBus,
   ) {
     super(mirrorNodeAdapter, networkService);
     this.projectId = '';

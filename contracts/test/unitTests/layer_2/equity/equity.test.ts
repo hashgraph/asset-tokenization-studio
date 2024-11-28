@@ -237,6 +237,10 @@ const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
 const info = 'info'
 
+let balanceAdjustmentExecutionDateInSeconds = 0
+const balanceAdjustmentFactor = 356
+const balanceAdjustmentDecimals = 2
+
 const voteData = '0x'
 let votingData = {
     recordDate: votingRecordDateInSeconds.toString(),
@@ -246,6 +250,11 @@ let dividendData = {
     recordDate: dividendsRecordDateInSeconds.toString(),
     executionDate: dividendsExecutionDateInSeconds.toString(),
     amount: dividendsAmountPerEquity,
+}
+let balanceAdjustmentData = {
+    executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
+    factor: balanceAdjustmentFactor,
+    decimals: balanceAdjustmentDecimals,
 }
 
 describe('Equity Tests', () => {
@@ -273,6 +282,8 @@ describe('Equity Tests', () => {
         dividendsRecordDateInSeconds = currentTimeInSeconds + TIME
         dividendsExecutionDateInSeconds = currentTimeInSeconds + 10 * TIME
         votingRecordDateInSeconds = currentTimeInSeconds + TIME
+        balanceAdjustmentExecutionDateInSeconds = currentTimeInSeconds + TIME
+
         votingData = {
             recordDate: votingRecordDateInSeconds.toString(),
             data: voteData,
@@ -281,6 +292,11 @@ describe('Equity Tests', () => {
             recordDate: dividendsRecordDateInSeconds.toString(),
             executionDate: dividendsExecutionDateInSeconds.toString(),
             amount: dividendsAmountPerEquity,
+        }
+        balanceAdjustmentData = {
+            executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
+            factor: balanceAdjustmentFactor,
+            decimals: balanceAdjustmentDecimals,
         }
     })
 
@@ -459,7 +475,7 @@ describe('Equity Tests', () => {
             )
         })
 
-        it('GIVEN a paused Token WHEN setDividends THEN transaction fails with TokenIsPaused', async () => {
+        it('GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused', async () => {
             // Granting Role to account C and Pause
             await grantRoleAndPauseToken(
                 accessControlFacet,
@@ -517,6 +533,77 @@ describe('Equity Tests', () => {
             expect(votingFor.data).to.equal(voteData)
             expect(votingFor.tokenBalance).to.equal(0)
             expect(votingFor.recordDateReached).to.equal(false)
+        })
+    })
+
+    describe('Balance adjustments', () => {
+        it('GIVEN an account without corporateActions role WHEN setBalanceAdjustment THEN transaction fails with AccountHasNoRole', async () => {
+            // Using account C (non role)
+            equityFacet = equityFacet.connect(signer_C)
+
+            // set dividend fails
+            await expect(
+                equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
+            ).to.be.rejectedWith('AccountHasNoRole')
+        })
+
+        it('GIVEN a paused Token WHEN setBalanceAdjustment THEN transaction fails with TokenIsPaused', async () => {
+            // Granting Role to account C and Pause
+            await grantRoleAndPauseToken(
+                accessControlFacet,
+                pauseFacet,
+                _CORPORATE_ACTION_ROLE,
+                signer_A,
+                signer_B,
+                account_C
+            )
+
+            // Using account C (with role)
+            equityFacet = equityFacet.connect(signer_C)
+
+            // set dividend fails
+            await expect(
+                equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
+            ).to.be.rejectedWith('TokenIsPaused')
+        })
+
+        it('GIVEN an account with corporateActions role WHEN setBalanceAdjustment THEN transaction succeeds', async () => {
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(
+                _CORPORATE_ACTION_ROLE,
+                account_C
+            )
+            // Using account C (with role)
+            equityFacet = equityFacet.connect(signer_C)
+
+            // set dividend
+            await expect(
+                equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
+            )
+                .to.emit(equityFacet, 'ScheduledBalanceAdjustmentSet')
+                .withArgs(
+                    '0x0000000000000000000000000000000000000000000000000000000000000001',
+                    1,
+                    account_C,
+                    balanceAdjustmentExecutionDateInSeconds,
+                    balanceAdjustmentFactor,
+                    balanceAdjustmentDecimals
+                )
+
+            const listCount =
+                await equityFacet.getScheduledBalanceAdjustmentCount()
+            const balanceAdjustment =
+                await equityFacet.getScheduledBalanceAdjustment(1)
+
+            expect(listCount).to.equal(1)
+            expect(balanceAdjustment.executionDate).to.equal(
+                balanceAdjustmentExecutionDateInSeconds
+            )
+            expect(balanceAdjustment.factor).to.equal(balanceAdjustmentFactor)
+            expect(balanceAdjustment.decimals).to.equal(
+                balanceAdjustmentDecimals
+            )
         })
     })
 })

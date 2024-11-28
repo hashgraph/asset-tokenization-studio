@@ -214,6 +214,7 @@ export enum SecurityRole {
   _SNAPSHOT_ROLE = '0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da',
   _LOCKER_ROLE = '0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88',
   _BOND_MANAGER_ROLE = '0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d',
+  _ADJUSTMENT_BALANCE_ROLE = '0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9',
 }
 
 export const MAX_ACCOUNTS_ROLES = 10;
@@ -229,4 +230,5 @@ export const SecurityRoleLabel = new Map<SecurityRole, string>([
   [SecurityRole._SNAPSHOT_ROLE, 'Snapshot'],
   [SecurityRole._LOCKER_ROLE, 'Locker'],
   [SecurityRole._BOND_MANAGER_ROLE, 'Bond Manager'],
+  [SecurityRole._ADJUSTMENT_BALANCE_ROLE, 'Adjustment Balance'],
 ]);

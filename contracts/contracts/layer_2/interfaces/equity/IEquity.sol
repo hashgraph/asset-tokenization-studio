@@ -262,6 +262,12 @@ interface IEquity {
         bool recordDateReached;
     }
 
+    struct ScheduledBalanceAdjustment {
+        uint256 executionDate;
+        uint256 factor;
+        uint8 decimals;
+    }
+
     function getEquityDetails()
         external
         view
@@ -282,17 +288,10 @@ interface IEquity {
 
     function getDividendsCount() external view returns (uint256 dividendCount_);
 
-    /*
-     Schedules a vote (corporate action) which is just a snapshot of series (partitions) with
-      Voting rights at "record date". Returns true if success and the vote ID (incremental id).
-     This function is used to record voting powers at given points in time. The actual voting process
-      (voting options, decreasing voting power, counting votes etc...) is not included.
-    */
     function setVoting(
         Voting calldata _newVoting
     ) external returns (bool success_, uint256 voteID_);
 
-    // Returns vote properties
     function getVoting(
         uint256 _voteID
     ) external view returns (RegisteredVoting memory registeredVoting_);
@@ -302,6 +301,21 @@ interface IEquity {
         address _account
     ) external view returns (VotingFor memory votingFor_);
 
-    // Returns vote counts
     function getVotingCount() external view returns (uint256 votingCount_);
+
+    function setScheduledBalanceAdjustment(
+        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    ) external returns (bool success_, uint256 balanceAdjustmentID_);
+
+    function getScheduledBalanceAdjustment(
+        uint256 _balanceAdjustmentID
+    )
+        external
+        view
+        returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
+
+    function getScheduledBalanceAdjustmentCount()
+        external
+        view
+        returns (uint256 balanceAdjustmentCount_);
 }
