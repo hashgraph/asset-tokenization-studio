@@ -251,35 +251,64 @@ import {
 } from './contractsMethods'
 //import { adjustBalances } from '../typechain-types/contracts/layer_2/index.js'
 
-const used_already_deployed = false
-const resolver_proxy_contract: ContractId = ContractId.fromString('0.0.4916112')
-const resolver_proxyAdmin_contract: ContractId =
-    ContractId.fromString('0.0.4916106')
-const resolver_contract: ContractId = ContractId.fromString('0.0.4916103')
-const factory_proxy_contract: ContractId = ContractId.fromString('0.0.4916186')
-const factory_proxyAdmin_contract: ContractId =
-    ContractId.fromString('0.0.4916183')
-const factory_contract: ContractId = ContractId.fromString('0.0.4916173')
-const accessControl_contract: ContractId = ContractId.fromString('0.0.4916115')
-const cap_contract: ContractId = ContractId.fromString('0.0.4916119')
-const controlList_contract: ContractId = ContractId.fromString('0.0.4916121')
-const pause_contract: ContractId = ContractId.fromString('0.0.4916124')
-const erc20_contract: ContractId = ContractId.fromString('0.0.4916132')
-const erc1410_contract: ContractId = ContractId.fromString('0.0.4916136')
-const erc1594_contract: ContractId = ContractId.fromString('0.0.4916138')
-const erc1643_contract: ContractId = ContractId.fromString('0.0.4916141')
-const erc1644_contract: ContractId = ContractId.fromString('0.0.4916146')
-const snapshots_contract: ContractId = ContractId.fromString('0.0.4916149')
-const diamondFacet_contract: ContractId = ContractId.fromString('0.0.4916152')
-const equity_contract: ContractId = ContractId.fromString('0.0.4916156')
-const bond_contract: ContractId = ContractId.fromString('0.0.4916160')
-const scheduledSnapshots_contract: ContractId =
-    ContractId.fromString('0.0.4916164')
-const corporateActionsSecurity_contract: ContractId =
-    ContractId.fromString('0.0.4916166')
-const lock_contract: ContractId = ContractId.fromString('0.0.4916130')
-const transferAndLock_contract: ContractId =
-    ContractId.fromString('0.0.4916168')
+const ExistingContractIds = {
+    resolver: {
+        proxy: ContractId.fromString(getEnvVar({ name: 'RESOLVER_PROXY' })),
+        proxyAdmin: ContractId.fromString(
+            getEnvVar({ name: 'RESOLVER_PROXY_ADMIN' })
+        ),
+        contract: ContractId.fromString(
+            getEnvVar({ name: 'RESOLVER_CONTRACT' })
+        ),
+    },
+    factory: {
+        proxy: ContractId.fromString(getEnvVar({ name: 'FACTORY_PROXY' })),
+        proxyAdmin: ContractId.fromString(
+            getEnvVar({ name: 'FACTORY_PROXY_ADMIN' })
+        ),
+        contract: ContractId.fromString(
+            getEnvVar({ name: 'FACTORY_CONTRACT' })
+        ),
+    },
+    accessControl: ContractId.fromString(getEnvVar({ name: 'ACCESS_CONTROL' })),
+    cap: ContractId.fromString(getEnvVar({ name: 'CAP' })),
+    controlList: ContractId.fromString(getEnvVar({ name: 'CONTROL_LIST' })),
+    pause: ContractId.fromString(getEnvVar({ name: 'PAUSE' })),
+    erc20: ContractId.fromString(getEnvVar({ name: 'ERC20' })),
+    erc1410: ContractId.fromString(getEnvVar({ name: 'ERC1410' })),
+    erc1594: ContractId.fromString(getEnvVar({ name: 'ERC1594' })),
+    erc1643: ContractId.fromString(getEnvVar({ name: 'ERC1643' })),
+    erc1644: ContractId.fromString(getEnvVar({ name: 'ERC1644' })),
+    snapshots: ContractId.fromString(getEnvVar({ name: 'SNAPSHOTS' })),
+    diamondFacet: ContractId.fromString(getEnvVar({ name: 'DIAMOND_FACET' })),
+    equity: ContractId.fromString(getEnvVar({ name: 'EQUITY' })),
+    bond: ContractId.fromString(getEnvVar({ name: 'BOND' })),
+    scheduledSnapshots: ContractId.fromString(
+        getEnvVar({ name: 'SCHEDULED_SNAPSHOTS' })
+    ),
+    scheduledBalanceAdjustments: ContractId.fromString(
+        getEnvVar({ name: 'SCHEDULED_BALANCE_ADJUSTMENTS' })
+    ),
+    scheduledTasks: ContractId.fromString(
+        getEnvVar({ name: 'SCHEDULED_TASKS' })
+    ),
+    corporateActionsSecurity: ContractId.fromString(
+        getEnvVar({ name: 'CORPORATE_ACTIONS_SECURITY' })
+    ),
+    lock: ContractId.fromString(getEnvVar({ name: 'LOCK' })),
+    transferAndLock: ContractId.fromString(
+        getEnvVar({ name: 'TRANSFER_AND_LOCK' })
+    ),
+    adjustBalances: ContractId.fromString(
+        getEnvVar({ name: 'ADJUST_BALANCES' })
+    ),
+}
+
+export interface DeployedContract {
+    proxyAdmin?: IContract
+    proxy?: IContract
+    contract: IContract
+}
 
 export function initializeClient(): [
     Client,
