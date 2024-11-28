@@ -276,7 +276,7 @@ describe('Snapshots Layer 2 Tests', () => {
             'TEST_AccessControl',
             'TAC',
             DECIMALS,
-            'ABCDEF123456',
+            'SJ5633813320',
             false,
             false,
             false,

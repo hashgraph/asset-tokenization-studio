@@ -686,7 +686,7 @@ describe('ERC1400 Tests', () => {
             'TEST_AccessControl',
             'TAC',
             decimals_Original,
-            'ABCDEF123456',
+            'SJ5633813320',
             false,
             false,
             false,
