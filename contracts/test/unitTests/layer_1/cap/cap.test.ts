@@ -504,7 +504,7 @@ describe('CAP Tests', () => {
                 []
             )
 
-            capFacet = await ethers.getContractAt('Cap', diamond.address)
+            capFacet = await ethers.getContractAt('Cap_2', diamond.address)
             accessControlFacet = await ethers.getContractAt(
                 'AccessControl',
                 diamond.address

@@ -236,10 +236,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import {
-    grantRoleAndPauseToken,
-    MAX_UINT256,
-} from '../../../../scripts/testCommon'
+import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
 
 const amount = 1
@@ -296,7 +293,7 @@ describe('Adjust Balances Tests', () => {
             false,
             1,
             '0x345678',
-            MAX_UINT256,
+            BigInt(maxSupply_Original),
             100,
             RegulationType.REG_D,
             RegulationSubType.REG_D_506_B,

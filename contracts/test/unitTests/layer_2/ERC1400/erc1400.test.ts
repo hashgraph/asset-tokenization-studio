@@ -248,10 +248,7 @@ import {
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { ADDRESS_0 } from '../../../../scripts/constants'
-import {
-    grantRoleAndPauseToken,
-    MAX_UINT256,
-} from '../../../../scripts/testCommon'
+import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -272,6 +269,7 @@ const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
+const MAX_SUPPLY_DEPLOYED = BigInt(maxSupply_Original)
 
 describe('ERC1400 Tests', () => {
     let diamond: ResolverProxy
@@ -313,15 +311,17 @@ describe('ERC1400 Tests', () => {
         capFacet = capFacet.connect(signer_A)
 
         await capFacet.setMaxSupply(maxSupply_Original)
-        await capFacet.setMaxSupplyByPartition(
-            _PARTITION_ID_1,
-            maxSupply_Partition_1_Original
-        )
-        if (!singlePartition)
+
+        if (!singlePartition) {
+            await capFacet.setMaxSupplyByPartition(
+                _PARTITION_ID_1,
+                maxSupply_Partition_1_Original
+            )
             await capFacet.setMaxSupplyByPartition(
                 _PARTITION_ID_2,
                 maxSupply_Partition_2_Original
             )
+        }
 
         await erc1410Facet.issueByPartition(
             _PARTITION_ID_1,
@@ -696,7 +696,7 @@ describe('ERC1400 Tests', () => {
             false,
             1,
             '0x345678',
-            MAX_UINT256,
+            MAX_SUPPLY_DEPLOYED,
             100,
             RegulationType.REG_D,
             RegulationSubType.REG_D_506_B,
@@ -787,7 +787,7 @@ describe('ERC1400 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                BigInt(100000),
+                MAX_SUPPLY_DEPLOYED,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_B,
@@ -1205,7 +1205,7 @@ describe('ERC1400 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                MAX_UINT256,
+                MAX_SUPPLY_DEPLOYED,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_B,
@@ -2089,7 +2089,7 @@ describe('ERC1400 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                MAX_UINT256,
+                MAX_SUPPLY_DEPLOYED,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_C,
@@ -2449,7 +2449,7 @@ describe('ERC1400 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                MAX_UINT256,
+                MAX_SUPPLY_DEPLOYED,
                 100,
                 RegulationType.REG_S,
                 RegulationSubType.NONE,
