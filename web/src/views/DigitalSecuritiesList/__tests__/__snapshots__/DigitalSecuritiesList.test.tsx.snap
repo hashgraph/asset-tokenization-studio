@@ -256,6 +256,19 @@ exports[`DigitalSecuritiesList render correctly 1`] = `
                   </div>
                 </div>
               </th>
+              <th
+                class="css-1fegb7z"
+              >
+                <div
+                  class="css-1lekzkb"
+                >
+                  <div
+                    class="css-zvlevn"
+                  >
+                    EVM Address
+                  </div>
+                </div>
+              </th>
             </tr>
           </tbody>
         </table>

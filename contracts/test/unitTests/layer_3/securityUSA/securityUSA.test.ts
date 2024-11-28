@@ -227,7 +227,7 @@ const listOfCountries = 'ES,FR,CH'
 const info = 'info'
 const init_rbacs: Rbac[] = []
 
-const TIME = 30
+const TIME = 1000
 const numberOfUnits = 1000
 let currentTimeInSeconds = 0
 let startingDate = 0
@@ -253,8 +253,11 @@ describe('Security USA Tests', () => {
         account_A = signer_A.address
 
         currentTimeInSeconds = await time.latest()
+
         startingDate = currentTimeInSeconds + TIME
+
         maturityDate = startingDate + numberOfCoupons * frequency
+
         firstCouponDate = startingDate + 1
 
         expect(startingDate).to.be.gt(currentTimeInSeconds)

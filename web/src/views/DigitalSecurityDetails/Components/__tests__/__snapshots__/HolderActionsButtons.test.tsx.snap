@@ -1,18 +1,69 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`() => {
-    const { t: tButtons } = (0, react_i18next_1.useTranslation)("security", {
-        keyPrefix: "details.actions",
-    });
-    const { id = "" } = (0, react_router_dom_1.useParams)();
-    const { data: isPaused } = (0, useGetSecurityDetails_1.useGetIsPaused)(new asset_tokenization_sdk_1.PauseRequest({ securityId: id }));
-    if (isPaused)
-        return (0, jsx_runtime_1.jsx)(jsx_runtime_1.Fragment, {});
-    return ((0, jsx_runtime_1.jsxs)(react_1.HStack, { "data-testid": "holder-actions-buttons", w: "full", justifyContent: "flex-end", gap: 4, children: [(0, jsx_runtime_1.jsx)(io_bricks_ui_1.Button, { "data-testid": "transfer-button", as: react_router_dom_1.Link, to: RouterManager_1.RouterManager.getUrl(RouteName_1.RouteName.DigitalSecurityTransfer, {
-                    params: { id },
-                }), variant: "secondary", children: tButtons("transfer") }), (0, jsx_runtime_1.jsx)(io_bricks_ui_1.Button, { "data-testid": "redeem-button", as: react_router_dom_1.Link, to: RouterManager_1.RouterManager.getUrl(RouteName_1.RouteName.DigitalSecurityRedeem, {
-                    params: { id },
-                }), variant: "secondary", children: tButtons("redeem") })] }));
+  /* istanbul ignore next */
+  cov_qodd5a1xd().f[0]++;
+  const {
+    t: tButtons
+  } =
+  /* istanbul ignore next */
+  (cov_qodd5a1xd().s[12]++, (0, react_i18next_1.useTranslation)("security", {
+    keyPrefix: "details.actions"
+  }));
+  const {
+    id =
+    /* istanbul ignore next */
+    (cov_qodd5a1xd().b[0][0]++, "")
+  } =
+  /* istanbul ignore next */
+  (cov_qodd5a1xd().s[13]++, (0, react_router_dom_1.useParams)());
+  const {
+    data: isPaused
+  } =
+  /* istanbul ignore next */
+  (cov_qodd5a1xd().s[14]++, (0, useGetSecurityDetails_1.useGetIsPaused)(new asset_tokenization_sdk_1.PauseRequest({
+    securityId: id
+  })));
+  /* istanbul ignore next */
+  cov_qodd5a1xd().s[15]++;
+  if (isPaused) {
+    /* istanbul ignore next */
+    cov_qodd5a1xd().b[1][0]++;
+    cov_qodd5a1xd().s[16]++;
+    return (0, jsx_runtime_1.jsx)(jsx_runtime_1.Fragment, {});
+  } else
+  /* istanbul ignore next */
+  {
+    cov_qodd5a1xd().b[1][1]++;
+  }
+  cov_qodd5a1xd().s[17]++;
+  return (0, jsx_runtime_1.jsxs)(react_1.HStack, {
+    "data-testid": "holder-actions-buttons",
+    w: "full",
+    justifyContent: "flex-end",
+    gap: 4,
+    children: [(0, jsx_runtime_1.jsx)(io_bricks_ui_1.Button, {
+      "data-testid": "transfer-button",
+      as: react_router_dom_1.Link,
+      to: RouterManager_1.RouterManager.getUrl(RouteName_1.RouteName.DigitalSecurityTransfer, {
+        params: {
+          id
+        }
+      }),
+      variant: "secondary",
+      children: tButtons("transfer")
+    }), (0, jsx_runtime_1.jsx)(io_bricks_ui_1.Button, {
+      "data-testid": "redeem-button",
+      as: react_router_dom_1.Link,
+      to: RouterManager_1.RouterManager.getUrl(RouteName_1.RouteName.DigitalSecurityRedeem, {
+        params: {
+          id
+        }
+      }),
+      variant: "secondary",
+      children: tButtons("redeem")
+    })]
+  });
 }.name should render correctly 1`] = `
 <DocumentFragment>
   <div

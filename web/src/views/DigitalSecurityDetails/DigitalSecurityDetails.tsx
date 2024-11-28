@@ -242,6 +242,7 @@ import { useSecurityStore } from "../../store/securityStore";
 import { VotingRights } from "./Components/VotingRights/VotingRights";
 import { Coupons } from "./Components/Coupons/Coupons";
 import { Management } from "./Components/Management/Management";
+import { BalanceAdjustment } from "./Components/BalanceAdjustment/BalanceAdjustment";
 
 export const DigitalSecurityDetails = () => {
   const { t: tHeader } = useTranslation("security", {
@@ -357,6 +358,13 @@ export const DigitalSecurityDetails = () => {
 
     if (equityDetails?.dividendRight && hasCorporateActionsRole && !isPaused) {
       adminTabs.push({ content: <Dividends />, header: tTabs("dividends") });
+    }
+
+    if (hasCorporateActionsRole && !isPaused) {
+      adminTabs.push({
+        content: <BalanceAdjustment />,
+        header: tTabs("balanceAdjustment"),
+      });
     }
 
     adminTabs.push({

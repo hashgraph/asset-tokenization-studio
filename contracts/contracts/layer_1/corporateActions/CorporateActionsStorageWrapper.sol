@@ -207,7 +207,8 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ICorporateActionsStorageWrapper
+    ICorporateActionsStorageWrapper,
+    CorporateActionDataStorage
 } from '../interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
 import {LibCommon} from '../common/LibCommon.sol';
 import {
@@ -224,18 +225,6 @@ abstract contract CorporateActionsStorageWrapper is
 {
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    struct ActionData {
-        bytes32 actionType;
-        bytes data;
-        bytes[] results;
-    }
-
-    struct CorporateActionDataStorage {
-        EnumerableSet.Bytes32Set actions;
-        mapping(bytes32 => ActionData) actionsData;
-        mapping(bytes32 => EnumerableSet.Bytes32Set) actionsByType;
-    }
 
     modifier checkIndexForCorporateActionByType(
         bytes32 actionType,

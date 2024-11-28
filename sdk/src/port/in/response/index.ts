@@ -221,6 +221,7 @@ import VotingRightsViewModel from './VotingRightsViewModel.js';
 import RegulationViewModel from './RegulationViewModel.js';
 import LockViewModel from './LockViewModel.js';
 import ConfigInfoViewModel from './ConfigInfoViewModel.js';
+import ScheduledBalanceAdjustmentViewModel from './ScheduledBalanceAdjustmentViewModel.js';
 
 export {
   AccountViewModel,
@@ -241,4 +242,5 @@ export {
   RegulationViewModel,
   LockViewModel,
   ConfigInfoViewModel,
+  ScheduledBalanceAdjustmentViewModel
 };

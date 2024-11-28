@@ -218,7 +218,7 @@ import {
     type ControlList,
     type ERC20,
     type ERC1644,
-    type ERC1410ScheduledSnapshot,
+    type ERC1410ScheduledTasks,
     type ERC1594,
     type ERC1643,
     type Equity,
@@ -235,7 +235,7 @@ import {
     AccessControl__factory,
     ERC1643__factory,
     ERC20__factory,
-    ERC1410ScheduledSnapshot__factory,
+    ERC1410ScheduledTasks__factory,
     CorporateActionsSecurity__factory,
     ScheduledSnapshots__factory,
     ResolverProxy__factory,
@@ -318,7 +318,7 @@ describe('Demo RedSwam', () => {
         controlList: ControlList,
         erc20: ERC20,
         erc1644: ERC1644,
-        erc1410: ERC1410ScheduledSnapshot,
+        erc1410: ERC1410ScheduledTasks,
         erc1594: ERC1594,
         erc1643: ERC1643,
         equity: Equity,
@@ -343,7 +343,7 @@ describe('Demo RedSwam', () => {
         informationRight: boolean,
         liquidationRight: boolean,
         subscriptionRight: boolean,
-        convertionRight: boolean,
+        conversionRight: boolean,
         redemptionRight: boolean,
         putRight: boolean,
         dividendRight: DividendType,
@@ -399,7 +399,7 @@ describe('Demo RedSwam', () => {
             informationRight: informationRight,
             liquidationRight: liquidationRight,
             subscriptionRight: subscriptionRight,
-            convertionRight: convertionRight,
+            conversionRight: conversionRight,
             redemptionRight: redemptionRight,
             putRight: putRight,
             dividendRight: dividendRight,
@@ -578,9 +578,9 @@ describe('Demo RedSwam', () => {
         ) as ERC1644
         erc1410 = new ethers.Contract(
             await toEvmAddress(erc1410Address, true),
-            ERC1410ScheduledSnapshot__factory.abi,
+            ERC1410ScheduledTasks__factory.abi,
             signer_A
-        ) as ERC1410ScheduledSnapshot
+        ) as ERC1410ScheduledTasks
         erc1594 = new ethers.Contract(
             await toEvmAddress(erc1594Address, true),
             ERC1594__factory.abi,
@@ -972,7 +972,7 @@ describe('Demo RedSwam', () => {
         const informationRight = false
         const liquidationRight = true
         const subscriptionRight = false
-        const convertionRight = true
+        const conversionRight = true
         const redemptionRight = false
         const putRight = true
         const dividendRight = DividendType.PREFERRED
@@ -994,7 +994,7 @@ describe('Demo RedSwam', () => {
             informationRight,
             liquidationRight,
             subscriptionRight,
-            convertionRight,
+            conversionRight,
             redemptionRight,
             putRight,
             dividendRight,
@@ -1171,7 +1171,7 @@ describe('Demo RedSwam', () => {
         expect(equityMetadata.informationRight).to.equal(informationRight)
         expect(equityMetadata.liquidationRight).to.equal(liquidationRight)
         expect(equityMetadata.subscriptionRight).to.equal(subscriptionRight)
-        expect(equityMetadata.convertionRight).to.equal(convertionRight)
+        expect(equityMetadata.conversionRight).to.equal(conversionRight)
         expect(equityMetadata.redemptionRight).to.equal(redemptionRight)
         expect(equityMetadata.putRight).to.equal(putRight)
         expect(equityMetadata.dividendRight).to.equal(dividendRight)
