@@ -254,7 +254,7 @@ describe('ERC20 Tests', () => {
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
     const decimals = 6
-    const isin = 'ABCDEF123456'
+    const isin = 'SJ5633813320'
 
     describe('Multi partition', () => {
         beforeEach(async () => {

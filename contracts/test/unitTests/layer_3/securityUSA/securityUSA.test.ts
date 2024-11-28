@@ -256,6 +256,10 @@ describe('Security USA Tests', () => {
         startingDate = currentTimeInSeconds + TIME
         maturityDate = startingDate + numberOfCoupons * frequency
         firstCouponDate = startingDate + 1
+
+        expect(startingDate).to.be.gt(currentTimeInSeconds)
+        expect(maturityDate).to.be.gt(startingDate)
+        expect(firstCouponDate).to.be.gt(startingDate)
     })
 
     beforeEach(async () => {
@@ -272,7 +276,7 @@ describe('Security USA Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'ABCDEF123456',
+                'SJ5633813320',
                 false,
                 false,
                 false,
@@ -343,7 +347,7 @@ describe('Security USA Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'ABCDEF123456',
+                'SJ5633813320',
                 false,
                 false,
                 false,
@@ -414,7 +418,7 @@ describe('Security USA Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'ABCDEF123456',
+                'SJ5633813320',
                 false,
                 false,
                 false,
@@ -487,7 +491,7 @@ describe('Security USA Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'ABCDEF123456',
+                'SJ5633813320',
                 '0x455552',
                 numberOfUnits,
                 100,
@@ -555,7 +559,7 @@ describe('Security USA Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'ABCDEF123456',
+                'SJ5633813320',
                 '0x455552',
                 numberOfUnits,
                 100,
@@ -623,7 +627,7 @@ describe('Security USA Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'ABCDEF123456',
+                'SJ5633813320',
                 '0x455552',
                 numberOfUnits,
                 100,

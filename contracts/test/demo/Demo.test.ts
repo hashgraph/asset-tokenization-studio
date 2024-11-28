@@ -503,7 +503,7 @@ Deployed contracts:
         const TokenName = 'TEST_DEMO'
         const TokenSymbol = 'TD'
         const TokenDecimals = 6
-        const TokenISIN = 'ABCDEF123456'
+        const TokenISIN = 'SJ5633813320'
         const TokenType = 1 // equity
         const isWhiteList = false
         const isControllable = true

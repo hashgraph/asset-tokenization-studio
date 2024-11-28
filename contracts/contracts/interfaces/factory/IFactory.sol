@@ -267,7 +267,6 @@ interface IFactory {
     );
 
     error EmptyResolver(IBusinessLogicResolver resolver);
-    error WrongISIN(string isin);
     error NoInitialAdmins();
 
     function deployEquity(
