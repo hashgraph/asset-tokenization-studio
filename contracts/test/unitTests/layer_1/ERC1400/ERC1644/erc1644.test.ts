@@ -233,6 +233,7 @@ import {
     grantRoleAndPauseToken,
     MAX_UINT256,
 } from '../../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const amount = 1
 const data = '0x1234'
@@ -294,7 +295,7 @@ describe('ERC1644 Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -620,7 +621,7 @@ describe('ERC1644 Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,

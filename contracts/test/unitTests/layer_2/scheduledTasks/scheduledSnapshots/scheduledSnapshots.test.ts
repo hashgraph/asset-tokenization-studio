@@ -208,7 +208,6 @@ import { ethers } from 'hardhat'
 import {
     type ResolverProxy,
     type Equity,
-    type Pause,
     type ScheduledSnapshots,
     type AccessControl,
     ScheduledTasks,
@@ -226,6 +225,7 @@ import {
 } from '../../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { MAX_UINT256 } from '../../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const TIME = 6000
 
@@ -243,7 +243,6 @@ describe('Scheduled Snapshots Tests', () => {
     let scheduledSnapshotsFacet: ScheduledSnapshots
     let scheduledTasksFacet: ScheduledTasks
     let accessControlFacet: AccessControl
-    let pauseFacet: Pause
 
     beforeEach(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -268,7 +267,7 @@ describe('Scheduled Snapshots Tests', () => {
             'TEST_AccessControl',
             'TAC',
             6,
-            'SJ5633813320',
+            isinGenerator(),
             false,
             false,
             false,
@@ -303,8 +302,6 @@ describe('Scheduled Snapshots Tests', () => {
             'ScheduledTasks',
             diamond.address
         )
-
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
     })
 
     it('GIVEN a token WHEN triggerSnapshots THEN transaction succeeds', async () => {

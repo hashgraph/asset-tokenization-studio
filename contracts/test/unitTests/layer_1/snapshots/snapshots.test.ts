@@ -229,6 +229,8 @@ import {
     grantRoleAndPauseToken,
     MAX_UINT256,
 } from '../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -274,7 +276,7 @@ describe('Snapshots Tests', () => {
             'TEST_AccessControl',
             'TAC',
             6,
-            'SJ5633813320',
+            isinGenerator(),
             false,
             false,
             false,

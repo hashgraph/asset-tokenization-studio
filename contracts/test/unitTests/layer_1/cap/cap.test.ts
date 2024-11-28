@@ -225,6 +225,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const maxSupply = 1
 const maxSupplyByPartition = 1
@@ -269,7 +270,7 @@ describe('CAP Tests', () => {
             'TEST_AccessControl',
             'TAC',
             6,
-            'SJ5633813320',
+            isinGenerator(),
             false,
             false,
             false,
@@ -316,7 +317,7 @@ describe('CAP Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -484,7 +485,7 @@ describe('CAP Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,
