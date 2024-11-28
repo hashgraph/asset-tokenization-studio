@@ -696,7 +696,7 @@ describe('ERC1400 Tests', () => {
             false,
             1,
             '0x345678',
-            0,
+            MAX_UINT256,
             100,
             RegulationType.REG_D,
             RegulationSubType.REG_D_506_B,

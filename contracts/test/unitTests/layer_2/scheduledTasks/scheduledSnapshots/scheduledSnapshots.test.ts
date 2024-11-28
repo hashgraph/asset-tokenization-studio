@@ -225,7 +225,7 @@ import {
     RegulationType,
 } from '../../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { MAX_UINT256 } from '../../../../scripts/testCommon'
+import { MAX_UINT256 } from '../../../../../scripts/testCommon'
 
 const TIME = 6000
 
