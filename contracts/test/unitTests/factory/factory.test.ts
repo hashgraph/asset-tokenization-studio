@@ -264,7 +264,7 @@ describe('Factory Tests', () => {
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
     const decimals = 6
-    const isin = 'ABCDEF123456'
+    const isin = 'SJ5633813320'
     const isWhitelist = false
     const isControllable = true
     const isMultiPartition = false
@@ -455,6 +455,10 @@ describe('Factory Tests', () => {
             await expect(
                 factory.deployEquity(equityData, factoryRegulationData)
             ).to.be.rejectedWith('WrongISIN')
+            equityData.security.erc20MetadataInfo.isin = 'SJ5633813321'
+            await expect(
+                factory.deployEquity(equityData, factoryRegulationData)
+            ).to.be.rejectedWith('WrongISINChecksum')
         })
 
         it('GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails', async () => {
@@ -754,6 +758,10 @@ describe('Factory Tests', () => {
             await expect(
                 factory.deployBond(bondData, factoryRegulationData)
             ).to.be.rejectedWith('WrongISIN')
+            bondData.security.erc20MetadataInfo.isin = 'SJ5633813321'
+            await expect(
+                factory.deployBond(bondData, factoryRegulationData)
+            ).to.be.rejectedWith('WrongISINChecksum')
         })
 
         it('GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails', async () => {

@@ -303,7 +303,7 @@ describe('Bond Tests', () => {
             'TEST_AccessControl',
             'TAC',
             6,
-            'ABCDEF123456',
+            'SJ5633813320',
             '0x455552',
             numberOfUnits,
             100,

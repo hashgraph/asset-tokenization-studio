@@ -203,230 +203,68 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import {
-    type ResolverProxy,
-    type ControlList,
-    type Pause,
-    AccessControl,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
-import { _CONTROL_LIST_ROLE, _PAUSER_ROLE } from '../../../../scripts/constants'
-import {
-    deployEquityFromFactory,
-    Rbac,
-    RegulationSubType,
-    RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import {
-    grantRoleAndPauseToken,
-    MAX_UINT256,
-} from '../../../../scripts/testCommon'
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
 
-describe('Control List Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
-    let signer_D: SignerWithAddress
-    let signer_E: SignerWithAddress
+import {_ISIN_LENGTH} from '../layer_1/constants/values.sol';
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
-    let account_D: string
-    let account_E: string
+error WrongISIN(string isin);
+error WrongISINChecksum(string isin);
 
-    let controlListFacet: ControlList
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
+function validateISIN(string calldata _isin) pure {
+    checkLength(_isin);
+    checkChecksum(_isin);
+}
 
-    beforeEach(async () => {
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
-            await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-        account_D = signer_D.address
-        account_E = signer_E.address
+function checkLength(string calldata _isin) pure {
+    if (bytes(_isin).length != _ISIN_LENGTH) {
+        revert WrongISIN(_isin);
+    }
+}
 
-        await deployEnvironment()
+function checkChecksum(string calldata _isin) pure {
+    bytes memory isin = bytes(_isin);
+    (uint8[] memory conv, uint8 convLength) = convertISINToNumber(isin);
+    if (byteToCode(isin[11]) != calculateChecksum(conv, convLength)) {
+        revert WrongISINChecksum(_isin);
+    }
+}
 
-        const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
-            members: [account_B],
+function convertISINToNumber(
+    bytes memory _isin
+) pure returns (uint8[] memory conv_, uint8 convLength_) {
+    conv_ = new uint8[](24);
+    for (uint256 index; index < 11; ++index) {
+        uint8 code = byteToCode(_isin[index]);
+        if (code > 10) {
+            conv_[convLength_] = code / 10;
+            conv_[++convLength_] = (code % 10);
+        } else {
+            conv_[convLength_] = code;
         }
-        const init_rbacs: Rbac[] = [rbacPause]
+        ++convLength_;
+    }
+}
 
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            'TEST_AccessControl',
-            'TAC',
-            6,
-            'SJ5633813320',
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            MAX_UINT256,
-            100,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_C,
-            true,
-            'ES,FR,CH',
-            'nothing',
-            init_rbacs
-        )
+function calculateChecksum(
+    uint8[] memory _conv,
+    uint8 _convLength
+) pure returns (uint8 checksum_) {
+    uint256 pairing = (_convLength + 1) % 2;
+    uint256 checksum;
+    for (uint256 index; index < _convLength; ++index) {
+        uint8 code = _conv[index] * ((index % 2) == pairing ? 2 : 1);
+        if (code > 9) {
+            checksum += code / 10;
+            checksum += (code % 10);
+        } else {
+            checksum += code;
+        }
+    }
+    checksum_ = uint8((10 - (checksum % 10)) % 10);
+}
 
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
-        )
-
-        controlListFacet = await ethers.getContractAt(
-            'ControlList',
-            diamond.address
-        )
-
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-    })
-
-    it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {
-        await expect(
-            controlListFacet.initialize_ControlList(true)
-        ).to.be.rejectedWith('AlreadyInitialized')
-    })
-
-    it('GIVEN an account without controlList role WHEN addToControlList THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non role)
-        controlListFacet = controlListFacet.connect(signer_C)
-
-        // add to list fails
-        await expect(
-            controlListFacet.addToControlList(account_D)
-        ).to.be.rejectedWith('AccountHasNoRole')
-    })
-
-    it('GIVEN an account without controlList role WHEN removeFromControlList THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non role)
-        controlListFacet = controlListFacet.connect(signer_C)
-
-        // remove From list fails
-        await expect(
-            controlListFacet.removeFromControlList(account_D)
-        ).to.be.rejectedWith('AccountHasNoRole')
-    })
-
-    it('GIVEN a paused Token WHEN addToControlList THEN transaction fails with TokenIsPaused', async () => {
-        // Granting Role to account C and Pause
-        await grantRoleAndPauseToken(
-            accessControlFacet,
-            pauseFacet,
-            _CONTROL_LIST_ROLE,
-            signer_A,
-            signer_B,
-            account_C
-        )
-
-        // Using account C (with role)
-        controlListFacet = controlListFacet.connect(signer_C)
-
-        // add to list fails
-        await expect(
-            controlListFacet.addToControlList(account_D)
-        ).to.be.rejectedWith('TokenIsPaused')
-    })
-
-    it('GIVEN a paused Token WHEN removeFromControlList THEN transaction fails with TokenIsPaused', async () => {
-        // Granting Role to account C and Pause
-        await grantRoleAndPauseToken(
-            accessControlFacet,
-            pauseFacet,
-            _CONTROL_LIST_ROLE,
-            signer_A,
-            signer_B,
-            account_C
-        )
-
-        // Using account C (with role)
-        controlListFacet = controlListFacet.connect(signer_C)
-
-        // remove from list fails
-        await expect(
-            controlListFacet.removeFromControlList(account_D)
-        ).to.be.rejectedWith('TokenIsPaused')
-    })
-
-    it('GIVEN an account with controlList role WHEN addToControlList and removeFromControlList THEN transaction succeeds', async () => {
-        // ADD TO LIST ------------------------------------------------------------------
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_CONTROL_LIST_ROLE, account_C)
-        // Using account C (with role)
-        controlListFacet = controlListFacet.connect(signer_C)
-
-        // check that D and E are not in the list
-        let check_D = await controlListFacet.isInControlList(account_D)
-        expect(check_D).to.equal(false)
-        let check_E = await controlListFacet.isInControlList(account_E)
-        expect(check_E).to.equal(false)
-
-        // add to list
-        await expect(controlListFacet.addToControlList(account_D))
-            .to.emit(controlListFacet, 'AddedToControlList')
-            .withArgs(account_C, account_D)
-        await expect(controlListFacet.addToControlList(account_E))
-            .to.emit(controlListFacet, 'AddedToControlList')
-            .withArgs(account_C, account_E)
-
-        // check that D and E are in the list
-        check_D = await controlListFacet.isInControlList(account_D)
-        expect(check_D).to.equal(true)
-        check_E = await controlListFacet.isInControlList(account_E)
-        expect(check_E).to.equal(true)
-        // check list members
-        let listCount = await controlListFacet.getControlListCount()
-        let listMembers = await controlListFacet.getControlListMembers(
-            0,
-            listCount
-        )
-
-        expect(listCount).to.equal(2)
-        expect(listMembers.length).to.equal(listCount)
-        expect(listMembers[0].toUpperCase()).to.equal(account_D.toUpperCase())
-        expect(listMembers[1].toUpperCase()).to.equal(account_E.toUpperCase())
-
-        // REMOVE FROM LIST ------------------------------------------------------------------
-        // remove From list
-        await expect(controlListFacet.removeFromControlList(account_D))
-            .to.emit(controlListFacet, 'RemovedFromControlList')
-            .withArgs(account_C, account_D)
-
-        // check that D is not in the list
-        check_D = await controlListFacet.isInControlList(account_D)
-        expect(check_D).to.equal(false)
-
-        // check list members
-        listCount = await controlListFacet.getControlListCount()
-        listMembers = await controlListFacet.getControlListMembers(0, listCount)
-
-        expect(listCount).to.equal(1)
-        expect(listMembers.length).to.equal(listCount)
-        expect(listMembers[0].toUpperCase()).to.equal(account_E.toUpperCase())
-
-        // CHECK LIST TYPE ------------------------------------------------------------------
-        const listType = await controlListFacet.getControlListType()
-        expect(listType).to.equal(false)
-    })
-})
+function byteToCode(bytes1 _character) pure returns (uint8 code_) {
+    code_ = uint8(_character);
+    code_ = code_ > 57 ? code_ - 55 : code_ - 48;
+}
