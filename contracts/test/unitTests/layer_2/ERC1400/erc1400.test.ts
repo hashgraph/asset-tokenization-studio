@@ -469,7 +469,9 @@ describe('ERC1400 Tests', () => {
         after: BalanceAdjustedValues,
         before: BalanceAdjustedValues
     ) {
+        // Has been adjusted 2 times
         const factorSquared = BigNumber.from(adjustFactor).pow(2)
+        const doubleDecimals = 2 * adjustDecimals
 
         expect(after.maxSupply).to.be.equal(before.maxSupply.mul(factorSquared))
         expect(after.maxSupply_Partition_1).to.be.equal(
@@ -509,7 +511,7 @@ describe('ERC1400 Tests', () => {
             before.balanceOf_B_Partition_2.mul(factorSquared)
         )
 
-        expect(after.decimals).to.be.equal(before.decimals + 2 * adjustDecimals)
+        expect(after.decimals).to.be.equal(before.decimals + doubleDecimals)
         expect(after.metadata?.info?.decimals).to.be.equal(after.decimals)
     }
 
@@ -544,7 +546,7 @@ describe('ERC1400 Tests', () => {
         )
 
         expect(after.totalSupply).to.be.equal(
-            before.totalSupply.mul(adjustFactor)
+            before.totalSupply.mul(adjustFactor).sub(balanceReduction)
         )
         expect(after.totalSupply_Partition_1).to.be.equal(
             before.totalSupply_Partition_1
@@ -556,7 +558,7 @@ describe('ERC1400 Tests', () => {
         )
 
         expect(after.balanceOf_A).to.be.equal(
-            before.balanceOf_A.mul(adjustFactor)
+            before.balanceOf_A.mul(adjustFactor).sub(subtractedAmount)
         )
         expect(after.balanceOf_A_Partition_1).to.be.equal(
             before.balanceOf_A_Partition_1
@@ -568,10 +570,10 @@ describe('ERC1400 Tests', () => {
         )
 
         expect(after.balanceOf_B).to.be.equal(
-            before.balanceOf_B.mul(adjustFactor)
+            before.balanceOf_B.mul(adjustFactor).add(addedAmount)
         )
         expect(after.balanceOf_B_Partition_1).to.be.equal(
-            before.balanceOf_B_Partition_1.mul(adjustFactor)
+            before.balanceOf_B_Partition_1.mul(adjustFactor).add(addedAmount)
         )
         expect(after.balanceOf_B_Partition_2).to.be.equal(
             before.balanceOf_B_Partition_2.mul(adjustFactor)
