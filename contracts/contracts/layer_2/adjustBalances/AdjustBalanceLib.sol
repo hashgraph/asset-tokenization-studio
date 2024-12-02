@@ -410,14 +410,17 @@ library AdjustBalanceLib {
         factor_ = _ABAF / _LABAF;
     }
 
-    function _getPendingScheduledBalanceAdjustments(
+    function _getPendingScheduledBalanceAdjustmentsAt(
         ScheduledTasksLib.ScheduledTasksDataStorage
             storage _scheduledBalanceAdjustments,
-        CorporateActionDataStorage storage _corporateActions
+        CorporateActionDataStorage storage _corporateActions,
+        uint256 _timestamp
     ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
         // * Initialization
         pendingABAF_ = 1;
         pendingDecimals_ = 0;
+        uint256 timestamp = _timestamp;
+        if (timestamp == 0) timestamp = block.timestamp;
 
         uint256 scheduledTaskCount = ScheduledTasksLib._getScheduledTaskCount(
             _scheduledBalanceAdjustments
@@ -433,7 +436,7 @@ library AdjustBalanceLib {
                         pos
                     );
 
-            if (scheduledTask.scheduledTimestamp < block.timestamp) {
+            if (scheduledTask.scheduledTimestamp < timestamp) {
                 bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
 
                 bytes memory balanceAdjustmentData = _corporateActions

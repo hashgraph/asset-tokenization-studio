@@ -312,7 +312,10 @@ abstract contract EquityStorageWrapper is
 
             dividendFor_.tokenBalance = (registeredDividend.snapshotId != 0)
                 ? _balanceOfAtSnapshot(registeredDividend.snapshotId, _account)
-                : _balanceOfAdjusted(_account);
+                : _balanceOfAdjustedAt(
+                    _account,
+                    registeredDividend.dividend.recordDate
+                );
         }
     }
 
@@ -380,7 +383,10 @@ abstract contract EquityStorageWrapper is
 
             votingFor_.tokenBalance = (registeredVoting.snapshotId != 0)
                 ? _balanceOfAtSnapshot(registeredVoting.snapshotId, _account)
-                : _balanceOf(_account);
+                : _balanceOfAdjustedAt(
+                    _account,
+                    registeredVoting.voting.recordDate
+                );
         }
     }
 

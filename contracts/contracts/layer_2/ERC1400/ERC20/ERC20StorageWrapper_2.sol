@@ -307,15 +307,29 @@ abstract contract ERC20StorageWrapper_2 is
     }
 
     function _decimalsAdjusted() internal view virtual returns (uint8) {
-        return _getERC20MetadataAdjusted().info.decimals;
+        return _decimalsAdjustedAt(0);
+    }
+
+    function _decimalsAdjustedAt(
+        uint256 _timestamp
+    ) internal view virtual returns (uint8) {
+        return _getERC20MetadataAdjustedAt(_timestamp).info.decimals;
     }
 
     function _allowanceAdjusted(
         address _owner,
         address _spender
     ) internal view virtual returns (uint256) {
+        return _allowanceAdjustedAt(_owner, _spender, 0);
+    }
+
+    function _allowanceAdjustedAt(
+        address _owner,
+        address _spender,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
+            _getABAFAdjustedAt(_timestamp),
             _getAllowanceLABAF(_owner, _spender)
         );
         return _allowance(_owner, _spender) * factor;
@@ -340,10 +354,22 @@ abstract contract ERC20StorageWrapper_2 is
         virtual
         returns (IERC20.ERC20Metadata memory erc20Metadata_)
     {
+        erc20Metadata_ = _getERC20MetadataAdjustedAt(0);
+    }
+
+    function _getERC20MetadataAdjustedAt(
+        uint256 _timestamp
+    )
+        internal
+        view
+        virtual
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+    {
         (, uint8 pendingDecimals) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
+            ._getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
+                _corporateActionsStorage(),
+                _timestamp
             );
         erc20Metadata_ = super._getERC20Metadata();
         erc20Metadata_.info.decimals += pendingDecimals;

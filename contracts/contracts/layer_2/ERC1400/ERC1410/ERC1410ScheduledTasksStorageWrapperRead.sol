@@ -247,12 +247,19 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
     }
 
     function _getABAFAdjusted() internal view virtual returns (uint256) {
+        return _getABAFAdjustedAt(0);
+    }
+
+    function _getABAFAdjustedAt(
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
         uint256 ABAF = _getABAF();
         if (ABAF == 0) ABAF = 1;
         (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
+            ._getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
+                _corporateActionsStorage(),
+                _timestamp
             );
         return ABAF * pendingABAF;
     }
@@ -287,8 +294,15 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
     function _balanceOfAdjusted(
         address _tokenHolder
     ) internal view virtual returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, 0);
+    }
+
+    function _balanceOfAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
+            _getABAFAdjustedAt(_timestamp),
             _getLABAFForUser(_tokenHolder)
         );
         return _balanceOf(_tokenHolder) * factor;
@@ -298,8 +312,16 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256) {
+        return _balanceOfByPartitionAdjustedAt(_partition, _tokenHolder, 0);
+    }
+
+    function _balanceOfByPartitionAdjustedAt(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
+            _getABAFAdjustedAt(_timestamp),
             _getLABAFForUserAndPartition(_partition, _tokenHolder)
         );
         return _balanceOfByPartition(_partition, _tokenHolder) * factor;
