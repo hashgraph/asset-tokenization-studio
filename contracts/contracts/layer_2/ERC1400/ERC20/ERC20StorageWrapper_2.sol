@@ -206,6 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {
     ERC20StorageWrapper
 } from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
@@ -306,13 +307,7 @@ abstract contract ERC20StorageWrapper_2 is
     }
 
     function _decimalsAdjusted() internal view virtual returns (uint8) {
-        (, uint8 pendingDecimals) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
-                _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
-            );
-
-        return _decimals() + pendingDecimals;
+        return _getERC20MetadataAdjusted().info.decimals;
     }
 
     function _allowanceAdjusted(
@@ -337,5 +332,20 @@ abstract contract ERC20StorageWrapper_2 is
         assembly {
             erc20Storage_2_.slot := position
         }
+    }
+
+    function _getERC20MetadataAdjusted()
+        internal
+        view
+        virtual
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+    {
+        (, uint8 pendingDecimals) = AdjustBalanceLib
+            ._getPendingScheduledBalanceAdjustments(
+                _scheduledBalanceAdjustmentStorage(),
+                _corporateActionsStorage()
+            );
+        erc20Metadata_ = super._getERC20Metadata();
+        erc20Metadata_.info.decimals += pendingDecimals;
     }
 }
