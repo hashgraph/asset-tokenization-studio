@@ -215,10 +215,9 @@ import {
     ERC20_2,
     ERC1594,
     ERC1644,
-    Lock_2,
     AdjustBalances,
     Cap_2,
-    ScheduledBalanceAdjustments,
+    IERC20,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
@@ -249,6 +248,7 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { ADDRESS_0 } from '../../../../scripts/constants'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+import { BigNumber } from 'ethers'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -269,6 +269,23 @@ const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
+
+interface BalanceAdjustedValues {
+    maxSupply: BigNumber
+    maxSupply_Partition_1: BigNumber
+    maxSupply_Partition_2: BigNumber
+    totalSupply: BigNumber
+    totalSupply_Partition_1: BigNumber
+    totalSupply_Partition_2: BigNumber
+    balanceOf_A: BigNumber
+    balanceOf_A_Partition_1: BigNumber
+    balanceOf_A_Partition_2: BigNumber
+    balanceOf_B: BigNumber
+    balanceOf_B_Partition_1: BigNumber
+    balanceOf_B_Partition_2: BigNumber
+    decimals: number
+    metadata?: IERC20.ERC20MetadataStructOutput
+}
 
 describe('ERC1400 Tests', () => {
     let diamond: ResolverProxy
@@ -348,7 +365,10 @@ describe('ERC1400 Tests', () => {
             )
     }
 
-    async function getBalanceAdjustedValues(): Promise<any[]> {
+    /**
+     * Retrieves and returns various balance and supply values adjusted for partitions.
+     */
+    async function getBalanceAdjustedValues(): Promise<BalanceAdjustedValues> {
         const maxSupply = await capFacet.getMaxSupply()
         const maxSupply_Partition_1 = await capFacet.getMaxSupplyByPartition(
             _PARTITION_ID_1
@@ -385,7 +405,9 @@ describe('ERC1400 Tests', () => {
 
         const decimals = await erc20Facet.decimals()
 
-        return [
+        const metadata = await erc20Facet.getERC20Metadata()
+
+        return {
             maxSupply,
             maxSupply_Partition_1,
             maxSupply_Partition_2,
@@ -399,277 +421,138 @@ describe('ERC1400 Tests', () => {
             balanceOf_B_Partition_1,
             balanceOf_B_Partition_2,
             decimals,
-        ]
+            metadata,
+        }
     }
 
     async function checkAdjustmentsAfterBalanceAdjustment(
-        maxSupply_After: any,
-        maxSupply_Partition_1_After: any,
-        maxSupply_Partition_2_After: any,
-        totalSupply_After: any,
-        totalSupply_Partition_1_After: any,
-        totalSupply_Partition_2_After: any,
-        balanceOf_A_After: any,
-        balanceOf_A_Partition_1_After: any,
-        balanceOf_A_Partition_2_After: any,
-        balanceOf_B_After: any,
-        balanceOf_B_Partition_1_After: any,
-        balanceOf_B_Partition_2_After: any,
-        decimals_After: any,
-        maxSupply_Before: any,
-        maxSupply_Partition_1_Before: any,
-        maxSupply_Partition_2_Before: any,
-        totalSupply_Before: any,
-        totalSupply_Partition_1_Before: any,
-        totalSupply_Partition_2_Before: any,
-        balanceOf_A_Before: any,
-        balanceOf_A_Partition_1_Before: any,
-        balanceOf_A_Partition_2_Before: any,
-        balanceOf_B_Before: any,
-        balanceOf_B_Partition_1_Before: any,
-        balanceOf_B_Partition_2_Before: any,
-        decimals_Before: any
+        after: BalanceAdjustedValues,
+        before: BalanceAdjustedValues
     ) {
-        expect(maxSupply_After).to.be.equal(
-            maxSupply_Before.mul(adjustFactor * adjustFactor)
+        expect(after.maxSupply).to.be.equal(
+            before.maxSupply.mul(adjustFactor * adjustFactor)
         )
-        expect(maxSupply_Partition_1_After).to.be.equal(
-            maxSupply_Partition_1_Before.mul(adjustFactor * adjustFactor)
+        expect(after.maxSupply_Partition_1).to.be.equal(
+            before.maxSupply_Partition_1.mul(adjustFactor * adjustFactor)
         )
-        expect(maxSupply_Partition_2_After).to.be.equal(
-            maxSupply_Partition_2_Before.mul(adjustFactor * adjustFactor)
-        )
-
-        expect(totalSupply_After).to.be.equal(
-            totalSupply_Before.mul(adjustFactor * adjustFactor)
-        )
-        expect(totalSupply_Partition_1_After).to.be.equal(
-            totalSupply_Partition_1_Before.mul(adjustFactor * adjustFactor)
-        )
-        expect(totalSupply_Partition_2_After).to.be.equal(
-            totalSupply_Partition_2_Before.mul(adjustFactor * adjustFactor)
+        expect(after.maxSupply_Partition_2).to.be.equal(
+            before.maxSupply_Partition_2.mul(adjustFactor * adjustFactor)
         )
 
-        expect(balanceOf_A_After).to.be.equal(
-            balanceOf_A_Before.mul(adjustFactor * adjustFactor)
+        expect(after.totalSupply).to.be.equal(
+            before.totalSupply.mul(adjustFactor * adjustFactor)
         )
-        expect(balanceOf_A_Partition_1_After).to.be.equal(
-            balanceOf_A_Partition_1_Before.mul(adjustFactor * adjustFactor)
+        expect(after.totalSupply_Partition_1).to.be.equal(
+            before.totalSupply_Partition_1.mul(adjustFactor * adjustFactor)
         )
-        expect(balanceOf_A_Partition_2_After).to.be.equal(
-            balanceOf_A_Partition_2_Before.mul(adjustFactor * adjustFactor)
-        )
-
-        expect(balanceOf_B_After).to.be.equal(
-            balanceOf_B_Before.mul(adjustFactor * adjustFactor)
-        )
-        expect(balanceOf_B_Partition_1_After).to.be.equal(
-            balanceOf_B_Partition_1_Before.mul(adjustFactor * adjustFactor)
-        )
-        expect(balanceOf_B_Partition_2_After).to.be.equal(
-            balanceOf_B_Partition_2_Before.mul(adjustFactor * adjustFactor)
+        expect(after.totalSupply_Partition_2).to.be.equal(
+            before.totalSupply_Partition_2.mul(adjustFactor * adjustFactor)
         )
 
-        expect(decimals_After).to.be.equal(
-            decimals_Before + adjustDecimals + adjustDecimals
+        expect(after.balanceOf_A).to.be.equal(
+            before.balanceOf_A.mul(adjustFactor * adjustFactor)
+        )
+        expect(after.balanceOf_A_Partition_1).to.be.equal(
+            before.balanceOf_A_Partition_1.mul(adjustFactor * adjustFactor)
+        )
+        expect(after.balanceOf_A_Partition_2).to.be.equal(
+            before.balanceOf_A_Partition_2.mul(adjustFactor * adjustFactor)
+        )
+
+        expect(after.balanceOf_B).to.be.equal(
+            before.balanceOf_B.mul(adjustFactor * adjustFactor)
+        )
+        expect(after.balanceOf_B_Partition_1).to.be.equal(
+            before.balanceOf_B_Partition_1.mul(adjustFactor * adjustFactor)
+        )
+        expect(after.balanceOf_B_Partition_2).to.be.equal(
+            before.balanceOf_B_Partition_2.mul(adjustFactor * adjustFactor)
+        )
+
+        expect(after.decimals).to.be.equal(
+            before.decimals + adjustDecimals + adjustDecimals
+        )
+        expect(after.metadata).not.to.be.undefined
+        expect(after.metadata?.info).not.to.be.undefined
+        expect(after.metadata?.info?.decimals).not.to.be.undefined
+        expect(after.metadata?.info?.decimals).to.be.equal(after.decimals)
+        expect(after.metadata?.info?.decimals).to.be.equal(
+            before.decimals + adjustDecimals
         )
     }
 
     async function checkAdjustmentsAfterTransfer(
-        maxSupply_After: any,
-        maxSupply_Partition_1_After: any,
-        maxSupply_Partition_2_After: any,
-        totalSupply_After: any,
-        totalSupply_Partition_1_After: any,
-        totalSupply_Partition_2_After: any,
-        balanceOf_A_After: any,
-        balanceOf_A_Partition_1_After: any,
-        balanceOf_A_Partition_2_After: any,
-        balanceOf_B_After: any,
-        balanceOf_B_Partition_1_After: any,
-        balanceOf_B_Partition_2_After: any,
-        decimals_After: any,
-        maxSupply_Before: any,
-        maxSupply_Partition_1_Before: any,
-        maxSupply_Partition_2_Before: any,
-        totalSupply_Before: any,
-        totalSupply_Partition_1_Before: any,
-        totalSupply_Partition_2_Before: any,
-        balanceOf_A_Before: any,
-        balanceOf_A_Partition_1_Before: any,
-        balanceOf_A_Partition_2_Before: any,
-        balanceOf_B_Before: any,
-        balanceOf_B_Partition_1_Before: any,
-        balanceOf_B_Partition_2_Before: any,
-        decimals_Before: any
+        after: BalanceAdjustedValues,
+        before: BalanceAdjustedValues
     ) {
-        await checkAdjustmentsAfterOperations(
-            maxSupply_After,
-            maxSupply_Partition_1_After,
-            maxSupply_Partition_2_After,
-            totalSupply_After,
-            totalSupply_Partition_1_After,
-            totalSupply_Partition_2_After,
-            balanceOf_A_After,
-            balanceOf_A_Partition_1_After,
-            balanceOf_A_Partition_2_After,
-            balanceOf_B_After,
-            balanceOf_B_Partition_1_After,
-            balanceOf_B_Partition_2_After,
-            decimals_After,
-            maxSupply_Before,
-            maxSupply_Partition_1_Before,
-            maxSupply_Partition_2_Before,
-            totalSupply_Before,
-            totalSupply_Partition_1_Before,
-            totalSupply_Partition_2_Before,
-            balanceOf_A_Before,
-            balanceOf_A_Partition_1_Before,
-            balanceOf_A_Partition_2_Before,
-            balanceOf_B_Before,
-            balanceOf_B_Partition_1_Before,
-            balanceOf_B_Partition_2_Before,
-            decimals_Before,
-            amount,
-            amount
-        )
+        await checkAdjustmentsAfterOperations(after, before, amount, amount)
     }
 
     async function checkAdjustmentsAfterRedeem(
-        maxSupply_After: any,
-        maxSupply_Partition_1_After: any,
-        maxSupply_Partition_2_After: any,
-        totalSupply_After: any,
-        totalSupply_Partition_1_After: any,
-        totalSupply_Partition_2_After: any,
-        balanceOf_A_After: any,
-        balanceOf_A_Partition_1_After: any,
-        balanceOf_A_Partition_2_After: any,
-        balanceOf_B_After: any,
-        balanceOf_B_Partition_1_After: any,
-        balanceOf_B_Partition_2_After: any,
-        decimals_After: any,
-        maxSupply_Before: any,
-        maxSupply_Partition_1_Before: any,
-        maxSupply_Partition_2_Before: any,
-        totalSupply_Before: any,
-        totalSupply_Partition_1_Before: any,
-        totalSupply_Partition_2_Before: any,
-        balanceOf_A_Before: any,
-        balanceOf_A_Partition_1_Before: any,
-        balanceOf_A_Partition_2_Before: any,
-        balanceOf_B_Before: any,
-        balanceOf_B_Partition_1_Before: any,
-        balanceOf_B_Partition_2_Before: any,
-        decimals_Before: any
+        after: BalanceAdjustedValues,
+        before: BalanceAdjustedValues
     ) {
-        await checkAdjustmentsAfterOperations(
-            maxSupply_After,
-            maxSupply_Partition_1_After,
-            maxSupply_Partition_2_After,
-            totalSupply_After,
-            totalSupply_Partition_1_After,
-            totalSupply_Partition_2_After,
-            balanceOf_A_After,
-            balanceOf_A_Partition_1_After,
-            balanceOf_A_Partition_2_After,
-            balanceOf_B_After,
-            balanceOf_B_Partition_1_After,
-            balanceOf_B_Partition_2_After,
-            decimals_After,
-            maxSupply_Before,
-            maxSupply_Partition_1_Before,
-            maxSupply_Partition_2_Before,
-            totalSupply_Before,
-            totalSupply_Partition_1_Before,
-            totalSupply_Partition_2_Before,
-            balanceOf_A_Before,
-            balanceOf_A_Partition_1_Before,
-            balanceOf_A_Partition_2_Before,
-            balanceOf_B_Before,
-            balanceOf_B_Partition_1_Before,
-            balanceOf_B_Partition_2_Before,
-            decimals_Before,
-            amount,
-            0
-        )
+        await checkAdjustmentsAfterOperations(after, before, amount, 0)
     }
 
     async function checkAdjustmentsAfterOperations(
-        maxSupply_After: any,
-        maxSupply_Partition_1_After: any,
-        maxSupply_Partition_2_After: any,
-        totalSupply_After: any,
-        totalSupply_Partition_1_After: any,
-        totalSupply_Partition_2_After: any,
-        balanceOf_A_After: any,
-        balanceOf_A_Partition_1_After: any,
-        balanceOf_A_Partition_2_After: any,
-        balanceOf_B_After: any,
-        balanceOf_B_Partition_1_After: any,
-        balanceOf_B_Partition_2_After: any,
-        decimals_After: any,
-        maxSupply_Before: any,
-        maxSupply_Partition_1_Before: any,
-        maxSupply_Partition_2_Before: any,
-        totalSupply_Before: any,
-        totalSupply_Partition_1_Before: any,
-        totalSupply_Partition_2_Before: any,
-        balanceOf_A_Before: any,
-        balanceOf_A_Partition_1_Before: any,
-        balanceOf_A_Partition_2_Before: any,
-        balanceOf_B_Before: any,
-        balanceOf_B_Partition_1_Before: any,
-        balanceOf_B_Partition_2_Before: any,
-        decimals_Before: any,
-        subustracted_Amount: any,
-        added_Amount: any
+        after: BalanceAdjustedValues,
+        before: BalanceAdjustedValues,
+        subustracted_Amount: number,
+        added_Amount: number
     ) {
         const balanceReduction = subustracted_Amount - added_Amount
 
-        expect(maxSupply_After).to.be.equal(maxSupply_Before.mul(adjustFactor))
-        expect(maxSupply_Partition_1_After).to.be.equal(
-            maxSupply_Partition_1_Before.mul(adjustFactor)
+        expect(after.maxSupply).to.be.equal(before.maxSupply.mul(adjustFactor))
+        expect(after.maxSupply_Partition_1).to.be.equal(
+            before.maxSupply_Partition_1.mul(adjustFactor)
         )
-        expect(maxSupply_Partition_2_After).to.be.equal(
-            maxSupply_Partition_2_Before.mul(adjustFactor)
+        expect(after.maxSupply_Partition_2).to.be.equal(
+            before.maxSupply_Partition_2.mul(adjustFactor)
         )
 
-        expect(totalSupply_After).to.be.equal(
-            totalSupply_Before.mul(adjustFactor).sub(balanceReduction)
+        expect(after.totalSupply).to.be.equal(
+            before.totalSupply.mul(adjustFactor).sub(balanceReduction)
         )
-        expect(totalSupply_Partition_1_After).to.be.equal(
-            totalSupply_Partition_1_Before
+        expect(after.totalSupply_Partition_1).to.be.equal(
+            before.totalSupply_Partition_1
                 .mul(adjustFactor)
                 .sub(balanceReduction)
         )
-        expect(totalSupply_Partition_2_After).to.be.equal(
-            totalSupply_Partition_2_Before.mul(adjustFactor)
+        expect(after.totalSupply_Partition_2).to.be.equal(
+            before.totalSupply_Partition_2.mul(adjustFactor)
         )
 
-        expect(balanceOf_A_After).to.be.equal(
-            balanceOf_A_Before.mul(adjustFactor).sub(subustracted_Amount)
+        expect(after.balanceOf_A).to.be.equal(
+            before.balanceOf_A.mul(adjustFactor).sub(subustracted_Amount)
         )
-        expect(balanceOf_A_Partition_1_After).to.be.equal(
-            balanceOf_A_Partition_1_Before
+        expect(after.balanceOf_A_Partition_1).to.be.equal(
+            before.balanceOf_A_Partition_1
                 .mul(adjustFactor)
                 .sub(subustracted_Amount)
         )
-        expect(balanceOf_A_Partition_2_After).to.be.equal(
-            balanceOf_A_Partition_2_Before.mul(adjustFactor)
+        expect(after.balanceOf_A_Partition_2).to.be.equal(
+            before.balanceOf_A_Partition_2.mul(adjustFactor)
         )
 
-        expect(balanceOf_B_After).to.be.equal(
-            balanceOf_B_Before.mul(adjustFactor).add(added_Amount)
+        expect(after.balanceOf_B).to.be.equal(
+            before.balanceOf_B.mul(adjustFactor).add(added_Amount)
         )
-        expect(balanceOf_B_Partition_1_After).to.be.equal(
-            balanceOf_B_Partition_1_Before.mul(adjustFactor).add(added_Amount)
+        expect(after.balanceOf_B_Partition_1).to.be.equal(
+            before.balanceOf_B_Partition_1.mul(adjustFactor).add(added_Amount)
         )
-        expect(balanceOf_B_Partition_2_After).to.be.equal(
-            balanceOf_B_Partition_2_Before.mul(adjustFactor)
+        expect(after.balanceOf_B_Partition_2).to.be.equal(
+            before.balanceOf_B_Partition_2.mul(adjustFactor)
         )
 
-        expect(decimals_After).to.be.equal(decimals_Before + adjustDecimals)
+        expect(after.decimals).to.be.equal(before.decimals + adjustDecimals)
+        expect(after.metadata).not.to.be.undefined
+        expect(after.metadata?.info).not.to.be.undefined
+        expect(after.metadata?.info?.decimals).not.to.be.undefined
+        expect(after.metadata?.info?.decimals).to.be.equal(after.decimals)
+        expect(after.metadata?.info?.decimals).to.be.equal(
+            before.decimals + adjustDecimals
+        )
     }
 
     async function deployAsset(multiPartition: boolean) {
@@ -2639,21 +2522,8 @@ describe('ERC1400 Tests', () => {
             await setPreBalanceAdjustment()
 
             // Before Values
-            const [
-                maxSupply_Before,
-                maxSupply_Partition_1_Before,
-                maxSupply_Partition_2_Before,
-                totalSupply_Before,
-                totalSupply_Partition_1_Before,
-                totalSupply_Partition_2_Before,
-                balanceOf_A_Before,
-                balanceOf_A_Partition_1_Before,
-                balanceOf_A_Partition_2_Before,
-                balanceOf_B_Before,
-                balanceOf_B_Partition_1_Before,
-                balanceOf_B_Partition_2_Before,
-                decimals_Before,
-            ] = await getBalanceAdjustedValues()
+            const before: BalanceAdjustedValues =
+                await getBalanceAdjustedValues()
 
             // adjustBalances
             await adjustBalancesFacet.adjustBalances(
@@ -2691,50 +2561,10 @@ describe('ERC1400 Tests', () => {
             await accessControlFacet.grantRole(_PAUSER_ROLE, account_C) // DUMB transaction
 
             // After Values Before Transaction
-            const [
-                maxSupply_After,
-                maxSupply_Partition_1_After,
-                maxSupply_Partition_2_After,
-                totalSupply_After,
-                totalSupply_Partition_1_After,
-                totalSupply_Partition_2_After,
-                balanceOf_A_After,
-                balanceOf_A_Partition_1_After,
-                balanceOf_A_Partition_2_After,
-                balanceOf_B_After,
-                balanceOf_B_Partition_1_After,
-                balanceOf_B_Partition_2_After,
-                decimals_After,
-            ] = await getBalanceAdjustedValues()
+            const after: BalanceAdjustedValues =
+                await getBalanceAdjustedValues()
 
-            await checkAdjustmentsAfterBalanceAdjustment(
-                maxSupply_After,
-                maxSupply_Partition_1_After,
-                maxSupply_Partition_2_After,
-                totalSupply_After,
-                totalSupply_Partition_1_After,
-                totalSupply_Partition_2_After,
-                balanceOf_A_After,
-                balanceOf_A_Partition_1_After,
-                balanceOf_A_Partition_2_After,
-                balanceOf_B_After,
-                balanceOf_B_Partition_1_After,
-                balanceOf_B_Partition_2_After,
-                decimals_After,
-                maxSupply_Before,
-                maxSupply_Partition_1_Before,
-                maxSupply_Partition_2_Before,
-                totalSupply_Before,
-                totalSupply_Partition_1_Before,
-                totalSupply_Partition_2_Before,
-                balanceOf_A_Before,
-                balanceOf_A_Partition_1_Before,
-                balanceOf_A_Partition_2_Before,
-                balanceOf_B_Before,
-                balanceOf_B_Partition_1_Before,
-                balanceOf_B_Partition_2_Before,
-                decimals_Before
-            )
+            await checkAdjustmentsAfterBalanceAdjustment(after, before)
         })
 
         describe('Issues', () => {
@@ -2881,21 +2711,7 @@ describe('ERC1400 Tests', () => {
                 await setPreBalanceAdjustment()
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -2912,71 +2728,17 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after: BalanceAdjustedValues =
+                    await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterTransfer(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterTransfer(after, before)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorTransferByPartition succeeds', async () => {
                 await setPreBalanceAdjustment()
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -2996,71 +2758,16 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterTransfer(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterTransfer(after, before)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 controllerTransferByPartition succeeds', async () => {
                 await setPreBalanceAdjustment()
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3079,50 +2786,9 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterTransfer(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterTransfer(after, before)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1644 controllerTransfer succeeds', async () => {
@@ -3131,21 +2797,7 @@ describe('ERC1400 Tests', () => {
                 await setPreBalanceAdjustment(true)
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3164,50 +2816,9 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterTransfer(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterTransfer(after, before)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 transferWithData succeeds', async () => {
@@ -3216,21 +2827,7 @@ describe('ERC1400 Tests', () => {
                 await setPreBalanceAdjustment(true)
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3243,50 +2840,9 @@ describe('ERC1400 Tests', () => {
                 await erc1594Facet.transferWithData(account_B, amount, '0x')
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterTransfer(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterTransfer(after, before)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 transferFromWithData succeeds', async () => {
@@ -3298,21 +2854,7 @@ describe('ERC1400 Tests', () => {
                 await erc20Facet.approve(account_A, amount)
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3330,50 +2872,9 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterTransfer(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterTransfer(after, before)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransfer succeeds', async () => {
@@ -3453,21 +2954,7 @@ describe('ERC1400 Tests', () => {
                 await setPreBalanceAdjustment(true)
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3480,50 +2967,9 @@ describe('ERC1400 Tests', () => {
                 await erc20Facet.transfer(account_B, amount)
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterTransfer(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterTransfer(after, before)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 transferFrom succeeds', async () => {
@@ -3535,21 +2981,7 @@ describe('ERC1400 Tests', () => {
                 await erc20Facet.approve(account_A, amount)
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3561,50 +2993,9 @@ describe('ERC1400 Tests', () => {
                 await erc20Facet.transferFrom(account_A, account_B, amount)
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterTransfer(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterTransfer(after, before)
             })
         })
 
@@ -3613,21 +3004,7 @@ describe('ERC1400 Tests', () => {
                 await setPreBalanceAdjustment()
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3643,71 +3020,16 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterRedeem(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterRedeem(after, before)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorRedeemByPartition succeeds', async () => {
                 await setPreBalanceAdjustment()
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3726,71 +3048,16 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterRedeem(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterRedeem(after, before)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 controllerRedeemByPartition succeeds', async () => {
                 await setPreBalanceAdjustment()
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3808,50 +3075,9 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterRedeem(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterRedeem(after, before)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1644 controllerRedeem succeeds', async () => {
@@ -3860,21 +3086,7 @@ describe('ERC1400 Tests', () => {
                 await setPreBalanceAdjustment(true)
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3891,50 +3103,9 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterRedeem(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterRedeem(after, before)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeem succeeds', async () => {
@@ -3943,21 +3114,7 @@ describe('ERC1400 Tests', () => {
                 await setPreBalanceAdjustment(true)
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3971,50 +3128,9 @@ describe('ERC1400 Tests', () => {
                 await erc1594Facet.redeem(amount, '0x')
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterRedeem(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterRedeem(after, before)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeemFrom succeeds', async () => {
@@ -4026,21 +3142,7 @@ describe('ERC1400 Tests', () => {
                 await erc20Facet.approve(account_A, amount)
 
                 // Before Values
-                const [
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before,
-                ] = await getBalanceAdjustedValues()
+                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -4054,50 +3156,9 @@ describe('ERC1400 Tests', () => {
                 await erc1594Facet.redeemFrom(account_A, amount, '0x')
 
                 // After Transaction Partition 1 Values
-                const [
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                ] = await getBalanceAdjustedValues()
+                const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterRedeem(
-                    maxSupply_After,
-                    maxSupply_Partition_1_After,
-                    maxSupply_Partition_2_After,
-                    totalSupply_After,
-                    totalSupply_Partition_1_After,
-                    totalSupply_Partition_2_After,
-                    balanceOf_A_After,
-                    balanceOf_A_Partition_1_After,
-                    balanceOf_A_Partition_2_After,
-                    balanceOf_B_After,
-                    balanceOf_B_Partition_1_After,
-                    balanceOf_B_Partition_2_After,
-                    decimals_After,
-                    maxSupply_Before,
-                    maxSupply_Partition_1_Before,
-                    maxSupply_Partition_2_Before,
-                    totalSupply_Before,
-                    totalSupply_Partition_1_Before,
-                    totalSupply_Partition_2_Before,
-                    balanceOf_A_Before,
-                    balanceOf_A_Partition_1_Before,
-                    balanceOf_A_Partition_2_Before,
-                    balanceOf_B_Before,
-                    balanceOf_B_Partition_1_Before,
-                    balanceOf_B_Partition_2_Before,
-                    decimals_Before
-                )
+                await checkAdjustmentsAfterRedeem(after, before)
             })
         })
 
