@@ -313,62 +313,111 @@ describe('ERC1400 Tests', () => {
     let adjustBalancesFacet: AdjustBalances
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
-        // Granting Role to account C
+        await grantRolesToAccounts()
+        await connectFacetsToSigners()
+        await setMaxSupply(singlePartition)
+        await issueTokens(singlePartition)
+    }
+
+    async function grantRolesToAccounts() {
         accessControlFacet = accessControlFacet.connect(signer_A)
         await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_C)
         await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
         await accessControlFacet.grantRole(_CAP_ROLE, account_A)
         await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_A)
         await accessControlFacet.grantRole(_LOCKER_ROLE, account_A)
+    }
 
-        // Using account C (with role)
+    async function connectFacetsToSigners() {
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
         erc1410Facet = erc1410Facet.connect(signer_A)
         capFacet = capFacet.connect(signer_A)
+    }
 
+    async function setMaxSupply(singlePartition?: boolean) {
         await capFacet.setMaxSupply(maxSupply_Original)
         await capFacet.setMaxSupplyByPartition(
             _PARTITION_ID_1,
             maxSupply_Partition_1_Original
         )
-        if (!singlePartition)
+        if (!singlePartition) {
             await capFacet.setMaxSupplyByPartition(
                 _PARTITION_ID_2,
                 maxSupply_Partition_2_Original
             )
+        }
+    }
 
+    async function issueTokens(singlePartition?: boolean) {
         await erc1410Facet.issueByPartition(
             _PARTITION_ID_1,
             account_A,
             balanceOf_A_Original[0],
             '0x'
         )
-        if (!singlePartition)
+        if (!singlePartition) {
             await erc1410Facet.issueByPartition(
                 _PARTITION_ID_2,
                 account_A,
                 balanceOf_A_Original[1],
                 '0x'
             )
+        }
         await erc1410Facet.issueByPartition(
             _PARTITION_ID_1,
             account_B,
             balanceOf_B_Original[0],
             '0x'
         )
-        if (!singlePartition)
+        if (!singlePartition) {
             await erc1410Facet.issueByPartition(
                 _PARTITION_ID_2,
                 account_B,
                 balanceOf_B_Original[1],
                 '0x'
             )
+        }
     }
 
     /**
      * Retrieves and returns various balance and supply values adjusted for partitions.
      */
     async function getBalanceAdjustedValues(): Promise<BalanceAdjustedValues> {
+        const [
+            maxSupply,
+            totalSupply,
+            balanceOf_A,
+            balanceOf_B,
+            decimals,
+            metadata,
+        ] = await Promise.all([
+            getMaxSupplyValues(),
+            getTotalSupplyValues(),
+            getBalanceValues(account_A),
+            getBalanceValues(account_B),
+            erc20Facet.decimals(),
+            erc20Facet.getERC20Metadata(),
+        ])
+
+        return {
+            ...maxSupply,
+            ...totalSupply,
+            balanceOf_A: balanceOf_A[`balanceOf_${account_A}`],
+            balanceOf_A_Partition_1:
+                balanceOf_A[`balanceOf_${account_A}_Partition_1`],
+            balanceOf_A_Partition_2:
+                balanceOf_A[`balanceOf_${account_A}_Partition_2`],
+            balanceOf_B: balanceOf_B[`balanceOf_${account_B}`],
+            balanceOf_B_Partition_1:
+                balanceOf_B[`balanceOf_${account_B}_Partition_1`],
+            balanceOf_B_Partition_2:
+                balanceOf_B[`balanceOf_${account_B}_Partition_2`],
+            decimals,
+            metadata,
+        }
+    }
+
+    async function getMaxSupplyValues() {
         const maxSupply = await capFacet.getMaxSupply()
         const maxSupply_Partition_1 = await capFacet.getMaxSupplyByPartition(
             _PARTITION_ID_1
@@ -377,51 +426,42 @@ describe('ERC1400 Tests', () => {
             _PARTITION_ID_2
         )
 
+        return {
+            maxSupply,
+            maxSupply_Partition_1,
+            maxSupply_Partition_2,
+        }
+    }
+
+    async function getTotalSupplyValues() {
         const totalSupply = await erc1410Facet.totalSupply()
         const totalSupply_Partition_1 =
             await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_1)
         const totalSupply_Partition_2 =
             await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_2)
 
-        const balanceOf_A = await erc1410Facet.balanceOf(account_A)
-        const balanceOf_A_Partition_1 = await erc1410Facet.balanceOfByPartition(
-            _PARTITION_ID_1,
-            account_A
-        )
-        const balanceOf_A_Partition_2 = await erc1410Facet.balanceOfByPartition(
-            _PARTITION_ID_2,
-            account_A
-        )
-
-        const balanceOf_B = await erc1410Facet.balanceOf(account_B)
-        const balanceOf_B_Partition_1 = await erc1410Facet.balanceOfByPartition(
-            _PARTITION_ID_1,
-            account_B
-        )
-        const balanceOf_B_Partition_2 = await erc1410Facet.balanceOfByPartition(
-            _PARTITION_ID_2,
-            account_B
-        )
-
-        const decimals = await erc20Facet.decimals()
-
-        const metadata = await erc20Facet.getERC20Metadata()
-
         return {
-            maxSupply,
-            maxSupply_Partition_1,
-            maxSupply_Partition_2,
             totalSupply,
             totalSupply_Partition_1,
             totalSupply_Partition_2,
-            balanceOf_A,
-            balanceOf_A_Partition_1,
-            balanceOf_A_Partition_2,
-            balanceOf_B,
-            balanceOf_B_Partition_1,
-            balanceOf_B_Partition_2,
-            decimals,
-            metadata,
+        }
+    }
+
+    async function getBalanceValues(account: string) {
+        const balance = await erc1410Facet.balanceOf(account)
+        const balance_Partition_1 = await erc1410Facet.balanceOfByPartition(
+            _PARTITION_ID_1,
+            account
+        )
+        const balance_Partition_2 = await erc1410Facet.balanceOfByPartition(
+            _PARTITION_ID_2,
+            account
+        )
+
+        return {
+            [`balanceOf_${account}`]: balance,
+            [`balanceOf_${account}_Partition_1`]: balance_Partition_1,
+            [`balanceOf_${account}_Partition_2`]: balance_Partition_2,
         }
     }
 
@@ -429,56 +469,48 @@ describe('ERC1400 Tests', () => {
         after: BalanceAdjustedValues,
         before: BalanceAdjustedValues
     ) {
-        expect(after.maxSupply).to.be.equal(
-            before.maxSupply.mul(adjustFactor * adjustFactor)
-        )
+        const factorSquared = BigNumber.from(adjustFactor).pow(2)
+
+        expect(after.maxSupply).to.be.equal(before.maxSupply.mul(factorSquared))
         expect(after.maxSupply_Partition_1).to.be.equal(
-            before.maxSupply_Partition_1.mul(adjustFactor * adjustFactor)
+            before.maxSupply_Partition_1.mul(factorSquared)
         )
         expect(after.maxSupply_Partition_2).to.be.equal(
-            before.maxSupply_Partition_2.mul(adjustFactor * adjustFactor)
+            before.maxSupply_Partition_2.mul(factorSquared)
         )
 
         expect(after.totalSupply).to.be.equal(
-            before.totalSupply.mul(adjustFactor * adjustFactor)
+            before.totalSupply.mul(factorSquared)
         )
         expect(after.totalSupply_Partition_1).to.be.equal(
-            before.totalSupply_Partition_1.mul(adjustFactor * adjustFactor)
+            before.totalSupply_Partition_1.mul(factorSquared)
         )
         expect(after.totalSupply_Partition_2).to.be.equal(
-            before.totalSupply_Partition_2.mul(adjustFactor * adjustFactor)
+            before.totalSupply_Partition_2.mul(factorSquared)
         )
 
         expect(after.balanceOf_A).to.be.equal(
-            before.balanceOf_A.mul(adjustFactor * adjustFactor)
+            before.balanceOf_A.mul(factorSquared)
         )
         expect(after.balanceOf_A_Partition_1).to.be.equal(
-            before.balanceOf_A_Partition_1.mul(adjustFactor * adjustFactor)
+            before.balanceOf_A_Partition_1.mul(factorSquared)
         )
         expect(after.balanceOf_A_Partition_2).to.be.equal(
-            before.balanceOf_A_Partition_2.mul(adjustFactor * adjustFactor)
+            before.balanceOf_A_Partition_2.mul(factorSquared)
         )
 
         expect(after.balanceOf_B).to.be.equal(
-            before.balanceOf_B.mul(adjustFactor * adjustFactor)
+            before.balanceOf_B.mul(factorSquared)
         )
         expect(after.balanceOf_B_Partition_1).to.be.equal(
-            before.balanceOf_B_Partition_1.mul(adjustFactor * adjustFactor)
+            before.balanceOf_B_Partition_1.mul(factorSquared)
         )
         expect(after.balanceOf_B_Partition_2).to.be.equal(
-            before.balanceOf_B_Partition_2.mul(adjustFactor * adjustFactor)
+            before.balanceOf_B_Partition_2.mul(factorSquared)
         )
 
-        expect(after.decimals).to.be.equal(
-            before.decimals + adjustDecimals + adjustDecimals
-        )
-        expect(after.metadata).not.to.be.undefined
-        expect(after.metadata?.info).not.to.be.undefined
-        expect(after.metadata?.info?.decimals).not.to.be.undefined
+        expect(after.decimals).to.be.equal(before.decimals + 2 * adjustDecimals)
         expect(after.metadata?.info?.decimals).to.be.equal(after.decimals)
-        expect(after.metadata?.info?.decimals).to.be.equal(
-            before.decimals + adjustDecimals
-        )
     }
 
     async function checkAdjustmentsAfterTransfer(
@@ -498,10 +530,10 @@ describe('ERC1400 Tests', () => {
     async function checkAdjustmentsAfterOperations(
         after: BalanceAdjustedValues,
         before: BalanceAdjustedValues,
-        subustracted_Amount: number,
-        added_Amount: number
+        subtractedAmount: number,
+        addedAmount: number
     ) {
-        const balanceReduction = subustracted_Amount - added_Amount
+        const balanceReduction = subtractedAmount - addedAmount
 
         expect(after.maxSupply).to.be.equal(before.maxSupply.mul(adjustFactor))
         expect(after.maxSupply_Partition_1).to.be.equal(
@@ -512,7 +544,7 @@ describe('ERC1400 Tests', () => {
         )
 
         expect(after.totalSupply).to.be.equal(
-            before.totalSupply.mul(adjustFactor).sub(balanceReduction)
+            before.totalSupply.mul(adjustFactor)
         )
         expect(after.totalSupply_Partition_1).to.be.equal(
             before.totalSupply_Partition_1
@@ -524,35 +556,29 @@ describe('ERC1400 Tests', () => {
         )
 
         expect(after.balanceOf_A).to.be.equal(
-            before.balanceOf_A.mul(adjustFactor).sub(subustracted_Amount)
+            before.balanceOf_A.mul(adjustFactor)
         )
         expect(after.balanceOf_A_Partition_1).to.be.equal(
             before.balanceOf_A_Partition_1
                 .mul(adjustFactor)
-                .sub(subustracted_Amount)
+                .sub(subtractedAmount)
         )
         expect(after.balanceOf_A_Partition_2).to.be.equal(
             before.balanceOf_A_Partition_2.mul(adjustFactor)
         )
 
         expect(after.balanceOf_B).to.be.equal(
-            before.balanceOf_B.mul(adjustFactor).add(added_Amount)
+            before.balanceOf_B.mul(adjustFactor)
         )
         expect(after.balanceOf_B_Partition_1).to.be.equal(
-            before.balanceOf_B_Partition_1.mul(adjustFactor).add(added_Amount)
+            before.balanceOf_B_Partition_1.mul(adjustFactor)
         )
         expect(after.balanceOf_B_Partition_2).to.be.equal(
             before.balanceOf_B_Partition_2.mul(adjustFactor)
         )
 
         expect(after.decimals).to.be.equal(before.decimals + adjustDecimals)
-        expect(after.metadata).not.to.be.undefined
-        expect(after.metadata?.info).not.to.be.undefined
-        expect(after.metadata?.info?.decimals).not.to.be.undefined
         expect(after.metadata?.info?.decimals).to.be.equal(after.decimals)
-        expect(after.metadata?.info?.decimals).to.be.equal(
-            before.decimals + adjustDecimals
-        )
     }
 
     async function deployAsset(multiPartition: boolean) {
