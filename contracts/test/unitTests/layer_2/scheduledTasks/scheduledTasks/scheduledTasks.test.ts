@@ -212,6 +212,8 @@ import {
     type ScheduledSnapshots,
     type AccessControl,
     ScheduledTasks,
+    ERC1410ScheduledTasks,
+    ERC20_2,
 } from '../../../../../typechain-types'
 import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
 import {
@@ -219,6 +221,7 @@ import {
     _PAUSER_ROLE,
     _SNAPSHOT_TASK_TYPE,
     _BALANCE_ADJUSTMENT_TASK_TYPE,
+    _ISSUER_ROLE,
 } from '../../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -229,6 +232,10 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 
 const TIME = 6000
+const _PARTITION_ID_1 =
+    '0x0000000000000000000000000000000000000000000000000000000000000001'
+const INITIAL_AMOUNT = 1000
+const DECIMALS_INIT = 6
 
 describe('Scheduled Tasks Tests', () => {
     let diamond: ResolverProxy
@@ -245,6 +252,8 @@ describe('Scheduled Tasks Tests', () => {
     let scheduledTasksFacet: ScheduledTasks
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
+    let erc1410Facet: ERC1410ScheduledTasks
+    let erc20Facet: ERC20_2
 
     beforeEach(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -259,7 +268,11 @@ describe('Scheduled Tasks Tests', () => {
             role: _PAUSER_ROLE,
             members: [account_B],
         }
-        const init_rbacs: Rbac[] = [rbacPause]
+        const rbacIssue: Rbac = {
+            role: _ISSUER_ROLE,
+            members: [account_B],
+        }
+        const init_rbacs: Rbac[] = [rbacPause, rbacIssue]
 
         diamond = await deployEquityFromFactory(
             account_A,
@@ -268,7 +281,7 @@ describe('Scheduled Tasks Tests', () => {
             false,
             'TEST_AccessControl',
             'TAC',
-            6,
+            DECIMALS_INIT,
             'ABCDEF123456',
             false,
             false,
@@ -306,6 +319,13 @@ describe('Scheduled Tasks Tests', () => {
         )
 
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+
+        erc1410Facet = await ethers.getContractAt(
+            'ERC1410ScheduledTasks',
+            diamond.address
+        )
+
+        erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
     })
 
     it('GIVEN a paused Token WHEN triggerTasks THEN transaction fails with TokenIsPaused', async () => {
@@ -329,6 +349,15 @@ describe('Scheduled Tasks Tests', () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
         await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
+
+        erc1410Facet = erc1410Facet.connect(signer_B)
+        await erc1410Facet.issueByPartition(
+            _PARTITION_ID_1,
+            account_A,
+            INITIAL_AMOUNT,
+            '0x'
+        )
+
         // Using account C (with role)
         equityFacet = equityFacet.connect(signer_C)
 
@@ -407,6 +436,26 @@ describe('Scheduled Tasks Tests', () => {
         scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
 
         await new Promise((f) => setTimeout(f, TIME + 1000 + 1))
+
+        // Checking dividends For before triggering from the queue
+        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A) // Dumb transaciton that does not trigger scheduled tasks
+        const BalanceOf_A_Dividend_1 = await equityFacet.getDividendsFor(
+            2,
+            account_A
+        )
+        let BalanceOf_A_Dividend_2 = await equityFacet.getDividendsFor(
+            1,
+            account_A
+        )
+        const decimals_At_Dividend_1 = await erc20Facet.decimalsAdjustedAt(
+            BalanceOf_A_Dividend_1.recordDate
+        )
+
+        expect(BalanceOf_A_Dividend_1.tokenBalance).to.equal(INITIAL_AMOUNT)
+        expect(BalanceOf_A_Dividend_2.tokenBalance).to.equal(0)
+        expect(decimals_At_Dividend_1).to.equal(DECIMALS_INIT)
+
+        // triggering from the queue
         await scheduledTasksFacet.triggerPendingScheduledTasks()
 
         scheduledTasksCount = await scheduledTasksFacet.scheduledTaskCount()
@@ -426,6 +475,21 @@ describe('Scheduled Tasks Tests', () => {
 
         // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
         await new Promise((f) => setTimeout(f, TIME + 1000 + 1))
+        // Checking dividends For before triggering from the queue
+        await accessControlFacet.revokeRole(_ISSUER_ROLE, account_A) // Dumb transaciton that does not trigger scheduled tasks
+        BalanceOf_A_Dividend_2 = await equityFacet.getDividendsFor(1, account_A)
+        let decimals_At_Dividend_2 = await erc20Facet.decimalsAdjustedAt(
+            BalanceOf_A_Dividend_1.recordDate
+        )
+
+        expect(BalanceOf_A_Dividend_2.tokenBalance).to.equal(
+            INITIAL_AMOUNT * balanceAdjustmentsFactor_1
+        )
+        expect(decimals_At_Dividend_2).to.equal(
+            DECIMALS_INIT + balanceAdjustmentsDecimals_1
+        )
+
+        // triggering from the queue
         await scheduledTasksFacet.triggerScheduledTasks(100)
 
         scheduledTasksCount = await scheduledTasksFacet.scheduledTaskCount()

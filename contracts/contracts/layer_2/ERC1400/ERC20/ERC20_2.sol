@@ -227,6 +227,12 @@ import {_ERC20_RESOLVER_KEY} from '../../../layer_1/constants/resolverKeys.sol';
 import {IERC20_2} from '../../interfaces/ERC1400/IERC20_2.sol';
 
 contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
+    function decimalsAdjustedAt(
+        uint256 _timestamp
+    ) external view virtual override returns (uint8) {
+        return _decimalsAdjustedAt(_timestamp);
+    }
+
     function allowance(
         address owner,
         address spender
@@ -234,14 +240,14 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         return _allowanceAdjusted(owner, spender);
     }
 
-    function decimals() external view override returns (uint8) {
+    function decimals() external view virtual override returns (uint8) {
         return _decimalsAdjusted();
     }
 
     function getAllowanceLABAF(
         address _owner,
         address _spender
-    ) external view returns (uint256) {
+    ) external view virtual override returns (uint256) {
         return _getAllowanceLABAF(_owner, _spender);
     }
 
@@ -297,7 +303,7 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](12);
+        staticFunctionSelectors_ = new bytes4[](13);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this
             .initialize_ERC20
@@ -320,6 +326,9 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         staticFunctionSelectors_[selectorsIndex++] = this.decimals.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .getAllowanceLABAF
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .decimalsAdjustedAt
             .selector;
     }
 
