@@ -307,7 +307,7 @@ abstract contract ERC20StorageWrapper_2 is
     }
 
     function _decimalsAdjusted() internal view virtual returns (uint8) {
-        return _decimalsAdjustedAt(block.timestamp);
+        return _decimalsAdjustedAt(_blockTimestamp());
     }
 
     function _decimalsAdjustedAt(
@@ -320,7 +320,7 @@ abstract contract ERC20StorageWrapper_2 is
         address _owner,
         address _spender
     ) internal view virtual returns (uint256) {
-        return _allowanceAdjustedAt(_owner, _spender, block.timestamp);
+        return _allowanceAdjustedAt(_owner, _spender, _blockTimestamp());
     }
 
     function _allowanceAdjustedAt(
@@ -354,7 +354,7 @@ abstract contract ERC20StorageWrapper_2 is
         virtual
         returns (IERC20.ERC20Metadata memory erc20Metadata_)
     {
-        erc20Metadata_ = _getERC20MetadataAdjustedAt(block.timestamp);
+        erc20Metadata_ = _getERC20MetadataAdjustedAt(_blockTimestamp());
     }
 
     function _getERC20MetadataAdjustedAt(

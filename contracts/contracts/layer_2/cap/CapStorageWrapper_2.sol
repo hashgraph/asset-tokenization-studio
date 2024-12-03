@@ -226,7 +226,7 @@ abstract contract CapStorageWrapper_2 is
         virtual
         returns (uint256 maxSupply_)
     {
-        return _getMaxSupplyAdjustedAt(block.timestamp);
+        return _getMaxSupplyAdjustedAt(_blockTimestamp());
     }
 
     function _getMaxSupplyAdjustedAt(
@@ -244,7 +244,8 @@ abstract contract CapStorageWrapper_2 is
     function _getMaxSupplyByPartitionAdjusted(
         bytes32 _partition
     ) internal view virtual returns (uint256 maxSupply_) {
-        return _getMaxSupplyByPartitionAdjustedAt(_partition, block.timestamp);
+        return
+            _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
     }
 
     function _getMaxSupplyByPartitionAdjustedAt(

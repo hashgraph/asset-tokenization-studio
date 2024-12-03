@@ -270,7 +270,8 @@ library ScheduledTasksLib {
     function _triggerScheduledTasks(
         ScheduledTasksDataStorage storage _scheduledTasks,
         bytes4 onScheduledTaskTriggeredSelector,
-        uint256 _max
+        uint256 _max,
+        uint256 _timestamp
     ) internal returns (uint256) {
         uint256 scheduledTasksLength = _getScheduledTaskCount(_scheduledTasks);
 
@@ -295,7 +296,7 @@ library ScheduledTasksLib {
                     pos
                 );
 
-            if (currentScheduledTask.scheduledTimestamp < block.timestamp) {
+            if (currentScheduledTask.scheduledTimestamp < _timestamp) {
                 _popScheduledTask(_scheduledTasks);
 
                 _scheduledTasks.autoCalling = true;

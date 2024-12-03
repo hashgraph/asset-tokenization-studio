@@ -247,7 +247,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
     }
 
     function _getABAFAdjusted() internal view virtual returns (uint256) {
-        return _getABAFAdjustedAt(block.timestamp);
+        return _getABAFAdjustedAt(_blockTimestamp());
     }
 
     function _getABAFAdjustedAt(
@@ -294,7 +294,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
     function _balanceOfAdjusted(
         address _tokenHolder
     ) internal view virtual returns (uint256) {
-        return _balanceOfAdjustedAt(_tokenHolder, block.timestamp);
+        return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
     }
 
     function _balanceOfAdjustedAt(
@@ -316,7 +316,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
             _balanceOfByPartitionAdjustedAt(
                 _partition,
                 _tokenHolder,
-                block.timestamp
+                _blockTimestamp()
             );
     }
 
