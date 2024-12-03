@@ -203,23 +203,13 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
+import BigDecimal from '../shared/BigDecimal';
 
-export class GetVotingForQueryResponse implements QueryResponse {
-  constructor(
-    public readonly tokenBalance: BigDecimal,
-    public readonly decimals: number,
-  ) {}
-}
-
-export class GetVotingForQuery extends Query<GetVotingForQueryResponse> {
-  constructor(
-    public readonly targetId: string,
-    public readonly securityId: string,
-    public readonly votingId: number,
-  ) {
-    super();
+export class VotingFor {
+  tokenBalance: BigDecimal;
+  decimals: number;
+  constructor(tokenBalance: BigDecimal, decimals: number) {
+    this.tokenBalance = tokenBalance;
+    this.decimals = decimals;
   }
 }

@@ -447,7 +447,8 @@ class EquityInPort implements IEquityInPort {
     );
 
     const votingFor: VotingRightsForViewModel = {
-      value: res.payload.toString(),
+      tokenBalance: res.tokenBalance.toString(),
+      decimals: res.decimals.toString(),
     };
 
     return votingFor;

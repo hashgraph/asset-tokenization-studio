@@ -261,6 +261,7 @@ import {
 } from '../../../domain/context/factory/RegulationType.js';
 import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
 import { DividendFor } from '../../../domain/context/equity/DividendFor';
+import { VotingFor } from '../../../domain/context/equity/VotingFor';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -744,7 +745,7 @@ export class RPCQueryAdapter {
     address: EvmAddress,
     target: EvmAddress,
     voting: number,
-  ): Promise<BigNumber> {
+  ): Promise<VotingFor> {
     LogService.logTrace(`Getting voting for`);
 
     const votingFor = await this.connect(
@@ -752,7 +753,10 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getVotingFor(voting, target.toString());
 
-    return votingFor.tokenBalance;
+    return new VotingFor(
+      new BigDecimal(votingFor.tokenBalance),
+      votingFor.decimals,
+    );
   }
 
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {

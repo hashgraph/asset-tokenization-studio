@@ -237,6 +237,7 @@ import {
 import ConfigInfoViewModel from '../src/port/in/response/ConfigInfoViewModel';
 import { ScheduledBalanceAdjustment } from '../src/domain/context/equity/ScheduledBalanceAdjustment.js';
 import { DividendFor } from '../src/domain/context/equity/DividendFor';
+import { VotingFor } from '../src/domain/context/equity/VotingFor';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -612,13 +613,23 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       const votingBalances = votingRightsFor.get(voting);
 
       if (!votingBalances)
-        return BigDecimal.fromString('0', securityInfo.decimals);
+        return new VotingFor(
+          BigDecimal.fromString('0', securityInfo.decimals),
+          securityInfo.decimals,
+        );
 
       const balance = votingBalances.get(
         '0x' + target.toString().toUpperCase().substring(2),
       );
-      if (balance) return BigDecimal.fromString(balance, securityInfo.decimals);
-      return BigDecimal.fromString('0', securityInfo.decimals);
+      if (balance)
+        return new VotingFor(
+          BigDecimal.fromString(balance, securityInfo.decimals),
+          securityInfo.decimals,
+        );
+      return new VotingFor(
+        BigDecimal.fromString('0', securityInfo.decimals),
+        securityInfo.decimals,
+      );
     },
   );
 

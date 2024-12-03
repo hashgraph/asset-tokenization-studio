@@ -478,7 +478,8 @@ describe('🧪 Equity test', () => {
     expect(voting.votingId).toEqual(1);
     expect(voting.recordDate.getTime() / 1000).toEqual(recordTimestamp);
     expect(voting.data.toUpperCase()).toEqual(data.toUpperCase());
-    expect(votingFor.value).toEqual('0');
+    expect(votingFor.tokenBalance).toEqual('0');
+    expect(votingFor.decimals).toEqual('0');
     expect(allVotings.length).toEqual(1);
 
     await Role.revokeRole(
