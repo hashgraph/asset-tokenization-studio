@@ -368,16 +368,14 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
         couponFor_.recordDate = registeredCoupon.coupon.recordDate;
         couponFor_.executionDate = registeredCoupon.coupon.executionDate;
 
-        if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
-            couponFor_.recordDateReached = true;
-
-            couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? _balanceOfAtSnapshot(registeredCoupon.snapshotId, _account)
-                : _balanceOfAdjustedAt(
-                    _account,
-                    registeredCoupon.coupon.recordDate
-                );
-        }
+        (
+            couponFor_.tokenBalance,
+            couponFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredCoupon.coupon.recordDate,
+            registeredCoupon.snapshotId,
+            _account
+        );
     }
 
     function _getCouponCount()

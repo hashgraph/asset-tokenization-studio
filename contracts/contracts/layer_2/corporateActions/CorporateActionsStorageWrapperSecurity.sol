@@ -417,4 +417,18 @@ abstract contract CorporateActionsStorageWrapperSecurity is
 
         return snapshotId;
     }
+
+    function _getSnapshotBalanceForIfDateReached(
+        uint256 _date,
+        uint256 _snapshotId,
+        address _account
+    ) internal view virtual returns (uint256 balance_, bool dateReached_) {
+        if (_date < _blockTimestamp()) {
+            dateReached_ = true;
+
+            balance_ = (_snapshotId != 0)
+                ? _balanceOfAtSnapshot(_snapshotId, _account)
+                : _balanceOfAdjustedAt(_account, _date);
+        }
+    }
 }

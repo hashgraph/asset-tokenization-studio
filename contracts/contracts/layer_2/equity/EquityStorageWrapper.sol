@@ -307,16 +307,14 @@ abstract contract EquityStorageWrapper is
         dividendFor_.recordDate = registeredDividend.dividend.recordDate;
         dividendFor_.executionDate = registeredDividend.dividend.executionDate;
 
-        if (registeredDividend.dividend.recordDate < _blockTimestamp()) {
-            dividendFor_.recordDateReached = true;
-
-            dividendFor_.tokenBalance = (registeredDividend.snapshotId != 0)
-                ? _balanceOfAtSnapshot(registeredDividend.snapshotId, _account)
-                : _balanceOfAdjustedAt(
-                    _account,
-                    registeredDividend.dividend.recordDate
-                );
-        }
+        (
+            dividendFor_.tokenBalance,
+            dividendFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredDividend.dividend.recordDate,
+            registeredDividend.snapshotId,
+            _account
+        );
     }
 
     function _getDividendsCount()
@@ -378,16 +376,14 @@ abstract contract EquityStorageWrapper is
         votingFor_.recordDate = registeredVoting.voting.recordDate;
         votingFor_.data = registeredVoting.voting.data;
 
-        if (registeredVoting.voting.recordDate < _blockTimestamp()) {
-            votingFor_.recordDateReached = true;
-
-            votingFor_.tokenBalance = (registeredVoting.snapshotId != 0)
-                ? _balanceOfAtSnapshot(registeredVoting.snapshotId, _account)
-                : _balanceOfAdjustedAt(
-                    _account,
-                    registeredVoting.voting.recordDate
-                );
-        }
+        (
+            votingFor_.tokenBalance,
+            votingFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredVoting.voting.recordDate,
+            registeredVoting.snapshotId,
+            _account
+        );
     }
 
     function _getVotingCount()
