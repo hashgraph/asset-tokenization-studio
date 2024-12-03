@@ -227,6 +227,8 @@ import {
   useGetCoupons,
   useGetCouponsFor,
 } from "../../../../hooks/queries/useCoupons";
+import { formatDate } from "../../../../utils/format";
+import { DATE_TIME_FORMAT } from "../../../../utils/constants";
 
 interface SeeCouponFormValues {
   couponId: number;
@@ -396,7 +398,10 @@ export const SeeCoupon = () => {
             items={[
               {
                 title: tDetail("paymentDay"),
-                description: coupons.executionDate.toDateString(),
+                description: formatDate(
+                  coupons.executionDate,
+                  DATE_TIME_FORMAT,
+                ),
                 canCopy: true,
                 valueToCopy: coupons.executionDate.toDateString(),
               },
