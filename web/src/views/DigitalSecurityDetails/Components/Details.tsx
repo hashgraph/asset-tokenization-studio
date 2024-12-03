@@ -503,11 +503,13 @@ export const Details = ({
                 },
                 {
                   title: tBenefits("recordDate"),
-                  description: formatDate(coupon.recordDate) ?? "",
+                  description:
+                    formatDate(coupon.recordDate, DATE_TIME_FORMAT) ?? "",
                 },
                 {
                   title: tBenefits("executionDate"),
-                  description: formatDate(coupon.executionDate) ?? "",
+                  description:
+                    formatDate(coupon.executionDate, DATE_TIME_FORMAT) ?? "",
                 },
                 {
                   title: tBenefits("couponRate"),
