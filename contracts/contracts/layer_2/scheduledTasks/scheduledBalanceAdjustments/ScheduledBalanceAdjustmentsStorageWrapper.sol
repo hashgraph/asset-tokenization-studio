@@ -243,7 +243,8 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
             ScheduledTasksLib._triggerScheduledTasks(
                 _scheduledBalanceAdjustmentStorage(),
                 this.onScheduledBalanceAdjustmentTriggered.selector,
-                _max
+                _max,
+                _blockTimestamp()
             );
     }
 

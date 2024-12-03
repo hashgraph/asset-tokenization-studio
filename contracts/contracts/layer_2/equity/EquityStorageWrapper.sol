@@ -307,13 +307,14 @@ abstract contract EquityStorageWrapper is
         dividendFor_.recordDate = registeredDividend.dividend.recordDate;
         dividendFor_.executionDate = registeredDividend.dividend.executionDate;
 
-        if (registeredDividend.dividend.recordDate < _blockTimestamp()) {
-            dividendFor_.recordDateReached = true;
-
-            dividendFor_.tokenBalance = (registeredDividend.snapshotId != 0)
-                ? _balanceOfAtSnapshot(registeredDividend.snapshotId, _account)
-                : _balanceOfAdjusted(_account);
-        }
+        (
+            dividendFor_.tokenBalance,
+            dividendFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredDividend.dividend.recordDate,
+            registeredDividend.snapshotId,
+            _account
+        );
     }
 
     function _getDividendsCount()
@@ -375,13 +376,14 @@ abstract contract EquityStorageWrapper is
         votingFor_.recordDate = registeredVoting.voting.recordDate;
         votingFor_.data = registeredVoting.voting.data;
 
-        if (registeredVoting.voting.recordDate < _blockTimestamp()) {
-            votingFor_.recordDateReached = true;
-
-            votingFor_.tokenBalance = (registeredVoting.snapshotId != 0)
-                ? _balanceOfAtSnapshot(registeredVoting.snapshotId, _account)
-                : _balanceOf(_account);
-        }
+        (
+            votingFor_.tokenBalance,
+            votingFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredVoting.voting.recordDate,
+            registeredVoting.snapshotId,
+            _account
+        );
     }
 
     function _getVotingCount()
@@ -447,6 +449,20 @@ abstract contract EquityStorageWrapper is
             _getCorporateActionCountByType(
                 BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
             );
+    }
+
+    function _getSnapshotBalanceForIfDateReached(
+        uint256 _date,
+        uint256 _snapshotId,
+        address _account
+    ) internal view virtual returns (uint256 balance_, bool dateReached_) {
+        if (_date < _blockTimestamp()) {
+            dateReached_ = true;
+
+            balance_ = (_snapshotId != 0)
+                ? _balanceOfAtSnapshot(_snapshotId, _account)
+                : _balanceOfAdjustedAt(_account, _date);
+        }
     }
 
     function _equityStorage()

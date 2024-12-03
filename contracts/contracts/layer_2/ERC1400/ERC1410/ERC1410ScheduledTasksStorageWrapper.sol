@@ -316,10 +316,17 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
     }
 
     function _totalSupplyAdjusted() internal view virtual returns (uint256) {
+        return _totalSupplyAdjustedAt(_blockTimestamp());
+    }
+
+    function _totalSupplyAdjustedAt(
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
         (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
+            ._getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
+                _corporateActionsStorage(),
+                _timestamp
             );
         return _totalSupply() * pendingABAF;
     }

@@ -241,7 +241,8 @@ abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
             ScheduledTasksLib._triggerScheduledTasks(
                 _scheduledSnapshotStorage(),
                 this.onScheduledSnapshotTriggered.selector,
-                _max
+                _max,
+                _blockTimestamp()
             );
     }
 

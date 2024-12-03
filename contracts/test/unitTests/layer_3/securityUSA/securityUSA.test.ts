@@ -248,20 +248,20 @@ describe('Security USA Tests', () => {
 
     before(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        [signer_A, signer_B] = await ethers.getSigners()
+        ;[signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
 
         currentTimeInSeconds = await time.latest()
-        console.log("Current Time (seconds):", currentTimeInSeconds)
+        console.log('Current Time (seconds):', currentTimeInSeconds)
 
         startingDate = currentTimeInSeconds + TIME
-        console.log("Starting Date:", startingDate)
+        console.log('Starting Date:', startingDate)
 
         maturityDate = startingDate + numberOfCoupons * frequency
-        console.log("Maturity Date:", maturityDate)
+        console.log('Maturity Date:', maturityDate)
 
         firstCouponDate = startingDate + 1
-        console.log("First Coupon Date:", firstCouponDate)
+        console.log('First Coupon Date:', firstCouponDate)
 
         expect(startingDate).to.be.gt(currentTimeInSeconds)
         expect(maturityDate).to.be.gt(startingDate)
