@@ -253,6 +253,6 @@ export class GetDividendsForQueryHandler
       dividendId,
     );
 
-    return new GetDividendsForQueryResponse(new BigDecimal(res));
+    return new GetDividendsForQueryResponse(res.tokenBalance, res.decimals);
   }
 }

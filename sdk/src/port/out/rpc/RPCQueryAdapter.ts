@@ -260,6 +260,7 @@ import {
   CastRegulationType,
 } from '../../../domain/context/factory/RegulationType.js';
 import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
+import { DividendFor } from '../../../domain/context/equity/DividendFor';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -698,7 +699,7 @@ export class RPCQueryAdapter {
     address: EvmAddress,
     target: EvmAddress,
     dividend: number,
-  ): Promise<BigNumber> {
+  ): Promise<DividendFor> {
     LogService.logTrace(`Getting dividends for`);
 
     const dividendFor = await this.connect(
@@ -706,7 +707,10 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getDividendsFor(dividend, target.toString());
 
-    return dividendFor.tokenBalance;
+    return new DividendFor(
+      new BigDecimal(dividendFor.tokenBalance),
+      dividendFor.decimals,
+    );
   }
 
   async getDividends(address: EvmAddress, dividend: number): Promise<Dividend> {

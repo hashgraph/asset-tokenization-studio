@@ -540,7 +540,8 @@ class EquityInPort implements IEquityInPort {
     );
 
     const dividendsFor: DividendsForViewModel = {
-      value: res.payload.toString(),
+      tokenBalance: res.tokenBalance.toString(),
+      decimals: res.decimals.toString(),
     };
 
     return dividendsFor;
