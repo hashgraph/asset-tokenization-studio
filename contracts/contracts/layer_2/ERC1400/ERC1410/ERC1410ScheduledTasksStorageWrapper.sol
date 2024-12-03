@@ -316,7 +316,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
     }
 
     function _totalSupplyAdjusted() internal view virtual returns (uint256) {
-        return _totalSupplyAdjustedAt(0);
+        return _totalSupplyAdjustedAt(block.timestamp);
     }
 
     function _totalSupplyAdjustedAt(

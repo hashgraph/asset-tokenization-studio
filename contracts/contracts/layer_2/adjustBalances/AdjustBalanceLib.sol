@@ -419,8 +419,6 @@ library AdjustBalanceLib {
         // * Initialization
         pendingABAF_ = 1;
         pendingDecimals_ = 0;
-        uint256 timestamp = _timestamp;
-        if (timestamp == 0) timestamp = block.timestamp;
 
         uint256 scheduledTaskCount = ScheduledTasksLib._getScheduledTaskCount(
             _scheduledBalanceAdjustments
@@ -436,7 +434,7 @@ library AdjustBalanceLib {
                         pos
                     );
 
-            if (scheduledTask.scheduledTimestamp < timestamp) {
+            if (scheduledTask.scheduledTimestamp < _timestamp) {
                 bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
 
                 bytes memory balanceAdjustmentData = _corporateActions
