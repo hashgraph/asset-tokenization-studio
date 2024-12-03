@@ -213,8 +213,4 @@ interface IERC20_2 {
         address _owner,
         address _spender
     ) external view returns (uint256);
-
-    function decimalsAdjustedAt(
-        uint256 _timestamp
-    ) external view returns (uint8);
 }

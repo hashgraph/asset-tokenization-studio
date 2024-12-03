@@ -225,14 +225,9 @@ import {ERC20StorageWrapper_2} from './ERC20StorageWrapper_2.sol';
 import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {_ERC20_RESOLVER_KEY} from '../../../layer_1/constants/resolverKeys.sol';
 import {IERC20_2} from '../../interfaces/ERC1400/IERC20_2.sol';
+import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
 
 contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
-    function decimalsAdjustedAt(
-        uint256 _timestamp
-    ) external view virtual override returns (uint8) {
-        return _decimalsAdjustedAt(_timestamp);
-    }
-
     function allowance(
         address owner,
         address spender
@@ -256,8 +251,13 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         address from,
         address to,
         uint256 amount
-    ) internal virtual override(ERC20, ERC20StorageWrapper_2) {
-        ERC20StorageWrapper_2._beforeTokenTransfer(partition, from, to, amount);
+    ) internal virtual override(ERC20, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._beforeTokenTransfer(
+            partition,
+            from,
+            to,
+            amount
+        );
     }
 
     function _addPartitionTo(
@@ -267,9 +267,13 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
     )
         internal
         virtual
-        override(ERC1410BasicStorageWrapper, ERC20StorageWrapper_2)
+        override(ERC1410BasicStorageWrapper, ERC20StorageWrapper_2_Read)
     {
-        ERC20StorageWrapper_2._addPartitionTo(_value, _account, _partition);
+        ERC20StorageWrapper_2_Read._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
     }
 
     function _beforeAllowanceUpdate(
@@ -303,7 +307,7 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](13);
+        staticFunctionSelectors_ = new bytes4[](12);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this
             .initialize_ERC20
@@ -326,9 +330,6 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         staticFunctionSelectors_[selectorsIndex++] = this.decimals.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .getAllowanceLABAF
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .decimalsAdjustedAt
             .selector;
     }
 

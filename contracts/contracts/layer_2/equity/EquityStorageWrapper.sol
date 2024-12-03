@@ -219,9 +219,38 @@ import {
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    ERC20StorageWrapper_2_Read
+} from '../ERC1400/ERC20/ERC20StorageWrapper_2_Read.sol';
+import {
+    SnapshotsStorageWrapper
+} from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
+import {
+    SnapshotsStorageWrapper_2
+} from '../snapshots/SnapshotsStorageWrapper_2.sol';
+import {
+    ERC1410ControllerStorageWrapper
+} from '../../layer_1/ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
+import {
+    ERC1410SnapshotStorageWrapper
+} from '../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {ERC20} from '../../layer_1/ERC1400/ERC20/ERC20.sol';
+import {
+    ERC1410BasicStorageWrapper
+} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {
+    ERC20StorageWrapper_2
+} from '../ERC1400/ERC20/ERC20StorageWrapper_2.sol';
+import {
+    CorporateActionsStorageWrapper
+} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
 
 abstract contract EquityStorageWrapper is
-    CorporateActionsStorageWrapperSecurity
+    CorporateActionsStorageWrapperSecurity,
+    ERC20StorageWrapper_2_Read
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -309,6 +338,7 @@ abstract contract EquityStorageWrapper is
 
         (
             dividendFor_.tokenBalance,
+            dividendFor_.decimals,
             dividendFor_.recordDateReached
         ) = _getSnapshotBalanceForIfDateReached(
             registeredDividend.dividend.recordDate,
@@ -378,6 +408,7 @@ abstract contract EquityStorageWrapper is
 
         (
             votingFor_.tokenBalance,
+            votingFor_.decimals,
             votingFor_.recordDateReached
         ) = _getSnapshotBalanceForIfDateReached(
             registeredVoting.voting.recordDate,
@@ -455,13 +486,22 @@ abstract contract EquityStorageWrapper is
         uint256 _date,
         uint256 _snapshotId,
         address _account
-    ) internal view virtual returns (uint256 balance_, bool dateReached_) {
+    )
+        internal
+        view
+        virtual
+        returns (uint256 balance_, uint8 decimals_, bool dateReached_)
+    {
         if (_date < _blockTimestamp()) {
             dateReached_ = true;
 
             balance_ = (_snapshotId != 0)
                 ? _balanceOfAtSnapshot(_snapshotId, _account)
                 : _balanceOfAdjustedAt(_account, _date);
+
+            decimals_ = (_snapshotId != 0)
+                ? _decimalsAtSnapshot(_snapshotId)
+                : _decimalsAdjustedAt(_date);
         }
     }
 
@@ -476,5 +516,68 @@ abstract contract EquityStorageWrapper is
         assembly {
             equityData_.slot := position
         }
+    }
+
+    function _beforeTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
+    )
+        internal
+        virtual
+        override(
+            ERC1410ScheduledTasksStorageWrapper,
+            ERC20StorageWrapper_2_Read
+        )
+    {
+        ERC1410ScheduledTasksStorageWrapper._beforeTokenTransfer(
+            partition,
+            from,
+            to,
+            amount
+        );
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(
+            ERC1410ScheduledTasksStorageWrapper,
+            ERC20StorageWrapper_2_Read
+        )
+    {
+        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
+    }
+
+    function _addCorporateAction(
+        bytes32 _actionType,
+        bytes memory _data
+    )
+        internal
+        virtual
+        override(
+            CorporateActionsStorageWrapper,
+            CorporateActionsStorageWrapperSecurity
+        )
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 corporateActionIndexByType_
+        )
+    {
+        return
+            CorporateActionsStorageWrapperSecurity._addCorporateAction(
+                _actionType,
+                _data
+            );
     }
 }

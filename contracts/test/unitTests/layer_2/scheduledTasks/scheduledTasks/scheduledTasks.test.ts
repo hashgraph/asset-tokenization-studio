@@ -447,13 +447,10 @@ describe('Scheduled Tasks Tests', () => {
             1,
             account_A
         )
-        const decimals_At_Dividend_1 = await erc20Facet.decimalsAdjustedAt(
-            BalanceOf_A_Dividend_1.recordDate
-        )
 
         expect(BalanceOf_A_Dividend_1.tokenBalance).to.equal(INITIAL_AMOUNT)
         expect(BalanceOf_A_Dividend_2.tokenBalance).to.equal(0)
-        expect(decimals_At_Dividend_1).to.equal(DECIMALS_INIT)
+        expect(BalanceOf_A_Dividend_1.decimals).to.equal(DECIMALS_INIT)
 
         // triggering from the queue
         await scheduledTasksFacet.triggerPendingScheduledTasks()
@@ -478,14 +475,11 @@ describe('Scheduled Tasks Tests', () => {
         // Checking dividends For before triggering from the queue
         await accessControlFacet.revokeRole(_ISSUER_ROLE, account_A) // Dumb transaciton that does not trigger scheduled tasks
         BalanceOf_A_Dividend_2 = await equityFacet.getDividendsFor(1, account_A)
-        let decimals_At_Dividend_2 = await erc20Facet.decimalsAdjustedAt(
-            BalanceOf_A_Dividend_1.recordDate
-        )
 
         expect(BalanceOf_A_Dividend_2.tokenBalance).to.equal(
             INITIAL_AMOUNT * balanceAdjustmentsFactor_1
         )
-        expect(decimals_At_Dividend_2).to.equal(
+        expect(BalanceOf_A_Dividend_2.decimals).to.equal(
             DECIMALS_INIT + balanceAdjustmentsDecimals_1
         )
 
