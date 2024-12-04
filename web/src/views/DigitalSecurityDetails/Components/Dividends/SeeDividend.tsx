@@ -227,7 +227,6 @@ import {
 } from "@hashgraph/asset-tokenization-sdk";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useSecurityStore } from "../../../../store/securityStore";
 import { formatDate, formatNumberLocale } from "../../../../utils/format";
 import { DATE_TIME_FORMAT } from "../../../../utils/constants";
 
@@ -274,8 +273,6 @@ export const SeeDividend = () => {
   const { t: tError } = useTranslation("security", {
     keyPrefix: "details.dividends.see.error",
   });
-  const { details } = useSecurityStore();
-  const { decimals } = details || { decimals: 0 };
 
   const { data: dividendsFor, refetch: refetchDividendsFor } =
     useGetDividendsFor(dividendsForRequest ?? defaultDividendsForRequest, {
@@ -351,10 +348,13 @@ export const SeeDividend = () => {
     dividendsPaymentDay = dividends.executionDate.toDateString();
     const amount = (
       parseFloat(dividends.amountPerUnitOfSecurity) *
-      parseFloat(dividendsFor.value)
+      parseFloat(dividendsFor.tokenBalance)
     ).toString();
 
-    dividendsAmount = `${formatNumberLocale(amount, decimals)} $`;
+    dividendsAmount = `${formatNumberLocale(
+      amount,
+      parseFloat(dividendsFor.decimals),
+    )} $`;
   }
 
   return (
