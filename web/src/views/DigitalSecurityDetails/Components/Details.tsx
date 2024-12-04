@@ -604,7 +604,7 @@ export const Details = ({
                   description:
                     (
                       Number(balanceAdjustment.factor) /
-                      (10 * Number(balanceAdjustment.decimals))
+                      Math.pow(10, Number(balanceAdjustment.decimals))
                     ).toString() ?? "",
                 },
               ]}
