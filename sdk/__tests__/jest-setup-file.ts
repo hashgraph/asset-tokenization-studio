@@ -235,6 +235,7 @@ import {
   CastRegulationType,
 } from '../src/domain/context/factory/RegulationType.js';
 import ConfigInfoViewModel from '../src/port/in/response/ConfigInfoViewModel';
+import { ScheduledBalanceAdjustment } from '../src/domain/context/equity/ScheduledBalanceAdjustment.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -282,6 +283,7 @@ const accounts_with_roles = new Map<string, string[]>();
 const locksIds = new Map<string, number[]>();
 const locks = new Map<string, lock>();
 const lastLockIds = new Map<string, number>();
+const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
 
 let controlList: string[] = [];
 
@@ -796,6 +798,41 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
   singletonInstance.getConfigInfo = jest.fn(async (address: EvmAddress) => {
     return [resolverAddress, configId, configVersion];
   });
+
+  singletonInstance.getScheduledBalanceAdjustment = jest.fn(
+    async (address: EvmAddress, balanceAdjustmentId: number) => {
+      if (balanceAdjustmentId > scheduledBalanceAdjustments.length)
+        return undefined;
+      return scheduledBalanceAdjustments[balanceAdjustmentId - 1];
+    },
+  );
+
+  singletonInstance.getScheduledBalanceAdjustmentCount = jest.fn(
+    async function (security: EvmAddress) {
+      return scheduledBalanceAdjustments.length;
+    },
+  );
+
+  singletonInstance.getLastAggregatedBalanceAdjustmentFactorFor = jest.fn(
+    async function (security: EvmAddress, target: EvmAddress) {
+      return Math.random();
+    },
+  );
+
+  singletonInstance.getAggregatedBalanceAdjustmentFactor = jest.fn(
+    async function (security: EvmAddress) {
+      return Math.random();
+    },
+  );
+
+  singletonInstance.getLastAggregatedBalanceAdjustmentFactorForByPartition =
+    jest.fn(async function (
+      security: EvmAddress,
+      target: EvmAddress,
+      partitionId: string,
+    ) {
+      return Math.random();
+    });
 
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
@@ -1419,6 +1456,27 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       string[],
       Error
     >;
+  });
+
+  singletonInstance.setScheduledBalanceAdjustment = jest.fn(async function (
+    security: EvmAddress,
+    _executionDate: number,
+    _factor: number,
+    _decimals: number,
+  ) {
+    const scheduledBalanceAdjustment = new ScheduledBalanceAdjustment(
+      parseInt(_executionDate.toString()),
+      parseInt(_factor.toString()),
+      parseInt(_decimals.toString()),
+    );
+
+    scheduledBalanceAdjustments.pop();
+    scheduledBalanceAdjustments.push(scheduledBalanceAdjustment);
+
+    return {
+      status: 'success',
+      id: transactionId,
+    } as TransactionResponse;
   });
 
   return {

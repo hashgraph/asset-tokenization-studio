@@ -351,3 +351,16 @@ export const dateToUnixTimestamp = (date: string) => {
 export const calculateCouponFrequency = (couponFrequency: string) => {
   return (parseInt(couponFrequency) * (30 * 24 * 60 * 60)).toString();
 };
+
+export const calculateFactorDecimals = (number: number, separator?: string) => {
+  const [integerPart, decimalPart] = number.toString().split(separator ?? ".");
+
+  const factorNumber = Number(
+    decimalPart ? integerPart + decimalPart : integerPart,
+  );
+
+  return {
+    factor: factorNumber,
+    decimals: decimalPart ? decimalPart.length : 0,
+  };
+};

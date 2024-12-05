@@ -213,8 +213,8 @@ import {
 import {ERC20StorageWrapper} from '../ERC20/ERC20StorageWrapper.sol';
 
 abstract contract ERC1644StorageWrapper is
-    ERC20StorageWrapper,
-    IERC1644StorageWrapper
+    IERC1644StorageWrapper,
+    ERC20StorageWrapper
 {
     struct ERC1644Storage {
         bool isControllable;

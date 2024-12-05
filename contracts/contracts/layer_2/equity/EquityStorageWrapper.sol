@@ -213,7 +213,8 @@ import {
 } from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from '../constants/values.sol';
 import {
     EnumerableSet
@@ -311,7 +312,7 @@ abstract contract EquityStorageWrapper is
 
             dividendFor_.tokenBalance = (registeredDividend.snapshotId != 0)
                 ? _balanceOfAtSnapshot(registeredDividend.snapshotId, _account)
-                : _balanceOf(_account);
+                : _balanceOfAdjusted(_account);
         }
     }
 
@@ -391,6 +392,61 @@ abstract contract EquityStorageWrapper is
     {
         return
             _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+    }
+
+    function _setScheduledBalanceAdjustment(
+        IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    )
+        internal
+        virtual
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 balanceAdjustmentID_
+        )
+    {
+        (
+            success_,
+            corporateActionId_,
+            balanceAdjustmentID_
+        ) = _addCorporateAction(
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            abi.encode(_newBalanceAdjustment)
+        );
+    }
+
+    function _getScheduledBalanceAdjusment(
+        uint256 _balanceAdjustmentID
+    )
+        internal
+        view
+        virtual
+        returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_)
+    {
+        bytes32 actionId = _corporateActionsStorage()
+            .actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE]
+            .at(_balanceAdjustmentID - 1);
+
+        (, bytes memory data) = _getCorporateAction(actionId);
+
+        if (data.length > 0) {
+            (balanceAdjustment_) = abi.decode(
+                data,
+                (IEquity.ScheduledBalanceAdjustment)
+            );
+        }
+    }
+
+    function _getScheduledBalanceAdjustmentsCount()
+        internal
+        view
+        virtual
+        returns (uint256 balanceAdjustmentCount_)
+    {
+        return
+            _getCorporateActionCountByType(
+                BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
+            );
     }
 
     function _equityStorage()

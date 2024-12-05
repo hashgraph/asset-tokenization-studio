@@ -224,6 +224,16 @@ interface IEquityStorageWrapper {
         uint256 amount
     );
 
+    event ScheduledBalanceAdjustmentSet(
+        bytes32 corporateActionId,
+        uint256 balanceAdjustmentId,
+        address indexed operator,
+        uint256 indexed executionDate,
+        uint256 factor,
+        uint256 decimals
+    );
+
     error DividendCreationFailed();
     error VotingRightsCreationFailed();
+    error BalanceAdjustmentCreationFailed();
 }

@@ -216,5 +216,13 @@ bytes32 constant VOTING_RIGHTS_CORPORATE_ACTION_TYPE = 0x250dbe25ab2f06b39b93657
 // keccak256('security.token.standard.coupon.corporateAction');
 bytes32 constant COUPON_CORPORATE_ACTION_TYPE = 0x4657b10f3cac57d39d628d52e74738d0fdcadc1b2f82958cb835081f1bb26620;
 
+// keccak256('security.token.standard.balanceAdjustment.corporateAction');
+bytes32 constant BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE = 0x1256aa1b36483ca651f5d8cbafb7033dcb54872ae7d24442b8ee4baa3f49aa2f;
+
 uint256 constant SNAPSHOT_RESULT_ID = 0;
-// solhint-enable max-line-length
+
+// keccak256('security.token.standard.balanceAdjustment.scheduledTasks');
+bytes32 constant BALANCE_ADJUSTMENT_TASK_TYPE = 0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d;
+
+// keccak256('security.token.standard.snapshot.scheduledTasks');
+bytes32 constant SNAPSHOT_TASK_TYPE = 0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c;

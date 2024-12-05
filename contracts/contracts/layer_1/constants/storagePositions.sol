@@ -249,3 +249,9 @@ bytes32 constant _SNAPSHOT_STORAGE_POSITION = 0x450898ebb84982a28d8787f0138cfce4
 
 // keccak256('security.token.standard.lock.storage');
 bytes32 constant _LOCK_STORAGE_POSITION = 0xd15962e60f276260fba4c9b4de7fd05f475afe18b48c917ec6f6fcc71c00bf71;
+
+// ERC1410BasicStorageWrapperRead.Partition.amount.slot
+uint256 constant _PARTITION_AMOUNT_OFFSET = 0;
+
+// ERC1410BasicStorageWrapperRead.Partition
+uint256 constant _PARTITION_SIZE = 2;
