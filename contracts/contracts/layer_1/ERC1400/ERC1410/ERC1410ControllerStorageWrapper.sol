@@ -257,10 +257,7 @@ abstract contract ERC1410ControllerStorageWrapper is
         if (!_validPartition(_partition, _from)) {
             return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
         }
-
-        uint256 balance = _getBalanceForByPartition(_partition, _from);
-
-        if (balance < _value) {
+        if (_balanceOfByPartition(_partition, _from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
         // TODO: Better to check all in one boolean expression defined in a different pure function.

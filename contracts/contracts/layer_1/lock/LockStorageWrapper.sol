@@ -219,8 +219,8 @@ import {
 
 abstract contract LockStorageWrapper is
     ILockStorageWrapper,
-    LocalContext,
-    ERC1410BasicStorageWrapperRead
+    ERC1410BasicStorageWrapperRead,
+    LocalContext
 {
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
@@ -334,7 +334,7 @@ abstract contract LockStorageWrapper is
         address _tokenHolder,
         uint256 _lockIndex,
         LockData memory lock
-    ) private {
+    ) internal virtual {
         LockDataStorage storage lockStorage = _lockStorage();
 
         lockStorage.locks[_tokenHolder][_partition][_lockIndex - 1].id = lock
@@ -403,7 +403,7 @@ abstract contract LockStorageWrapper is
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockId
-    ) private view returns (uint256) {
+    ) internal view returns (uint256) {
         return _lockStorage().locksIndex[_tokenHolder][_partition][_lockId];
     }
 

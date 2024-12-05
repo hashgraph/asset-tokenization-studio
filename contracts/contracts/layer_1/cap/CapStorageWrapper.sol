@@ -215,8 +215,8 @@ import {
 
 abstract contract CapStorageWrapper is
     ICapStorageWrapper,
-    LocalContext,
-    ERC1410BasicStorageWrapperRead
+    ERC1410BasicStorageWrapperRead,
+    LocalContext
 {
     struct CapDataStorage {
         uint256 maxSupply;

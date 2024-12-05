@@ -231,7 +231,7 @@ import {
   ControlList__factory,
   Pause__factory,
   ERC20__factory,
-  ERC1410ScheduledSnapshot__factory,
+  ERC1410ScheduledTasks__factory,
   Bond__factory,
   Cap__factory,
   ERC1643__factory,
@@ -259,6 +259,7 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../../../domain/context/factory/RegulationType.js';
+import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -306,7 +307,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).balanceOf(target.toString());
   }
@@ -321,7 +322,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).balanceOfByPartition(partitionId, target.toString());
   }
@@ -370,7 +371,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).partitionsOf(targetId.toString());
   }
@@ -396,7 +397,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).totalSupply();
   }
@@ -500,7 +501,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getERC20Metadata();
     const totalSupply = await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).totalSupply();
     const maxSupply = await this.connect(
@@ -516,7 +517,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).isControllable();
     const isMultiPartition = await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).isMultiPartition();
     const isIssuable = await this.connect(
@@ -845,7 +846,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Checking can transfer`);
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).canTransferByPartition(
       sourceId.toString(),
@@ -868,7 +869,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Checking can redeem`);
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).canRedeemByPartition(
       sourceId.toString(),
@@ -910,7 +911,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).isOperatorForPartition(
       partitionId,
@@ -929,7 +930,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      ERC1410ScheduledSnapshot__factory,
+      ERC1410ScheduledTasks__factory,
       address.toString(),
     ).isOperator(operator.toString(), target.toString());
   }
@@ -1070,5 +1071,67 @@ export class RPCQueryAdapter {
       configInfo.configurationId_,
       configInfo.version_.toNumber(),
     ];
+  }
+
+  async getScheduledBalanceAdjustment(
+    address: EvmAddress,
+    balanceAdjustmentId: number,
+  ): Promise<ScheduledBalanceAdjustment> {
+    LogService.logTrace(`Getting scheduled balance adjustment`);
+
+    const scheduledBalanceAdjustmentInfo = await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getScheduledBalanceAdjustment(balanceAdjustmentId);
+
+    return new ScheduledBalanceAdjustment(
+      scheduledBalanceAdjustmentInfo.executionDate.toNumber(),
+      scheduledBalanceAdjustmentInfo.factor.toNumber(),
+      scheduledBalanceAdjustmentInfo.decimals,
+    );
+  }
+
+  async getScheduledBalanceAdjustmentCount(
+    address: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(`Getting scheduled balance adjustment count`);
+
+    const scheduledBalanceAdjustmentCount = await this.connect(
+      Equity__factory,
+      address.toString(),
+    ).getScheduledBalanceAdjustmentCount();
+
+    return scheduledBalanceAdjustmentCount.toNumber();
+  }
+
+  async getLastAggregatedBalanceAdjustmentFactorFor(
+    address: EvmAddress,
+    target: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting last aggregated balance adjustment factor for the account ${target.toString()}`,
+    );
+    //TODO implement factory to call the method
+    return 1;
+  }
+
+  async getAggregatedBalanceAdjustmentFactor(
+    address: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(`Getting last aggregated balance adjustment factor}`);
+    //TODO implement factory to call the method
+    return 1;
+  }
+
+  async getLastAggregatedBalanceAdjustmentFactorForByPartition(
+    address: EvmAddress,
+    target: EvmAddress,
+    partitionId: string,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting last aggregated balance adjustment factor for the account ${target.toString()} and partition ${partitionId}`,
+    );
+    //TODO implement factory to call the method
+    return 1;
   }
 }

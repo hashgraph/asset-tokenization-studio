@@ -419,6 +419,13 @@ interface ITransactionAdapter {
     maturityDate: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  setScheduledBalanceAdjustment(
+    security: EvmAddress,
+    executionDate: BigDecimal,
+    factor: BigDecimal,
+    decimals: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 interface RoleTransactionAdapter {
@@ -845,6 +852,15 @@ export default abstract class TransactionAdapter
   updateMaturityDate(
     security: EvmAddress,
     maturityDate: number,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setScheduledBalanceAdjustment(
+    security: EvmAddress,
+    executionDate: BigDecimal,
+    factor: BigDecimal,
+    decimals: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');

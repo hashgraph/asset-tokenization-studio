@@ -301,6 +301,7 @@ export default {
     document: "Document role",
     snapshot: "Snapshot role",
     bondManager: "Bond Manager role",
+    adjustmentBalance: "Adjustment Balance role",
   },
   landing,
   routes,
