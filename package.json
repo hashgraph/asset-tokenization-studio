@@ -37,7 +37,7 @@
     "concurrently": "^7.6.0",
     "elliptic": "^6.5.5",
     "ethers": "^5.7.2",
-    "rimraf": "^4.1.1",
+    "rimraf": "^6.0.1",
     "serverless": "^3.34.0"
   },
   "devDependencies": {
