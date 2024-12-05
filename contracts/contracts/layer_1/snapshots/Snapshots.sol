@@ -216,22 +216,11 @@ import {
     ERC1410SnapshotStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
 
-contract Snapshots is
+abstract contract Snapshots is
     IStaticFunctionSelectors,
     ISnapshots,
     ERC1410SnapshotStorageWrapper
 {
-    function takeSnapshot()
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID)
-    {
-        return _takeSnapshot();
-    }
-
     function balanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder

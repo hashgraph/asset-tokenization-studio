@@ -213,16 +213,14 @@ import {
 import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
 import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
 import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
 import {
-    ERC1410ScheduledSnapshotStorageWrapper
-} from '../../layer_2/ERC1400/ERC1410/ERC1410ScheduledSnapshotStorageWrapper.sol';
+    LockStorageWrapper_2
+} from '../../layer_2/lock/LockStorageWrapper_2.sol';
 
 contract TransferAndLock is
     ITransferAndLock,
     IStaticFunctionSelectors,
-    LockStorageWrapper,
-    ERC1410ScheduledSnapshotStorageWrapper
+    LockStorageWrapper_2
 {
     function transferAndLockByPartition(
         bytes32 _partition,

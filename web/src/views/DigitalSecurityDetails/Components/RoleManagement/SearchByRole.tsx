@@ -218,9 +218,10 @@ import {
   GetRoleMembersRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
-import { rolesList } from "./rolesList";
+import { rolesList, TSecurityType } from "./rolesList";
 import { useEffect, useState } from "react";
 import { SecurityRole } from "../../../../utils/SecurityRole";
+import { useSecurityStore } from "../../../../store/securityStore";
 
 interface SearchByRoleFieldValue {
   role: { label: string; value: SecurityRole };
@@ -241,6 +242,8 @@ export const SearchByRole = () => {
     keyPrefix: "details.roleManagement.search",
   });
   const { id = "" } = useParams();
+  const { details: securityDetails } = useSecurityStore();
+
   const [roleToSearch, setRoleToSearch] = useState<SecurityRole>();
   const [isRoleMemberCountLoading, setIsRoleMemberCountLoading] =
     useState<boolean>(false);
@@ -328,10 +331,18 @@ export const SearchByRole = () => {
                 <SelectController
                   id="role"
                   control={control}
-                  options={rolesList.map((role) => ({
-                    label: tRoles(role.label),
-                    value: role.value,
-                  }))}
+                  options={rolesList
+                    .filter((role) => {
+                      if (!securityDetails) return role;
+
+                      return role.allowedSecurities.includes(
+                        securityDetails.type as TSecurityType,
+                      );
+                    })
+                    .map((role) => ({
+                      value: role.label,
+                      label: tRoles(role.label),
+                    }))}
                   size="sm"
                   setsFullOption
                   rules={{ required }}

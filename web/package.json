@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-dapp",
-  "version": "1.6.1",
+  "version": "1.7.0",
   "license": "Apache-2.0",
   "scripts": {
     "dev": "vite",
@@ -81,6 +81,6 @@
     "@tanstack/react-table": "8.9.1"
   },
   "engines": {
-    "yarn": ">=1.22.0"
+    "yarn": "1.22.19"
   }
 }

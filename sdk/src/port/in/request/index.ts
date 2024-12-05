@@ -258,6 +258,13 @@ import UpdateConfigRequest from './UpdateConfigRequest.js';
 import UpdateConfigVersionRequest from './UpdateConfigVersionRequest.js';
 import UpdateResolverRequest from './UpdateResolverRequest.js';
 import UpdateMaturityDateRequest from './UpdateMaturityDateRequest.js';
+import SetScheduledBalanceAdjustmentRequest from './SetScheduledBalanceAdjustmentRequest.js';
+import GetScheduledBalanceAdjustmentRequest from './GetScheduledBalanceAdjustmentRequest.js';
+import GetScheduledBalanceAdjustmentCountRequest from './GetScheduledBalanceAdjustmentsCountRequest.js';
+import GetAllScheduledBalanceAdjustmentsRequest from './GetAllScheduledBalanceAdjustmentst.js';
+import GetLastAggregatedBalanceAdjustmentFactorForRequest from './GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
+import GetAggregatedBalanceAdjustmentFactorRequest from './GetAggregatedBalanceAdjustmentFactorRequest.js';
+import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from './GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -315,4 +322,11 @@ export {
   UpdateConfigRequest,
   GetConfigInfoRequest,
   UpdateMaturityDateRequest,
+  SetScheduledBalanceAdjustmentRequest,
+  GetScheduledBalanceAdjustmentRequest,
+  GetScheduledBalanceAdjustmentCountRequest,
+  GetAllScheduledBalanceAdjustmentsRequest,
+  GetLastAggregatedBalanceAdjustmentFactorForRequest,
+  GetAggregatedBalanceAdjustmentFactorRequest,
+  GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest
 };
