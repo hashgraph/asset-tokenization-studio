@@ -249,6 +249,7 @@ import {
     createConfiguration,
     registerBusinessLogics,
 } from './contractsMethods'
+//import { adjustBalances } from '../typechain-types/contracts/layer_2/index.js'
 
 const ExistingContractIds = {
     resolver: {
@@ -324,6 +325,12 @@ const ExistingContractIds = {
     scheduledTasks: ContractId.fromString(
         getEnvVar({ name: 'SCHEDULED_TASKS', defaultValue: '0.0.0' })
     ),
+    scheduledBalanceAdjustments: ContractId.fromString(
+        getEnvVar({ name: 'SCHEDULED_BALANCE_ADJUSTMENTS' })
+    ),
+    scheduledTasks: ContractId.fromString(
+        getEnvVar({ name: 'SCHEDULED_TASKS' })
+    ),
     corporateActionsSecurity: ContractId.fromString(
         getEnvVar({ name: 'CORPORATE_ACTIONS_SECURITY', defaultValue: '0.0.0' })
     ),
@@ -335,6 +342,9 @@ const ExistingContractIds = {
     ),
     adjustBalances: ContractId.fromString(
         getEnvVar({ name: 'ADJUST_BALANCES', defaultValue: '0.0.0' })
+    ),
+    adjustBalances: ContractId.fromString(
+        getEnvVar({ name: 'ADJUST_BALANCES' })
     ),
 }
 

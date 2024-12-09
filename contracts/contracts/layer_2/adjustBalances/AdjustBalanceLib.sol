@@ -237,9 +237,9 @@ import {
     * t2 = account's partition 2 balance
     * x = factor for total balance
     * y = factor for partition 2 balance
-    * 
+    *
     * OPTION : First adjusting partition : (y * t2) // adding partition increment diff to total :  total = total + (t2 * (y - 1)) // Finally adjusting total : (x * total)
-    * 
+    *
     * total = t1 + t2;
     * total = t1 + t2 + (t2 * (y - 1)) = t1 + t2 + y * t2 - t2
       total = t1 + y * t2;
