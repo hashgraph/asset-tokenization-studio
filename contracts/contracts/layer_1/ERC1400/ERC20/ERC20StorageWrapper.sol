@@ -393,12 +393,14 @@ abstract contract ERC20StorageWrapper is
         erc20Storage.allowed[from][spender] -= value;
     }
 
+    // solhint-disable no-empty-blocks
     function _beforeAllowanceUpdate(
         address _owner,
         address _spender,
         uint256 _amount,
         bool _isIncrease
     ) internal virtual {}
+    // solhint-enable no-empty-blocks
 
     function _emitTransferEvent(
         address from,

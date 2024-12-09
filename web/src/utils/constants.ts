@@ -221,3 +221,5 @@ export enum User {
 export const LOCALE = "en-US";
 export const COUPONS_FACTOR = 1000;
 export const NOMINAL_VALUE_FACTOR = 100;
+
+export const DATE_TIME_FORMAT = "dd/MM/yyyy HH:mm:ss";

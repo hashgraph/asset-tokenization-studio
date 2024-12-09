@@ -213,7 +213,6 @@ import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC20_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 
 abstract contract ERC20 is
     IERC20,

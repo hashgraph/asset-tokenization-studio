@@ -374,6 +374,8 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
                 ? _balanceOfAtSnapshot(registeredCoupon.snapshotId, _account)
                 : _balanceOf(_account);
+
+            couponFor_.decimals = _decimals();
         }
     }
 
