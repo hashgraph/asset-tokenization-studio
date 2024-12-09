@@ -209,10 +209,8 @@ pragma solidity 0.8.18;
 import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
-
-import {LibCommon} from '../../../layer_1/common/LibCommon.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 
 abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
     function onScheduledSnapshotTriggered(

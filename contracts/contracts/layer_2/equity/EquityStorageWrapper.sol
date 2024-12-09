@@ -206,47 +206,28 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {
-    CorporateActionsStorageWrapperSecurity
-} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+    CorporateActionsStorageWrapper
+} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
+    ERC20StorageWrapper_2_Read
+} from '../ERC1400/ERC20/ERC20StorageWrapper_2_Read.sol';
+import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from '../constants/values.sol';
 import {
+    CorporateActionsStorageWrapperSecurity
+} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+import {IEquity} from '../interfaces/equity/IEquity.sol';
+import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    ERC20StorageWrapper_2_Read
-} from '../ERC1400/ERC20/ERC20StorageWrapper_2_Read.sol';
-import {
-    SnapshotsStorageWrapper
-} from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
-import {
-    SnapshotsStorageWrapper_2
-} from '../snapshots/SnapshotsStorageWrapper_2.sol';
-import {
-    ERC1410ControllerStorageWrapper
-} from '../../layer_1/ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {ERC20} from '../../layer_1/ERC1400/ERC20/ERC20.sol';
-import {
-    ERC1410BasicStorageWrapper
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
-import {
-    ERC20StorageWrapper_2
-} from '../ERC1400/ERC20/ERC20StorageWrapper_2.sol';
-import {
-    CorporateActionsStorageWrapper
-} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
 
 abstract contract EquityStorageWrapper is
     CorporateActionsStorageWrapperSecurity,

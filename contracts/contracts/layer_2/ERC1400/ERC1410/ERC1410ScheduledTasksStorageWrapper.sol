@@ -208,37 +208,29 @@
 
 pragma solidity 0.8.18;
 
+import {_CONTROLLER_ROLE} from '../../../layer_1/constants/roles.sol';
+import {
+    _IS_PAUSED_ERROR_ID,
+    _FROM_ACCOUNT_NULL_ERROR_ID,
+    _TO_ACCOUNT_NULL_ERROR_ID,
+    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
+    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
+    _TO_ACCOUNT_BLOCKED_ERROR_ID,
+    _WRONG_PARTITION_ERROR_ID,
+    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+    _IS_NOT_OPERATOR_ERROR_ID,
+    _SUCCESS
+} from '../../../layer_1/constants/values.sol';
+import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
 import {
     ScheduledSnapshotsStorageWrapper
 } from '../../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
 import {
     ScheduledTasksStorageWrapper
 } from '../../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
-import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
-import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
-import {
-    _ERC1410_BASIC_STORAGE_2_POSITION
-} from '../../constants/storagePositions.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410//ERC1410SnapshotStorageWrapper.sol';
 import {
     SnapshotsStorageWrapper_2
 } from '../../snapshots/SnapshotsStorageWrapper_2.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS
-} from '../../../layer_1/constants/values.sol';
-
-import {_CONTROLLER_ROLE} from '../../../layer_1/constants/roles.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
     SnapshotsStorageWrapper_2,

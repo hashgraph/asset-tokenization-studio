@@ -209,11 +209,9 @@ import {
     type ResolverProxy,
     type Equity,
     type Pause,
-    type ScheduledSnapshots,
     type AccessControl,
     ScheduledTasks,
     ERC1410ScheduledTasks,
-    ERC20_2,
 } from '../../../../../typechain-types'
 import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
 import {
@@ -248,12 +246,10 @@ describe('Scheduled Tasks Tests', () => {
     let account_C: string
 
     let equityFacet: Equity
-    let scheduledSnapshotsFacet: ScheduledSnapshots
     let scheduledTasksFacet: ScheduledTasks
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
-    let erc20Facet: ERC20_2
 
     beforeEach(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -308,11 +304,6 @@ describe('Scheduled Tasks Tests', () => {
         )
 
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
-
-        scheduledSnapshotsFacet = await ethers.getContractAt(
-            'ScheduledSnapshots',
-            diamond.address
-        )
         scheduledTasksFacet = await ethers.getContractAt(
             'ScheduledTasks',
             diamond.address
@@ -324,8 +315,6 @@ describe('Scheduled Tasks Tests', () => {
             'ERC1410ScheduledTasks',
             diamond.address
         )
-
-        erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
     })
 
     it('GIVEN a paused Token WHEN triggerTasks THEN transaction fails with TokenIsPaused', async () => {

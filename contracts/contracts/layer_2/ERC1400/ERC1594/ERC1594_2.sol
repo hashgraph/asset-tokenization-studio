@@ -209,16 +209,9 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {ERC1594} from '../../../layer_1/ERC1400/ERC1594/ERC1594.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {
     ERC1410BasicStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
-import {ERC1594StorageWrapper_2} from './ERC1594StorageWrapper_2.sol';
+import {ERC1594} from '../../../layer_1/ERC1400/ERC1594/ERC1594.sol';
 import {
     ERC1594StorageWrapper
 } from '../../../layer_1/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
@@ -226,8 +219,12 @@ import {
     ERC20StorageWrapper
 } from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
 import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
     ERC20StorageWrapper_2_Read
 } from '../ERC20/ERC20StorageWrapper_2_Read.sol';
+import {ERC1594StorageWrapper_2} from './ERC1594StorageWrapper_2.sol';
 
 contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
     function _beforeTokenTransfer(

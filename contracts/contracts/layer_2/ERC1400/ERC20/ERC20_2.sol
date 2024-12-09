@@ -209,22 +209,16 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+    ERC1410BasicStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
 import {ERC20} from '../../../layer_1/ERC1400/ERC20/ERC20.sol';
 import {
     ERC20StorageWrapper
 } from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
-import {ERC20StorageWrapper_2} from './ERC20StorageWrapper_2.sol';
-import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {_ERC20_RESOLVER_KEY} from '../../../layer_1/constants/resolverKeys.sol';
+import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {IERC20_2} from '../../interfaces/ERC1400/IERC20_2.sol';
+import {ERC20StorageWrapper_2} from './ERC20StorageWrapper_2.sol';
 import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
 
 contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {

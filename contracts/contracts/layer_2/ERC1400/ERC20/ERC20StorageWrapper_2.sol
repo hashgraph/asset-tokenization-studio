@@ -206,19 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
-import {
-    ERC20StorageWrapper
-} from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
 import {_DEFAULT_PARTITION} from '../../../layer_1/constants/values.sol';
-import {_ERC20_2_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
+import {_ERC20_2_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
 
 abstract contract ERC20StorageWrapper_2 is ERC20StorageWrapper_2_Read {
@@ -255,16 +245,23 @@ abstract contract ERC20StorageWrapper_2 is ERC20StorageWrapper_2_Read {
     function _getAllowanceLABAF(
         address _owner,
         address _spender
-    ) internal view virtual returns (uint256) {
+    ) internal view virtual override returns (uint256) {
         ERC20Storage_2 storage erc20Storage_2 = _getErc20Storage_2();
         return erc20Storage_2.LABAFs_allowances[_owner][_spender];
     }
 
-    function _decimalsAdjusted() internal view virtual returns (uint8) {
+    function _decimalsAdjusted()
+        internal
+        view
+        virtual
+        override
+        returns (uint8)
+    {
         (, uint8 pendingDecimals) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
+            ._getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
+                _corporateActionsStorage(),
+                _blockTimestamp()
             );
 
         return _decimals() + pendingDecimals;
@@ -273,7 +270,7 @@ abstract contract ERC20StorageWrapper_2 is ERC20StorageWrapper_2_Read {
     function _allowanceAdjusted(
         address _owner,
         address _spender
-    ) internal view virtual returns (uint256) {
+    ) internal view virtual override returns (uint256) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
             _getABAFAdjusted(),
             _getAllowanceLABAF(_owner, _spender)
@@ -285,6 +282,7 @@ abstract contract ERC20StorageWrapper_2 is ERC20StorageWrapper_2_Read {
         internal
         view
         virtual
+        override
         returns (ERC20Storage_2 storage erc20Storage_2_)
     {
         bytes32 position = _ERC20_2_STORAGE_POSITION;

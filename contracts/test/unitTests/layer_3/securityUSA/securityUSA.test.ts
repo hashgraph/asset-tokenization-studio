@@ -248,7 +248,7 @@ describe('Security USA Tests', () => {
 
     before(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        [signer_A, signer_B] = await ethers.getSigners()
+        ;[signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
 
         currentTimeInSeconds = await time.latest()

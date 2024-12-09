@@ -216,7 +216,6 @@ import {
     type Equity,
     type Snapshots,
     type ScheduledSnapshots,
-    type ScheduledTasks,
     type Cap_2,
 } from '../../typechain-types'
 import {

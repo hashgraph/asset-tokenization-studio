@@ -240,7 +240,7 @@ import {
     toHashgraphKey,
     IContract,
     contractIdToString,
-} from '../scripts/utils'
+} from './utils'
 import { BusinessLogicRegistryData } from './businessLogicResolverLogic'
 import { EquityConfigId, BondConfigId, _DEFAULT_ADMIN_ROLE } from './constants'
 import { contractCall } from './contractsLifeCycle/utils'
@@ -325,12 +325,6 @@ const ExistingContractIds = {
     scheduledTasks: ContractId.fromString(
         getEnvVar({ name: 'SCHEDULED_TASKS', defaultValue: '0.0.0' })
     ),
-    scheduledBalanceAdjustments: ContractId.fromString(
-        getEnvVar({ name: 'SCHEDULED_BALANCE_ADJUSTMENTS' })
-    ),
-    scheduledTasks: ContractId.fromString(
-        getEnvVar({ name: 'SCHEDULED_TASKS' })
-    ),
     corporateActionsSecurity: ContractId.fromString(
         getEnvVar({ name: 'CORPORATE_ACTIONS_SECURITY', defaultValue: '0.0.0' })
     ),
@@ -342,9 +336,6 @@ const ExistingContractIds = {
     ),
     adjustBalances: ContractId.fromString(
         getEnvVar({ name: 'ADJUST_BALANCES', defaultValue: '0.0.0' })
-    ),
-    adjustBalances: ContractId.fromString(
-        getEnvVar({ name: 'ADJUST_BALANCES' })
     ),
 }
 
