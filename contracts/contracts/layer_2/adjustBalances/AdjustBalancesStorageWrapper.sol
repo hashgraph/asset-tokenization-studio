@@ -251,6 +251,6 @@ abstract contract AdjustBalancesStorageWrapper is
     ) internal virtual {
         _updateDecimalsSnapshot();
         _updateABAFSnapshot();
-        _updateTotalSupplySnapshot();
+        _updateAssetTotalSupplySnapshot();
     }
 }

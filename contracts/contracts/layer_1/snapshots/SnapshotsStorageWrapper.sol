@@ -220,10 +220,13 @@ import {
 } from '../interfaces/snapshots/ISnapshotsStorageWrapper.sol';
 import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {Common} from '../common/Common.sol';
+import {_DEFAULT_PARTITION} from '../constants/values.sol';
+import {LockStorageWrapperRead} from '../lock/LockStorageWrapperRead.sol';
 
 abstract contract SnapshotsStorageWrapper is
     ISnapshotsStorageWrapper,
     ERC1410BasicStorageWrapperRead,
+    LockStorageWrapperRead,
     Common
 {
     using ArraysUpgradeable for uint256[];
@@ -251,6 +254,9 @@ abstract contract SnapshotsStorageWrapper is
         Snapshots totalSupplySnapshots;
         // Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
         CountersUpgradeable.Counter currentSnapshotId;
+        mapping(address => Snapshots) accountLockedBalanceSnapshots;
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
+        mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
     }
 
     event SnapshotTriggered(address indexed operator, uint256 snapshotId);
@@ -300,6 +306,54 @@ abstract contract SnapshotsStorageWrapper is
         return _totalSupplyAt(_snapshotID);
     }
 
+    function _totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    ) internal view virtual returns (uint256 totalSupply_) {
+        (bool snapshotted, uint256 value) = _valueAt(
+            _snapshotID,
+            _snapshotStorage().totalSupplyByPartitionSnapshots[_partition]
+        );
+
+        return snapshotted ? value : _totalSupplyByPartition(_partition);
+    }
+
+    function _lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_) {
+        (bool snapshotted, uint256 value) = _valueAt(
+            _snapshotID,
+            _snapshotStorage().accountLockedBalanceSnapshots[_tokenHolder]
+        );
+
+        return
+            snapshotted
+                ? value
+                : _getLockedAmountForByPartition(
+                    _DEFAULT_PARTITION,
+                    _tokenHolder
+                );
+    }
+
+    function _lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_) {
+        (bool snapshotted, uint256 value) = _valueAt(
+            _snapshotID,
+            _snapshotStorage().accountPartitionLockedBalanceSnapshots[
+                _tokenHolder
+            ][_partition]
+        );
+
+        return
+            snapshotted
+                ? value
+                : _getLockedAmountForByPartition(_partition, _tokenHolder);
+    }
+
     function _snapshot() internal virtual returns (uint256) {
         _snapshotStorage().currentSnapshotId.increment();
 
@@ -335,10 +389,30 @@ abstract contract SnapshotsStorageWrapper is
         );
     }
 
-    function _updateTotalSupplySnapshot() internal virtual {
+    function _updateAccountLockedBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual {
+        _updateSnapshot(
+            _snapshotStorage().accountLockedBalanceSnapshots[account],
+            _getLockedAmountFor(account)
+        );
+        _updateSnapshot(
+            _snapshotStorage().accountPartitionLockedBalanceSnapshots[account][
+                partition
+            ],
+            _getLockedAmountForByPartition(partition, account)
+        );
+    }
+
+    function _updateTotalSupplySnapshot(bytes32 partition) internal virtual {
         _updateSnapshot(
             _snapshotStorage().totalSupplySnapshots,
             _totalSupply()
+        );
+        _updateSnapshot(
+            _snapshotStorage().totalSupplyByPartitionSnapshots[partition],
+            _totalSupplyByPartition(partition)
         );
     }
 

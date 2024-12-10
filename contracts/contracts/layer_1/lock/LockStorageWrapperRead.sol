@@ -203,167 +203,177 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {_CONTROLLER_ROLE} from '../../../layer_1/constants/roles.sol';
+import {LocalContext} from '../context/LocalContext.sol';
+import {ILockStorageWrapper} from '../interfaces/lock/ILockStorageWrapper.sol';
+import {_LOCK_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
-    _IS_PAUSED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _SUCCESS
-} from '../../../layer_1/constants/values.sol';
-import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
+    ERC1410BasicStorageWrapperRead
+} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {LibCommon} from '../common/LibCommon.sol';
 import {
-    ScheduledSnapshotsStorageWrapper
-} from '../../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
-import {
-    ScheduledTasksStorageWrapper
-} from '../../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
-import {
-    SnapshotsStorageWrapper_2
-} from '../../snapshots/SnapshotsStorageWrapper_2.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-abstract contract ERC1410ScheduledTasksStorageWrapper is
-    SnapshotsStorageWrapper_2,
-    ScheduledSnapshotsStorageWrapper,
-    ScheduledTasksStorageWrapper
-{
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override {
-        _triggerAndSyncAll(partition, from, to);
+abstract contract LockStorageWrapperRead is ILockStorageWrapper, LocalContext {
+    using LibCommon for EnumerableSet.UintSet;
 
-        super._beforeTokenTransfer(partition, from, to, amount);
+    struct LockData {
+        uint256 id;
+        uint256 amount;
+        uint256 expirationTimestamp;
     }
 
-    function _triggerAndSyncAll(
+    struct LockDataStorage {
+        mapping(address => uint256) totalLockedAmount;
+        mapping(address => mapping(bytes32 => uint256)) lockedAmountByPartition;
+        mapping(address => mapping(bytes32 => LockData[])) locks;
+        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) lockIds;
+        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) locksIndex;
+        mapping(address => mapping(bytes32 => uint256)) lockNextId;
+    }
+
+    modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp) {
+        if (_expirationTimestamp < _blockTimestamp())
+            revert WrongExpirationTimestamp();
+        _;
+    }
+
+    modifier onlyWithValidLockId(
         bytes32 _partition,
-        address _from,
-        address _to
-    ) internal virtual {
-        _triggerScheduledTasks(0);
-        _syncBalanceAdjustments(_partition, _from, _to);
+        address _tokenHolder,
+        uint256 _lockId
+    ) {
+        if (!_isLockIdValid(_partition, _tokenHolder, _lockId))
+            revert WrongLockId();
+        _;
     }
 
-    function _syncBalanceAdjustments(
+    modifier onlyWithLockedExpirationTimestamp(
         bytes32 _partition,
-        address _from,
-        address _to
-    ) internal virtual {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
-        CapDataStorage storage capStorage = _capStorage();
-
-        // adjust the total supply for the partition
-        AdjustBalanceLib._adjustTotalAndMaxSupplyForPartition(
-            _partition,
-            erc1410Storage,
-            capStorage,
-            erc1410Storage_2
-        );
-
-        // adjust "from" total and partition balance
-        if (_from != address(0))
-            AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
-                _partition,
-                _from,
-                erc1410Storage,
-                erc1410Storage_2
-            );
-
-        // adjust "to" total and partition balance
-        if (_to != address(0))
-            AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
-                _partition,
-                _to,
-                erc1410Storage,
-                erc1410Storage_2
-            );
+        address _tokenHolder,
+        uint256 _lockId
+    ) {
+        if (!_isLockedExpirationTimestamp(_partition, _tokenHolder, _lockId))
+            revert LockExpirationNotReached();
+        _;
     }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    ) internal virtual override {
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
-
-        erc1410Storage_2.LABAF_user_partition[_account].push(_getABAF());
-
-        super._addPartitionTo(_value, _account, _partition);
+    function _getLockedAmountFor(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _lockStorage().totalLockedAmount[_tokenHolder];
     }
 
-    function _totalSupplyAdjusted() internal view virtual returns (uint256) {
-        return _totalSupplyAdjustedAt(_blockTimestamp());
-    }
-
-    function _totalSupplyAdjustedAt(
-        uint256 _timestamp
-    ) internal view virtual returns (uint256) {
-        (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustmentsAt(
-                _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage(),
-                _timestamp
-            );
-        return _totalSupply() * pendingABAF;
-    }
-
-    function _canTransferByPartition(
-        address _from,
-        address _to,
+    function _getLockedAmountForByPartition(
         bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data, // solhint-disable-line no-unused-vars
-        bytes calldata _operatorData // solhint-disable-line no-unused-vars
-    ) internal view virtual override returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_validPartition(_partition, _from)) {
-            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfByPartitionAdjusted(_partition, _from) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        // TODO: Better to check all in one boolean expression defined in a different pure function.
-        if (
-            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
-        ) {
-            if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-            }
-        }
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _lockStorage().lockedAmountByPartition[_tokenHolder][_partition];
+    }
 
-        return (true, _SUCCESS, bytes32(0));
+    function _getLockCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 lockCount_) {
+        return _lockStorage().locks[_tokenHolder][_partition].length;
+    }
+
+    function _getLocksIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (uint256[] memory locksId_) {
+        return
+            _lockStorage().lockIds[_tokenHolder][_partition].getFromSet(
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _getLockForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    )
+        internal
+        view
+        virtual
+        returns (uint256 amount_, uint256 expirationTimestamp_)
+    {
+        LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
+        amount_ = lock.amount;
+        expirationTimestamp_ = lock.expirationTimestamp;
+    }
+
+    function _isLockIdValid(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (bool) {
+        if (_getLockIndex(_partition, _tokenHolder, _lockId) == 0) return false;
+        return true;
+    }
+
+    function _getLockIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (uint256) {
+        return _lockStorage().locksIndex[_tokenHolder][_partition][_lockId];
+    }
+
+    function _getLock(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (LockData memory) {
+        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
+
+        return _getLockByIndex(_partition, _tokenHolder, lockIndex);
+    }
+
+    function _getLockByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex
+    ) internal view returns (LockData memory) {
+        LockDataStorage storage lockStorage = _lockStorage();
+
+        if (_lockIndex == 0) return LockData(0, 0, 0);
+
+        _lockIndex--;
+
+        assert(_lockIndex < lockStorage.locks[_tokenHolder][_partition].length);
+
+        return lockStorage.locks[_tokenHolder][_partition][_lockIndex];
+    }
+
+    function _isLockedExpirationTimestamp(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (bool) {
+        LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
+
+        if (lock.expirationTimestamp > _blockTimestamp()) return false;
+
+        return true;
+    }
+
+    function _lockStorage()
+        internal
+        pure
+        virtual
+        returns (LockDataStorage storage lock_)
+    {
+        bytes32 position = _LOCK_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            lock_.slot := position
+        }
     }
 }

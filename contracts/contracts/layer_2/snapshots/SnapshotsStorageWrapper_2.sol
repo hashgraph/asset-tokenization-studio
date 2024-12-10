@@ -213,10 +213,11 @@ import {
     ERC1410ScheduledTasksStorageWrapperRead
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol';
 import {_SNAPSHOT_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {LockStorageWrapper_2_Read} from '../lock/LockStorageWrapper_2_Read.sol';
 
 abstract contract SnapshotsStorageWrapper_2 is
     SnapshotsStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapperRead
+    LockStorageWrapper_2_Read
 {
     struct SnapshotStorage_2 {
         Snapshots ABAFSnapshots;
@@ -229,6 +230,13 @@ abstract contract SnapshotsStorageWrapper_2 is
 
     function _updateDecimalsSnapshot() internal virtual {
         _updateSnapshot(_snapshotStorage_2().decimals, _decimals());
+    }
+
+    function _updateAssetTotalSupplySnapshot() internal virtual {
+        _updateSnapshot(
+            _snapshotStorage().totalSupplySnapshots,
+            _totalSupply()
+        );
     }
 
     function _ABAFAtSnapshot(
@@ -319,6 +327,44 @@ abstract contract SnapshotsStorageWrapper_2 is
                 ],
                 _balanceOfByPartitionAdjusted(_partition, account)
             );
+    }
+
+    function _totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    ) internal view virtual override returns (uint256 totalSupply_) {
+        return
+            _balanceOfAt_Adjusted(
+                _snapshotID,
+                _snapshotStorage().totalSupplyByPartitionSnapshots[_partition],
+                _totalSupplyByPartitionAdjusted(_partition)
+            );
+    }
+
+    function _lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 balance_) {
+        return
+            _balanceOfAt_Adjusted(
+                _snapshotID,
+                _snapshotStorage().accountLockedBalanceSnapshots[_tokenHolder],
+                _getLockedAmountForAdjusted(_tokenHolder)
+            );
+    }
+
+    function _lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 balance_) {
+        _balanceOfAt_Adjusted(
+            _snapshotID,
+            _snapshotStorage().accountPartitionLockedBalanceSnapshots[
+                _tokenHolder
+            ][_partition],
+            _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder)
+        );
     }
 
     function _balanceOfAt_Adjusted(

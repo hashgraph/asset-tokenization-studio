@@ -228,4 +228,20 @@ interface ISnapshots {
     function totalSupplyAtSnapshot(
         uint256 _snapshotID
     ) external view returns (uint256 totalSupply_);
+
+    function totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    ) external view returns (uint256 totalSupply_);
+
+    function lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_);
+
+    function lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_);
 }

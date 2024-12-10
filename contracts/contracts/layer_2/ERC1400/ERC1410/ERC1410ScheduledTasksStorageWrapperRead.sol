@@ -287,6 +287,16 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
             ];
     }
 
+    function _totalSupplyByPartitionAdjusted(
+        bytes32 _partition
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            _getABAFAdjusted(),
+            _getLABAFForPartition(_partition)
+        );
+        return _totalSupplyByPartition(_partition) * factor;
+    }
+
     function _balanceOfAdjusted(
         address _tokenHolder
     ) internal view virtual returns (uint256) {

@@ -253,6 +253,33 @@ abstract contract Snapshots is
         return _totalSupplyAtSnapshot(_snapshotID);
     }
 
+    function totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    ) external view virtual override returns (uint256 totalSupply_) {
+        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
+    }
+
+    function lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 balance_) {
+        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
+    }
+
+    function lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 balance_) {
+        return
+            _lockedBalanceOfAtSnapshotByPartition(
+                _partition,
+                _snapshotID,
+                _tokenHolder
+            );
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -271,7 +298,7 @@ abstract contract Snapshots is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_ = new bytes4[](8);
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .balanceOfAtSnapshot
@@ -284,6 +311,15 @@ abstract contract Snapshots is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .partitionsOfAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyAtSnapshotByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .lockedBalanceOfAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .lockedBalanceOfAtSnapshotByPartition
             .selector;
     }
 
