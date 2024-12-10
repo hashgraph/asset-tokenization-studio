@@ -8,15 +8,15 @@
 # NOTE: Must be placed last to ensure enforcement over all other rules
 
 # Protection Rules for Github Configuration Files and Actions Workflows
-/.github/                                       @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/release-engineering-managers
-/.github/workflows/                             @hashgraph/devops-ci @hashgraph/devops-ci-committers
+/.github/                                       @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/release-engineering-managers @hashgraph/asset-tokenization-studio-committers @hashgraph/developer-advocates @hashgraph/iobuilders-hedera
+/.github/workflows/                             @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/asset-tokenization-studio-committers @hashgraph/developer-advocates @hashgraph/iobuilders-hedera
 
 # Self-protection for root CODEOWNERS files (this file should not exist and should definitely require approval)
-/CODEOWNERS                                     @hashgraph/release-engineering-managers
+/CODEOWNERS                                     @hashgraph/release-engineering-managers @hashgraph/asset-tokenization-studio-committers @hashgraph/developer-advocates @hashgraph/iobuilders-hedera
 
 # Protect the repository root files
 /README.md                                      @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/release-engineering-managers @hashgraph/asset-tokenization-studio-committers @hashgraph/developer-advocates @hashgraph/iobuilders-hedera
-**/LICENSE                                      @hashgraph/release-engineering-managers
+**/LICENSE                                      @hashgraph/release-engineering-managers @hashgraph/asset-tokenization-studio-committers @hashgraph/developer-advocates @hashgraph/iobuilders-hedera
 
 # CodeCov configuration
 **/codecov.yml                                  @hashgraph/devops-ci @hashgraph/devops-ci-committers @hashgraph/release-engineering-managers @hashgraph/asset-tokenization-studio-committers @hashgraph/developer-advocates @hashgraph/iobuilders-hedera
