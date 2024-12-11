@@ -2904,7 +2904,7 @@ describe('ERC1400 Tests', () => {
                 await erc1594Facet.transferFromWithData(
                     account_A,
                     account_B,
-                    amount,
+                    amount + 1,
                     '0x'
                 )
 
