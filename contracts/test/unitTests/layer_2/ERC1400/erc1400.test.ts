@@ -3303,7 +3303,7 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // APPROVE 2
-                await erc20Facet.decreaseAllowance(account_B, amount)
+                await erc20Facet.decreaseAllowance(account_B, allowance_Before.add(amount))
 
                 const allowance_After = await erc20Facet.allowance(
                     account_A,
@@ -3315,7 +3315,7 @@ describe('ERC1400 Tests', () => {
                 )
 
                 expect(allowance_After).to.be.equal(
-                    allowance_Before.mul(adjustFactor).sub(amount)
+                    allowance_Before.mul(adjustFactor).sub(allowance_Before.add(amount))
                 )
                 expect(LABAF_Before).to.be.equal(0)
                 expect(LABAF_After).to.be.equal(adjustFactor)
