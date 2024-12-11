@@ -337,8 +337,10 @@ describe('CAP Layer 2 Tests', () => {
             [5, 6, 7],
             [2, 0, 1]
         );
-
+        const currentMaxSupplyByPartition_2 = await capFacet.getMaxSupplyByPartition(_PARTITION_ID_2)
+        expect(currentMaxSupplyByPartition_2).to.equal(0)
         await testBalanceAdjustments(adjustments, [5, 6, 7]);
+
     });
 
     it('GIVEN a token WHEN setMaxSupply THEN balance adjustments are included', async () => {
@@ -359,7 +361,7 @@ describe('CAP Layer 2 Tests', () => {
             currentTime,
             [TIME / 1000, (2 * TIME) / 1000],
             [5, 6],
-            [2, 0]
+            [0, 0]
         );
 
         await setupScheduledBalanceAdjustments(adjustments);
