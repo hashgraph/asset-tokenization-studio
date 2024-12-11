@@ -220,11 +220,20 @@ import {EquityStorageWrapper} from './EquityStorageWrapper.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {ScheduledTasksCommon} from '../scheduledTasks/ScheduledTasksCommon.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {
+    AdjustBalancesStorageWrapper
+} from '../adjustBalances/AdjustBalancesStorageWrapper.sol';
+import {
+    CorporateActionsStorageWrapper
+} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
 
 abstract contract Equity is
     IEquity,
     IStaticFunctionSelectors,
-    EquityStorageWrapper
+    EquityStorageWrapper,
+    AdjustBalancesStorageWrapper
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -448,5 +457,21 @@ abstract contract Equity is
         returns (uint256 balanceAdjustmentCount_)
     {
         return _getScheduledBalanceAdjustmentsCount();
+    }
+
+    function _addCorporateAction(
+        bytes32 _actionType,
+        bytes memory _data
+    )
+        internal
+        virtual
+        override(CorporateActionsStorageWrapper, EquityStorageWrapper)
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 corporateActionIndexByType_
+        )
+    {
+        EquityStorageWrapper._addCorporateAction(_actionType, _data);
     }
 }

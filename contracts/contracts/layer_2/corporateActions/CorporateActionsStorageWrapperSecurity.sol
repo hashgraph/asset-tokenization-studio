@@ -227,15 +227,23 @@ import {
 import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {IBond} from '../interfaces/bond/IBond.sol';
 import {
-    AdjustBalancesStorageWrapper
-} from '../adjustBalances/AdjustBalancesStorageWrapper.sol';
+    AdjustBalances_CD_Lib
+} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {
+    ScheduledTasks_CD_Lib
+} from '../scheduledTasks/scheduledTasks/ScheduledTasks_CD_Lib.sol';
+import {
+    ScheduledSnapshots_CD_Lib
+} from '../scheduledTasks/scheduledSnapshots/ScheduledSnapshots_CD_Lib.sol';
+import {
+    ScheduledBalanceAdjustments_CD_Lib
+} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustments_CD_Lib.sol';
 
 abstract contract CorporateActionsStorageWrapperSecurity is
     ICorporateActionsStorageWrapperSecurity,
     IEquityStorageWrapper,
     IBondStorageWrapper,
-    CorporateActionsStorageWrapper,
-    AdjustBalancesStorageWrapper
+    CorporateActionsStorageWrapper
 {
     modifier checkDates(uint256 firstDate, uint256 secondDate) {
         if (secondDate < firstDate) {
@@ -285,11 +293,14 @@ abstract contract CorporateActionsStorageWrapperSecurity is
             (IEquity.Dividend)
         );
 
-        _addScheduledTask(
+        ScheduledTasks_CD_Lib.addScheduledTask(
             newDividend.recordDate,
             abi.encode(SNAPSHOT_TASK_TYPE)
         );
-        _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));
+        ScheduledSnapshots_CD_Lib.addScheduledSnapshot(
+            newDividend.recordDate,
+            abi.encode(_actionId)
+        );
     }
 
     function _initVotingRights(
@@ -303,8 +314,14 @@ abstract contract CorporateActionsStorageWrapperSecurity is
 
         IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
 
-        _addScheduledTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
-        _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));
+        ScheduledTasks_CD_Lib.addScheduledTask(
+            newVoting.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
+        ScheduledSnapshots_CD_Lib.addScheduledSnapshot(
+            newVoting.recordDate,
+            abi.encode(_actionId)
+        );
     }
 
     function _initCoupon(
@@ -318,8 +335,14 @@ abstract contract CorporateActionsStorageWrapperSecurity is
 
         IBond.Coupon memory newCoupon = abi.decode(_data, (IBond.Coupon));
 
-        _addScheduledTask(newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
-        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
+        ScheduledTasks_CD_Lib.addScheduledTask(
+            newCoupon.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
+        ScheduledSnapshots_CD_Lib.addScheduledSnapshot(
+            newCoupon.recordDate,
+            abi.encode(_actionId)
+        );
     }
 
     function _initBalanceAdjustment(
@@ -334,11 +357,11 @@ abstract contract CorporateActionsStorageWrapperSecurity is
         IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
             .decode(_data, (IEquity.ScheduledBalanceAdjustment));
 
-        _addScheduledTask(
+        ScheduledTasks_CD_Lib.addScheduledTask(
             newBalanceAdjustment.executionDate,
             abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
         );
-        _addScheduledBalanceAdjustment(
+        ScheduledBalanceAdjustments_CD_Lib.addScheduledBalanceAdjustment(
             newBalanceAdjustment.executionDate,
             abi.encode(_actionId)
         );
@@ -349,9 +372,10 @@ abstract contract CorporateActionsStorageWrapperSecurity is
         if (_data.length > 0) {
             bytes32 taskType = abi.decode(_data, (bytes32));
             if (taskType == SNAPSHOT_TASK_TYPE) {
-                _triggerScheduledSnapshots(1);
+                ScheduledSnapshots_CD_Lib.triggerScheduledSnapshots(1);
             } else if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
-                _triggerScheduledBalanceAdjustments(1);
+                ScheduledBalanceAdjustments_CD_Lib
+                    .triggerScheduledBalanceAdjustments(1);
             }
         }
     }
@@ -382,7 +406,7 @@ abstract contract CorporateActionsStorageWrapperSecurity is
                         (IEquity.ScheduledBalanceAdjustment)
                     );
 
-                _adjustBalances(
+                AdjustBalances_CD_Lib.adjustBalances(
                     balanceAdjustment.factor,
                     balanceAdjustment.decimals
                 );

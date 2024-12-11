@@ -214,11 +214,20 @@ import {
 import {
     CorporateActionsStorageWrapper
 } from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {
+    CorporateActionsStorageWrapper
+} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
 
 abstract contract CapStorageWrapper_2 is
-    CorporateActionsStorageWrapper,
     CapStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
+    CorporateActionsStorageWrapper,
+    ScheduledBalanceAdjustmentsStorageWrapper
 {
     function _getMaxSupplyAdjusted()
         internal
@@ -253,8 +262,8 @@ abstract contract CapStorageWrapper_2 is
         uint256 _timestamp
     ) internal view virtual returns (uint256 maxSupply_) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjustedAt(_timestamp),
-            _getLABAFForPartition(_partition)
+            AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
+            AdjustBalances_CD_Lib.getLABAFForPartition(_partition)
         );
         return _getMaxSupplyByPartition(_partition) * factor;
     }

@@ -221,19 +221,22 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-contract ScheduledTasks is
-    IStaticFunctionSelectors,
-    IScheduledTasks,
-    CorporateActionsStorageWrapperSecurity
-{
+contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     function onScheduledTaskTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    ) external virtual override onlyAutoCalling(_scheduledTaskStorage()) {
+    ) external virtual override onlyDelegate {
         _onScheduledTaskTriggered(_data);
+    }
+
+    function addScheduledTask(
+        uint256 _newScheduledTimestamp,
+        bytes memory _newData
+    ) external virtual onlyDelegate {
+        _addScheduledTask(_newScheduledTimestamp, _newData);
     }
 
     function triggerPendingScheduledTasks()
@@ -293,7 +296,7 @@ contract ScheduledTasks is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_ = new bytes4[](6);
         staticFunctionSelectors_[selectorIndex++] = this
             .triggerPendingScheduledTasks
             .selector;
@@ -308,6 +311,9 @@ contract ScheduledTasks is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .onScheduledTaskTriggered
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .addScheduledTask
             .selector;
     }
 

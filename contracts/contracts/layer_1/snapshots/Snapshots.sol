@@ -220,6 +220,10 @@ abstract contract Snapshots is
     ISnapshots,
     ERC1410SnapshotStorageWrapper
 {
+    function updateTotalSupplySnapshot() external virtual onlyDelegate {
+        _updateTotalSupplySnapshot();
+    }
+
     function balanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
@@ -271,7 +275,7 @@ abstract contract Snapshots is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_ = new bytes4[](6);
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .balanceOfAtSnapshot
@@ -284,6 +288,9 @@ abstract contract Snapshots is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .partitionsOfAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .updateTotalSupplySnapshot
             .selector;
     }
 

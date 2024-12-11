@@ -213,11 +213,14 @@ import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {
+    ERC1410ScheduledTasks_CD_Lib
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
 
-abstract contract LockStorageWrapper_2 is
-    LockStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
-{
+abstract contract LockStorageWrapper_2 is LockStorageWrapper {
     struct LockDataStorage_2 {
         mapping(address => mapping(bytes32 => uint256)) LABAFs_TotalLocked;
         mapping(address => mapping(bytes32 => uint256[])) LABAF_locks;
@@ -231,7 +234,11 @@ abstract contract LockStorageWrapper_2 is
     ) internal virtual override returns (bool success_, uint256 lockId_) {
         LockDataStorage_2 storage lockStorage_2 = _lockStorage_2();
 
-        _triggerAndSyncAll(_partition, _tokenHolder, address(0));
+        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
+            _partition,
+            _tokenHolder,
+            address(0)
+        );
 
         uint256 ABAF = _updateTotalLock(
             _partition,
@@ -257,7 +264,11 @@ abstract contract LockStorageWrapper_2 is
     ) internal virtual override returns (bool success_) {
         LockDataStorage_2 storage lockStorage_2 = _lockStorage_2();
 
-        _triggerAndSyncAll(_partition, address(0), _tokenHolder);
+        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
+            _partition,
+            address(0),
+            _tokenHolder
+        );
 
         uint256 ABAF = _updateTotalLock(
             _partition,
@@ -348,7 +359,7 @@ abstract contract LockStorageWrapper_2 is
         address _tokenHolder,
         LockDataStorage_2 storage lockStorage_2
     ) internal returns (uint256 ABAF_) {
-        ABAF_ = _getABAF();
+        ABAF_ = AdjustBalances_CD_Lib.getABAF();
 
         uint256 LABAF = _getTotalLockLABAFByPartition(_partition, _tokenHolder);
 
@@ -384,7 +395,7 @@ abstract contract LockStorageWrapper_2 is
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
             _getTotalLockLABAFByPartition(_partition, _tokenHolder)
         );
         return
@@ -402,7 +413,7 @@ abstract contract LockStorageWrapper_2 is
         returns (uint256 amount_, uint256 expirationTimestamp_)
     {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
             _getLockLABAFByPartition(_partition, _lockId, _tokenHolder)
         );
 

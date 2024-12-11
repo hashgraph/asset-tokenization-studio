@@ -204,140 +204,33 @@
 */
 
 // SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
 
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {
-    CorporateActionsStorageWrapper
-} from '../../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
-import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
-import {
-    _ERC1410_BASIC_STORAGE_2_POSITION
-} from '../../constants/storagePositions.sol';
-import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+import {CD_Lib} from '../../../layer_1/common/CD_Lib.sol';
 
-abstract contract ERC1410ScheduledTasksStorageWrapperRead is
-    CorporateActionsStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper,
-    ERC1410SnapshotStorageWrapper
-{
-    struct ERC1410BasicStorage_2 {
-        // Mapping from investor to their partitions LABAF
-        mapping(address => uint256[]) LABAF_user_partition;
-        // Aggregated Balance Adjustment
-        uint256 ABAF;
-        // Last Aggregated Balance Adjustment per account
-        mapping(address => uint256) LABAF;
-        // Last Aggregated Balance Adjustment per partition
-        mapping(bytes32 => uint256) LABAF_partition;
-    }
-
-    function _getABAF() internal view virtual returns (uint256) {
-        return _getERC1410BasicStorage_2().ABAF;
-    }
-
-    function _getABAFAdjusted() internal view virtual returns (uint256) {
-        return _getABAFAdjustedAt(_blockTimestamp());
-    }
-
-    function _getABAFAdjustedAt(
-        uint256 _timestamp
-    ) internal view virtual returns (uint256) {
-        uint256 ABAF = _getABAF();
-        if (ABAF == 0) ABAF = 1;
-        (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustmentsAt(
-                _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage(),
-                _timestamp
-            );
-        return ABAF * pendingABAF;
-    }
-
-    function _getLABAFForUser(
-        address _account
-    ) internal view virtual returns (uint256) {
-        return _getERC1410BasicStorage_2().LABAF[_account];
-    }
-
-    function _getLABAFForPartition(
-        bytes32 _partition
-    ) internal view virtual returns (uint256) {
-        return _getERC1410BasicStorage_2().LABAF_partition[_partition];
-    }
-
-    function _getLABAFForUserAndPartition(
-        bytes32 _partition,
-        address _account
-    ) internal view virtual returns (uint256) {
-        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
-            _account
-        ][_partition];
-
-        if (partitionsIndex == 0) return 0;
-        return
-            _getERC1410BasicStorage_2().LABAF_user_partition[_account][
-                partitionsIndex - 1
-            ];
-    }
-
-    function _balanceOfAdjusted(
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
-        return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
-    }
-
-    function _balanceOfAdjustedAt(
-        address _tokenHolder,
-        uint256 _timestamp
-    ) internal view virtual returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjustedAt(_timestamp),
-            _getLABAFForUser(_tokenHolder)
+library ScheduledBalanceAdjustments_CD_Lib {
+    function triggerScheduledBalanceAdjustments(
+        uint256 _max
+    ) external returns (uint256) {
+        bytes memory data = CD_Lib.delegateCall(
+            abi.encodeWithSignature(
+                'triggerScheduledBalanceAdjustments(uint256)',
+                _max
+            )
         );
-        return _balanceOf(_tokenHolder) * factor;
+        return abi.decode(data, (uint256));
     }
 
-    function _balanceOfByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
-        return
-            _balanceOfByPartitionAdjustedAt(
-                _partition,
-                _tokenHolder,
-                _blockTimestamp()
-            );
-    }
-
-    function _balanceOfByPartitionAdjustedAt(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _timestamp
-    ) internal view virtual returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjustedAt(_timestamp),
-            _getLABAFForUserAndPartition(_partition, _tokenHolder)
+    function addScheduledBalanceAdjustment(
+        uint256 _newScheduledTimestamp,
+        bytes memory _newData
+    ) external {
+        CD_Lib.delegateCall(
+            abi.encodeWithSignature(
+                'addScheduledBalanceAdjustment(uint256,bytes)',
+                _newScheduledTimestamp,
+                _newData
+            )
         );
-        return _balanceOfByPartition(_partition, _tokenHolder) * factor;
-    }
-
-    function _getERC1410BasicStorage_2()
-        internal
-        pure
-        virtual
-        returns (ERC1410BasicStorage_2 storage erc1410BasicStorage_2_)
-    {
-        bytes32 position = _ERC1410_BASIC_STORAGE_2_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1410BasicStorage_2_.slot := position
-        }
     }
 }

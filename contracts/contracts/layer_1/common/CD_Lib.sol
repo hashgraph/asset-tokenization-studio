@@ -204,11 +204,14 @@
 */
 
 library CD_Lib {
-    function delegateCall(bytes memory encodedCallData) external {
+    function delegateCall(
+        bytes memory encodedCallData
+    ) external returns (bytes memory) {
         (bool success, bytes memory data) = address(this).delegatecall(
             encodedCallData
         );
         _checkSuccess(success, data);
+        return data;
     }
 
     function staticCall(

@@ -209,26 +209,28 @@ pragma solidity 0.8.18;
 import {
     SnapshotsStorageWrapper
 } from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol';
 import {_SNAPSHOT_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
+import {ERC20_CD_Lib} from '../../layer_1/ERC1400/ERC20/ERC20_CD_Lib.sol';
+import {
+    ERC1410ScheduledTasks_CD_Lib
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
 
-abstract contract SnapshotsStorageWrapper_2 is
-    SnapshotsStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapperRead
-{
+abstract contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
     struct SnapshotStorage_2 {
         Snapshots ABAFSnapshots;
         Snapshots decimals;
     }
 
     function _updateABAFSnapshot() internal virtual {
-        _updateSnapshot(_snapshotStorage_2().ABAFSnapshots, _getABAF());
+        _updateSnapshot(
+            _snapshotStorage_2().ABAFSnapshots,
+            AdjustBalanceLib.getABAF()
+        );
     }
 
     function _updateDecimalsSnapshot() internal virtual {
-        _updateSnapshot(_snapshotStorage_2().decimals, _decimals());
+        _updateSnapshot(_snapshotStorage_2().decimals, ERC20_CD_Lib.decimals());
     }
 
     function _ABAFAtSnapshot(
@@ -239,7 +241,7 @@ abstract contract SnapshotsStorageWrapper_2 is
             _snapshotStorage_2().ABAFSnapshots
         );
 
-        return snapshotted ? value : _getABAF();
+        return snapshotted ? value : AdjustBalanceLib.getABAF();
     }
 
     function _decimalsAtSnapshot(
@@ -250,7 +252,7 @@ abstract contract SnapshotsStorageWrapper_2 is
             _snapshotStorage_2().decimals
         );
 
-        return snapshotted ? uint8(value) : _decimals();
+        return snapshotted ? uint8(value) : ERC20_CD_Lib.decimals();
     }
 
     function _updateAccountSnapshot(
@@ -262,7 +264,7 @@ abstract contract SnapshotsStorageWrapper_2 is
         if (currentSnapshotId == 0) return;
 
         uint256 ABAFAtCurrentSnapshot = _ABAFAtSnapshot(currentSnapshotId);
-        uint256 ABAF = _getABAFAdjusted();
+        uint256 ABAF = AdjustBalanceLib.getABAFAdjusted();
 
         if (ABAF == ABAFAtCurrentSnapshot) {
             super._updateAccountSnapshot(account, partition);
@@ -270,11 +272,11 @@ abstract contract SnapshotsStorageWrapper_2 is
         }
         if (ABAFAtCurrentSnapshot == 0) ABAFAtCurrentSnapshot = 1;
 
-        uint256 balance = _balanceOfAdjusted(account);
-        uint256 balanceForPartition = _balanceOfByPartitionAdjusted(
-            partition,
+        uint256 balance = ERC1410ScheduledTasks_CD_Lib.balanceOfAdjusted(
             account
         );
+        uint256 balanceForPartition = ERC1410ScheduledTasks_CD_Lib
+            .balanceOfByPartitionAdjusted(partition, account);
         uint256 factor = ABAF / ABAFAtCurrentSnapshot;
 
         balance /= factor;
@@ -302,7 +304,7 @@ abstract contract SnapshotsStorageWrapper_2 is
             _balanceOfAt_Adjusted(
                 snapshotId,
                 _snapshotStorage().accountBalanceSnapshots[account],
-                _balanceOfAdjusted(account)
+                ERC1410ScheduledTasks_CD_Lib.balanceOfAdjusted(account)
             );
     }
 
@@ -317,7 +319,10 @@ abstract contract SnapshotsStorageWrapper_2 is
                 _snapshotStorage().accountPartitionBalanceSnapshots[account][
                     _partition
                 ],
-                _balanceOfByPartitionAdjusted(_partition, account)
+                ERC1410ScheduledTasks_CD_Lib.balanceOfByPartitionAdjusted(
+                    _partition,
+                    account
+                )
             );
     }
 
@@ -330,7 +335,7 @@ abstract contract SnapshotsStorageWrapper_2 is
         if (snapshotted) return value;
 
         uint256 ABAFAtSnapshot = _ABAFAtSnapshot(_snapshotId);
-        uint256 ABAF = _getABAF();
+        uint256 ABAF = AdjustBalanceLib.getABAF();
 
         if (ABAFAtSnapshot == ABAF) return _currentBalanceAdjusted;
         if (ABAFAtSnapshot == 0) ABAFAtSnapshot = 1;

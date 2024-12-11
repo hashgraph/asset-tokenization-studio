@@ -220,13 +220,19 @@ import {
     ScheduledTasksStorageWrapper
 } from '../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
 import {SnapshotsStorageWrapper_2} from './SnapshotsStorageWrapper_2.sol';
+import {
+    ScheduledTasks_CD_Lib
+} from '../scheduledTasks/scheduledTasks/ScheduledTasks_CD_Lib.sol';
 
-contract Snapshots_2 is
-    ISnapshots_2,
-    ScheduledTasksStorageWrapper,
-    Snapshots,
-    SnapshotsStorageWrapper_2
-{
+contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
+    function updateABAFSnapshot() external virtual override onlyDelegate {
+        _updateABAFSnapshot();
+    }
+
+    function updateDecimalsSnapshot() external virtual override onlyDelegate {
+        _updateDecimalsSnapshot();
+    }
+
     function takeSnapshot()
         external
         virtual
@@ -235,7 +241,7 @@ contract Snapshots_2 is
         onlyRole(_SNAPSHOT_ROLE)
         returns (uint256 snapshotID)
     {
-        _triggerScheduledTasks(0);
+        ScheduledTasks_CD_Lib.triggerScheduledTasks(0);
         return _takeSnapshot();
     }
 
@@ -316,7 +322,14 @@ contract Snapshots_2 is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_ = new bytes4[](9);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .updateABAFSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .updateDecimalsSnapshot
+            .selector;
+
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .balanceOfAtSnapshot

@@ -233,6 +233,12 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         return _decimalsAdjusted();
     }
 
+    function decimalsAdjustedAt(
+        uint256 _timestamp
+    ) external view virtual returns (uint8) {
+        return _decimalsAdjustedAt(_timestamp);
+    }
+
     function getAllowanceLABAF(
         address _owner,
         address _spender
@@ -324,6 +330,9 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         staticFunctionSelectors_[selectorsIndex++] = this.decimals.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
             .getAllowanceLABAF
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .decimalsAdjustedAt
             .selector;
     }
 

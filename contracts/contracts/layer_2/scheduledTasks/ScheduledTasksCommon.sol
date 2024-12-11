@@ -219,11 +219,4 @@ abstract contract ScheduledTasksCommon is LocalContext {
         }
         _;
     }
-
-    modifier onlyAutoCalling(
-        ScheduledTasksLib.ScheduledTasksDataStorage storage _scheduledTasks
-    ) {
-        if (!_scheduledTasks.autoCalling) revert NotAutocalling();
-        _;
-    }
 }

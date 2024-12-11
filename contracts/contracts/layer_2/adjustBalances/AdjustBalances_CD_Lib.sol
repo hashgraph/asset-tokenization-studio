@@ -209,6 +209,20 @@ pragma solidity 0.8.18;
 import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
 
 library AdjustBalances_CD_Lib {
+    function adjustBalances(
+        uint256 factor,
+        uint8 decimals
+    ) external returns (bool success_) {
+        bytes memory data = CD_Lib.delegateCall(
+            abi.encodeWithSignature(
+                'adjustBalances(uint256,uint8)',
+                factor,
+                decimals
+            )
+        );
+        return abi.decode(data, (bool));
+    }
+
     function getABAFAdjustedAt(
         uint256 _timestamp
     ) external view returns (uint256) {
@@ -235,6 +249,29 @@ library AdjustBalances_CD_Lib {
                 _partition,
                 _account
             )
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getABAF() external view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getABAF()')
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getABAFAdjusted() external view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getABAFAdjusted()')
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getLABAFForPartition(
+        bytes32 _partition
+    ) external view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getLABAFForPartition(bytes32)', _partition)
         );
         return abi.decode(data, (uint256));
     }

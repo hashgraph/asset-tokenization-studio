@@ -236,4 +236,11 @@ library ERC1410Basic_CD_Lib {
         );
         return abi.decode(data, (bytes32[]));
     }
+
+    function balanceOf(address _tokenHolder) external view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('balanceOf(address)', _tokenHolder)
+        );
+        return abi.decode(data, (uint256));
+    }
 }

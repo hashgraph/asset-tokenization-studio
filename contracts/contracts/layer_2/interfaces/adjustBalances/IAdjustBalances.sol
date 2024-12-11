@@ -211,4 +211,23 @@ interface IAdjustBalances {
         uint256 factor,
         uint8 decimals
     ) external returns (bool success_);
+
+    function getABAF() external view returns (uint256);
+
+    function getABAFAdjusted() external view returns (uint256);
+
+    function getABAFAdjustedAt(
+        uint256 _timestamp
+    ) external view returns (uint256);
+
+    function getLABAFForUser(address _account) external view returns (uint256);
+
+    function getLABAFForPartition(
+        bytes32 _partition
+    ) external view returns (uint256);
+
+    function getLABAFForUserAndPartition(
+        bytes32 _partition,
+        address _account
+    ) external view returns (uint256);
 }

@@ -228,10 +228,15 @@ import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {Snapshots_CD_Lib} from '../../layer_1/snapshots/Snapshots_CD_Lib.sol';
+import {
+    ERC1410ScheduledTasks_CD_Lib
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
+import {ERC20_2_CD_Lib} from '../ERC1400/ERC20/ERC20_2_CD_Lib.sol';
+import {Snapshots_2_CD_Lib} from '../snapshots/Snapshots_2_CD_Lib.sol';
 
 abstract contract EquityStorageWrapper is
-    CorporateActionsStorageWrapperSecurity,
-    ERC20StorageWrapper_2_Read
+    CorporateActionsStorageWrapperSecurity
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -477,12 +482,15 @@ abstract contract EquityStorageWrapper is
             dateReached_ = true;
 
             balance_ = (_snapshotId != 0)
-                ? _balanceOfAtSnapshot(_snapshotId, _account)
-                : _balanceOfAdjustedAt(_account, _date);
+                ? Snapshots_CD_Lib.balanceOfAtSnapshot(_snapshotId, _account)
+                : ERC1410ScheduledTasks_CD_Lib.balanceOfAdjustedAt(
+                    _account,
+                    _date
+                );
 
             decimals_ = (_snapshotId != 0)
-                ? _decimalsAtSnapshot(_snapshotId)
-                : _decimalsAdjustedAt(_date);
+                ? Snapshots_2_CD_Lib.decimalsAtSnapshot(_snapshotId)
+                : ERC20_2_CD_Lib.decimalsAdjustedAt(_date);
         }
     }
 
@@ -499,56 +507,13 @@ abstract contract EquityStorageWrapper is
         }
     }
 
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    )
-        internal
-        virtual
-        override(
-            ERC1410ScheduledTasksStorageWrapper,
-            ERC20StorageWrapper_2_Read
-        )
-    {
-        ERC1410ScheduledTasksStorageWrapper._beforeTokenTransfer(
-            partition,
-            from,
-            to,
-            amount
-        );
-    }
-
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(
-            ERC1410ScheduledTasksStorageWrapper,
-            ERC20StorageWrapper_2_Read
-        )
-    {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
-        );
-    }
-
     function _addCorporateAction(
         bytes32 _actionType,
         bytes memory _data
     )
         internal
         virtual
-        override(
-            CorporateActionsStorageWrapper,
-            CorporateActionsStorageWrapperSecurity
-        )
+        override(CorporateActionsStorageWrapperSecurity)
         returns (
             bool success_,
             bytes32 corporateActionId_,

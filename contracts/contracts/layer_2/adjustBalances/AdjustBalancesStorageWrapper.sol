@@ -207,16 +207,45 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {
     IAdjustBalancesStorageWrapper
 } from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+import {
+    _ADJUST_BALANCES_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {
+    ERC20StorageWrapper
+} from '../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
+import {AdjustBalanceLib} from './AdjustBalanceLib.sol';
+import {Snapshots_2_CD_Lib} from '../snapshots/Snapshots_2_CD_Lib.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {Snapshots_CD_Lib} from '../../layer_1/snapshots/Snapshots_CD_Lib.sol';
+import {
+    CorporateActionsStorageWrapper
+} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
 
 abstract contract AdjustBalancesStorageWrapper is
     IAdjustBalancesStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
+    ERC1410BasicStorageWrapperRead,
+    ERC20StorageWrapper,
+    CorporateActionsStorageWrapper,
+    ScheduledBalanceAdjustmentsStorageWrapper
 {
+    struct AdjustBalancesStorage {
+        // Mapping from investor to their partitions LABAF
+        mapping(address => uint256[]) LABAF_user_partition;
+        // Aggregated Balance Adjustment
+        uint256 ABAF;
+        // Last Aggregated Balance Adjustment per account
+        mapping(address => uint256) LABAF;
+        // Last Aggregated Balance Adjustment per partition
+        mapping(bytes32 => uint256) LABAF_partition;
+    }
+
     modifier checkFactor(uint256 _factor) {
         if (_factor == 0) revert FactorIsZero();
         _;
@@ -229,15 +258,15 @@ abstract contract AdjustBalancesStorageWrapper is
         _beforeBalanceAdjustment(_factor, _decimals);
 
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
         ERC20Storage storage erc20Storage = _getErc20Storage();
         CapDataStorage storage capStorage = _capStorage();
 
         erc1410Storage.totalSupply *= _factor;
 
-        if (_getABAF() == 0) erc1410Storage_2.ABAF = _factor;
-        else erc1410Storage_2.ABAF *= _factor;
+        if (_getABAF() == 0) adjustBalancesStorage.ABAF = _factor;
+        else adjustBalancesStorage.ABAF *= _factor;
 
         erc20Storage.decimals += _decimals;
         capStorage.maxSupply *= _factor;
@@ -249,8 +278,70 @@ abstract contract AdjustBalancesStorageWrapper is
         uint256 _factor,
         uint8 _decimals
     ) internal virtual {
-        _updateDecimalsSnapshot();
-        _updateABAFSnapshot();
-        _updateTotalSupplySnapshot();
+        Snapshots_2_CD_Lib.updateDecimalsSnapshot();
+        Snapshots_2_CD_Lib.updateABAFSnapshot();
+        Snapshots_CD_Lib.updateTotalSupplySnapshot();
+    }
+
+    function _getABAF() internal view virtual returns (uint256) {
+        return _getAdjustBalancesStorage().ABAF;
+    }
+
+    function _getABAFAdjusted() internal view virtual returns (uint256) {
+        return _getABAFAdjustedAt(_blockTimestamp());
+    }
+
+    function _getABAFAdjustedAt(
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
+        uint256 ABAF = _getABAF();
+        if (ABAF == 0) ABAF = 1;
+        (uint256 pendingABAF, ) = AdjustBalanceLib
+            ._getPendingScheduledBalanceAdjustmentsAt(
+                _scheduledBalanceAdjustmentStorage(),
+                _corporateActionsStorage(),
+                _timestamp
+            );
+        return ABAF * pendingABAF;
+    }
+
+    function _getLABAFForUser(
+        address _account
+    ) internal view virtual returns (uint256) {
+        return _getAdjustBalancesStorage().LABAF[_account];
+    }
+
+    function _getLABAFForPartition(
+        bytes32 _partition
+    ) internal view virtual returns (uint256) {
+        return _getAdjustBalancesStorage().LABAF_partition[_partition];
+    }
+
+    function _getLABAFForUserAndPartition(
+        bytes32 _partition,
+        address _account
+    ) internal view virtual returns (uint256) {
+        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
+            _account
+        ][_partition];
+
+        if (partitionsIndex == 0) return 0;
+        return
+            _getAdjustBalancesStorage().LABAF_user_partition[_account][
+                partitionsIndex - 1
+            ];
+    }
+
+    function _getAdjustBalancesStorage()
+        internal
+        pure
+        virtual
+        returns (AdjustBalancesStorage storage adjustBalancesStorage_)
+    {
+        bytes32 position = _ADJUST_BALANCES_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            adjustBalancesStorage_.slot := position
+        }
     }
 }

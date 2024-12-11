@@ -221,10 +221,18 @@ abstract contract Common is
     ControlListStorageWrapper
 {
     error AlreadyInitialized();
+    error OnlyDelegateAllowed();
 
     modifier onlyUninitialized(bool initialized) {
         if (initialized) {
             revert AlreadyInitialized();
+        }
+        _;
+    }
+
+    modifier onlyDelegate() {
+        if (_msgSender() != address(this)) {
+            revert OnlyDelegateAllowed();
         }
         _;
     }

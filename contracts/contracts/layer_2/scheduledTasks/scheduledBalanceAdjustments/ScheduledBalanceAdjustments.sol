@@ -222,24 +222,38 @@ import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from './ScheduledBalanceAdjustmentsStorageWrapper.sol';
 
 contract ScheduledBalanceAdjustments is
     IStaticFunctionSelectors,
     IScheduledBalanceAdjustments,
+    ScheduledBalanceAdjustmentsStorageWrapper,
+    Common,
     CorporateActionsStorageWrapperSecurity
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    function triggerScheduledBalanceAdjustments(
+        uint256 _max
+    ) external virtual onlyDelegate returns (uint256) {
+        return _triggerScheduledBalanceAdjustments(_max);
+    }
+
+    function addScheduledBalanceAdjustment(
+        uint256 _newScheduledTimestamp,
+        bytes memory _newData
+    ) external virtual onlyDelegate {
+        _addScheduledBalanceAdjustment(_newScheduledTimestamp, _newData);
+    }
 
     function onScheduledBalanceAdjustmentTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    )
-        external
-        virtual
-        override
-        onlyAutoCalling(_scheduledBalanceAdjustmentStorage())
-    {
+    ) external virtual override onlyDelegate {
         _onScheduledBalanceAdjustmentTriggered(_data);
     }
 
@@ -289,7 +303,7 @@ contract ScheduledBalanceAdjustments is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_ = new bytes4[](4);
         staticFunctionSelectors_[selectorIndex++] = this
             .scheduledBalanceAdjustmentCount
             .selector;
@@ -298,6 +312,9 @@ contract ScheduledBalanceAdjustments is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .onScheduledBalanceAdjustmentTriggered
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .addScheduledBalanceAdjustment
             .selector;
     }
 
