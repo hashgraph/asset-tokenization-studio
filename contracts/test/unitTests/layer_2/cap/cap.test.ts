@@ -211,11 +211,13 @@ import {
     AccessControl,
     Equity,
     Snapshots_2,
+    ERC1410ScheduledTasks,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _CAP_ROLE,
     _CORPORATE_ACTION_ROLE,
+    _ISSUER_ROLE,
     _PAUSER_ROLE,
     _SNAPSHOT_ROLE,
 } from '../../../../scripts/constants'
@@ -226,6 +228,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { cap } from '../../../../typechain-types/contracts/layer_1'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -249,6 +252,7 @@ describe('CAP Layer 2 Tests', () => {
     let accessControlFacet: AccessControl
     let equityFacet: Equity
     let snapshotFacet: Snapshots_2
+    let erc1410Facet: ERC1410ScheduledTasks
 
     beforeEach(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -302,6 +306,10 @@ describe('CAP Layer 2 Tests', () => {
 
         snapshotFacet = await ethers.getContractAt(
             'Snapshots_2',
+            diamond.address
+        )
+        erc1410Facet = await ethers.getContractAt(
+            'ERC1410ScheduledTasks',
             diamond.address
         )
     })
@@ -383,5 +391,63 @@ describe('CAP Layer 2 Tests', () => {
             maxSupplyByPartition * adjustmentFactor
         )
         expect(currentMaxSupplyByPartition_2).to.equal(0)
+    })
+
+    it('GIVEN a token WHEN max supply and partition max supply are set THEN balance adjustments occur and resetting partition max supply fails with NewMaxSupplyForPartitionTooLow', async () => {
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
+        await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A)
+
+        capFacet = capFacet.connect(signer_C)
+        equityFacet = equityFacet.connect(signer_C)
+        snapshotFacet = snapshotFacet.connect(signer_A)
+        erc1410Facet = erc1410Facet.connect(signer_C)
+
+        await erc1410Facet.issueByPartition(
+            _PARTITION_ID_1,
+            account_A,
+            maxSupply - 1,
+            '0x'
+        )
+
+        await capFacet.setMaxSupply(maxSupply)
+
+        await capFacet.setMaxSupplyByPartition(
+            _PARTITION_ID_1,
+            maxSupplyByPartition
+        )
+
+        // scheduled balance adjustments
+        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
+            .timestamp
+
+        const balanceAdjustmentExecutionDateInSeconds_1 =
+            currentTimeInSeconds + TIME / 1000
+
+        const balanceAdjustmentsFactor_1 = 5
+        const balanceAdjustmentsDecimals_1 = 2
+
+        const balanceAdjustmentData_1 = {
+            executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
+            factor: balanceAdjustmentsFactor_1,
+            decimals: balanceAdjustmentsDecimals_1,
+        }
+
+        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+
+        //-------------------------
+        // wait for first balance adjustment
+        await new Promise((f) => setTimeout(f, TIME + 1))
+        await snapshotFacet.takeSnapshot() // execute first adjustment balance only
+
+        // Attempt to change the max supply by partition with the same value as before
+        await expect(
+            capFacet.setMaxSupplyByPartition(
+                _PARTITION_ID_1,
+                maxSupplyByPartition
+            )
+        ).to.eventually.be.rejectedWith(Error)
     })
 })
