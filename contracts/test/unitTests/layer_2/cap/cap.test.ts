@@ -441,9 +441,6 @@ describe('CAP Layer 2 Tests', () => {
         // wait for first balance adjustment
         await new Promise((f) => setTimeout(f, TIME + 1))
         await snapshotFacet.takeSnapshot() // execute first adjustment balance only
-        // wait for second balance adjustment
-        await new Promise((f) => setTimeout(f, TIME + 1))
-        await accessControlFacet.revokeRole(_SNAPSHOT_ROLE, account_A) // dumb operation
 
         // Attempt to change the max supply by partition with the same value as before
         await expect(
