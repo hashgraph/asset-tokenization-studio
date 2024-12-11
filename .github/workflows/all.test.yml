@@ -51,6 +51,10 @@ jobs:
         working-directory: web
         run: yarn install
 
+      - name: Build web
+        working-directory: web
+        run: yarn build
+
       - name: Create .env file in SDK
         working-directory: sdk
         run: |
