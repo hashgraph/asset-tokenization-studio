@@ -279,6 +279,13 @@ contract AdjustBalances is
         return _getLABAFForUserAndPartition(_partition, _account);
     }
 
+    function getAllowanceLABAF(
+        address _owner,
+        address _spender
+    ) external view virtual override returns (uint256) {
+        return _getAllowanceLABAF(_owner, _spender);
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -297,7 +304,7 @@ contract AdjustBalances is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_ = new bytes4[](8);
         staticFunctionSelectors_[selectorIndex++] = this
             .adjustBalances
             .selector;
@@ -316,6 +323,9 @@ contract AdjustBalances is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getLABAFForUserAndPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getAllowanceLABAF
             .selector;
     }
 

@@ -261,4 +261,18 @@ library AdjustBalances_CD_Lib {
         );
         return abi.decode(data, (uint256));
     }
+
+    function getAllowanceLABAF(
+        address _owner,
+        address _spender
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getAllowanceLABAF(address,address)',
+                _owner,
+                _spender
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
 }

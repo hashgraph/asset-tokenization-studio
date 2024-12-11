@@ -230,4 +230,9 @@ interface IAdjustBalances {
         bytes32 _partition,
         address _account
     ) external view returns (uint256);
+
+    function getAllowanceLABAF(
+        address _owner,
+        address _spender
+    ) external view returns (uint256);
 }

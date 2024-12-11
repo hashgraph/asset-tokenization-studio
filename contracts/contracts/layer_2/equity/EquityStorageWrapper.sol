@@ -212,9 +212,6 @@ import {
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {
-    ERC20StorageWrapper_2_Read
-} from '../ERC1400/ERC20/ERC20StorageWrapper_2_Read.sol';
 import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,

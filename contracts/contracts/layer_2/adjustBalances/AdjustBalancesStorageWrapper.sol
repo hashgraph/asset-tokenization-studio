@@ -325,6 +325,13 @@ contract AdjustBalancesStorageWrapper is
             ];
     }
 
+    function _getAllowanceLABAF(
+        address _owner,
+        address _spender
+    ) internal view virtual returns (uint256) {
+        return _getAdjustBalancesStorage().LABAFs_allowances[_owner][_spender];
+    }
+
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,

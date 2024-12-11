@@ -226,18 +226,6 @@ abstract contract ERC20StorageWrapper_2_Read is
     ERC20StorageWrapper,
     ERC1410ScheduledTasksStorageWrapper
 {
-    struct ERC20Storage_2 {
-        mapping(address => mapping(address => uint256)) LABAFs_allowances;
-    }
-
-    function _getAllowanceLABAF(
-        address _owner,
-        address _spender
-    ) internal view virtual returns (uint256) {
-        ERC20Storage_2 storage erc20Storage_2 = _getErc20Storage_2();
-        return erc20Storage_2.LABAFs_allowances[_owner][_spender];
-    }
-
     function _decimalsAdjusted() internal view virtual returns (uint8) {
         return _decimalsAdjustedAt(_blockTimestamp());
     }
@@ -262,22 +250,9 @@ abstract contract ERC20StorageWrapper_2_Read is
     ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
-            _getAllowanceLABAF(_owner, _spender)
+            AdjustBalances_CD_Lib.getAllowanceLABAF(_owner, _spender)
         );
         return _allowance(_owner, _spender) * factor;
-    }
-
-    function _getErc20Storage_2()
-        internal
-        view
-        virtual
-        returns (ERC20Storage_2 storage erc20Storage_2_)
-    {
-        bytes32 position = _ERC20_2_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc20Storage_2_.slot := position
-        }
     }
 
     function _getERC20MetadataAdjusted()
