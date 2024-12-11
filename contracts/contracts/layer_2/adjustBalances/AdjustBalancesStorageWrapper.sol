@@ -210,13 +210,12 @@ import {
     IAdjustBalancesStorageWrapper
 } from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
 import {
-    _ADJUST_BALANCES_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {
     ERC20StorageWrapper
 } from '../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
 import {AdjustBalanceLib} from './AdjustBalanceLib.sol';
-import {Snapshots_2_CD_Lib} from '../snapshots/Snapshots_2_CD_Lib.sol';
+import {
+    SnapshotsStorageWrapper_2
+} from '../snapshots/SnapshotsStorageWrapper_2.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
@@ -227,25 +226,19 @@ import {
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+import {
+    AdjustBalancesStorageWrapperRead
+} from './AdjustBalancesStorageWrapperRead.sol';
 
 abstract contract AdjustBalancesStorageWrapper is
     IAdjustBalancesStorageWrapper,
+    AdjustBalancesStorageWrapperRead,
     ERC1410BasicStorageWrapperRead,
-    ERC20StorageWrapper,
     CorporateActionsStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper
+    ERC20StorageWrapper,
+    ScheduledBalanceAdjustmentsStorageWrapper,
+    SnapshotsStorageWrapper_2
 {
-    struct AdjustBalancesStorage {
-        // Mapping from investor to their partitions LABAF
-        mapping(address => uint256[]) LABAF_user_partition;
-        // Aggregated Balance Adjustment
-        uint256 ABAF;
-        // Last Aggregated Balance Adjustment per account
-        mapping(address => uint256) LABAF;
-        // Last Aggregated Balance Adjustment per partition
-        mapping(bytes32 => uint256) LABAF_partition;
-    }
-
     modifier checkFactor(uint256 _factor) {
         if (_factor == 0) revert FactorIsZero();
         _;
@@ -278,9 +271,9 @@ abstract contract AdjustBalancesStorageWrapper is
         uint256 _factor,
         uint8 _decimals
     ) internal virtual {
-        Snapshots_2_CD_Lib.updateDecimalsSnapshot();
-        Snapshots_2_CD_Lib.updateABAFSnapshot();
-        Snapshots_CD_Lib.updateTotalSupplySnapshot();
+        _updateDecimalsSnapshot();
+        _updateABAFSnapshot();
+        _updateTotalSupplySnapshot();
     }
 
     function _getABAF() internal view virtual returns (uint256) {
@@ -330,18 +323,5 @@ abstract contract AdjustBalancesStorageWrapper is
             _getAdjustBalancesStorage().LABAF_user_partition[_account][
                 partitionsIndex - 1
             ];
-    }
-
-    function _getAdjustBalancesStorage()
-        internal
-        pure
-        virtual
-        returns (AdjustBalancesStorage storage adjustBalancesStorage_)
-    {
-        bytes32 position = _ADJUST_BALANCES_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            adjustBalancesStorage_.slot := position
-        }
     }
 }

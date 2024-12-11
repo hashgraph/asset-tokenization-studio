@@ -222,17 +222,4 @@ library ScheduledTasks_CD_Lib {
         );
         return abi.decode(data, (uint256));
     }
-
-    function addScheduledTask(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) external {
-        CD_Lib.delegateCall(
-            abi.encodeWithSignature(
-                'addScheduledTask(uint256,bytes)',
-                _newScheduledTimestamp,
-                _newData
-            )
-        );
-    }
 }

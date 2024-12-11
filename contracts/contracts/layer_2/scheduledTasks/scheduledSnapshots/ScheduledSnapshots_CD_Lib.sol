@@ -208,26 +208,4 @@ pragma solidity 0.8.18;
 
 import {CD_Lib} from '../../../layer_1/common/CD_Lib.sol';
 
-library ScheduledSnapshots_CD_Lib {
-    function triggerScheduledSnapshots(
-        uint256 _max
-    ) external returns (uint256) {
-        bytes memory data = CD_Lib.delegateCall(
-            abi.encodeWithSignature('triggerScheduledSnapshots(uint256)', _max)
-        );
-        return abi.decode(data, (uint256));
-    }
-
-    function addScheduledSnapshot(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) external {
-        bytes memory data = CD_Lib.delegateCall(
-            abi.encodeWithSignature(
-                'addScheduledSnapshot(uint256,bytes)',
-                _newScheduledTimestamp,
-                _newData
-            )
-        );
-    }
-}
+library ScheduledSnapshots_CD_Lib {}

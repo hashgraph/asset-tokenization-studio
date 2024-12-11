@@ -209,20 +209,6 @@ pragma solidity 0.8.18;
 import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
 
 library AdjustBalances_CD_Lib {
-    function adjustBalances(
-        uint256 factor,
-        uint8 decimals
-    ) external returns (bool success_) {
-        bytes memory data = CD_Lib.delegateCall(
-            abi.encodeWithSignature(
-                'adjustBalances(uint256,uint8)',
-                factor,
-                decimals
-            )
-        );
-        return abi.decode(data, (bool));
-    }
-
     function getABAFAdjustedAt(
         uint256 _timestamp
     ) external view returns (uint256) {

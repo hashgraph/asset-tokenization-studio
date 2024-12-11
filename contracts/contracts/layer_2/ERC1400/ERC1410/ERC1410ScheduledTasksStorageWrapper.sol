@@ -223,8 +223,8 @@ import {
 } from '../../../layer_1/constants/values.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
 import {
-    AdjustBalancesStorageWrapper
-} from '../../adjustBalances/AdjustBalancesStorageWrapper.sol';
+    AdjustBalancesStorageWrapperRead
+} from '../../adjustBalances/AdjustBalancesStorageWrapperRead.sol';
 import {
     ScheduledSnapshotsStorageWrapper
 } from '../../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
@@ -249,21 +249,25 @@ import {
 import {
     AdjustBalances_CD_Lib
 } from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {
+    CorporateActionsStorageWrapper
+} from '../../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
+    AdjustBalancesStorageWrapperRead,
     ERC1410SnapshotStorageWrapper,
-    AdjustBalancesStorageWrapper
+    CorporateActionsStorageWrapper,
+    ScheduledBalanceAdjustmentsStorageWrapper
 {
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
         address to,
         uint256 amount
-    )
-        internal
-        virtual
-        override(ERC1410BasicStorageWrapper, ERC1410SnapshotStorageWrapper)
-    {
+    ) internal virtual override {
         _triggerAndSyncAll(partition, from, to);
 
         super._beforeTokenTransfer(partition, from, to, amount);
@@ -323,7 +327,9 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
-        adjustBalancesStorage.LABAF_user_partition[_account].push(_getABAF());
+        adjustBalancesStorage.LABAF_user_partition[_account].push(
+            AdjustBalances_CD_Lib.getABAF()
+        );
 
         super._addPartitionTo(_value, _account, _partition);
     }
@@ -348,8 +354,8 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         bytes32 _partition
     ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
-            _getLABAFForPartition(_partition)
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getLABAFForPartition(_partition)
         );
         return _totalSupplyByPartition(_partition) * factor;
     }

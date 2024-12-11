@@ -242,7 +242,7 @@ contract ERC1410ScheduledTasks is
         bytes32 _partition,
         address _from,
         address _to
-    ) external virtual onlyDelegate {
+    ) external virtual {
         _triggerAndSyncAll(_partition, _from, _to);
     }
 

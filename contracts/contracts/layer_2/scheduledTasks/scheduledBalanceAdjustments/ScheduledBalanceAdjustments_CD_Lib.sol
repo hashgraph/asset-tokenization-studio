@@ -208,29 +208,4 @@ pragma solidity 0.8.18;
 
 import {CD_Lib} from '../../../layer_1/common/CD_Lib.sol';
 
-library ScheduledBalanceAdjustments_CD_Lib {
-    function triggerScheduledBalanceAdjustments(
-        uint256 _max
-    ) external returns (uint256) {
-        bytes memory data = CD_Lib.delegateCall(
-            abi.encodeWithSignature(
-                'triggerScheduledBalanceAdjustments(uint256)',
-                _max
-            )
-        );
-        return abi.decode(data, (uint256));
-    }
-
-    function addScheduledBalanceAdjustment(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) external {
-        CD_Lib.delegateCall(
-            abi.encodeWithSignature(
-                'addScheduledBalanceAdjustment(uint256,bytes)',
-                _newScheduledTimestamp,
-                _newData
-            )
-        );
-    }
-}
+library ScheduledBalanceAdjustments_CD_Lib {}

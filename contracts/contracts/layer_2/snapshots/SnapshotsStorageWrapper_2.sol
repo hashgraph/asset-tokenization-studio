@@ -210,7 +210,9 @@ import {
     SnapshotsStorageWrapper
 } from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
 import {_SNAPSHOT_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
 import {ERC20_CD_Lib} from '../../layer_1/ERC1400/ERC20/ERC20_CD_Lib.sol';
 import {
     ERC1410ScheduledTasks_CD_Lib
@@ -225,7 +227,7 @@ abstract contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
     function _updateABAFSnapshot() internal virtual {
         _updateSnapshot(
             _snapshotStorage_2().ABAFSnapshots,
-            AdjustBalanceLib.getABAF()
+            AdjustBalances_CD_Lib.getABAF()
         );
     }
 
@@ -241,7 +243,7 @@ abstract contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
             _snapshotStorage_2().ABAFSnapshots
         );
 
-        return snapshotted ? value : AdjustBalanceLib.getABAF();
+        return snapshotted ? value : AdjustBalances_CD_Lib.getABAF();
     }
 
     function _decimalsAtSnapshot(
@@ -264,7 +266,7 @@ abstract contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
         if (currentSnapshotId == 0) return;
 
         uint256 ABAFAtCurrentSnapshot = _ABAFAtSnapshot(currentSnapshotId);
-        uint256 ABAF = AdjustBalanceLib.getABAFAdjusted();
+        uint256 ABAF = AdjustBalances_CD_Lib.getABAFAdjusted();
 
         if (ABAF == ABAFAtCurrentSnapshot) {
             super._updateAccountSnapshot(account, partition);
@@ -335,7 +337,7 @@ abstract contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
         if (snapshotted) return value;
 
         uint256 ABAFAtSnapshot = _ABAFAtSnapshot(_snapshotId);
-        uint256 ABAF = AdjustBalanceLib.getABAF();
+        uint256 ABAF = AdjustBalances_CD_Lib.getABAF();
 
         if (ABAFAtSnapshot == ABAF) return _currentBalanceAdjusted;
         if (ABAFAtSnapshot == 0) ABAFAtSnapshot = 1;

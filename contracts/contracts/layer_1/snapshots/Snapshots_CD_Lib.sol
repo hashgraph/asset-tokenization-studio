@@ -209,12 +209,6 @@ pragma solidity 0.8.18;
 import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
 
 library Snapshots_CD_Lib {
-    function updateTotalSupplySnapshot() external {
-        CD_Lib.delegateCall(
-            abi.encodeWithSignature('updateTotalSupplySnapshot()')
-        );
-    }
-
     function balanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder

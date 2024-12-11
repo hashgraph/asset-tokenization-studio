@@ -230,35 +230,22 @@ import {
 contract ScheduledSnapshots is
     IStaticFunctionSelectors,
     IScheduledSnapshots,
-    ScheduledSnapshotsStorageWrapper,
     Common,
     CorporateActionsStorageWrapperSecurity
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    function triggerScheduledSnapshots(
-        uint256 _max
-    ) external virtual override onlyDelegate returns (uint256) {
-        return _triggerScheduledSnapshots(_max);
-    }
     function onScheduledSnapshotTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    ) external virtual override onlyDelegate {
+    ) external virtual override onlyAutoCalling(_scheduledSnapshotStorage()) {
         uint256 newSnapShotID;
         if (_pos == _scheduledTasksLength - 1) {
             newSnapShotID = _snapshot();
         } else newSnapShotID = _getCurrentSnapshotId();
 
         _onScheduledSnapshotTriggered(newSnapShotID, _data);
-    }
-
-    function addScheduledSnapshot(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) external virtual onlyDelegate {
-        _addScheduledSnapshot(_newScheduledTimestamp, _newData);
     }
 
     function scheduledSnapshotCount()
@@ -302,7 +289,7 @@ contract ScheduledSnapshots is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](4);
+        staticFunctionSelectors_ = new bytes4[](3);
         staticFunctionSelectors_[selectorIndex++] = this
             .scheduledSnapshotCount
             .selector;
@@ -311,12 +298,6 @@ contract ScheduledSnapshots is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .onScheduledSnapshotTriggered
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerScheduledSnapshots
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .addScheduledSnapshot
             .selector;
     }
 

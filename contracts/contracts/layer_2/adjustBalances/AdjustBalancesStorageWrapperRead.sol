@@ -203,18 +203,35 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
+import {
+    _ADJUST_BALANCES_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
 
-library Snapshots_2_CD_Lib {
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 decimals_) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('decimalsAtSnapshot(uint256)', _snapshotID)
-        );
-        return abi.decode(data, (uint256));
+abstract contract AdjustBalancesStorageWrapperRead {
+    struct AdjustBalancesStorage {
+        // Mapping from investor to their partitions LABAF
+        mapping(address => uint256[]) LABAF_user_partition;
+        // Aggregated Balance Adjustment
+        uint256 ABAF;
+        // Last Aggregated Balance Adjustment per account
+        mapping(address => uint256) LABAF;
+        // Last Aggregated Balance Adjustment per partition
+        mapping(bytes32 => uint256) LABAF_partition;
+    }
+
+    function _getAdjustBalancesStorage()
+        internal
+        pure
+        virtual
+        returns (AdjustBalancesStorage storage adjustBalancesStorage_)
+    {
+        bytes32 position = _ADJUST_BALANCES_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            adjustBalancesStorage_.slot := position
+        }
     }
 }
