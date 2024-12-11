@@ -209,7 +209,7 @@ pragma solidity 0.8.18;
 import {CD_Lib} from '../../common/CD_Lib.sol';
 
 library ERC1410Basic_CD_Lib {
-    function totalSupply() external view returns (uint256) {
+    function totalSupply() internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('totalSupply()')
         );
@@ -218,7 +218,7 @@ library ERC1410Basic_CD_Lib {
 
     function totalSupplyByPartition(
         bytes32 _partition
-    ) external view returns (uint256) {
+    ) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature(
                 'totalSupplyByPartition(bytes32)',
@@ -230,14 +230,14 @@ library ERC1410Basic_CD_Lib {
 
     function partitionsOf(
         address _tokenHolder
-    ) external view returns (bytes32[] memory) {
+    ) internal view returns (bytes32[] memory) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('partitionsOf(address)', _tokenHolder)
         );
         return abi.decode(data, (bytes32[]));
     }
 
-    function balanceOf(address _tokenHolder) external view returns (uint256) {
+    function balanceOf(address _tokenHolder) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('balanceOf(address)', _tokenHolder)
         );

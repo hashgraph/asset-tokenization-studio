@@ -216,16 +216,8 @@ import {BondStorageWrapper} from './BondStorageWrapper.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ScheduledTasksCommon} from '../scheduledTasks/ScheduledTasksCommon.sol';
-import {Common} from '../../layer_1/common/Common.sol';
 
-abstract contract Bond is
-    IBond,
-    IStaticFunctionSelectors,
-    BondStorageWrapper,
-    ScheduledTasksCommon,
-    Common
-{
+abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     // solhint-disable func-name-mixedcase
     // solhint-disable-next-line private-vars-leading-underscore
     function _initialize_bond(

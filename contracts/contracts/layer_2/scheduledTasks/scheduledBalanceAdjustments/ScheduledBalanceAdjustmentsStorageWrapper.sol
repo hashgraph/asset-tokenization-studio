@@ -212,9 +212,7 @@ import {
 import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
 
-abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
-    ScheduledTasksCommon
-{
+contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledTasksCommon {
     function onScheduledBalanceAdjustmentTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,

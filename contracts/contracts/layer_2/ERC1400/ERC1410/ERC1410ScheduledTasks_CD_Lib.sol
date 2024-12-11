@@ -213,7 +213,7 @@ library ERC1410ScheduledTasks_CD_Lib {
         bytes32 _partition,
         address _from,
         address _to
-    ) external {
+    ) internal {
         CD_Lib.delegateCall(
             abi.encodeWithSignature(
                 'triggerAndSyncAll(bytes32,address,address)',
@@ -226,7 +226,7 @@ library ERC1410ScheduledTasks_CD_Lib {
 
     function balanceOfAdjusted(
         address _tokenHolder
-    ) external view returns (uint256) {
+    ) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('balanceOfAdjusted(address)', _tokenHolder)
         );
@@ -236,7 +236,7 @@ library ERC1410ScheduledTasks_CD_Lib {
     function balanceOfAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
-    ) external view returns (uint256) {
+    ) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature(
                 'balanceOfAdjustedAt(address,uint256)',
@@ -250,10 +250,10 @@ library ERC1410ScheduledTasks_CD_Lib {
     function balanceOfByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
-    ) external view returns (uint256) {
+    ) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature(
-                'balanceOfByPartitionAdjusted(bytes32, address)',
+                'balanceOfByPartitionAdjusted(bytes32,address)',
                 _partition,
                 _tokenHolder
             )

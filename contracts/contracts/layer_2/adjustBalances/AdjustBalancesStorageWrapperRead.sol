@@ -210,7 +210,7 @@ import {
     _ADJUST_BALANCES_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 
-abstract contract AdjustBalancesStorageWrapperRead {
+contract AdjustBalancesStorageWrapperRead {
     struct AdjustBalancesStorage {
         // Mapping from investor to their partitions LABAF
         mapping(address => uint256[]) LABAF_user_partition;

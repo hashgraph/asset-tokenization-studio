@@ -211,7 +211,7 @@ import {CD_Lib} from '../../../layer_1/common/CD_Lib.sol';
 library ERC20_2_CD_Lib {
     function decimalsAdjustedAt(
         uint256 _timestamp
-    ) external view returns (uint8) {
+    ) internal view returns (uint8) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('decimalsAdjustedAt(uint256)', _timestamp)
         );

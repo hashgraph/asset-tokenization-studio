@@ -209,14 +209,14 @@ pragma solidity 0.8.18;
 import {CD_Lib} from '../../../layer_1/common/CD_Lib.sol';
 
 library ScheduledTasks_CD_Lib {
-    function triggerPendingScheduledTasks() external returns (uint256) {
+    function triggerPendingScheduledTasks() internal returns (uint256) {
         bytes memory data = CD_Lib.delegateCall(
             abi.encodeWithSignature('triggerPendingScheduledTasks()')
         );
         return abi.decode(data, (uint256));
     }
 
-    function triggerScheduledTasks(uint256 _max) external returns (uint256) {
+    function triggerScheduledTasks(uint256 _max) internal returns (uint256) {
         bytes memory data = CD_Lib.delegateCall(
             abi.encodeWithSignature('triggerScheduledTasks(uint256)', _max)
         );

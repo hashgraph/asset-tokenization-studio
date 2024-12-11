@@ -209,7 +209,7 @@ pragma solidity 0.8.18;
 import {CD_Lib} from '../common/CD_Lib.sol';
 
 library Cap_CD_Lib {
-    function getMaxSupply() external view returns (uint256) {
+    function getMaxSupply() internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('getMaxSupply()')
         );
@@ -218,7 +218,7 @@ library Cap_CD_Lib {
 
     function getMaxSupplyByPartition(
         bytes32 _partition
-    ) external view returns (uint256) {
+    ) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature(
                 'getMaxSupplyByPartition(bytes32)',

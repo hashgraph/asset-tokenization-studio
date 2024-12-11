@@ -245,7 +245,7 @@ contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
 
     function decimalsAtSnapshot(
         uint256 _snapshotID
-    ) external view returns (uint256 decimals_) {
+    ) external view virtual override returns (uint8 decimals_) {
         return _decimalsAtSnapshot(_snapshotID);
     }
 

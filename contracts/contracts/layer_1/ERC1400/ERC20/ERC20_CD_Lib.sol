@@ -209,7 +209,7 @@ pragma solidity 0.8.18;
 import {CD_Lib} from '../../common/CD_Lib.sol';
 
 library ERC20_CD_Lib {
-    function decimals() external view returns (uint8) {
+    function decimals() internal view returns (uint8) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('decimals()')
         );

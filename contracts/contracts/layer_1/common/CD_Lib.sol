@@ -206,7 +206,7 @@
 library CD_Lib {
     function delegateCall(
         bytes memory encodedCallData
-    ) external returns (bytes memory) {
+    ) internal returns (bytes memory) {
         (bool success, bytes memory data) = address(this).delegatecall(
             encodedCallData
         );
@@ -216,7 +216,7 @@ library CD_Lib {
 
     function staticCall(
         bytes memory encodedCallData
-    ) external view returns (bytes memory) {
+    ) internal view returns (bytes memory) {
         (bool success, bytes memory data) = address(this).staticcall(
             encodedCallData
         );

@@ -215,7 +215,7 @@ import {
 } from '../controlList/ControlListStorageWrapper.sol';
 
 // solhint-disable no-empty-blocks
-abstract contract Common is
+contract Common is
     AccessControlStorageWrapper,
     PauseStorageWrapper,
     ControlListStorageWrapper

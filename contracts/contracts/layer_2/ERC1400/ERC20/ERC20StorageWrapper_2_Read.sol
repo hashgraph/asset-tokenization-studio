@@ -218,6 +218,9 @@ import {_ERC20_2_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
 
 abstract contract ERC20StorageWrapper_2_Read is
     ERC20StorageWrapper,
@@ -258,7 +261,7 @@ abstract contract ERC20StorageWrapper_2_Read is
         uint256 _timestamp
     ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjustedAt(_timestamp),
+            AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
             _getAllowanceLABAF(_owner, _spender)
         );
         return _allowance(_owner, _spender) * factor;

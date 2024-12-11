@@ -221,10 +221,6 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ScheduledTasksCommon} from '../scheduledTasks/ScheduledTasksCommon.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-import {
-    AdjustBalancesStorageWrapper
-} from '../adjustBalances/AdjustBalancesStorageWrapper.sol';
 import {
     CorporateActionsStorageWrapper
 } from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
@@ -232,8 +228,7 @@ import {
 abstract contract Equity is
     IEquity,
     IStaticFunctionSelectors,
-    EquityStorageWrapper,
-    AdjustBalancesStorageWrapper
+    EquityStorageWrapper
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -465,7 +460,7 @@ abstract contract Equity is
     )
         internal
         virtual
-        override(CorporateActionsStorageWrapper, EquityStorageWrapper)
+        override
         returns (
             bool success_,
             bytes32 corporateActionId_,

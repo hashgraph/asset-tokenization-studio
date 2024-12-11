@@ -240,36 +240,42 @@ contract AdjustBalances is
         success_ = true;
     }
 
-    function getABAF() external view virtual returns (uint256) {
+    function getABAF() external view virtual override returns (uint256) {
         return _getABAF();
     }
 
-    function getABAFAdjusted() external view virtual returns (uint256) {
+    function getABAFAdjusted()
+        external
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         return _getABAFAdjusted();
     }
 
     function getABAFAdjustedAt(
         uint256 _timestamp
-    ) external view virtual returns (uint256) {
+    ) external view virtual override returns (uint256) {
         return _getABAFAdjustedAt(_timestamp);
     }
 
     function getLABAFForUser(
         address _account
-    ) external view virtual returns (uint256) {
+    ) external view virtual override returns (uint256) {
         return _getLABAFForUser(_account);
     }
 
     function getLABAFForPartition(
         bytes32 _partition
-    ) external view virtual returns (uint256) {
+    ) external view virtual override returns (uint256) {
         return _getLABAFForPartition(_partition);
     }
 
     function getLABAFForUserAndPartition(
         bytes32 _partition,
         address _account
-    ) external view virtual returns (uint256) {
+    ) external view virtual override returns (uint256) {
         return _getLABAFForUserAndPartition(_partition, _account);
     }
 

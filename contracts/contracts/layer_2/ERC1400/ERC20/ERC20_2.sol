@@ -307,7 +307,7 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](12);
+        staticFunctionSelectors_ = new bytes4[](13);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this
             .initialize_ERC20

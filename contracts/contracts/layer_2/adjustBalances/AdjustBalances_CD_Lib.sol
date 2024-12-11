@@ -211,14 +211,14 @@ import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
 library AdjustBalances_CD_Lib {
     function getABAFAdjustedAt(
         uint256 _timestamp
-    ) external view returns (uint256) {
+    ) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('getABAFAdjustedAt(uint256)', _timestamp)
         );
         return abi.decode(data, (uint256));
     }
 
-    function getLABAFForUser(address _account) external view returns (uint256) {
+    function getLABAFForUser(address _account) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('getLABAFForUser(address)', _account)
         );
@@ -228,7 +228,7 @@ library AdjustBalances_CD_Lib {
     function getLABAFForUserAndPartition(
         bytes32 _partition,
         address _account
-    ) external view returns (uint256) {
+    ) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature(
                 'getLABAFForUserAndPartition(bytes32,address)',
@@ -239,14 +239,14 @@ library AdjustBalances_CD_Lib {
         return abi.decode(data, (uint256));
     }
 
-    function getABAF() external view returns (uint256) {
+    function getABAF() internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('getABAF()')
         );
         return abi.decode(data, (uint256));
     }
 
-    function getABAFAdjusted() external view returns (uint256) {
+    function getABAFAdjusted() internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('getABAFAdjusted()')
         );
@@ -255,7 +255,7 @@ library AdjustBalances_CD_Lib {
 
     function getLABAFForPartition(
         bytes32 _partition
-    ) external view returns (uint256) {
+    ) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('getLABAFForPartition(bytes32)', _partition)
         );

@@ -242,7 +242,7 @@ contract ERC1410ScheduledTasks is
         bytes32 _partition,
         address _from,
         address _to
-    ) external virtual {
+    ) external virtual onlyUnpaused {
         _triggerAndSyncAll(_partition, _from, _to);
     }
 
@@ -355,49 +355,6 @@ contract ERC1410ScheduledTasks is
                 _value,
                 _data,
                 _operatorData
-            );
-    }
-
-    function _updateAccountSnapshot(
-        address account,
-        bytes32 partition
-    ) internal virtual override(SnapshotsStorageWrapper) {
-        return
-            SnapshotsStorageWrapper_2._updateAccountSnapshot(
-                account,
-                partition
-            );
-    }
-
-    function _balanceOfAt(
-        address account,
-        uint256 snapshotId
-    )
-        internal
-        view
-        virtual
-        override(SnapshotsStorageWrapper)
-        returns (uint256)
-    {
-        return SnapshotsStorageWrapper_2._balanceOfAt(account, snapshotId);
-    }
-
-    function _balanceOfAtByPartition(
-        bytes32 _partition,
-        address account,
-        uint256 snapshotId
-    )
-        internal
-        view
-        virtual
-        override(SnapshotsStorageWrapper)
-        returns (uint256)
-    {
-        return
-            SnapshotsStorageWrapper_2._balanceOfAtByPartition(
-                _partition,
-                account,
-                snapshotId
             );
     }
 

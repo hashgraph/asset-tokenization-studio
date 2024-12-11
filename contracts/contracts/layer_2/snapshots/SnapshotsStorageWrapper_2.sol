@@ -218,7 +218,7 @@ import {
     ERC1410ScheduledTasks_CD_Lib
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
 
-abstract contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
+contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
     struct SnapshotStorage_2 {
         Snapshots ABAFSnapshots;
         Snapshots decimals;

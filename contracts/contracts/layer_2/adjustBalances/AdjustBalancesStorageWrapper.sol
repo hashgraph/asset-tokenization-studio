@@ -230,7 +230,7 @@ import {
     AdjustBalancesStorageWrapperRead
 } from './AdjustBalancesStorageWrapperRead.sol';
 
-abstract contract AdjustBalancesStorageWrapper is
+contract AdjustBalancesStorageWrapper is
     IAdjustBalancesStorageWrapper,
     AdjustBalancesStorageWrapperRead,
     ERC1410BasicStorageWrapperRead,
@@ -323,5 +323,14 @@ abstract contract AdjustBalancesStorageWrapper is
             _getAdjustBalancesStorage().LABAF_user_partition[_account][
                 partitionsIndex - 1
             ];
+    }
+
+    function _beforeTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual override {
+        revert('Should never reach this part');
     }
 }

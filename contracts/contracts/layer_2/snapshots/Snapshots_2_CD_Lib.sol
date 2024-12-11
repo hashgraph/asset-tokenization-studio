@@ -211,10 +211,10 @@ import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
 library Snapshots_2_CD_Lib {
     function decimalsAtSnapshot(
         uint256 _snapshotID
-    ) external view returns (uint256 decimals_) {
+    ) internal view returns (uint8 decimals_) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('decimalsAtSnapshot(uint256)', _snapshotID)
         );
-        return abi.decode(data, (uint256));
+        return abi.decode(data, (uint8));
     }
 }
