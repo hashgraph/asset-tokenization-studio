@@ -3205,6 +3205,32 @@ describe('ERC1400 Tests', () => {
                 await checkAdjustmentsAfterRedeem(after, before)
             })
 
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1644 controllerRedeem with the expected adjusted amount succeeds', async () => {
+                await deployAsset(false)
+
+                await setPreBalanceAdjustment(true)
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                const adjustAmount = amount * adjustFactor
+
+                // Transaction Partition 1
+                await expect(
+                    erc1644Facet.controllerRedeem(
+                        account_A,
+                        adjustAmount,
+                        '0x',
+                        '0x'
+                    )
+                )
+                    .to.emit(erc1644Facet, 'ControllerRedemption')
+                    .withArgs(account_A, account_A, adjustAmount, '0x', '0x')
+            })
+
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeem succeeds', async () => {
                 await deployAsset(false)
 
@@ -3277,6 +3303,32 @@ describe('ERC1400 Tests', () => {
                 const after = await getBalanceAdjustedValues()
 
                 await checkAdjustmentsAfterRedeem(after, before)
+            })
+
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeemFrom with the expected adjusted amount succeeds', async () => {
+                await deployAsset(false)
+
+                await setPreBalanceAdjustment(true)
+
+                erc20Facet = erc20Facet.connect(signer_A)
+                await erc20Facet.approve(account_A, amount)
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                const adjustAmount = amount * adjustFactor
+
+                // Transaction Partition 1
+                erc1594Facet = erc1594Facet.connect(signer_A)
+
+                await expect(
+                    erc1594Facet.redeemFrom(account_A, adjustAmount, '0x')
+                )
+                    .to.emit(erc1594Facet, 'Redeemed')
+                    .withArgs(account_A, account_A, adjustAmount, '0x')
             })
         })
 
