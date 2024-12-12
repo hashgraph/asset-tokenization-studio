@@ -73,5 +73,8 @@
     "web3": "^4.1.1",
     "winston": "^3.8.2",
     "winston-daily-rotate-file": "^4.7.1"
+  },
+  "overrides": {
+    "ws": "7.5.10"
   }
 }
