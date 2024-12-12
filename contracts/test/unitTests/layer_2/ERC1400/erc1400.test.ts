@@ -3062,6 +3062,31 @@ describe('ERC1400 Tests', () => {
                 await checkAdjustmentsAfterRedeem(after, before)
             })
 
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 redeemByPartition with the expected adjusted amount succeeds', async () => {
+                await setPreBalanceAdjustment()
+
+                // Before Values
+                const before = await getBalanceAdjustedValues()
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                // Transaction Partition 1 with the amount adjusted
+                await erc1410Facet.redeemByPartition(
+                    _PARTITION_ID_1,
+                    amount * adjustFactor,
+                    '0x'
+                )
+
+                // After Transaction Partition 1 Values
+                const after = await getBalanceAdjustedValues()
+
+                await checkAdjustmentsAfterRedeem(after, before)
+            })
+
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorRedeemByPartition succeeds', async () => {
                 await setPreBalanceAdjustment()
 
