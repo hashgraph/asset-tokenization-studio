@@ -221,18 +221,12 @@ abstract contract LockStorageWrapper_2_Read is
     LockStorageWrapper,
     ERC1410ScheduledTasksStorageWrapper
 {
-    struct LockDataStorage_2 {
-        mapping(address => uint256) LABAFs_TotalLocked;
-        mapping(address => mapping(bytes32 => uint256)) LABAFs_TotalLockedByPartition;
-        mapping(address => mapping(bytes32 => uint256[])) LABAF_locks;
-    }
-
     function _getLockedAmountForAdjusted(
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjusted(),
-            _getTotalLockLABAF(_tokenHolder)
+            AdjustBalances_CD_Lib.getTotalLockLABAF(_tokenHolder)
         );
 
         return _getLockedAmountFor(_tokenHolder) * factor;
@@ -244,7 +238,10 @@ abstract contract LockStorageWrapper_2_Read is
     ) internal view virtual returns (uint256 amount_) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjusted(),
-            _getTotalLockLABAFByPartition(_partition, _tokenHolder)
+            AdjustBalances_CD_Lib.getTotalLockLABAFByPartition(
+                _partition,
+                _tokenHolder
+            )
         );
         return
             _getLockedAmountForByPartition(_partition, _tokenHolder) * factor;
@@ -262,7 +259,11 @@ abstract contract LockStorageWrapper_2_Read is
     {
         uint256 factor = AdjustBalanceLib._calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjusted(),
-            _getLockLABAFByPartition(_partition, _lockId, _tokenHolder)
+            AdjustBalances_CD_Lib.getLockLABAFByPartition(
+                _partition,
+                _lockId,
+                _tokenHolder
+            )
         );
 
         (amount_, expirationTimestamp_) = _getLockForByPartition(
@@ -271,58 +272,5 @@ abstract contract LockStorageWrapper_2_Read is
             _lockId
         );
         amount_ *= factor;
-    }
-
-    function _getTotalLockLABAF(
-        address _tokenHolder
-    ) internal view virtual returns (uint256 LABAF_) {
-        LockDataStorage_2 storage lockStorage_2 = _lockStorage_2();
-
-        return lockStorage_2.LABAFs_TotalLocked[_tokenHolder];
-    }
-
-    function _getTotalLockLABAFByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 LABAF_) {
-        LockDataStorage_2 storage lockStorage_2 = _lockStorage_2();
-
-        return
-            lockStorage_2.LABAFs_TotalLockedByPartition[_tokenHolder][
-                _partition
-            ];
-    }
-
-    function _getLockLABAFByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
-        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
-        if (lockIndex == 0) return 0;
-        return _getLockLABAFByIndex(_partition, _tokenHolder, lockIndex);
-    }
-
-    function _getLockLABAFByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockIndex
-    ) internal view virtual returns (uint256) {
-        LockDataStorage_2 storage lockStorage_2 = _lockStorage_2();
-        return
-            lockStorage_2.LABAF_locks[_tokenHolder][_partition][_lockIndex - 1];
-    }
-
-    function _lockStorage_2()
-        internal
-        pure
-        virtual
-        returns (LockDataStorage_2 storage lock_2_)
-    {
-        bytes32 position = _LOCK_2_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            lock_2_.slot := position
-        }
     }
 }

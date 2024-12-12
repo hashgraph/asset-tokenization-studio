@@ -222,6 +222,10 @@ contract AdjustBalancesStorageWrapperRead {
         mapping(bytes32 => uint256) LABAF_partition;
         // Last Aggregated Balance Adjustment per allowance
         mapping(address => mapping(address => uint256)) LABAFs_allowances;
+        // Locks
+        mapping(address => uint256) LABAFs_TotalLocked;
+        mapping(address => mapping(bytes32 => uint256)) LABAFs_TotalLockedByPartition;
+        mapping(address => mapping(bytes32 => uint256[])) LABAF_locks;
     }
 
     function _getAdjustBalancesStorage()

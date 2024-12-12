@@ -275,4 +275,59 @@ library AdjustBalances_CD_Lib {
         );
         return abi.decode(data, (uint256));
     }
+
+    function getTotalLockLABAF(
+        address _tokenHolder
+    ) internal view returns (uint256 LABAF_) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getTotalLockLABAF(address)', _tokenHolder)
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getTotalLockLABAFByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view returns (uint256 LABAF_) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getTotalLockLABAFByPartition(bytes32,address)',
+                _partition,
+                _tokenHolder
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getLockLABAFByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getLockLABAFByIndex(bytes32,address,uint256)',
+                _partition,
+                _tokenHolder,
+                _lockIndex
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getLockLABAFByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) internal view returns (uint256 LABAF_) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getLockLABAFByPartition(bytes32,uint256,address)',
+                _partition,
+                _lockId,
+                _tokenHolder
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
 }

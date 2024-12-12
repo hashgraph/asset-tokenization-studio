@@ -286,6 +286,35 @@ contract AdjustBalances is
         return _getAllowanceLABAF(_owner, _spender);
     }
 
+    function getTotalLockLABAF(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 LABAF_) {
+        return _getTotalLockLABAF(_tokenHolder);
+    }
+
+    function getTotalLockLABAFByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 LABAF_) {
+        return _getTotalLockLABAFByPartition(_partition, _tokenHolder);
+    }
+
+    function getLockLABAFByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex
+    ) external view virtual override returns (uint256) {
+        return _getLockLABAFByIndex(_partition, _tokenHolder, _lockIndex);
+    }
+
+    function getLockLABAFByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 LABAF_) {
+        return _getLockLABAFByPartition(_partition, _lockId, _tokenHolder);
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -304,7 +333,7 @@ contract AdjustBalances is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](8);
+        staticFunctionSelectors_ = new bytes4[](12);
         staticFunctionSelectors_[selectorIndex++] = this
             .adjustBalances
             .selector;
@@ -326,6 +355,18 @@ contract AdjustBalances is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getAllowanceLABAF
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalLockLABAF
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalLockLABAFByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockLABAFByIndex
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockLABAFByPartition
             .selector;
     }
 
