@@ -3062,6 +3062,33 @@ describe('ERC1400 Tests', () => {
                 await checkAdjustmentsAfterRedeem(after, before)
             })
 
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 redeemByPartition with the expected adjusted amount succeeds', async () => {
+                await setPreBalanceAdjustment()
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                await expect(
+                    erc1410Facet.redeemByPartition(
+                        _PARTITION_ID_1,
+                        amount * adjustFactor,
+                        data
+                    )
+                )
+                    .to.emit(erc1410Facet, 'RedeemedByPartition')
+                    .withArgs(
+                        _PARTITION_ID_1,
+                        ADDRESS_0,
+                        account_A,
+                        amount * adjustFactor,
+                        data,
+                        '0x'
+                    )
+            })
+
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorRedeemByPartition succeeds', async () => {
                 await setPreBalanceAdjustment()
 
@@ -3303,7 +3330,10 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // APPROVE 2
-                await erc20Facet.decreaseAllowance(account_B, allowance_Before.add(amount))
+                await erc20Facet.decreaseAllowance(
+                    account_B,
+                    allowance_Before.add(amount)
+                )
 
                 const allowance_After = await erc20Facet.allowance(
                     account_A,
@@ -3315,7 +3345,9 @@ describe('ERC1400 Tests', () => {
                 )
 
                 expect(allowance_After).to.be.equal(
-                    allowance_Before.mul(adjustFactor).sub(allowance_Before.add(amount))
+                    allowance_Before
+                        .mul(adjustFactor)
+                        .sub(allowance_Before.add(amount))
                 )
                 expect(LABAF_Before).to.be.equal(0)
                 expect(LABAF_After).to.be.equal(adjustFactor)
