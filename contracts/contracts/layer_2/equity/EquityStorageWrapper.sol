@@ -231,6 +231,7 @@ import {
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
 import {ERC20_2_CD_Lib} from '../ERC1400/ERC20/ERC20_2_CD_Lib.sol';
 import {Snapshots_2_CD_Lib} from '../snapshots/Snapshots_2_CD_Lib.sol';
+import {Lock_2_CD_Lib} from '../lock/Lock_2_CD_Lib.sol';
 
 abstract contract EquityStorageWrapper is
     CorporateActionsStorageWrapperSecurity
@@ -479,11 +480,15 @@ abstract contract EquityStorageWrapper is
             dateReached_ = true;
 
             balance_ = (_snapshotId != 0)
-                ? Snapshots_CD_Lib.balanceOfAtSnapshot(_snapshotId, _account)
-                : ERC1410ScheduledTasks_CD_Lib.balanceOfAdjustedAt(
+                ? (Snapshots_CD_Lib.balanceOfAtSnapshot(_snapshotId, _account) +
+                    Snapshots_CD_Lib.lockedBalanceOfAtSnapshot(
+                        _snapshotId,
+                        _account
+                    ))
+                : (ERC1410ScheduledTasks_CD_Lib.balanceOfAdjustedAt(
                     _account,
                     _date
-                );
+                ) + Lock_2_CD_Lib.getLockedAmountForAdjusted(_account));
 
             decimals_ = (_snapshotId != 0)
                 ? Snapshots_2_CD_Lib.decimalsAtSnapshot(_snapshotId)
