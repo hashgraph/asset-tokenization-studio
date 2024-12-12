@@ -3230,6 +3230,27 @@ describe('ERC1400 Tests', () => {
                 await checkAdjustmentsAfterRedeem(after, before)
             })
 
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeem with the expected adjusted amount succeeds', async () => {
+                await deployAsset(false)
+
+                await setPreBalanceAdjustment(true)
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                const adjustAmount = amount * adjustFactor
+
+                // Transaction Partition 1
+                erc1594Facet = erc1594Facet.connect(signer_A)
+
+                await expect(erc1594Facet.redeem(adjustAmount, '0x'))
+                    .to.emit(erc1594Facet, 'Redeemed')
+                    .withArgs(ADDRESS_0, account_A, adjustAmount, '0x')
+            })
+
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeemFrom succeeds', async () => {
                 await deployAsset(false)
 
