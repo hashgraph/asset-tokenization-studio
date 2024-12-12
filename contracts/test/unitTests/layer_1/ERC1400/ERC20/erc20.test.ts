@@ -212,6 +212,7 @@ import {
     type Pause,
     type ControlList,
     type ERC1594,
+    ERC20_2,
 } from '../../../../../typechain-types'
 import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
 import {
@@ -244,7 +245,7 @@ describe('ERC20 Tests', () => {
     let account_C: string
     let account_E: string
 
-    let erc20Facet: ERC20
+    let erc20Facet: ERC20_2
     let erc20FacetBlackList: ERC20
     let pauseFacet: Pause
     let controlListFacet: ControlList
@@ -305,7 +306,7 @@ describe('ERC20 Tests', () => {
                 init_rbacs
             )
 
-            erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
+            erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
             erc20FacetBlackList = await ethers.getContractAt(
                 'ERC20',
                 diamond.address,
@@ -356,7 +357,7 @@ describe('ERC20 Tests', () => {
             // initialize fails
             const retrieved_name = await erc20Facet.name()
             const retrieved_symbol = await erc20Facet.symbol()
-            const retrieved_decimals = await erc20Facet.decimals()
+            const retrieved_decimals = await erc20Facet.decimalsAdjusted()
 
             expect(retrieved_name).to.equal(name)
             expect(retrieved_symbol).to.equal(symbol)
@@ -504,7 +505,7 @@ describe('ERC20 Tests', () => {
                 init_rbacs
             )
 
-            erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
+            erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
             erc20SignerC = await ethers.getContractAt(
                 'ERC20',
                 diamond.address,

@@ -503,24 +503,4 @@ abstract contract EquityStorageWrapper is
             equityData_.slot := position
         }
     }
-
-    function _addCorporateAction(
-        bytes32 _actionType,
-        bytes memory _data
-    )
-        internal
-        virtual
-        override(CorporateActionsStorageWrapperSecurity)
-        returns (
-            bool success_,
-            bytes32 corporateActionId_,
-            uint256 corporateActionIndexByType_
-        )
-    {
-        return
-            CorporateActionsStorageWrapperSecurity._addCorporateAction(
-                _actionType,
-                _data
-            );
-    }
 }

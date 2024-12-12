@@ -217,4 +217,11 @@ library ERC20_2_CD_Lib {
         );
         return abi.decode(data, (uint8));
     }
+
+    function decimalsAdjusted() internal view returns (uint8) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('decimalsAdjusted()')
+        );
+        return abi.decode(data, (uint8));
+    }
 }

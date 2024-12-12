@@ -453,20 +453,4 @@ abstract contract Equity is
     {
         return _getScheduledBalanceAdjustmentsCount();
     }
-
-    function _addCorporateAction(
-        bytes32 _actionType,
-        bytes memory _data
-    )
-        internal
-        virtual
-        override
-        returns (
-            bool success_,
-            bytes32 corporateActionId_,
-            uint256 corporateActionIndexByType_
-        )
-    {
-        EquityStorageWrapper._addCorporateAction(_actionType, _data);
-    }
 }

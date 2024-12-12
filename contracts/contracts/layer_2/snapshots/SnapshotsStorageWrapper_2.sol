@@ -213,6 +213,7 @@ import {_SNAPSHOT_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     AdjustBalances_CD_Lib
 } from '../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {ERC20_2_CD_Lib} from '../ERC1400/ERC20/ERC20_2_CD_Lib.sol';
 import {ERC20_CD_Lib} from '../../layer_1/ERC1400/ERC20/ERC20_CD_Lib.sol';
 import {
     ERC1410ScheduledTasks_CD_Lib
@@ -254,7 +255,7 @@ contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
             _snapshotStorage_2().decimals
         );
 
-        return snapshotted ? uint8(value) : ERC20_CD_Lib.decimals();
+        return snapshotted ? uint8(value) : ERC20_2_CD_Lib.decimalsAdjusted();
     }
 
     function _updateAccountSnapshot(

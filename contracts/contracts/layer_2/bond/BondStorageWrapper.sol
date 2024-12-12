@@ -215,7 +215,7 @@ import {
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {ERC20_CD_Lib} from '../../layer_1/ERC1400/ERC20/ERC20_CD_Lib.sol';
+import {ERC20_2_CD_Lib} from '../ERC1400/ERC20/ERC20_2_CD_Lib.sol';
 import {Snapshots_CD_Lib} from '../../layer_1/snapshots/Snapshots_CD_Lib.sol';
 import {
     ERC1410Basic_CD_Lib
@@ -383,7 +383,7 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
                 )
                 : ERC1410Basic_CD_Lib.balanceOf(_account);
 
-            couponFor_.decimals = ERC20_CD_Lib.decimals();
+            couponFor_.decimals = ERC20_2_CD_Lib.decimalsAdjusted();
         }
     }
 
