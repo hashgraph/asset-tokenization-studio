@@ -209,27 +209,33 @@ pragma solidity 0.8.18;
 import {
     SnapshotsStorageWrapper
 } from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol';
 import {_SNAPSHOT_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {LockStorageWrapper_2_Read} from '../lock/LockStorageWrapper_2_Read.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {ERC20_2_CD_Lib} from '../ERC1400/ERC20/ERC20_2_CD_Lib.sol';
+import {ERC20_CD_Lib} from '../../layer_1/ERC1400/ERC20/ERC20_CD_Lib.sol';
+import {
+    ERC1410ScheduledTasks_CD_Lib
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
+import {Lock_2_CD_Lib} from '../lock/Lock_2_CD_Lib.sol';
 
-abstract contract SnapshotsStorageWrapper_2 is
-    SnapshotsStorageWrapper,
-    LockStorageWrapper_2_Read
-{
+
+contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
     struct SnapshotStorage_2 {
         Snapshots ABAFSnapshots;
         Snapshots decimals;
     }
 
     function _updateABAFSnapshot() internal virtual {
-        _updateSnapshot(_snapshotStorage_2().ABAFSnapshots, _getABAF());
+        _updateSnapshot(
+            _snapshotStorage_2().ABAFSnapshots,
+            AdjustBalances_CD_Lib.getABAF()
+        );
     }
 
     function _updateDecimalsSnapshot() internal virtual {
-        _updateSnapshot(_snapshotStorage_2().decimals, _decimals());
+        _updateSnapshot(_snapshotStorage_2().decimals, ERC20_CD_Lib.decimals());
     }
 
     function _updateAssetTotalSupplySnapshot() internal virtual {
@@ -247,7 +253,7 @@ abstract contract SnapshotsStorageWrapper_2 is
             _snapshotStorage_2().ABAFSnapshots
         );
 
-        return snapshotted ? value : _getABAF();
+        return snapshotted ? value : AdjustBalances_CD_Lib.getABAF();
     }
 
     function _decimalsAtSnapshot(
@@ -258,7 +264,7 @@ abstract contract SnapshotsStorageWrapper_2 is
             _snapshotStorage_2().decimals
         );
 
-        return snapshotted ? uint8(value) : _decimals();
+        return snapshotted ? uint8(value) : ERC20_2_CD_Lib.decimalsAdjusted();
     }
 
     function _updateAccountSnapshot(
@@ -270,7 +276,7 @@ abstract contract SnapshotsStorageWrapper_2 is
         if (currentSnapshotId == 0) return;
 
         uint256 ABAFAtCurrentSnapshot = _ABAFAtSnapshot(currentSnapshotId);
-        uint256 ABAF = _getABAFAdjusted();
+        uint256 ABAF = AdjustBalances_CD_Lib.getABAFAdjusted();
 
         if (ABAF == ABAFAtCurrentSnapshot) {
             super._updateAccountSnapshot(account, partition);
@@ -278,11 +284,11 @@ abstract contract SnapshotsStorageWrapper_2 is
         }
         if (ABAFAtCurrentSnapshot == 0) ABAFAtCurrentSnapshot = 1;
 
-        uint256 balance = _balanceOfAdjusted(account);
-        uint256 balanceForPartition = _balanceOfByPartitionAdjusted(
-            partition,
+        uint256 balance = ERC1410ScheduledTasks_CD_Lib.balanceOfAdjusted(
             account
         );
+        uint256 balanceForPartition = ERC1410ScheduledTasks_CD_Lib
+            .balanceOfByPartitionAdjusted(partition, account);
         uint256 factor = ABAF / ABAFAtCurrentSnapshot;
 
         balance /= factor;
@@ -310,7 +316,7 @@ abstract contract SnapshotsStorageWrapper_2 is
             _balanceOfAt_Adjusted(
                 snapshotId,
                 _snapshotStorage().accountBalanceSnapshots[account],
-                _balanceOfAdjusted(account)
+                ERC1410ScheduledTasks_CD_Lib.balanceOfAdjusted(account)
             );
     }
 
@@ -325,7 +331,10 @@ abstract contract SnapshotsStorageWrapper_2 is
                 _snapshotStorage().accountPartitionBalanceSnapshots[account][
                     _partition
                 ],
-                _balanceOfByPartitionAdjusted(_partition, account)
+                ERC1410ScheduledTasks_CD_Lib.balanceOfByPartitionAdjusted(
+                    _partition,
+                    account
+                )
             );
     }
 
@@ -337,7 +346,7 @@ abstract contract SnapshotsStorageWrapper_2 is
             _balanceOfAt_Adjusted(
                 _snapshotID,
                 _snapshotStorage().totalSupplyByPartitionSnapshots[_partition],
-                _totalSupplyByPartitionAdjusted(_partition)
+                ERC1410ScheduledTasks_CD_Lib.totalSupplyByPartitionAdjusted(_partition)
             );
     }
 
@@ -349,7 +358,7 @@ abstract contract SnapshotsStorageWrapper_2 is
             _balanceOfAt_Adjusted(
                 _snapshotID,
                 _snapshotStorage().accountLockedBalanceSnapshots[_tokenHolder],
-                _getLockedAmountForAdjusted(_tokenHolder)
+                Lock_2_CD_Lib.getLockedAmountForAdjusted(_tokenHolder)
             );
     }
 
@@ -358,12 +367,12 @@ abstract contract SnapshotsStorageWrapper_2 is
         uint256 _snapshotID,
         address _tokenHolder
     ) internal view virtual override returns (uint256 balance_) {
-        _balanceOfAt_Adjusted(
+        return _balanceOfAt_Adjusted(
             _snapshotID,
             _snapshotStorage().accountPartitionLockedBalanceSnapshots[
                 _tokenHolder
             ][_partition],
-            _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder)
+            Lock_2_CD_Lib.getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder)
         );
     }
 
@@ -376,7 +385,7 @@ abstract contract SnapshotsStorageWrapper_2 is
         if (snapshotted) return value;
 
         uint256 ABAFAtSnapshot = _ABAFAtSnapshot(_snapshotId);
-        uint256 ABAF = _getABAF();
+        uint256 ABAF = AdjustBalances_CD_Lib.getABAF();
 
         if (ABAFAtSnapshot == ABAF) return _currentBalanceAdjusted;
         if (ABAFAtSnapshot == 0) ABAFAtSnapshot = 1;

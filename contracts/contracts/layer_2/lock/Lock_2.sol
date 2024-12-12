@@ -294,6 +294,20 @@ contract Lock_2 is ILock_2, Lock, LockStorageWrapper_2 {
             _getLockLABAFByPartition(_DEFAULT_PARTITION, _lockId, _tokenHolder);
     }
 
+    function getLockedAmountForAdjusted(
+        address _tokenHolder
+    ) external view virtual returns (uint256 amount_) {
+        return _getLockedAmountForAdjusted(_tokenHolder);
+    }
+
+    function getLockedAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual returns (uint256 amount_) {
+        return
+            _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
     function _lockByPartition(
         bytes32 _partition,
         uint256 _amount,
@@ -364,7 +378,7 @@ contract Lock_2 is ILock_2, Lock, LockStorageWrapper_2 {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](16);
+        staticFunctionSelectors_ = new bytes4[](18);
         staticFunctionSelectors_[selectorIndex++] = this
             .lockByPartition
             .selector;
@@ -403,6 +417,9 @@ contract Lock_2 is ILock_2, Lock, LockStorageWrapper_2 {
             .getTotalLockLABAF
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this.getLockLABAF.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getLockedAmountForAdjusted.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getLockedAmountForByPartitionAdjusted.selector;
+
     }
 
     function getStaticInterfaceIds()

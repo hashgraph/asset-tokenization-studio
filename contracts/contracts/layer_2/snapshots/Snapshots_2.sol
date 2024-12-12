@@ -220,13 +220,11 @@ import {
     ScheduledTasksStorageWrapper
 } from '../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
 import {SnapshotsStorageWrapper_2} from './SnapshotsStorageWrapper_2.sol';
+import {
+    ScheduledTasks_CD_Lib
+} from '../scheduledTasks/scheduledTasks/ScheduledTasks_CD_Lib.sol';
 
-contract Snapshots_2 is
-    ISnapshots_2,
-    ScheduledTasksStorageWrapper,
-    Snapshots,
-    SnapshotsStorageWrapper_2
-{
+contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
     function takeSnapshot()
         external
         virtual
@@ -235,7 +233,7 @@ contract Snapshots_2 is
         onlyRole(_SNAPSHOT_ROLE)
         returns (uint256 snapshotID)
     {
-        _triggerScheduledTasks(0);
+        ScheduledTasks_CD_Lib.triggerScheduledTasks(0);
         return _takeSnapshot();
     }
 
@@ -247,7 +245,7 @@ contract Snapshots_2 is
 
     function decimalsAtSnapshot(
         uint256 _snapshotID
-    ) external view returns (uint256 decimals_) {
+    ) external view virtual override returns (uint8 decimals_) {
         return _decimalsAtSnapshot(_snapshotID);
     }
 
@@ -269,33 +267,44 @@ contract Snapshots_2 is
     function _balanceOfAt(
         address account,
         uint256 snapshotId
-    )
-        internal
-        view
-        virtual
-        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
-        returns (uint256)
-    {
-        return SnapshotsStorageWrapper_2._balanceOfAt(account, snapshotId);
+    ) internal view virtual override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2) returns (uint256){
+        SnapshotsStorageWrapper_2._balanceOfAt(account, snapshotId);
     }
 
+    /**
+     * @dev Retrieves the balance of `account` for 'partition' at the time `snapshotId` was created.
+     */
     function _balanceOfAtByPartition(
         bytes32 _partition,
         address account,
         uint256 snapshotId
-    )
-        internal
-        view
-        virtual
-        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
-        returns (uint256)
-    {
-        return
-            SnapshotsStorageWrapper_2._balanceOfAtByPartition(
-                _partition,
-                account,
-                snapshotId
-            );
+    ) internal view virtual override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2) returns (uint256){
+        SnapshotsStorageWrapper_2._balanceOfAtByPartition(_partition, account, snapshotId);
+    }
+
+    function _totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    ) internal view virtual override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2) returns (uint256 totalSupply_) {
+        SnapshotsStorageWrapper_2._totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
+
+    }
+
+    function _lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2) returns (uint256 balance_) {
+        SnapshotsStorageWrapper_2._lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
+
+    }
+
+    function _lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2) returns (uint256 balance_) {
+        SnapshotsStorageWrapper_2._lockedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
+
     }
 
     function getStaticResolverKey()
@@ -316,7 +325,7 @@ contract Snapshots_2 is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_ = new bytes4[](10);
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .balanceOfAtSnapshot
@@ -329,6 +338,15 @@ contract Snapshots_2 is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .partitionsOfAtSnapshot
+            .selector;
+         staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyAtSnapshotByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .lockedBalanceOfAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .lockedBalanceOfAtSnapshotByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .ABAFAtSnapshot

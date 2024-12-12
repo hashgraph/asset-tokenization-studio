@@ -222,10 +222,15 @@ import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
+import {
+    ScheduledSnapshotsStorageWrapper
+} from './ScheduledSnapshotsStorageWrapper.sol';
 
 contract ScheduledSnapshots is
     IStaticFunctionSelectors,
     IScheduledSnapshots,
+    Common,
     CorporateActionsStorageWrapperSecurity
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;

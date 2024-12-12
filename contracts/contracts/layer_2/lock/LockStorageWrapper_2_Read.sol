@@ -210,13 +210,16 @@ pragma solidity 0.8.18;
 import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
 import {_LOCK_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
-    ERC1410ScheduledTasksStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol';
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
 
 abstract contract LockStorageWrapper_2_Read is
     LockStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapperRead
+    ERC1410ScheduledTasksStorageWrapper
 {
     struct LockDataStorage_2 {
         mapping(address => uint256) LABAFs_TotalLocked;
@@ -228,7 +231,7 @@ abstract contract LockStorageWrapper_2_Read is
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
             _getTotalLockLABAF(_tokenHolder)
         );
 
@@ -240,7 +243,7 @@ abstract contract LockStorageWrapper_2_Read is
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
             _getTotalLockLABAFByPartition(_partition, _tokenHolder)
         );
         return
@@ -258,7 +261,7 @@ abstract contract LockStorageWrapper_2_Read is
         returns (uint256 amount_, uint256 expirationTimestamp_)
     {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
             _getLockLABAFByPartition(_partition, _lockId, _tokenHolder)
         );
 

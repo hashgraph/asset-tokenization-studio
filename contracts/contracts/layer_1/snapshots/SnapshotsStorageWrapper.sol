@@ -306,54 +306,6 @@ abstract contract SnapshotsStorageWrapper is
         return _totalSupplyAt(_snapshotID);
     }
 
-    function _totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) internal view virtual returns (uint256 totalSupply_) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            _snapshotID,
-            _snapshotStorage().totalSupplyByPartitionSnapshots[_partition]
-        );
-
-        return snapshotted ? value : _totalSupplyByPartition(_partition);
-    }
-
-    function _lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 balance_) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            _snapshotID,
-            _snapshotStorage().accountLockedBalanceSnapshots[_tokenHolder]
-        );
-
-        return
-            snapshotted
-                ? value
-                : _getLockedAmountForByPartition(
-                    _DEFAULT_PARTITION,
-                    _tokenHolder
-                );
-    }
-
-    function _lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 balance_) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            _snapshotID,
-            _snapshotStorage().accountPartitionLockedBalanceSnapshots[
-                _tokenHolder
-            ][_partition]
-        );
-
-        return
-            snapshotted
-                ? value
-                : _getLockedAmountForByPartition(_partition, _tokenHolder);
-    }
-
     function _snapshot() internal virtual returns (uint256) {
         _snapshotStorage().currentSnapshotId.increment();
 
@@ -455,13 +407,8 @@ abstract contract SnapshotsStorageWrapper is
     function _balanceOfAt(
         address account,
         uint256 snapshotId
-    ) internal view virtual returns (uint256) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            snapshotId,
-            _snapshotStorage().accountBalanceSnapshots[account]
-        );
-
-        return snapshotted ? value : _balanceOf(account);
+    ) internal view virtual returns (uint256){
+        revert("Should not reach this function");
     }
 
     /**
@@ -471,15 +418,33 @@ abstract contract SnapshotsStorageWrapper is
         bytes32 _partition,
         address account,
         uint256 snapshotId
-    ) internal view virtual returns (uint256) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            snapshotId,
-            _snapshotStorage().accountPartitionBalanceSnapshots[account][
-                _partition
-            ]
-        );
+    ) internal view virtual returns (uint256){
+        revert("Should not reach this function");
+    }
 
-        return snapshotted ? value : _balanceOfByPartition(_partition, account);
+    function _totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    ) internal view virtual returns (uint256 totalSupply_) {
+               revert("Should not reach this function");
+
+    }
+
+    function _lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_) {
+                revert("Should not reach this function");
+
+    }
+
+    function _lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_) {
+               revert("Should not reach this function");
+
     }
 
     /**

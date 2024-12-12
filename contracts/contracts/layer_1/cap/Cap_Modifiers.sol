@@ -203,141 +203,48 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    IAdjustBalancesStorageWrapper
-} from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
-import {
-    ERC20StorageWrapper
-} from '../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
-import {AdjustBalanceLib} from './AdjustBalanceLib.sol';
-import {
-    SnapshotsStorageWrapper_2
-} from '../snapshots/SnapshotsStorageWrapper_2.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {Snapshots_CD_Lib} from '../../layer_1/snapshots/Snapshots_CD_Lib.sol';
-import {
-    CorporateActionsStorageWrapper
-} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
-import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
-import {
-    AdjustBalancesStorageWrapperRead
-} from './AdjustBalancesStorageWrapperRead.sol';
+import {Cap_CD_Lib} from './Cap_CD_Lib.sol';
+import {ERC1410Basic_CD_Lib} from '../ERC1400/ERC1410/ERC1410Basic_CD_Lib.sol';
+import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
 
-contract AdjustBalancesStorageWrapper is
-    IAdjustBalancesStorageWrapper,
-    AdjustBalancesStorageWrapperRead,
-    ERC1410BasicStorageWrapperRead,
-    CorporateActionsStorageWrapper,
-    ERC20StorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper,
-    SnapshotsStorageWrapper_2
-{
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
+contract Cap_Modifiers is ICapStorageWrapper {
+    modifier checkMaxSupply(uint256 _amount) {
+        uint256 newTotalSupply = ERC1410Basic_CD_Lib.totalSupply() + _amount;
+        uint256 maxSupply = Cap_CD_Lib.getMaxSupply();
+
+        if (!_checkMaxSupply(newTotalSupply, maxSupply)) {
+            revert MaxSupplyReached(maxSupply);
+        }
         _;
     }
 
-    function _adjustBalances(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _beforeBalanceAdjustment(_factor, _decimals);
+    modifier checkMaxSupplyForPartition(bytes32 _partition, uint256 _amount) {
+        uint256 newTotalSupplyForPartition = ERC1410Basic_CD_Lib
+            .totalSupplyByPartition(_partition) + _amount;
+        uint256 maxSupplyForPartition = Cap_CD_Lib.getMaxSupplyByPartition(
+            _partition
+        );
 
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        AdjustBalancesStorage
-            storage adjustBalancesStorage = _getAdjustBalancesStorage();
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-        CapDataStorage storage capStorage = _capStorage();
-
-        erc1410Storage.totalSupply *= _factor;
-
-        if (_getABAF() == 0) adjustBalancesStorage.ABAF = _factor;
-        else adjustBalancesStorage.ABAF *= _factor;
-
-        erc20Storage.decimals += _decimals;
-        capStorage.maxSupply *= _factor;
-
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
-    }
-
-    function _beforeBalanceAdjustment(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _updateDecimalsSnapshot();
-        _updateABAFSnapshot();
-        _updateAssetTotalSupplySnapshot();
-    }
-
-    function _getABAF() internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().ABAF;
-    }
-
-    function _getABAFAdjusted() internal view virtual returns (uint256) {
-        return _getABAFAdjustedAt(_blockTimestamp());
-    }
-
-    function _getABAFAdjustedAt(
-        uint256 _timestamp
-    ) internal view virtual returns (uint256) {
-        uint256 ABAF = _getABAF();
-        if (ABAF == 0) ABAF = 1;
-        (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustmentsAt(
-                _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage(),
-                _timestamp
+        if (
+            !_checkMaxSupply(newTotalSupplyForPartition, maxSupplyForPartition)
+        ) {
+            revert MaxSupplyReachedForPartition(
+                _partition,
+                maxSupplyForPartition
             );
-        return ABAF * pendingABAF;
+        }
+        _;
     }
 
-    function _getLABAFForUser(
-        address _account
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().LABAF[_account];
-    }
-
-    function _getLABAFForPartition(
-        bytes32 _partition
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().LABAF_partition[_partition];
-    }
-
-    function _getLABAFForUserAndPartition(
-        bytes32 _partition,
-        address _account
-    ) internal view virtual returns (uint256) {
-        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
-            _account
-        ][_partition];
-
-        if (partitionsIndex == 0) return 0;
-        return
-            _getAdjustBalancesStorage().LABAF_user_partition[_account][
-                partitionsIndex - 1
-            ];
-    }
-
-    function _getAllowanceLABAF(
-        address _owner,
-        address _spender
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().LABAFs_allowances[_owner][_spender];
-    }
-
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override {
-        revert('Should never reach this part');
+    function _checkMaxSupply(
+        uint256 _amount,
+        uint256 _maxSupply
+    ) internal pure returns (bool) {
+        if (_maxSupply == 0) return true;
+        if (_amount <= _maxSupply) return true;
+        return false;
     }
 }

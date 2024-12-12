@@ -222,10 +222,15 @@ import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from './ScheduledBalanceAdjustmentsStorageWrapper.sol';
 
 contract ScheduledBalanceAdjustments is
     IStaticFunctionSelectors,
     IScheduledBalanceAdjustments,
+    Common,
     CorporateActionsStorageWrapperSecurity
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;

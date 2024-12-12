@@ -203,141 +203,73 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    IAdjustBalancesStorageWrapper
-} from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
-import {
-    ERC20StorageWrapper
-} from '../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
-import {AdjustBalanceLib} from './AdjustBalanceLib.sol';
-import {
-    SnapshotsStorageWrapper_2
-} from '../snapshots/SnapshotsStorageWrapper_2.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {Snapshots_CD_Lib} from '../../layer_1/snapshots/Snapshots_CD_Lib.sol';
-import {
-    CorporateActionsStorageWrapper
-} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
-import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
-import {
-    AdjustBalancesStorageWrapperRead
-} from './AdjustBalancesStorageWrapperRead.sol';
+import {CD_Lib} from '../../../layer_1/common/CD_Lib.sol';
 
-contract AdjustBalancesStorageWrapper is
-    IAdjustBalancesStorageWrapper,
-    AdjustBalancesStorageWrapperRead,
-    ERC1410BasicStorageWrapperRead,
-    CorporateActionsStorageWrapper,
-    ERC20StorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper,
-    SnapshotsStorageWrapper_2
-{
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
-        _;
-    }
-
-    function _adjustBalances(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _beforeBalanceAdjustment(_factor, _decimals);
-
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        AdjustBalancesStorage
-            storage adjustBalancesStorage = _getAdjustBalancesStorage();
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-        CapDataStorage storage capStorage = _capStorage();
-
-        erc1410Storage.totalSupply *= _factor;
-
-        if (_getABAF() == 0) adjustBalancesStorage.ABAF = _factor;
-        else adjustBalancesStorage.ABAF *= _factor;
-
-        erc20Storage.decimals += _decimals;
-        capStorage.maxSupply *= _factor;
-
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
-    }
-
-    function _beforeBalanceAdjustment(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _updateDecimalsSnapshot();
-        _updateABAFSnapshot();
-        _updateAssetTotalSupplySnapshot();
-    }
-
-    function _getABAF() internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().ABAF;
-    }
-
-    function _getABAFAdjusted() internal view virtual returns (uint256) {
-        return _getABAFAdjustedAt(_blockTimestamp());
-    }
-
-    function _getABAFAdjustedAt(
-        uint256 _timestamp
-    ) internal view virtual returns (uint256) {
-        uint256 ABAF = _getABAF();
-        if (ABAF == 0) ABAF = 1;
-        (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustmentsAt(
-                _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage(),
-                _timestamp
-            );
-        return ABAF * pendingABAF;
-    }
-
-    function _getLABAFForUser(
-        address _account
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().LABAF[_account];
-    }
-
-    function _getLABAFForPartition(
-        bytes32 _partition
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().LABAF_partition[_partition];
-    }
-
-    function _getLABAFForUserAndPartition(
+library ERC1410ScheduledTasks_CD_Lib {
+    function triggerAndSyncAll(
         bytes32 _partition,
-        address _account
-    ) internal view virtual returns (uint256) {
-        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
-            _account
-        ][_partition];
-
-        if (partitionsIndex == 0) return 0;
-        return
-            _getAdjustBalancesStorage().LABAF_user_partition[_account][
-                partitionsIndex - 1
-            ];
+        address _from,
+        address _to
+    ) internal {
+        CD_Lib.delegateCall(
+            abi.encodeWithSignature(
+                'triggerAndSyncAll(bytes32,address,address)',
+                _partition,
+                _from,
+                _to
+            )
+        );
     }
 
-    function _getAllowanceLABAF(
-        address _owner,
-        address _spender
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().LABAFs_allowances[_owner][_spender];
+    function balanceOfAdjusted(
+        address _tokenHolder
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('balanceOfAdjusted(address)', _tokenHolder)
+        );
+        return abi.decode(data, (uint256));
     }
 
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override {
-        revert('Should never reach this part');
+    function balanceOfAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'balanceOfAdjustedAt(address,uint256)',
+                _tokenHolder,
+                _timestamp
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function balanceOfByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'balanceOfByPartitionAdjusted(bytes32,address)',
+                _partition,
+                _tokenHolder
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function totalSupplyByPartitionAdjusted(
+        bytes32 _partition
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'totalSupplyByPartitionAdjusted(bytes32)',
+                _partition
+            )
+        );
+        return abi.decode(data, (uint256));
     }
 }

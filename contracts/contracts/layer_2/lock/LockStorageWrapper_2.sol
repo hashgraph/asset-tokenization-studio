@@ -207,17 +207,20 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 //import {AdjustBalancesStorageWrapper} from '../adjustBalances/AdjustBalancesStorageWrapper.sol';
-import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
+import {LockStorageWrapper_2_Read} from './LockStorageWrapper_2_Read.sol';
 import {_LOCK_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {
+    ERC1410ScheduledTasks_CD_Lib
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
 
-abstract contract LockStorageWrapper_2 is
-    LockStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
-{
+abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
     function _lockByPartition(
         bytes32 _partition,
         uint256 _amount,
@@ -226,7 +229,11 @@ abstract contract LockStorageWrapper_2 is
     ) internal virtual override returns (bool success_, uint256 lockId_) {
         LockDataStorage_2 storage lockStorage_2 = _lockStorage_2();
 
-        _triggerAndSyncAll(_partition, _tokenHolder, address(0));
+        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
+            _partition,
+            _tokenHolder,
+            address(0)
+        );
 
         uint256 ABAF = _updateTotalLock(
             _partition,
@@ -252,7 +259,11 @@ abstract contract LockStorageWrapper_2 is
     ) internal virtual override returns (bool success_) {
         LockDataStorage_2 storage lockStorage_2 = _lockStorage_2();
 
-        _triggerAndSyncAll(_partition, address(0), _tokenHolder);
+        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
+            _partition,
+            address(0),
+            _tokenHolder
+        );
 
         uint256 ABAF = _updateTotalLock(
             _partition,
@@ -343,7 +354,7 @@ abstract contract LockStorageWrapper_2 is
         address _tokenHolder,
         LockDataStorage_2 storage lockStorage_2
     ) internal returns (uint256 ABAF_) {
-        ABAF_ = _getABAF();
+        ABAF_ = AdjustBalances_CD_Lib.getABAF();
 
         uint256 LABAF = _getTotalLockLABAF(_tokenHolder);
         uint256 LABAFByPartition = _getTotalLockLABAFByPartition(
