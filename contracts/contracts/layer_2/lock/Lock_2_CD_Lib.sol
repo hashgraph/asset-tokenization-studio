@@ -209,11 +209,14 @@ pragma solidity 0.8.18;
 import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
 
 library Lock_2_CD_Lib {
-   function getLockedAmountForAdjusted(
+    function getLockedAmountForAdjusted(
         address _tokenHolder
     ) internal view returns (uint256 amount_) {
         bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('getLockedAmountForAdjusted(address)', _tokenHolder)
+            abi.encodeWithSignature(
+                'getLockedAmountForAdjusted(address)',
+                _tokenHolder
+            )
         );
         return abi.decode(data, (uint256));
     }
@@ -223,9 +226,12 @@ library Lock_2_CD_Lib {
         address _tokenHolder
     ) internal view returns (uint256 amount_) {
         bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('getLockedAmountForByPartitionAdjusted(bytes32,address)', _partition, _tokenHolder)
+            abi.encodeWithSignature(
+                'getLockedAmountForByPartitionAdjusted(bytes32,address)',
+                _partition,
+                _tokenHolder
+            )
         );
         return abi.decode(data, (uint256));
     }
-
 }

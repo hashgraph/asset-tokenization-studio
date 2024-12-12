@@ -434,11 +434,11 @@ describe('ERC1400 Tests', () => {
     }
 
     async function getTotalSupplyValues() {
-        const totalSupply = await erc1410Facet.totalSupply()
+        const totalSupply = await erc1410Facet.totalSupplyAdjusted()
         const totalSupply_Partition_1 =
-            await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_1)
+            await erc1410Facet.totalSupplyByPartitionAdjusted(_PARTITION_ID_1)
         const totalSupply_Partition_2 =
-            await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_2)
+            await erc1410Facet.totalSupplyByPartitionAdjusted(_PARTITION_ID_2)
 
         return {
             totalSupply,

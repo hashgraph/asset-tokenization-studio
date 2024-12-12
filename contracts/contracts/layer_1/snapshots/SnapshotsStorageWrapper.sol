@@ -407,8 +407,8 @@ abstract contract SnapshotsStorageWrapper is
     function _balanceOfAt(
         address account,
         uint256 snapshotId
-    ) internal view virtual returns (uint256){
-        revert("Should not reach this function");
+    ) internal view virtual returns (uint256) {
+        revert('Should not reach this function');
     }
 
     /**
@@ -418,24 +418,22 @@ abstract contract SnapshotsStorageWrapper is
         bytes32 _partition,
         address account,
         uint256 snapshotId
-    ) internal view virtual returns (uint256){
-        revert("Should not reach this function");
+    ) internal view virtual returns (uint256) {
+        revert('Should not reach this function');
     }
 
     function _totalSupplyAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID
     ) internal view virtual returns (uint256 totalSupply_) {
-               revert("Should not reach this function");
-
+        revert('Should not reach this function');
     }
 
     function _lockedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
     ) internal view virtual returns (uint256 balance_) {
-                revert("Should not reach this function");
-
+        revert('Should not reach this function');
     }
 
     function _lockedBalanceOfAtSnapshotByPartition(
@@ -443,8 +441,7 @@ abstract contract SnapshotsStorageWrapper is
         uint256 _snapshotID,
         address _tokenHolder
     ) internal view virtual returns (uint256 balance_) {
-               revert("Should not reach this function");
-
+        revert('Should not reach this function');
     }
 
     /**

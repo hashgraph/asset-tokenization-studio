@@ -220,7 +220,6 @@ import {
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
 import {Lock_2_CD_Lib} from '../lock/Lock_2_CD_Lib.sol';
 
-
 contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
     struct SnapshotStorage_2 {
         Snapshots ABAFSnapshots;
@@ -346,7 +345,9 @@ contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
             _balanceOfAt_Adjusted(
                 _snapshotID,
                 _snapshotStorage().totalSupplyByPartitionSnapshots[_partition],
-                ERC1410ScheduledTasks_CD_Lib.totalSupplyByPartitionAdjusted(_partition)
+                ERC1410ScheduledTasks_CD_Lib.totalSupplyByPartitionAdjusted(
+                    _partition
+                )
             );
     }
 
@@ -367,13 +368,17 @@ contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
         uint256 _snapshotID,
         address _tokenHolder
     ) internal view virtual override returns (uint256 balance_) {
-        return _balanceOfAt_Adjusted(
-            _snapshotID,
-            _snapshotStorage().accountPartitionLockedBalanceSnapshots[
-                _tokenHolder
-            ][_partition],
-            Lock_2_CD_Lib.getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder)
-        );
+        return
+            _balanceOfAt_Adjusted(
+                _snapshotID,
+                _snapshotStorage().accountPartitionLockedBalanceSnapshots[
+                    _tokenHolder
+                ][_partition],
+                Lock_2_CD_Lib.getLockedAmountForByPartitionAdjusted(
+                    _partition,
+                    _tokenHolder
+                )
+            );
     }
 
     function _balanceOfAt_Adjusted(

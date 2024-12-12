@@ -267,8 +267,14 @@ contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
     function _balanceOfAt(
         address account,
         uint256 snapshotId
-    ) internal view virtual override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2) returns (uint256){
-        SnapshotsStorageWrapper_2._balanceOfAt(account, snapshotId);
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256)
+    {
+        return SnapshotsStorageWrapper_2._balanceOfAt(account, snapshotId);
     }
 
     /**
@@ -278,33 +284,72 @@ contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
         bytes32 _partition,
         address account,
         uint256 snapshotId
-    ) internal view virtual override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2) returns (uint256){
-        SnapshotsStorageWrapper_2._balanceOfAtByPartition(_partition, account, snapshotId);
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256)
+    {
+        return
+            SnapshotsStorageWrapper_2._balanceOfAtByPartition(
+                _partition,
+                account,
+                snapshotId
+            );
     }
 
     function _totalSupplyAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID
-    ) internal view virtual override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2) returns (uint256 totalSupply_) {
-        SnapshotsStorageWrapper_2._totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
-
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256 totalSupply_)
+    {
+        return
+            SnapshotsStorageWrapper_2._totalSupplyAtSnapshotByPartition(
+                _partition,
+                _snapshotID
+            );
     }
 
     function _lockedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
-    ) internal view virtual override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2) returns (uint256 balance_) {
-        SnapshotsStorageWrapper_2._lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256 balance_)
+    {
+        return
+            SnapshotsStorageWrapper_2._lockedBalanceOfAtSnapshot(
+                _snapshotID,
+                _tokenHolder
+            );
     }
 
     function _lockedBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID,
         address _tokenHolder
-    ) internal view virtual override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2) returns (uint256 balance_) {
-        SnapshotsStorageWrapper_2._lockedBalanceOfAtSnapshotByPartition(_partition, _snapshotID, _tokenHolder);
-
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256 balance_)
+    {
+        return
+            SnapshotsStorageWrapper_2._lockedBalanceOfAtSnapshotByPartition(
+                _partition,
+                _snapshotID,
+                _tokenHolder
+            );
     }
 
     function getStaticResolverKey()
@@ -339,7 +384,7 @@ contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
         staticFunctionSelectors_[selectorIndex++] = this
             .partitionsOfAtSnapshot
             .selector;
-         staticFunctionSelectors_[selectorIndex++] = this
+        staticFunctionSelectors_[selectorIndex++] = this
             .totalSupplyAtSnapshotByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this

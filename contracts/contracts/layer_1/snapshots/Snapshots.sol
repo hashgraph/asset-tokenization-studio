@@ -279,5 +279,4 @@ abstract contract Snapshots is
                 _tokenHolder
             );
     }
-
 }

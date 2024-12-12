@@ -233,8 +233,12 @@ import {IERC1410} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 import {
     _ERC1410_RESOLVER_KEY
 } from '../../../layer_1/constants/resolverKeys.sol';
+import {
+    IERC1410ScheduledTasks
+} from '../../interfaces/ERC1400/IERC1410ScheduledTasks.sol';
 
 contract ERC1410ScheduledTasks is
+    IERC1410ScheduledTasks,
     ERC1410Snapshot,
     ERC1410ScheduledTasksStorageWrapper
 {
@@ -246,7 +250,7 @@ contract ERC1410ScheduledTasks is
         _triggerAndSyncAll(_partition, _from, _to);
     }
 
-    function totalSupply() external view virtual override returns (uint256) {
+    function totalSupplyAdjusted() external view virtual returns (uint256) {
         return _totalSupplyAdjusted();
     }
 
@@ -375,7 +379,7 @@ contract ERC1410ScheduledTasks is
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](27);
+        staticFunctionSelectors_ = new bytes4[](28);
         uint256 selectorIndex = 0;
         staticFunctionSelectors_[selectorIndex++] = this
             .balanceOfAdjusted
@@ -449,6 +453,9 @@ contract ERC1410ScheduledTasks is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .triggerAndSyncAll
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyAdjusted
             .selector;
     }
 

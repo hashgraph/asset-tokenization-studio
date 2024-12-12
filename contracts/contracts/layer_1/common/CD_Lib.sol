@@ -203,6 +203,9 @@
 
 */
 
+pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
 library CD_Lib {
     function delegateCall(
         bytes memory encodedCallData

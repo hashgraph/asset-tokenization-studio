@@ -286,30 +286,30 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
     function _totalSupplyAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID
-    ) internal view virtual override returns (uint256 totalSupply_){
-        revert("Should not reach this function");
+    ) internal view virtual override returns (uint256 totalSupply_) {
+        revert('Should not reach this function');
     }
 
     function _lockedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
-    ) internal view virtual override returns (uint256 balance_){
-        revert("Should not reach this function");
+    ) internal view virtual override returns (uint256 balance_) {
+        revert('Should not reach this function');
     }
 
     function _lockedBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID,
         address _tokenHolder
-    ) internal view virtual override returns (uint256 balance_){
-        revert("Should not reach this function");
+    ) internal view virtual override returns (uint256 balance_) {
+        revert('Should not reach this function');
     }
 
     function _balanceOfAt(
         address account,
         uint256 snapshotId
-    ) internal view virtual override returns (uint256){
-        revert("Should not reach this function");
+    ) internal view virtual override returns (uint256) {
+        revert('Should not reach this function');
     }
 
     /**
@@ -319,8 +319,8 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         bytes32 _partition,
         address account,
         uint256 snapshotId
-    ) internal view virtual override returns (uint256){
-        revert("Should not reach this function");
+    ) internal view virtual override returns (uint256) {
+        revert('Should not reach this function');
     }
 
     function getStaticResolverKey()
