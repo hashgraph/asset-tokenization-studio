@@ -3026,10 +3026,14 @@ describe('ERC1400 Tests', () => {
                     adjustDecimals
                 )
 
-                const updatedBalance = before.balanceOf_A.mul(adjustFactor);
+                const updatedBalance = before.balanceOf_A.mul(adjustFactor)
 
                 // Transaction Partition 1 with updated balance
-                await erc20Facet.transferFrom(account_A, account_B, updatedBalance)
+                await erc20Facet.transferFrom(
+                    account_A,
+                    account_B,
+                    updatedBalance
+                )
 
                 // // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
@@ -3177,6 +3181,38 @@ describe('ERC1400 Tests', () => {
                 const after = await getBalanceAdjustedValues()
 
                 await checkAdjustmentsAfterRedeem(after, before)
+            })
+
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 controllerRedeemByPartition with the expected adjusted amount succeeds', async () => {
+                await setPreBalanceAdjustment()
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                const adjustAmount = amount * adjustFactor
+
+                // Transaction Partition 1
+                await expect(
+                    erc1410Facet.controllerRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_A,
+                        adjustAmount,
+                        '0x',
+                        '0x'
+                    )
+                )
+                    .to.emit(erc1410Facet, 'RedeemedByPartition')
+                    .withArgs(
+                        _PARTITION_ID_1,
+                        account_A,
+                        account_A,
+                        adjustAmount,
+                        '0x',
+                        '0x'
+                    )
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1644 controllerRedeem succeeds', async () => {
