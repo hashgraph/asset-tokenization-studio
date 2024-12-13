@@ -228,7 +228,6 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { cap } from '../../../../typechain-types/contracts/layer_1'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -238,141 +237,240 @@ const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const TIME = 6000
 describe('CAP Layer 2 Tests', () => {
-    let diamond: Equity, capFacet: Cap_2, accessControlFacet: AccessControl, equityFacet: Equity, snapshotFacet: Snapshots_2;
-    let signer_A: SignerWithAddress, signer_B: SignerWithAddress, signer_C: SignerWithAddress;
-    let account_A: string, account_B: string, account_C: string;
+    let diamond: Equity,
+        capFacet: Cap_2,
+        accessControlFacet: AccessControl,
+        equityFacet: Equity,
+        snapshotFacet: Snapshots_2,
+        erc1410Facet: ERC1410ScheduledTasks
+    let signer_A: SignerWithAddress,
+        signer_B: SignerWithAddress,
+        signer_C: SignerWithAddress
+    let account_A: string, account_B: string, account_C: string
 
     interface Adjustment {
-        executionDate: string;
-        factor: number;
-        decimals: number;
+        executionDate: string
+        factor: number
+        decimals: number
     }
 
     const setupSignersAndAccounts = async () => {
-        [signer_A, signer_B, signer_C] = await ethers.getSigners();
-        account_A = signer_A.address;
-        account_B = signer_B.address;
-        account_C = signer_C.address;
-    };
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+    }
 
     const setupEnvironment = async () => {
-        const rbacPause = { role: _PAUSER_ROLE, members: [account_B] };
-        const rbaCap = { role: _CAP_ROLE, members: [account_B] };
-        const init_rbacs = [rbacPause, rbaCap];
+        const rbacPause = { role: _PAUSER_ROLE, members: [account_B] }
+        const rbaCap = { role: _CAP_ROLE, members: [account_B] }
+        const init_rbacs = [rbacPause, rbaCap]
 
         diamond = await deployEquityFromFactory(
             account_A,
-            false, true, false,
-            'TEST_AccessControl', 'TAC', 6,
+            false,
+            true,
+            false,
+            'TEST_AccessControl',
+            'TAC',
+            6,
             'ABCDEF123456',
-            false, false, false,
-            true, true, true, false,
-            1, '0x345678',
-            0, 100,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            false,
+            1,
+            '0x345678',
+            0,
+            100,
             RegulationType.REG_D,
             RegulationSubType.REG_D_506_B,
             true,
             'ES,FR,CH',
             'nothing',
             init_rbacs
-        );
+        )
 
-        capFacet = await ethers.getContractAt('Cap_2', diamond.address);
-        accessControlFacet = await ethers.getContractAt('AccessControl', diamond.address);
-        equityFacet = await ethers.getContractAt('Equity', diamond.address);
-        snapshotFacet = await ethers.getContractAt('Snapshots_2', diamond.address);
-    };
+        capFacet = await ethers.getContractAt('Cap_2', diamond.address)
+        accessControlFacet = await ethers.getContractAt(
+            'AccessControl',
+            diamond.address
+        )
+        equityFacet = await ethers.getContractAt('Equity', diamond.address)
+        snapshotFacet = await ethers.getContractAt(
+            'Snapshots_2',
+            diamond.address
+        )
+        erc1410Facet = await ethers.getContractAt(
+            'ERC1410ScheduledTasks',
+            diamond.address
+        )
+    }
 
-    const setupScheduledBalanceAdjustments = async (adjustments: Adjustment[]) => {
+    const setupScheduledBalanceAdjustments = async (
+        adjustments: Adjustment[]
+    ) => {
         for (const adjustment of adjustments) {
-            await equityFacet.setScheduledBalanceAdjustment(adjustment);
+            await equityFacet.setScheduledBalanceAdjustment(adjustment)
         }
-    };
+    }
 
-    const createAdjustmentData = (currentTime: number, intervals: number[], factors: number[], decimals: number[]): Adjustment[] => {
+    const createAdjustmentData = (
+        currentTime: number,
+        intervals: number[],
+        factors: number[],
+        decimals: number[]
+    ): Adjustment[] => {
         return intervals.map((interval, index) => ({
             executionDate: (currentTime + interval).toString(),
             factor: factors[index],
-            decimals: decimals[index]
-        }));
-    };
+            decimals: decimals[index],
+        }))
+    }
 
     beforeEach(async () => {
-        await setupSignersAndAccounts();
-        await deployEnvironment();
-        await setupEnvironment();
-    });
+        await setupSignersAndAccounts()
+        await deployEnvironment()
+        await setupEnvironment()
+    })
 
-    const testBalanceAdjustments = async (adjustments: Adjustment[], expectedFactors: number[]) => {
-        await setupScheduledBalanceAdjustments(adjustments);
+    const testBalanceAdjustments = async (
+        adjustments: Adjustment[],
+        expectedFactors: number[]
+    ) => {
+        await setupScheduledBalanceAdjustments(adjustments)
 
         // Execute adjustments and verify
         for (let i = 0; i < adjustments.length; i++) {
-            await new Promise((resolve) => setTimeout(resolve, TIME + 1));
-            await snapshotFacet.takeSnapshot();
+            await new Promise((resolve) => setTimeout(resolve, TIME + 1))
+            await snapshotFacet.takeSnapshot()
         }
 
-        const currentMaxSupply = await capFacet.getMaxSupply();
-        const currentMaxSupplyByPartition_1 = await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1);
+        const currentMaxSupply = await capFacet.getMaxSupply()
+        const currentMaxSupplyByPartition_1 =
+            await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1)
 
-        const adjustmentFactor = expectedFactors.reduce((acc, val) => acc * val, 1);
-        expect(currentMaxSupply).to.equal(maxSupply * adjustmentFactor);
-        expect(currentMaxSupplyByPartition_1).to.equal(maxSupplyByPartition * adjustmentFactor);
-    };
+        const adjustmentFactor = expectedFactors.reduce(
+            (acc, val) => acc * val,
+            1
+        )
+        expect(currentMaxSupply).to.equal(maxSupply * adjustmentFactor)
+        expect(currentMaxSupplyByPartition_1).to.equal(
+            maxSupplyByPartition * adjustmentFactor
+        )
+    }
 
     it('GIVEN a token WHEN getMaxSupply or getMaxSupplyByPartition THEN balance adjustments are included', async () => {
-        accessControlFacet = accessControlFacet.connect(signer_A);
-        await accessControlFacet.grantRole(_CAP_ROLE, account_C);
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C);
-        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A);
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
+        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A)
 
-        capFacet = capFacet.connect(signer_C);
-        equityFacet = equityFacet.connect(signer_C);
-        snapshotFacet = snapshotFacet.connect(signer_A);
+        capFacet = capFacet.connect(signer_C)
+        equityFacet = equityFacet.connect(signer_C)
+        snapshotFacet = snapshotFacet.connect(signer_A)
 
-        await capFacet.setMaxSupply(maxSupply);
-        await capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition);
+        await capFacet.setMaxSupply(maxSupply)
+        await capFacet.setMaxSupplyByPartition(
+            _PARTITION_ID_1,
+            maxSupplyByPartition
+        )
 
-        const currentTime = (await ethers.provider.getBlock('latest')).timestamp;
+        const currentTime = (await ethers.provider.getBlock('latest')).timestamp
         const adjustments = createAdjustmentData(
             currentTime,
             [TIME / 1000, (2 * TIME) / 1000, (3 * TIME) / 1000],
             [5, 6, 7],
             [2, 0, 1]
-        );
-        const currentMaxSupplyByPartition_2 = await capFacet.getMaxSupplyByPartition(_PARTITION_ID_2)
+        )
+        const currentMaxSupplyByPartition_2 =
+            await capFacet.getMaxSupplyByPartition(_PARTITION_ID_2)
         expect(currentMaxSupplyByPartition_2).to.equal(0)
-        await testBalanceAdjustments(adjustments, [5, 6, 7]);
-
-    });
+        await testBalanceAdjustments(adjustments, [5, 6, 7])
+    })
 
     it('GIVEN a token WHEN setMaxSupply THEN balance adjustments are included', async () => {
-        accessControlFacet = accessControlFacet.connect(signer_A);
-        await accessControlFacet.grantRole(_CAP_ROLE, account_C);
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C);
-        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A);
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
+        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A)
 
-        capFacet = capFacet.connect(signer_C);
-        equityFacet = equityFacet.connect(signer_C);
-        snapshotFacet = snapshotFacet.connect(signer_A);
+        capFacet = capFacet.connect(signer_C)
+        equityFacet = equityFacet.connect(signer_C)
+        snapshotFacet = snapshotFacet.connect(signer_A)
 
-        await capFacet.setMaxSupply(maxSupply);
-        await capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition);
+        await capFacet.setMaxSupply(maxSupply)
+        await capFacet.setMaxSupplyByPartition(
+            _PARTITION_ID_1,
+            maxSupplyByPartition
+        )
 
-        const currentTime = (await ethers.provider.getBlock('latest')).timestamp;
+        const currentTime = (await ethers.provider.getBlock('latest')).timestamp
         const adjustments = createAdjustmentData(
             currentTime,
             [TIME / 1000, (2 * TIME) / 1000],
             [5, 6],
             [0, 0]
-        );
+        )
 
-        await setupScheduledBalanceAdjustments(adjustments);
+        await setupScheduledBalanceAdjustments(adjustments)
 
         // Execute adjustments and verify reversion case
-        await new Promise((resolve) => setTimeout(resolve, TIME + 1));
-        await snapshotFacet.takeSnapshot();
+        await new Promise((resolve) => setTimeout(resolve, TIME + 1))
+        await snapshotFacet.takeSnapshot()
 
-        await expect(capFacet.setMaxSupply(maxSupplyByPartition)).to.be.revertedWith('NewMaxSupplyTooLow');
-    });
-});
+        await expect(
+            capFacet.setMaxSupply(maxSupplyByPartition)
+        ).to.be.revertedWith('NewMaxSupplyTooLow')
+    })
+
+    it('GIVEN a token WHEN max supply and partition max supply are set THEN balance adjustments occur and resetting partition max supply fails with NewMaxSupplyForPartitionTooLow', async () => {
+        accessControlFacet = accessControlFacet.connect(signer_A)
+        await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
+        await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A)
+        capFacet = capFacet.connect(signer_C)
+        equityFacet = equityFacet.connect(signer_C)
+        snapshotFacet = snapshotFacet.connect(signer_A)
+        erc1410Facet = erc1410Facet.connect(signer_C)
+        await erc1410Facet.issueByPartition(
+            _PARTITION_ID_1,
+            account_A,
+            maxSupply - 1,
+            '0x'
+        )
+        await capFacet.setMaxSupply(maxSupply)
+        await capFacet.setMaxSupplyByPartition(
+            _PARTITION_ID_1,
+            maxSupplyByPartition
+        )
+        // scheduled balance adjustments
+        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
+            .timestamp
+        const balanceAdjustmentExecutionDateInSeconds_1 =
+            currentTimeInSeconds + TIME / 1000
+        const balanceAdjustmentsFactor_1 = 5
+        const balanceAdjustmentsDecimals_1 = 2
+        const balanceAdjustmentData_1 = {
+            executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
+            factor: balanceAdjustmentsFactor_1,
+            decimals: balanceAdjustmentsDecimals_1,
+        }
+        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+        //-------------------------
+        // wait for first balance adjustment
+        await new Promise((f) => setTimeout(f, TIME + 1))
+        await snapshotFacet.takeSnapshot() // execute first adjustment balance only
+        // Attempt to change the max supply by partition with the same value as before
+        await expect(
+            capFacet.setMaxSupplyByPartition(
+                _PARTITION_ID_1,
+                maxSupplyByPartition
+            )
+        ).to.eventually.be.rejectedWith(Error)
+    })
+})
