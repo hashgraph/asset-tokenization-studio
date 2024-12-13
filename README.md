@@ -36,7 +36,7 @@ Ensure the following tools are installed with these versions:
 
 - **Node:**`v20.17.0`
 - **NPM:** `v10.8.3`
-- **Yarn:** `v1.22.19`
+- **Yarn:** `v1.22.22`
 
 # Installation
 
