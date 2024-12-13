@@ -3026,10 +3026,12 @@ describe('ERC1400 Tests', () => {
                     adjustDecimals
                 )
 
-                // Transaction Partition 1
-                await erc20Facet.transferFrom(account_A, account_B, amount)
+                const updatedBalance = before.balanceOf_A.mul(adjustFactor);
 
-                // After Transaction Partition 1 Values
+                // Transaction Partition 1 with updated balance
+                await erc20Facet.transferFrom(account_A, account_B, updatedBalance)
+
+                // // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
 
                 await checkAdjustmentsAfterTransfer(after, before)
