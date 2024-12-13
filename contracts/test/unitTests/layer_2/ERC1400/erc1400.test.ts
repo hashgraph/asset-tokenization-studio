@@ -2904,7 +2904,7 @@ describe('ERC1400 Tests', () => {
                 await erc1594Facet.transferFromWithData(
                     account_A,
                     account_B,
-                    amount,
+                    amount + 1,
                     '0x'
                 )
 
@@ -3026,10 +3026,12 @@ describe('ERC1400 Tests', () => {
                     adjustDecimals
                 )
 
-                // Transaction Partition 1
-                await erc20Facet.transferFrom(account_A, account_B, amount)
+                const updatedBalance = before.balanceOf_A.mul(adjustFactor);
 
-                // After Transaction Partition 1 Values
+                // Transaction Partition 1 with updated balance
+                await erc20Facet.transferFrom(account_A, account_B, updatedBalance)
+
+                // // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
 
                 await checkAdjustmentsAfterTransfer(after, before)
@@ -3062,6 +3064,33 @@ describe('ERC1400 Tests', () => {
                 await checkAdjustmentsAfterRedeem(after, before)
             })
 
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 redeemByPartition with the expected adjusted amount succeeds', async () => {
+                await setPreBalanceAdjustment()
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                await expect(
+                    erc1410Facet.redeemByPartition(
+                        _PARTITION_ID_1,
+                        amount * adjustFactor,
+                        data
+                    )
+                )
+                    .to.emit(erc1410Facet, 'RedeemedByPartition')
+                    .withArgs(
+                        _PARTITION_ID_1,
+                        ADDRESS_0,
+                        account_A,
+                        amount * adjustFactor,
+                        data,
+                        '0x'
+                    )
+            })
+
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorRedeemByPartition succeeds', async () => {
                 await setPreBalanceAdjustment()
 
@@ -3088,6 +3117,39 @@ describe('ERC1400 Tests', () => {
                 const after = await getBalanceAdjustedValues()
 
                 await checkAdjustmentsAfterRedeem(after, before)
+            })
+
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorRedeemByPartition with the expected adjusted amount succeeds', async () => {
+                await setPreBalanceAdjustment()
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                const adjustAmount = amount * adjustFactor
+
+                // Transaction Partition 1
+                await erc1410Facet.authorizeOperator(account_A)
+                await expect(
+                    erc1410Facet.operatorRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_A,
+                        adjustAmount,
+                        data,
+                        '0x'
+                    )
+                )
+                    .to.emit(erc1410Facet, 'RedeemedByPartition')
+                    .withArgs(
+                        _PARTITION_ID_1,
+                        account_A,
+                        account_A,
+                        adjustAmount,
+                        data,
+                        '0x'
+                    )
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 controllerRedeemByPartition succeeds', async () => {
@@ -3145,6 +3207,32 @@ describe('ERC1400 Tests', () => {
                 await checkAdjustmentsAfterRedeem(after, before)
             })
 
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1644 controllerRedeem with the expected adjusted amount succeeds', async () => {
+                await deployAsset(false)
+
+                await setPreBalanceAdjustment(true)
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                const adjustAmount = amount * adjustFactor
+
+                // Transaction Partition 1
+                await expect(
+                    erc1644Facet.controllerRedeem(
+                        account_A,
+                        adjustAmount,
+                        '0x',
+                        '0x'
+                    )
+                )
+                    .to.emit(erc1644Facet, 'ControllerRedemption')
+                    .withArgs(account_A, account_A, adjustAmount, '0x', '0x')
+            })
+
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeem succeeds', async () => {
                 await deployAsset(false)
 
@@ -3168,6 +3256,27 @@ describe('ERC1400 Tests', () => {
                 const after = await getBalanceAdjustedValues()
 
                 await checkAdjustmentsAfterRedeem(after, before)
+            })
+
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeem with the expected adjusted amount succeeds', async () => {
+                await deployAsset(false)
+
+                await setPreBalanceAdjustment(true)
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                const adjustAmount = amount * adjustFactor
+
+                // Transaction Partition 1
+                erc1594Facet = erc1594Facet.connect(signer_A)
+
+                await expect(erc1594Facet.redeem(adjustAmount, '0x'))
+                    .to.emit(erc1594Facet, 'Redeemed')
+                    .withArgs(ADDRESS_0, account_A, adjustAmount, '0x')
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeemFrom succeeds', async () => {
@@ -3196,6 +3305,32 @@ describe('ERC1400 Tests', () => {
                 const after = await getBalanceAdjustedValues()
 
                 await checkAdjustmentsAfterRedeem(after, before)
+            })
+
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeemFrom with the expected adjusted amount succeeds', async () => {
+                await deployAsset(false)
+
+                await setPreBalanceAdjustment(true)
+
+                erc20Facet = erc20Facet.connect(signer_A)
+                await erc20Facet.approve(account_A, amount)
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                const adjustAmount = amount * adjustFactor
+
+                // Transaction Partition 1
+                erc1594Facet = erc1594Facet.connect(signer_A)
+
+                await expect(
+                    erc1594Facet.redeemFrom(account_A, adjustAmount, '0x')
+                )
+                    .to.emit(erc1594Facet, 'Redeemed')
+                    .withArgs(account_A, account_A, adjustAmount, '0x')
             })
         })
 
@@ -3303,7 +3438,10 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // APPROVE 2
-                await erc20Facet.decreaseAllowance(account_B, amount)
+                await erc20Facet.decreaseAllowance(
+                    account_B,
+                    allowance_Before.add(amount)
+                )
 
                 const allowance_After = await erc20Facet.allowance(
                     account_A,
@@ -3315,7 +3453,9 @@ describe('ERC1400 Tests', () => {
                 )
 
                 expect(allowance_After).to.be.equal(
-                    allowance_Before.mul(adjustFactor).sub(amount)
+                    allowance_Before
+                        .mul(adjustFactor)
+                        .sub(allowance_Before.add(amount))
                 )
                 expect(LABAF_Before).to.be.equal(0)
                 expect(LABAF_After).to.be.equal(adjustFactor)

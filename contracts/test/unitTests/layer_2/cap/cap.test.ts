@@ -211,11 +211,13 @@ import {
     AccessControl,
     Equity,
     Snapshots_2,
+    ERC1410ScheduledTasks,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _CAP_ROLE,
     _CORPORATE_ACTION_ROLE,
+    _ISSUER_ROLE,
     _PAUSER_ROLE,
     _SNAPSHOT_ROLE,
 } from '../../../../scripts/constants'
@@ -226,6 +228,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { cap } from '../../../../typechain-types/contracts/layer_1'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
