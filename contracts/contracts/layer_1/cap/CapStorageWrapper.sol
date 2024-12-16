@@ -249,10 +249,7 @@ contract CapStorageWrapper is
     }
 
     modifier checkNewMaxSupply(uint256 _newMaxSupply) {
-        uint256 totalSupply = _totalSupply();
-        if (_newMaxSupply != 0 && totalSupply > _newMaxSupply) {
-            revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
-        }
+        _checkNewMaxSupply(_newMaxSupply);
         _;
     }
 
@@ -333,6 +330,10 @@ contract CapStorageWrapper is
         if (_maxSupply == 0) return true;
         if (_amount <= _maxSupply) return true;
         return false;
+    }
+
+    function _checkNewMaxSupply(uint256 _newMaxSupply) internal virtual {
+        revert('Should not reach this function');
     }
 
     function _capStorage()

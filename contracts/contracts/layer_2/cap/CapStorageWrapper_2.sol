@@ -227,7 +227,7 @@ import {
 abstract contract CapStorageWrapper_2 is
     CapStorageWrapper,
     CorporateActionsStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper
+    ERC1410ScheduledTasksStorageWrapper
 {
     function _getMaxSupplyAdjusted()
         internal
@@ -266,5 +266,14 @@ abstract contract CapStorageWrapper_2 is
             AdjustBalances_CD_Lib.getLABAFForPartition(_partition)
         );
         return _getMaxSupplyByPartition(_partition) * factor;
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override {
+        uint256 totalSupply = _totalSupplyAdjusted();
+        if (_newMaxSupply != 0 && totalSupply > _newMaxSupply) {
+            revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
+        }
     }
 }

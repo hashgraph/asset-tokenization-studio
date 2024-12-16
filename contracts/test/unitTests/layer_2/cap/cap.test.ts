@@ -203,8 +203,8 @@
 
 */
 
-import {expect} from 'chai'
-import {ethers} from 'hardhat'
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
 import {
     AccessControl,
     type Cap_2,
@@ -212,7 +212,7 @@ import {
     ERC1410ScheduledTasks,
     Snapshots_2,
 } from '../../../../typechain-types'
-import {deployEnvironment} from '../../../../scripts/deployEnvironmentByRpc'
+import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _CAP_ROLE,
     _CORPORATE_ACTION_ROLE,
@@ -220,8 +220,12 @@ import {
     _PAUSER_ROLE,
     _SNAPSHOT_ROLE,
 } from '../../../../scripts/constants'
-import {deployEquityFromFactory, RegulationSubType, RegulationType,} from '../../../../scripts/factory'
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers.js'
+import {
+    deployEquityFromFactory,
+    RegulationSubType,
+    RegulationType,
+} from '../../../../scripts/factory'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -250,7 +254,7 @@ describe('CAP Layer 2 Tests', () => {
     }
 
     const setupSignersAndAccounts = async () => {
-        [signer_A, signer_B, signer_C] = await ethers.getSigners()
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
@@ -431,7 +435,7 @@ describe('CAP Layer 2 Tests', () => {
 
         await expect(
             capFacet.setMaxSupply(maxSupplyByPartition)
-        ).to.be.revertedWith('NewMaxSupplyTooLow')
+        ).to.eventually.be.rejectedWith('NewMaxSupplyTooLow')
     })
 
     it('GIVEN a token WHEN max supply and partition max supply are set THEN balance adjustments occur and resetting partition max supply fails with NewMaxSupplyForPartitionTooLow', async () => {
@@ -458,7 +462,7 @@ describe('CAP Layer 2 Tests', () => {
             _PARTITION_ID_1,
             maxSupplyByPartition
         )
-        
+
         // scheduled balance adjustments
         const currentTime = (await ethers.provider.getBlock('latest')).timestamp
         const adjustments = createAdjustmentData(

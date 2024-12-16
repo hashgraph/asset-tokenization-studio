@@ -207,6 +207,7 @@ pragma solidity 0.8.18;
 
 import {Cap} from '../../layer_1/cap/Cap.sol';
 import {CapStorageWrapper_2} from './CapStorageWrapper_2.sol';
+import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 contract Cap_2 is Cap, CapStorageWrapper_2 {
@@ -224,5 +225,11 @@ contract Cap_2 is Cap, CapStorageWrapper_2 {
         bytes32 _partition
     ) external view virtual override returns (uint256 maxSupply_) {
         return _getMaxSupplyByPartitionAdjusted(_partition);
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
+        CapStorageWrapper_2._checkNewMaxSupply(_newMaxSupply);
     }
 }
