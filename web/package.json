@@ -81,6 +81,6 @@
     "@tanstack/react-table": "8.9.1"
   },
   "engines": {
-    "yarn": "1.22.19"
+    "yarn": "1.22.22"
   }
 }
