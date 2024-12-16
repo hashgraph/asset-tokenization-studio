@@ -226,10 +226,7 @@ contract CapStorageWrapper is
 
     // modifiers
     modifier checkMaxSupply(uint256 _amount) {
-        uint256 newTotalSupply = _totalSupply() + _amount;
-        if (!_checkMaxSupply(newTotalSupply)) {
-            revert MaxSupplyReached(_capStorage().maxSupply);
-        }
+        _checkNewTotalSupply(_amount);
         _;
     }
 
@@ -309,7 +306,7 @@ contract CapStorageWrapper is
     function _checkMaxSupply(
         uint256 _amount
     ) internal view virtual returns (bool) {
-        return _checkMaxSupplyCommon(_amount, _capStorage().maxSupply);
+        revert('Should not reach this function');
     }
 
     function _checkMaxSupplyByPartition(
@@ -326,13 +323,17 @@ contract CapStorageWrapper is
     function _checkMaxSupplyCommon(
         uint256 _amount,
         uint256 _maxSupply
-    ) private pure returns (bool) {
+    ) internal pure returns (bool) {
         if (_maxSupply == 0) return true;
         if (_amount <= _maxSupply) return true;
         return false;
     }
 
     function _checkNewMaxSupply(uint256 _newMaxSupply) internal virtual {
+        revert('Should not reach this function');
+    }
+
+    function _checkNewTotalSupply(uint256 _amount) internal virtual {
         revert('Should not reach this function');
     }
 

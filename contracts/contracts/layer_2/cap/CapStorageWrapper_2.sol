@@ -209,9 +209,6 @@ pragma solidity 0.8.18;
 import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
 import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {
     CorporateActionsStorageWrapper
 } from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
 import {
@@ -223,11 +220,14 @@ import {
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+import {
+    ERC1410ScheduledTasks_CD_Lib
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
 
 abstract contract CapStorageWrapper_2 is
     CapStorageWrapper,
     CorporateActionsStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
+    ScheduledBalanceAdjustmentsStorageWrapper
 {
     function _getMaxSupplyAdjusted()
         internal
@@ -271,9 +271,24 @@ abstract contract CapStorageWrapper_2 is
     function _checkNewMaxSupply(
         uint256 _newMaxSupply
     ) internal virtual override {
-        uint256 totalSupply = _totalSupplyAdjusted();
+        uint256 totalSupply = ERC1410ScheduledTasks_CD_Lib
+            .totalSupplyAdjusted();
         if (_newMaxSupply != 0 && totalSupply > _newMaxSupply) {
             revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
         }
+    }
+
+    function _checkNewTotalSupply(uint256 _amount) internal virtual override {
+        uint256 newTotalSupply = ERC1410ScheduledTasks_CD_Lib
+            .totalSupplyAdjusted() + _amount;
+        if (!_checkMaxSupply(newTotalSupply)) {
+            revert MaxSupplyReached(_getMaxSupplyAdjusted());
+        }
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    ) internal view virtual override returns (bool) {
+        return _checkMaxSupplyCommon(_amount, _getMaxSupplyAdjusted());
     }
 }

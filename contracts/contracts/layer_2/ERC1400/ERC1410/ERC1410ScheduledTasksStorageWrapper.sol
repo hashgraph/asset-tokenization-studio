@@ -255,12 +255,15 @@ import {
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+import {CapStorageWrapper_2} from '../../cap/CapStorageWrapper_2.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
     AdjustBalancesStorageWrapperRead,
     ERC1410SnapshotStorageWrapper,
     CorporateActionsStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper
+    ScheduledBalanceAdjustmentsStorageWrapper,
+    CapStorageWrapper_2
 {
     function _beforeTokenTransfer(
         bytes32 partition,
@@ -446,5 +449,29 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
             )
         );
         return _balanceOfByPartition(_partition, _tokenHolder) * factor;
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
+        CapStorageWrapper_2._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
+        CapStorageWrapper_2._checkNewTotalSupply(_amount);
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, CapStorageWrapper_2)
+        returns (bool)
+    {
+        return CapStorageWrapper_2._checkMaxSupply(_amount);
     }
 }

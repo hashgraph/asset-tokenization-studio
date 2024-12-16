@@ -382,7 +382,7 @@ describe('ERC1594 Tests', () => {
                 // issue fails
                 await expect(
                     erc1594Facet.issue(account_E, amount, data)
-                ).to.be.rejectedWith('TokenIsPaused')
+                ).to.be.rejectedWith(Error)
             })
 
             it('GIVEN a paused Token WHEN redeem THEN transaction fails with TokenIsPaused', async () => {

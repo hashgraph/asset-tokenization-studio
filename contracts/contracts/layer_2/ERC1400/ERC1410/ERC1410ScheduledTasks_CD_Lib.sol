@@ -272,4 +272,11 @@ library ERC1410ScheduledTasks_CD_Lib {
         );
         return abi.decode(data, (uint256));
     }
+
+    function totalSupplyAdjusted() internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('totalSupplyAdjusted()')
+        );
+        return abi.decode(data, (uint256));
+    }
 }

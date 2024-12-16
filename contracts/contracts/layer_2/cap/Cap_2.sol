@@ -232,4 +232,22 @@ contract Cap_2 is Cap, CapStorageWrapper_2 {
     ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
         CapStorageWrapper_2._checkNewMaxSupply(_newMaxSupply);
     }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
+        CapStorageWrapper_2._checkNewTotalSupply(_amount);
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, CapStorageWrapper_2)
+        returns (bool)
+    {
+        return CapStorageWrapper_2._checkMaxSupply(_amount);
+    }
 }
