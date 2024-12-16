@@ -2671,6 +2671,51 @@ describe('ERC1400 Tests', () => {
                 )
             })
 
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 Issue with max supply succeeds', async () => {
+                await deployAsset(false)
+
+                // Granting Role to account C
+                accessControlFacet = accessControlFacet.connect(signer_A)
+                await accessControlFacet.grantRole(
+                    _ADJUSTMENT_BALANCE_ROLE,
+                    account_C
+                )
+                await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
+                await accessControlFacet.grantRole(_CAP_ROLE, account_A)
+
+                // Using account C (with role)
+                adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+                erc1410Facet = erc1410Facet.connect(signer_A)
+                erc1594Facet = erc1594Facet.connect(signer_A)
+                capFacet = capFacet.connect(signer_A)
+
+                await capFacet.setMaxSupply(balanceOf_A_Original[1])
+
+                await erc1594Facet.issue(
+                    account_A,
+                    balanceOf_A_Original[0],
+                    '0x'
+                )
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                // issue after adjust
+                await expect(
+                    erc1594Facet.issue(account_A, balanceOf_A_Original[0], '0x')
+                )
+                    .to.emit(erc1594Facet, 'Issued')
+                    .withArgs(
+                        account_A,
+                        account_A,
+                        balanceOf_A_Original[0],
+                        '0x'
+                    )
+            })
+
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 IssueByPartition succeeds', async () => {
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
@@ -2904,7 +2949,41 @@ describe('ERC1400 Tests', () => {
                 await erc1594Facet.transferFromWithData(
                     account_A,
                     account_B,
-                    amount + 1,
+                    amount,
+                    '0x'
+                )
+
+                // After Transaction Partition 1 Values
+                const after = await getBalanceAdjustedValues()
+
+                await checkAdjustmentsAfterTransfer(after, before)
+            })
+
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 transferFromWithData with expected allowance amount succeeds', async () => {
+                await deployAsset(false)
+
+                await setPreBalanceAdjustment(true)
+
+                erc20Facet = erc20Facet.connect(signer_A)
+                await erc20Facet.approve(account_A, amount)
+
+                // Before Values
+                const before = await getBalanceAdjustedValues()
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                const expectedAllowance = amount * adjustFactor
+
+                // Transaction Partition 1
+                erc1594Facet = erc1594Facet.connect(signer_A)
+                await erc1594Facet.transferFromWithData(
+                    account_A,
+                    account_B,
+                    expectedAllowance,
                     '0x'
                 )
 
