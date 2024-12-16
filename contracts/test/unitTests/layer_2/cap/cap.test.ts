@@ -419,7 +419,12 @@ describe('CAP Layer 2 Tests', () => {
             maxSupplyByPartition
         )
 
-        await erc1594Facet.issue(account_C, issueAmount, '0x')
+        await erc1410Facet.issueByPartition(
+            _PARTITION_ID_1,
+            account_C,
+            issueAmount,
+            '0x'
+        )
 
         const currentTime = (await ethers.provider.getBlock('latest')).timestamp
         const adjustments = createAdjustmentData(
