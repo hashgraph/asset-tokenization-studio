@@ -1,13 +1,17 @@
 import { HardhatUserConfig } from 'hardhat/config'
+import {
+    HederaAccount,
+    HederaNodeConfig,
+} from '@hashgraph/hardhat-hethers/src/type-extensions'
 import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-contract-sizer'
 import 'solidity-coverage'
 import '@hashgraph/sdk'
 import { getEnvVar } from './scripts/utils'
 // ! Uncomment the following lines to be able to use tasks AFTER compiling the project
-// import './tasks/utils'
-// import './tasks/deploy'
-// import './tasks/update'
+import './tasks/utils'
+import './tasks/deploy'
+import './tasks/update'
 
 if (getEnvVar({ name: 'NETWORK', defaultValue: 'hardhat' }) !== 'hardhat') {
     require('@hashgraph/hardhat-hethers')
@@ -30,16 +34,49 @@ const HEDERA_ACCOUNTS = [
     },
 ]
 
+const HEDERA_NETWORKS = {
+    local: {
+        accounts: HEDERA_ACCOUNTS,
+        mirrorNodeUrl: getEnvVar({
+            name: 'MIRROR_NODE_URL_LOCAL',
+            defaultValue: 'http://localhost:5551',
+        }),
+        nodeId: '0.0.3',
+    },
+    previewnet: {
+        accounts: HEDERA_ACCOUNTS,
+        mirrorNodeUrl: getEnvVar({
+            name: 'MIRROR_NODE_URL_PREVIEWNET',
+            defaultValue: 'https://previewnet.mirrornode.hedera.com',
+        }),
+    },
+    testnet: {
+        accounts: HEDERA_ACCOUNTS,
+        mirrorNodeUrl: getEnvVar({
+            name: 'MIRROR_NODE_URL_TESTNET',
+            defaultValue: 'https://testnet.mirrornode.hedera.com',
+        }),
+    },
+    mainnet: {
+        accounts: HEDERA_ACCOUNTS,
+        mirrorNodeUrl: getEnvVar({
+            name: 'MIRROR_NODE_URL_MAINNET',
+            defaultValue: 'https://mainnet.mirrornode.hedera.com',
+        }),
+    },
+}
+
 // Needed to be able to use the HederaConfig interface
 interface ExtendedHardhatUserConfig extends Omit<HardhatUserConfig, 'hedera'> {
     hedera?: {
         gasLimit: number
         networks: {
             [key: string]: {
-                accounts: {
-                    account: string
-                    privateKey: string
-                }[]
+                accounts: Array<HederaAccount>
+                nodeId?: string
+                consensusNodes?: Array<HederaNodeConfig>
+                mirrorNodeUrl?: string
+                chainId?: number
             }
         }
     }
@@ -73,14 +110,10 @@ let config: ExtendedHardhatUserConfig = {
 if (getEnvVar({ name: 'NETWORK', defaultValue: 'hardhat' }) !== 'hardhat') {
     config = {
         ...config,
-        defaultNetwork: 'testnet',
+        defaultNetwork: getEnvVar({ name: 'NETWORK' }),
         hedera: {
             gasLimit: 300000,
-            networks: {
-                testnet: {
-                    accounts: HEDERA_ACCOUNTS,
-                },
-            },
+            networks: HEDERA_NETWORKS,
         },
     }
 }
