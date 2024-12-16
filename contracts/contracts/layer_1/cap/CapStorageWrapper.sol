@@ -203,12 +203,15 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity 0.8.18;
 
 import {LocalContext} from '../context/LocalContext.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
 import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {
+    ICapStorageWrapper,
+    CapDataStorage
+} from '../interfaces/cap/ICapStorageWrapper.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
@@ -218,12 +221,6 @@ abstract contract CapStorageWrapper is
     ERC1410BasicStorageWrapperRead,
     LocalContext
 {
-    struct CapDataStorage {
-        uint256 maxSupply;
-        mapping(bytes32 => uint256) maxSupplyByPartition;
-        bool initialized;
-    }
-
     // modifiers
     modifier checkMaxSupply(uint256 _amount) {
         uint256 newTotalSupply = _totalSupply() + _amount;

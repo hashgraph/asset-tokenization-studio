@@ -206,6 +206,26 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+// Represents a fungible set of tokens.
+struct Partition {
+    uint256 amount;
+    bytes32 partition;
+}
+
+struct ERC1410BasicStorage {
+    uint256 totalSupply;
+    mapping(bytes32 => uint256) totalSupplyByPartition;
+    // Mapping from investor to aggregated balance across all investor token sets
+    mapping(address => uint256) balances;
+    // Mapping from investor to their partitions
+    mapping(address => Partition[]) partitions;
+    // Mapping from (investor, partition) to index of corresponding partition in partitions
+    // @dev Stored value is always greater by 1 to avoid the 0 value of every index
+    mapping(address => mapping(bytes32 => uint256)) partitionToIndex;
+    bool multiPartition;
+    bool initialized;
+}
+
 interface IERC1410StorageWrapper {
     error NotAllowedInMultiPartitionMode();
     error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);

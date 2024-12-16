@@ -212,6 +212,9 @@ import {
 import {
     IAdjustBalancesStorageWrapper
 } from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+import {
+    ERC1410BasicStorage
+} from '../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
 
 abstract contract AdjustBalancesStorageWrapper is
     IAdjustBalancesStorageWrapper,

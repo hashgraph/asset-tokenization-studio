@@ -207,16 +207,16 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {LibCommon} from '../common/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    IAccessControlStorageWrapper
-} from '../interfaces/accessControl/IAccessControlStorageWrapper.sol';
 import {LocalContext} from '../context/LocalContext.sol';
 import {
     _ACCESS_CONTROL_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
+import {
+    RoleData,
+    RoleDataStorage,
+    IAccessControlStorageWrapper,
+    EnumerableSet
+} from '../interfaces/accessControl/IAccessControlStorageWrapper.sol';
 
 abstract contract AccessControlStorageWrapper is
     IAccessControlStorageWrapper,
@@ -227,16 +227,6 @@ abstract contract AccessControlStorageWrapper is
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    struct RoleData {
-        bytes32 roleAdmin;
-        EnumerableSet.AddressSet roleMembers;
-    }
-
-    struct RoleDataStorage {
-        mapping(bytes32 => RoleData) roles;
-        mapping(address => EnumerableSet.Bytes32Set) memberRoles;
-    }
 
     modifier onlyRole(bytes32 role) {
         _checkRole(role);

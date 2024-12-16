@@ -207,7 +207,8 @@
 pragma solidity 0.8.18;
 
 import {
-    IERC1410StorageWrapper
+    IERC1410StorageWrapper,
+    ERC1410BasicStorage
 } from '../../interfaces/ERC1400/IERC1410StorageWrapper.sol';
 import {
     _ERC1410_BASIC_STORAGE_POSITION
@@ -215,26 +216,6 @@ import {
 import {_DEFAULT_PARTITION} from '../../constants/values.sol';
 
 abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
-    // Represents a fungible set of tokens.
-    struct Partition {
-        uint256 amount;
-        bytes32 partition;
-    }
-
-    struct ERC1410BasicStorage {
-        uint256 totalSupply;
-        mapping(bytes32 => uint256) totalSupplyByPartition;
-        // Mapping from investor to aggregated balance across all investor token sets
-        mapping(address => uint256) balances;
-        // Mapping from investor to their partitions
-        mapping(address => Partition[]) partitions;
-        // Mapping from (investor, partition) to index of corresponding partition in partitions
-        // @dev Stored value is always greater by 1 to avoid the 0 value of every index
-        mapping(address => mapping(bytes32 => uint256)) partitionToIndex;
-        bool multiPartition;
-        bool initialized;
-    }
-
     modifier onlyWithoutMultiPartition() {
         if (_isMultiPartition()) {
             revert NotAllowedInMultiPartitionMode();

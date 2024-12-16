@@ -207,7 +207,9 @@
 pragma solidity 0.8.18;
 
 import {
-    IERC1410StorageWrapper
+    IERC1410StorageWrapper,
+    ERC1410BasicStorage,
+    Partition
 } from '../../interfaces/ERC1400/IERC1410StorageWrapper.sol';
 import {Common} from '../../common/Common.sol';
 import {

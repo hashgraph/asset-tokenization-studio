@@ -231,6 +231,9 @@ import {
 import {
     SnapshotsStorageWrapper_2
 } from '../../snapshots/SnapshotsStorageWrapper_2.sol';
+import {
+    ERC1410BasicStorage
+} from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
     SnapshotsStorageWrapper_2,

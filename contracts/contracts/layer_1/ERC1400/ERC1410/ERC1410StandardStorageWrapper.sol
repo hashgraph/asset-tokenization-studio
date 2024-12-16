@@ -207,6 +207,9 @@
 pragma solidity 0.8.18;
 
 import {
+    ERC1410BasicStorage
+} from '../../interfaces/ERC1400/IERC1410StorageWrapper.sol';
+import {
     ERC1410OperatorStorageWrapper
 } from './ERC1410OperatorStorageWrapper.sol';
 import {

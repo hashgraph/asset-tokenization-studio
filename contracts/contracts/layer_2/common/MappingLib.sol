@@ -207,8 +207,8 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+    Partition
+} from '../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
 
 library MappingLib {
     function _getSlotForBytes32MappingKey(
@@ -251,8 +251,7 @@ library MappingLib {
     }
 
     function _getSlotForAddressMappingKey(
-        mapping(address => ERC1410BasicStorageWrapperRead.Partition[])
-            storage _mapping,
+        mapping(address => Partition[]) storage _mapping,
         address _key
     ) internal pure returns (uint256) {
         uint256 MappingSlot;

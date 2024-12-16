@@ -206,6 +206,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+struct CapDataStorage {
+    uint256 maxSupply;
+    mapping(bytes32 => uint256) maxSupplyByPartition;
+    bool initialized;
+}
+
 interface ICapStorageWrapper {
     /**
      * @dev Emitted when the token max supply is set

@@ -213,7 +213,7 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {Common} from '../common/Common.sol';
-import {CapStorageWrapper} from './CapStorageWrapper.sol';
+import {CapStorageWrapper, CapDataStorage} from './CapStorageWrapper.sol';
 
 abstract contract Cap is
     ICap,
@@ -221,14 +221,11 @@ abstract contract Cap is
     CapStorageWrapper,
     Common
 {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_Cap(
+    function initialize(
         uint256 maxSupply,
         PartitionCap[] calldata partitionCap
     )
         external
-        virtual
-        override
         onlyUninitialized(_capStorage().initialized)
         returns (bool success_)
     {

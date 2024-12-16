@@ -206,8 +206,8 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+    ERC1410BasicStorage
+} from '../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
 import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
 import {
     _PARTITION_SIZE,
@@ -223,6 +223,7 @@ import {ArrayLib} from '../common/ArrayLib.sol';
 import {MappingLib} from '../common/MappingLib.sol';
 import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {ScheduledTasksLib} from '../scheduledTasks/ScheduledTasksLib.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 /**
@@ -246,8 +247,7 @@ library AdjustBalanceLib {
     function _adjustTotalBalanceAndPartitionBalanceFor(
         bytes32 _partition,
         address _account,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
-            storage _basicStorage,
+        ERC1410BasicStorage storage _basicStorage,
         ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
     ) internal {
@@ -265,8 +265,7 @@ library AdjustBalanceLib {
 
     function _adjustTotalAndMaxSupplyForPartition(
         bytes32 _partition,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
-            storage _basicStorage,
+        ERC1410BasicStorage storage _basicStorage,
         CapStorageWrapper.CapDataStorage storage _capStorage,
         ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
@@ -299,8 +298,7 @@ library AdjustBalanceLib {
     function _adjustTotalBalanceFor(
         uint256 _ABAF,
         address _account,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
-            storage _basicStorage,
+        ERC1410BasicStorage storage _basicStorage,
         ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
     ) internal {
@@ -324,8 +322,7 @@ library AdjustBalanceLib {
         uint256 _ABAF,
         bytes32 _partition,
         address _account,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
-            storage _basicStorage,
+        ERC1410BasicStorage storage _basicStorage,
         ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
     ) internal {
