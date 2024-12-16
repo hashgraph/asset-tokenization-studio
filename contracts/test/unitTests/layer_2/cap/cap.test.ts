@@ -203,18 +203,16 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import {expect} from 'chai'
+import {ethers} from 'hardhat'
 import {
-    type ResolverProxy,
-    type Cap_2,
     AccessControl,
+    type Cap_2,
     Equity,
-    Snapshots_2,
     ERC1410ScheduledTasks,
-    ERC1594,
+    Snapshots_2,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+import {deployEnvironment} from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _CAP_ROLE,
     _CORPORATE_ACTION_ROLE,
@@ -222,13 +220,8 @@ import {
     _PAUSER_ROLE,
     _SNAPSHOT_ROLE,
 } from '../../../../scripts/constants'
-import {
-    deployEquityFromFactory,
-    Rbac,
-    RegulationSubType,
-    RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import {deployEquityFromFactory, RegulationSubType, RegulationType,} from '../../../../scripts/factory'
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers.js'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -244,8 +237,7 @@ describe('CAP Layer 2 Tests', () => {
         accessControlFacet: AccessControl,
         equityFacet: Equity,
         snapshotFacet: Snapshots_2,
-        erc1410Facet: ERC1410ScheduledTasks,
-        erc1594Facet: ERC1594
+        erc1410Facet: ERC1410ScheduledTasks
     let signer_A: SignerWithAddress,
         signer_B: SignerWithAddress,
         signer_C: SignerWithAddress
@@ -315,7 +307,6 @@ describe('CAP Layer 2 Tests', () => {
             'ERC1410ScheduledTasks',
             diamond.address
         )
-        erc1594Facet = await ethers.getContractAt('ERC1594', diamond.address)
     }
 
     const setupScheduledBalanceAdjustments = async (
@@ -411,7 +402,6 @@ describe('CAP Layer 2 Tests', () => {
         equityFacet = equityFacet.connect(signer_C)
         snapshotFacet = snapshotFacet.connect(signer_A)
         erc1410Facet = erc1410Facet.connect(signer_C)
-        erc1594Facet = erc1594Facet.connect(signer_C)
 
         await capFacet.setMaxSupply(maxSupply)
         await capFacet.setMaxSupplyByPartition(
@@ -455,9 +445,13 @@ describe('CAP Layer 2 Tests', () => {
         equityFacet = equityFacet.connect(signer_C)
         snapshotFacet = snapshotFacet.connect(signer_A)
         erc1410Facet = erc1410Facet.connect(signer_C)
-        erc1594Facet = erc1594Facet.connect(signer_C)
 
-        await erc1594Facet.issue(account_C, issueAmount, '0x')
+        await erc1410Facet.issueByPartition(
+            _PARTITION_ID_1,
+            account_C,
+            issueAmount,
+            '0x'
+        )
 
         await capFacet.setMaxSupply(maxSupply)
         await capFacet.setMaxSupplyByPartition(
