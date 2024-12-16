@@ -203,91 +203,28 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+import {CD_Lib} from '../common/CD_Lib.sol';
 
-contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledTasksCommon {
-    function onScheduledBalanceAdjustmentTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external virtual {
-        revert('This method should never be executed, it should be overriden');
-    }
-
-    function _addScheduledBalanceAdjustment(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal virtual {
-        ScheduledTasksLib._addScheduledTask(
-            _scheduledBalanceAdjustmentStorage(),
-            _newScheduledTimestamp,
-            _newData
+library Cap_CD_Lib {
+    function getMaxSupply() internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getMaxSupply()')
         );
+        return abi.decode(data, (uint256));
     }
 
-    function _triggerScheduledBalanceAdjustments(
-        uint256 _max
-    ) internal virtual returns (uint256) {
-        return
-            ScheduledTasksLib._triggerScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
-                this.onScheduledBalanceAdjustmentTriggered.selector,
-                _max,
-                _blockTimestamp()
-            );
-    }
-
-    function _getScheduledBalanceAdjustmentCount()
-        internal
-        view
-        virtual
-        returns (uint256)
-    {
-        return
-            ScheduledTasksLib._getScheduledTaskCount(
-                _scheduledBalanceAdjustmentStorage()
-            );
-    }
-
-    function _getScheduledBalanceAdjustments(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    )
-        internal
-        view
-        virtual
-        returns (
-            ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
-        )
-    {
-        return
-            ScheduledTasksLib._getScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function _scheduledBalanceAdjustmentStorage()
-        internal
-        pure
-        virtual
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage
-                storage scheduledBalanceAdjustments_
-        )
-    {
-        bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledBalanceAdjustments_.slot := position
-        }
+    function getMaxSupplyByPartition(
+        bytes32 _partition
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getMaxSupplyByPartition(bytes32)',
+                _partition
+            )
+        );
+        return abi.decode(data, (uint256));
     }
 }

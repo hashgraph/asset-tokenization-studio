@@ -223,6 +223,9 @@ import {
 } from '../../../layer_1/constants/values.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
 import {
+    AdjustBalancesStorageWrapperRead
+} from '../../adjustBalances/AdjustBalancesStorageWrapperRead.sol';
+import {
     ScheduledSnapshotsStorageWrapper
 } from '../../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
 import {
@@ -231,11 +234,33 @@ import {
 import {
     SnapshotsStorageWrapper_2
 } from '../../snapshots/SnapshotsStorageWrapper_2.sol';
+import {
+    ERC1410BasicStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {
+    ERC1410SnapshotStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
+import {
+    ScheduledTasks_CD_Lib
+} from '../../scheduledTasks/scheduledTasks/ScheduledTasks_CD_Lib.sol';
+import {
+    ERC1410SnapshotStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {
+    CorporateActionsStorageWrapper
+} from '../../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
-    SnapshotsStorageWrapper_2,
-    ScheduledSnapshotsStorageWrapper,
-    ScheduledTasksStorageWrapper
+    AdjustBalancesStorageWrapperRead,
+    ERC1410SnapshotStorageWrapper,
+    CorporateActionsStorageWrapper,
+    ScheduledBalanceAdjustmentsStorageWrapper
 {
     function _beforeTokenTransfer(
         bytes32 partition,
@@ -253,7 +278,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         address _from,
         address _to
     ) internal virtual {
-        _triggerScheduledTasks(0);
+        ScheduledTasks_CD_Lib.triggerScheduledTasks(0);
         _syncBalanceAdjustments(_partition, _from, _to);
     }
 
@@ -263,8 +288,8 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         address _to
     ) internal virtual {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
         CapDataStorage storage capStorage = _capStorage();
 
         // adjust the total supply for the partition
@@ -272,7 +297,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
             _partition,
             erc1410Storage,
             capStorage,
-            erc1410Storage_2
+            adjustBalancesStorage
         );
 
         // adjust "from" total and partition balance
@@ -281,7 +306,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
                 _partition,
                 _from,
                 erc1410Storage,
-                erc1410Storage_2
+                adjustBalancesStorage
             );
 
         // adjust "to" total and partition balance
@@ -290,7 +315,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
                 _partition,
                 _to,
                 erc1410Storage,
-                erc1410Storage_2
+                adjustBalancesStorage
             );
     }
 
@@ -299,10 +324,12 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         address _account,
         bytes32 _partition
     ) internal virtual override {
-        ERC1410BasicStorage_2
-            storage erc1410Storage_2 = _getERC1410BasicStorage_2();
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
-        erc1410Storage_2.LABAF_user_partition[_account].push(_getABAF());
+        adjustBalancesStorage.LABAF_user_partition[_account].push(
+            AdjustBalances_CD_Lib.getABAF()
+        );
 
         super._addPartitionTo(_value, _account, _partition);
     }
@@ -327,8 +354,8 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         bytes32 _partition
     ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
-            _getLABAFForPartition(_partition)
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getLABAFForPartition(_partition)
         );
         return _totalSupplyByPartition(_partition) * factor;
     }
@@ -375,5 +402,49 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         }
 
         return (true, _SUCCESS, bytes32(0));
+    }
+
+    function _balanceOfAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
+    }
+
+    function _balanceOfAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
+            AdjustBalances_CD_Lib.getLABAFForUser(_tokenHolder)
+        );
+        return _balanceOf(_tokenHolder) * factor;
+    }
+
+    function _balanceOfByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        return
+            _balanceOfByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                _blockTimestamp()
+            );
+    }
+
+    function _balanceOfByPartitionAdjustedAt(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
+            AdjustBalances_CD_Lib.getLABAFForUserAndPartition(
+                _partition,
+                _tokenHolder
+            )
+        );
+        return _balanceOfByPartition(_partition, _tokenHolder) * factor;
     }
 }

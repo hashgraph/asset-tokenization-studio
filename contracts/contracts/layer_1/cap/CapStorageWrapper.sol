@@ -213,7 +213,7 @@ import {
     ERC1410BasicStorageWrapperRead
 } from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 
-abstract contract CapStorageWrapper is
+contract CapStorageWrapper is
     ICapStorageWrapper,
     ERC1410BasicStorageWrapperRead,
     LocalContext

@@ -203,91 +203,73 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+import {CD_Lib} from '../../../layer_1/common/CD_Lib.sol';
 
-contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledTasksCommon {
-    function onScheduledBalanceAdjustmentTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external virtual {
-        revert('This method should never be executed, it should be overriden');
-    }
-
-    function _addScheduledBalanceAdjustment(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal virtual {
-        ScheduledTasksLib._addScheduledTask(
-            _scheduledBalanceAdjustmentStorage(),
-            _newScheduledTimestamp,
-            _newData
+library ERC1410ScheduledTasks_CD_Lib {
+    function triggerAndSyncAll(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) internal {
+        CD_Lib.delegateCall(
+            abi.encodeWithSignature(
+                'triggerAndSyncAll(bytes32,address,address)',
+                _partition,
+                _from,
+                _to
+            )
         );
     }
 
-    function _triggerScheduledBalanceAdjustments(
-        uint256 _max
-    ) internal virtual returns (uint256) {
-        return
-            ScheduledTasksLib._triggerScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
-                this.onScheduledBalanceAdjustmentTriggered.selector,
-                _max,
-                _blockTimestamp()
-            );
+    function balanceOfAdjusted(
+        address _tokenHolder
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('balanceOfAdjusted(address)', _tokenHolder)
+        );
+        return abi.decode(data, (uint256));
     }
 
-    function _getScheduledBalanceAdjustmentCount()
-        internal
-        view
-        virtual
-        returns (uint256)
-    {
-        return
-            ScheduledTasksLib._getScheduledTaskCount(
-                _scheduledBalanceAdjustmentStorage()
-            );
+    function balanceOfAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'balanceOfAdjustedAt(address,uint256)',
+                _tokenHolder,
+                _timestamp
+            )
+        );
+        return abi.decode(data, (uint256));
     }
 
-    function _getScheduledBalanceAdjustments(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    )
-        internal
-        view
-        virtual
-        returns (
-            ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
-        )
-    {
-        return
-            ScheduledTasksLib._getScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
-                _pageIndex,
-                _pageLength
-            );
+    function balanceOfByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'balanceOfByPartitionAdjusted(bytes32,address)',
+                _partition,
+                _tokenHolder
+            )
+        );
+        return abi.decode(data, (uint256));
     }
 
-    function _scheduledBalanceAdjustmentStorage()
-        internal
-        pure
-        virtual
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage
-                storage scheduledBalanceAdjustments_
-        )
-    {
-        bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledBalanceAdjustments_.slot := position
-        }
+    function totalSupplyByPartitionAdjusted(
+        bytes32 _partition
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'totalSupplyByPartitionAdjusted(bytes32)',
+                _partition
+            )
+        );
+        return abi.decode(data, (uint256));
     }
 }

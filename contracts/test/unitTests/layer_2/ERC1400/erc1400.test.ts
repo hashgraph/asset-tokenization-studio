@@ -395,7 +395,7 @@ describe('ERC1400 Tests', () => {
             getTotalSupplyValues(),
             getBalanceValues(account_A),
             getBalanceValues(account_B),
-            erc20Facet.decimals(),
+            erc20Facet.decimalsAdjusted(),
             erc20Facet.getERC20Metadata(),
         ])
 
@@ -434,11 +434,11 @@ describe('ERC1400 Tests', () => {
     }
 
     async function getTotalSupplyValues() {
-        const totalSupply = await erc1410Facet.totalSupply()
+        const totalSupply = await erc1410Facet.totalSupplyAdjusted()
         const totalSupply_Partition_1 =
-            await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_1)
+            await erc1410Facet.totalSupplyByPartitionAdjusted(_PARTITION_ID_1)
         const totalSupply_Partition_2 =
-            await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_2)
+            await erc1410Facet.totalSupplyByPartitionAdjusted(_PARTITION_ID_2)
 
         return {
             totalSupply,
@@ -3495,10 +3495,11 @@ describe('ERC1400 Tests', () => {
                     account_B
                 )
 
-                const LABAF_Before = await erc20Facet.getAllowanceLABAF(
-                    account_A,
-                    account_B
-                )
+                const LABAF_Before =
+                    await adjustBalancesFacet.getAllowanceLABAF(
+                        account_A,
+                        account_B
+                    )
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3514,7 +3515,7 @@ describe('ERC1400 Tests', () => {
                     account_B
                 )
 
-                const LABAF_After = await erc20Facet.getAllowanceLABAF(
+                const LABAF_After = await adjustBalancesFacet.getAllowanceLABAF(
                     account_A,
                     account_B
                 )
@@ -3541,10 +3542,11 @@ describe('ERC1400 Tests', () => {
                     account_A,
                     account_B
                 )
-                const LABAF_Before = await erc20Facet.getAllowanceLABAF(
-                    account_A,
-                    account_B
-                )
+                const LABAF_Before =
+                    await adjustBalancesFacet.getAllowanceLABAF(
+                        account_A,
+                        account_B
+                    )
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3562,7 +3564,7 @@ describe('ERC1400 Tests', () => {
                     account_A,
                     account_B
                 )
-                const LABAF_After = await erc20Facet.getAllowanceLABAF(
+                const LABAF_After = await adjustBalancesFacet.getAllowanceLABAF(
                     account_A,
                     account_B
                 )
