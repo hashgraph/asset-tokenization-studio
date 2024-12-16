@@ -215,12 +215,7 @@ import {Common} from '../common/Common.sol';
 import {LockStorageWrapper} from './LockStorageWrapper.sol';
 import {_DEFAULT_PARTITION} from '../constants/values.sol';
 
-abstract contract Lock is
-    ILock,
-    IStaticFunctionSelectors,
-    LockStorageWrapper,
-    Common
-{
+abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     function lockByPartition(
         bytes32 _partition,
         uint256 _amount,
@@ -382,7 +377,7 @@ abstract contract Lock is
     function getLockedAmountFor(
         address _tokenHolder
     ) external view virtual override returns (uint256 amount_) {
-        return _getLockedAmountForByPartition(_DEFAULT_PARTITION, _tokenHolder);
+        return _getLockedAmountFor(_tokenHolder);
     }
 
     function getLockCountFor(

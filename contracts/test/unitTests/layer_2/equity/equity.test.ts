@@ -210,10 +210,15 @@ import {
     type Equity,
     type Pause,
     type AccessControl,
+    Lock_2,
+    ERC1410ScheduledTasks,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _CORPORATE_ACTION_ROLE,
+    _DEFAULT_PARTITION,
+    _ISSUER_ROLE,
+    _LOCKER_ROLE,
     _PAUSER_ROLE,
 } from '../../../../scripts/constants'
 import {
@@ -257,6 +262,7 @@ let balanceAdjustmentData = {
     factor: balanceAdjustmentFactor,
     decimals: balanceAdjustmentDecimals,
 }
+const number_Of_Shares = 100000
 
 describe('Equity Tests', () => {
     let diamond: ResolverProxy
@@ -271,6 +277,8 @@ describe('Equity Tests', () => {
     let equityFacet: Equity
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
+    let lockFacet: Lock_2
+    let erc1410Facet: ERC1410ScheduledTasks
 
     before(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -278,27 +286,6 @@ describe('Equity Tests', () => {
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
-
-        currentTimeInSeconds = await time.latest()
-        dividendsRecordDateInSeconds = currentTimeInSeconds + TIME
-        dividendsExecutionDateInSeconds = currentTimeInSeconds + 10 * TIME
-        votingRecordDateInSeconds = currentTimeInSeconds + TIME
-        balanceAdjustmentExecutionDateInSeconds = currentTimeInSeconds + TIME
-
-        votingData = {
-            recordDate: votingRecordDateInSeconds.toString(),
-            data: voteData,
-        }
-        dividendData = {
-            recordDate: dividendsRecordDateInSeconds.toString(),
-            executionDate: dividendsExecutionDateInSeconds.toString(),
-            amount: dividendsAmountPerEquity,
-        }
-        balanceAdjustmentData = {
-            executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
-            factor: balanceAdjustmentFactor,
-            decimals: balanceAdjustmentDecimals,
-        }
     })
 
     beforeEach(async () => {
@@ -328,7 +315,7 @@ describe('Equity Tests', () => {
             false,
             1,
             '0x345678',
-            0,
+            number_Of_Shares,
             100,
             RegulationType.REG_D,
             RegulationSubType.REG_D_506_B,
@@ -346,6 +333,36 @@ describe('Equity Tests', () => {
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
 
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+
+        lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
+
+        erc1410Facet = await ethers.getContractAt(
+            'ERC1410ScheduledTasks',
+            await diamond.address
+        )
+
+        currentTimeInSeconds = await time.latest()
+        dividendsRecordDateInSeconds = currentTimeInSeconds + TIME / 1000
+        dividendsExecutionDateInSeconds =
+            currentTimeInSeconds + (10 * TIME) / 1000
+        votingRecordDateInSeconds = currentTimeInSeconds + TIME / 1000
+        balanceAdjustmentExecutionDateInSeconds =
+            currentTimeInSeconds + TIME / 1000
+
+        votingData = {
+            recordDate: votingRecordDateInSeconds.toString(),
+            data: voteData,
+        }
+        dividendData = {
+            recordDate: dividendsRecordDateInSeconds.toString(),
+            executionDate: dividendsExecutionDateInSeconds.toString(),
+            amount: dividendsAmountPerEquity,
+        }
+        balanceAdjustmentData = {
+            executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
+            factor: balanceAdjustmentFactor,
+            decimals: balanceAdjustmentDecimals,
+        }
     })
 
     describe('Dividends', () => {
@@ -464,6 +481,53 @@ describe('Equity Tests', () => {
             expect(dividendFor.recordDateReached).to.equal(false)
             expect(dividendFor.decimals).to.equal(0)
         })
+
+        it('GIVEN an account with corporateActions role WHEN setDividends and lock THEN transaction succeeds', async () => {
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(
+                _CORPORATE_ACTION_ROLE,
+                account_C
+            )
+            await accessControlFacet.grantRole(_LOCKER_ROLE, account_C)
+            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+            // Using account C (with role)
+            equityFacet = equityFacet.connect(signer_C)
+            lockFacet = lockFacet.connect(signer_C)
+            erc1410Facet = erc1410Facet.connect(signer_C)
+
+            // issue and lock
+            const TotalAmount = number_Of_Shares
+            const LockedAmount = TotalAmount - 5
+
+            await erc1410Facet.issueByPartition(
+                _DEFAULT_PARTITION,
+                account_A,
+                TotalAmount,
+                '0x'
+            )
+            await lockFacet.lock(LockedAmount, account_A, 99999999999)
+
+            // set dividend
+            await expect(equityFacet.setDividends(dividendData))
+                .to.emit(equityFacet, 'DividendSet')
+                .withArgs(
+                    '0x0000000000000000000000000000000000000000000000000000000000000001',
+                    1,
+                    account_C,
+                    dividendsRecordDateInSeconds,
+                    dividendsExecutionDateInSeconds,
+                    dividendsAmountPerEquity
+                )
+
+            // check list members
+            await new Promise((f) => setTimeout(f, TIME + 1))
+            await accessControlFacet.revokeRole(_ISSUER_ROLE, account_C)
+            const dividendFor = await equityFacet.getDividendsFor(1, account_A)
+
+            expect(dividendFor.tokenBalance).to.equal(TotalAmount)
+            expect(dividendFor.recordDateReached).to.equal(true)
+        })
     })
 
     describe('Voting rights', () => {
@@ -535,6 +599,51 @@ describe('Equity Tests', () => {
             expect(votingFor.data).to.equal(voteData)
             expect(votingFor.tokenBalance).to.equal(0)
             expect(votingFor.recordDateReached).to.equal(false)
+        })
+
+        it('GIVEN an account with corporateActions role WHEN setVoting and lock THEN transaction succeeds', async () => {
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(
+                _CORPORATE_ACTION_ROLE,
+                account_C
+            )
+            await accessControlFacet.grantRole(_LOCKER_ROLE, account_C)
+            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+            // Using account C (with role)
+            equityFacet = equityFacet.connect(signer_C)
+            lockFacet = lockFacet.connect(signer_C)
+            erc1410Facet = erc1410Facet.connect(signer_C)
+
+            // issue and lock
+            const TotalAmount = number_Of_Shares
+            const LockedAmount = TotalAmount - 5
+
+            await erc1410Facet.issueByPartition(
+                _DEFAULT_PARTITION,
+                account_A,
+                TotalAmount,
+                '0x'
+            )
+            await lockFacet.lock(LockedAmount, account_A, 99999999999)
+
+            // set dividend
+            await expect(equityFacet.setVoting(votingData))
+                .to.emit(equityFacet, 'VotingSet')
+                .withArgs(
+                    '0x0000000000000000000000000000000000000000000000000000000000000001',
+                    1,
+                    account_C,
+                    votingRecordDateInSeconds,
+                    voteData
+                )
+
+            await new Promise((f) => setTimeout(f, TIME + 1))
+            await accessControlFacet.revokeRole(_ISSUER_ROLE, account_C)
+            const votingFor = await equityFacet.getVotingFor(1, account_A)
+
+            expect(votingFor.tokenBalance).to.equal(TotalAmount)
+            expect(votingFor.recordDateReached).to.equal(true)
         })
     })
 

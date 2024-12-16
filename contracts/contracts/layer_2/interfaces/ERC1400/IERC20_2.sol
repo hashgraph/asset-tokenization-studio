@@ -209,8 +209,9 @@
 pragma solidity 0.8.18;
 
 interface IERC20_2 {
-    function getAllowanceLABAF(
-        address _owner,
-        address _spender
-    ) external view returns (uint256);
+    function decimalsAdjusted() external view returns (uint8);
+
+    function decimalsAdjustedAt(
+        uint256 _timestamp
+    ) external view returns (uint8);
 }

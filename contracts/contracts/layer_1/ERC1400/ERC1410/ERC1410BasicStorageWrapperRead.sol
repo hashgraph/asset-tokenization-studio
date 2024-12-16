@@ -214,7 +214,7 @@ import {
 } from '../../constants/storagePositions.sol';
 import {_DEFAULT_PARTITION} from '../../constants/values.sol';
 
-abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
+contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
     // Represents a fungible set of tokens.
     struct Partition {
         uint256 amount;

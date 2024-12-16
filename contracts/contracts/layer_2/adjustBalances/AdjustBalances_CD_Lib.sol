@@ -203,91 +203,131 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
 
-contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledTasksCommon {
-    function onScheduledBalanceAdjustmentTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external virtual {
-        revert('This method should never be executed, it should be overriden');
-    }
-
-    function _addScheduledBalanceAdjustment(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal virtual {
-        ScheduledTasksLib._addScheduledTask(
-            _scheduledBalanceAdjustmentStorage(),
-            _newScheduledTimestamp,
-            _newData
+library AdjustBalances_CD_Lib {
+    function getABAFAdjustedAt(
+        uint256 _timestamp
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getABAFAdjustedAt(uint256)', _timestamp)
         );
+        return abi.decode(data, (uint256));
     }
 
-    function _triggerScheduledBalanceAdjustments(
-        uint256 _max
-    ) internal virtual returns (uint256) {
-        return
-            ScheduledTasksLib._triggerScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
-                this.onScheduledBalanceAdjustmentTriggered.selector,
-                _max,
-                _blockTimestamp()
-            );
+    function getLABAFForUser(address _account) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getLABAFForUser(address)', _account)
+        );
+        return abi.decode(data, (uint256));
     }
 
-    function _getScheduledBalanceAdjustmentCount()
-        internal
-        view
-        virtual
-        returns (uint256)
-    {
-        return
-            ScheduledTasksLib._getScheduledTaskCount(
-                _scheduledBalanceAdjustmentStorage()
-            );
+    function getLABAFForUserAndPartition(
+        bytes32 _partition,
+        address _account
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getLABAFForUserAndPartition(bytes32,address)',
+                _partition,
+                _account
+            )
+        );
+        return abi.decode(data, (uint256));
     }
 
-    function _getScheduledBalanceAdjustments(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    )
-        internal
-        view
-        virtual
-        returns (
-            ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
-        )
-    {
-        return
-            ScheduledTasksLib._getScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
-                _pageIndex,
-                _pageLength
-            );
+    function getABAF() internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getABAF()')
+        );
+        return abi.decode(data, (uint256));
     }
 
-    function _scheduledBalanceAdjustmentStorage()
-        internal
-        pure
-        virtual
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage
-                storage scheduledBalanceAdjustments_
-        )
-    {
-        bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledBalanceAdjustments_.slot := position
-        }
+    function getABAFAdjusted() internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getABAFAdjusted()')
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getLABAFForPartition(
+        bytes32 _partition
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getLABAFForPartition(bytes32)', _partition)
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getAllowanceLABAF(
+        address _owner,
+        address _spender
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getAllowanceLABAF(address,address)',
+                _owner,
+                _spender
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getTotalLockLABAF(
+        address _tokenHolder
+    ) internal view returns (uint256 LABAF_) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getTotalLockLABAF(address)', _tokenHolder)
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getTotalLockLABAFByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view returns (uint256 LABAF_) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getTotalLockLABAFByPartition(bytes32,address)',
+                _partition,
+                _tokenHolder
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getLockLABAFByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getLockLABAFByIndex(bytes32,address,uint256)',
+                _partition,
+                _tokenHolder,
+                _lockIndex
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getLockLABAFByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) internal view returns (uint256 LABAF_) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getLockLABAFByPartition(bytes32,uint256,address)',
+                _partition,
+                _lockId,
+                _tokenHolder
+            )
+        );
+        return abi.decode(data, (uint256));
     }
 }

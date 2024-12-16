@@ -203,91 +203,177 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {LocalContext} from '../context/LocalContext.sol';
+import {ILockStorageWrapper} from '../interfaces/lock/ILockStorageWrapper.sol';
+import {_LOCK_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
-    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+    ERC1410BasicStorageWrapperRead
+} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {LibCommon} from '../common/LibCommon.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledTasksCommon {
-    function onScheduledBalanceAdjustmentTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external virtual {
-        revert('This method should never be executed, it should be overriden');
+abstract contract LockStorageWrapperRead is ILockStorageWrapper, LocalContext {
+    using LibCommon for EnumerableSet.UintSet;
+
+    struct LockData {
+        uint256 id;
+        uint256 amount;
+        uint256 expirationTimestamp;
     }
 
-    function _addScheduledBalanceAdjustment(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal virtual {
-        ScheduledTasksLib._addScheduledTask(
-            _scheduledBalanceAdjustmentStorage(),
-            _newScheduledTimestamp,
-            _newData
-        );
+    struct LockDataStorage {
+        mapping(address => uint256) totalLockedAmount;
+        mapping(address => mapping(bytes32 => uint256)) lockedAmountByPartition;
+        mapping(address => mapping(bytes32 => LockData[])) locks;
+        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) lockIds;
+        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) locksIndex;
+        mapping(address => mapping(bytes32 => uint256)) lockNextId;
     }
 
-    function _triggerScheduledBalanceAdjustments(
-        uint256 _max
-    ) internal virtual returns (uint256) {
-        return
-            ScheduledTasksLib._triggerScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
-                this.onScheduledBalanceAdjustmentTriggered.selector,
-                _max,
-                _blockTimestamp()
-            );
+    modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp) {
+        if (_expirationTimestamp < _blockTimestamp())
+            revert WrongExpirationTimestamp();
+        _;
     }
 
-    function _getScheduledBalanceAdjustmentCount()
-        internal
-        view
-        virtual
-        returns (uint256)
-    {
-        return
-            ScheduledTasksLib._getScheduledTaskCount(
-                _scheduledBalanceAdjustmentStorage()
-            );
+    modifier onlyWithValidLockId(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) {
+        if (!_isLockIdValid(_partition, _tokenHolder, _lockId))
+            revert WrongLockId();
+        _;
     }
 
-    function _getScheduledBalanceAdjustments(
+    modifier onlyWithLockedExpirationTimestamp(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) {
+        if (!_isLockedExpirationTimestamp(_partition, _tokenHolder, _lockId))
+            revert LockExpirationNotReached();
+        _;
+    }
+
+    function _getLockedAmountFor(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _lockStorage().totalLockedAmount[_tokenHolder];
+    }
+
+    function _getLockedAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _lockStorage().lockedAmountByPartition[_tokenHolder][_partition];
+    }
+
+    function _getLockCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 lockCount_) {
+        return _lockStorage().locks[_tokenHolder][_partition].length;
+    }
+
+    function _getLocksIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        internal
-        view
-        virtual
-        returns (
-            ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
-        )
-    {
+    ) internal view virtual returns (uint256[] memory locksId_) {
         return
-            ScheduledTasksLib._getScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
+            _lockStorage().lockIds[_tokenHolder][_partition].getFromSet(
                 _pageIndex,
                 _pageLength
             );
     }
 
-    function _scheduledBalanceAdjustmentStorage()
+    function _getLockForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    )
+        internal
+        view
+        virtual
+        returns (uint256 amount_, uint256 expirationTimestamp_)
+    {
+        LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
+        amount_ = lock.amount;
+        expirationTimestamp_ = lock.expirationTimestamp;
+    }
+
+    function _isLockIdValid(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (bool) {
+        if (_getLockIndex(_partition, _tokenHolder, _lockId) == 0) return false;
+        return true;
+    }
+
+    function _getLockIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (uint256) {
+        return _lockStorage().locksIndex[_tokenHolder][_partition][_lockId];
+    }
+
+    function _getLock(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (LockData memory) {
+        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
+
+        return _getLockByIndex(_partition, _tokenHolder, lockIndex);
+    }
+
+    function _getLockByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex
+    ) internal view returns (LockData memory) {
+        LockDataStorage storage lockStorage = _lockStorage();
+
+        if (_lockIndex == 0) return LockData(0, 0, 0);
+
+        _lockIndex--;
+
+        assert(_lockIndex < lockStorage.locks[_tokenHolder][_partition].length);
+
+        return lockStorage.locks[_tokenHolder][_partition][_lockIndex];
+    }
+
+    function _isLockedExpirationTimestamp(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (bool) {
+        LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
+
+        if (lock.expirationTimestamp > _blockTimestamp()) return false;
+
+        return true;
+    }
+
+    function _lockStorage()
         internal
         pure
         virtual
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage
-                storage scheduledBalanceAdjustments_
-        )
+        returns (LockDataStorage storage lock_)
     {
-        bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
+        bytes32 position = _LOCK_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            scheduledBalanceAdjustments_.slot := position
+            lock_.slot := position
         }
     }
 }

@@ -203,91 +203,48 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+import {Cap_CD_Lib} from './Cap_CD_Lib.sol';
+import {ERC1410Basic_CD_Lib} from '../ERC1400/ERC1410/ERC1410Basic_CD_Lib.sol';
+import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
 
-contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledTasksCommon {
-    function onScheduledBalanceAdjustmentTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external virtual {
-        revert('This method should never be executed, it should be overriden');
-    }
+contract Cap_Modifiers is ICapStorageWrapper {
+    modifier checkMaxSupply(uint256 _amount) {
+        uint256 newTotalSupply = ERC1410Basic_CD_Lib.totalSupply() + _amount;
+        uint256 maxSupply = Cap_CD_Lib.getMaxSupply();
 
-    function _addScheduledBalanceAdjustment(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal virtual {
-        ScheduledTasksLib._addScheduledTask(
-            _scheduledBalanceAdjustmentStorage(),
-            _newScheduledTimestamp,
-            _newData
-        );
-    }
-
-    function _triggerScheduledBalanceAdjustments(
-        uint256 _max
-    ) internal virtual returns (uint256) {
-        return
-            ScheduledTasksLib._triggerScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
-                this.onScheduledBalanceAdjustmentTriggered.selector,
-                _max,
-                _blockTimestamp()
-            );
-    }
-
-    function _getScheduledBalanceAdjustmentCount()
-        internal
-        view
-        virtual
-        returns (uint256)
-    {
-        return
-            ScheduledTasksLib._getScheduledTaskCount(
-                _scheduledBalanceAdjustmentStorage()
-            );
-    }
-
-    function _getScheduledBalanceAdjustments(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    )
-        internal
-        view
-        virtual
-        returns (
-            ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
-        )
-    {
-        return
-            ScheduledTasksLib._getScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function _scheduledBalanceAdjustmentStorage()
-        internal
-        pure
-        virtual
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage
-                storage scheduledBalanceAdjustments_
-        )
-    {
-        bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledBalanceAdjustments_.slot := position
+        if (!_checkMaxSupply(newTotalSupply, maxSupply)) {
+            revert MaxSupplyReached(maxSupply);
         }
+        _;
+    }
+
+    modifier checkMaxSupplyForPartition(bytes32 _partition, uint256 _amount) {
+        uint256 newTotalSupplyForPartition = ERC1410Basic_CD_Lib
+            .totalSupplyByPartition(_partition) + _amount;
+        uint256 maxSupplyForPartition = Cap_CD_Lib.getMaxSupplyByPartition(
+            _partition
+        );
+
+        if (
+            !_checkMaxSupply(newTotalSupplyForPartition, maxSupplyForPartition)
+        ) {
+            revert MaxSupplyReachedForPartition(
+                _partition,
+                maxSupplyForPartition
+            );
+        }
+        _;
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount,
+        uint256 _maxSupply
+    ) internal pure returns (bool) {
+        if (_maxSupply == 0) return true;
+        if (_amount <= _maxSupply) return true;
+        return false;
     }
 }

@@ -220,6 +220,10 @@ import {EquityStorageWrapper} from './EquityStorageWrapper.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {ScheduledTasksCommon} from '../scheduledTasks/ScheduledTasksCommon.sol';
+import {
+    CorporateActionsStorageWrapper
+} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
 
 abstract contract Equity is
     IEquity,
