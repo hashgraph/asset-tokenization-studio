@@ -299,7 +299,7 @@ contract CapStorageWrapper is
         revert('Should not reach this function');
     }
 
-    function _checkMaxSupplyByPartition(
+    function _checkMaxSupplyForPartition(
         bytes32 _partition,
         uint256 _amount
     ) internal view virtual returns (bool) {
