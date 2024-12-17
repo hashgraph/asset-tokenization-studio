@@ -283,11 +283,9 @@ abstract contract CapStorageWrapper_2 is
         uint256 additionalAmount
     ) internal view virtual override returns (bool) {
         uint256 newMaxSupply = _getMaxSupplyByPartitionAdjusted(partition) + additionalAmount;
-
         if (isMaxSupplyExceeded(newMaxSupply)) {
             revert MaxSupplyReached(_getMaxSupplyAdjusted());
         }
-
         return true;
     }
 

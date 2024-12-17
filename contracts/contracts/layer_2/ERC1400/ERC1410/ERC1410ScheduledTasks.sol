@@ -397,14 +397,15 @@ contract ERC1410ScheduledTasks is
 
     function _checkNewMaxSupplyForPartition(
         bytes32 _partition,
-        uint256 _newMaxSupply
+        uint256 _amount
     )
-        external
+        internal
         view
         virtual
-        override
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
     {
-        _checkNewMaxSupplyForPartition(_partition, _newMaxSupply);
+        return ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(_partition, _amount);
     }
 
     function getStaticResolverKey()

@@ -229,7 +229,17 @@ contract CapStorageWrapper is
     }
 
     modifier checkMaxSupplyForPartition(bytes32 _partition, uint256 _amount) {
-        _checkNewMaxSupplyForPartition(_partition, _amount);
+        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
+            _partition
+        ) + _amount;
+        if (
+            !_checkMaxSupplyByPartition(_partition, newTotalSupplyForPartition)
+        ) {
+            revert MaxSupplyReachedForPartition(
+                _partition,
+                _capStorage().maxSupplyByPartition[_partition]
+            );
+        }
         _;
     }
 
@@ -242,7 +252,8 @@ contract CapStorageWrapper is
         bytes32 _partition,
         uint256 _newMaxSupply
     ) {
-        revert('Should not reach this function');
+        _checkNewMaxSupplyForPartition(_partition, _newMaxSupply);
+        _;
     }
 
     // Internal
@@ -317,7 +328,8 @@ contract CapStorageWrapper is
         revert('Should not reach this function');
     }
 
-    function _checkNewMaxSupplyForPartition(bytes32 _partition, uint256 _amount) internal virtual {
+    function _checkNewMaxSupplyForPartition(bytes32 _partition, uint256 _amount)
+    internal view virtual returns (bool) {
         revert('Should not reach this function');
     }
 

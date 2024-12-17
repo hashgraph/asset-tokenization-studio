@@ -285,15 +285,17 @@ contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
 
     function _checkNewMaxSupplyForPartition(
         bytes32 _partition,
-        uint256 _newMaxSupply
+        uint256 _amount
     )
         internal
+        view
         virtual
         override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    returns (bool)
     {
-        ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
+        return ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
             _partition,
-            _newMaxSupply
+            _amount
         );
     }
 
