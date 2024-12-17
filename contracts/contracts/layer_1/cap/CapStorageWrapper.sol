@@ -205,10 +205,12 @@
 
 pragma solidity 0.8.18;
 
-import {ERC1410BasicStorageWrapperRead} from "../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol";
-import {_CAP_STORAGE_POSITION} from "../constants/storagePositions.sol";
-import {LocalContext} from "../context/LocalContext.sol";
-import {ICapStorageWrapper} from "../interfaces/cap/ICapStorageWrapper.sol";
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {LocalContext} from '../context/LocalContext.sol';
+import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 contract CapStorageWrapper is
@@ -328,8 +330,10 @@ contract CapStorageWrapper is
         revert('Should not reach this function');
     }
 
-    function _checkNewMaxSupplyForPartition(bytes32 _partition, uint256 _amount)
-    internal view virtual returns (bool) {
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal view virtual returns (bool) {
         revert('Should not reach this function');
     }
 

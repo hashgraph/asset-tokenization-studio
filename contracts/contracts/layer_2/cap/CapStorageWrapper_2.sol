@@ -280,9 +280,10 @@ abstract contract CapStorageWrapper_2 is
 
     function _checkNewMaxSupplyForPartition(
         bytes32 partition,
-        uint256 additionalAmount
+        uint256 amount
     ) internal view virtual override returns (bool) {
-        uint256 newMaxSupply = _getMaxSupplyByPartitionAdjusted(partition) + additionalAmount;
+        uint256 newMaxSupply = _getMaxSupplyByPartitionAdjusted(partition) +
+            amount;
         if (isMaxSupplyExceeded(newMaxSupply)) {
             revert MaxSupplyReached(_getMaxSupplyAdjusted());
         }

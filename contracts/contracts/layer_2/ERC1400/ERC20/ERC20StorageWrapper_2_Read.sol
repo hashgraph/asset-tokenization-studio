@@ -365,9 +365,10 @@ abstract contract ERC20StorageWrapper_2_Read is
         override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
         returns (bool)
     {
-        return ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
-            _partition,
-            _amount
-        );
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 }

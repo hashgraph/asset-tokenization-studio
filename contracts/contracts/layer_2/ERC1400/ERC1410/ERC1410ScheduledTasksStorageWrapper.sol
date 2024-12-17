@@ -478,7 +478,17 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
     function _checkNewMaxSupplyForPartition(
         bytes32 _partition,
         uint256 _amount
-    ) internal view virtual override(CapStorageWrapper, CapStorageWrapper_2) returns (bool) {
-        return CapStorageWrapper_2._checkNewMaxSupplyForPartition(_partition, _amount);
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, CapStorageWrapper_2)
+        returns (bool)
+    {
+        return
+            CapStorageWrapper_2._checkNewMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 }

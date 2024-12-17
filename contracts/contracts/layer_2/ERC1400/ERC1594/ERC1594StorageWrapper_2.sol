@@ -352,10 +352,19 @@ abstract contract ERC1594StorageWrapper_2 is
     }
 
     function _checkNewMaxSupplyForPartition(
-        uint256 _amount,
-        bytes32 _partition
-    ) internal view virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) returns (bool) {
-        return ERC20StorageWrapper_2_Read._checkNewMaxSupplyForPartition(_amount, _partition);
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return
+            ERC20StorageWrapper_2_Read._checkNewMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
-
 }

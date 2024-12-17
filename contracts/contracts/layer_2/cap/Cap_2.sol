@@ -261,6 +261,10 @@ contract Cap_2 is Cap, CapStorageWrapper_2 {
         override(CapStorageWrapper, CapStorageWrapper_2)
         returns (bool)
     {
-        return CapStorageWrapper_2._checkNewMaxSupplyForPartition(_partition, _amount);
+        return
+            CapStorageWrapper_2._checkNewMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 }

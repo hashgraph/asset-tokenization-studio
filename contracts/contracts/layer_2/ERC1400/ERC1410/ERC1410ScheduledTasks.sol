@@ -405,7 +405,11 @@ contract ERC1410ScheduledTasks is
         override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
         returns (bool)
     {
-        return ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(_partition, _amount);
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 
     function getStaticResolverKey()
