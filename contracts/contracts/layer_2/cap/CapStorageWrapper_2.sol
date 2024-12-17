@@ -291,4 +291,15 @@ abstract contract CapStorageWrapper_2 is
     ) internal view virtual override returns (bool) {
         return _checkMaxSupplyCommon(_amount, _getMaxSupplyAdjusted());
     }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal view virtual override returns (bool) {
+        return
+            _checkMaxSupplyCommon(
+                _amount,
+                _getMaxSupplyByPartitionAdjusted(_partition)
+            );
+    }
 }
