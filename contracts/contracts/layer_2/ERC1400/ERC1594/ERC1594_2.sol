@@ -318,6 +318,16 @@ contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
         ERC1594StorageWrapper_2._checkNewTotalSupply(_amount);
     }
 
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC1594StorageWrapper_2) {
+        ERC1594StorageWrapper_2._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
     function _checkMaxSupply(
         uint256 _amount
     )
@@ -340,6 +350,10 @@ contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
         override(CapStorageWrapper, ERC1594StorageWrapper_2)
         returns (bool)
     {
-        return ERC1594StorageWrapper_2._checkMaxSupplyForPartition(_partition, _amount);
+        return
+            ERC1594StorageWrapper_2._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 }

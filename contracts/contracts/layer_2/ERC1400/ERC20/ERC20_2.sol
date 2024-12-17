@@ -336,6 +336,16 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         ERC20StorageWrapper_2_Read._checkNewTotalSupply(_amount);
     }
 
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
     function _checkMaxSupply(
         uint256 _amount
     )

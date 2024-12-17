@@ -271,6 +271,20 @@ contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
         ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupply(_amount);
     }
 
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
     function _checkMaxSupply(
         uint256 _amount
     )
@@ -293,6 +307,10 @@ contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
         override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
         returns (bool)
     {
-        return ERC1410ScheduledTasksStorageWrapper._checkMaxSupplyForPartition(_partition, _amount);
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 }
