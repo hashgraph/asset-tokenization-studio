@@ -225,6 +225,7 @@ import {
     ERC20StorageWrapper_2_Read
 } from '../ERC20/ERC20StorageWrapper_2_Read.sol';
 import {ERC1594StorageWrapper_2} from './ERC1594StorageWrapper_2.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 
 contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
     function _beforeTokenTransfer(
@@ -303,5 +304,29 @@ contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
             _amount,
             _isIncrease
         );
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override(CapStorageWrapper, ERC1594StorageWrapper_2) {
+        ERC1594StorageWrapper_2._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC1594StorageWrapper_2) {
+        ERC1594StorageWrapper_2._checkNewTotalSupply(_amount);
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1594StorageWrapper_2)
+        returns (bool)
+    {
+        return ERC1594StorageWrapper_2._checkMaxSupply(_amount);
     }
 }

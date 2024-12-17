@@ -220,6 +220,7 @@ import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {ERC20StorageWrapper_2} from './ERC20StorageWrapper_2.sol';
 import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
 import {IERC20_2} from '../../interfaces/ERC1400/IERC20_2.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 
 contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
     function allowance(
@@ -321,6 +322,30 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         uint256 snapshotId
     ) internal view virtual override returns (uint256) {
         revert('Should not reach this function');
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewTotalSupply(_amount);
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return ERC20StorageWrapper_2_Read._checkMaxSupply(_amount);
     }
 
     function getStaticResolverKey()

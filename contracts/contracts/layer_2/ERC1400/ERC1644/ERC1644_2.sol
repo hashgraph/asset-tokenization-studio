@@ -215,6 +215,7 @@ import {ERC1644} from '../../../layer_1/ERC1400/ERC1644/ERC1644.sol';
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 
 contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
     function _beforeTokenTransfer(
@@ -248,5 +249,37 @@ contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
             _account,
             _partition
         );
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupply(_amount);
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return ERC1410ScheduledTasksStorageWrapper._checkMaxSupply(_amount);
     }
 }

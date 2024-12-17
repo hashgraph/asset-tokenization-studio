@@ -213,8 +213,8 @@ import {
     type Equity,
     type ControlList,
     ERC20_2,
-    ERC1594,
-    ERC1644,
+    ERC1594_2,
+    ERC1644_2,
     AdjustBalances,
     Cap_2,
     IERC20,
@@ -308,8 +308,8 @@ describe('ERC1400 Tests', () => {
     let controlList: ControlList
     let capFacet: Cap_2
     let erc20Facet: ERC20_2
-    let erc1594Facet: ERC1594
-    let erc1644Facet: ERC1644
+    let erc1594Facet: ERC1594_2
+    let erc1644Facet: ERC1644_2
     let adjustBalancesFacet: AdjustBalances
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
@@ -639,9 +639,9 @@ describe('ERC1400 Tests', () => {
 
         erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
 
-        erc1594Facet = await ethers.getContractAt('ERC1594', diamond.address)
+        erc1594Facet = await ethers.getContractAt('ERC1594_2', diamond.address)
 
-        erc1644Facet = await ethers.getContractAt('ERC1644', diamond.address)
+        erc1644Facet = await ethers.getContractAt('ERC1644_2', diamond.address)
 
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
     }
