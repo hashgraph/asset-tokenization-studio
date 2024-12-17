@@ -290,7 +290,13 @@ abstract contract LockStorageWrapper is SnapshotsStorageWrapper {
 
         lockStorage.locks[_tokenHolder][_partition].pop();
 
-        _increaseBalanceByPartition(_tokenHolder, lock.amount, _partition);
+        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
+            _addPartitionTo(lock.amount, _tokenHolder, _partition);
+        } else {
+            _increaseBalanceByPartition(_tokenHolder, lock.amount, _partition);
+        }
+
+        //_increaseBalanceByPartition(_tokenHolder, lock.amount, _partition);
 
         success_ = true;
     }

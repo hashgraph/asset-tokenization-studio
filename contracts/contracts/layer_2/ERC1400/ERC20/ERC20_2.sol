@@ -209,8 +209,8 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 import {ERC20} from '../../../layer_1/ERC1400/ERC20/ERC20.sol';
 import {
     ERC20StorageWrapper
@@ -261,7 +261,7 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
     )
         internal
         virtual
-        override(ERC1410BasicStorageWrapper, ERC20StorageWrapper_2_Read)
+        override(ERC1410BasicStorageWrapperRead, ERC20StorageWrapper_2_Read)
     {
         ERC20StorageWrapper_2_Read._addPartitionTo(
             _value,

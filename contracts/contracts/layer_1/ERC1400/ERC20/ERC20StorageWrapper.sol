@@ -384,11 +384,12 @@ abstract contract ERC20StorageWrapper is
         address spender,
         uint256 value
     ) private {
+        _beforeAllowanceUpdate(_msgSender(), spender, value, false);
+
         ERC20Storage storage erc20Storage = _getErc20Storage();
         if (value > erc20Storage.allowed[from][spender]) {
             revert InsufficientAllowance(spender, from);
         }
-        _beforeAllowanceUpdate(_msgSender(), spender, value, false);
 
         erc20Storage.allowed[from][spender] -= value;
     }

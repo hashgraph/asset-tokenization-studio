@@ -207,11 +207,15 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {LockStorageWrapper_2} from './LockStorageWrapper_2.sol';
+import {LockStorageWrapper_2_Read} from './LockStorageWrapper_2_Read.sol';
 import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
 import {Lock} from '../../layer_1/lock/Lock.sol';
 import {ILock} from '../../layer_1/interfaces/lock/ILock.sol';
 import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
 import {_LOCK_RESOLVER_KEY} from '../../layer_1/constants/resolverKeys.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 
 contract Lock_2 is Lock, LockStorageWrapper_2 {
     function getLockedAmountForByPartition(
@@ -327,6 +331,18 @@ contract Lock_2 is Lock, LockStorageWrapper_2 {
             _lockIndex,
             _lock
         );
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(ERC1410BasicStorageWrapperRead, LockStorageWrapper_2_Read)
+    {
+        LockStorageWrapper_2_Read._addPartitionTo(_value, _account, _partition);
     }
 
     function getStaticResolverKey()

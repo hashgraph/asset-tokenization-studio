@@ -250,21 +250,6 @@ abstract contract ERC1410BasicStorageWrapper is
         );
     }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    ) internal virtual {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-
-        erc1410Storage.partitions[_account].push(Partition(_value, _partition));
-        erc1410Storage.partitionToIndex[_account][
-            _partition
-        ] = _getERC1410BasicStorage().partitions[_account].length;
-
-        if (_value != 0) erc1410Storage.balances[_account] += _value;
-    }
-
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
