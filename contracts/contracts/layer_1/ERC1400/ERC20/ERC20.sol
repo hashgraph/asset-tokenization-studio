@@ -215,9 +215,9 @@ import {
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
 abstract contract ERC20 is
-    IERC20,
+    ERC20StorageWrapper,
     IStaticFunctionSelectors,
-    ERC20StorageWrapper
+    IERC20
 {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(

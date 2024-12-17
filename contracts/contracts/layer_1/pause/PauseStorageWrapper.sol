@@ -212,7 +212,7 @@ import {
 } from '../interfaces/pause/IPauseStorageWrapper.sol';
 import {_PAUSE_STORAGE_POSITION} from '../constants/storagePositions.sol';
 
-abstract contract PauseStorageWrapper is IPauseStorageWrapper, LocalContext {
+abstract contract PauseStorageWrapper is LocalContext, IPauseStorageWrapper {
     struct PauseDataStorage {
         bool paused;
     }

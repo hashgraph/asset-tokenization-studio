@@ -206,56 +206,87 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
-import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
+import {_CAP_ROLE} from './layer_1/constants/roles.sol';
+import {ICap} from './layer_1/interfaces/cap/ICap.sol';
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+    IStaticFunctionSelectors
+} from './interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from './layer_1/common/Common.sol';
 import {
-    CorporateActionsStorageWrapper
-} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+    CapStorageWrapperBalanceAdjustment
+} from './layer_2/cap/CapStorageWrapperBalanceAdjustment.sol';
 
-abstract contract CapStorageWrapper_2 is
-    CorporateActionsStorageWrapper,
-    CapStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
+abstract contract Cap is
+    Common,
+    ICap,
+    IStaticFunctionSelectors,
+    CapStorageWrapperBalanceAdjustment
 {
-    function _getMaxSupplyAdjusted()
-        internal
-        view
-        virtual
-        returns (uint256 maxSupply_)
+    function initialize_Cap(
+        uint256 maxSupply,
+        PartitionCap[] calldata partitionCap
+    ) external {
+        CapDataStorage storage capStorage = _capStorage();
+        capStorage.maxSupply = maxSupply;
+
+        for (uint256 i = 0; i < partitionCap.length; i++) {
+            capStorage.maxSupplyByPartition[
+                partitionCap[i].partition
+            ] = partitionCap[i].maxSupply;
+        }
+    }
+
+    function setMaxSupply(
+        uint256 maxSupply
+    ) external onlyUnpaused onlyRole(_CAP_ROLE) checkNewMaxSupply(maxSupply) {
+        _setMaxSupply(maxSupply);
+    }
+
+    function setMaxSupplyByPartition(
+        bytes32 partition,
+        uint256 maxSupply
+    )
+        external
+        onlyUnpaused
+        onlyRole(_CAP_ROLE)
+        checkNewMaxSupplyForPartition(partition, maxSupply)
     {
-        return _getMaxSupplyAdjustedAt(_blockTimestamp());
+        _setMaxSupplyByPartition(partition, maxSupply);
     }
 
-    function _getMaxSupplyAdjustedAt(
-        uint256 _timestamp
-    ) internal view virtual returns (uint256 maxSupply_) {
-        (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustmentsAt(
-                _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage(),
-                _timestamp
-            );
-        return _getMaxSupply() * pendingABAF;
+    function getStaticResolverKey()
+        external
+        pure
+        returns (bytes32 staticResolverKey)
+    {
+        return _getStaticResolverKey();
     }
 
-    function _getMaxSupplyByPartitionAdjusted(
-        bytes32 _partition
-    ) internal view virtual returns (uint256 maxSupply_) {
-        return
-            _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
+    function getStaticFunctionSelectors()
+        external
+        pure
+        returns (bytes4[] memory staticFunctionSelectors)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors = new bytes4[](5);
+        staticFunctionSelectors[selectorIndex++] = this.initialize_Cap.selector;
+        staticFunctionSelectors[selectorIndex++] = this.setMaxSupply.selector;
+        staticFunctionSelectors[selectorIndex++] = this
+            .setMaxSupplyByPartition
+            .selector;
+        staticFunctionSelectors[selectorIndex++] = this.getMaxSupply.selector;
+        staticFunctionSelectors[selectorIndex++] = this
+            .getMaxSupplyByPartition
+            .selector;
     }
 
-    function _getMaxSupplyByPartitionAdjustedAt(
-        bytes32 _partition,
-        uint256 _timestamp
-    ) internal view virtual returns (uint256 maxSupply_) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjustedAt(_timestamp),
-            _getLABAFForPartition(_partition)
-        );
-        return _getMaxSupplyByPartition(_partition) * factor;
+    function getStaticInterfaceIds()
+        external
+        pure
+        returns (bytes4[] memory staticInterfaceIds)
+    {
+        staticInterfaceIds = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds[selectorsIndex++] = type(ICap).interfaceId;
     }
 }

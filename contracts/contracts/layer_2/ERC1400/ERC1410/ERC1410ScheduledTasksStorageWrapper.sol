@@ -234,11 +234,16 @@ import {
 import {
     ERC1410BasicStorage
 } from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
+import {
+    CapDataStorage
+} from '../../../layer_1/interfaces/cap/ICapStorageWrapper.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
     SnapshotsStorageWrapper_2,
     ScheduledSnapshotsStorageWrapper,
-    ScheduledTasksStorageWrapper
+    ScheduledTasksStorageWrapper,
+    CapStorageWrapper
 {
     function _beforeTokenTransfer(
         bytes32 partition,

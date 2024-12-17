@@ -214,11 +214,15 @@ import {
     ControlListStorageWrapper
 } from '../controlList/ControlListStorageWrapper.sol';
 
+struct CommonStorage {
+    bool initialized;
+}
+
 // solhint-disable no-empty-blocks
 abstract contract Common is
-    AccessControlStorageWrapper,
     PauseStorageWrapper,
-    ControlListStorageWrapper
+    ControlListStorageWrapper,
+    AccessControlStorageWrapper
 {
     error AlreadyInitialized();
 
@@ -227,5 +231,24 @@ abstract contract Common is
             revert AlreadyInitialized();
         }
         _;
+    }
+
+    modifier onlyUninitTest(bytes32 storagePosition) {
+        if (_getStorage().initialized) {
+            revert AlreadyInitialized();
+        }
+        _;
+    }
+
+    function _initialize(
+        bytes32 storagePosition
+    ) internal onlyUninitTest(storagePosition) {
+        _getStorage().initialized = true;
+    }
+
+    function _getStorage() internal pure returns (CommonStorage storage s_) {
+        assembly {
+            s_.slot := 0
+        }
     }
 }

@@ -219,8 +219,8 @@ import {
 } from '../constants/storagePositions.sol';
 
 abstract contract ControlListStorageWrapper is
-    IControlListStorageWrapper,
-    LocalContext
+    LocalContext,
+    IControlListStorageWrapper
 {
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;

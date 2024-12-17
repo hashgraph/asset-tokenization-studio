@@ -218,8 +218,8 @@ import {
 import {IFactory} from '../../../interfaces/factory/IFactory.sol';
 
 abstract contract ERC20StorageWrapper is
-    IERC20StorageWrapper,
-    ERC1410StandardStorageWrapper
+    ERC1410StandardStorageWrapper,
+    IERC20StorageWrapper
 {
     struct ERC20Storage {
         string name;
@@ -400,6 +400,7 @@ abstract contract ERC20StorageWrapper is
         uint256 _amount,
         bool _isIncrease
     ) internal virtual {}
+
     // solhint-enable no-empty-blocks
 
     function _emitTransferEvent(

@@ -208,7 +208,10 @@ pragma solidity 0.8.18;
 import {
     ERC1410BasicStorage
 } from '../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    CapStorageWrapper,
+    CapDataStorage
+} from '../../layer_1/cap/CapStorageWrapper.sol';
 import {
     _PARTITION_SIZE,
     _PARTITION_AMOUNT_OFFSET
@@ -266,7 +269,7 @@ library AdjustBalanceLib {
     function _adjustTotalAndMaxSupplyForPartition(
         bytes32 _partition,
         ERC1410BasicStorage storage _basicStorage,
-        CapStorageWrapper.CapDataStorage storage _capStorage,
+        CapDataStorage storage _capStorage,
         ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
             storage _basicStorage_2
     ) internal {

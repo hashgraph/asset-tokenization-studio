@@ -208,6 +208,7 @@ pragma solidity 0.8.18;
 
 import {LocalContext} from '../context/LocalContext.sol';
 import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     ICapStorageWrapper,
     CapDataStorage
@@ -221,7 +222,7 @@ abstract contract CapStorageWrapper is
     ERC1410BasicStorageWrapperRead,
     LocalContext
 {
-    // modifiers
+    // * Modifiers
     modifier checkMaxSupply(uint256 _amount) {
         uint256 newTotalSupply = _totalSupply() + _amount;
         if (!_checkMaxSupply(newTotalSupply)) {
@@ -268,7 +269,8 @@ abstract contract CapStorageWrapper is
         _;
     }
 
-    // Internal
+    // * Internal | private functions
+    // Write functions
     function _setMaxSupply(uint256 _maxSupply) internal virtual {
         uint256 previousMaxSupply = _capStorage().maxSupply;
         _capStorage().maxSupply = _maxSupply;
@@ -291,6 +293,7 @@ abstract contract CapStorageWrapper is
         );
     }
 
+    // Read functions
     function _getMaxSupply()
         internal
         view
@@ -323,13 +326,8 @@ abstract contract CapStorageWrapper is
             );
     }
 
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) private pure returns (bool) {
-        if (_maxSupply == 0) return true;
-        if (_amount <= _maxSupply) return true;
-        return false;
+    function _getStaticResolverKey() internal pure returns (bytes32) {
+        return _CAP_RESOLVER_KEY;
     }
 
     function _capStorage()
@@ -343,5 +341,14 @@ abstract contract CapStorageWrapper is
         assembly {
             cap_.slot := position
         }
+    }
+
+    function _checkMaxSupplyCommon(
+        uint256 _amount,
+        uint256 _maxSupply
+    ) private pure returns (bool) {
+        if (_maxSupply == 0) return true;
+        if (_amount <= _maxSupply) return true;
+        return false;
     }
 }

@@ -230,6 +230,20 @@ interface IERC1410StorageWrapper {
     error NotAllowedInMultiPartitionMode();
     error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
     error ZeroAddressNotAllowed();
+    error ZeroPartition();
+    error ZeroValue();
+    error InvalidPartition(address account, bytes32 partition);
+    error InsufficientBalance(
+        address account,
+        uint256 balance,
+        uint256 value,
+        bytes32 partition
+    );
+    error Unauthorized(
+        address operator,
+        address tokenHolder,
+        bytes32 partition
+    );
 
     // Transfer Events
     event TransferByPartition(
@@ -277,20 +291,5 @@ interface IERC1410StorageWrapper {
         uint256 value,
         bytes data,
         bytes operatorData
-    );
-
-    error ZeroPartition();
-    error ZeroValue();
-    error InvalidPartition(address account, bytes32 partition);
-    error InsufficientBalance(
-        address account,
-        uint256 balance,
-        uint256 value,
-        bytes32 partition
-    );
-    error Unauthorized(
-        address operator,
-        address tokenHolder,
-        bytes32 partition
     );
 }

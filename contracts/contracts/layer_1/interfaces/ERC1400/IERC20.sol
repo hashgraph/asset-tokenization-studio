@@ -208,10 +208,9 @@
 
 pragma solidity 0.8.18;
 
-import {IERC20StorageWrapper} from './IERC20StorageWrapper.sol';
 import {IFactory} from '../../../interfaces/factory/IFactory.sol';
 
-interface IERC20 is IERC20StorageWrapper {
+interface IERC20 {
     struct ERC20MetadataInfo {
         string name;
         string symbol;
