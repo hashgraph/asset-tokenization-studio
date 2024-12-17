@@ -228,19 +228,15 @@ abstract contract ERC1410BasicStorageWrapper is
         address _operator,
         bytes memory _operatorData
     ) internal virtual {
-        if (!_validPartition(_partition, _from)) {
-            revert InvalidPartition(_from, _partition);
-        }
-
         _beforeTokenTransfer(_partition, _from, _to, _value);
 
-        if (!_validPartitionForReceiver(_partition, _to)) {
-            _addPartitionTo(0, _to, _partition);
-        }
-
-        // Changing the state values
         _reduceBalanceByPartition(_from, _value, _partition);
-        _increaseBalanceByPartition(_to, _value, _partition);
+
+        if (!_validPartitionForReceiver(_partition, _to)) {
+            _addPartitionTo(_value, _to, _partition);
+        } else {
+            _increaseBalanceByPartition(_to, _value, _partition);
+        }
 
         // Emit transfer event.
         emit TransferByPartition(
@@ -265,6 +261,8 @@ abstract contract ERC1410BasicStorageWrapper is
         erc1410Storage.partitionToIndex[_account][
             _partition
         ] = _getERC1410BasicStorage().partitions[_account].length;
+
+        if (_value != 0) erc1410Storage.balances[_account] += _value;
     }
 
     function _beforeTokenTransfer(
