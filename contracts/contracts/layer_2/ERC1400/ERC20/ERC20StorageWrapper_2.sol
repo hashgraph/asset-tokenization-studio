@@ -210,8 +210,17 @@ import {_DEFAULT_PARTITION} from '../../../layer_1/constants/values.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
 import {_ERC20_2_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {
+    AdjustBalancesStorageWrapperRead
+} from '../../adjustBalances/AdjustBalancesStorageWrapperRead.sol';
 
-abstract contract ERC20StorageWrapper_2 is ERC20StorageWrapper_2_Read {
+contract ERC20StorageWrapper_2 is
+    AdjustBalancesStorageWrapperRead,
+    ERC20StorageWrapper_2_Read
+{
     function _beforeAllowanceUpdate(
         address _owner,
         address _spender,
@@ -229,25 +238,21 @@ abstract contract ERC20StorageWrapper_2 is ERC20StorageWrapper_2_Read {
         address _owner,
         address _spender
     ) internal virtual {
-        ERC20Storage_2 storage erc20Storage_2 = _getErc20Storage_2();
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
-        uint256 ABAF = _getABAF();
-        uint256 LABAF = _getAllowanceLABAF(_owner, _spender);
+        uint256 ABAF = AdjustBalances_CD_Lib.getABAF();
+        uint256 LABAF = AdjustBalances_CD_Lib.getAllowanceLABAF(
+            _owner,
+            _spender
+        );
 
         if (ABAF == LABAF) return;
 
         uint256 factor = AdjustBalanceLib._calculateFactor(ABAF, LABAF);
 
         _getErc20Storage().allowed[_owner][_spender] *= factor;
-        erc20Storage_2.LABAFs_allowances[_owner][_spender] = ABAF;
-    }
-
-    function _getAllowanceLABAF(
-        address _owner,
-        address _spender
-    ) internal view virtual override returns (uint256) {
-        ERC20Storage_2 storage erc20Storage_2 = _getErc20Storage_2();
-        return erc20Storage_2.LABAFs_allowances[_owner][_spender];
+        adjustBalancesStorage.LABAFs_allowances[_owner][_spender] = ABAF;
     }
 
     function _decimalsAdjusted()
@@ -272,23 +277,9 @@ abstract contract ERC20StorageWrapper_2 is ERC20StorageWrapper_2_Read {
         address _spender
     ) internal view virtual override returns (uint256) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
-            _getAllowanceLABAF(_owner, _spender)
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getAllowanceLABAF(_owner, _spender)
         );
         return _allowance(_owner, _spender) * factor;
-    }
-
-    function _getErc20Storage_2()
-        internal
-        view
-        virtual
-        override
-        returns (ERC20Storage_2 storage erc20Storage_2_)
-    {
-        bytes32 position = _ERC20_2_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc20Storage_2_.slot := position
-        }
     }
 }

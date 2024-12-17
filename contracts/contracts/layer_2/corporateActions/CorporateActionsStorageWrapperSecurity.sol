@@ -229,12 +229,22 @@ import {IBond} from '../interfaces/bond/IBond.sol';
 import {
     AdjustBalancesStorageWrapper
 } from '../adjustBalances/AdjustBalancesStorageWrapper.sol';
+import {
+    ScheduledTasksStorageWrapper
+} from '../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
+import {
+    ScheduledSnapshotsStorageWrapper
+} from '../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
 
 abstract contract CorporateActionsStorageWrapperSecurity is
     ICorporateActionsStorageWrapperSecurity,
     IEquityStorageWrapper,
     IBondStorageWrapper,
-    CorporateActionsStorageWrapper,
+    ScheduledTasksStorageWrapper,
+    ScheduledSnapshotsStorageWrapper,
     AdjustBalancesStorageWrapper
 {
     modifier checkDates(uint256 firstDate, uint256 secondDate) {

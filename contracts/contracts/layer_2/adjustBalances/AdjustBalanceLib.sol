@@ -216,9 +216,7 @@ import {
 import {
     CorporateActionDataStorage
 } from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol';
+import {AdjustBalancesStorageWrapper} from './AdjustBalancesStorageWrapper.sol';
 import {ArrayLib} from '../common/ArrayLib.sol';
 import {MappingLib} from '../common/MappingLib.sol';
 import {IEquity} from '../interfaces/equity/IEquity.sol';
@@ -248,19 +246,24 @@ library AdjustBalanceLib {
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
-            storage _basicStorage_2
+        AdjustBalancesStorageWrapper.AdjustBalancesStorage
+            storage _adjustBalanceStorage
     ) internal {
-        uint256 ABAF = _basicStorage_2.ABAF;
+        uint256 ABAF = _adjustBalanceStorage.ABAF;
 
         _adjustPartitionBalanceFor(
             ABAF,
             _partition,
             _account,
             _basicStorage,
-            _basicStorage_2
+            _adjustBalanceStorage
         );
-        _adjustTotalBalanceFor(ABAF, _account, _basicStorage, _basicStorage_2);
+        _adjustTotalBalanceFor(
+            ABAF,
+            _account,
+            _basicStorage,
+            _adjustBalanceStorage
+        );
     }
 
     function _adjustTotalAndMaxSupplyForPartition(
@@ -268,11 +271,11 @@ library AdjustBalanceLib {
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
         CapStorageWrapper.CapDataStorage storage _capStorage,
-        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
-            storage _basicStorage_2
+        AdjustBalancesStorageWrapper.AdjustBalancesStorage
+            storage _adjustBalanceStorage
     ) internal {
-        uint256 ABAF = _basicStorage_2.ABAF;
-        uint256 LABAF = _basicStorage_2.LABAF_partition[_partition];
+        uint256 ABAF = _adjustBalanceStorage.ABAF;
+        uint256 LABAF = _adjustBalanceStorage.LABAF_partition[_partition];
 
         if (ABAF == LABAF) return;
 
@@ -285,7 +288,7 @@ library AdjustBalanceLib {
             _partition
         );
         uint256 LABAFSlot = MappingLib._getSlotForBytes32MappingKey(
-            _basicStorage_2.LABAF_partition,
+            _adjustBalanceStorage.LABAF_partition,
             _partition
         );
 
@@ -301,10 +304,10 @@ library AdjustBalanceLib {
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
-            storage _basicStorage_2
+        AdjustBalancesStorageWrapper.AdjustBalancesStorage
+            storage _adjustBalanceStorage
     ) internal {
-        uint256 LABAF = _basicStorage_2.LABAF[_account];
+        uint256 LABAF = _adjustBalanceStorage.LABAF[_account];
         if (_ABAF == LABAF) return;
 
         uint256 balanceSlot = MappingLib._getSlotForAddressMappingKey(
@@ -312,7 +315,7 @@ library AdjustBalanceLib {
             _account
         );
         uint256 LABAFSlot = MappingLib._getSlotForAddressMappingKey(
-            _basicStorage_2.LABAF,
+            _adjustBalanceStorage.LABAF,
             _account
         );
 
@@ -326,8 +329,8 @@ library AdjustBalanceLib {
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
-            storage _basicStorage_2
+        AdjustBalancesStorageWrapper.AdjustBalancesStorage
+            storage _adjustBalanceStorage
     ) internal {
         uint256 partitionsIndex = _basicStorage.partitionToIndex[_account][
             _partition
@@ -335,7 +338,7 @@ library AdjustBalanceLib {
 
         if (partitionsIndex == 0) return;
 
-        uint256 LABAF = _basicStorage_2.LABAF_user_partition[_account][
+        uint256 LABAF = _adjustBalanceStorage.LABAF_user_partition[_account][
             partitionsIndex - 1
         ];
 
@@ -347,7 +350,7 @@ library AdjustBalanceLib {
         );
         uint256 partitionsLABAFBaseSlot = MappingLib
             ._getSlotForAddressMappingKey(
-                _basicStorage_2.LABAF_user_partition,
+                _adjustBalanceStorage.LABAF_user_partition,
                 _account
             );
 

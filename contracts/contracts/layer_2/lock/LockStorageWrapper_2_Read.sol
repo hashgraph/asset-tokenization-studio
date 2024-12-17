@@ -203,91 +203,74 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+//import {AdjustBalancesStorageWrapper} from '../adjustBalances/AdjustBalancesStorageWrapper.sol';
+import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
+import {_LOCK_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
-    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
 
-contract ScheduledBalanceAdjustmentsStorageWrapper is ScheduledTasksCommon {
-    function onScheduledBalanceAdjustmentTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external virtual {
-        revert('This method should never be executed, it should be overriden');
-    }
-
-    function _addScheduledBalanceAdjustment(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal virtual {
-        ScheduledTasksLib._addScheduledTask(
-            _scheduledBalanceAdjustmentStorage(),
-            _newScheduledTimestamp,
-            _newData
+abstract contract LockStorageWrapper_2_Read is
+    LockStorageWrapper,
+    ERC1410ScheduledTasksStorageWrapper
+{
+    function _getLockedAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getTotalLockLABAF(_tokenHolder)
         );
+
+        return _getLockedAmountFor(_tokenHolder) * factor;
     }
 
-    function _triggerScheduledBalanceAdjustments(
-        uint256 _max
-    ) internal virtual returns (uint256) {
+    function _getLockedAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getTotalLockLABAFByPartition(
+                _partition,
+                _tokenHolder
+            )
+        );
         return
-            ScheduledTasksLib._triggerScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
-                this.onScheduledBalanceAdjustmentTriggered.selector,
-                _max,
-                _blockTimestamp()
-            );
+            _getLockedAmountForByPartition(_partition, _tokenHolder) * factor;
     }
 
-    function _getScheduledBalanceAdjustmentCount()
-        internal
-        view
-        virtual
-        returns (uint256)
-    {
-        return
-            ScheduledTasksLib._getScheduledTaskCount(
-                _scheduledBalanceAdjustmentStorage()
-            );
-    }
-
-    function _getScheduledBalanceAdjustments(
-        uint256 _pageIndex,
-        uint256 _pageLength
+    function _getLockForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
     )
         internal
         view
         virtual
-        returns (
-            ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
-        )
+        returns (uint256 amount_, uint256 expirationTimestamp_)
     {
-        return
-            ScheduledTasksLib._getScheduledTasks(
-                _scheduledBalanceAdjustmentStorage(),
-                _pageIndex,
-                _pageLength
-            );
-    }
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getLockLABAFByPartition(
+                _partition,
+                _lockId,
+                _tokenHolder
+            )
+        );
 
-    function _scheduledBalanceAdjustmentStorage()
-        internal
-        pure
-        virtual
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage
-                storage scheduledBalanceAdjustments_
-        )
-    {
-        bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledBalanceAdjustments_.slot := position
-        }
+        (amount_, expirationTimestamp_) = _getLockForByPartition(
+            _partition,
+            _tokenHolder,
+            _lockId
+        );
+        amount_ *= factor;
     }
 }

@@ -216,10 +216,15 @@ import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     LockStorageWrapper_2
 } from '../../layer_2/lock/LockStorageWrapper_2.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 
 contract TransferAndLock is
     ITransferAndLock,
     IStaticFunctionSelectors,
+    Common,
     LockStorageWrapper_2
 {
     function transferAndLockByPartition(

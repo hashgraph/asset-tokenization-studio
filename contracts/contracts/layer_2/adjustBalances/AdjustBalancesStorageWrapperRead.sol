@@ -203,27 +203,41 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-interface ILock_2 {
-    function getTotalLockLABAF(
-        address _tokenHolder
-    ) external returns (uint256 LABAF_);
+import {
+    _ADJUST_BALANCES_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
 
-    function getTotalLockLABAFByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external returns (uint256 LABAF_);
+contract AdjustBalancesStorageWrapperRead {
+    struct AdjustBalancesStorage {
+        // Mapping from investor to their partitions LABAF
+        mapping(address => uint256[]) LABAF_user_partition;
+        // Aggregated Balance Adjustment
+        uint256 ABAF;
+        // Last Aggregated Balance Adjustment per account
+        mapping(address => uint256) LABAF;
+        // Last Aggregated Balance Adjustment per partition
+        mapping(bytes32 => uint256) LABAF_partition;
+        // Last Aggregated Balance Adjustment per allowance
+        mapping(address => mapping(address => uint256)) LABAFs_allowances;
+        // Locks
+        mapping(address => uint256) LABAFs_TotalLocked;
+        mapping(address => mapping(bytes32 => uint256)) LABAFs_TotalLockedByPartition;
+        mapping(address => mapping(bytes32 => uint256[])) LABAF_locks;
+    }
 
-    function getLockLABAFByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) external returns (uint256 LABAF_);
-
-    function getLockLABAF(
-        uint256 _lockId,
-        address _tokenHolder
-    ) external returns (uint256 LABAF_);
+    function _getAdjustBalancesStorage()
+        internal
+        pure
+        virtual
+        returns (AdjustBalancesStorage storage adjustBalancesStorage_)
+    {
+        bytes32 position = _ADJUST_BALANCES_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            adjustBalancesStorage_.slot := position
+        }
+    }
 }
