@@ -215,7 +215,7 @@ import {
 import {
     ERC1410StandardStorageWrapper
 } from '../ERC1410/ERC1410StandardStorageWrapper.sol';
-import {IFactory} from '../../../interfaces/factory/IFactory.sol';
+import {SecurityType} from '../../../interfaces/factory/IFactory.sol';
 
 abstract contract ERC20StorageWrapper is
     IERC20StorageWrapper,
@@ -228,7 +228,7 @@ abstract contract ERC20StorageWrapper is
         uint8 decimals;
         bool initialized;
         mapping(address => mapping(address => uint256)) allowed;
-        IFactory.SecurityType securityType;
+        SecurityType securityType;
     }
 
     /**
