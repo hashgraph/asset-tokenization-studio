@@ -268,31 +268,30 @@ abstract contract CapStorageWrapper_2 is
         return _getMaxSupplyByPartition(_partition) * factor;
     }
 
-    function _checkNewMaxSupply(
-        uint256 _newMaxSupply
-    ) internal virtual override {
-        uint256 totalSupply = ERC1410ScheduledTasks_CD_Lib
-            .totalSupplyAdjusted();
-        if (_newMaxSupply != 0 && totalSupply > _newMaxSupply) {
-            revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
+    function _validateMaxSupplyOverTotalSupply(uint256 _maxSupply, uint256 _currentTotalSupply) internal pure {
+        if (_maxSupply != 0 && _currentTotalSupply > _maxSupply) {
+            revert NewMaxSupplyTooLow(_maxSupply, _currentTotalSupply);
         }
+    }
+
+    function _checkNewMaxSupply(uint256 _newMaxSupply) internal virtual override {
+        uint256 totalSupply = ERC1410ScheduledTasks_CD_Lib.totalSupplyAdjusted();
+        _validateMaxSupplyOverTotalSupply(_newMaxSupply, totalSupply);
     }
 
     function _checkNewMaxSupplyForPartition(
-        bytes32 partition,
-        uint256 amount
+        bytes32 _partition,
+        uint256 _amount
     ) internal view virtual override returns (bool) {
-        uint256 newMaxSupply = _getMaxSupplyByPartitionAdjusted(partition) +
-            amount;
-        if (isMaxSupplyExceeded(newMaxSupply)) {
-            revert MaxSupplyReached(_getMaxSupplyAdjusted());
-        }
+        uint256 newMaxSupply = _getMaxSupplyByPartitionAdjusted(_partition) +
+                    _amount;
+        uint256 totalSupply = ERC1410ScheduledTasks_CD_Lib.totalSupplyByPartitionAdjusted(_partition);
+        _validateMaxSupplyOverTotalSupply(newMaxSupply, totalSupply);
         return true;
     }
 
-    function isMaxSupplyExceeded(uint256 supply) internal view returns (bool) {
-        return !_checkMaxSupply(supply);
-    }
+
+
 
     function _checkNewTotalSupply(uint256 _amount) internal virtual override {
         uint256 newTotalSupply = ERC1410ScheduledTasks_CD_Lib
