@@ -302,7 +302,7 @@ contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
 
     function _checkNewMaxSupplyForPartition(
         bytes32 _partition,
-        uint256 _amount
+        uint256 _newMaxSupply
     )
         internal
         view
@@ -313,7 +313,7 @@ contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
         return
             ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
                 _partition,
-                _amount
+                _newMaxSupply
             );
     }
 

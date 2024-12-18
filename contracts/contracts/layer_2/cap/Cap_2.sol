@@ -263,7 +263,7 @@ contract Cap_2 is Cap, CapStorageWrapper_2 {
 
     function _checkNewMaxSupplyForPartition(
         bytes32 _partition,
-        uint256 _amount
+        uint256 _newMaxSupply
     )
         internal
         view
@@ -274,7 +274,7 @@ contract Cap_2 is Cap, CapStorageWrapper_2 {
         return
             CapStorageWrapper_2._checkNewMaxSupplyForPartition(
                 _partition,
-                _amount
+                _newMaxSupply
             );
     }
 

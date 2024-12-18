@@ -487,7 +487,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
 
     function _checkNewMaxSupplyForPartition(
         bytes32 _partition,
-        uint256 _amount
+        uint256 _newMaxSupply
     )
         internal
         view
@@ -498,7 +498,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         return
             CapStorageWrapper_2._checkNewMaxSupplyForPartition(
                 _partition,
-                _amount
+                _newMaxSupply
             );
     }
 

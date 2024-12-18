@@ -483,6 +483,6 @@ describe('CAP Layer 2 Tests', () => {
                 _PARTITION_ID_1,
                 maxSupplyByPartition
             )
-        ).to.be.revertedWith('NewMaxSupplyTooLow')
+        ).to.be.revertedWith('NewMaxSupplyForPartitionTooLow')
     })
 })

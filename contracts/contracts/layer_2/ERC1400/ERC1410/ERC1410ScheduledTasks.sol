@@ -414,7 +414,7 @@ contract ERC1410ScheduledTasks is
 
     function _checkNewMaxSupplyForPartition(
         bytes32 _partition,
-        uint256 _amount
+        uint256 _newMaxSupply
     )
         internal
         view
@@ -425,7 +425,7 @@ contract ERC1410ScheduledTasks is
         return
             ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
                 _partition,
-                _amount
+                _newMaxSupply
             );
     }
 

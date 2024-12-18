@@ -318,7 +318,7 @@ contract CapStorageWrapper is
 
     function _checkNewMaxSupplyForPartition(
         bytes32 _partition,
-        uint256 _amount
+        uint256 _newMaxSupply
     ) internal view virtual returns (bool) {
         revert('Should not reach this function');
     }

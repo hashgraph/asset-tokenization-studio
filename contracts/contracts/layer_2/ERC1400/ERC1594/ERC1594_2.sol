@@ -362,7 +362,7 @@ contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
 
     function _checkNewMaxSupplyForPartition(
         bytes32 _partition,
-        uint256 _amount
+        uint256 _newMaxSupply
     )
         internal
         view
@@ -373,7 +373,7 @@ contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
         return
             ERC1594StorageWrapper_2._checkNewMaxSupplyForPartition(
                 _partition,
-                _amount
+                _newMaxSupply
             );
     }
 }
