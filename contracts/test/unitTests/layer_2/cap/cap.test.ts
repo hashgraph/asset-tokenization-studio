@@ -203,16 +203,10 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import {
-    AccessControl,
-    type Cap_2,
-    Equity,
-    ERC1410ScheduledTasks, ERC20_2, IERC20,
-    Snapshots_2,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+import {expect} from 'chai'
+import {ethers} from 'hardhat'
+import {AccessControl, type Cap_2, Equity, ERC1410ScheduledTasks, Snapshots_2,} from '../../../../typechain-types'
+import {deployEnvironment} from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _CAP_ROLE,
     _CORPORATE_ACTION_ROLE,
@@ -220,13 +214,8 @@ import {
     _PAUSER_ROLE,
     _SNAPSHOT_ROLE,
 } from '../../../../scripts/constants'
-import {
-    deployEquityFromFactory,
-    RegulationSubType,
-    RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import {BigNumber} from "ethers";
+import {deployEquityFromFactory, RegulationSubType, RegulationType,} from '../../../../scripts/factory'
+import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers.js'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
