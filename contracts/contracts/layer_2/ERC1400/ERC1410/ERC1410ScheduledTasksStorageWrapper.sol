@@ -463,6 +463,16 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         CapStorageWrapper_2._checkNewTotalSupply(_amount);
     }
 
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
+        CapStorageWrapper_2._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
     function _checkMaxSupply(
         uint256 _amount
     )
@@ -473,5 +483,22 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         returns (bool)
     {
         return CapStorageWrapper_2._checkMaxSupply(_amount);
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, CapStorageWrapper_2)
+        returns (bool)
+    {
+        return
+            CapStorageWrapper_2._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 }
