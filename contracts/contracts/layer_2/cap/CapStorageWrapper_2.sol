@@ -278,6 +278,22 @@ abstract contract CapStorageWrapper_2 is
         }
     }
 
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    ) internal view virtual override returns (bool) {
+        uint256 totalSupply = ERC1410ScheduledTasks_CD_Lib
+            .totalSupplyByPartitionAdjusted(_partition);
+        if (_newMaxSupply != 0 && totalSupply > _newMaxSupply) {
+            revert NewMaxSupplyForPartitionTooLow(
+                _partition,
+                _newMaxSupply,
+                totalSupply
+            );
+        }
+        return true;
+    }
+
     function _checkNewTotalSupply(uint256 _amount) internal virtual override {
         uint256 newTotalSupply = ERC1410ScheduledTasks_CD_Lib
             .totalSupplyAdjusted() + _amount;

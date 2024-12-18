@@ -372,6 +372,23 @@ abstract contract ERC20StorageWrapper_2_Read is
         return ERC1410ScheduledTasksStorageWrapper._checkMaxSupply(_amount);
     }
 
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
+                _partition,
+                _newMaxSupply
+            );
+    }
+
     function _checkMaxSupplyForPartition(
         bytes32 _partition,
         uint256 _amount

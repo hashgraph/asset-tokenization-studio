@@ -204,14 +204,14 @@
 */
 
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LocalContext} from '../context/LocalContext.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
-import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {LocalContext} from '../context/LocalContext.sol';
+import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 contract CapStorageWrapper is
     ICapStorageWrapper,
@@ -244,14 +244,7 @@ contract CapStorageWrapper is
         bytes32 _partition,
         uint256 _newMaxSupply
     ) {
-        uint256 totalSupplyForPartition = _totalSupplyByPartition(_partition);
-        if (_newMaxSupply != 0 && totalSupplyForPartition > _newMaxSupply) {
-            revert NewMaxSupplyForPartitionTooLow(
-                _partition,
-                _newMaxSupply,
-                totalSupplyForPartition
-            );
-        }
+        _checkNewMaxSupplyForPartition(_partition, _newMaxSupply);
         _;
     }
 
@@ -320,6 +313,13 @@ contract CapStorageWrapper is
     }
 
     function _checkNewTotalSupply(uint256 _amount) internal virtual {
+        revert('Should not reach this function');
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    ) internal view virtual returns (bool) {
         revert('Should not reach this function');
     }
 
