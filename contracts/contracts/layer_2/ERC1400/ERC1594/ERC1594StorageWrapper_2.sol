@@ -234,6 +234,9 @@ import {
     ERC20StorageWrapper
 } from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
 import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 
 abstract contract ERC1594StorageWrapper_2 is
     ERC1594StorageWrapper,
@@ -304,7 +307,7 @@ abstract contract ERC1594StorageWrapper_2 is
     )
         internal
         virtual
-        override(ERC1410BasicStorageWrapper, ERC20StorageWrapper_2_Read)
+        override(ERC1410BasicStorageWrapperRead, ERC20StorageWrapper_2_Read)
     {
         ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
             _value,

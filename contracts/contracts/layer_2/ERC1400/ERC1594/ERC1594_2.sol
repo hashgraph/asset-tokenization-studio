@@ -226,6 +226,9 @@ import {
 } from '../ERC20/ERC20StorageWrapper_2_Read.sol';
 import {ERC1594StorageWrapper_2} from './ERC1594StorageWrapper_2.sol';
 import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 
 contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
     function _beforeTokenTransfer(
@@ -257,7 +260,7 @@ contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
     )
         internal
         virtual
-        override(ERC1410BasicStorageWrapper, ERC1594StorageWrapper_2)
+        override(ERC1410BasicStorageWrapperRead, ERC1594StorageWrapper_2)
     {
         ERC1594StorageWrapper_2._addPartitionTo(_value, _account, _partition);
     }

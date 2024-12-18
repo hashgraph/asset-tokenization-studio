@@ -377,7 +377,7 @@ describe('Adjust Balances Tests', () => {
         // adjustBalances fails
         await expect(
             adjustBalancesFacet.adjustBalances(0, adjustDecimals)
-        ).to.be.rejectedWith(Error)
+        ).to.be.revertedWithCustomError(adjustBalancesFacet, 'FactorIsZero')
     })
 
     it('GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds', async () => {
@@ -501,6 +501,6 @@ describe('Adjust Balances Tests', () => {
                 balanceOf_B_Original,
                 '0x'
             )
-        ).to.eventually.be.rejectedWith(Error)
+        ).to.be.revertedWithCustomError(erc1410Facet, 'MaxSupplyReached')
     })
 })

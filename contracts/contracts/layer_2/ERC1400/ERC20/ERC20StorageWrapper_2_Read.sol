@@ -222,6 +222,9 @@ import {
     AdjustBalances_CD_Lib
 } from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
 import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 
 abstract contract ERC20StorageWrapper_2_Read is
     ERC20StorageWrapper,
@@ -312,7 +315,7 @@ abstract contract ERC20StorageWrapper_2_Read is
         internal
         virtual
         override(
-            ERC1410BasicStorageWrapper,
+            ERC1410BasicStorageWrapperRead,
             ERC1410ScheduledTasksStorageWrapper
         )
     {
