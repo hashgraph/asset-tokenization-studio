@@ -216,6 +216,9 @@ import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 
 contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
     function _beforeTokenTransfer(
@@ -240,7 +243,7 @@ contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
         internal
         virtual
         override(
-            ERC1410BasicStorageWrapper,
+            ERC1410BasicStorageWrapperRead,
             ERC1410ScheduledTasksStorageWrapper
         )
     {

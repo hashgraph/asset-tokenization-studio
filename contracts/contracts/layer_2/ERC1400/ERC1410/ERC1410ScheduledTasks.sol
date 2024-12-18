@@ -221,6 +221,9 @@ import {
     ERC1410BasicStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
 import {
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {
     SnapshotsStorageWrapper
 } from '../../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
 import {
@@ -324,7 +327,7 @@ contract ERC1410ScheduledTasks is
         internal
         virtual
         override(
-            ERC1410BasicStorageWrapper,
+            ERC1410BasicStorageWrapperRead,
             ERC1410ScheduledTasksStorageWrapper
         )
     {

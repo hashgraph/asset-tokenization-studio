@@ -230,8 +230,6 @@ contract ERC20StorageWrapper_2 is
         _triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
 
         _updateAllowanceAndLABAF(_owner, _spender);
-
-        super._beforeAllowanceUpdate(_owner, _spender, _amount, _isIncrease);
     }
 
     function _updateAllowanceAndLABAF(
