@@ -9,9 +9,9 @@ import 'solidity-coverage'
 import '@hashgraph/sdk'
 import { getEnvVar } from './scripts/utils'
 // ! Uncomment the following lines to be able to use tasks AFTER compiling the project
-import './tasks/utils'
-import './tasks/deploy'
-import './tasks/update'
+// import './tasks/utils'
+// import './tasks/deploy'
+// import './tasks/update'
 
 if (getEnvVar({ name: 'NETWORK', defaultValue: 'hardhat' }) !== 'hardhat') {
     require('@hashgraph/hardhat-hethers')
