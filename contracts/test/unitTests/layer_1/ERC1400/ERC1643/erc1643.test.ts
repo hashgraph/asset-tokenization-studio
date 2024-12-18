@@ -348,7 +348,7 @@ describe('ERC1643 Tests', () => {
                 documentURI_1,
                 documentHASH_1
             )
-        ).to.eventually.be.rejectedWith(Error)
+        ).to.be.revertedWithCustomError(erc1643Facet, 'TokenIsPaused')
     })
 
     it('GIVEN a paused Token WHEN removeDocument THEN transaction fails with TokenIsPaused', async () => {
@@ -368,7 +368,7 @@ describe('ERC1643 Tests', () => {
         // remove document
         await expect(
             erc1643Facet.removeDocument(documentName_1)
-        ).to.eventually.be.rejectedWith(Error)
+        ).to.be.revertedWithCustomError(erc1643Facet, 'TokenIsPaused')
     })
 
     it('GIVEN a document with no name WHEN setDocument THEN transaction fails with EmptyName', async () => {

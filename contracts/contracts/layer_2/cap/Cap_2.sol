@@ -239,6 +239,16 @@ contract Cap_2 is Cap, CapStorageWrapper_2 {
         CapStorageWrapper_2._checkNewTotalSupply(_amount);
     }
 
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
+        CapStorageWrapper_2._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
     function _checkMaxSupply(
         uint256 _amount
     )
@@ -263,6 +273,23 @@ contract Cap_2 is Cap, CapStorageWrapper_2 {
     {
         return
             CapStorageWrapper_2._checkNewMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, CapStorageWrapper_2)
+        returns (bool)
+    {
+        return
+            CapStorageWrapper_2._checkMaxSupplyForPartition(
                 _partition,
                 _amount
             );

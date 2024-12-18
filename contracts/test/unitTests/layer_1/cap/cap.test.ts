@@ -356,7 +356,7 @@ describe('CAP Tests', () => {
             // add to list fails
             await expect(
                 capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply)
-            ).to.be.rejectedWith(Error)
+            ).to.be.revertedWithCustomError(capFacet, 'AccountHasNoRole')
         })
     })
 
@@ -380,10 +380,10 @@ describe('CAP Tests', () => {
             // add to list fails
             await expect(
                 capFacet.setMaxSupply(maxSupply)
-            ).to.eventually.be.rejectedWith(Error)
+            ).to.be.revertedWithCustomError(capFacet, 'NewMaxSupplyTooLow')
         })
 
-        it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyTooLow', async () => {
+        it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyForPartitionTooLow', async () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
             await accessControlFacet.grantRole(_CAP_ROLE, account_C)
@@ -402,7 +402,10 @@ describe('CAP Tests', () => {
             // add to list fails
             await expect(
                 capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply)
-            ).to.eventually.be.rejectedWith(Error)
+            ).to.be.revertedWithCustomError(
+                capFacet,
+                'NewMaxSupplyForPartitionTooLow'
+            )
         })
     })
 

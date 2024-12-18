@@ -887,7 +887,7 @@ describe('ERC1400 Tests', () => {
                     amount,
                     data
                 )
-            ).to.be.rejectedWith('TokenIsPaused')
+            ).to.be.revertedWithCustomError(erc1410Facet, 'TokenIsPaused')
         })
 
         it('GIVEN Token WHEN issue to partition 0 THEN transaction fails with ZeroPartition', async () => {
@@ -2990,7 +2990,9 @@ describe('ERC1400 Tests', () => {
                 // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterTransfer(after, before)
+                expect(after.balanceOf_A).to.equal(
+                    before.balanceOf_A.mul(adjustFactor).sub(expectedAllowance)
+                )
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransfer succeeds', async () => {
@@ -3093,11 +3095,12 @@ describe('ERC1400 Tests', () => {
 
                 await setPreBalanceAdjustment(true)
 
+                const before = await getBalanceAdjustedValues()
+
                 erc20Facet = erc20Facet.connect(signer_A)
-                await erc20Facet.approve(account_A, amount)
+                await erc20Facet.approve(account_B, before.balanceOf_A)
 
                 // Before Values
-                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3105,9 +3108,10 @@ describe('ERC1400 Tests', () => {
                     adjustDecimals
                 )
 
+                erc20Facet = erc20Facet.connect(signer_B)
+                // Transaction Partition 1 with updated balance
                 const updatedBalance = before.balanceOf_A.mul(adjustFactor)
 
-                // Transaction Partition 1 with updated balance
                 await erc20Facet.transferFrom(
                     account_A,
                     account_B,
@@ -3117,7 +3121,7 @@ describe('ERC1400 Tests', () => {
                 // // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterTransfer(after, before)
+                expect(after.balanceOf_A).to.equal(0)
             })
         })
 
