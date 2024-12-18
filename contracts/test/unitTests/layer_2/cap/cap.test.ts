@@ -209,7 +209,7 @@ import {
     AccessControl,
     type Cap_2,
     Equity,
-    ERC1410ScheduledTasks,
+    ERC1410ScheduledTasks, ERC20_2, IERC20,
     Snapshots_2,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
@@ -226,6 +226,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import {BigNumber} from "ethers";
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -479,10 +480,7 @@ describe('CAP Layer 2 Tests', () => {
 
         // Attempt to change the max supply by partition with the same value as before
         await expect(
-            capFacet.setMaxSupplyByPartition(
-                _PARTITION_ID_1,
-                maxSupplyByPartition
-            )
-        ).to.be.revertedWith('NewMaxSupplyForPartitionTooLow')
+            capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition)
+        ).to.eventually.be.rejectedWith('NewMaxSupplyForPartitionTooLow')
     })
 })
