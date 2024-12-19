@@ -209,22 +209,18 @@
 pragma solidity 0.8.18;
 
 import {
-    ScheduledSnapshotsStorageWrapper
-} from '../../scheduledTasks/scheduledSnapshots/ScheduledSnapshotsStorageWrapper.sol';
+    ERC1410SnapshotStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
 import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
-import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+    CorporateActionsStorageWrapper
+} from '../../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
 import {
     _ERC1410_BASIC_STORAGE_2_POSITION
 } from '../../constants/storagePositions.sol';
 import {
-    ERC1410SnapshotStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410//ERC1410SnapshotStorageWrapper.sol';
-import {
-    CorporateActionsStorageWrapper
-} from '../../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapperRead is
     CorporateActionsStorageWrapper,
@@ -247,12 +243,19 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
     }
 
     function _getABAFAdjusted() internal view virtual returns (uint256) {
+        return _getABAFAdjustedAt(_blockTimestamp());
+    }
+
+    function _getABAFAdjustedAt(
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
         uint256 ABAF = _getABAF();
         if (ABAF == 0) ABAF = 1;
         (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
+            ._getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
+                _corporateActionsStorage(),
+                _timestamp
             );
         return ABAF * pendingABAF;
     }
@@ -287,8 +290,15 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
     function _balanceOfAdjusted(
         address _tokenHolder
     ) internal view virtual returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
+    }
+
+    function _balanceOfAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
+            _getABAFAdjustedAt(_timestamp),
             _getLABAFForUser(_tokenHolder)
         );
         return _balanceOf(_tokenHolder) * factor;
@@ -298,8 +308,21 @@ abstract contract ERC1410ScheduledTasksStorageWrapperRead is
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256) {
+        return
+            _balanceOfByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                _blockTimestamp()
+            );
+    }
+
+    function _balanceOfByPartitionAdjustedAt(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
+            _getABAFAdjustedAt(_timestamp),
             _getLABAFForUserAndPartition(_partition, _tokenHolder)
         );
         return _balanceOfByPartition(_partition, _tokenHolder) * factor;

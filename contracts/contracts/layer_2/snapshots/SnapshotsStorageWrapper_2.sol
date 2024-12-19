@@ -209,13 +209,10 @@ pragma solidity 0.8.18;
 import {
     SnapshotsStorageWrapper
 } from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
-import {_SNAPSHOT_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     ERC1410ScheduledTasksStorageWrapperRead
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol';
-import {
-    ERC1410BasicStorageWrapper
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {_SNAPSHOT_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
 
 abstract contract SnapshotsStorageWrapper_2 is
     SnapshotsStorageWrapper,
@@ -247,13 +244,13 @@ abstract contract SnapshotsStorageWrapper_2 is
 
     function _decimalsAtSnapshot(
         uint256 _snapshotID
-    ) internal view returns (uint256 decimals_) {
+    ) internal view returns (uint8 decimals_) {
         (bool snapshotted, uint256 value) = _valueAt(
             _snapshotID,
             _snapshotStorage_2().decimals
         );
 
-        return snapshotted ? value : _decimals();
+        return snapshotted ? uint8(value) : _decimals();
     }
 
     function _updateAccountSnapshot(

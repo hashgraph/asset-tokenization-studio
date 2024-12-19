@@ -228,7 +228,6 @@ abstract contract ERC1410BasicStorageWrapper is
         address _operator,
         bytes memory _operatorData
     ) internal virtual {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
         if (!_validPartition(_partition, _from)) {
             revert InvalidPartition(_from, _partition);
         }

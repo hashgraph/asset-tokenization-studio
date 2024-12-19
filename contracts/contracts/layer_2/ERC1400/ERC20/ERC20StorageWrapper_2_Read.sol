@@ -207,94 +207,122 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1594StorageWrapper
-} from '../../../layer_1/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
-    _ALLOWANCE_REACHED_ERROR_ID,
-    _SUCCESS
-} from '../../../layer_1/constants/values.sol';
-import {
     ERC1410BasicStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
-import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
-import {
-    ERC20StorageWrapper_2_Read
-} from '../ERC20/ERC20StorageWrapper_2_Read.sol';
-
 import {
     ERC20StorageWrapper
 } from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
+import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
+import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
+import {_ERC20_2_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 
-abstract contract ERC1594StorageWrapper_2 is
-    ERC1594StorageWrapper,
-    ERC20StorageWrapper_2
+abstract contract ERC20StorageWrapper_2_Read is
+    ERC20StorageWrapper,
+    ERC1410ScheduledTasksStorageWrapper
 {
-    function _canTransfer(
-        address _to,
-        uint256 _value,
-        bytes calldata _data // solhint-disable-line no-unused-vars
-    ) internal view virtual override returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_msgSender())) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfAdjusted(_msgSender()) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-
-        return (true, _SUCCESS, bytes32(0));
+    struct ERC20Storage_2 {
+        mapping(address => mapping(address => uint256)) LABAFs_allowances;
     }
 
-    function _canTransferFrom(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data // solhint-disable-line no-unused-vars
-    ) internal view virtual override returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (_allowanceAdjusted(_from, _msgSender()) < _value) {
-            return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfAdjusted(_from) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
+    function _getAllowanceLABAF(
+        address _owner,
+        address _spender
+    ) internal view virtual returns (uint256) {
+        ERC20Storage_2 storage erc20Storage_2 = _getErc20Storage_2();
+        return erc20Storage_2.LABAFs_allowances[_owner][_spender];
+    }
 
-        return (true, _SUCCESS, bytes32(0));
+    function _decimalsAdjusted() internal view virtual returns (uint8) {
+        return _decimalsAdjustedAt(_blockTimestamp());
+    }
+
+    function _decimalsAdjustedAt(
+        uint256 _timestamp
+    ) internal view virtual returns (uint8) {
+        return _getERC20MetadataAdjustedAt(_timestamp).info.decimals;
+    }
+
+    function _allowanceAdjusted(
+        address _owner,
+        address _spender
+    ) internal view virtual returns (uint256) {
+        return _allowanceAdjustedAt(_owner, _spender, _blockTimestamp());
+    }
+
+    function _allowanceAdjustedAt(
+        address _owner,
+        address _spender,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            _getABAFAdjustedAt(_timestamp),
+            _getAllowanceLABAF(_owner, _spender)
+        );
+        return _allowance(_owner, _spender) * factor;
+    }
+
+    function _getErc20Storage_2()
+        internal
+        view
+        virtual
+        returns (ERC20Storage_2 storage erc20Storage_2_)
+    {
+        bytes32 position = _ERC20_2_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc20Storage_2_.slot := position
+        }
+    }
+
+    function _getERC20MetadataAdjusted()
+        internal
+        view
+        virtual
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+    {
+        erc20Metadata_ = _getERC20MetadataAdjustedAt(_blockTimestamp());
+    }
+
+    function _getERC20MetadataAdjustedAt(
+        uint256 _timestamp
+    )
+        internal
+        view
+        virtual
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+    {
+        (, uint8 pendingDecimals) = AdjustBalanceLib
+            ._getPendingScheduledBalanceAdjustmentsAt(
+                _scheduledBalanceAdjustmentStorage(),
+                _corporateActionsStorage(),
+                _timestamp
+            );
+        erc20Metadata_ = super._getERC20Metadata();
+        erc20Metadata_.info.decimals += pendingDecimals;
+    }
+
+    function _beforeTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
+    )
+        internal
+        virtual
+        override(
+            ERC1410BasicStorageWrapper,
+            ERC1410ScheduledTasksStorageWrapper
+        )
+    {
+        ERC1410ScheduledTasksStorageWrapper._beforeTokenTransfer(
+            partition,
+            from,
+            to,
+            amount
+        );
     }
 
     function _addPartitionTo(
@@ -304,26 +332,15 @@ abstract contract ERC1594StorageWrapper_2 is
     )
         internal
         virtual
-        override(ERC1410BasicStorageWrapper, ERC20StorageWrapper_2_Read)
+        override(
+            ERC1410BasicStorageWrapper,
+            ERC1410ScheduledTasksStorageWrapper
+        )
     {
         ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
             _value,
             _account,
             _partition
-        );
-    }
-
-    function _beforeAllowanceUpdate(
-        address _owner,
-        address _spender,
-        uint256 _amount,
-        bool _isIncrease
-    ) internal virtual override(ERC20StorageWrapper, ERC20StorageWrapper_2) {
-        ERC20StorageWrapper_2._beforeAllowanceUpdate(
-            _owner,
-            _spender,
-            _amount,
-            _isIncrease
         );
     }
 }

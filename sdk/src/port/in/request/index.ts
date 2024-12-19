@@ -328,5 +328,5 @@ export {
   GetAllScheduledBalanceAdjustmentsRequest,
   GetLastAggregatedBalanceAdjustmentFactorForRequest,
   GetAggregatedBalanceAdjustmentFactorRequest,
-  GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest
+  GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
 };

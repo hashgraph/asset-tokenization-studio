@@ -206,22 +206,32 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {
-    CorporateActionsStorageWrapperSecurity
-} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+    CorporateActionsStorageWrapper
+} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
+    ERC20StorageWrapper_2_Read
+} from '../ERC1400/ERC20/ERC20StorageWrapper_2_Read.sol';
+import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from '../constants/values.sol';
 import {
+    CorporateActionsStorageWrapperSecurity
+} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+import {IEquity} from '../interfaces/equity/IEquity.sol';
+import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 abstract contract EquityStorageWrapper is
-    CorporateActionsStorageWrapperSecurity
+    CorporateActionsStorageWrapperSecurity,
+    ERC20StorageWrapper_2_Read
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -307,13 +317,15 @@ abstract contract EquityStorageWrapper is
         dividendFor_.recordDate = registeredDividend.dividend.recordDate;
         dividendFor_.executionDate = registeredDividend.dividend.executionDate;
 
-        if (registeredDividend.dividend.recordDate < _blockTimestamp()) {
-            dividendFor_.recordDateReached = true;
-
-            dividendFor_.tokenBalance = (registeredDividend.snapshotId != 0)
-                ? _balanceOfAtSnapshot(registeredDividend.snapshotId, _account)
-                : _balanceOfAdjusted(_account);
-        }
+        (
+            dividendFor_.tokenBalance,
+            dividendFor_.decimals,
+            dividendFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredDividend.dividend.recordDate,
+            registeredDividend.snapshotId,
+            _account
+        );
     }
 
     function _getDividendsCount()
@@ -375,13 +387,15 @@ abstract contract EquityStorageWrapper is
         votingFor_.recordDate = registeredVoting.voting.recordDate;
         votingFor_.data = registeredVoting.voting.data;
 
-        if (registeredVoting.voting.recordDate < _blockTimestamp()) {
-            votingFor_.recordDateReached = true;
-
-            votingFor_.tokenBalance = (registeredVoting.snapshotId != 0)
-                ? _balanceOfAtSnapshot(registeredVoting.snapshotId, _account)
-                : _balanceOf(_account);
-        }
+        (
+            votingFor_.tokenBalance,
+            votingFor_.decimals,
+            votingFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredVoting.voting.recordDate,
+            registeredVoting.snapshotId,
+            _account
+        );
     }
 
     function _getVotingCount()
@@ -449,6 +463,29 @@ abstract contract EquityStorageWrapper is
             );
     }
 
+    function _getSnapshotBalanceForIfDateReached(
+        uint256 _date,
+        uint256 _snapshotId,
+        address _account
+    )
+        internal
+        view
+        virtual
+        returns (uint256 balance_, uint8 decimals_, bool dateReached_)
+    {
+        if (_date < _blockTimestamp()) {
+            dateReached_ = true;
+
+            balance_ = (_snapshotId != 0)
+                ? _balanceOfAtSnapshot(_snapshotId, _account)
+                : _balanceOfAdjustedAt(_account, _date);
+
+            decimals_ = (_snapshotId != 0)
+                ? _decimalsAtSnapshot(_snapshotId)
+                : _decimalsAdjustedAt(_date);
+        }
+    }
+
     function _equityStorage()
         internal
         pure
@@ -460,5 +497,68 @@ abstract contract EquityStorageWrapper is
         assembly {
             equityData_.slot := position
         }
+    }
+
+    function _beforeTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
+    )
+        internal
+        virtual
+        override(
+            ERC1410ScheduledTasksStorageWrapper,
+            ERC20StorageWrapper_2_Read
+        )
+    {
+        ERC1410ScheduledTasksStorageWrapper._beforeTokenTransfer(
+            partition,
+            from,
+            to,
+            amount
+        );
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(
+            ERC1410ScheduledTasksStorageWrapper,
+            ERC20StorageWrapper_2_Read
+        )
+    {
+        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
+    }
+
+    function _addCorporateAction(
+        bytes32 _actionType,
+        bytes memory _data
+    )
+        internal
+        virtual
+        override(
+            CorporateActionsStorageWrapper,
+            CorporateActionsStorageWrapperSecurity
+        )
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 corporateActionIndexByType_
+        )
+    {
+        return
+            CorporateActionsStorageWrapperSecurity._addCorporateAction(
+                _actionType,
+                _data
+            );
     }
 }

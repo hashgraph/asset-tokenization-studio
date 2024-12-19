@@ -207,8 +207,8 @@
 pragma solidity 0.8.18;
 
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_SCHEDULED_TASKS_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {
     CorporateActionsStorageWrapperSecurity
@@ -216,10 +216,10 @@ import {
 import {
     IScheduledTasks
 } from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 contract ScheduledTasks is
     IStaticFunctionSelectors,

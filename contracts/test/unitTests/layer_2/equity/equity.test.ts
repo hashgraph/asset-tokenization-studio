@@ -227,6 +227,7 @@ import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
 
 const TIME = 10000
+const DECIMALS = 7
 let currentTimeInSeconds = 0
 let dividendsRecordDateInSeconds = 0
 let dividendsExecutionDateInSeconds = 0
@@ -316,7 +317,7 @@ describe('Equity Tests', () => {
             false,
             'TEST_AccessControl',
             'TAC',
-            6,
+            DECIMALS,
             'ABCDEF123456',
             false,
             false,
@@ -461,6 +462,7 @@ describe('Equity Tests', () => {
             expect(dividendFor.amount).to.equal(dividendsAmountPerEquity)
             expect(dividendFor.tokenBalance).to.equal(0)
             expect(dividendFor.recordDateReached).to.equal(false)
+            expect(dividendFor.decimals).to.equal(0)
         })
     })
 

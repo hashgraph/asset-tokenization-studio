@@ -206,15 +206,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_SNAPSHOTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
 import {
     ERC1410SnapshotStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
+import {_SNAPSHOTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
 
 abstract contract Snapshots is
     IStaticFunctionSelectors,

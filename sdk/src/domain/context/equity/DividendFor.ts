@@ -203,127 +203,13 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+import BigDecimal from '../shared/BigDecimal';
 
-import {
-    ERC1594StorageWrapper
-} from '../../../layer_1/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
-    _ALLOWANCE_REACHED_ERROR_ID,
-    _SUCCESS
-} from '../../../layer_1/constants/values.sol';
-import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
-import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
-import {
-    ERC20StorageWrapper_2_Read
-} from '../ERC20/ERC20StorageWrapper_2_Read.sol';
-
-import {
-    ERC20StorageWrapper
-} from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
-
-abstract contract ERC1594StorageWrapper_2 is
-    ERC1594StorageWrapper,
-    ERC20StorageWrapper_2
-{
-    function _canTransfer(
-        address _to,
-        uint256 _value,
-        bytes calldata _data // solhint-disable-line no-unused-vars
-    ) internal view virtual override returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_msgSender())) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfAdjusted(_msgSender()) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-
-        return (true, _SUCCESS, bytes32(0));
-    }
-
-    function _canTransferFrom(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data // solhint-disable-line no-unused-vars
-    ) internal view virtual override returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (_allowanceAdjusted(_from, _msgSender()) < _value) {
-            return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfAdjusted(_from) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-
-        return (true, _SUCCESS, bytes32(0));
-    }
-
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(ERC1410BasicStorageWrapper, ERC20StorageWrapper_2_Read)
-    {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
-        );
-    }
-
-    function _beforeAllowanceUpdate(
-        address _owner,
-        address _spender,
-        uint256 _amount,
-        bool _isIncrease
-    ) internal virtual override(ERC20StorageWrapper, ERC20StorageWrapper_2) {
-        ERC20StorageWrapper_2._beforeAllowanceUpdate(
-            _owner,
-            _spender,
-            _amount,
-            _isIncrease
-        );
-    }
+export class DividendFor {
+  tokenBalance: BigDecimal;
+  decimals: number;
+  constructor(tokenBalance: BigDecimal, decimals: number) {
+    this.tokenBalance = tokenBalance;
+    this.decimals = decimals;
+  }
 }

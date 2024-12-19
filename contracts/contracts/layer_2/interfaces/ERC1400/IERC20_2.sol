@@ -212,5 +212,5 @@ interface IERC20_2 {
     function getAllowanceLABAF(
         address _owner,
         address _spender
-    ) external returns (uint256);
+    ) external view returns (uint256);
 }

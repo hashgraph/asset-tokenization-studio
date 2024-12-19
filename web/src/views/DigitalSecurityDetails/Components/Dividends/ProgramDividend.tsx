@@ -219,6 +219,7 @@ import { useDividends } from "../../../../hooks/queries/useDividends";
 import { SetDividendsRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
 import { dateToUnixTimestamp } from "../../../../utils/format";
+import { DATE_TIME_FORMAT } from "../../../../utils/constants";
 
 interface ProgramDividendFormValues {
   amountPerUnitOfSecurity: string;
@@ -280,6 +281,7 @@ export const ProgramDividend = () => {
             fromDate={new Date()}
             placeholder={tForm("recordDate.placeholder")}
             withTimeInput
+            format={DATE_TIME_FORMAT}
           />
         </Stack>
         <Stack w="full">
@@ -298,6 +300,7 @@ export const ProgramDividend = () => {
             fromDate={new Date()}
             placeholder={tForm("paymentDate.placeholder")}
             withTimeInput
+            format={DATE_TIME_FORMAT}
           />
         </Stack>
         <Stack w="full">
