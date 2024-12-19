@@ -207,16 +207,13 @@
 
 pragma solidity 0.8.18;
 
+import { IAccessControl } from "../interfaces/IAccessControl.sol";
 import { LibCommon } from "../common/LibCommon.sol";
 import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import { IAccessControlStorageWrapper } from "../interfaces/accessControl/IAccessControlStorageWrapper.sol";
 import { LocalContext } from "../context/LocalContext.sol";
 import { _ACCESS_CONTROL_STORAGE_POSITION } from "../constants/storagePositions.sol";
 
-abstract contract AccessControlStorageWrapper is
-    IAccessControlStorageWrapper,
-    LocalContext
-{
+abstract contract AccessControlStorageWrapper is LocalContext {
     // TODO: Check if it's possible to use only one dependency of AddressSet and Bytes32Set
     using LibCommon for EnumerableSet.AddressSet;
     using LibCommon for EnumerableSet.Bytes32Set;
@@ -243,7 +240,10 @@ abstract contract AccessControlStorageWrapper is
         uint256 _activesLength
     ) {
         if (_rolesLength != _activesLength) {
-            revert RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
+            revert IAccessControl.RolesAndActivesLengthMismatch(
+                _rolesLength,
+                _activesLength
+            );
         }
         _;
     }
@@ -288,7 +288,7 @@ abstract contract AccessControlStorageWrapper is
         for (uint256 index2 = 0; index2 < _roles.length; index2++) {
             if (_actives[index2]) {
                 if (!_has(roleDataStorage, _roles[index2], _account))
-                    revert ApplyRoleContradiction(
+                    revert IAccessControl.ApplyRoleContradiction(
                         _roles,
                         _actives,
                         _roles[index2]
@@ -296,7 +296,7 @@ abstract contract AccessControlStorageWrapper is
                 continue;
             } else {
                 if (_has(roleDataStorage, _roles[index2], _account))
-                    revert ApplyRoleContradiction(
+                    revert IAccessControl.ApplyRoleContradiction(
                         _roles,
                         _actives,
                         _roles[index2]
@@ -361,7 +361,7 @@ abstract contract AccessControlStorageWrapper is
 
     function _checkRole(bytes32 _role, address _account) internal view virtual {
         if (!_hasRole(_role, _account)) {
-            revert AccountHasNoRole(_account, _role);
+            revert IAccessControl.AccountHasNoRole(_account, _role);
         }
     }
 

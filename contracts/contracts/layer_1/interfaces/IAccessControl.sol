@@ -203,14 +203,78 @@
 
 */
 
-pragma solidity 0.8.18;
-
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+pragma solidity 0.8.18;
+
 interface IAccessControl {
+    // * Errors
+    /**
+     * @dev Emitted when the provided account is not granted the role
+     *
+     * @param account The account for which the role is checked for granted
+     * @param role The role that is checked to see if the account has been granted
+     */
+    error AccountHasNoRole(address account, bytes32 role);
+
+    /**
+     * @dev Emitted when the roles length and actives length are not the same
+     *
+     * @param rolesLength The length of roles array
+     * @param activesLength The length of actives array
+     */
+    error RolesAndActivesLengthMismatch(
+        uint256 rolesLength,
+        uint256 activesLength
+    );
+
+    /**
+     * @dev Emitted when there is a contradiction in the roles to apply, the same role must be granted and revoked
+     *
+     * @param roles The list of roles
+     * @param actives The array indicating whether to grant or revoke each role
+     * @param role The role for which there is a contradiction
+     */
+    error ApplyRoleContradiction(bytes32[] roles, bool[] actives, bytes32 role);
+
+    /**
+     * @dev Emitted when an account is already assigned to a role
+     *
+     * @param role The role that is already assigned
+     * @param account The account that is already assigned to the role
+     */
     error AccountAssignedToRole(bytes32 role, address account);
+
+    /**
+     * @dev Emitted when an account is not assigned to a role
+     *
+     * @param role The role that is not assigned
+     * @param account The account that is not assigned to the role
+     */
     error AccountNotAssignedToRole(bytes32 role, address account);
+
+    /**
+     * @dev Emitted when roles are not applied correctly to an account
+     *
+     * @param roles The list of roles
+     * @param actives The array indicating whether to grant or revoke each role
+     * @param account The account to which the roles were to be applied
+     */
     error RolesNotApplied(bytes32[] roles, bool[] actives, address account);
+
+    // * Events
+    /**
+     * @dev Emitted when a default admin role is replaced
+     *
+     * @param role The role that replace its administrative role.
+     * @param previousAdminRole The legacy administrative role.
+     * @param newAdminRole The new administrative role.
+     */
+    event RoleAdminChanged(
+        bytes32 indexed role,
+        bytes32 indexed previousAdminRole,
+        bytes32 indexed newAdminRole
+    );
 
     /**
      * @dev Emitted when a role is granted to an account
@@ -255,6 +319,7 @@ interface IAccessControl {
      */
     event RolesApplied(bytes32[] roles, bool[] actives, address account);
 
+    // * Functions
     /**
      * @dev Grants a role
      *

@@ -106,6 +106,7 @@
     "prettier": "^3.4.2",
     "prettier-plugin-solidity": "^1.4.1",
     "solhint": "^5.0.3",
+    "solhint-plugin-prettier": "^0.1.0",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typechain": "8.1.0",

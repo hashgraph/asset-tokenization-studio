@@ -418,11 +418,7 @@ task('getConfigurationInfo', 'Get all info for a given configuration')
                     `  Selectors: ${JSON.stringify(facet.selectors, null, 2)}`
                 );
                 console.log(
-                    `  Interface IDs: ${JSON.stringify(
-                        facet.interfaceIds,
-                        null,
-                        2
-                    )}`
+                    `  Interface IDs: ${JSON.stringify(facet.interfaceIds, null, 2)}`
                 );
                 console.log('-------------------------');
             }

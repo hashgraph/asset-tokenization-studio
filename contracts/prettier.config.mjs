@@ -9,6 +9,7 @@ const config = {
     tabWidth: 4,
     semi: true,
     singleQuote: true,
+    bracketSpacing: true,
     plugins: ['prettier-plugin-solidity'],
     overrides: [
         {

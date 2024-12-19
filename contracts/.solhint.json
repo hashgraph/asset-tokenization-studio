@@ -1,6 +1,8 @@
 {
     "extends": "solhint:recommended",
+    "plugins": ["prettier"],
     "rules": {
+        "prettier/prettier": "error",
         "no-unused-vars": "warn",
         "max-line-length": false
     }
