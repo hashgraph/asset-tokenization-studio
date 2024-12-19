@@ -206,29 +206,20 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {SnapshotsStorageWrapper_2} from './SnapshotsStorageWrapper_2.sol';
-import {
-    SnapshotsStorageWrapper
-} from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
-import {Snapshots} from '../../layer_1/snapshots/Snapshots.sol';
-import {
-    ERC1410BasicStorageWrapper
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 import {
     _SNAPSHOTS_RESOLVER_KEY
 } from '../../layer_1/constants/resolverKeys.sol';
-import {ISnapshots} from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
-import {ISnapshots_2} from '../interfaces/snapshots/ISnapshots_2.sol';
 import {_SNAPSHOT_ROLE} from '../../layer_1/constants/roles.sol';
+import {ISnapshots} from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
+import {Snapshots} from '../../layer_1/snapshots/Snapshots.sol';
+import {
+    SnapshotsStorageWrapper
+} from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
+import {ISnapshots_2} from '../interfaces/snapshots/ISnapshots_2.sol';
 import {
     ScheduledTasksStorageWrapper
 } from '../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
+import {SnapshotsStorageWrapper_2} from './SnapshotsStorageWrapper_2.sol';
 
 contract Snapshots_2 is
     ISnapshots_2,

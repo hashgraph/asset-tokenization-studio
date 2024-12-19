@@ -213,7 +213,6 @@ import {
 } from './GetDividendsForQuery.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
 
@@ -253,6 +252,6 @@ export class GetDividendsForQueryHandler
       dividendId,
     );
 
-    return new GetDividendsForQueryResponse(new BigDecimal(res));
+    return new GetDividendsForQueryResponse(res.tokenBalance, res.decimals);
   }
 }

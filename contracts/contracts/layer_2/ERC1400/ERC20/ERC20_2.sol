@@ -209,22 +209,17 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+    ERC1410BasicStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
 import {ERC20} from '../../../layer_1/ERC1400/ERC20/ERC20.sol';
 import {
     ERC20StorageWrapper
 } from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
-import {ERC20StorageWrapper_2} from './ERC20StorageWrapper_2.sol';
-import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {_ERC20_RESOLVER_KEY} from '../../../layer_1/constants/resolverKeys.sol';
+import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {IERC20_2} from '../../interfaces/ERC1400/IERC20_2.sol';
+import {ERC20StorageWrapper_2} from './ERC20StorageWrapper_2.sol';
+import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
 
 contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
     function allowance(
@@ -234,14 +229,14 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         return _allowanceAdjusted(owner, spender);
     }
 
-    function decimals() external view override returns (uint8) {
+    function decimals() external view virtual override returns (uint8) {
         return _decimalsAdjusted();
     }
 
     function getAllowanceLABAF(
         address _owner,
         address _spender
-    ) external view returns (uint256) {
+    ) external view virtual override returns (uint256) {
         return _getAllowanceLABAF(_owner, _spender);
     }
 
@@ -250,8 +245,13 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         address from,
         address to,
         uint256 amount
-    ) internal virtual override(ERC20, ERC20StorageWrapper_2) {
-        ERC20StorageWrapper_2._beforeTokenTransfer(partition, from, to, amount);
+    ) internal virtual override(ERC20, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._beforeTokenTransfer(
+            partition,
+            from,
+            to,
+            amount
+        );
     }
 
     function _addPartitionTo(
@@ -261,9 +261,13 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
     )
         internal
         virtual
-        override(ERC1410BasicStorageWrapper, ERC20StorageWrapper_2)
+        override(ERC1410BasicStorageWrapper, ERC20StorageWrapper_2_Read)
     {
-        ERC20StorageWrapper_2._addPartitionTo(_value, _account, _partition);
+        ERC20StorageWrapper_2_Read._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
     }
 
     function _beforeAllowanceUpdate(
@@ -334,5 +338,14 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IERC20).interfaceId;
         staticInterfaceIds_[selectorsIndex++] = type(IERC20_2).interfaceId;
+    }
+
+    function getERC20Metadata()
+        external
+        view
+        override
+        returns (ERC20Metadata memory)
+    {
+        return _getERC20MetadataAdjusted();
     }
 }

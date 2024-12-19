@@ -208,7 +208,6 @@ import { ethers } from 'hardhat'
 import {
     type ResolverProxy,
     type Equity,
-    type Pause,
     type ScheduledSnapshots,
     type AccessControl,
     ScheduledTasks,
@@ -242,7 +241,6 @@ describe('Scheduled Snapshots Tests', () => {
     let scheduledSnapshotsFacet: ScheduledSnapshots
     let scheduledTasksFacet: ScheduledTasks
     let accessControlFacet: AccessControl
-    let pauseFacet: Pause
 
     beforeEach(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -302,8 +300,6 @@ describe('Scheduled Snapshots Tests', () => {
             'ScheduledTasks',
             diamond.address
         )
-
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
     })
 
     it('GIVEN a token WHEN triggerSnapshots THEN transaction succeeds', async () => {

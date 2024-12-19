@@ -421,7 +421,8 @@ describe('🧪 Equity test', () => {
     expect(dividend.dividendId).toEqual(1);
     expect(dividend.executionDate.getTime() / 1000).toEqual(executionTimestamp);
     expect(dividend.recordDate.getTime() / 1000).toEqual(recordTimestamp);
-    expect(dividendFor.value).toEqual('0');
+    expect(dividendFor.tokenBalance).toEqual('0');
+    expect(dividendFor.decimals).toEqual('0');
     expect(allDividends.length).toEqual(1);
 
     await Role.revokeRole(
@@ -477,7 +478,8 @@ describe('🧪 Equity test', () => {
     expect(voting.votingId).toEqual(1);
     expect(voting.recordDate.getTime() / 1000).toEqual(recordTimestamp);
     expect(voting.data.toUpperCase()).toEqual(data.toUpperCase());
-    expect(votingFor.value).toEqual('0');
+    expect(votingFor.tokenBalance).toEqual('0');
+    expect(votingFor.decimals).toEqual('0');
     expect(allVotings.length).toEqual(1);
 
     await Role.revokeRole(
