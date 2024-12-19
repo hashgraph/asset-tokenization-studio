@@ -252,6 +252,7 @@ interface IEquity {
         uint256 amount;
         uint256 recordDate;
         uint256 executionDate;
+        uint8 decimals;
         bool recordDateReached;
     }
 
@@ -259,6 +260,7 @@ interface IEquity {
         uint256 tokenBalance;
         uint256 recordDate;
         bytes data;
+        uint8 decimals;
         bool recordDateReached;
     }
 

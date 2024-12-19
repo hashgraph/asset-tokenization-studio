@@ -207,16 +207,12 @@ import ValidatedRequest from './validation/ValidatedRequest.js';
 import Validation from './validation/Validation.js';
 
 export default class GetScheduledBalanceAdjustmentCountRequest extends ValidatedRequest<GetScheduledBalanceAdjustmentCountRequest> {
-    securityId: string;
+  securityId: string;
 
-    constructor({
-                    securityId,
-                }: {
-        securityId: string;
-    }) {
-        super({
-            securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-        });
-        this.securityId = securityId;
-    }
+  constructor({ securityId }: { securityId: string }) {
+    super({
+      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+    });
+    this.securityId = securityId;
+  }
 }

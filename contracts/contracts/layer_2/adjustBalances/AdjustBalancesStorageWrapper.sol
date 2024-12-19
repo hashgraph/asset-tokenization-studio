@@ -245,14 +245,6 @@ abstract contract AdjustBalancesStorageWrapper is
         emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
     }
 
-    function _adjustBalancesByPartition(
-        bytes32 _partition,
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        // TODO : When balance adjustment for specific partitions are included
-    }
-
     function _beforeBalanceAdjustment(
         uint256 _factor,
         uint8 _decimals
