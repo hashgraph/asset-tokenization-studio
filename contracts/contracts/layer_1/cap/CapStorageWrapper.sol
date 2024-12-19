@@ -203,18 +203,18 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import { LocalContext } from "../context/LocalContext.sol";
-import { ICapStorageWrapper } from "../interfaces/cap/ICapStorageWrapper.sol";
+pragma solidity 0.8.18;
+
 import { _CAP_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { ICap } from "../interfaces/ICap.sol";
+import { LocalContext } from "../context/LocalContext.sol";
 import { ERC1410BasicStorageWrapperRead } from "../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol";
 
 abstract contract CapStorageWrapper is
-    ICapStorageWrapper,
-    ERC1410BasicStorageWrapperRead,
-    LocalContext
+    LocalContext,
+    ERC1410BasicStorageWrapperRead
 {
     struct CapDataStorage {
         uint256 maxSupply;
@@ -226,7 +226,7 @@ abstract contract CapStorageWrapper is
     modifier checkMaxSupply(uint256 _amount) {
         uint256 newTotalSupply = _totalSupply() + _amount;
         if (!_checkMaxSupply(newTotalSupply)) {
-            revert MaxSupplyReached(_capStorage().maxSupply);
+            revert ICap.MaxSupplyReached(_capStorage().maxSupply);
         }
         _;
     }
@@ -238,7 +238,7 @@ abstract contract CapStorageWrapper is
         if (
             !_checkMaxSupplyByPartition(_partition, newTotalSupplyForPartition)
         ) {
-            revert MaxSupplyReachedForPartition(
+            revert ICap.MaxSupplyReachedForPartition(
                 _partition,
                 _capStorage().maxSupplyByPartition[_partition]
             );
@@ -249,7 +249,7 @@ abstract contract CapStorageWrapper is
     modifier checkNewMaxSupply(uint256 _newMaxSupply) {
         uint256 totalSupply = _totalSupply();
         if (_newMaxSupply != 0 && totalSupply > _newMaxSupply) {
-            revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
+            revert ICap.NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
         }
         _;
     }
@@ -260,7 +260,7 @@ abstract contract CapStorageWrapper is
     ) {
         uint256 totalSupplyForPartition = _totalSupplyByPartition(_partition);
         if (_newMaxSupply != 0 && totalSupplyForPartition > _newMaxSupply) {
-            revert NewMaxSupplyForPartitionTooLow(
+            revert ICap.NewMaxSupplyForPartitionTooLow(
                 _partition,
                 _newMaxSupply,
                 totalSupplyForPartition
@@ -273,7 +273,7 @@ abstract contract CapStorageWrapper is
     function _setMaxSupply(uint256 _maxSupply) internal virtual {
         uint256 previousMaxSupply = _capStorage().maxSupply;
         _capStorage().maxSupply = _maxSupply;
-        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
+        emit ICap.MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
     }
 
     function _setMaxSupplyByPartition(
@@ -284,7 +284,7 @@ abstract contract CapStorageWrapper is
             _partition
         ];
         _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
+        emit ICap.MaxSupplyByPartitionSet(
             _msgSender(),
             _partition,
             _maxSupply,

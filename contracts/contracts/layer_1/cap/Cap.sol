@@ -203,13 +203,14 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import { ICap } from "../interfaces/cap/ICap.sol";
+pragma solidity 0.8.18;
+
 import { _CAP_ROLE } from "../constants/roles.sol";
-import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
 import { _CAP_RESOLVER_KEY } from "../constants/resolverKeys.sol";
+import { ICap } from "../interfaces/ICap.sol";
+import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
 import { Common } from "../common/Common.sol";
 import { CapStorageWrapper } from "./CapStorageWrapper.sol";
 
