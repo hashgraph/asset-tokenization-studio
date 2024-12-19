@@ -206,7 +206,6 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { BigNumber } from 'ethers'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     ResolverProxy,
@@ -282,7 +281,8 @@ describe('Bond Tests', () => {
     })
 
     beforeEach(async () => {
-        currentTimeInSeconds = await time.latest()
+        currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
+            .timestamp
         startingDate = currentTimeInSeconds + TIME / 1000
         maturityDate = startingDate + numberOfCoupons * frequency
         firstCouponDate = startingDate + 1
