@@ -203,10 +203,16 @@
 
 */
 
-import {expect} from 'chai'
-import {ethers} from 'hardhat'
-import {AccessControl, type Cap_2, Equity, ERC1410ScheduledTasks, Snapshots_2,} from '../../../../typechain-types'
-import {deployEnvironment} from '../../../../scripts/deployEnvironmentByRpc'
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import {
+    AccessControl,
+    type Cap_2,
+    Equity,
+    ERC1410ScheduledTasks,
+    Snapshots_2,
+} from '../../../../typechain-types'
+import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _CAP_ROLE,
     _CORPORATE_ACTION_ROLE,
@@ -214,8 +220,12 @@ import {
     _PAUSER_ROLE,
     _SNAPSHOT_ROLE,
 } from '../../../../scripts/constants'
-import {deployEquityFromFactory, RegulationSubType, RegulationType,} from '../../../../scripts/factory'
-import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers.js'
+import {
+    deployEquityFromFactory,
+    RegulationSubType,
+    RegulationType,
+} from '../../../../scripts/factory'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -469,7 +479,10 @@ describe('CAP Layer 2 Tests', () => {
 
         // Attempt to change the max supply by partition with the same value as before
         await expect(
-            capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupplyByPartition)
+            capFacet.setMaxSupplyByPartition(
+                _PARTITION_ID_1,
+                maxSupplyByPartition
+            )
         ).to.eventually.be.rejectedWith('NewMaxSupplyForPartitionTooLow')
     })
 })
