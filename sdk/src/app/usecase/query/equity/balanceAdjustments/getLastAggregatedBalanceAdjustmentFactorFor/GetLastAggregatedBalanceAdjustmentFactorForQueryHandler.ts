@@ -246,10 +246,11 @@ export class GetLastAggregatedBalanceAdjustmentFactorForQueryHandler
       ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
       : new EvmAddress(targetId);
 
-    const res = await this.queryAdapter.getLastAggregatedBalanceAdjustmentFactorFor(
-      securityEvmAddress,
-      targetEvmAddress,
-    );
+    const res =
+      await this.queryAdapter.getLastAggregatedBalanceAdjustmentFactorFor(
+        securityEvmAddress,
+        targetEvmAddress,
+      );
 
     return new GetLastAggregatedBalanceAdjustmentFactorForQueryResponse(res);
   }

@@ -209,8 +209,6 @@ import {
     type ResolverProxy,
     type Cap_2,
     AccessControl,
-    Pause,
-    ERC1410ScheduledTasks,
     Equity,
     Snapshots_2,
 } from '../../../../typechain-types'
@@ -218,7 +216,6 @@ import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _CAP_ROLE,
     _CORPORATE_ACTION_ROLE,
-    _ISSUER_ROLE,
     _PAUSER_ROLE,
     _SNAPSHOT_ROLE,
 } from '../../../../scripts/constants'

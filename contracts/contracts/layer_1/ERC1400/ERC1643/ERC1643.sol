@@ -259,7 +259,7 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
         }
         erc1643Storage.documents[_name] = Document(
             _documentHash,
-            block.timestamp,
+            _blockTimestamp(),
             _uri
         );
         emit DocumentUpdated(_name, _uri, _documentHash);

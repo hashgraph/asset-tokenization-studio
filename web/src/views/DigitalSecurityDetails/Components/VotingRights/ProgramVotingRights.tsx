@@ -219,6 +219,7 @@ import { useParams } from "react-router-dom";
 import { SetVotingRightsRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useSetVotingRights } from "../../../../hooks/queries/VotingRights";
 import { dateToUnixTimestamp, textToHex } from "../../../../utils/format";
+import { DATE_TIME_FORMAT } from "../../../../utils/constants";
 
 interface ProgramVotingRightsFormValues {
   name: string;
@@ -300,6 +301,7 @@ export const ProgramVotingRights = () => {
             fromDate={new Date()}
             placeholder={tForm("date.placeholder")}
             withTimeInput
+            format={DATE_TIME_FORMAT}
           />
         </Stack>
         <Button

@@ -211,13 +211,18 @@ import {
   BasicDefinitionListItem,
 } from "io-bricks-ui";
 import { useTranslation } from "react-i18next";
-import { formatNumberLocale, toNumber } from "../../../utils/format";
+import {
+  formatDate,
+  formatNumberLocale,
+  toNumber,
+} from "../../../utils/format";
 import { useSecurityStore } from "../../../store/securityStore";
 import { useParams } from "react-router-dom";
 import { Flex } from "@chakra-ui/react";
 import { BondDetailsViewModel } from "@hashgraph/asset-tokenization-sdk";
 import { useEffect, useMemo } from "react";
 import { MaturityDateItem } from "./MadurityDateItem";
+import { DATE_TIME_FORMAT } from "../../../utils/constants";
 interface SecurityDetailsExtended extends Omit<DefinitionListProps, "items"> {
   nominalValue?: number;
   bondDetailsResponse?: BondDetailsViewModel;
@@ -302,9 +307,10 @@ export const SecurityDetailsExtended = ({
     ) {
       defaultItems.push({
         title: tProperties("startingDate"),
-        description: `${new Date(
-          bondDetailsResponse?.startingDate!,
-        ).toLocaleDateString()}`,
+        description: formatDate(
+          bondDetailsResponse?.startingDate,
+          DATE_TIME_FORMAT,
+        ),
       });
 
       if (

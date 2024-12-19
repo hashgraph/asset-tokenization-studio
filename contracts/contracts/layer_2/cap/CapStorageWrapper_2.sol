@@ -226,10 +226,17 @@ abstract contract CapStorageWrapper_2 is
         virtual
         returns (uint256 maxSupply_)
     {
+        return _getMaxSupplyAdjustedAt(_blockTimestamp());
+    }
+
+    function _getMaxSupplyAdjustedAt(
+        uint256 _timestamp
+    ) internal view virtual returns (uint256 maxSupply_) {
         (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
+            ._getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
+                _corporateActionsStorage(),
+                _timestamp
             );
         return _getMaxSupply() * pendingABAF;
     }
@@ -237,8 +244,16 @@ abstract contract CapStorageWrapper_2 is
     function _getMaxSupplyByPartitionAdjusted(
         bytes32 _partition
     ) internal view virtual returns (uint256 maxSupply_) {
+        return
+            _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
+    }
+
+    function _getMaxSupplyByPartitionAdjustedAt(
+        bytes32 _partition,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256 maxSupply_) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
+            _getABAFAdjustedAt(_timestamp),
             _getLABAFForPartition(_partition)
         );
         return _getMaxSupplyByPartition(_partition) * factor;

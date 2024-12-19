@@ -216,7 +216,6 @@ import {
     type Equity,
     type Snapshots,
     type ScheduledSnapshots,
-    type ScheduledTasks,
     type Cap_2,
 } from '../../typechain-types'
 import {
@@ -1101,7 +1100,9 @@ DiamondResume:
         expect(accountABalanceAtSnapshot).to.be.equal(9500)
         expect(accountCBalanceAtSnapshot).to.be.equal(500)
         expect(dividend_For_A.tokenBalance).to.be.equal(9500)
+        expect(dividend_For_A.decimals).to.be.equal(TokenDecimals)
         expect(dividend_For_C.tokenBalance).to.be.equal(500)
+        expect(dividend_For_C.decimals).to.be.equal(TokenDecimals)
         expect(accountABalance).to.be.equal(10000)
         expect(accountCBalance).to.be.equal(0)
         expect(accountABalanceByPartition).to.be.equal(accountABalance)

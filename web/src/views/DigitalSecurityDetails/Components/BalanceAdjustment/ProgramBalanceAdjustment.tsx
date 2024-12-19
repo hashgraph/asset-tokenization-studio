@@ -224,6 +224,7 @@ import {
   dateToUnixTimestamp,
 } from "../../../../utils/format";
 import { SetScheduledBalanceAdjustmentRequest } from "@hashgraph/asset-tokenization-sdk";
+import { DATE_TIME_FORMAT } from "../../../../utils/constants";
 
 interface ProgramBalanceAdjustmentFormValues {
   executionDate: string;
@@ -292,12 +293,12 @@ export const ProgramBalanceAdjustment = () => {
               id="executionDate"
               rules={{
                 required,
-                validate: isAfterDate(new Date(), "dd-MM-yyyy HH:mm:ss"),
+                validate: isAfterDate(new Date(), DATE_TIME_FORMAT),
               }}
               fromDate={new Date()}
               placeholder={tForm("executionDate.placeholder")}
               withTimeInput
-              format="dd:MM:yyyy HH:mm:ss"
+              format={DATE_TIME_FORMAT}
             />
           </Stack>
           <Stack w="full">

@@ -217,9 +217,17 @@ import {
   GetAllScheduledBalanceAdjustmentsRequest,
   SecurityViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
-import { formatNumberLocale, toNumber } from "../../../utils/format";
+import {
+  formatDate,
+  formatNumberLocale,
+  toNumber,
+} from "../../../utils/format";
 import { useUserStore } from "../../../store/userStore";
-import { COUPONS_FACTOR, User } from "../../../utils/constants";
+import {
+  COUPONS_FACTOR,
+  DATE_TIME_FORMAT,
+  User,
+} from "../../../utils/constants";
 import { useSecurityStore } from "../../../store/securityStore";
 import { SkeletonText } from "@chakra-ui/react";
 import {
@@ -453,16 +461,12 @@ export const Details = ({
                 {
                   title: tBenefits("recordDate"),
                   description:
-                    new Date(
-                      dividend.recordDate.getTime(),
-                    ).toLocaleDateString() ?? "",
+                    formatDate(dividend.recordDate, DATE_TIME_FORMAT) ?? "",
                 },
                 {
                   title: tBenefits("executionDate"),
                   description:
-                    new Date(
-                      dividend.executionDate.getTime(),
-                    ).toLocaleDateString() ?? "",
+                    formatDate(dividend.executionDate, DATE_TIME_FORMAT) ?? "",
                 },
                 {
                   title: tBenefits("dividendAmount"),
@@ -500,16 +504,12 @@ export const Details = ({
                 {
                   title: tBenefits("recordDate"),
                   description:
-                    new Date(
-                      coupon.recordDate.getTime(),
-                    ).toLocaleDateString() ?? "",
+                    formatDate(coupon.recordDate, DATE_TIME_FORMAT) ?? "",
                 },
                 {
                   title: tBenefits("executionDate"),
                   description:
-                    new Date(
-                      coupon.executionDate.getTime(),
-                    ).toLocaleDateString() ?? "",
+                    formatDate(coupon.executionDate, DATE_TIME_FORMAT) ?? "",
                 },
                 {
                   title: tBenefits("couponRate"),
@@ -594,17 +594,18 @@ export const Details = ({
                 {
                   title: tBenefits("executionDate"),
                   description:
-                    new Date(
-                      balanceAdjustment.executionDate.getTime(),
-                    ).toLocaleDateString() ?? "",
+                    formatDate(
+                      balanceAdjustment.executionDate,
+                      DATE_TIME_FORMAT,
+                    ) ?? "",
                 },
                 {
                   title: tBenefits("factor"),
-                  description: balanceAdjustment.factor ?? "",
-                },
-                {
-                  title: tBenefits("decimals"),
-                  description: balanceAdjustment.decimals ?? "",
+                  description:
+                    (
+                      Number(balanceAdjustment.factor) /
+                      Math.pow(10, Number(balanceAdjustment.decimals))
+                    ).toString() ?? "",
                 },
               ]}
               title={tBenefits("balanceAdjustments")}

@@ -360,7 +360,7 @@ export const DigitalSecurityDetails = () => {
       adminTabs.push({ content: <Dividends />, header: tTabs("dividends") });
     }
 
-    if (hasCorporateActionsRole && !isPaused) {
+    if (equityDetails && hasCorporateActionsRole && !isPaused) {
       adminTabs.push({
         content: <BalanceAdjustment />,
         header: tTabs("balanceAdjustment"),

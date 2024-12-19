@@ -211,11 +211,6 @@ import {
     type Pause,
     type ERC1410ScheduledTasks,
     type AccessControl,
-    Cap,
-    ERC20,
-    ERC1594,
-    ERC1644,
-    Lock_2,
     Equity,
     ScheduledTasks,
 } from '../../../../typechain-types'
@@ -224,9 +219,6 @@ import {
     _ADJUSTMENT_BALANCE_ROLE,
     _PAUSER_ROLE,
     _ISSUER_ROLE,
-    _CAP_ROLE,
-    _CONTROLLER_ROLE,
-    _LOCKER_ROLE,
     _CORPORATE_ACTION_ROLE,
 } from '../../../../scripts/constants'
 import {
@@ -237,22 +229,14 @@ import {
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
 
 const amount = 1
-const balanceOf_A_Original = [10 * amount, 100 * amount]
 const balanceOf_B_Original = [20 * amount, 200 * amount]
-const _PARTITION_ID_1 =
-    '0x0000000000000000000000000000000000000000000000000000000000000001'
 const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const adjustFactor = 253
 const adjustDecimals = 2
 const decimals_Original = 6
-const maxSupply_Original = 1000000 * amount
-const maxSupply_Partition_1_Original = 50000 * amount
-const maxSupply_Partition_2_Original = 0
-const ONE_SECOND = 1
 const TIME = 6000
 
 describe('Adjust Balances Tests', () => {

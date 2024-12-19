@@ -242,5 +242,5 @@ export {
   RegulationViewModel,
   LockViewModel,
   ConfigInfoViewModel,
-  ScheduledBalanceAdjustmentViewModel
+  ScheduledBalanceAdjustmentViewModel,
 };

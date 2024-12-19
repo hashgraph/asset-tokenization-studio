@@ -358,7 +358,9 @@ export const SeeVotingRights = () => {
               <Text textStyle="ElementsSemibold2XL">
                 {votingIsPending
                   ? tDetails("pending")
-                  : tDetails("number", { number: votingRightsFor.value })}
+                  : tDetails("number", {
+                      number: votingRightsFor.tokenBalance,
+                    })}
               </Text>
             </Center>
           </Panel>

@@ -223,7 +223,7 @@ import { useParams } from "react-router-dom";
 import { useCoupons } from "../../../../hooks/queries/useCoupons";
 import { useGetBondDetails } from "../../../../hooks/queries/useGetSecurityDetails";
 import { dateToUnixTimestamp } from "../../../../utils/format";
-import { COUPONS_FACTOR } from "../../../../utils/constants";
+import { COUPONS_FACTOR, DATE_TIME_FORMAT } from "../../../../utils/constants";
 import { isBeforeDate } from "../../../../utils/helpers";
 
 interface ProgramCouponFormValues {
@@ -296,6 +296,7 @@ export const ProgramCoupon = () => {
                 toDate={new Date(bondDetails.maturityDate)}
                 placeholder={tForm("recordDate.placeholder")}
                 withTimeInput
+                format={DATE_TIME_FORMAT}
               />
             )}
           </Stack>
@@ -320,6 +321,7 @@ export const ProgramCoupon = () => {
                 toDate={new Date(bondDetails.maturityDate)}
                 placeholder={tForm("paymentDate.placeholder")}
                 withTimeInput
+                format={DATE_TIME_FORMAT}
               />
             )}
           </Stack>
