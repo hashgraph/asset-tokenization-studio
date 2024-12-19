@@ -203,59 +203,59 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
 import {
     type ResolverProxy,
     type Equity,
     type ScheduledBalanceAdjustments,
     type AccessControl,
     ScheduledTasks,
-} from '../../../../../typechain-types'
-import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
+} from '../../../../../typechain-types';
+import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc';
 import {
     _CORPORATE_ACTION_ROLE,
     _PAUSER_ROLE,
-} from '../../../../../scripts/constants'
+} from '../../../../../scripts/constants';
 import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+} from '../../../../../scripts/factory';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
 
-const TIME = 6000
+const TIME = 6000;
 
 describe('Scheduled BalanceAdjustments Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
+    let diamond: ResolverProxy;
+    let signer_A: SignerWithAddress;
+    let signer_B: SignerWithAddress;
+    let signer_C: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
+    let account_A: string;
+    let account_B: string;
+    let account_C: string;
 
-    let equityFacet: Equity
-    let scheduledBalanceAdjustmentsFacet: ScheduledBalanceAdjustments
-    let scheduledTasksFacet: ScheduledTasks
-    let accessControlFacet: AccessControl
+    let equityFacet: Equity;
+    let scheduledBalanceAdjustmentsFacet: ScheduledBalanceAdjustments;
+    let scheduledTasksFacet: ScheduledTasks;
+    let accessControlFacet: AccessControl;
 
     beforeEach(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
+        [signer_A, signer_B, signer_C] = await ethers.getSigners();
+        account_A = signer_A.address;
+        account_B = signer_B.address;
+        account_C = signer_C.address;
 
-        await deployEnvironment()
+        await deployEnvironment();
 
         const rbacPause: Rbac = {
             role: _PAUSER_ROLE,
             members: [account_B],
-        }
-        const init_rbacs: Rbac[] = [rbacPause]
+        };
+        const init_rbacs: Rbac[] = [rbacPause];
 
         diamond = await deployEquityFromFactory(
             account_A,
@@ -283,174 +283,180 @@ describe('Scheduled BalanceAdjustments Tests', () => {
             'ES,FR,CH',
             'nothing',
             init_rbacs
-        )
+        );
 
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address
-        )
+        );
 
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
+        equityFacet = await ethers.getContractAt('Equity', diamond.address);
 
         scheduledBalanceAdjustmentsFacet = await ethers.getContractAt(
             'ScheduledBalanceAdjustments',
             diamond.address
-        )
+        );
         scheduledTasksFacet = await ethers.getContractAt(
             'ScheduledTasks',
             diamond.address
-        )
-    })
+        );
+    });
 
     it('GIVEN a token WHEN triggerBalanceAdjustments THEN transaction succeeds', async () => {
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C);
         // Using account C (with role)
-        equityFacet = equityFacet.connect(signer_C)
+        equityFacet = equityFacet.connect(signer_C);
 
         // set balanceAdjustment
         const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
+            .timestamp;
         const balanceAdjustmentExecutionDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000
+            currentTimeInSeconds + TIME / 1000;
         const balanceAdjustmentExecutionDateInSeconds_2 =
-            currentTimeInSeconds + (2 * TIME) / 1000
+            currentTimeInSeconds + (2 * TIME) / 1000;
         const balanceAdjustmentExecutionDateInSeconds_3 =
-            currentTimeInSeconds + (3 * TIME) / 1000
+            currentTimeInSeconds + (3 * TIME) / 1000;
 
-        const balanceAdjustmentsFactor = 1
-        const balanceAdjustmentsDecimals = 2
+        const balanceAdjustmentsFactor = 1;
+        const balanceAdjustmentsDecimals = 2;
 
         const balanceAdjustmentData_1 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
             factor: balanceAdjustmentsFactor,
             decimals: balanceAdjustmentsDecimals,
-        }
+        };
         const balanceAdjustmentData_2 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_2.toString(),
             factor: balanceAdjustmentsFactor,
             decimals: balanceAdjustmentsDecimals,
-        }
+        };
         const balanceAdjustmentData_3 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_3.toString(),
             factor: balanceAdjustmentsFactor,
             decimals: balanceAdjustmentsDecimals,
-        }
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_3)
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+        };
+        await equityFacet.setScheduledBalanceAdjustment(
+            balanceAdjustmentData_2
+        );
+        await equityFacet.setScheduledBalanceAdjustment(
+            balanceAdjustmentData_3
+        );
+        await equityFacet.setScheduledBalanceAdjustment(
+            balanceAdjustmentData_1
+        );
 
         const balanceAdjustment_2_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000001'
+            '0x0000000000000000000000000000000000000000000000000000000000000001';
         const balanceAdjustment_3_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000002'
+            '0x0000000000000000000000000000000000000000000000000000000000000002';
         const balanceAdjustment_1_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000003'
+            '0x0000000000000000000000000000000000000000000000000000000000000003';
 
         // check schedled BalanceAdjustments
         scheduledBalanceAdjustmentsFacet =
-            scheduledBalanceAdjustmentsFacet.connect(signer_A)
+            scheduledBalanceAdjustmentsFacet.connect(signer_A);
 
         let scheduledBalanceAdjustmentCount =
-            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
+            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount();
         let scheduledBalanceAdjustments =
             await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
                 0,
                 100
-            )
+            );
 
-        expect(scheduledBalanceAdjustmentCount).to.equal(3)
+        expect(scheduledBalanceAdjustmentCount).to.equal(3);
         expect(scheduledBalanceAdjustments.length).to.equal(
             scheduledBalanceAdjustmentCount
-        )
+        );
         expect(
             scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3)
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3);
         expect(scheduledBalanceAdjustments[0].data).to.equal(
             balanceAdjustment_3_Id
-        )
+        );
         expect(
             scheduledBalanceAdjustments[1].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_2)
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_2);
         expect(scheduledBalanceAdjustments[1].data).to.equal(
             balanceAdjustment_2_Id
-        )
+        );
         expect(
             scheduledBalanceAdjustments[2].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_1)
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_1);
         expect(scheduledBalanceAdjustments[2].data).to.equal(
             balanceAdjustment_1_Id
-        )
+        );
 
         // AFTER FIRST SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
-        await new Promise((f) => setTimeout(f, TIME + 1000))
-        await scheduledTasksFacet.triggerPendingScheduledTasks()
+        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A);
+        await new Promise((f) => setTimeout(f, TIME + 1000));
+        await scheduledTasksFacet.triggerPendingScheduledTasks();
 
         scheduledBalanceAdjustmentCount =
-            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
+            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount();
         scheduledBalanceAdjustments =
             await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
                 0,
                 100
-            )
+            );
 
-        expect(scheduledBalanceAdjustmentCount).to.equal(2)
+        expect(scheduledBalanceAdjustmentCount).to.equal(2);
         expect(scheduledBalanceAdjustments.length).to.equal(
             scheduledBalanceAdjustmentCount
-        )
+        );
         expect(
             scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3)
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3);
         expect(scheduledBalanceAdjustments[0].data).to.equal(
             balanceAdjustment_3_Id
-        )
+        );
         expect(
             scheduledBalanceAdjustments[1].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_2)
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_2);
         expect(scheduledBalanceAdjustments[1].data).to.equal(
             balanceAdjustment_2_Id
-        )
+        );
 
         // AFTER SECOND SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        await new Promise((f) => setTimeout(f, TIME + 1000))
-        await scheduledTasksFacet.triggerScheduledTasks(100)
+        await new Promise((f) => setTimeout(f, TIME + 1000));
+        await scheduledTasksFacet.triggerScheduledTasks(100);
 
         scheduledBalanceAdjustmentCount =
-            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
+            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount();
         scheduledBalanceAdjustments =
             await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
                 0,
                 100
-            )
+            );
 
-        expect(scheduledBalanceAdjustmentCount).to.equal(1)
+        expect(scheduledBalanceAdjustmentCount).to.equal(1);
         expect(scheduledBalanceAdjustments.length).to.equal(
             scheduledBalanceAdjustmentCount
-        )
+        );
         expect(
             scheduledBalanceAdjustments[0].scheduledTimestamp.toNumber()
-        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3)
+        ).to.equal(balanceAdjustmentExecutionDateInSeconds_3);
         expect(scheduledBalanceAdjustments[0].data).to.equal(
             balanceAdjustment_3_Id
-        )
+        );
 
         // AFTER SECOND SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        await new Promise((f) => setTimeout(f, TIME + 1000))
-        await scheduledTasksFacet.triggerScheduledTasks(0)
+        await new Promise((f) => setTimeout(f, TIME + 1000));
+        await scheduledTasksFacet.triggerScheduledTasks(0);
 
         scheduledBalanceAdjustmentCount =
-            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount()
+            await scheduledBalanceAdjustmentsFacet.scheduledBalanceAdjustmentCount();
         scheduledBalanceAdjustments =
             await scheduledBalanceAdjustmentsFacet.getScheduledBalanceAdjustments(
                 0,
                 100
-            )
+            );
 
-        expect(scheduledBalanceAdjustmentCount).to.equal(0)
+        expect(scheduledBalanceAdjustmentCount).to.equal(0);
         expect(scheduledBalanceAdjustments.length).to.equal(
             scheduledBalanceAdjustmentCount
-        )
-    })
-})
+        );
+    });
+});

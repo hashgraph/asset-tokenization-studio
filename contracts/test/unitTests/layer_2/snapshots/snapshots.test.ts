@@ -203,69 +203,69 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
 import {
     type ResolverProxy,
     type Snapshots_2,
     type Equity,
     type ERC1410ScheduledTasks,
     type AccessControl,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+} from '../../../../typechain-types';
+import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc';
 import {
     _SNAPSHOT_ROLE,
     _PAUSER_ROLE,
     _ISSUER_ROLE,
     _CORPORATE_ACTION_ROLE,
-} from '../../../../scripts/constants'
+} from '../../../../scripts/constants';
 import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+} from '../../../../scripts/factory';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
 
-const amount = 1
-const balanceOf_C_Original = 2 * amount
-const balanceOf_B_Original = 2 * amount
+const amount = 1;
+const balanceOf_C_Original = 2 * amount;
+const balanceOf_B_Original = 2 * amount;
 const _PARTITION_ID_1 =
-    '0x0000000000000000000000000000000000000000000000000000000000000001'
+    '0x0000000000000000000000000000000000000000000000000000000000000001';
 const _PARTITION_ID_2 =
-    '0x0000000000000000000000000000000000000000000000000000000000000002'
-const TIME = 6000
-const DECIMALS = 6
+    '0x0000000000000000000000000000000000000000000000000000000000000002';
+const TIME = 6000;
+const DECIMALS = 6;
 
 describe('Snapshots Layer 2 Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
+    let diamond: ResolverProxy;
+    let signer_A: SignerWithAddress;
+    let signer_B: SignerWithAddress;
+    let signer_C: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
+    let account_A: string;
+    let account_B: string;
+    let account_C: string;
 
-    let erc1410Facet: ERC1410ScheduledTasks
-    let snapshotFacet: Snapshots_2
-    let accessControlFacet: AccessControl
-    let equityFacet: Equity
+    let erc1410Facet: ERC1410ScheduledTasks;
+    let snapshotFacet: Snapshots_2;
+    let accessControlFacet: AccessControl;
+    let equityFacet: Equity;
 
     beforeEach(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
+        [signer_A, signer_B, signer_C] = await ethers.getSigners();
+        account_A = signer_A.address;
+        account_B = signer_B.address;
+        account_C = signer_C.address;
 
-        await deployEnvironment()
+        await deployEnvironment();
 
         const rbacPause: Rbac = {
             role: _PAUSER_ROLE,
             members: [account_B],
-        }
-        const init_rbacs: Rbac[] = [rbacPause]
+        };
+        const init_rbacs: Rbac[] = [rbacPause];
 
         diamond = await deployEquityFromFactory(
             account_A,
@@ -293,263 +293,277 @@ describe('Snapshots Layer 2 Tests', () => {
             'ES,FR,CH',
             'nothing',
             init_rbacs
-        )
+        );
 
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address
-        )
+        );
 
         erc1410Facet = await ethers.getContractAt(
             'ERC1410ScheduledTasks',
             diamond.address
-        )
+        );
 
         snapshotFacet = await ethers.getContractAt(
             'Snapshots_2',
             diamond.address
-        )
+        );
 
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
-    })
+        equityFacet = await ethers.getContractAt('Equity', diamond.address);
+    });
 
     it('GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds', async () => {
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_A)
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A);
+        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A);
+        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_A);
 
-        snapshotFacet = snapshotFacet.connect(signer_A)
-        erc1410Facet = erc1410Facet.connect(signer_A)
-        equityFacet = equityFacet.connect(signer_A)
+        snapshotFacet = snapshotFacet.connect(signer_A);
+        erc1410Facet = erc1410Facet.connect(signer_A);
+        equityFacet = equityFacet.connect(signer_A);
 
         await erc1410Facet.issueByPartition(
             _PARTITION_ID_1,
             account_C,
             balanceOf_C_Original,
             '0x'
-        )
+        );
         await erc1410Facet.issueByPartition(
             _PARTITION_ID_2,
             account_B,
             balanceOf_B_Original,
             '0x'
-        )
+        );
 
         // schedule tasks
         const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
+            .timestamp;
 
         const dividendsRecordDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000
+            currentTimeInSeconds + TIME / 1000;
         const dividendsRecordDateInSeconds_2 =
-            currentTimeInSeconds + (2 * TIME) / 1000
+            currentTimeInSeconds + (2 * TIME) / 1000;
         const dividendsRecordDateInSeconds_3 =
-            currentTimeInSeconds + (3 * TIME) / 1000
+            currentTimeInSeconds + (3 * TIME) / 1000;
         const dividendsExecutionDateInSeconds =
-            currentTimeInSeconds + (10 * TIME) / 1000
-        const dividendsAmountPerEquity = 1
+            currentTimeInSeconds + (10 * TIME) / 1000;
+        const dividendsAmountPerEquity = 1;
         const dividendData_1 = {
             recordDate: dividendsRecordDateInSeconds_1.toString(),
             executionDate: dividendsExecutionDateInSeconds.toString(),
             amount: dividendsAmountPerEquity,
-        }
+        };
         const dividendData_2 = {
             recordDate: dividendsRecordDateInSeconds_2.toString(),
             executionDate: dividendsExecutionDateInSeconds.toString(),
             amount: dividendsAmountPerEquity,
-        }
+        };
         const dividendData_3 = {
             recordDate: dividendsRecordDateInSeconds_3.toString(),
             executionDate: dividendsExecutionDateInSeconds.toString(),
             amount: dividendsAmountPerEquity,
-        }
-        await equityFacet.setDividends(dividendData_1)
-        await equityFacet.setDividends(dividendData_2)
-        await equityFacet.setDividends(dividendData_3)
+        };
+        await equityFacet.setDividends(dividendData_1);
+        await equityFacet.setDividends(dividendData_2);
+        await equityFacet.setDividends(dividendData_3);
 
         const balanceAdjustmentExecutionDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000 + 1
+            currentTimeInSeconds + TIME / 1000 + 1;
         const balanceAdjustmentExecutionDateInSeconds_2 =
-            currentTimeInSeconds + (2 * TIME) / 1000 + 1
+            currentTimeInSeconds + (2 * TIME) / 1000 + 1;
         const balanceAdjustmentExecutionDateInSeconds_3 =
-            currentTimeInSeconds + (3 * TIME) / 1000 + 1
+            currentTimeInSeconds + (3 * TIME) / 1000 + 1;
 
-        const balanceAdjustmentsFactor_1 = 5
-        const balanceAdjustmentsDecimals_1 = 2
-        const balanceAdjustmentsFactor_2 = 6
-        const balanceAdjustmentsDecimals_2 = 0
-        const balanceAdjustmentsFactor_3 = 7
-        const balanceAdjustmentsDecimals_3 = 1
+        const balanceAdjustmentsFactor_1 = 5;
+        const balanceAdjustmentsDecimals_1 = 2;
+        const balanceAdjustmentsFactor_2 = 6;
+        const balanceAdjustmentsDecimals_2 = 0;
+        const balanceAdjustmentsFactor_3 = 7;
+        const balanceAdjustmentsDecimals_3 = 1;
 
         const balanceAdjustmentData_1 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
             factor: balanceAdjustmentsFactor_1,
             decimals: balanceAdjustmentsDecimals_1,
-        }
+        };
         const balanceAdjustmentData_2 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_2.toString(),
             factor: balanceAdjustmentsFactor_2,
             decimals: balanceAdjustmentsDecimals_2,
-        }
+        };
         const balanceAdjustmentData_3 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_3.toString(),
             factor: balanceAdjustmentsFactor_3,
             decimals: balanceAdjustmentsDecimals_3,
-        }
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_3)
+        };
+        await equityFacet.setScheduledBalanceAdjustment(
+            balanceAdjustmentData_1
+        );
+        await equityFacet.setScheduledBalanceAdjustment(
+            balanceAdjustmentData_2
+        );
+        await equityFacet.setScheduledBalanceAdjustment(
+            balanceAdjustmentData_3
+        );
 
         //-------------------------
-        await new Promise((f) => setTimeout(f, 3 * TIME + 2))
+        await new Promise((f) => setTimeout(f, 3 * TIME + 2));
 
         // snapshot
-        await snapshotFacet.takeSnapshot()
+        await snapshotFacet.takeSnapshot();
 
-        const adjustmentFactor_1 = balanceAdjustmentsFactor_1
+        const adjustmentFactor_1 = balanceAdjustmentsFactor_1;
         const adjustmentFactor_2 =
-            adjustmentFactor_1 * balanceAdjustmentsFactor_2
+            adjustmentFactor_1 * balanceAdjustmentsFactor_2;
         const adjustmentFactor_3 =
-            adjustmentFactor_2 * balanceAdjustmentsFactor_3
+            adjustmentFactor_2 * balanceAdjustmentsFactor_3;
 
-        const decimalFactor_1 = balanceAdjustmentsDecimals_1
-        const decimalFactor_2 = decimalFactor_1 + balanceAdjustmentsDecimals_2
-        const decimalFactor_3 = decimalFactor_2 + balanceAdjustmentsDecimals_3
+        const decimalFactor_1 = balanceAdjustmentsDecimals_1;
+        const decimalFactor_2 = decimalFactor_1 + balanceAdjustmentsDecimals_2;
+        const decimalFactor_3 = decimalFactor_2 + balanceAdjustmentsDecimals_3;
 
         // check
-        const dividendFor_C_1 = await equityFacet.getDividendsFor(1, account_C)
-        const dividendFor_C_2 = await equityFacet.getDividendsFor(2, account_C)
-        const dividendFor_C_3 = await equityFacet.getDividendsFor(3, account_C)
+        const dividendFor_C_1 = await equityFacet.getDividendsFor(1, account_C);
+        const dividendFor_C_2 = await equityFacet.getDividendsFor(2, account_C);
+        const dividendFor_C_3 = await equityFacet.getDividendsFor(3, account_C);
         const balance_C_At_Snapshot_4 = await snapshotFacet.balanceOfAtSnapshot(
             4,
             account_C
-        )
+        );
 
-        expect(dividendFor_C_1.tokenBalance).to.be.equal(balanceOf_C_Original)
-        expect(dividendFor_C_1.decimals).to.be.equal(DECIMALS)
+        expect(dividendFor_C_1.tokenBalance).to.be.equal(balanceOf_C_Original);
+        expect(dividendFor_C_1.decimals).to.be.equal(DECIMALS);
         expect(dividendFor_C_2.tokenBalance).to.be.equal(
             balanceOf_C_Original * adjustmentFactor_1
-        )
-        expect(dividendFor_C_2.decimals).to.be.equal(DECIMALS + decimalFactor_1)
+        );
+        expect(dividendFor_C_2.decimals).to.be.equal(
+            DECIMALS + decimalFactor_1
+        );
 
         expect(dividendFor_C_3.tokenBalance).to.be.equal(
             balanceOf_C_Original * adjustmentFactor_2
-        )
-        expect(dividendFor_C_3.decimals).to.be.equal(DECIMALS + decimalFactor_2)
+        );
+        expect(dividendFor_C_3.decimals).to.be.equal(
+            DECIMALS + decimalFactor_2
+        );
         expect(balance_C_At_Snapshot_4).to.be.equal(
             balanceOf_C_Original * adjustmentFactor_3
-        )
+        );
 
         const balance_C_At_Snapshot_1_partition_1 =
             await snapshotFacet.balanceOfAtSnapshotByPartition(
                 _PARTITION_ID_1,
                 1,
                 account_C
-            )
+            );
         const balance_C_At_Snapshot_2_partition_1 =
             await snapshotFacet.balanceOfAtSnapshotByPartition(
                 _PARTITION_ID_1,
                 2,
                 account_C
-            )
+            );
         const balance_C_At_Snapshot_3_partition_1 =
             await snapshotFacet.balanceOfAtSnapshotByPartition(
                 _PARTITION_ID_1,
                 3,
                 account_C
-            )
+            );
         const balance_C_At_Snapshot_4_partition_1 =
             await snapshotFacet.balanceOfAtSnapshotByPartition(
                 _PARTITION_ID_1,
                 4,
                 account_C
-            )
+            );
 
         expect(balance_C_At_Snapshot_1_partition_1).to.be.equal(
             balanceOf_C_Original
-        )
+        );
         expect(balance_C_At_Snapshot_2_partition_1).to.be.equal(
             balanceOf_C_Original * adjustmentFactor_1
-        )
+        );
         expect(balance_C_At_Snapshot_3_partition_1).to.be.equal(
             balanceOf_C_Original * adjustmentFactor_2
-        )
+        );
         expect(balance_C_At_Snapshot_4_partition_1).to.be.equal(
             balanceOf_C_Original * adjustmentFactor_3
-        )
+        );
 
         const balance_C_At_Snapshot_1_partition_2 =
             await snapshotFacet.balanceOfAtSnapshotByPartition(
                 _PARTITION_ID_2,
                 1,
                 account_C
-            )
+            );
         const balance_C_At_Snapshot_2_partition_2 =
             await snapshotFacet.balanceOfAtSnapshotByPartition(
                 _PARTITION_ID_2,
                 2,
                 account_C
-            )
+            );
         const balance_C_At_Snapshot_3_partition_2 =
             await snapshotFacet.balanceOfAtSnapshotByPartition(
                 _PARTITION_ID_2,
                 3,
                 account_C
-            )
+            );
         const balance_C_At_Snapshot_4_partition_2 =
             await snapshotFacet.balanceOfAtSnapshotByPartition(
                 _PARTITION_ID_2,
                 4,
                 account_C
-            )
+            );
 
-        expect(balance_C_At_Snapshot_1_partition_2).to.be.equal(0)
-        expect(balance_C_At_Snapshot_2_partition_2).to.be.equal(0)
-        expect(balance_C_At_Snapshot_3_partition_2).to.be.equal(0)
-        expect(balance_C_At_Snapshot_4_partition_2).to.be.equal(0)
+        expect(balance_C_At_Snapshot_1_partition_2).to.be.equal(0);
+        expect(balance_C_At_Snapshot_2_partition_2).to.be.equal(0);
+        expect(balance_C_At_Snapshot_3_partition_2).to.be.equal(0);
+        expect(balance_C_At_Snapshot_4_partition_2).to.be.equal(0);
 
-        const decimals_At_Snapshot_1 = await snapshotFacet.decimalsAtSnapshot(1)
-        const decimals_At_Snapshot_2 = await snapshotFacet.decimalsAtSnapshot(2)
-        const decimals_At_Snapshot_3 = await snapshotFacet.decimalsAtSnapshot(3)
-        const decimals_At_Snapshot_4 = await snapshotFacet.decimalsAtSnapshot(4)
+        const decimals_At_Snapshot_1 =
+            await snapshotFacet.decimalsAtSnapshot(1);
+        const decimals_At_Snapshot_2 =
+            await snapshotFacet.decimalsAtSnapshot(2);
+        const decimals_At_Snapshot_3 =
+            await snapshotFacet.decimalsAtSnapshot(3);
+        const decimals_At_Snapshot_4 =
+            await snapshotFacet.decimalsAtSnapshot(4);
 
-        expect(decimals_At_Snapshot_1).to.be.equal(DECIMALS)
-        expect(decimals_At_Snapshot_2).to.be.equal(DECIMALS + decimalFactor_1)
-        expect(decimals_At_Snapshot_3).to.be.equal(DECIMALS + decimalFactor_2)
-        expect(decimals_At_Snapshot_4).to.be.equal(DECIMALS + decimalFactor_3)
+        expect(decimals_At_Snapshot_1).to.be.equal(DECIMALS);
+        expect(decimals_At_Snapshot_2).to.be.equal(DECIMALS + decimalFactor_1);
+        expect(decimals_At_Snapshot_3).to.be.equal(DECIMALS + decimalFactor_2);
+        expect(decimals_At_Snapshot_4).to.be.equal(DECIMALS + decimalFactor_3);
 
-        const ABAF_At_Snapshot_1 = await snapshotFacet.ABAFAtSnapshot(1)
-        const ABAF_At_Snapshot_2 = await snapshotFacet.ABAFAtSnapshot(2)
-        const ABAF_At_Snapshot_3 = await snapshotFacet.ABAFAtSnapshot(3)
-        const ABAF_At_Snapshot_4 = await snapshotFacet.ABAFAtSnapshot(4)
+        const ABAF_At_Snapshot_1 = await snapshotFacet.ABAFAtSnapshot(1);
+        const ABAF_At_Snapshot_2 = await snapshotFacet.ABAFAtSnapshot(2);
+        const ABAF_At_Snapshot_3 = await snapshotFacet.ABAFAtSnapshot(3);
+        const ABAF_At_Snapshot_4 = await snapshotFacet.ABAFAtSnapshot(4);
 
-        expect(ABAF_At_Snapshot_1).to.be.equal(0)
-        expect(ABAF_At_Snapshot_2).to.be.equal(adjustmentFactor_1)
-        expect(ABAF_At_Snapshot_3).to.be.equal(adjustmentFactor_2)
-        expect(ABAF_At_Snapshot_4).to.be.equal(adjustmentFactor_3)
+        expect(ABAF_At_Snapshot_1).to.be.equal(0);
+        expect(ABAF_At_Snapshot_2).to.be.equal(adjustmentFactor_1);
+        expect(ABAF_At_Snapshot_3).to.be.equal(adjustmentFactor_2);
+        expect(ABAF_At_Snapshot_4).to.be.equal(adjustmentFactor_3);
 
         const totalSupply_At_Snapshot_1 =
-            await snapshotFacet.totalSupplyAtSnapshot(1)
+            await snapshotFacet.totalSupplyAtSnapshot(1);
         const totalSupply_At_Snapshot_2 =
-            await snapshotFacet.totalSupplyAtSnapshot(2)
+            await snapshotFacet.totalSupplyAtSnapshot(2);
         const totalSupply_At_Snapshot_3 =
-            await snapshotFacet.totalSupplyAtSnapshot(3)
+            await snapshotFacet.totalSupplyAtSnapshot(3);
         const totalSupply_At_Snapshot_4 =
-            await snapshotFacet.totalSupplyAtSnapshot(4)
+            await snapshotFacet.totalSupplyAtSnapshot(4);
 
         expect(totalSupply_At_Snapshot_1).to.be.equal(
             balanceOf_C_Original + balanceOf_B_Original
-        )
+        );
         expect(totalSupply_At_Snapshot_2).to.be.equal(
             (balanceOf_C_Original + balanceOf_B_Original) * adjustmentFactor_1
-        )
+        );
         expect(totalSupply_At_Snapshot_3).to.be.equal(
             (balanceOf_C_Original + balanceOf_B_Original) * adjustmentFactor_2
-        )
+        );
         expect(totalSupply_At_Snapshot_4).to.be.equal(
             (balanceOf_C_Original + balanceOf_B_Original) * adjustmentFactor_3
-        )
-    })
-})
+        );
+    });
+});

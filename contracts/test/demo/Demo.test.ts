@@ -203,8 +203,8 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
 import {
     type ResolverProxy,
     type DiamondLoupeFacet,
@@ -217,11 +217,11 @@ import {
     type Snapshots,
     type ScheduledSnapshots,
     type Cap_2,
-} from '../../typechain-types'
+} from '../../typechain-types';
 import {
     deployEnvironment,
     environment,
-} from '../../scripts/deployEnvironmentByRpc'
+} from '../../scripts/deployEnvironmentByRpc';
 import {
     _DEFAULT_ADMIN_ROLE,
     _CONTROL_LIST_ROLE,
@@ -230,18 +230,18 @@ import {
     _CONTROLLER_ROLE,
     _PAUSER_ROLE,
     ADDRESS_0,
-} from '../../scripts/constants'
+} from '../../scripts/constants';
 import {
     DividendType,
     RegulationSubType,
     RegulationType,
     deployEquityFromFactory,
-} from '../../scripts/factory'
+} from '../../scripts/factory';
 
-const _MINUTE_1 = 6000
-const _BUSINESS_LOGIC_COUNT = 20
+const _MINUTE_1 = 6000;
+const _BUSINESS_LOGIC_COUNT = 20;
 const _PARTITION_ID_1 =
-    '0x0000000000000000000000000000000000000000000000000000000000000001'
+    '0x0000000000000000000000000000000000000000000000000000000000000001';
 
 enum VersionStatus {
     NONE = 0,
@@ -250,26 +250,26 @@ enum VersionStatus {
 }
 
 describe('Demo RedSwam', () => {
-    let diamond: ResolverProxy
+    let diamond: ResolverProxy;
 
     it('Demo RedSwam', async () => {
         const [signer_Z, signer_A, signer_B, signer_C, signer_I, signer_P] =
-            await ethers.getSigners()
-        const account_Z = signer_Z.address
-        const account_A = signer_A.address
-        const account_B = signer_B.address
-        const account_C = signer_C.address
-        const account_I = signer_I.address
-        const account_P = signer_P.address
+            await ethers.getSigners();
+        const account_Z = signer_Z.address;
+        const account_A = signer_A.address;
+        const account_B = signer_B.address;
+        const account_C = signer_C.address;
+        const account_I = signer_I.address;
+        const account_P = signer_P.address;
 
-        console.log('Account Z : ' + account_Z)
-        console.log('Account A : ' + account_A)
-        console.log('Account B : ' + account_B)
-        console.log('Account C : ' + account_C)
-        console.log('Account I : ' + account_I)
-        console.log('Account P : ' + account_P)
+        console.log('Account Z : ' + account_Z);
+        console.log('Account A : ' + account_A);
+        console.log('Account B : ' + account_B);
+        console.log('Account C : ' + account_C);
+        console.log('Account I : ' + account_I);
+        console.log('Account P : ' + account_P);
 
-        await deployEnvironment()
+        await deployEnvironment();
 
         console.log(`
 Deployed contracts:
@@ -394,105 +394,105 @@ Deployed contracts:
         selectors: ${JSON.stringify(
             await environment.deployedBusinessLogics.adjustBalances.getStaticFunctionSelectors()
         )},
-        `)
+        `);
 
         expect(await environment.resolver.getVersionStatus(1)).to.be.equal(
             VersionStatus.ACTIVATED
-        )
+        );
 
-        expect(await environment.resolver.getLatestVersion()).to.be.equal(1)
+        expect(await environment.resolver.getLatestVersion()).to.be.equal(1);
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.diamondFacet.address)
+        ).to.be.equal(environment.deployedBusinessLogics.diamondFacet.address);
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.accessControl.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.accessControl.address)
+        ).to.be.equal(environment.deployedBusinessLogics.accessControl.address);
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.pause.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.pause.address)
+        ).to.be.equal(environment.deployedBusinessLogics.pause.address);
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.controlList.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.controlList.address)
+        ).to.be.equal(environment.deployedBusinessLogics.controlList.address);
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey()
             )
         ).to.be.equal(
             environment.deployedBusinessLogics.corporateActionsSecurity.address
-        )
+        );
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.cap_2.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.cap_2.address)
+        ).to.be.equal(environment.deployedBusinessLogics.cap_2.address);
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.eRC20_2.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.eRC20_2.address)
+        ).to.be.equal(environment.deployedBusinessLogics.eRC20_2.address);
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.eRC1644_2.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.eRC1644_2.address)
+        ).to.be.equal(environment.deployedBusinessLogics.eRC1644_2.address);
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticResolverKey()
             )
         ).to.be.equal(
             environment.deployedBusinessLogics.eRC1410ScheduledTasks.address
-        )
+        );
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.eRC1594_2.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.eRC1594_2.address)
+        ).to.be.equal(environment.deployedBusinessLogics.eRC1594_2.address);
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey()
             )
-        ).to.be.equal(await environment.deployedBusinessLogics.eRC1643.address)
+        ).to.be.equal(await environment.deployedBusinessLogics.eRC1643.address);
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.equityUSA.getStaticResolverKey()
             )
         ).to.be.equal(
             await environment.deployedBusinessLogics.equityUSA.address
-        )
+        );
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.snapshots_2.getStaticResolverKey()
             )
         ).to.be.equal(
             await environment.deployedBusinessLogics.snapshots_2.address
-        )
+        );
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.lock_2.getStaticResolverKey()
             )
-        ).to.be.equal(await environment.deployedBusinessLogics.lock_2.address)
+        ).to.be.equal(await environment.deployedBusinessLogics.lock_2.address);
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.transferAndLock.getStaticResolverKey()
             )
         ).to.be.equal(
             await environment.deployedBusinessLogics.transferAndLock.address
-        )
+        );
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey()
             )
         ).to.be.equal(
             await environment.deployedBusinessLogics.scheduledSnapshots.address
-        )
+        );
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticResolverKey()
@@ -500,29 +500,29 @@ Deployed contracts:
         ).to.be.equal(
             await environment.deployedBusinessLogics.scheduledBalanceAdjustments
                 .address
-        )
+        );
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.scheduledTasks.getStaticResolverKey()
             )
         ).to.be.equal(
             await environment.deployedBusinessLogics.scheduledTasks.address
-        )
+        );
         expect(
             await environment.resolver.resolveLatestBusinessLogic(
                 await environment.deployedBusinessLogics.adjustBalances.getStaticResolverKey()
             )
         ).to.be.equal(
             await environment.deployedBusinessLogics.adjustBalances.address
-        )
+        );
         expect(await environment.resolver.getBusinessLogicCount()).to.be.equal(
             _BUSINESS_LOGIC_COUNT
-        )
+        );
         const businessLogicKeys = JSON.parse(
             JSON.stringify(
                 await environment.resolver.getBusinessLogicKeys(0, 30)
             )
-        ).sort()
+        ).sort();
         expect(businessLogicKeys).to.be.deep.equal(
             [
                 await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey(),
@@ -546,31 +546,31 @@ Deployed contracts:
                 await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.scheduledTasks.getStaticResolverKey(),
             ].sort()
-        )
+        );
         console.log(
             `Business Logic Keys : ${JSON.stringify(businessLogicKeys)}`
-        )
+        );
 
         //await loadFixture(deployDiamond(signerAddress))
-        const TokenName = 'TEST_DEMO'
-        const TokenSymbol = 'TD'
-        const TokenDecimals = 6
-        const TokenISIN = 'ABCDEF123456'
-        const TokenType = 1 // equity
-        const isWhiteList = false
-        const isControllable = true
-        const isMultiPartition = false
-        const votingRight = true
-        const informationRight = false
-        const liquidationRight = true
-        const subscriptionRight = false
-        const conversionRight = true
-        const redemptionRight = false
-        const putRight = true
-        const dividendRight = DividendType.PREFERRED
-        const currency = '0x455552'
-        const numberOfShares = 200000
-        const nominalValue = 100
+        const TokenName = 'TEST_DEMO';
+        const TokenSymbol = 'TD';
+        const TokenDecimals = 6;
+        const TokenISIN = 'ABCDEF123456';
+        const TokenType = 1; // equity
+        const isWhiteList = false;
+        const isControllable = true;
+        const isMultiPartition = false;
+        const votingRight = true;
+        const informationRight = false;
+        const liquidationRight = true;
+        const subscriptionRight = false;
+        const conversionRight = true;
+        const redemptionRight = false;
+        const putRight = true;
+        const dividendRight = DividendType.PREFERRED;
+        const currency = '0x455552';
+        const numberOfShares = 200000;
+        const nominalValue = 100;
 
         diamond = await deployEquityFromFactory(
             account_Z,
@@ -597,13 +597,13 @@ Deployed contracts:
             true,
             'ES,FR,CH',
             'nothing'
-        )
-        console.log(`    Diamond: ${diamond.address}`)
+        );
+        console.log(`    Diamond: ${diamond.address}`);
 
         const loupeFacet: DiamondLoupeFacet = await ethers.getContractAt(
             'DiamondLoupeFacet',
             diamond.address
-        )
+        );
 
         console.log(`
 DiamondResume:
@@ -718,50 +718,50 @@ DiamondResume:
     )}
     DiamondLoupe.supportsInterface(0xb8fb063e): ${JSON.stringify(
         await loupeFacet.supportsInterface('0xb8fb063e')
-    )}`)
+    )}`);
 
         let accessControlFacet: AccessControl = await ethers.getContractAt(
             'AccessControl',
             diamond.address
-        )
+        );
 
         const capFacet: Cap_2 = await ethers.getContractAt(
             'Cap_2',
             await diamond.address
-        )
+        );
 
         let pauseFacet: Pause = await ethers.getContractAt(
             'Pause',
             diamond.address
-        )
+        );
 
         let controlListFacet: ControlList = await ethers.getContractAt(
             'ControlList',
             diamond.address
-        )
+        );
 
         const erc20Facet: ERC20_2 = await ethers.getContractAt(
             'ERC20_2',
             await diamond.address
-        )
+        );
 
         let erc1410Facet: ERC1410ScheduledTasks = await ethers.getContractAt(
             'ERC1410ScheduledTasks',
             await diamond.address
-        )
+        );
 
         let equityFacet: Equity = await ethers.getContractAt(
             'Equity',
             await diamond.address
-        )
+        );
 
         const snapshotsFacet: Snapshots = await ethers.getContractAt(
             'Snapshots',
             diamond.address
-        )
+        );
 
         const scheduledSnapshotsFacet: ScheduledSnapshots =
-            await ethers.getContractAt('ScheduledSnapshots', diamond.address)
+            await ethers.getContractAt('ScheduledSnapshots', diamond.address);
 
         // --------------------------------------------
         // --------------------------------------------
@@ -776,146 +776,146 @@ DiamondResume:
             DEMO STEPS 
         --------------------------------
 
-        `)
-        console.log('Check token metadata')
-        const metadata = await erc20Facet.getERC20Metadata()
-        expect(metadata.info.name).to.equal(TokenName)
-        expect(metadata.info.symbol).to.equal(TokenSymbol)
-        expect(metadata.info.decimals).to.equal(TokenDecimals)
-        expect(metadata.info.isin).to.equal(TokenISIN)
-        expect(metadata.securityType).to.equal(TokenType)
+        `);
+        console.log('Check token metadata');
+        const metadata = await erc20Facet.getERC20Metadata();
+        expect(metadata.info.name).to.equal(TokenName);
+        expect(metadata.info.symbol).to.equal(TokenSymbol);
+        expect(metadata.info.decimals).to.equal(TokenDecimals);
+        expect(metadata.info.isin).to.equal(TokenISIN);
+        expect(metadata.securityType).to.equal(TokenType);
 
-        console.log('Check token name, symbol and decimals')
-        const retrieved_name = await erc20Facet.name()
-        const retrieved_symbol = await erc20Facet.symbol()
-        const retrieved_decimals = await erc20Facet.decimals()
+        console.log('Check token name, symbol and decimals');
+        const retrieved_name = await erc20Facet.name();
+        const retrieved_symbol = await erc20Facet.symbol();
+        const retrieved_decimals = await erc20Facet.decimals();
 
-        expect(retrieved_name).to.equal(TokenName)
-        expect(retrieved_symbol).to.equal(TokenSymbol)
-        expect(retrieved_decimals).to.equal(TokenDecimals)
+        expect(retrieved_name).to.equal(TokenName);
+        expect(retrieved_symbol).to.equal(TokenSymbol);
+        expect(retrieved_decimals).to.equal(TokenDecimals);
 
-        console.log('Check multi partition')
-        const multiPartition = await erc1410Facet.isMultiPartition()
-        expect(multiPartition).to.equal(isMultiPartition)
+        console.log('Check multi partition');
+        const multiPartition = await erc1410Facet.isMultiPartition();
+        expect(multiPartition).to.equal(isMultiPartition);
 
-        console.log('Check equity metadata')
-        const equityMetadata = await equityFacet.getEquityDetails()
-        expect(equityMetadata.votingRight).to.equal(votingRight)
-        expect(equityMetadata.informationRight).to.equal(informationRight)
-        expect(equityMetadata.liquidationRight).to.equal(liquidationRight)
-        expect(equityMetadata.subscriptionRight).to.equal(subscriptionRight)
-        expect(equityMetadata.conversionRight).to.equal(conversionRight)
-        expect(equityMetadata.redemptionRight).to.equal(redemptionRight)
-        expect(equityMetadata.putRight).to.equal(putRight)
-        expect(equityMetadata.dividendRight).to.equal(dividendRight)
-        expect(equityMetadata.currency).to.equal(currency)
-        expect(equityMetadata.nominalValue).to.equal(nominalValue)
+        console.log('Check equity metadata');
+        const equityMetadata = await equityFacet.getEquityDetails();
+        expect(equityMetadata.votingRight).to.equal(votingRight);
+        expect(equityMetadata.informationRight).to.equal(informationRight);
+        expect(equityMetadata.liquidationRight).to.equal(liquidationRight);
+        expect(equityMetadata.subscriptionRight).to.equal(subscriptionRight);
+        expect(equityMetadata.conversionRight).to.equal(conversionRight);
+        expect(equityMetadata.redemptionRight).to.equal(redemptionRight);
+        expect(equityMetadata.putRight).to.equal(putRight);
+        expect(equityMetadata.dividendRight).to.equal(dividendRight);
+        expect(equityMetadata.currency).to.equal(currency);
+        expect(equityMetadata.nominalValue).to.equal(nominalValue);
 
-        console.log('Check max Supply')
-        const maxSupply = await capFacet.getMaxSupply()
-        expect(maxSupply).to.equal(numberOfShares)
+        console.log('Check max Supply');
+        const maxSupply = await capFacet.getMaxSupply();
+        expect(maxSupply).to.equal(numberOfShares);
 
         console.log(
             'Add account "B" to blakclist using account "I" => fails (no permission)'
-        )
-        controlListFacet = controlListFacet.connect(signer_I)
+        );
+        controlListFacet = controlListFacet.connect(signer_I);
         await expect(
             controlListFacet.addToControlList(account_B)
-        ).to.be.rejectedWith('AccountHasNoRole')
+        ).to.be.rejectedWith('AccountHasNoRole');
 
         console.log(
             'Grant issuer, control list, corporate action and controller roles to account "I" using account "Z" => succeeds'
-        )
-        accessControlFacet = accessControlFacet.connect(signer_Z)
+        );
+        accessControlFacet = accessControlFacet.connect(signer_Z);
         await expect(accessControlFacet.grantRole(_ISSUER_ROLE, account_I))
             .to.emit(accessControlFacet, 'RoleGranted')
-            .withArgs(account_Z, account_I, _ISSUER_ROLE)
-        await accessControlFacet.grantRole(_CONTROL_LIST_ROLE, account_I)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_I)
-        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_I)
+            .withArgs(account_Z, account_I, _ISSUER_ROLE);
+        await accessControlFacet.grantRole(_CONTROL_LIST_ROLE, account_I);
+        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_I);
+        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_I);
 
         console.log(
             'Grant pauser role to account "P" using account "Z" => succeeds'
-        )
-        accessControlFacet = accessControlFacet.connect(signer_Z)
-        await accessControlFacet.grantRole(_PAUSER_ROLE, account_P)
+        );
+        accessControlFacet = accessControlFacet.connect(signer_Z);
+        await accessControlFacet.grantRole(_PAUSER_ROLE, account_P);
 
-        console.log('Check current roles')
+        console.log('Check current roles');
         const adminMemberCount =
-            await accessControlFacet.getRoleMemberCount(_DEFAULT_ADMIN_ROLE)
+            await accessControlFacet.getRoleMemberCount(_DEFAULT_ADMIN_ROLE);
         const issuerMemberCount =
-            await accessControlFacet.getRoleMemberCount(_ISSUER_ROLE)
+            await accessControlFacet.getRoleMemberCount(_ISSUER_ROLE);
         const controlListMemberCount =
-            await accessControlFacet.getRoleMemberCount(_CONTROL_LIST_ROLE)
+            await accessControlFacet.getRoleMemberCount(_CONTROL_LIST_ROLE);
         const corporateActionsMemberCount =
-            await accessControlFacet.getRoleMemberCount(_CORPORATE_ACTION_ROLE)
+            await accessControlFacet.getRoleMemberCount(_CORPORATE_ACTION_ROLE);
         const controllerMemberCount =
-            await accessControlFacet.getRoleMemberCount(_CONTROLLER_ROLE)
+            await accessControlFacet.getRoleMemberCount(_CONTROLLER_ROLE);
         const pauserMemberCount =
-            await accessControlFacet.getRoleMemberCount(_PAUSER_ROLE)
-        expect(adminMemberCount).to.be.equal(1)
-        expect(issuerMemberCount).to.be.equal(1)
-        expect(controlListMemberCount).to.be.equal(1)
-        expect(corporateActionsMemberCount).to.be.equal(1)
-        expect(controllerMemberCount).to.be.equal(1)
-        expect(pauserMemberCount).to.be.equal(1)
+            await accessControlFacet.getRoleMemberCount(_PAUSER_ROLE);
+        expect(adminMemberCount).to.be.equal(1);
+        expect(issuerMemberCount).to.be.equal(1);
+        expect(controlListMemberCount).to.be.equal(1);
+        expect(corporateActionsMemberCount).to.be.equal(1);
+        expect(controllerMemberCount).to.be.equal(1);
+        expect(pauserMemberCount).to.be.equal(1);
         const adminMembers = await accessControlFacet.getRoleMembers(
             _DEFAULT_ADMIN_ROLE,
             0,
             adminMemberCount
-        )
+        );
         const issuerMembers = await accessControlFacet.getRoleMembers(
             _ISSUER_ROLE,
             0,
             issuerMemberCount
-        )
+        );
         const controlListMembers = await accessControlFacet.getRoleMembers(
             _CONTROL_LIST_ROLE,
             0,
             controlListMemberCount
-        )
+        );
         const corporateActionsMembers = await accessControlFacet.getRoleMembers(
             _CORPORATE_ACTION_ROLE,
             0,
             corporateActionsMemberCount
-        )
+        );
         const controllerMembers = await accessControlFacet.getRoleMembers(
             _CONTROLLER_ROLE,
             0,
             controllerMemberCount
-        )
+        );
         const pauserMembers = await accessControlFacet.getRoleMembers(
             _PAUSER_ROLE,
             0,
             pauserMemberCount
-        )
-        expect(adminMembers.length).to.be.equal(adminMemberCount)
-        expect(adminMembers[0]).to.be.equal(account_Z)
-        expect(issuerMembers.length).to.be.equal(issuerMemberCount)
-        expect(issuerMembers[0]).to.be.equal(account_I)
-        expect(controlListMembers.length).to.be.equal(controlListMemberCount)
-        expect(controlListMembers[0]).to.be.equal(account_I)
+        );
+        expect(adminMembers.length).to.be.equal(adminMemberCount);
+        expect(adminMembers[0]).to.be.equal(account_Z);
+        expect(issuerMembers.length).to.be.equal(issuerMemberCount);
+        expect(issuerMembers[0]).to.be.equal(account_I);
+        expect(controlListMembers.length).to.be.equal(controlListMemberCount);
+        expect(controlListMembers[0]).to.be.equal(account_I);
         expect(corporateActionsMembers.length).to.be.equal(
             corporateActionsMemberCount
-        )
-        expect(corporateActionsMembers[0]).to.be.equal(account_I)
-        expect(controllerMembers.length).to.be.equal(controllerMemberCount)
-        expect(controllerMembers[0]).to.be.equal(account_I)
-        expect(pauserMembers.length).to.be.equal(pauserMemberCount)
-        expect(pauserMembers[0]).to.be.equal(account_P)
+        );
+        expect(corporateActionsMembers[0]).to.be.equal(account_I);
+        expect(controllerMembers.length).to.be.equal(controllerMemberCount);
+        expect(controllerMembers[0]).to.be.equal(account_I);
+        expect(pauserMembers.length).to.be.equal(pauserMemberCount);
+        expect(pauserMembers[0]).to.be.equal(account_P);
 
         console.log(
             'Add account "B" to blacklist using account "I" => succeeds'
-        )
-        controlListFacet = controlListFacet.connect(signer_I)
+        );
+        controlListFacet = controlListFacet.connect(signer_I);
         await expect(controlListFacet.addToControlList(account_B))
             .to.emit(controlListFacet, 'AddedToControlList')
-            .withArgs(account_I, account_B)
+            .withArgs(account_I, account_B);
 
         console.log(
             'Issue 10.000 securities to account "B" using account "I" => fails (B is blacklisted)'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_I)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_I);
         await expect(
             erc1410Facet.issueByPartition(
                 _PARTITION_ID_1,
@@ -923,12 +923,12 @@ DiamondResume:
                 10000,
                 '0x'
             )
-        ).to.be.rejectedWith('AccountIsBlocked')
+        ).to.be.rejectedWith('AccountIsBlocked');
 
         console.log(
             'Issue 10.000 securities to account "A" using account "I" => succeeds'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_I)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_I);
         await expect(
             erc1410Facet.issueByPartition(
                 _PARTITION_ID_1,
@@ -936,21 +936,21 @@ DiamondResume:
                 10000,
                 '0x'
             )
-        ).to.emit(erc1410Facet, 'IssuedByPartition')
-        let totalSupply = await erc1410Facet.totalSupply()
-        let accountABalance = await erc1410Facet.balanceOf(account_A)
+        ).to.emit(erc1410Facet, 'IssuedByPartition');
+        let totalSupply = await erc1410Facet.totalSupply();
+        let accountABalance = await erc1410Facet.balanceOf(account_A);
         let accountABalanceByPartition =
-            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
-        expect(totalSupply.toNumber()).to.be.equal(10000)
-        expect(accountABalance.toNumber()).to.be.equal(10000)
+            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A);
+        expect(totalSupply.toNumber()).to.be.equal(10000);
+        expect(accountABalance.toNumber()).to.be.equal(10000);
         expect(accountABalanceByPartition.toNumber()).to.be.equal(
             accountABalance.toNumber()
-        )
+        );
 
         console.log(
             'Transfer 500 securities from account "A" to "B" => fails (B is blacklisted)'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_A)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_A);
         await expect(
             erc1410Facet.transferByPartition(
                 _PARTITION_ID_1,
@@ -958,12 +958,12 @@ DiamondResume:
                 500,
                 '0x'
             )
-        ).to.be.rejectedWith('AccountIsBlocked')
+        ).to.be.rejectedWith('AccountIsBlocked');
 
         console.log(
             'Transfer 500 securities from account "A" to "C" => succeeds'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_A)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_A);
         await expect(
             erc1410Facet.transferByPartition(
                 _PARTITION_ID_1,
@@ -981,59 +981,59 @@ DiamondResume:
                 500,
                 '0x',
                 '0x'
-            )
+            );
 
         console.log(
             'Schedule dividends for 1 minute later (1 unit per security) using account "I" => succeeds'
-        )
-        equityFacet = equityFacet.connect(signer_I)
+        );
+        equityFacet = equityFacet.connect(signer_I);
         const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
+            .timestamp;
         const dividendsRecordDateInSeconds =
-            currentTimeInSeconds + _MINUTE_1 / 1000
+            currentTimeInSeconds + _MINUTE_1 / 1000;
         const dividendsExecutionDateInSeconds =
-            currentTimeInSeconds + 10 * (_MINUTE_1 / 1000)
-        const dividendsAmountPerEquity = 1
+            currentTimeInSeconds + 10 * (_MINUTE_1 / 1000);
+        const dividendsAmountPerEquity = 1;
         const result = await equityFacet.setDividends({
             recordDate: dividendsRecordDateInSeconds.toString(),
             executionDate: dividendsExecutionDateInSeconds.toString(),
             amount: dividendsAmountPerEquity,
-        })
-        const events = (await result.wait()).events!
-        const setDividendEvent = events.find((e) => e.event == 'DividendSet')
-        const dividendId = setDividendEvent!.args!.dividendId
-        let dividendDetails = await equityFacet.getDividends(dividendId)
+        });
+        const events = (await result.wait()).events!;
+        const setDividendEvent = events.find((e) => e.event == 'DividendSet');
+        const dividendId = setDividendEvent!.args!.dividendId;
+        let dividendDetails = await equityFacet.getDividends(dividendId);
         expect(dividendDetails.dividend.recordDate.toNumber()).to.be.equal(
             dividendsRecordDateInSeconds
-        )
+        );
         expect(dividendDetails.dividend.executionDate.toNumber()).to.be.equal(
             dividendsExecutionDateInSeconds
-        )
+        );
         expect(dividendDetails.dividend.amount.toNumber()).to.be.equal(
             dividendsAmountPerEquity
-        )
-        expect(dividendDetails.snapshotId.toNumber()).to.be.equal(0)
+        );
+        expect(dividendDetails.snapshotId.toNumber()).to.be.equal(0);
         const scheduledSnapshotsCount =
-            await scheduledSnapshotsFacet.scheduledSnapshotCount()
+            await scheduledSnapshotsFacet.scheduledSnapshotCount();
         const scheduledSnapshots =
-            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 1000)
-        expect(scheduledSnapshotsCount.toNumber()).to.be.equal(1)
-        expect(scheduledSnapshots.length).to.be.equal(1)
+            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 1000);
+        expect(scheduledSnapshotsCount.toNumber()).to.be.equal(1);
+        expect(scheduledSnapshots.length).to.be.equal(1);
         expect(scheduledSnapshots[0].scheduledTimestamp.toNumber()).to.be.equal(
             dividendsRecordDateInSeconds
-        )
+        );
         expect(scheduledSnapshots[0].data).to.be.equal(
             '0x0000000000000000000000000000000000000000000000000000000000000001'
-        )
+        );
 
-        console.log('Add account "C" to blacklist using account I => succeeds')
-        controlListFacet = controlListFacet.connect(signer_I)
-        await controlListFacet.addToControlList(account_C)
+        console.log('Add account "C" to blacklist using account I => succeeds');
+        controlListFacet = controlListFacet.connect(signer_I);
+        await controlListFacet.addToControlList(account_C);
 
         console.log(
             'Transfer 1 securities from account "C" to "A" => fails (C is blacklisted)'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_C)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_C);
         await expect(
             erc1410Facet.transferByPartition(
                 _PARTITION_ID_1,
@@ -1041,89 +1041,89 @@ DiamondResume:
                 1,
                 '0x'
             )
-        ).to.be.rejectedWith('AccountIsBlocked')
+        ).to.be.rejectedWith('AccountIsBlocked');
 
         console.log(
             'Remove account "C" from blacklist using account "I" => succeeds'
-        )
-        controlListFacet = controlListFacet.connect(signer_I)
-        await controlListFacet.removeFromControlList(account_C)
+        );
+        controlListFacet = controlListFacet.connect(signer_I);
+        await controlListFacet.removeFromControlList(account_C);
 
-        console.log('Wait 1 minute') // wait 1 minute
-        await new Promise((f) => setTimeout(f, _MINUTE_1 + 2000))
+        console.log('Wait 1 minute'); // wait 1 minute
+        await new Promise((f) => setTimeout(f, _MINUTE_1 + 2000));
 
         console.log(
             'Transfer 500 securities from account "C" to "A" => succeeds'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_C)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_C);
         await erc1410Facet.transferByPartition(
             _PARTITION_ID_1,
             account_A,
             500,
             '0x'
-        )
+        );
 
         console.log(
             'Check accounts entitled dividends and accounts current balances'
-        )
-        dividendDetails = await equityFacet.getDividends(dividendId)
+        );
+        dividendDetails = await equityFacet.getDividends(dividendId);
         const dividend_For_A = await equityFacet.getDividendsFor(
             dividendId,
             account_A
-        )
+        );
         const dividend_For_C = await equityFacet.getDividendsFor(
             dividendId,
             account_C
-        )
-        expect(dividendDetails.snapshotId.toNumber()).to.be.equal(1)
+        );
+        expect(dividendDetails.snapshotId.toNumber()).to.be.equal(1);
         const accountABalanceAtSnapshot =
             await snapshotsFacet.balanceOfAtSnapshot(
                 dividendDetails.snapshotId,
                 account_A
-            )
+            );
         const accountCBalanceAtSnapshot =
             await snapshotsFacet.balanceOfAtSnapshot(
                 dividendDetails.snapshotId,
                 account_C
-            )
-        accountABalance = await erc1410Facet.balanceOf(account_A)
+            );
+        accountABalance = await erc1410Facet.balanceOf(account_A);
         accountABalanceByPartition = await erc1410Facet.balanceOfByPartition(
             _PARTITION_ID_1,
             account_A
-        )
-        let accountCBalance = await erc1410Facet.balanceOf(account_C)
+        );
+        let accountCBalance = await erc1410Facet.balanceOf(account_C);
         let accountCBalanceByPartition =
-            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_C)
-        expect(accountABalanceAtSnapshot).to.be.equal(9500)
-        expect(accountCBalanceAtSnapshot).to.be.equal(500)
-        expect(dividend_For_A.tokenBalance).to.be.equal(9500)
-        expect(dividend_For_A.decimals).to.be.equal(TokenDecimals)
-        expect(dividend_For_C.tokenBalance).to.be.equal(500)
-        expect(dividend_For_C.decimals).to.be.equal(TokenDecimals)
-        expect(accountABalance).to.be.equal(10000)
-        expect(accountCBalance).to.be.equal(0)
-        expect(accountABalanceByPartition).to.be.equal(accountABalance)
-        expect(accountCBalanceByPartition).to.be.equal(accountCBalance)
+            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_C);
+        expect(accountABalanceAtSnapshot).to.be.equal(9500);
+        expect(accountCBalanceAtSnapshot).to.be.equal(500);
+        expect(dividend_For_A.tokenBalance).to.be.equal(9500);
+        expect(dividend_For_A.decimals).to.be.equal(TokenDecimals);
+        expect(dividend_For_C.tokenBalance).to.be.equal(500);
+        expect(dividend_For_C.decimals).to.be.equal(TokenDecimals);
+        expect(accountABalance).to.be.equal(10000);
+        expect(accountCBalance).to.be.equal(0);
+        expect(accountABalanceByPartition).to.be.equal(accountABalance);
+        expect(accountCBalanceByPartition).to.be.equal(accountCBalance);
 
-        console.log('Redeem 1.000 securities from account "A" => succeeds')
-        erc1410Facet = erc1410Facet.connect(signer_A)
-        await erc1410Facet.redeemByPartition(_PARTITION_ID_1, 1000, '0x')
+        console.log('Redeem 1.000 securities from account "A" => succeeds');
+        erc1410Facet = erc1410Facet.connect(signer_A);
+        await erc1410Facet.redeemByPartition(_PARTITION_ID_1, 1000, '0x');
 
-        console.log('Check current balances and total supply')
-        totalSupply = await erc1410Facet.totalSupply()
-        accountABalance = await erc1410Facet.balanceOf(account_A)
+        console.log('Check current balances and total supply');
+        totalSupply = await erc1410Facet.totalSupply();
+        accountABalance = await erc1410Facet.balanceOf(account_A);
         accountABalanceByPartition = await erc1410Facet.balanceOfByPartition(
             _PARTITION_ID_1,
             account_A
-        )
-        expect(totalSupply).to.be.equal(9000)
-        expect(accountABalance).to.be.equal(9000)
-        expect(accountABalanceByPartition).to.be.equal(accountABalance)
+        );
+        expect(totalSupply).to.be.equal(9000);
+        expect(accountABalance).to.be.equal(9000);
+        expect(accountABalanceByPartition).to.be.equal(accountABalance);
 
         console.log(
             'Force transfer 500 securities from account "A" to "C" using account "I" => succeeds'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_I)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_I);
         await erc1410Facet.controllerTransferByPartition(
             _PARTITION_ID_1,
             account_A,
@@ -1131,48 +1131,48 @@ DiamondResume:
             500,
             '0x',
             '0x'
-        )
+        );
 
         console.log(
             'Force redeem 100 securities from account "C" using account "I" => succeeds'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_I)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_I);
         await erc1410Facet.controllerRedeemByPartition(
             _PARTITION_ID_1,
             account_C,
             100,
             '0x',
             '0x'
-        )
+        );
 
-        console.log('Check current balances and total supply')
-        totalSupply = await erc1410Facet.totalSupply()
-        accountABalance = await erc1410Facet.balanceOf(account_A)
+        console.log('Check current balances and total supply');
+        totalSupply = await erc1410Facet.totalSupply();
+        accountABalance = await erc1410Facet.balanceOf(account_A);
         accountABalanceByPartition = await erc1410Facet.balanceOfByPartition(
             _PARTITION_ID_1,
             account_A
-        )
-        accountCBalance = await erc1410Facet.balanceOf(account_C)
+        );
+        accountCBalance = await erc1410Facet.balanceOf(account_C);
         accountCBalanceByPartition = await erc1410Facet.balanceOfByPartition(
             _PARTITION_ID_1,
             account_C
-        )
-        expect(totalSupply).to.be.equal(8900)
-        expect(accountABalance).to.be.equal(8500)
-        expect(accountCBalance).to.be.equal(400)
-        expect(accountABalanceByPartition).to.be.equal(accountABalance)
-        expect(accountCBalanceByPartition).to.be.equal(accountCBalance)
+        );
+        expect(totalSupply).to.be.equal(8900);
+        expect(accountABalance).to.be.equal(8500);
+        expect(accountCBalance).to.be.equal(400);
+        expect(accountABalanceByPartition).to.be.equal(accountABalance);
+        expect(accountCBalanceByPartition).to.be.equal(accountCBalance);
 
         console.log(
             'Revoke controller role from account "I" using account "Z" => succeeds'
-        )
-        accessControlFacet = accessControlFacet.connect(signer_Z)
-        await accessControlFacet.revokeRole(_CONTROLLER_ROLE, account_I)
+        );
+        accessControlFacet = accessControlFacet.connect(signer_Z);
+        await accessControlFacet.revokeRole(_CONTROLLER_ROLE, account_I);
 
         console.log(
             'Force transfer 500 securities from account "A" to "C" using account "I" => fails (no permission)'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_I)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_I);
         await expect(
             erc1410Facet.controllerTransferByPartition(
                 _PARTITION_ID_1,
@@ -1182,12 +1182,12 @@ DiamondResume:
                 '0x',
                 '0x'
             )
-        ).to.be.rejectedWith('AccountHasNoRole')
+        ).to.be.rejectedWith('AccountHasNoRole');
 
         console.log(
             'Force redeem 100 securities from account "C" using account "I" => fails (no permission)'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_I)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_I);
         await expect(
             erc1410Facet.controllerRedeemByPartition(
                 _PARTITION_ID_1,
@@ -1196,24 +1196,24 @@ DiamondResume:
                 '0x',
                 '0x'
             )
-        ).to.be.rejectedWith('AccountHasNoRole')
+        ).to.be.rejectedWith('AccountHasNoRole');
 
-        console.log('Pause security token using account "P" => succeeds')
-        pauseFacet = pauseFacet.connect(signer_P)
-        await pauseFacet.pause()
+        console.log('Pause security token using account "P" => succeeds');
+        pauseFacet = pauseFacet.connect(signer_P);
+        await pauseFacet.pause();
 
         console.log(
             'Grant controller role to  account “I” using account “Z” => fails (paused)'
-        )
-        accessControlFacet = accessControlFacet.connect(signer_Z)
+        );
+        accessControlFacet = accessControlFacet.connect(signer_Z);
         await expect(
             accessControlFacet.grantRole(_CONTROLLER_ROLE, account_I)
-        ).to.be.rejectedWith('TokenIsPaused')
+        ).to.be.rejectedWith('TokenIsPaused');
 
         console.log(
             'Transfer 500 securities from account “A” to “C” => fails (paused)'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_A)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_A);
         await expect(
             erc1410Facet.transferByPartition(
                 _PARTITION_ID_1,
@@ -1221,60 +1221,65 @@ DiamondResume:
                 500,
                 '0x'
             )
-        ).to.be.rejectedWith('TokenIsPaused')
+        ).to.be.rejectedWith('TokenIsPaused');
 
         console.log(
             'Issue 1 security to account “A” using account “I” => fails (paused)'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_I)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_I);
         await expect(
             erc1410Facet.issueByPartition(_PARTITION_ID_1, account_A, 1, '0x')
-        ).to.be.rejectedWith('TokenIsPaused')
+        ).to.be.rejectedWith('TokenIsPaused');
 
-        console.log('Unpause security token using account “P” => succeeds')
-        pauseFacet = pauseFacet.connect(signer_P)
-        await pauseFacet.unpause()
+        console.log('Unpause security token using account “P” => succeeds');
+        pauseFacet = pauseFacet.connect(signer_P);
+        await pauseFacet.unpause();
 
         console.log(
             'Grant controller role to account “I” using account “Z” => succeeds'
-        )
-        accessControlFacet = accessControlFacet.connect(signer_Z)
-        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_I)
+        );
+        accessControlFacet = accessControlFacet.connect(signer_Z);
+        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_I);
 
         console.log(
             'Transfer 500 securities from account “A” to “C” => succeeds'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_A)
+        );
+        erc1410Facet = erc1410Facet.connect(signer_A);
         await erc1410Facet.transferByPartition(
             _PARTITION_ID_1,
             account_C,
             500,
             '0x'
-        )
+        );
 
         console.log(
             'Issue 1 security to account “A” using account “I” => succeeds'
-        )
-        erc1410Facet = erc1410Facet.connect(signer_I)
-        await erc1410Facet.issueByPartition(_PARTITION_ID_1, account_A, 1, '0x')
+        );
+        erc1410Facet = erc1410Facet.connect(signer_I);
+        await erc1410Facet.issueByPartition(
+            _PARTITION_ID_1,
+            account_A,
+            1,
+            '0x'
+        );
 
-        console.log('Check current balances and total supply')
-        totalSupply = await erc1410Facet.totalSupply()
-        accountABalance = await erc1410Facet.balanceOf(account_A)
+        console.log('Check current balances and total supply');
+        totalSupply = await erc1410Facet.totalSupply();
+        accountABalance = await erc1410Facet.balanceOf(account_A);
         accountABalanceByPartition = await erc1410Facet.balanceOfByPartition(
             _PARTITION_ID_1,
             account_A
-        )
-        accountCBalance = await erc1410Facet.balanceOf(account_C)
+        );
+        accountCBalance = await erc1410Facet.balanceOf(account_C);
         accountCBalanceByPartition = await erc1410Facet.balanceOfByPartition(
             _PARTITION_ID_1,
             account_C
-        )
-        expect(totalSupply).to.be.equal(8901)
-        expect(accountABalance).to.be.equal(8001)
-        expect(accountCBalance).to.be.equal(900)
-        expect(accountABalanceByPartition).to.be.equal(accountABalance)
-        expect(accountCBalanceByPartition).to.be.equal(accountCBalance)
+        );
+        expect(totalSupply).to.be.equal(8901);
+        expect(accountABalance).to.be.equal(8001);
+        expect(accountCBalance).to.be.equal(900);
+        expect(accountABalanceByPartition).to.be.equal(accountABalance);
+        expect(accountCBalanceByPartition).to.be.equal(accountCBalance);
 
         console.log(`
 
@@ -1283,6 +1288,6 @@ DiamondResume:
             DEMO OVER 
         --------------------------------
         
-        `)
-    })
-})
+        `);
+    });
+});

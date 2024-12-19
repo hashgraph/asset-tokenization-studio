@@ -211,89 +211,89 @@ import {
     PrivateKey,
     ContractCreateFlow,
     ContractId,
-} from '@hashgraph/sdk'
-import axios from 'axios'
-import { ADDRESS_0, REGEX } from './constants'
-import * as dotenv from 'dotenv'
-dotenv.config()
+} from '@hashgraph/sdk';
+import axios from 'axios';
+import { ADDRESS_0, REGEX } from './constants';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 interface IAccount {
-    evm_address: string
-    key: IKey
-    account: string
+    evm_address: string;
+    key: IKey;
+    account: string;
 }
 
 export interface IContract {
-    admin_key: IKey
-    nullable: boolean
-    auto_renew_account: string
-    auto_renew_period: string
-    contract_id: string
-    contractId: ContractId
-    created_timestamp: string
-    deleted: string
-    evm_address: string
-    expiration_timestamp: string
-    file_id: string
-    max_automatic_token_associations: string
-    memo: string
-    obtainer_id: string
-    permanent_removal: string
-    proxy_account_id: string
-    timestamp: string
+    admin_key: IKey;
+    nullable: boolean;
+    auto_renew_account: string;
+    auto_renew_period: string;
+    contract_id: string;
+    contractId: ContractId;
+    created_timestamp: string;
+    deleted: string;
+    evm_address: string;
+    expiration_timestamp: string;
+    file_id: string;
+    max_automatic_token_associations: string;
+    memo: string;
+    obtainer_id: string;
+    permanent_removal: string;
+    proxy_account_id: string;
+    timestamp: string;
 }
 
 interface IKey {
-    _type: string
-    key: string
+    _type: string;
+    key: string;
 }
 
 export function getEnvVar({
     name,
     defaultValue,
 }: {
-    name: string
-    defaultValue?: string
+    name: string;
+    defaultValue?: string;
 }): string {
-    const value = process.env[name]
+    const value = process.env[name];
     if (value) {
-        return value
+        return value;
     }
     if (defaultValue) {
         console.warn(
             `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
-        )
-        return defaultValue
+        );
+        return defaultValue;
     }
-    throw new Error(`Environment variable ${name} is not defined`)
+    throw new Error(`Environment variable ${name} is not defined`);
 }
 
 export const sleep = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms))
+    new Promise((resolve) => setTimeout(resolve, ms));
 
 export function oneYearLaterInSeconds(): number {
-    const currentDate: Date = new Date()
+    const currentDate: Date = new Date();
     return Math.floor(
         currentDate.setFullYear(currentDate.getFullYear() + 1) / 1000
-    )
+    );
 }
 
 export function getClient(network?: string): Client {
     if (!network) {
-        const hre = require('hardhat')
-        network = hre.network.name
+        const hre = require('hardhat');
+        network = hre.network.name;
     }
     switch (network) {
         case 'previewnet':
-            return Client.forPreviewnet()
+            return Client.forPreviewnet();
         case 'testnet':
-            return Client.forTestnet()
+            return Client.forTestnet();
         case 'mainnet':
-            return Client.forMainnet()
+            return Client.forMainnet();
         default:
             throw new Error(
                 'Network not supported for Hedera Operations. Check NETWORK env variable'
-            )
+            );
     }
 }
 
@@ -307,32 +307,32 @@ export async function deployContractSDK(
 ): Promise<IContract> {
     const transaction = new ContractCreateFlow()
         .setBytecode(factory.bytecode)
-        .setGas(15000000)
+        .setGas(15000000);
     //.setAdminKey(Key)
     if (contractMemo) {
-        transaction.setContractMemo(contractMemo)
+        transaction.setContractMemo(contractMemo);
     }
     if (constructorParameters) {
-        transaction.setConstructorParameters(constructorParameters)
+        transaction.setConstructorParameters(constructorParameters);
     }
 
     const contractCreateSign = await transaction.sign(
         PrivateKey.fromStringED25519(privateKey)
-    )
+    );
 
-    const txResponse = await contractCreateSign.execute(clientOperator)
-    await sleep(2000)
-    const receipt = await txResponse.getReceipt(clientOperator)
-    await sleep(2000)
-    const contractId = receipt.contractId
+    const txResponse = await contractCreateSign.execute(clientOperator);
+    await sleep(2000);
+    const receipt = await txResponse.getReceipt(clientOperator);
+    await sleep(2000);
+    const contractId = receipt.contractId;
     if (!contractId) {
-        throw Error('Error deploying contractSDK')
+        throw Error('Error deploying contractSDK');
     }
-    const contractInfo = await getContractInfo(contractId.toString())
+    const contractInfo = await getContractInfo(contractId.toString());
     console.log(
         `${factory.name} - ${contractInfo.contract_id} - ${contractInfo.evm_address}`
-    )
-    return contractInfo
+    );
+    return contractInfo;
 }
 
 export async function toEvmAddress(
@@ -341,19 +341,19 @@ export async function toEvmAddress(
 ): Promise<string> {
     try {
         if (isE25519)
-            return '0x' + AccountId.fromString(accountId).toSolidityAddress()
+            return '0x' + AccountId.fromString(accountId).toSolidityAddress();
 
-        const URI_BASE = `${getHederaNetworkMirrorNodeURL()}/api/v1/`
-        const url = URI_BASE + 'accounts/' + accountId
-        const res = await axios.get<IAccount>(url)
-        return res.data.evm_address
+        const URI_BASE = `${getHederaNetworkMirrorNodeURL()}/api/v1/`;
+        const url = URI_BASE + 'accounts/' + accountId;
+        const res = await axios.get<IAccount>(url);
+        return res.data.evm_address;
     } catch (error) {
-        throw new Error('Error retrieving the Evm Address : ' + error)
+        throw new Error('Error retrieving the Evm Address : ' + error);
     }
 }
 
 export function contractIdToString(contractId: ContractId): string {
-    return `${contractId.shard.toString()}.${contractId.realm.toString()}.${contractId.num.toString()}`
+    return `${contractId.shard.toString()}.${contractId.realm.toString()}.${contractId.num.toString()}`;
 }
 
 /**
@@ -368,12 +368,12 @@ export function toHashgraphKey({
     privateKey,
     isED25519,
 }: {
-    privateKey: string
-    isED25519: boolean
+    privateKey: string;
+    isED25519: boolean;
 }): PrivateKey {
     return isED25519
         ? PrivateKey.fromStringED25519(privateKey)
-        : PrivateKey.fromStringECDSA(privateKey)
+        : PrivateKey.fromStringECDSA(privateKey);
 }
 
 export async function getContractInfo(contractId: string): Promise<IContract> {
@@ -384,51 +384,51 @@ export async function getContractInfo(contractId: string): Promise<IContract> {
         ) {
             throw new Error(
                 'Invalid contractId format. It must be like "0.0.XXXX" or "0xhexadecimal".'
-            )
+            );
         }
-        const URI_BASE = `${getHederaNetworkMirrorNodeURL()}/api/v1/`
-        const url = URI_BASE + 'contracts/' + contractId
+        const URI_BASE = `${getHederaNetworkMirrorNodeURL()}/api/v1/`;
+        const url = URI_BASE + 'contracts/' + contractId;
 
-        console.log(url)
-        const retry = 10
-        let i = 0
-        let res = null
+        console.log(url);
+        const retry = 10;
+        let i = 0;
+        let res = null;
         do {
-            res = await axios.get<IContract>(url)
-            i++
-            await sleep(1000)
-        } while (res.status !== 200 && i < retry)
+            res = await axios.get<IContract>(url);
+            i++;
+            await sleep(1000);
+        } while (res.status !== 200 && i < retry);
 
         return {
             ...res.data,
             contractId: ContractId.fromString(res.data.contract_id),
-        }
+        };
     } catch (error) {
-        throw new Error('Error retrieving the Evm Address : ' + error)
+        throw new Error('Error retrieving the Evm Address : ' + error);
     }
 }
 
 export async function evmToHederaFormat(evmAddress: string): Promise<string> {
-    if (evmAddress === ADDRESS_0) return '0.0.0'
-    const URI_BASE = `${getHederaNetworkMirrorNodeURL()}/api/v1/`
-    const url = URI_BASE + 'accounts/' + evmAddress
-    const res = await axios.get<IAccount>(url)
-    return res.data.account
+    if (evmAddress === ADDRESS_0) return '0.0.0';
+    const URI_BASE = `${getHederaNetworkMirrorNodeURL()}/api/v1/`;
+    const url = URI_BASE + 'accounts/' + evmAddress;
+    const res = await axios.get<IAccount>(url);
+    return res.data.account;
 }
 
 function getHederaNetworkMirrorNodeURL(network?: string): string {
     if (!network) {
-        const hre = require('hardhat')
-        network = hre.network.name
+        const hre = require('hardhat');
+        network = hre.network.name;
     }
     switch (network) {
         case 'mainnet':
-            return 'https://mainnet-public.mirrornode.hedera.com'
+            return 'https://mainnet-public.mirrornode.hedera.com';
         case 'previewnet':
-            return 'https://previewnet.mirrornode.hedera.com'
+            return 'https://previewnet.mirrornode.hedera.com';
         case 'testnet':
-            return 'https://testnet.mirrornode.hedera.com'
+            return 'https://testnet.mirrornode.hedera.com';
         default:
-            return 'https://testnet.mirrornode.hedera.com'
+            return 'https://testnet.mirrornode.hedera.com';
     }
 }

@@ -203,19 +203,19 @@
 
 */
 
-import { task, types } from 'hardhat/config'
-import { ContractId } from '@hashgraph/sdk'
+import { task, types } from 'hardhat/config';
+import { ContractId } from '@hashgraph/sdk';
 import {
     GetClientResult,
     UpdateBusinessLogicKeysArgs,
     UpdateFactoryVersionArgs,
-} from './Arguments'
-import { BusinessLogicRegistryData } from '../scripts/businessLogicResolverLogic'
-import { getProxyImpl, updateProxy } from '../scripts/deploy'
+} from './Arguments';
+import { BusinessLogicRegistryData } from '../scripts/businessLogicResolverLogic';
+import { getProxyImpl, updateProxy } from '../scripts/deploy';
 import {
     getStaticResolverKey,
     registerBusinessLogics,
-} from '../scripts/contractsMethods'
+} from '../scripts/contractsMethods';
 
 task('updateFactoryVersion', 'Updates the factory version')
     .addPositionalParam(
@@ -249,24 +249,26 @@ task('updateFactoryVersion', 'Updates the factory version')
         types.boolean
     )
     .setAction(async (args: UpdateFactoryVersionArgs, hre) => {
-        console.log(`Executing updateFactoryVersion on ${hre.network.name} ...`)
+        console.log(
+            `Executing updateFactoryVersion on ${hre.network.name} ...`
+        );
         const { client }: GetClientResult = await hre.run('getClient', {
             account: args.account,
             privateKey: args.privateKey,
             isEd25519: args.isEd25519,
-        })
+        });
 
         await updateProxy(
             client,
             args.proxyAdmin,
             args.proxy,
             args.newImplementation
-        )
+        );
 
-        await getProxyImpl(client, args.proxyAdmin, args.proxy)
+        await getProxyImpl(client, args.proxyAdmin, args.proxy);
 
-        console.log('Factory version updated')
-    })
+        console.log('Factory version updated');
+    });
 
 task('updateBusinessLogicKeys', 'Update the address of a business logic key')
     .addPositionalParam('resolver', 'The resolver Contract ID. 0.0.XXXX format')
@@ -295,39 +297,39 @@ task('updateBusinessLogicKeys', 'Update the address of a business logic key')
     .setAction(async (args: UpdateBusinessLogicKeysArgs, hre) => {
         console.log(
             `Executing updateBusinessLogicKeys on ${hre.network.name} ...`
-        )
+        );
         const { client }: GetClientResult = await hre.run('getClient', {
             account: args.account,
             privateKey: args.privateKey,
             isEd25519: args.isEd25519,
-        })
+        });
 
-        const businessLogicRegistries: BusinessLogicRegistryData[] = []
+        const businessLogicRegistries: BusinessLogicRegistryData[] = [];
 
-        const implementationList = args.implementations.split(',')
+        const implementationList = args.implementations.split(',');
 
         for (let i = 0; i < implementationList.length; i++) {
-            const facet = ContractId.fromString(implementationList[i])
+            const facet = ContractId.fromString(implementationList[i]);
 
-            console.log(implementationList[i])
+            console.log(implementationList[i]);
 
-            const businessLogicKey = await getStaticResolverKey(facet, client)
+            const businessLogicKey = await getStaticResolverKey(facet, client);
 
-            console.log(businessLogicKey)
+            console.log(businessLogicKey);
 
             businessLogicRegistries.push({
                 businessLogicKey: businessLogicKey,
                 businessLogicAddress: ContractId.fromString(
                     implementationList[i]
                 ).toSolidityAddress(),
-            })
+            });
         }
 
-        const resolverContract = ContractId.fromString(args.resolver)
+        const resolverContract = ContractId.fromString(args.resolver);
 
         await registerBusinessLogics(
             businessLogicRegistries,
             resolverContract,
             client
-        )
-    })
+        );
+    });

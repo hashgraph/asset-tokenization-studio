@@ -203,54 +203,54 @@
 
 */
 
-import { Client } from '@hashgraph/sdk'
+import { Client } from '@hashgraph/sdk';
 
 export interface GetClientResult {
-    client: Client
-    account: string
-    privateKey: string
+    client: Client;
+    account: string;
+    privateKey: string;
 }
 
 interface BasicArgs {
-    account?: string
-    privateKey?: string
-    isEd25519: boolean
+    account?: string;
+    privateKey?: string;
+    isEd25519: boolean;
 }
 
-export type GetClientArgs = BasicArgs
+export type GetClientArgs = BasicArgs;
 
 // * Utils
 export interface GetProxyAdminConfigArgs extends BasicArgs {
-    proxyAdmin: string
-    proxy: string
+    proxyAdmin: string;
+    proxy: string;
 }
 
 export interface GetConfigurationInfoArgs extends BasicArgs {
-    resolver: string
-    configId: string
+    resolver: string;
+    configId: string;
 }
 
 export interface GetResolverBusinessLogicsArgs extends BasicArgs {
-    resolver: string
+    resolver: string;
 }
 
 // * Deploy
 export interface DeployArgs extends BasicArgs {
-    contractName: string
+    contractName: string;
 }
 
 export interface DeployAllArgs extends BasicArgs {
-    useDeployed: boolean
+    useDeployed: boolean;
 }
 
 // * Update
 export interface UpdateFactoryVersionArgs extends BasicArgs {
-    proxyAdmin: string
-    proxy: string
-    newImplementation: string
+    proxyAdmin: string;
+    proxy: string;
+    newImplementation: string;
 }
 
 export interface UpdateBusinessLogicKeysArgs extends BasicArgs {
-    resolver: string
-    implementations: string // * Comma separated list
+    resolver: string;
+    implementations: string; // * Comma separated list
 }

@@ -203,8 +203,8 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
 import {
     type ResolverProxy,
     type AdjustBalances,
@@ -213,8 +213,8 @@ import {
     Lock_2,
     Equity,
     Cap_2,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+} from '../../../../typechain-types';
+import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc';
 import {
     _ADJUSTMENT_BALANCE_ROLE,
     _PAUSER_ROLE,
@@ -223,50 +223,50 @@ import {
     _CONTROLLER_ROLE,
     _LOCKER_ROLE,
     _CORPORATE_ACTION_ROLE,
-} from '../../../../scripts/constants'
+} from '../../../../scripts/constants';
 import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
+} from '../../../../scripts/factory';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { time } from '@nomicfoundation/hardhat-network-helpers';
 
-const amount = 1
-const balanceOf_A_Original = [10 * amount, 100 * amount]
-const balanceOf_B_Original = [20 * amount, 200 * amount]
+const amount = 1;
+const balanceOf_A_Original = [10 * amount, 100 * amount];
+const balanceOf_B_Original = [20 * amount, 200 * amount];
 const _PARTITION_ID_1 =
-    '0x0000000000000000000000000000000000000000000000000000000000000001'
+    '0x0000000000000000000000000000000000000000000000000000000000000001';
 const _PARTITION_ID_2 =
-    '0x0000000000000000000000000000000000000000000000000000000000000002'
-const adjustFactor = 253
-const adjustDecimals = 2
-const decimals_Original = 6
-const maxSupply_Original = 1000000 * amount
-const maxSupply_Partition_1_Original = 50000 * amount
-const maxSupply_Partition_2_Original = 0
-const ONE_SECOND = 1
+    '0x0000000000000000000000000000000000000000000000000000000000000002';
+const adjustFactor = 253;
+const adjustDecimals = 2;
+const decimals_Original = 6;
+const maxSupply_Original = 1000000 * amount;
+const maxSupply_Partition_1_Original = 50000 * amount;
+const maxSupply_Partition_2_Original = 0;
+const ONE_SECOND = 1;
 
 describe('Locks Layer 2 Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
+    let diamond: ResolverProxy;
+    let signer_A: SignerWithAddress;
+    let signer_B: SignerWithAddress;
+    let signer_C: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
+    let account_A: string;
+    let account_B: string;
+    let account_C: string;
 
-    let erc1410Facet: ERC1410ScheduledTasks
-    let adjustBalancesFacet: AdjustBalances
-    let accessControlFacet: AccessControl
-    let capFacet: Cap_2
-    let equityFacet: Equity
-    let lockFacet: Lock_2
+    let erc1410Facet: ERC1410ScheduledTasks;
+    let adjustBalancesFacet: AdjustBalances;
+    let accessControlFacet: AccessControl;
+    let capFacet: Cap_2;
+    let equityFacet: Equity;
+    let lockFacet: Lock_2;
 
     async function deployAsset(multiPartition: boolean) {
-        const init_rbacs: Rbac[] = set_initRbacs()
+        const init_rbacs: Rbac[] = set_initRbacs();
 
         diamond = await deployEquityFromFactory(
             account_A,
@@ -294,372 +294,374 @@ describe('Locks Layer 2 Tests', () => {
             'ES,FR,CH',
             'nothing',
             init_rbacs
-        )
+        );
 
-        await setFacets(diamond)
+        await setFacets(diamond);
     }
 
     async function setFacets(diamond: any) {
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address
-        )
+        );
 
         erc1410Facet = await ethers.getContractAt(
             'ERC1410ScheduledTasks',
             diamond.address
-        )
+        );
 
         adjustBalancesFacet = await ethers.getContractAt(
             'AdjustBalances',
             diamond.address
-        )
+        );
 
-        capFacet = await ethers.getContractAt('Cap_2', diamond.address)
+        capFacet = await ethers.getContractAt('Cap_2', diamond.address);
 
-        lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
+        lockFacet = await ethers.getContractAt('Lock_2', diamond.address);
 
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
+        equityFacet = await ethers.getContractAt('Equity', diamond.address);
     }
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
             role: _PAUSER_ROLE,
             members: [account_B],
-        }
+        };
         const corporateActionPause: Rbac = {
             role: _CORPORATE_ACTION_ROLE,
             members: [account_B],
-        }
-        return [rbacPause, corporateActionPause]
+        };
+        return [rbacPause, corporateActionPause];
     }
 
     async function setPreBalanceAdjustment() {
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_C)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(_CAP_ROLE, account_A)
-        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_A)
-        await accessControlFacet.grantRole(_LOCKER_ROLE, account_A)
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_C);
+        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A);
+        await accessControlFacet.grantRole(_CAP_ROLE, account_A);
+        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_A);
+        await accessControlFacet.grantRole(_LOCKER_ROLE, account_A);
 
         // Using account C (with role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-        erc1410Facet = erc1410Facet.connect(signer_A)
-        capFacet = capFacet.connect(signer_A)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C);
+        erc1410Facet = erc1410Facet.connect(signer_A);
+        capFacet = capFacet.connect(signer_A);
 
-        await capFacet.setMaxSupply(maxSupply_Original)
+        await capFacet.setMaxSupply(maxSupply_Original);
         await capFacet.setMaxSupplyByPartition(
             _PARTITION_ID_1,
             maxSupply_Partition_1_Original
-        )
+        );
         await capFacet.setMaxSupplyByPartition(
             _PARTITION_ID_2,
             maxSupply_Partition_2_Original
-        )
+        );
 
         await erc1410Facet.issueByPartition(
             _PARTITION_ID_1,
             account_A,
             balanceOf_A_Original[0],
             '0x'
-        )
+        );
         await erc1410Facet.issueByPartition(
             _PARTITION_ID_2,
             account_A,
             balanceOf_A_Original[1],
             '0x'
-        )
+        );
         await erc1410Facet.issueByPartition(
             _PARTITION_ID_1,
             account_B,
             balanceOf_B_Original[0],
             '0x'
-        )
+        );
         await erc1410Facet.issueByPartition(
             _PARTITION_ID_2,
             account_B,
             balanceOf_B_Original[1],
             '0x'
-        )
+        );
     }
 
     beforeEach(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
+        [signer_A, signer_B, signer_C] = await ethers.getSigners();
+        account_A = signer_A.address;
+        account_B = signer_B.address;
+        account_C = signer_C.address;
 
-        await deployEnvironment()
+        await deployEnvironment();
 
-        await deployAsset(true)
-    })
+        await deployAsset(true);
+    });
 
     it('GIVEN a lock WHEN adjustBalances THEN lock amount gets updated succeeds', async () => {
-        await setPreBalanceAdjustment()
+        await setPreBalanceAdjustment();
 
-        const balance_Before = await erc1410Facet.balanceOf(account_A)
+        const balance_Before = await erc1410Facet.balanceOf(account_A);
         const balance_Before_Partition_1 =
-            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
+            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A);
 
         // LOCK
         const currentTimestamp = (await ethers.provider.getBlock('latest'))
-            .timestamp
-        const ONE_SECOND = 1
+            .timestamp;
+        const ONE_SECOND = 1;
 
-        lockFacet = lockFacet.connect(signer_A)
+        lockFacet = lockFacet.connect(signer_A);
         await lockFacet.lockByPartition(
             _PARTITION_ID_1,
             amount,
             account_A,
             currentTimestamp + ONE_SECOND
-        )
+        );
 
         const lock_TotalAmount_Before =
-            await lockFacet.getLockedAmountFor(account_A)
+            await lockFacet.getLockedAmountFor(account_A);
         const lock_TotalAmount_Before_Partition_1 =
             await lockFacet.getLockedAmountForByPartition(
                 _PARTITION_ID_1,
                 account_A
-            )
+            );
         const lock_Before = await lockFacet.getLockForByPartition(
             _PARTITION_ID_1,
             account_A,
             1
-        )
+        );
 
         // adjustBalances
-        await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
+        await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
         // scheduled two balance updates
-        equityFacet = equityFacet.connect(signer_B)
+        equityFacet = equityFacet.connect(signer_B);
 
         const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
+            .timestamp;
 
         const balanceAdjustmentData = {
             executionDate: (currentTimeInSeconds + 2).toString(),
             factor: adjustFactor,
             decimals: adjustDecimals,
-        }
+        };
 
         const balanceAdjustmentData_2 = {
             executionDate: (currentTimeInSeconds + 1000).toString(),
             factor: adjustFactor,
             decimals: adjustDecimals,
-        }
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
+        };
+        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData);
+        await equityFacet.setScheduledBalanceAdjustment(
+            balanceAdjustmentData_2
+        );
 
         // wait for first scheduled balance adjustment only (run DUMB transaction)
-        await new Promise((f) => setTimeout(f, 3000))
-        await accessControlFacet.grantRole(_PAUSER_ROLE, account_C) // DUMB transaction
+        await new Promise((f) => setTimeout(f, 3000));
+        await accessControlFacet.grantRole(_PAUSER_ROLE, account_C); // DUMB transaction
 
         const lock_TotalAmount_After =
-            await lockFacet.getLockedAmountFor(account_A)
+            await lockFacet.getLockedAmountFor(account_A);
         const lock_TotalAmount_After_Partition_1 =
             await lockFacet.getLockedAmountForByPartition(
                 _PARTITION_ID_1,
                 account_A
-            )
+            );
         const lock_After = await lockFacet.getLockForByPartition(
             _PARTITION_ID_1,
             account_A,
             1
-        )
-        const balance_After = await erc1410Facet.balanceOf(account_A)
+        );
+        const balance_After = await erc1410Facet.balanceOf(account_A);
         const balance_After_Partition_1 =
-            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
+            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A);
 
         expect(lock_TotalAmount_After).to.be.equal(
             lock_TotalAmount_Before.mul(adjustFactor * adjustFactor)
-        )
+        );
         expect(lock_TotalAmount_After_Partition_1).to.be.equal(
             lock_TotalAmount_Before_Partition_1.mul(adjustFactor * adjustFactor)
-        )
+        );
         expect(balance_After).to.be.equal(
             balance_Before.sub(amount).mul(adjustFactor * adjustFactor)
-        )
+        );
         expect(lock_TotalAmount_After).to.be.equal(
             lock_TotalAmount_Before.mul(adjustFactor * adjustFactor)
-        )
+        );
         expect(balance_After_Partition_1).to.be.equal(
             balance_Before_Partition_1
                 .sub(amount)
                 .mul(adjustFactor * adjustFactor)
-        )
+        );
         expect(lock_After.amount_).to.be.equal(
             lock_Before.amount_.mul(adjustFactor * adjustFactor)
-        )
-    })
+        );
+    });
 
     it('GIVEN a lock WHEN adjustBalances THEN release succeeds', async () => {
-        await setPreBalanceAdjustment()
-        const balance_Before = await erc1410Facet.balanceOf(account_A)
+        await setPreBalanceAdjustment();
+        const balance_Before = await erc1410Facet.balanceOf(account_A);
         const balance_Before_Partition_1 =
-            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
+            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A);
 
         // LOCK TWICE
         const currentTimestamp = (await ethers.provider.getBlock('latest'))
-            .timestamp
+            .timestamp;
 
-        lockFacet = lockFacet.connect(signer_A)
+        lockFacet = lockFacet.connect(signer_A);
         await lockFacet.lockByPartition(
             _PARTITION_ID_1,
             amount,
             account_A,
             currentTimestamp + ONE_SECOND
-        )
+        );
         await lockFacet.lockByPartition(
             _PARTITION_ID_1,
             amount,
             account_A,
             currentTimestamp + 100 * ONE_SECOND
-        )
+        );
 
         const locked_Amount_Before =
-            await lockFacet.getLockedAmountFor(account_A)
+            await lockFacet.getLockedAmountFor(account_A);
         const locked_Amount_Before_Partition_1 =
             await lockFacet.getLockedAmountForByPartition(
                 _PARTITION_ID_1,
                 account_A
-            )
+            );
 
         // adjustBalances
-        await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
+        await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
         // RELEASE LOCK
         await time.setNextBlockTimestamp(
             (await ethers.provider.getBlock('latest')).timestamp +
                 2 * ONE_SECOND
-        )
-        await lockFacet.releaseByPartition(_PARTITION_ID_1, 1, account_A)
+        );
+        await lockFacet.releaseByPartition(_PARTITION_ID_1, 1, account_A);
 
-        const balance_After_Release = await erc1410Facet.balanceOf(account_A)
+        const balance_After_Release = await erc1410Facet.balanceOf(account_A);
         const balance_After_Release_Partition_1 =
-            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
+            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A);
         const locked_Amount_After =
-            await lockFacet.getLockedAmountFor(account_A)
+            await lockFacet.getLockedAmountFor(account_A);
         const locked_Amount_After_Partition_1 =
             await lockFacet.getLockedAmountForByPartition(
                 _PARTITION_ID_1,
                 account_A
-            )
+            );
 
         expect(balance_After_Release).to.be.equal(
             balance_Before.sub(amount).mul(adjustFactor)
-        )
+        );
         expect(balance_After_Release_Partition_1).to.be.equal(
             balance_Before_Partition_1.sub(amount).mul(adjustFactor)
-        )
+        );
         expect(locked_Amount_After).to.be.equal(
             locked_Amount_Before.sub(amount).mul(adjustFactor)
-        )
+        );
         expect(locked_Amount_After_Partition_1).to.be.equal(
             locked_Amount_Before_Partition_1.sub(amount).mul(adjustFactor)
-        )
+        );
         expect(balance_After_Release.add(locked_Amount_After)).to.be.equal(
             balance_Before.mul(adjustFactor)
-        )
+        );
         expect(
             balance_After_Release_Partition_1.add(
                 locked_Amount_After_Partition_1
             )
-        ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor))
-    })
+        ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor));
+    });
 
     it('GIVEN a lock WHEN adjustBalances THEN lock succeeds', async () => {
-        await setPreBalanceAdjustment()
-        const balance_Before = await erc1410Facet.balanceOf(account_A)
+        await setPreBalanceAdjustment();
+        const balance_Before = await erc1410Facet.balanceOf(account_A);
         const balance_Before_Partition_1 =
-            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
+            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A);
 
         // LOCK BEFORE BALANCE ADJUSTMENT
         const currentTimestamp = (await ethers.provider.getBlock('latest'))
-            .timestamp
+            .timestamp;
 
-        lockFacet = lockFacet.connect(signer_A)
+        lockFacet = lockFacet.connect(signer_A);
         await lockFacet.lockByPartition(
             _PARTITION_ID_1,
             amount,
             account_A,
             currentTimestamp + 100 * ONE_SECOND
-        )
+        );
 
         const locked_Amount_Before =
-            await lockFacet.getLockedAmountFor(account_A)
+            await lockFacet.getLockedAmountFor(account_A);
         const locked_Amount_Before_Partition_1 =
             await lockFacet.getLockedAmountForByPartition(
                 _PARTITION_ID_1,
                 account_A
-            )
+            );
 
         // adjustBalances
-        await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
+        await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
         // LOCK AFTER BALANCE ADJUSTMENT
-        lockFacet = lockFacet.connect(signer_A)
+        lockFacet = lockFacet.connect(signer_A);
         await lockFacet.lockByPartition(
             _PARTITION_ID_1,
             amount,
             account_A,
             currentTimestamp + 100 * ONE_SECOND
-        )
+        );
 
-        const balance_After_Lock = await erc1410Facet.balanceOf(account_A)
+        const balance_After_Lock = await erc1410Facet.balanceOf(account_A);
         const balance_After_Lock_Partition_1 =
-            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
+            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A);
         const locked_Amount_After =
-            await lockFacet.getLockedAmountFor(account_A)
+            await lockFacet.getLockedAmountFor(account_A);
         const locked_Amount_After_Partition_1 =
             await lockFacet.getLockedAmountForByPartition(
                 _PARTITION_ID_1,
                 account_A
-            )
+            );
 
         expect(balance_After_Lock).to.be.equal(
             balance_Before.sub(amount).mul(adjustFactor).sub(amount)
-        )
+        );
         expect(balance_After_Lock_Partition_1).to.be.equal(
             balance_Before_Partition_1.sub(amount).mul(adjustFactor).sub(amount)
-        )
+        );
         expect(locked_Amount_After).to.be.equal(
             locked_Amount_Before.mul(adjustFactor).add(amount)
-        )
+        );
         expect(locked_Amount_After_Partition_1).to.be.equal(
             locked_Amount_Before_Partition_1.mul(adjustFactor).add(amount)
-        )
+        );
         expect(balance_After_Lock.add(locked_Amount_After)).to.be.equal(
             balance_Before.mul(adjustFactor)
-        )
+        );
         expect(
             balance_After_Lock_Partition_1.add(locked_Amount_After_Partition_1)
-        ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor))
-    })
+        ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor));
+    });
 
     it('GIVEN a lock WHEN adjustBalances and release THEN reset lock LABAF succeeds', async () => {
-        await setPreBalanceAdjustment()
+        await setPreBalanceAdjustment();
 
         // LOCK
         const currentTimestamp = (await ethers.provider.getBlock('latest'))
-            .timestamp
+            .timestamp;
 
-        lockFacet = lockFacet.connect(signer_A)
+        lockFacet = lockFacet.connect(signer_A);
         await lockFacet.lockByPartition(
             _PARTITION_ID_1,
             amount,
             account_A,
             currentTimestamp + ONE_SECOND
-        )
+        );
         const TotalLockLABAF_Before =
             await lockFacet.getTotalLockLABAFByPartition(
                 _PARTITION_ID_1,
                 account_A
-            )
+            );
 
         // adjustBalances
-        await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
+        await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals);
 
         // LOCK AGAIN
         await lockFacet.lockByPartition(
@@ -667,35 +669,35 @@ describe('Locks Layer 2 Tests', () => {
             amount,
             account_A,
             currentTimestamp + 100 * ONE_SECOND
-        )
+        );
 
         const LockLABAF_Before = await lockFacet.getLockLABAFByPartition(
             _PARTITION_ID_1,
             2,
             account_A
-        )
+        );
 
         // RELEASE LOCK
         await time.setNextBlockTimestamp(
             (await ethers.provider.getBlock('latest')).timestamp +
                 2 * ONE_SECOND
-        )
-        await lockFacet.releaseByPartition(_PARTITION_ID_1, 1, account_A)
+        );
+        await lockFacet.releaseByPartition(_PARTITION_ID_1, 1, account_A);
 
         const TotalLockLABAF_After =
             await lockFacet.getTotalLockLABAFByPartition(
                 _PARTITION_ID_1,
                 account_A
-            )
+            );
         const LockLABAF_After = await lockFacet.getLockLABAFByPartition(
             _PARTITION_ID_1,
             2,
             account_A
-        )
+        );
 
-        expect(LockLABAF_Before).to.be.equal(LockLABAF_After)
-        expect(TotalLockLABAF_Before).to.be.equal(0)
-        expect(TotalLockLABAF_After).to.be.equal(adjustFactor)
-        expect(LockLABAF_Before).to.be.equal(adjustFactor)
-    })
-})
+        expect(LockLABAF_Before).to.be.equal(LockLABAF_After);
+        expect(TotalLockLABAF_Before).to.be.equal(0);
+        expect(TotalLockLABAF_After).to.be.equal(adjustFactor);
+        expect(LockLABAF_Before).to.be.equal(adjustFactor);
+    });
+});

@@ -203,8 +203,8 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { expect } from 'chai';
+import { ethers } from 'hardhat';
 import {
     type ResolverProxy,
     type AdjustBalances,
@@ -213,51 +213,51 @@ import {
     type AccessControl,
     Equity,
     ScheduledTasks,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+} from '../../../../typechain-types';
+import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc';
 import {
     _ADJUSTMENT_BALANCE_ROLE,
     _PAUSER_ROLE,
     _ISSUER_ROLE,
     _CORPORATE_ACTION_ROLE,
-} from '../../../../scripts/constants'
+} from '../../../../scripts/constants';
 import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+} from '../../../../scripts/factory';
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js';
+import { grantRoleAndPauseToken } from '../../../../scripts/testCommon';
 
-const amount = 1
-const balanceOf_B_Original = [20 * amount, 200 * amount]
+const amount = 1;
+const balanceOf_B_Original = [20 * amount, 200 * amount];
 const _PARTITION_ID_2 =
-    '0x0000000000000000000000000000000000000000000000000000000000000002'
-const adjustFactor = 253
-const adjustDecimals = 2
-const decimals_Original = 6
-const TIME = 6000
+    '0x0000000000000000000000000000000000000000000000000000000000000002';
+const adjustFactor = 253;
+const adjustDecimals = 2;
+const decimals_Original = 6;
+const TIME = 6000;
 
 describe('Adjust Balances Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
+    let diamond: ResolverProxy;
+    let signer_A: SignerWithAddress;
+    let signer_B: SignerWithAddress;
+    let signer_C: SignerWithAddress;
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
+    let account_A: string;
+    let account_B: string;
+    let account_C: string;
 
-    let erc1410Facet: ERC1410ScheduledTasks
-    let adjustBalancesFacet: AdjustBalances
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
-    let equityFacet: Equity
-    let scheduledTasksFacet: ScheduledTasks
+    let erc1410Facet: ERC1410ScheduledTasks;
+    let adjustBalancesFacet: AdjustBalances;
+    let accessControlFacet: AccessControl;
+    let pauseFacet: Pause;
+    let equityFacet: Equity;
+    let scheduledTasksFacet: ScheduledTasks;
 
     async function deployAsset(multiPartition: boolean) {
-        const init_rbacs: Rbac[] = set_initRbacs()
+        const init_rbacs: Rbac[] = set_initRbacs();
 
         diamond = await deployEquityFromFactory(
             account_A,
@@ -285,66 +285,66 @@ describe('Adjust Balances Tests', () => {
             'ES,FR,CH',
             'nothing',
             init_rbacs
-        )
+        );
 
-        await setFacets(diamond)
+        await setFacets(diamond);
     }
 
     async function setFacets(diamond: any) {
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address
-        )
+        );
 
         erc1410Facet = await ethers.getContractAt(
             'ERC1410ScheduledTasks',
             diamond.address
-        )
+        );
 
         adjustBalancesFacet = await ethers.getContractAt(
             'AdjustBalances',
             diamond.address
-        )
+        );
 
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+        pauseFacet = await ethers.getContractAt('Pause', diamond.address);
 
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
+        equityFacet = await ethers.getContractAt('Equity', diamond.address);
 
         scheduledTasksFacet = await ethers.getContractAt(
             'ScheduledTasks',
             diamond.address
-        )
+        );
     }
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
             role: _PAUSER_ROLE,
             members: [account_B],
-        }
-        return [rbacPause]
+        };
+        return [rbacPause];
     }
 
     beforeEach(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
+        [signer_A, signer_B, signer_C] = await ethers.getSigners();
+        account_A = signer_A.address;
+        account_B = signer_B.address;
+        account_C = signer_C.address;
 
-        await deployEnvironment()
+        await deployEnvironment();
 
-        await deployAsset(true)
-    })
+        await deployAsset(true);
+    });
 
     it('GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole', async () => {
         // Using account C (non role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C);
 
         // adjustBalances fails
         await expect(
             adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
-        ).to.be.rejectedWith('AccountHasNoRole')
-    })
+        ).to.be.rejectedWith('AccountHasNoRole');
+    });
 
     it('GIVEN a paused Token WHEN adjustBalances THEN transaction fails with TokenIsPaused', async () => {
         // Granting Role to account C and Pause
@@ -355,90 +355,93 @@ describe('Adjust Balances Tests', () => {
             signer_A,
             signer_B,
             account_C
-        )
+        );
 
         // Using account C (with role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C);
 
         // adjustBalances fails
         await expect(
             adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
-        ).to.be.rejectedWith('TokenIsPaused')
-    })
+        ).to.be.rejectedWith('TokenIsPaused');
+    });
 
     it('GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero', async () => {
         // Granting Role to account C and Pause
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_C)
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_C);
 
         // Using account C (with role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C);
 
         // adjustBalances fails
         await expect(
             adjustBalancesFacet.adjustBalances(0, adjustDecimals)
-        ).to.be.rejectedWith(Error)
-    })
+        ).to.be.rejectedWith(Error);
+    });
 
     it('GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds', async () => {
         // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_A)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_A)
+        accessControlFacet = accessControlFacet.connect(signer_A);
+        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_A);
+        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A);
+        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_A);
 
-        erc1410Facet = erc1410Facet.connect(signer_A)
-        equityFacet = equityFacet.connect(signer_A)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
+        erc1410Facet = erc1410Facet.connect(signer_A);
+        equityFacet = equityFacet.connect(signer_A);
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A);
 
         await erc1410Facet.issueByPartition(
             _PARTITION_ID_2,
             account_B,
             balanceOf_B_Original,
             '0x'
-        )
+        );
 
         // schedule tasks
         const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
+            .timestamp;
 
         const dividendsRecordDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000
+            currentTimeInSeconds + TIME / 1000;
         const dividendsExecutionDateInSeconds =
-            currentTimeInSeconds + (10 * TIME) / 1000
-        const dividendsAmountPerEquity = 1
+            currentTimeInSeconds + (10 * TIME) / 1000;
+        const dividendsAmountPerEquity = 1;
         const dividendData_1 = {
             recordDate: dividendsRecordDateInSeconds_1.toString(),
             executionDate: dividendsExecutionDateInSeconds.toString(),
             amount: dividendsAmountPerEquity,
-        }
+        };
 
-        await equityFacet.setDividends(dividendData_1)
+        await equityFacet.setDividends(dividendData_1);
 
         const balanceAdjustmentExecutionDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000 + 1
+            currentTimeInSeconds + TIME / 1000 + 1;
 
         const balanceAdjustmentData_1 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
             factor: adjustFactor,
             decimals: adjustDecimals,
-        }
+        };
 
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+        await equityFacet.setScheduledBalanceAdjustment(
+            balanceAdjustmentData_1
+        );
 
         const tasks_count_Before =
-            await scheduledTasksFacet.scheduledTaskCount()
+            await scheduledTasksFacet.scheduledTaskCount();
 
         //-------------------------
-        await new Promise((f) => setTimeout(f, TIME + 2))
+        await new Promise((f) => setTimeout(f, TIME + 2));
 
         // balance adjustment
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
-        await adjustBalancesFacet.adjustBalances(1, 0)
+        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A);
+        await adjustBalancesFacet.adjustBalances(1, 0);
 
-        const tasks_count_After = await scheduledTasksFacet.scheduledTaskCount()
+        const tasks_count_After =
+            await scheduledTasksFacet.scheduledTaskCount();
 
-        expect(tasks_count_Before).to.be.equal(2)
-        expect(tasks_count_After).to.be.equal(0)
-    })
-})
+        expect(tasks_count_Before).to.be.equal(2);
+        expect(tasks_count_After).to.be.equal(0);
+    });
+});

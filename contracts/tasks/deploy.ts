@@ -203,9 +203,9 @@
 
 */
 
-import { task, types } from 'hardhat/config'
-import { DeployAllArgs, DeployArgs, GetClientResult } from './Arguments'
-import { deployAtsFullInfrastructure, deployContract } from '../scripts/deploy'
+import { task, types } from 'hardhat/config';
+import { DeployAllArgs, DeployArgs, GetClientResult } from './Arguments';
+import { deployAtsFullInfrastructure, deployContract } from '../scripts/deploy';
 
 task(
     'deployAll',
@@ -236,7 +236,7 @@ task(
         types.boolean
     )
     .setAction(async (args: DeployAllArgs, hre) => {
-        console.log(`Executing deployAll on ${hre.network.name} ...`)
+        console.log(`Executing deployAll on ${hre.network.name} ...`);
         const { client, privateKey }: GetClientResult = await hre.run(
             'getClient',
             {
@@ -244,7 +244,7 @@ task(
                 privateKey: args.privateKey,
                 isEd25519: args.isEd25519,
             }
-        )
+        );
         // * Deploy the full infrastructure
         const {
             resolver,
@@ -274,7 +274,7 @@ task(
             privateKey: privateKey,
             isED25519: args.isEd25519,
             useDeployed: args.useDeployed,
-        })
+        });
 
         // * Display the deployed addresses
         const ids = {
@@ -305,15 +305,15 @@ task(
             Lock: lock.contract,
             'Transfer and Lock': transferAndLock.contract,
             'Adjust Balances': adjustBalances.contract,
-        }
+        };
 
-        console.log('\n 🟢 Deployed IDs:')
+        console.log('\n 🟢 Deployed IDs:');
         for (const [key, value] of Object.entries(ids)) {
             console.log(
                 `   --> ${key}: ${value?.contract_id}(${value?.evm_address})`
-            )
+            );
         }
-    })
+    });
 
 task('deploy', 'Deploy new contract')
     .addPositionalParam(
@@ -341,7 +341,7 @@ task('deploy', 'Deploy new contract')
         types.boolean
     )
     .setAction(async (args: DeployArgs, hre) => {
-        console.log(`Executing deploy on ${hre.network.name} ...`)
+        console.log(`Executing deploy on ${hre.network.name} ...`);
         const { client, privateKey }: GetClientResult = await hre.run(
             'getClient',
             {
@@ -349,24 +349,24 @@ task('deploy', 'Deploy new contract')
                 privateKey: args.privateKey,
                 isEd25519: args.isEd25519,
             }
-        )
+        );
         // * Deploy the contract
         const { proxyAdmin, proxy, contract } = await deployContract({
             clientOperator: client,
             privateKey: privateKey,
             isED25519: args.isEd25519,
             contractName: args.contractName,
-        })
+        });
 
         if (proxyAdmin) {
             console.log(
                 `Proxy Admin: ${proxyAdmin.evm_address}(${proxyAdmin.contract_id})`
-            )
+            );
         }
         if (proxy) {
-            console.log(`Proxy: ${proxy.evm_address}(${proxy.contract_id})`)
+            console.log(`Proxy: ${proxy.evm_address}(${proxy.contract_id})`);
         }
         console.log(
             `Implementation: ${contract.evm_address}(${contract.contract_id})`
-        )
-    })
+        );
+    });

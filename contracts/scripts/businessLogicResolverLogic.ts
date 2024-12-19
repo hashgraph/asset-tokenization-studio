@@ -204,59 +204,59 @@
 */
 
 //import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ethers } from 'hardhat'
-import { IBusinessLogicResolver } from '../typechain-types'
-import { IStaticFunctionSelectors } from '../typechain-types'
+import { ethers } from 'hardhat';
+import { IBusinessLogicResolver } from '../typechain-types';
+import { IStaticFunctionSelectors } from '../typechain-types';
 import {
     transparentUpgradableProxy,
     deployProxyAdmin,
     deployTransparentUpgradeableProxy,
-} from './transparentUpgradableProxy'
-import { expect } from 'chai'
+} from './transparentUpgradableProxy';
+import { expect } from 'chai';
 
 export interface BusinessLogicRegistryData {
-    businessLogicKey: string
-    businessLogicAddress: string
+    businessLogicKey: string;
+    businessLogicAddress: string;
 }
 
 export interface DeployedBusinessLogics {
-    businessLogicResolver: IStaticFunctionSelectors
-    factory: IStaticFunctionSelectors
-    diamondFacet: IStaticFunctionSelectors
-    accessControl: IStaticFunctionSelectors
-    controlList: IStaticFunctionSelectors
-    corporateActionsSecurity: IStaticFunctionSelectors
-    pause: IStaticFunctionSelectors
-    eRC20_2: IStaticFunctionSelectors
-    eRC1644_2: IStaticFunctionSelectors
-    eRC1410ScheduledTasks: IStaticFunctionSelectors
-    eRC1594_2: IStaticFunctionSelectors
-    eRC1643: IStaticFunctionSelectors
-    equityUSA: IStaticFunctionSelectors
-    bondUSA: IStaticFunctionSelectors
-    snapshots_2: IStaticFunctionSelectors
-    scheduledSnapshots: IStaticFunctionSelectors
-    scheduledBalanceAdjustments: IStaticFunctionSelectors
-    scheduledTasks: IStaticFunctionSelectors
-    cap_2: IStaticFunctionSelectors
-    lock_2: IStaticFunctionSelectors
-    transferAndLock: IStaticFunctionSelectors
-    adjustBalances: IStaticFunctionSelectors
+    businessLogicResolver: IStaticFunctionSelectors;
+    factory: IStaticFunctionSelectors;
+    diamondFacet: IStaticFunctionSelectors;
+    accessControl: IStaticFunctionSelectors;
+    controlList: IStaticFunctionSelectors;
+    corporateActionsSecurity: IStaticFunctionSelectors;
+    pause: IStaticFunctionSelectors;
+    eRC20_2: IStaticFunctionSelectors;
+    eRC1644_2: IStaticFunctionSelectors;
+    eRC1410ScheduledTasks: IStaticFunctionSelectors;
+    eRC1594_2: IStaticFunctionSelectors;
+    eRC1643: IStaticFunctionSelectors;
+    equityUSA: IStaticFunctionSelectors;
+    bondUSA: IStaticFunctionSelectors;
+    snapshots_2: IStaticFunctionSelectors;
+    scheduledSnapshots: IStaticFunctionSelectors;
+    scheduledBalanceAdjustments: IStaticFunctionSelectors;
+    scheduledTasks: IStaticFunctionSelectors;
+    cap_2: IStaticFunctionSelectors;
+    lock_2: IStaticFunctionSelectors;
+    transferAndLock: IStaticFunctionSelectors;
+    adjustBalances: IStaticFunctionSelectors;
 }
 
-export let businessLogicResolver: IBusinessLogicResolver
+export let businessLogicResolver: IBusinessLogicResolver;
 
 export async function deployProxyToBusinessLogicResolver(
     businessLogicResolverLogicAddress: string
 ) {
     //await loadFixture(deployProxyAdmin)
-    await deployProxyAdmin()
-    await deployTransparentUpgradeableProxy(businessLogicResolverLogicAddress)
+    await deployProxyAdmin();
+    await deployTransparentUpgradeableProxy(businessLogicResolverLogicAddress);
     businessLogicResolver = (await ethers.getContractAt(
         'BusinessLogicResolver',
         transparentUpgradableProxy.address
-    )) as IBusinessLogicResolver
-    await businessLogicResolver.initialize_BusinessLogicResolver()
+    )) as IBusinessLogicResolver;
+    await businessLogicResolver.initialize_BusinessLogicResolver();
 }
 
 async function toStaticFunctionSelectors(
@@ -265,15 +265,15 @@ async function toStaticFunctionSelectors(
     return (await ethers.getContractAt(
         'IStaticFunctionSelectors',
         address
-    )) as IStaticFunctionSelectors
+    )) as IStaticFunctionSelectors;
 }
 
 function capitalizeFirst(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1)
+    return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
 function uncapitalizeFirst(str: string) {
-    return str.charAt(0).toLowerCase() + str.slice(1)
+    return str.charAt(0).toLowerCase() + str.slice(1);
 }
 
 export async function deployBusinessLogics(
@@ -286,41 +286,41 @@ export async function deployBusinessLogics(
         async function deployContract() {
             return await (
                 await ethers.getContractFactory(contractToDeploy)
-            ).deploy()
+            ).deploy();
         }
         //await loadFixture(deployContract)
-        const deployedContract = await deployContract()
+        const deployedContract = await deployContract();
         const deployedAndRegisteredBusinessLogics_Property =
-            uncapitalizeFirst(contractToDeploy)
+            uncapitalizeFirst(contractToDeploy);
         deployedAndRegisteredBusinessLogics[
             deployedAndRegisteredBusinessLogics_Property as keyof DeployedBusinessLogics
-        ] = await toStaticFunctionSelectors(deployedContract.address)
+        ] = await toStaticFunctionSelectors(deployedContract.address);
     }
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
+    let key: keyof typeof deployedAndRegisteredBusinessLogics;
     for (key in deployedAndRegisteredBusinessLogics) {
         await deployContractAndAssignIt(
             deployedAndRegisteredBusinessLogics,
             capitalizeFirst(key)
-        )
+        );
     }
 }
 
 export async function registerBusinessLogics(
     deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
 ) {
-    const businessLogicsData: BusinessLogicRegistryData[] = []
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
+    const businessLogicsData: BusinessLogicRegistryData[] = [];
+    let key: keyof typeof deployedAndRegisteredBusinessLogics;
     for (key in deployedAndRegisteredBusinessLogics) {
         if (key === 'businessLogicResolver' || key === 'factory') {
-            continue
+            continue;
         }
-        const businessLogic = deployedAndRegisteredBusinessLogics[key]
+        const businessLogic = deployedAndRegisteredBusinessLogics[key];
         businessLogicsData.push({
             businessLogicKey: await businessLogic.getStaticResolverKey(),
             businessLogicAddress: businessLogic.address,
-        })
+        });
     }
     await expect(
         businessLogicResolver.registerBusinessLogics(businessLogicsData)
-    ).to.emit(businessLogicResolver, 'BusinessLogicsRegistered')
+    ).to.emit(businessLogicResolver, 'BusinessLogicsRegistered');
 }

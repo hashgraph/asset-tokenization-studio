@@ -203,58 +203,58 @@
 
 */
 
-import { deployProxyToFactory, factory } from './factory'
+import { deployProxyToFactory, factory } from './factory';
 import {
     IBusinessLogicResolver,
     IFactory,
     IStaticFunctionSelectors,
     ProxyAdmin,
-} from '../typechain-types'
+} from '../typechain-types';
 import {
     businessLogicResolver,
     deployProxyToBusinessLogicResolver,
     DeployedBusinessLogics,
     deployBusinessLogics,
     registerBusinessLogics,
-} from './businessLogicResolverLogic'
-import { proxyAdmin } from './transparentUpgradableProxy'
-import { createResolverConfig } from './resolverDiamondCut'
-import { BondConfigId, EquityConfigId } from './constants'
+} from './businessLogicResolverLogic';
+import { proxyAdmin } from './transparentUpgradableProxy';
+import { createResolverConfig } from './resolverDiamondCut';
+import { BondConfigId, EquityConfigId } from './constants';
 
 export interface Environment {
-    deployedBusinessLogics: DeployedBusinessLogics
-    facetIdsEquities: string[]
-    facetVersionsEquities: number[]
-    facetIdsBonds: string[]
-    facetVersionsBonds: number[]
-    proxyAdmin: ProxyAdmin
-    resolver: IBusinessLogicResolver
-    factory: IFactory
+    deployedBusinessLogics: DeployedBusinessLogics;
+    facetIdsEquities: string[];
+    facetVersionsEquities: number[];
+    facetIdsBonds: string[];
+    facetVersionsBonds: number[];
+    proxyAdmin: ProxyAdmin;
+    resolver: IBusinessLogicResolver;
+    factory: IFactory;
 }
 
-export const environment: Environment = buildEmptyEnvironment()
-let environmentInitialized = false
+export const environment: Environment = buildEmptyEnvironment();
+let environmentInitialized = false;
 
 async function deployResolverInEnvironment() {
     await deployProxyToBusinessLogicResolver(
         environment.deployedBusinessLogics.businessLogicResolver.address
-    )
-    environment.proxyAdmin = proxyAdmin
-    environment.resolver = businessLogicResolver
+    );
+    environment.proxyAdmin = proxyAdmin;
+    environment.resolver = businessLogicResolver;
 }
 
 async function deployFactoryInEnvironment() {
     await deployProxyToFactory(
         environment.deployedBusinessLogics.factory.address
-    )
-    environment.factory = factory
+    );
+    environment.factory = factory;
 }
 
 export async function deployEnvironment() {
     if (!environmentInitialized) {
-        await deployBusinessLogics(environment.deployedBusinessLogics)
-        await deployResolverInEnvironment()
-        await registerBusinessLogics(environment.deployedBusinessLogics)
+        await deployBusinessLogics(environment.deployedBusinessLogics);
+        await deployResolverInEnvironment();
+        await registerBusinessLogics(environment.deployedBusinessLogics);
         environment.facetIdsEquities = await Promise.all(
             Object.entries(environment.deployedBusinessLogics)
                 .filter(
@@ -266,7 +266,7 @@ export async function deployEnvironment() {
                 .map(
                     async ([, value]) => `${await value.getStaticResolverKey()}`
                 )
-        )
+        );
         environment.facetIdsBonds = await Promise.all(
             Object.entries(environment.deployedBusinessLogics)
                 .filter(
@@ -278,26 +278,26 @@ export async function deployEnvironment() {
                 .map(
                     async ([, value]) => `${await value.getStaticResolverKey()}`
                 )
-        )
+        );
         environment.facetVersionsEquities = environment.facetIdsEquities.map(
             () => 1
-        )
-        environment.facetVersionsBonds = environment.facetIdsBonds.map(() => 1)
+        );
+        environment.facetVersionsBonds = environment.facetIdsBonds.map(() => 1);
 
         await createResolverConfig(
             environment,
             EquityConfigId,
             environment.facetIdsEquities,
             environment.facetVersionsEquities
-        )
+        );
         await createResolverConfig(
             environment,
             BondConfigId,
             environment.facetIdsBonds,
             environment.facetVersionsBonds
-        )
-        await deployFactoryInEnvironment()
-        environmentInitialized = true
+        );
+        await deployFactoryInEnvironment();
+        environmentInitialized = true;
     }
 }
 
@@ -334,5 +334,5 @@ function buildEmptyEnvironment(): Environment {
         proxyAdmin: {} as ProxyAdmin,
         resolver: {} as IBusinessLogicResolver,
         factory: {} as IFactory,
-    }
+    };
 }

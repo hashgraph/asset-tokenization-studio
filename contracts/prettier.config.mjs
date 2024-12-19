@@ -7,7 +7,7 @@
 const config = {
     trailingComma: 'es5',
     tabWidth: 4,
-    semi: false,
+    semi: true,
     singleQuote: true,
     plugins: ['prettier-plugin-solidity'],
     overrides: [
@@ -23,6 +23,6 @@ const config = {
             },
         },
     ],
-}
+};
 
-export default config
+export default config;

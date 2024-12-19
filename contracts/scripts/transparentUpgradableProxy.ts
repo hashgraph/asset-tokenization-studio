@@ -203,17 +203,17 @@
 
 */
 
-import { ethers } from 'hardhat'
-import { ProxyAdmin } from '../typechain-types'
-import { TransparentUpgradeableProxy } from '../typechain-types'
+import { ethers } from 'hardhat';
+import { ProxyAdmin } from '../typechain-types';
+import { TransparentUpgradeableProxy } from '../typechain-types';
 
-export let transparentUpgradableProxy: TransparentUpgradeableProxy
-export let proxyAdmin: ProxyAdmin
+export let transparentUpgradableProxy: TransparentUpgradeableProxy;
+export let proxyAdmin: ProxyAdmin;
 
 export async function deployProxyAdmin() {
     proxyAdmin = (await (
         await ethers.getContractFactory('ProxyAdmin')
-    ).deploy()) as ProxyAdmin
+    ).deploy()) as ProxyAdmin;
 }
 export async function deployTransparentUpgradeableProxy(
     businessLogicAddress: string
@@ -224,5 +224,5 @@ export async function deployTransparentUpgradeableProxy(
         businessLogicAddress,
         proxyAdmin.address,
         '0x'
-    )) as TransparentUpgradeableProxy
+    )) as TransparentUpgradeableProxy;
 }

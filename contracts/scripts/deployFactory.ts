@@ -203,9 +203,9 @@
 
 */
 
-import { initializeClient, deployContract } from './deploy'
+import { initializeClient, deployContract } from './deploy';
 
-import { getClient, toHashgraphKey } from './utils'
+import { getClient, toHashgraphKey } from './utils';
 
 export const deployFactory = async () => {
     const [
@@ -214,24 +214,24 @@ export const deployFactory = async () => {
         operatorPriKey,
         //client1publickey,
         operatorIsE25519,
-    ] = initializeClient()
+    ] = initializeClient();
 
     // Deploy Token using Client
-    const clientSdk = getClient()
+    const clientSdk = getClient();
     clientSdk.setOperator(
         operatorAccount,
         toHashgraphKey({
             privateKey: operatorPriKey,
             isED25519: operatorIsE25519,
         })
-    )
+    );
 
     const { proxy, proxyAdmin, contract } = await deployContract({
         clientOperator: clientSdk,
         privateKey: operatorPriKey,
         contractName: 'factory',
         isED25519: operatorIsE25519,
-    })
+    });
 
     console.log(
         '\nProxy Address: \t',
@@ -240,5 +240,5 @@ export const deployFactory = async () => {
         proxyAdmin?.evm_address,
         '\nFactory Address: \t',
         contract?.evm_address
-    )
-}
+    );
+};

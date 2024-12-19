@@ -203,17 +203,17 @@
 
 */
 
-import { subtask, task, types } from 'hardhat/config'
-import { HederaAccount } from '@hashgraph/hardhat-hethers/src/type-extensions'
-import { ContractId } from '@hashgraph/sdk'
+import { subtask, task, types } from 'hardhat/config';
+import { HederaAccount } from '@hashgraph/hardhat-hethers/src/type-extensions';
+import { ContractId } from '@hashgraph/sdk';
 import {
     GetClientArgs,
     GetClientResult,
     GetConfigurationInfoArgs,
     GetProxyAdminConfigArgs,
     GetResolverBusinessLogicsArgs,
-} from './Arguments'
-import { evmToHederaFormat, getClient, toHashgraphKey } from '../scripts/utils'
+} from './Arguments';
+import { evmToHederaFormat, getClient, toHashgraphKey } from '../scripts/utils';
 import {
     getOwner,
     getProxyImplementation,
@@ -221,7 +221,7 @@ import {
     getFacetsLengthByConfigurationIdAndVersion,
     getFacetsByConfigurationIdAndVersion,
     getBusinessLogicKeys,
-} from '../scripts/contractsMethods'
+} from '../scripts/contractsMethods';
 
 subtask('getClient', 'Get the operator of the client')
     .addOptionalParam(
@@ -243,28 +243,28 @@ subtask('getClient', 'Get the operator of the client')
         types.boolean
     )
     .setAction(async (args: GetClientArgs, hre) => {
-        console.log(`Executing getOperator on ${hre.network.name} ...`)
-        const accounts = hre.network.config.accounts as HederaAccount[]
-        const client = getClient(hre.network.name)
+        console.log(`Executing getOperator on ${hre.network.name} ...`);
+        const accounts = hre.network.config.accounts as HederaAccount[];
+        const client = getClient(hre.network.name);
         if (!client) {
-            throw new Error('Client not found')
+            throw new Error('Client not found');
         }
         if (accounts.length === 0 || !accounts[0].account) {
-            throw new Error('No accounts found')
+            throw new Error('No accounts found');
         }
-        const account: string = args.account ?? accounts[0].account
-        const privateKey: string = args.privateKey ?? accounts[0].privateKey
+        const account: string = args.account ?? accounts[0].account;
+        const privateKey: string = args.privateKey ?? accounts[0].privateKey;
         client.setOperator(
             account,
             toHashgraphKey({ privateKey, isED25519: args.isEd25519 })
-        )
-        console.log(`Operator: ${account}`)
+        );
+        console.log(`Operator: ${account}`);
         return {
             client: client,
             account: account,
             privateKey: privateKey,
-        } as GetClientResult
-    })
+        } as GetClientResult;
+    });
 
 task('keccak256', 'Prints the keccak256 hash of a string')
     .addPositionalParam(
@@ -274,9 +274,9 @@ task('keccak256', 'Prints the keccak256 hash of a string')
         types.string
     )
     .setAction(async ({ input }: { input: string }, hre) => {
-        const hash = hre.ethers.utils.keccak256(Buffer.from(input, 'utf-8'))
-        console.log(`The keccak256 hash of the input "${input}" is: ${hash}`)
-    })
+        const hash = hre.ethers.utils.keccak256(Buffer.from(input, 'utf-8'));
+        console.log(`The keccak256 hash of the input "${input}" is: ${hash}`);
+    });
 
 task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
     .addPositionalParam(
@@ -310,16 +310,16 @@ task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
         types.boolean
     )
     .setAction(async (args: GetProxyAdminConfigArgs, hre) => {
-        console.log(`Executing getProxyAdminConfig on ${hre.network.name} ...`)
+        console.log(`Executing getProxyAdminConfig on ${hre.network.name} ...`);
         const { client } = await hre.run('getClient', {
             account: args.account,
             privateKey: args.privateKey,
             isEd25519: args.isEd25519,
-        })
+        });
 
         const owner = await evmToHederaFormat(
             await getOwner(ContractId.fromString(args.proxyAdmin), client)
-        )
+        );
 
         const implementation = await evmToHederaFormat(
             await getProxyImplementation(
@@ -327,10 +327,10 @@ task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
                 client,
                 ContractId.fromString(args.proxy).toSolidityAddress()
             )
-        )
+        );
 
-        console.log(`Owner: ${owner}, Implementation: ${implementation}`)
-    })
+        console.log(`Owner: ${owner}, Implementation: ${implementation}`);
+    });
 
 task('getConfigurationInfo', 'Get all info for a given configuration')
     .addPositionalParam(
@@ -359,13 +359,15 @@ task('getConfigurationInfo', 'Get all info for a given configuration')
         types.boolean
     )
     .setAction(async (args: GetConfigurationInfoArgs, hre) => {
-        console.log(`Executing getConfigurationInfo on ${hre.network.name} ...`)
+        console.log(
+            `Executing getConfigurationInfo on ${hre.network.name} ...`
+        );
 
         const { client } = await hre.run('getClient', {
             account: args.account,
             privateKey: args.privateKey,
             isEd25519: args.isEd25519,
-        })
+        });
 
         const configVersionLatest = parseInt(
             await getLatestVersionByConfiguration(
@@ -374,11 +376,11 @@ task('getConfigurationInfo', 'Get all info for a given configuration')
                 client
             ),
             16
-        )
+        );
 
         console.log(
             `Number of Versions for Config ${args.configId}: ${configVersionLatest}`
-        )
+        );
 
         for (
             let currentVersion = 1;
@@ -393,11 +395,11 @@ task('getConfigurationInfo', 'Get all info for a given configuration')
                     client
                 ),
                 16
-            )
+            );
 
             console.log(
                 `Number of Facets for Config ${args.configId} and Version ${currentVersion}: ${facetLength}`
-            )
+            );
 
             const facets = await getFacetsByConfigurationIdAndVersion(
                 args.configId,
@@ -406,26 +408,26 @@ task('getConfigurationInfo', 'Get all info for a given configuration')
                 facetLength,
                 ContractId.fromString(args.resolver),
                 client
-            )
+            );
 
             for (const [index, facet] of facets[0].entries()) {
-                console.log(`Facet ${index + 1}:`)
-                console.log(`  ID: ${facet.id}`)
-                console.log(`  Address: ${facet.addr}`)
+                console.log(`Facet ${index + 1}:`);
+                console.log(`  ID: ${facet.id}`);
+                console.log(`  Address: ${facet.addr}`);
                 console.log(
                     `  Selectors: ${JSON.stringify(facet.selectors, null, 2)}`
-                )
+                );
                 console.log(
                     `  Interface IDs: ${JSON.stringify(
                         facet.interfaceIds,
                         null,
                         2
                     )}`
-                )
-                console.log('-------------------------')
+                );
+                console.log('-------------------------');
             }
         }
-    })
+    });
 
 task('getResolverBusinessLogics', 'Get business logics from resolver')
     .addPositionalParam(
@@ -455,25 +457,25 @@ task('getResolverBusinessLogics', 'Get business logics from resolver')
     .setAction(async (args: GetResolverBusinessLogicsArgs, hre) => {
         console.log(
             `Executing getResolverBusinessLogics on ${hre.network.name} ...`
-        )
+        );
 
         // Get the client
         const { client } = await hre.run('getClient', {
             account: args.account,
             privateKey: args.privateKey,
             isEd25519: args.isEd25519,
-        })
+        });
 
         // Fetch business logic keys
         const result = await getBusinessLogicKeys(
             ContractId.fromString(args.resolver),
             client
-        )
+        );
 
         // Log the business logic keys
-        console.log('Business Logic Keys:')
+        console.log('Business Logic Keys:');
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         result.forEach((key: any, index: number) => {
-            console.log(`  Key ${index + 1}: ${key}`)
-        })
-    })
+            console.log(`  Key ${index + 1}: ${key}`);
+        });
+    });

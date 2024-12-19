@@ -1,17 +1,17 @@
-import { HardhatUserConfig } from 'hardhat/config'
-import '@nomicfoundation/hardhat-toolbox'
-import '@nomiclabs/hardhat-solhint'
-import 'hardhat-contract-sizer'
-import 'solidity-coverage'
-import '@hashgraph/sdk'
-import { getEnvVar } from './scripts/utils'
+import { HardhatUserConfig } from 'hardhat/config';
+import '@nomicfoundation/hardhat-toolbox';
+import '@nomiclabs/hardhat-solhint';
+import 'hardhat-contract-sizer';
+import 'solidity-coverage';
+import '@hashgraph/sdk';
+import { getEnvVar } from './scripts/utils';
 // ! Uncomment the following lines to be able to use tasks AFTER compiling the project
 // import './tasks/utils'
 // import './tasks/deploy'
 // import './tasks/update'
 
 if (getEnvVar({ name: 'NETWORK', defaultValue: 'hardhat' }) !== 'hardhat') {
-    require('@hashgraph/hardhat-hethers')
+    require('@hashgraph/hardhat-hethers');
 }
 
 const HEDERA_ACCOUNTS = [
@@ -29,21 +29,21 @@ const HEDERA_ACCOUNTS = [
             defaultValue: '0x0000',
         }).replace(/^0x/, ''),
     },
-]
+];
 
 // Needed to be able to use the HederaConfig interface
 interface ExtendedHardhatUserConfig extends Omit<HardhatUserConfig, 'hedera'> {
     hedera?: {
-        gasLimit: number
+        gasLimit: number;
         networks: {
             [key: string]: {
                 accounts: {
-                    account: string
-                    privateKey: string
-                }[]
-            }
-        }
-    }
+                    account: string;
+                    privateKey: string;
+                }[];
+            };
+        };
+    };
 }
 
 let config: ExtendedHardhatUserConfig = {
@@ -69,7 +69,7 @@ let config: ExtendedHardhatUserConfig = {
     mocha: {
         timeout: 3000000,
     },
-}
+};
 // If we are not using the hardhat network, we need to add the Hedera accounts
 if (getEnvVar({ name: 'NETWORK', defaultValue: 'hardhat' }) !== 'hardhat') {
     config = {
@@ -83,7 +83,7 @@ if (getEnvVar({ name: 'NETWORK', defaultValue: 'hardhat' }) !== 'hardhat') {
                 },
             },
         },
-    }
+    };
 }
 
-export default config
+export default config;

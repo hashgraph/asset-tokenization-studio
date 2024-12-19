@@ -1,1 +1,1 @@
-export const istanbulFolder = '../coverage/contracts'
+export const istanbulFolder = '../coverage/contracts';

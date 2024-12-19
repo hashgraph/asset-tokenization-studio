@@ -203,53 +203,53 @@
 
 */
 
-import { ethers } from 'hardhat'
-import { IFactory } from '../typechain-types'
+import { ethers } from 'hardhat';
+import { IFactory } from '../typechain-types';
 import {
     transparentUpgradableProxy,
     deployTransparentUpgradeableProxy,
-} from './transparentUpgradableProxy'
+} from './transparentUpgradableProxy';
 import {
     EquityDeployedEvent,
     _DEFAULT_ADMIN_ROLE,
     BondDeployedEvent,
     EquityConfigId,
     BondConfigId,
-} from './constants'
-import { environment } from './deployEnvironmentByRpc'
+} from './constants';
+import { environment } from './deployEnvironmentByRpc';
 
-export let factory: IFactory
+export let factory: IFactory;
 
 export async function deployProxyToFactory(
     factoryBusinessLogicAddress: string
 ) {
-    await deployTransparentUpgradeableProxy(factoryBusinessLogicAddress)
+    await deployTransparentUpgradeableProxy(factoryBusinessLogicAddress);
     factory = (await ethers.getContractAt(
         'Factory',
         transparentUpgradableProxy.address
-    )) as IFactory
+    )) as IFactory;
 }
 
 export interface Rbac {
-    role: string
-    members: string[]
+    role: string;
+    members: string[];
 }
 
 export interface ResolverProxyConfiguration {
-    key: string
-    version: number
+    key: string;
+    version: number;
 }
 
 export interface ERC20MetadataInfo {
-    name: string
-    symbol: string
-    isin: string
-    decimals: number
+    name: string;
+    symbol: string;
+    isin: string;
+    decimals: number;
 }
 
 export interface ERC20Metadata {
-    info: ERC20MetadataInfo
-    securityType: number
+    info: ERC20MetadataInfo;
+    securityType: number;
 }
 
 export enum DividendType {
@@ -264,76 +264,76 @@ export enum SecurityType {
 }
 
 export interface EquityDetailsData {
-    votingRight: boolean
-    informationRight: boolean
-    liquidationRight: boolean
-    subscriptionRight: boolean
-    conversionRight: boolean
-    redemptionRight: boolean
-    putRight: boolean
-    dividendRight: DividendType
-    currency: string
-    nominalValue: number
+    votingRight: boolean;
+    informationRight: boolean;
+    liquidationRight: boolean;
+    subscriptionRight: boolean;
+    conversionRight: boolean;
+    redemptionRight: boolean;
+    putRight: boolean;
+    dividendRight: DividendType;
+    currency: string;
+    nominalValue: number;
 }
 
 export interface BondDetailsData {
-    currency: string
-    nominalValue: number
-    startingDate: number
-    maturityDate: number
+    currency: string;
+    nominalValue: number;
+    startingDate: number;
+    maturityDate: number;
 }
 
 export interface CouponDetailsData {
-    couponFrequency: number
-    couponRate: number
-    firstCouponDate: number
+    couponFrequency: number;
+    couponRate: number;
+    firstCouponDate: number;
 }
 
 export interface SecurityData {
-    isMultiPartition: boolean
-    resolver: string
-    resolverProxyConfiguration: ResolverProxyConfiguration
-    rbacs: Rbac[]
-    isControllable: boolean
-    isWhiteList: boolean
-    maxSupply: number
-    erc20MetadataInfo: ERC20MetadataInfo
+    isMultiPartition: boolean;
+    resolver: string;
+    resolverProxyConfiguration: ResolverProxyConfiguration;
+    rbacs: Rbac[];
+    isControllable: boolean;
+    isWhiteList: boolean;
+    maxSupply: number;
+    erc20MetadataInfo: ERC20MetadataInfo;
 }
 
 export interface EquityData {
-    security: SecurityData
-    equityDetails: EquityDetailsData
+    security: SecurityData;
+    equityDetails: EquityDetailsData;
 }
 
 export interface BondData {
-    security: SecurityData
-    bondDetails: BondDetailsData
-    couponDetails: CouponDetailsData
+    security: SecurityData;
+    bondDetails: BondDetailsData;
+    couponDetails: CouponDetailsData;
 }
 
 export interface AdditionalSecurityData {
-    countriesControlListType: boolean
-    listOfCountries: string
-    info: string
+    countriesControlListType: boolean;
+    listOfCountries: string;
+    info: string;
 }
 
 export interface FactoryRegulationData {
-    regulationType: number
-    regulationSubType: number
-    additionalSecurityData: AdditionalSecurityData
+    regulationType: number;
+    regulationSubType: number;
+    additionalSecurityData: AdditionalSecurityData;
 }
 
 export const RegulationType = {
     NONE: 0,
     REG_S: 1,
     REG_D: 2,
-}
+};
 
 export const RegulationSubType = {
     NONE: 0,
     REG_D_506_B: 1,
     REG_D_506_C: 2,
-}
+};
 
 export async function setFactoryRegulationData(
     regulationType: number,
@@ -346,15 +346,15 @@ export async function setFactoryRegulationData(
         countriesControlListType: countriesControlListType,
         listOfCountries: listOfCountries,
         info: info,
-    }
+    };
 
     const factoryRegulationData: FactoryRegulationData = {
         regulationType: regulationType,
         regulationSubType: regulationSubType,
         additionalSecurityData: additionalSecurityData,
-    }
+    };
 
-    return factoryRegulationData
+    return factoryRegulationData;
 }
 
 export async function setEquityData(
@@ -381,33 +381,33 @@ export async function setEquityData(
     addAdmin = true,
     initResolver?: string
 ) {
-    let rbacs: Rbac[] = []
+    let rbacs: Rbac[] = [];
 
     if (addAdmin) {
         const rbacAdmin: Rbac = {
             role: _DEFAULT_ADMIN_ROLE,
             members: [adminAccount],
-        }
-        rbacs = [rbacAdmin]
+        };
+        rbacs = [rbacAdmin];
     }
 
     if (init_rbacs) {
-        rbacs = rbacs.concat(init_rbacs)
+        rbacs = rbacs.concat(init_rbacs);
     }
 
     const resolverProxyConfiguration: ResolverProxyConfiguration = {
         key: EquityConfigId,
         version: 1,
-    }
+    };
 
-    const resolver = initResolver ? initResolver : environment.resolver.address
+    const resolver = initResolver ? initResolver : environment.resolver.address;
 
     const erc20MetadataInfo: ERC20MetadataInfo = {
         name,
         symbol,
         isin,
         decimals,
-    }
+    };
 
     const security: SecurityData = {
         isMultiPartition: isMultiPartition,
@@ -418,7 +418,7 @@ export async function setEquityData(
         isWhiteList: isWhiteList,
         maxSupply: numberOfShares,
         erc20MetadataInfo: erc20MetadataInfo,
-    }
+    };
 
     const equityDetails: EquityDetailsData = {
         votingRight: votingRight,
@@ -431,14 +431,14 @@ export async function setEquityData(
         dividendRight: dividendRight,
         currency: currency,
         nominalValue: nominalValue,
-    }
+    };
 
     const equityData: EquityData = {
         security,
         equityDetails,
-    }
+    };
 
-    return equityData
+    return equityData;
 }
 
 export async function setBondData(
@@ -462,33 +462,33 @@ export async function setBondData(
     addAdmin = true,
     initResolver?: string
 ) {
-    let rbacs: Rbac[] = []
+    let rbacs: Rbac[] = [];
 
     if (addAdmin) {
         const rbacAdmin: Rbac = {
             role: _DEFAULT_ADMIN_ROLE,
             members: [adminAccount],
-        }
-        rbacs = [rbacAdmin]
+        };
+        rbacs = [rbacAdmin];
     }
 
     if (init_rbacs) {
-        rbacs = rbacs.concat(init_rbacs)
+        rbacs = rbacs.concat(init_rbacs);
     }
 
     const resolverProxyConfiguration: ResolverProxyConfiguration = {
         key: BondConfigId,
         version: 1,
-    }
+    };
 
-    const resolver = initResolver ? initResolver : environment.resolver.address
+    const resolver = initResolver ? initResolver : environment.resolver.address;
 
     const erc20MetadataInfo: ERC20MetadataInfo = {
         name,
         symbol,
         isin,
         decimals,
-    }
+    };
 
     const security: SecurityData = {
         isMultiPartition: isMultiPartition,
@@ -499,28 +499,28 @@ export async function setBondData(
         isWhiteList: isWhiteList,
         maxSupply: numberOfUnits,
         erc20MetadataInfo: erc20MetadataInfo,
-    }
+    };
 
     const bondDetails: BondDetailsData = {
         currency: currency, // EUR
         nominalValue: nominalValue,
         startingDate: startingDate,
         maturityDate: maturityDate,
-    }
+    };
 
     const couponDetails: CouponDetailsData = {
         couponFrequency: couponFrequency,
         couponRate: couponRate,
         firstCouponDate: firstCouponDate,
-    }
+    };
 
     const bondData: BondData = {
         security,
         bondDetails,
         couponDetails,
-    }
+    };
 
-    return bondData
+    return bondData;
 }
 
 export async function deployEquityFromFactory(
@@ -575,7 +575,7 @@ export async function deployEquityFromFactory(
         init_rbacs,
         addAdmin,
         initResolver
-    )
+    );
 
     const factoryRegulationData = await setFactoryRegulationData(
         regulationType,
@@ -583,19 +583,19 @@ export async function deployEquityFromFactory(
         countriesControlListType,
         listOfCountries,
         info
-    )
+    );
 
     const result = await environment.factory.deployEquity(
         equityData,
         factoryRegulationData
-    )
-    const events = (await result.wait()).events!
+    );
+    const events = (await result.wait()).events!;
     const deployedEquityEvent = events.find(
         (e) => e.event == EquityDeployedEvent
-    )
-    const equityAddress = deployedEquityEvent!.args!.equityAddress
+    );
+    const equityAddress = deployedEquityEvent!.args!.equityAddress;
 
-    return await ethers.getContractAt('Equity', equityAddress)
+    return await ethers.getContractAt('Equity', equityAddress);
 }
 
 export async function deployBondFromFactory(
@@ -644,7 +644,7 @@ export async function deployBondFromFactory(
         init_rbacs,
         addAdmin,
         initResolver
-    )
+    );
 
     const factoryRegulationData = await setFactoryRegulationData(
         regulationType,
@@ -652,15 +652,15 @@ export async function deployBondFromFactory(
         countriesControlListType,
         listOfCountries,
         info
-    )
+    );
 
     const result = await environment.factory.deployBond(
         bondData,
         factoryRegulationData
-    )
-    const events = (await result.wait()).events!
-    const deployedBondEvent = events.find((e) => e.event == BondDeployedEvent)
-    const bondAddress = deployedBondEvent!.args!.bondAddress
+    );
+    const events = (await result.wait()).events!;
+    const deployedBondEvent = events.find((e) => e.event == BondDeployedEvent);
+    const bondAddress = deployedBondEvent!.args!.bondAddress;
 
-    return await ethers.getContractAt('Bond', bondAddress)
+    return await ethers.getContractAt('Bond', bondAddress);
 }
