@@ -206,8 +206,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
-import {ERC1410BasicStorageWrapper} from './ERC1410BasicStorageWrapper.sol';
+import { IERC1410Basic } from "../../interfaces/ERC1400/IERC1410Basic.sol";
+import { ERC1410BasicStorageWrapper } from "./ERC1410BasicStorageWrapper.sol";
 
 abstract contract ERC1410Basic is IERC1410Basic, ERC1410BasicStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
@@ -262,7 +262,7 @@ abstract contract ERC1410Basic is IERC1410Basic, ERC1410BasicStorageWrapper {
             _partition,
             _data,
             address(0),
-            ''
+            ""
         );
     }
 

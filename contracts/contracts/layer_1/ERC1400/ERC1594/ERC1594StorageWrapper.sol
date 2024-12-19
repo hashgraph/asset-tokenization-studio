@@ -206,22 +206,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC1594_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {
-    IERC1594StorageWrapper
-} from '../../interfaces/ERC1400/IERC1594StorageWrapper.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
-    _ALLOWANCE_REACHED_ERROR_ID,
-    _SUCCESS
-} from '../../constants/values.sol';
-import {ERC20StorageWrapper} from '../ERC20/ERC20StorageWrapper.sol';
+import { _ERC1594_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { IERC1594StorageWrapper } from "../../interfaces/ERC1400/IERC1594StorageWrapper.sol";
+import { _IS_PAUSED_ERROR_ID, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, _FROM_ACCOUNT_BLOCKED_ERROR_ID, _FROM_ACCOUNT_NULL_ERROR_ID, _TO_ACCOUNT_BLOCKED_ERROR_ID, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, _TO_ACCOUNT_NULL_ERROR_ID, _ALLOWANCE_REACHED_ERROR_ID, _SUCCESS } from "../../constants/values.sol";
+import { ERC20StorageWrapper } from "../ERC20/ERC20StorageWrapper.sol";
 
 abstract contract ERC1594StorageWrapper is
     ERC20StorageWrapper,

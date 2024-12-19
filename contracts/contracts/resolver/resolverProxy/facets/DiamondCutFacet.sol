@@ -206,20 +206,12 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    IDiamondCut
-} from '../../../interfaces/resolver/resolverProxy/IDiamondCut.sol';
-import {
-    ResolverProxyUnstructured
-} from '../unstructured/ResolverProxyUnstructured.sol';
-import {
-    IBusinessLogicResolver
-} from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
-import {
-    _DIAMOND_CUT_RESOLVER_KEY
-} from '../../../layer_1/constants/resolverKeys.sol';
-import {Common} from '../../../layer_1/common/Common.sol';
-import {_DEFAULT_ADMIN_ROLE} from '../../../layer_1/constants/roles.sol';
+import { IDiamondCut } from "../../../interfaces/resolver/resolverProxy/IDiamondCut.sol";
+import { ResolverProxyUnstructured } from "../unstructured/ResolverProxyUnstructured.sol";
+import { IBusinessLogicResolver } from "../../../interfaces/resolver/IBusinessLogicResolver.sol";
+import { _DIAMOND_CUT_RESOLVER_KEY } from "../../../layer_1/constants/resolverKeys.sol";
+import { Common } from "../../../layer_1/common/Common.sol";
+import { _DEFAULT_ADMIN_ROLE } from "../../../layer_1/constants/roles.sol";
 
 contract DiamondCutFacet is IDiamondCut, Common, ResolverProxyUnstructured {
     function updateConfigVersion(

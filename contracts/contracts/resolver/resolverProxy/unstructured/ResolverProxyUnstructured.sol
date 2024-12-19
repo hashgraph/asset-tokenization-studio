@@ -206,24 +206,12 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    IResolverProxy
-} from '../../../interfaces/resolver/resolverProxy/IResolverProxy.sol';
-import {
-    IBusinessLogicResolver
-} from '../../../interfaces/resolver/IBusinessLogicResolver.sol';
-import {
-    IDiamondLoupe
-} from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
-import {
-    AccessControlStorageWrapper
-} from '../../../layer_1/accessControl/AccessControlStorageWrapper.sol';
-import {
-    PauseStorageWrapper
-} from '../../../layer_1/pause/PauseStorageWrapper.sol';
-import {
-    _RESOLVER_PROXY_STORAGE_POSITION
-} from '../../../layer_1/constants/storagePositions.sol';
+import { IResolverProxy } from "../../../interfaces/resolver/resolverProxy/IResolverProxy.sol";
+import { IBusinessLogicResolver } from "../../../interfaces/resolver/IBusinessLogicResolver.sol";
+import { IDiamondLoupe } from "../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol";
+import { AccessControlStorageWrapper } from "../../../layer_1/accessControl/AccessControlStorageWrapper.sol";
+import { PauseStorageWrapper } from "../../../layer_1/pause/PauseStorageWrapper.sol";
+import { _RESOLVER_PROXY_STORAGE_POSITION } from "../../../layer_1/constants/storagePositions.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet.sol.sol to the resolverProxy.
 // The loupe functions are required by the EIP2535 ResolverProxys standard

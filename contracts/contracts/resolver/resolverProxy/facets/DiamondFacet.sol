@@ -206,24 +206,14 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {DiamondCutFacet} from './DiamondCutFacet.sol';
-import {DiamondLoupeFacet} from './DiamondLoupeFacet.sol';
-import {
-    _DIAMOND_RESOLVER_KEY
-} from '../../../layer_1/constants/resolverKeys.sol';
-import {
-    IDiamond
-} from '../../../interfaces/resolver/resolverProxy/IDiamond.sol';
-import {
-    IDiamondCut
-} from '../../../interfaces/resolver/resolverProxy/IDiamondCut.sol';
-import {
-    IDiamondLoupe
-} from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
-import {IERC165} from '@openzeppelin/contracts/utils/introspection/IERC165.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import { DiamondCutFacet } from "./DiamondCutFacet.sol";
+import { DiamondLoupeFacet } from "./DiamondLoupeFacet.sol";
+import { _DIAMOND_RESOLVER_KEY } from "../../../layer_1/constants/resolverKeys.sol";
+import { IDiamond } from "../../../interfaces/resolver/resolverProxy/IDiamond.sol";
+import { IDiamondCut } from "../../../interfaces/resolver/resolverProxy/IDiamondCut.sol";
+import { IDiamondLoupe } from "../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol";
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import { IStaticFunctionSelectors } from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
 
 // Remember to add the loupe functions from DiamondLoupeFacet to the diamond.
 // The loupe functions are required by the EIP2535 Diamonds standard

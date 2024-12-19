@@ -1,3 +1,1 @@
-module.exports = {
-    istanbulFolder: '../coverage/contracts',
-}
+export const istanbulFolder = '../coverage/contracts'

@@ -462,9 +462,8 @@ describe('Bond Tests', () => {
 
             // * Act
             // Set maturity date
-            const receipt = await bondFacet.updateMaturityDate(
-                tomorrowInSeconds
-            )
+            const receipt =
+                await bondFacet.updateMaturityDate(tomorrowInSeconds)
 
             // * Assert
             await expect(receipt)

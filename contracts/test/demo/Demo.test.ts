@@ -841,21 +841,18 @@ DiamondResume:
         await accessControlFacet.grantRole(_PAUSER_ROLE, account_P)
 
         console.log('Check current roles')
-        const adminMemberCount = await accessControlFacet.getRoleMemberCount(
-            _DEFAULT_ADMIN_ROLE
-        )
-        const issuerMemberCount = await accessControlFacet.getRoleMemberCount(
-            _ISSUER_ROLE
-        )
+        const adminMemberCount =
+            await accessControlFacet.getRoleMemberCount(_DEFAULT_ADMIN_ROLE)
+        const issuerMemberCount =
+            await accessControlFacet.getRoleMemberCount(_ISSUER_ROLE)
         const controlListMemberCount =
             await accessControlFacet.getRoleMemberCount(_CONTROL_LIST_ROLE)
         const corporateActionsMemberCount =
             await accessControlFacet.getRoleMemberCount(_CORPORATE_ACTION_ROLE)
         const controllerMemberCount =
             await accessControlFacet.getRoleMemberCount(_CONTROLLER_ROLE)
-        const pauserMemberCount = await accessControlFacet.getRoleMemberCount(
-            _PAUSER_ROLE
-        )
+        const pauserMemberCount =
+            await accessControlFacet.getRoleMemberCount(_PAUSER_ROLE)
         expect(adminMemberCount).to.be.equal(1)
         expect(issuerMemberCount).to.be.equal(1)
         expect(controlListMemberCount).to.be.equal(1)

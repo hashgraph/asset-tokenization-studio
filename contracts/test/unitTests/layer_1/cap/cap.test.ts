@@ -434,9 +434,8 @@ describe('CAP Tests', () => {
                 .to.emit(capFacet, 'MaxSupplyByPartitionSet')
                 .withArgs(account_C, _PARTITION_ID_1, maxSupply, 0)
 
-            const currentMaxSupply = await capFacet.getMaxSupplyByPartition(
-                _PARTITION_ID_1
-            )
+            const currentMaxSupply =
+                await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1)
 
             expect(currentMaxSupply).to.equal(maxSupply)
         })

@@ -206,13 +206,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1644} from '../../interfaces/ERC1400/IERC1644.sol';
-import {_DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE} from '../../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC1644_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {ERC1644StorageWrapper} from './ERC1644StorageWrapper.sol';
+import { IERC1644 } from "../../interfaces/ERC1400/IERC1644.sol";
+import { _DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE } from "../../constants/roles.sol";
+import { IStaticFunctionSelectors } from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { _ERC1644_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
+import { ERC1644StorageWrapper } from "./ERC1644StorageWrapper.sol";
 
 contract ERC1644 is IERC1644, IStaticFunctionSelectors, ERC1644StorageWrapper {
     // solhint-disable-next-line func-name-mixedcase

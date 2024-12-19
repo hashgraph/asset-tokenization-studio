@@ -205,13 +205,11 @@
 
 pragma solidity 0.8.18;
 
-import {_DEFAULT_ADMIN_ROLE} from '../../layer_1/constants/roles.sol';
-import {Pause} from '../../layer_1/pause/Pause.sol';
-import {AccessControl} from '../../layer_1/accessControl/AccessControl.sol';
-import {DiamondCutManagerWrapper} from './DiamondCutManagerWrapper.sol';
-import {
-    IDiamondLoupe
-} from '../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
+import { _DEFAULT_ADMIN_ROLE } from "../../layer_1/constants/roles.sol";
+import { Pause } from "../../layer_1/pause/Pause.sol";
+import { AccessControl } from "../../layer_1/accessControl/AccessControl.sol";
+import { DiamondCutManagerWrapper } from "./DiamondCutManagerWrapper.sol";
+import { IDiamondLoupe } from "../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol";
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 

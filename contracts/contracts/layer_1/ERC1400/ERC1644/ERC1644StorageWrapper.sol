@@ -206,11 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {
-    IERC1644StorageWrapper
-} from '../../interfaces/ERC1400/IERC1644StorageWrapper.sol';
-import {ERC20StorageWrapper} from '../ERC20/ERC20StorageWrapper.sol';
+import { _ERC1644_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { IERC1644StorageWrapper } from "../../interfaces/ERC1400/IERC1644StorageWrapper.sol";
+import { ERC20StorageWrapper } from "../ERC20/ERC20StorageWrapper.sol";
 
 abstract contract ERC1644StorageWrapper is
     IERC1644StorageWrapper,

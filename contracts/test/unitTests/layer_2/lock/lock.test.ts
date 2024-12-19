@@ -416,9 +416,8 @@ describe('Locks Layer 2 Tests', () => {
             currentTimestamp + ONE_SECOND
         )
 
-        const lock_TotalAmount_Before = await lockFacet.getLockedAmountFor(
-            account_A
-        )
+        const lock_TotalAmount_Before =
+            await lockFacet.getLockedAmountFor(account_A)
         const lock_TotalAmount_Before_Partition_1 =
             await lockFacet.getLockedAmountForByPartition(
                 _PARTITION_ID_1,
@@ -457,9 +456,8 @@ describe('Locks Layer 2 Tests', () => {
         await new Promise((f) => setTimeout(f, 3000))
         await accessControlFacet.grantRole(_PAUSER_ROLE, account_C) // DUMB transaction
 
-        const lock_TotalAmount_After = await lockFacet.getLockedAmountFor(
-            account_A
-        )
+        const lock_TotalAmount_After =
+            await lockFacet.getLockedAmountFor(account_A)
         const lock_TotalAmount_After_Partition_1 =
             await lockFacet.getLockedAmountForByPartition(
                 _PARTITION_ID_1,
@@ -520,9 +518,8 @@ describe('Locks Layer 2 Tests', () => {
             currentTimestamp + 100 * ONE_SECOND
         )
 
-        const locked_Amount_Before = await lockFacet.getLockedAmountFor(
-            account_A
-        )
+        const locked_Amount_Before =
+            await lockFacet.getLockedAmountFor(account_A)
         const locked_Amount_Before_Partition_1 =
             await lockFacet.getLockedAmountForByPartition(
                 _PARTITION_ID_1,
@@ -542,9 +539,8 @@ describe('Locks Layer 2 Tests', () => {
         const balance_After_Release = await erc1410Facet.balanceOf(account_A)
         const balance_After_Release_Partition_1 =
             await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
-        const locked_Amount_After = await lockFacet.getLockedAmountFor(
-            account_A
-        )
+        const locked_Amount_After =
+            await lockFacet.getLockedAmountFor(account_A)
         const locked_Amount_After_Partition_1 =
             await lockFacet.getLockedAmountForByPartition(
                 _PARTITION_ID_1,
@@ -591,9 +587,8 @@ describe('Locks Layer 2 Tests', () => {
             currentTimestamp + 100 * ONE_SECOND
         )
 
-        const locked_Amount_Before = await lockFacet.getLockedAmountFor(
-            account_A
-        )
+        const locked_Amount_Before =
+            await lockFacet.getLockedAmountFor(account_A)
         const locked_Amount_Before_Partition_1 =
             await lockFacet.getLockedAmountForByPartition(
                 _PARTITION_ID_1,
@@ -615,9 +610,8 @@ describe('Locks Layer 2 Tests', () => {
         const balance_After_Lock = await erc1410Facet.balanceOf(account_A)
         const balance_After_Lock_Partition_1 =
             await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
-        const locked_Amount_After = await lockFacet.getLockedAmountFor(
-            account_A
-        )
+        const locked_Amount_After =
+            await lockFacet.getLockedAmountFor(account_A)
         const locked_Amount_After_Partition_1 =
             await lockFacet.getLockedAmountForByPartition(
                 _PARTITION_ID_1,

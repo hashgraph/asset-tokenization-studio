@@ -205,24 +205,15 @@
 
 pragma solidity 0.8.18;
 
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
-import {
-    _PARTITION_SIZE,
-    _PARTITION_AMOUNT_OFFSET
-} from '../../layer_1/constants/storagePositions.sol';
-import {
-    CorporateActionDataStorage
-} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol';
-import {ArrayLib} from '../common/ArrayLib.sol';
-import {MappingLib} from '../common/MappingLib.sol';
-import {IEquity} from '../interfaces/equity/IEquity.sol';
-import {ScheduledTasksLib} from '../scheduledTasks/ScheduledTasksLib.sol';
+import { ERC1410BasicStorageWrapperRead } from "../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol";
+import { CapStorageWrapper } from "../../layer_1/cap/CapStorageWrapper.sol";
+import { _PARTITION_SIZE, _PARTITION_AMOUNT_OFFSET } from "../../layer_1/constants/storagePositions.sol";
+import { CorporateActionDataStorage } from "../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
+import { ERC1410ScheduledTasksStorageWrapperRead } from "../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol";
+import { ArrayLib } from "../common/ArrayLib.sol";
+import { MappingLib } from "../common/MappingLib.sol";
+import { IEquity } from "../interfaces/equity/IEquity.sol";
+import { ScheduledTasksLib } from "../scheduledTasks/ScheduledTasksLib.sol";
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 /**

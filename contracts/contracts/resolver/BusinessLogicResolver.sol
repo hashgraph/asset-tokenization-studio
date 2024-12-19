@@ -206,18 +206,12 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    IBusinessLogicResolver
-} from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {
-    IAccessControl
-} from '../layer_1/interfaces/accessControl/IAccessControl.sol';
-import {IPause} from '../layer_1/interfaces/pause/IPause.sol';
-import {
-    IDiamondCutManager
-} from '../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol';
-import {DiamondCutManager} from './diamondCutManager/DiamondCutManager.sol';
-import {_DEFAULT_ADMIN_ROLE} from '../layer_1/constants/roles.sol';
+import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
+import { IAccessControl } from "../layer_1/interfaces/accessControl/IAccessControl.sol";
+import { IPause } from "../layer_1/interfaces/pause/IPause.sol";
+import { IDiamondCutManager } from "../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol";
+import { DiamondCutManager } from "./diamondCutManager/DiamondCutManager.sol";
+import { _DEFAULT_ADMIN_ROLE } from "../layer_1/constants/roles.sol";
 
 contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     // solhint-disable-next-line func-name-mixedcase

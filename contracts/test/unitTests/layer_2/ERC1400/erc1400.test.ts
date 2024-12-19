@@ -419,12 +419,10 @@ describe('ERC1400 Tests', () => {
 
     async function getMaxSupplyValues() {
         const maxSupply = await capFacet.getMaxSupply()
-        const maxSupply_Partition_1 = await capFacet.getMaxSupplyByPartition(
-            _PARTITION_ID_1
-        )
-        const maxSupply_Partition_2 = await capFacet.getMaxSupplyByPartition(
-            _PARTITION_ID_2
-        )
+        const maxSupply_Partition_1 =
+            await capFacet.getMaxSupplyByPartition(_PARTITION_ID_1)
+        const maxSupply_Partition_2 =
+            await capFacet.getMaxSupplyByPartition(_PARTITION_ID_2)
 
         return {
             maxSupply,
@@ -1908,9 +1906,8 @@ describe('ERC1400 Tests', () => {
                     operatorData
                 )
             totalSupply = await erc1410Facet.totalSupply()
-            totalSupplyByPartition = await erc1410Facet.totalSupplyByPartition(
-                _PARTITION_ID_1
-            )
+            totalSupplyByPartition =
+                await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_1)
 
             // check amounts
             const balanceOf_C = await erc1410Facet.balanceOf(account_C)
@@ -2628,9 +2625,8 @@ describe('ERC1400 Tests', () => {
                     '0x'
                 )
 
-                const balanceOf_A_Before = await erc1410Facet.balanceOf(
-                    account_A
-                )
+                const balanceOf_A_Before =
+                    await erc1410Facet.balanceOf(account_A)
                 const balanceOf_A_Partition_1_Before =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
@@ -2650,9 +2646,8 @@ describe('ERC1400 Tests', () => {
                     '0x'
                 )
 
-                const balanceOf_A_After = await erc1410Facet.balanceOf(
-                    account_A
-                )
+                const balanceOf_A_After =
+                    await erc1410Facet.balanceOf(account_A)
                 const balanceOf_A_Partition_1_After =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
@@ -2698,9 +2693,8 @@ describe('ERC1400 Tests', () => {
                     '0x'
                 )
 
-                const balanceOf_A_Before = await erc1410Facet.balanceOf(
-                    account_A
-                )
+                const balanceOf_A_Before =
+                    await erc1410Facet.balanceOf(account_A)
                 const balanceOf_A_Partition_1_Before =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,
@@ -2721,9 +2715,8 @@ describe('ERC1400 Tests', () => {
                     '0x'
                 )
 
-                const balanceOf_A_After = await erc1410Facet.balanceOf(
-                    account_A
-                )
+                const balanceOf_A_After =
+                    await erc1410Facet.balanceOf(account_A)
                 const balanceOf_A_Partition_1_After =
                     await erc1410Facet.balanceOfByPartition(
                         _PARTITION_ID_1,

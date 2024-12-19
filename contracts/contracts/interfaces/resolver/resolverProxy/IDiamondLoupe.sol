@@ -206,7 +206,7 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IStaticFunctionSelectors} from './IStaticFunctionSelectors.sol';
+import { IStaticFunctionSelectors } from "./IStaticFunctionSelectors.sol";
 
 // A loupe is a small magnifying glass used to look at resolverProxys.
 // These functions look at resolverProxys

@@ -206,19 +206,11 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    IBusinessLogicResolver
-} from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {LibCommon} from '../layer_1/common/LibCommon.sol';
-import {
-    IBusinessLogicResolverWrapper
-} from '../interfaces/resolver/IBusinessLogicResolverWrapper.sol';
-import {
-    IBusinessLogicResolver
-} from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {
-    _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
+import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
+import { LibCommon } from "../layer_1/common/LibCommon.sol";
+import { IBusinessLogicResolverWrapper } from "../interfaces/resolver/IBusinessLogicResolverWrapper.sol";
+import { IBusinessLogicResolver } from "../interfaces/resolver/IBusinessLogicResolver.sol";
+import { _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION } from "../constants/storagePositions.sol";
 
 contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
     struct BusinessLogicResolverDataStorage {

@@ -206,13 +206,11 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {IPause} from '../interfaces/pause/IPause.sol';
-import {_PAUSER_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_PAUSE_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {Common} from '../common/Common.sol';
+import { IPause } from "../interfaces/pause/IPause.sol";
+import { _PAUSER_ROLE } from "../constants/roles.sol";
+import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { _PAUSE_RESOLVER_KEY } from "../constants/resolverKeys.sol";
+import { Common } from "../common/Common.sol";
 
 contract Pause is IPause, IStaticFunctionSelectors, Common {
     function pause()

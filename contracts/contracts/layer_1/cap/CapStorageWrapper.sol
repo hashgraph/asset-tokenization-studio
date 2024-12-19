@@ -206,12 +206,10 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LocalContext} from '../context/LocalContext.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
-import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import { LocalContext } from "../context/LocalContext.sol";
+import { ICapStorageWrapper } from "../interfaces/cap/ICapStorageWrapper.sol";
+import { _CAP_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { ERC1410BasicStorageWrapperRead } from "../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol";
 
 abstract contract CapStorageWrapper is
     ICapStorageWrapper,

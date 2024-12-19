@@ -205,22 +205,12 @@
 
 pragma solidity 0.8.18;
 
-import {LibCommon} from '../../layer_1/common/LibCommon.sol';
-import {
-    IDiamondCutManager
-} from '../../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {
-    IDiamondLoupe
-} from '../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
-import {
-    BusinessLogicResolverWrapper
-} from '../BusinessLogicResolverWrapper.sol';
-import {
-    _DIAMOND_CUT_MANAGER_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
+import { LibCommon } from "../../layer_1/common/LibCommon.sol";
+import { IDiamondCutManager } from "../../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol";
+import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { IDiamondLoupe } from "../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol";
+import { BusinessLogicResolverWrapper } from "../BusinessLogicResolverWrapper.sol";
+import { _DIAMOND_CUT_MANAGER_STORAGE_POSITION } from "../../constants/storagePositions.sol";
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 

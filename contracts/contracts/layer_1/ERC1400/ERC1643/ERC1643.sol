@@ -206,14 +206,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1643} from '../../interfaces/ERC1400/IERC1643.sol';
-import {_DOCUMENTER_ROLE} from '../../constants/roles.sol';
-import {_ERC1643_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {Common} from '../../common/Common.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC1643_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
+import { IERC1643 } from "../../interfaces/ERC1400/IERC1643.sol";
+import { _DOCUMENTER_ROLE } from "../../constants/roles.sol";
+import { _ERC1643_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { Common } from "../../common/Common.sol";
+import { IStaticFunctionSelectors } from "../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { _ERC1643_RESOLVER_KEY } from "../../constants/resolverKeys.sol";
 
 contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
     struct Document {

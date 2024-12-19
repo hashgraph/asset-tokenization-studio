@@ -206,13 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IERC1410StorageWrapper
-} from '../../interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {
-    _ERC1410_BASIC_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {_DEFAULT_PARTITION} from '../../constants/values.sol';
+import { IERC1410StorageWrapper } from "../../interfaces/ERC1400/IERC1410StorageWrapper.sol";
+import { _ERC1410_BASIC_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
 
 abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
     // Represents a fungible set of tokens.

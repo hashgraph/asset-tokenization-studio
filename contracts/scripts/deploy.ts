@@ -350,7 +350,7 @@ export function initializeClient(): [
     string,
     string,
     //string,
-    boolean
+    boolean,
 ] {
     const hre = require('hardhat')
     const hreConfig = hre.network.config

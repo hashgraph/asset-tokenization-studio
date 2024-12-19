@@ -206,18 +206,12 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ICorporateActions
-} from '../interfaces/corporateActions/ICorporateActions.sol';
-import {Common} from '../common/Common.sol';
-import {_CORPORATE_ACTION_ROLE} from '../constants/roles.sol';
-import {_CORPORATE_ACTIONS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {
-    CorporateActionsStorageWrapper
-} from './CorporateActionsStorageWrapper.sol';
+import { ICorporateActions } from "../interfaces/corporateActions/ICorporateActions.sol";
+import { Common } from "../common/Common.sol";
+import { _CORPORATE_ACTION_ROLE } from "../constants/roles.sol";
+import { _CORPORATE_ACTIONS_RESOLVER_KEY } from "../constants/resolverKeys.sol";
+import { IStaticFunctionSelectors } from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import { CorporateActionsStorageWrapper } from "./CorporateActionsStorageWrapper.sol";
 
 contract CorporateActions is
     ICorporateActions,

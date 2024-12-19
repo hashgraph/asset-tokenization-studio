@@ -209,16 +209,10 @@ pragma solidity 0.8.18;
 // The functions in DiamondLoupeFacet.sol.sol MUST be added to a resolverProxy.
 // The EIP-2535 ResolverProxy standard requires these functions.
 
-import {
-    ResolverProxyUnstructured
-} from '../unstructured/ResolverProxyUnstructured.sol';
-import {
-    IDiamondLoupe
-} from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
-import {IERC165} from '@openzeppelin/contracts/utils/introspection/IERC165.sol';
-import {
-    _DIAMOND_LOUPE_RESOLVER_KEY
-} from '../../../layer_1/constants/resolverKeys.sol';
+import { ResolverProxyUnstructured } from "../unstructured/ResolverProxyUnstructured.sol";
+import { IDiamondLoupe } from "../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol";
+import { IERC165 } from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
+import { _DIAMOND_LOUPE_RESOLVER_KEY } from "../../../layer_1/constants/resolverKeys.sol";
 
 // HACK: I think that Loupe and Cut implementation should be only one contract.
 contract DiamondLoupeFacet is

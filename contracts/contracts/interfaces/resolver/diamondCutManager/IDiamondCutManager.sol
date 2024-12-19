@@ -205,7 +205,7 @@
 
 pragma solidity 0.8.18;
 
-import {IDiamondLoupe} from '../resolverProxy/IDiamondLoupe.sol';
+import { IDiamondLoupe } from "../resolverProxy/IDiamondLoupe.sol";
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 

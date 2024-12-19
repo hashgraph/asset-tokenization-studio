@@ -206,16 +206,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC20_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {_DEFAULT_PARTITION} from '../../constants/values.sol';
-import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
-import {
-    IERC20StorageWrapper
-} from '../../interfaces/ERC1400/IERC20StorageWrapper.sol';
-import {
-    ERC1410StandardStorageWrapper
-} from '../ERC1410/ERC1410StandardStorageWrapper.sol';
-import {SecurityType} from '../../../interfaces/factory/IFactory.sol';
+import { _ERC20_STORAGE_POSITION } from "../../constants/storagePositions.sol";
+import { _DEFAULT_PARTITION } from "../../constants/values.sol";
+import { IERC20 } from "../../interfaces/ERC1400/IERC20.sol";
+import { IERC20StorageWrapper } from "../../interfaces/ERC1400/IERC20StorageWrapper.sol";
+import { ERC1410StandardStorageWrapper } from "../ERC1410/ERC1410StandardStorageWrapper.sol";
+import { SecurityType } from "../../../interfaces/factory/IFactory.sol";
 
 abstract contract ERC20StorageWrapper is
     IERC20StorageWrapper,
@@ -333,7 +329,7 @@ abstract contract ERC20StorageWrapper is
             _DEFAULT_PARTITION,
             data,
             spender,
-            ''
+            ""
         );
         return _emitTransferEvent(from, to, value);
     }
@@ -348,9 +344,9 @@ abstract contract ERC20StorageWrapper is
             to,
             value,
             _DEFAULT_PARTITION,
-            '',
+            "",
             address(0),
-            ''
+            ""
         );
         return _emitTransferEvent(from, to, value);
     }

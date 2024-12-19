@@ -357,9 +357,8 @@ describe('Corporate Actions Tests', () => {
                 0,
                 listCount
             )
-        const corporateAction = await corporateActionsFacet.getCorporateAction(
-            corporateActionId_1
-        )
+        const corporateAction =
+            await corporateActionsFacet.getCorporateAction(corporateActionId_1)
 
         expect(listCount).to.equal(1)
         expect(listMembers.length).to.equal(listCount)

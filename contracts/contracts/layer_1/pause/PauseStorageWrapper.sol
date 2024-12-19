@@ -206,11 +206,9 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LocalContext} from '../context/LocalContext.sol';
-import {
-    IPauseStorageWrapper
-} from '../interfaces/pause/IPauseStorageWrapper.sol';
-import {_PAUSE_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import { LocalContext } from "../context/LocalContext.sol";
+import { IPauseStorageWrapper } from "../interfaces/pause/IPauseStorageWrapper.sol";
+import { _PAUSE_STORAGE_POSITION } from "../constants/storagePositions.sol";
 
 abstract contract PauseStorageWrapper is IPauseStorageWrapper, LocalContext {
     struct PauseDataStorage {

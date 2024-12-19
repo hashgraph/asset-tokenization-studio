@@ -206,13 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IERC1410StorageWrapper
-} from '../../interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {Common} from '../../common/Common.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from './ERC1410BasicStorageWrapperRead.sol';
+import { IERC1410StorageWrapper } from "../../interfaces/ERC1400/IERC1410StorageWrapper.sol";
+import { Common } from "../../common/Common.sol";
+import { ERC1410BasicStorageWrapperRead } from "./ERC1410BasicStorageWrapperRead.sol";
 
 abstract contract ERC1410BasicStorageWrapper is
     IERC1410StorageWrapper,

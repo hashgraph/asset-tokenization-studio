@@ -203,20 +203,15 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LibCommon} from '../common/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    IAccessControlStorageWrapper
-} from '../interfaces/accessControl/IAccessControlStorageWrapper.sol';
-import {LocalContext} from '../context/LocalContext.sol';
-import {
-    _ACCESS_CONTROL_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
+pragma solidity 0.8.18;
+
+import { LibCommon } from "../common/LibCommon.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { IAccessControlStorageWrapper } from "../interfaces/accessControl/IAccessControlStorageWrapper.sol";
+import { LocalContext } from "../context/LocalContext.sol";
+import { _ACCESS_CONTROL_STORAGE_POSITION } from "../constants/storagePositions.sol";
 
 abstract contract AccessControlStorageWrapper is
     IAccessControlStorageWrapper,

@@ -206,18 +206,11 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from '../interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {LibCommon} from '../common/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    _CORPORATE_ACTION_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
+import { ICorporateActionsStorageWrapper, CorporateActionDataStorage } from "../interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
+import { LibCommon } from "../common/LibCommon.sol";
+import { EnumerableSet } from "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import { _CORPORATE_ACTION_STORAGE_POSITION } from "../constants/storagePositions.sol";
+import { LocalContext } from "../context/LocalContext.sol";
 
 abstract contract CorporateActionsStorageWrapper is
     ICorporateActionsStorageWrapper,
@@ -332,7 +325,7 @@ abstract contract CorporateActionsStorageWrapper is
         }
 
         for (uint256 i = results.length; i < resultId; i++) {
-            corporateActions_.actionsData[actionId].results.push('');
+            corporateActions_.actionsData[actionId].results.push("");
         }
 
         corporateActions_.actionsData[actionId].results.push(newResult);
