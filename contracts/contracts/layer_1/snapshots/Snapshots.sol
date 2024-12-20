@@ -212,7 +212,6 @@ import {
 import {
     ERC1410SnapshotStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {_SNAPSHOTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
 
 abstract contract Snapshots is

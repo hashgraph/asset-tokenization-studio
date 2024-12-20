@@ -219,7 +219,6 @@ import {
 import {
     ERC1410BasicStorageWrapperRead
 } from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {Snapshots_CD_Lib} from '../../layer_1/snapshots/Snapshots_CD_Lib.sol';
 import {
     CorporateActionsStorageWrapper
 } from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';

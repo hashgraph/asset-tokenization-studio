@@ -217,12 +217,6 @@ import {
     LockStorageWrapper_2
 } from '../../layer_2/lock/LockStorageWrapper_2.sol';
 import {Common} from '../../layer_1/common/Common.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 
 contract TransferAndLock is
     ITransferAndLock,

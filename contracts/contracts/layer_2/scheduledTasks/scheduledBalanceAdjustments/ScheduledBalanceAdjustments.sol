@@ -207,8 +207,9 @@
 pragma solidity 0.8.18;
 
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
 import {
     _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY
 } from '../../constants/resolverKeys.sol';
@@ -218,14 +219,10 @@ import {
 import {
     IScheduledBalanceAdjustments
 } from '../../interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-import {Common} from '../../../layer_1/common/Common.sol';
 import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from './ScheduledBalanceAdjustmentsStorageWrapper.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 contract ScheduledBalanceAdjustments is
     IStaticFunctionSelectors,

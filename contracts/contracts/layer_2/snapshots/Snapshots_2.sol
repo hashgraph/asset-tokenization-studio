@@ -217,12 +217,9 @@ import {
 } from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
 import {ISnapshots_2} from '../interfaces/snapshots/ISnapshots_2.sol';
 import {
-    ScheduledTasksStorageWrapper
-} from '../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
-import {SnapshotsStorageWrapper_2} from './SnapshotsStorageWrapper_2.sol';
-import {
     ScheduledTasks_CD_Lib
 } from '../scheduledTasks/scheduledTasks/ScheduledTasks_CD_Lib.sol';
+import {SnapshotsStorageWrapper_2} from './SnapshotsStorageWrapper_2.sol';
 
 contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
     function takeSnapshot()

@@ -207,17 +207,15 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410SnapshotStorageWrapper
-} from './ERC1410SnapshotStorageWrapper.sol';
-import {ERC1410Basic} from './ERC1410Basic.sol';
-import {ERC1410Operator} from './ERC1410Operator.sol';
-import {ERC1410Standard} from './ERC1410Standard.sol';
-import {ERC1410Controller} from './ERC1410Controller.sol';
-import {_ERC1410_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {IERC1410} from '../../interfaces/ERC1400/IERC1410.sol';
+import {ERC1410Basic} from './ERC1410Basic.sol';
+import {ERC1410Controller} from './ERC1410Controller.sol';
+import {ERC1410Operator} from './ERC1410Operator.sol';
+import {
+    ERC1410SnapshotStorageWrapper
+} from './ERC1410SnapshotStorageWrapper.sol';
+import {ERC1410Standard} from './ERC1410Standard.sol';
 
 abstract contract ERC1410Snapshot is
     IStaticFunctionSelectors,

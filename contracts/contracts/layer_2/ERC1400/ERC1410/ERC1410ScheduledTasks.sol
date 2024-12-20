@@ -209,37 +209,31 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from './ERC1410ScheduledTasksStorageWrapper.sol';
-import {
-    ERC1410Snapshot
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410Snapshot.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {
     ERC1410BasicStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 import {
-    SnapshotsStorageWrapper
-} from '../../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
-import {
-    SnapshotsStorageWrapper_2
-} from '../../snapshots/SnapshotsStorageWrapper_2.sol';
-import {
     ERC1410ControllerStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
-import {IERC1410} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
+import {
+    ERC1410Snapshot
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410Snapshot.sol';
+import {
+    ERC1410SnapshotStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 import {
     _ERC1410_RESOLVER_KEY
 } from '../../../layer_1/constants/resolverKeys.sol';
+import {IERC1410} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 import {
     IERC1410ScheduledTasks
 } from '../../interfaces/ERC1400/IERC1410ScheduledTasks.sol';
-import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from './ERC1410ScheduledTasksStorageWrapper.sol';
 
 contract ERC1410ScheduledTasks is
     IERC1410ScheduledTasks,

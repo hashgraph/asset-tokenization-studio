@@ -209,6 +209,7 @@ pragma solidity 0.8.18;
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
 import {
     _SCHEDULED_SNAPSHOTS_RESOLVER_KEY
 } from '../../constants/resolverKeys.sol';
@@ -222,10 +223,6 @@ import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {Common} from '../../../layer_1/common/Common.sol';
-import {
-    ScheduledSnapshotsStorageWrapper
-} from './ScheduledSnapshotsStorageWrapper.sol';
 
 contract ScheduledSnapshots is
     IStaticFunctionSelectors,

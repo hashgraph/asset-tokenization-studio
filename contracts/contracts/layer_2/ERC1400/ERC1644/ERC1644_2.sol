@@ -209,16 +209,13 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 import {ERC1644} from '../../../layer_1/ERC1400/ERC1644/ERC1644.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 
 contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
     function _beforeTokenTransfer(

@@ -223,9 +223,6 @@ import {
     _ALLOWANCE_REACHED_ERROR_ID,
     _SUCCESS
 } from '../../../layer_1/constants/values.sol';
-import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
 import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
 import {
     ERC20StorageWrapper_2_Read

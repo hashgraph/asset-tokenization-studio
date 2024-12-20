@@ -206,12 +206,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
+import {Snapshots_CD_Lib} from '../../layer_1/snapshots/Snapshots_CD_Lib.sol';
 import {
-    CorporateActionsStorageWrapper
-} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+    ERC1410ScheduledTasks_CD_Lib
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
+import {ERC20_2_CD_Lib} from '../ERC1400/ERC20/ERC20_2_CD_Lib.sol';
 import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
@@ -222,16 +221,11 @@ import {
     CorporateActionsStorageWrapperSecurity
 } from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
 import {IEquity} from '../interfaces/equity/IEquity.sol';
+import {Lock_2_CD_Lib} from '../lock/Lock_2_CD_Lib.sol';
+import {Snapshots_2_CD_Lib} from '../snapshots/Snapshots_2_CD_Lib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {Snapshots_CD_Lib} from '../../layer_1/snapshots/Snapshots_CD_Lib.sol';
-import {
-    ERC1410ScheduledTasks_CD_Lib
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
-import {ERC20_2_CD_Lib} from '../ERC1400/ERC20/ERC20_2_CD_Lib.sol';
-import {Snapshots_2_CD_Lib} from '../snapshots/Snapshots_2_CD_Lib.sol';
-import {Lock_2_CD_Lib} from '../lock/Lock_2_CD_Lib.sol';
 
 abstract contract EquityStorageWrapper is
     CorporateActionsStorageWrapperSecurity

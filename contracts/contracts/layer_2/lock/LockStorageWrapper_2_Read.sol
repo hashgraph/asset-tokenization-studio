@@ -204,11 +204,11 @@
 */
 
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-//import {AdjustBalancesStorageWrapper} from '../adjustBalances/AdjustBalancesStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
-import {_LOCK_2_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
@@ -216,9 +216,9 @@ import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
 import {
     AdjustBalances_CD_Lib
 } from '../adjustBalances/AdjustBalances_CD_Lib.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+//import {AdjustBalancesStorageWrapper} from '../adjustBalances/AdjustBalancesStorageWrapper.sol';
 
 abstract contract LockStorageWrapper_2_Read is
     LockStorageWrapper,

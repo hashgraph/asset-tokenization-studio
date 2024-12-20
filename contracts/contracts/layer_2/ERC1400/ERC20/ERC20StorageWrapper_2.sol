@@ -208,14 +208,13 @@ pragma solidity 0.8.18;
 
 import {_DEFAULT_PARTITION} from '../../../layer_1/constants/values.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
-import {_ERC20_2_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
-import {
-    AdjustBalances_CD_Lib
-} from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
 import {
     AdjustBalancesStorageWrapperRead
 } from '../../adjustBalances/AdjustBalancesStorageWrapperRead.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
 
 contract ERC20StorageWrapper_2 is
     AdjustBalancesStorageWrapperRead,

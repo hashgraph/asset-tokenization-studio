@@ -204,22 +204,14 @@
 */
 
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LocalContext} from '../context/LocalContext.sol';
-import {ILockStorageWrapper} from '../interfaces/lock/ILockStorageWrapper.sol';
-import {_LOCK_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {LibCommon} from '../common/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {LockStorageWrapperRead} from './LockStorageWrapperRead.sol';
 import {
     SnapshotsStorageWrapper
 } from '../snapshots/SnapshotsStorageWrapper.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract LockStorageWrapper is SnapshotsStorageWrapper {
     using EnumerableSet for EnumerableSet.UintSet;

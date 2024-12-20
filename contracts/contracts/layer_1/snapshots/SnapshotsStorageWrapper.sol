@@ -207,21 +207,20 @@
 pragma solidity 0.8.18;
 
 import {
+    ERC1410BasicStorageWrapperRead
+} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {Common} from '../common/Common.sol';
+import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {
+    ISnapshotsStorageWrapper
+} from '../interfaces/snapshots/ISnapshotsStorageWrapper.sol';
+import {LockStorageWrapperRead} from '../lock/LockStorageWrapperRead.sol';
+import {
     ArraysUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
 import {
     CountersUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {
-    ISnapshotsStorageWrapper
-} from '../interfaces/snapshots/ISnapshotsStorageWrapper.sol';
-import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {Common} from '../common/Common.sol';
-import {_DEFAULT_PARTITION} from '../constants/values.sol';
-import {LockStorageWrapperRead} from '../lock/LockStorageWrapperRead.sol';
 
 abstract contract SnapshotsStorageWrapper is
     ISnapshotsStorageWrapper,
