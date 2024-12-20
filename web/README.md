@@ -25,15 +25,15 @@ This Dapp interacts directly with the Hedera Testnet through the SDK.
 
 # Yarn Version Compatibility
 
-This project is compatible with Yarn version 1.22.19. Please ensure you have this version installed before running any yarn commands. If you need to install this version, you can run:
+This project is compatible with Yarn version 1.22.22. Please ensure you have this version installed before running any yarn commands. If you need to install this version, you can run:
 
 ```
-npm install -g yarn@1.22.19
+npm install -g yarn@1.22.22
 ```
 
 # Installation
 
-First, verify that you have the correct version of Yarn installed by running `yarn --version`. You should see `1.22.19` as the output.
+First, verify that you have the correct version of Yarn installed by running `yarn --version`. You should see `1.22.22` as the output.
 
 Then, install the project dependencies with:
 

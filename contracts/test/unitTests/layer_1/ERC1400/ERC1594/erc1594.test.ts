@@ -382,7 +382,7 @@ describe('ERC1594 Tests', () => {
                 // issue fails
                 await expect(
                     erc1594Facet.issue(account_E, amount, data)
-                ).to.be.rejectedWith('TokenIsPaused')
+                ).to.be.revertedWithCustomError(erc1594Facet, 'TokenIsPaused')
             })
 
             it('GIVEN a paused Token WHEN redeem THEN transaction fails with TokenIsPaused', async () => {
@@ -513,7 +513,10 @@ describe('ERC1594 Tests', () => {
                 // issue fails
                 await expect(
                     erc1594Facet.issue(account_E, amount, data)
-                ).to.be.rejectedWith('AccountIsBlocked')
+                ).to.be.revertedWithCustomError(
+                    erc1594Facet,
+                    'AccountIsBlocked'
+                )
             })
 
             it('GIVEN blocked accounts (sender, from) WHEN redeem THEN transaction fails with AccountIsBlocked', async () => {
@@ -1120,7 +1123,12 @@ describe('ERC1594 Tests', () => {
                 // issue succeeds
                 await erc1594Issuer.issue(account_E, amount, data)
 
+                erc20Facet = erc20Facet.connect(signer_E)
+
                 await erc20Facet.approve(account_D, amount / 2)
+
+                erc1594Approved = erc1594Approved.connect(signer_D)
+
                 expect(
                     await erc1594Approved.redeemFrom(
                         account_E,

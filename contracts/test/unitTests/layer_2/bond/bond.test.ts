@@ -206,19 +206,23 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { BigNumber } from 'ethers'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     ResolverProxy,
     Bond,
     AccessControl,
     Pause,
+    Lock_2,
+    ERC1410ScheduledTasks,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _CORPORATE_ACTION_ROLE,
     _PAUSER_ROLE,
     _BOND_MANAGER_ROLE,
+    _LOCKER_ROLE,
+    _ISSUER_ROLE,
+    _DEFAULT_PARTITION,
 } from '../../../../scripts/constants'
 import {
     Rbac,
@@ -228,7 +232,7 @@ import {
 } from '../../../../scripts/factory'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
 
-const TIME = 30
+const TIME = 20000
 const numberOfUnits = 1000
 let currentTimeInSeconds = 0
 let startingDate = 0
@@ -241,7 +245,7 @@ const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
 const info = 'info'
 
-const TIME_2 = 10000
+const TIME_2 = 2 * TIME
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
 const couponRate = 5
@@ -265,6 +269,8 @@ describe('Bond Tests', () => {
     let bondFacet: Bond
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
+    let lockFacet: Lock_2
+    let erc1410Facet: ERC1410ScheduledTasks
 
     before(async () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -275,12 +281,14 @@ describe('Bond Tests', () => {
     })
 
     beforeEach(async () => {
-        currentTimeInSeconds = await time.latest()
-        startingDate = currentTimeInSeconds + TIME
+        currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
+            .timestamp
+        startingDate = currentTimeInSeconds + TIME / 1000
         maturityDate = startingDate + numberOfCoupons * frequency
         firstCouponDate = startingDate + 1
-        couponRecordDateInSeconds = currentTimeInSeconds + TIME_2
-        couponExecutionDateInSeconds = currentTimeInSeconds + 10 * TIME_2
+        couponRecordDateInSeconds = currentTimeInSeconds + TIME_2 / 1000
+        couponExecutionDateInSeconds =
+            currentTimeInSeconds + 10 * (TIME_2 / 1000)
         couponData = {
             recordDate: couponRecordDateInSeconds.toString(),
             executionDate: couponExecutionDateInSeconds.toString(),
@@ -328,6 +336,13 @@ describe('Bond Tests', () => {
         )
 
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+
+        lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
+
+        erc1410Facet = await ethers.getContractAt(
+            'ERC1410ScheduledTasks',
+            await diamond.address
+        )
     })
 
     describe('Coupons', () => {
@@ -443,6 +458,57 @@ describe('Bond Tests', () => {
             expect(couponFor.rate).to.equal(couponRate)
             expect(couponFor.tokenBalance).to.equal(0)
             expect(couponFor.recordDateReached).to.equal(false)
+        })
+
+        it('GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds', async () => {
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(
+                _CORPORATE_ACTION_ROLE,
+                account_C
+            )
+            await accessControlFacet.grantRole(_LOCKER_ROLE, account_C)
+            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+            // Using account C (with role)
+            bondFacet = bondFacet.connect(signer_C)
+            lockFacet = lockFacet.connect(signer_C)
+            erc1410Facet = erc1410Facet.connect(signer_C)
+
+            // issue and lock
+            const TotalAmount = numberOfUnits
+            const LockedAmount = TotalAmount - 5
+
+            await erc1410Facet.issueByPartition(
+                _DEFAULT_PARTITION,
+                account_A,
+                TotalAmount,
+                '0x'
+            )
+            await lockFacet.lock(LockedAmount, account_A, 99999999999)
+
+            // set coupon
+            await expect(bondFacet.setCoupon(couponData))
+                .to.emit(bondFacet, 'CouponSet')
+                .withArgs(
+                    '0x0000000000000000000000000000000000000000000000000000000000000033',
+                    numberOfCoupons + 1,
+                    account_C,
+                    couponRecordDateInSeconds,
+                    couponExecutionDateInSeconds,
+                    couponRate
+                )
+
+            // check list members
+            await new Promise((f) => setTimeout(f, TIME_2 + 1))
+            await accessControlFacet.revokeRole(_ISSUER_ROLE, account_C)
+
+            const couponFor = await bondFacet.getCouponFor(
+                numberOfCoupons + 1,
+                account_A
+            )
+
+            expect(couponFor.tokenBalance).to.equal(TotalAmount)
+            expect(couponFor.recordDateReached).to.equal(true)
         })
 
         it('GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds', async () => {
