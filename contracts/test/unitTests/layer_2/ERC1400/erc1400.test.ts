@@ -213,8 +213,8 @@ import {
     type Equity,
     type ControlList,
     ERC20_2,
-    ERC1594,
-    ERC1644,
+    ERC1594_2,
+    ERC1644_2,
     AdjustBalances,
     Cap_2,
     IERC20,
@@ -308,8 +308,8 @@ describe('ERC1400 Tests', () => {
     let controlList: ControlList
     let capFacet: Cap_2
     let erc20Facet: ERC20_2
-    let erc1594Facet: ERC1594
-    let erc1644Facet: ERC1644
+    let erc1594Facet: ERC1594_2
+    let erc1644Facet: ERC1644_2
     let adjustBalancesFacet: AdjustBalances
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
@@ -639,9 +639,9 @@ describe('ERC1400 Tests', () => {
 
         erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
 
-        erc1594Facet = await ethers.getContractAt('ERC1594', diamond.address)
+        erc1594Facet = await ethers.getContractAt('ERC1594_2', diamond.address)
 
-        erc1644Facet = await ethers.getContractAt('ERC1644', diamond.address)
+        erc1644Facet = await ethers.getContractAt('ERC1644_2', diamond.address)
 
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
     }
@@ -887,7 +887,7 @@ describe('ERC1400 Tests', () => {
                     amount,
                     data
                 )
-            ).to.be.rejectedWith('TokenIsPaused')
+            ).to.be.revertedWithCustomError(erc1410Facet, 'TokenIsPaused')
         })
 
         it('GIVEN Token WHEN issue to partition 0 THEN transaction fails with ZeroPartition', async () => {
@@ -2990,7 +2990,9 @@ describe('ERC1400 Tests', () => {
                 // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterTransfer(after, before)
+                expect(after.balanceOf_A).to.equal(
+                    before.balanceOf_A.mul(adjustFactor).sub(expectedAllowance)
+                )
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransfer succeeds', async () => {
@@ -3093,11 +3095,12 @@ describe('ERC1400 Tests', () => {
 
                 await setPreBalanceAdjustment(true)
 
+                const before = await getBalanceAdjustedValues()
+
                 erc20Facet = erc20Facet.connect(signer_A)
-                await erc20Facet.approve(account_A, amount)
+                await erc20Facet.approve(account_B, before.balanceOf_A)
 
                 // Before Values
-                const before = await getBalanceAdjustedValues()
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3105,9 +3108,10 @@ describe('ERC1400 Tests', () => {
                     adjustDecimals
                 )
 
+                erc20Facet = erc20Facet.connect(signer_B)
+                // Transaction Partition 1 with updated balance
                 const updatedBalance = before.balanceOf_A.mul(adjustFactor)
 
-                // Transaction Partition 1 with updated balance
                 await erc20Facet.transferFrom(
                     account_A,
                     account_B,
@@ -3117,7 +3121,7 @@ describe('ERC1400 Tests', () => {
                 // // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
 
-                await checkAdjustmentsAfterTransfer(after, before)
+                expect(after.balanceOf_A).to.equal(0)
             })
         })
 

@@ -232,23 +232,18 @@ abstract contract ERC1410StandardStorageWrapper is
         uint256 _value,
         bytes memory _data
     ) internal virtual {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        // Add the function to validate the `_data` parameter
         _validateParams(_partition, _value);
 
         _beforeTokenTransfer(_partition, address(0), _tokenHolder, _value);
 
-        uint256 index = erc1410Storage.partitionToIndex[_tokenHolder][
-            _partition
-        ];
-        if (index == 0) {
+        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
             _addPartitionTo(_value, _tokenHolder, _partition);
         } else {
-            erc1410Storage.partitions[_tokenHolder][index - 1].amount += _value;
+            _increaseBalanceByPartition(_tokenHolder, _value, _partition);
         }
-        erc1410Storage.totalSupply += _value;
-        erc1410Storage.totalSupplyByPartition[_partition] += _value;
-        erc1410Storage.balances[_tokenHolder] += _value;
+
+        _increaseTotalSupplyByPartition(_partition, _value);
+
         emit IssuedByPartition(
             _partition,
             _msgSender(),
@@ -266,31 +261,12 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes memory _data,
         bytes memory _operatorData
     ) internal virtual {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        // Add the function to validate the `_data` parameter
-        _validateParams(_partition, _value);
-        if (!_validPartition(_partition, _from)) {
-            revert InvalidPartition(_from, _partition);
-        }
-
-        uint256 balance = _balanceOfByPartition(_partition, _from);
-
-        if (balance < _value) {
-            revert InsufficientBalance(_from, balance, _value, _partition);
-        }
-
-        uint256 index = erc1410Storage.partitionToIndex[_from][_partition] - 1;
-
         _beforeTokenTransfer(_partition, _from, address(0), _value);
 
-        if (erc1410Storage.partitions[_from][index].amount == _value) {
-            _deletePartitionForHolder(_from, _partition, index);
-        } else {
-            erc1410Storage.partitions[_from][index].amount -= _value;
-        }
-        erc1410Storage.balances[_from] -= _value;
-        erc1410Storage.totalSupply -= _value;
-        erc1410Storage.totalSupplyByPartition[_partition] -= _value;
+        _reduceBalanceByPartition(_from, _value, _partition);
+
+        _reduceTotalSupplyByPartition(_partition, _value);
+
         emit RedeemedByPartition(
             _partition,
             _operator,
@@ -301,23 +277,24 @@ abstract contract ERC1410StandardStorageWrapper is
         );
     }
 
-    function _deletePartitionForHolder(
-        address _holder,
+    function _reduceTotalSupplyByPartition(
         bytes32 _partition,
-        uint256 index
+        uint256 _value
     ) internal virtual {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        if (index != erc1410Storage.partitions[_holder].length - 1) {
-            erc1410Storage.partitions[_holder][index] = erc1410Storage
-                .partitions[_holder][
-                    erc1410Storage.partitions[_holder].length - 1
-                ];
-            erc1410Storage.partitionToIndex[_holder][
-                erc1410Storage.partitions[_holder][index].partition
-            ] = index + 1;
-        }
-        delete erc1410Storage.partitionToIndex[_holder][_partition];
-        erc1410Storage.partitions[_holder].pop();
+
+        erc1410Storage.totalSupply -= _value;
+        erc1410Storage.totalSupplyByPartition[_partition] -= _value;
+    }
+
+    function _increaseTotalSupplyByPartition(
+        bytes32 _partition,
+        uint256 _value
+    ) internal virtual {
+        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+
+        erc1410Storage.totalSupply += _value;
+        erc1410Storage.totalSupplyByPartition[_partition] += _value;
     }
 
     function _validateParams(
