@@ -203,241 +203,133 @@
 
 */
 
+// SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
-import { ERC1410BasicStorageWrapperRead } from "../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol";
-import { CapStorageWrapper } from "../../layer_1/cap/CapStorageWrapper.sol";
-import { _PARTITION_SIZE, _PARTITION_AMOUNT_OFFSET } from "../../layer_1/constants/storagePositions.sol";
-import { CorporateActionDataStorage } from "../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol";
-import { ERC1410ScheduledTasksStorageWrapperRead } from "../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapperRead.sol";
-import { ArrayLib } from "../common/ArrayLib.sol";
-import { MappingLib } from "../common/MappingLib.sol";
-import { IEquity } from "../interfaces/equity/IEquity.sol";
-import { ScheduledTasksLib } from "../scheduledTasks/ScheduledTasksLib.sol";
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import { ERC1410SnapshotStorageWrapper } from "../../../layer1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol";
+import { CorporateActionsStorageWrapper } from "../../../layer1/corporateActions/CorporateActionsStorageWrapper.sol";
+import { AdjustBalanceLib } from "../../adjustBalances/AdjustBalanceLib.sol";
+import { _ERC1410_BASIC_STORAGE_2_POSITION } from "../../constants/storagePositions.sol";
+import { ScheduledBalanceAdjustmentsStorageWrapper } from "../../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol";
 
-/**
-    * total = account total balance
-    * t1 = account's partition 1 balance
-    * t2 = account's partition 2 balance
-    * x = factor for total balance
-    * y = factor for partition 2 balance
-    *
-    * OPTION : First adjusting partition : (y * t2)
-    *    // adding partition increment diff to total :  total = total + (t2 * (y - 1))
-    *    // Finally adjusting total : (x * total)
-    *
-    * total = t1 + t2;
-    * total = t1 + t2 + (t2 * (y - 1)) = t1 + t2 + y * t2 - t2
-      total = t1 + y * t2;
-      total = x * total = x * (t1 + y * t2)
-    */
-
-library AdjustBalanceLib {
-    function _adjustTotalBalanceAndPartitionBalanceFor(
-        bytes32 _partition,
-        address _account,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
-            storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
-            storage _basicStorage_2
-    ) internal {
-        uint256 ABAF = _basicStorage_2.ABAF;
-
-        _adjustPartitionBalanceFor(
-            ABAF,
-            _partition,
-            _account,
-            _basicStorage,
-            _basicStorage_2
-        );
-        _adjustTotalBalanceFor(ABAF, _account, _basicStorage, _basicStorage_2);
+abstract contract ERC1410ScheduledTasksStorageWrapperRead is
+    CorporateActionsStorageWrapper,
+    ScheduledBalanceAdjustmentsStorageWrapper,
+    ERC1410SnapshotStorageWrapper
+{
+    struct ERC1410BasicStorage_2 {
+        // Mapping from investor to their partitions LABAF
+        mapping(address => uint256[]) LABAF_user_partition;
+        // Aggregated Balance Adjustment
+        uint256 ABAF;
+        // Last Aggregated Balance Adjustment per account
+        mapping(address => uint256) LABAF;
+        // Last Aggregated Balance Adjustment per partition
+        mapping(bytes32 => uint256) LABAF_partition;
     }
 
-    function _adjustTotalAndMaxSupplyForPartition(
-        bytes32 _partition,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
-            storage _basicStorage,
-        CapStorageWrapper.CapDataStorage storage _capStorage,
-        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
-            storage _basicStorage_2
-    ) internal {
-        uint256 ABAF = _basicStorage_2.ABAF;
-        uint256 LABAF = _basicStorage_2.LABAF_partition[_partition];
-
-        if (ABAF == LABAF) return;
-
-        uint256 totalSupplySlot = MappingLib._getSlotForBytes32MappingKey(
-            _basicStorage.totalSupplyByPartition,
-            _partition
-        );
-        uint256 maxSupplySlot = MappingLib._getSlotForBytes32MappingKey(
-            _capStorage.maxSupplyByPartition,
-            _partition
-        );
-        uint256 LABAFSlot = MappingLib._getSlotForBytes32MappingKey(
-            _basicStorage_2.LABAF_partition,
-            _partition
-        );
-
-        _updateBalance(ABAF, LABAF, totalSupplySlot);
-
-        _updateBalance(ABAF, LABAF, maxSupplySlot);
-
-        _updateLABAF(ABAF, LABAFSlot);
+    function _getABAF() internal view virtual returns (uint256) {
+        return _getERC1410BasicStorage_2().ABAF;
     }
 
-    function _adjustTotalBalanceFor(
-        uint256 _ABAF,
-        address _account,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
-            storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
-            storage _basicStorage_2
-    ) internal {
-        uint256 LABAF = _basicStorage_2.LABAF[_account];
-        if (_ABAF == LABAF) return;
-
-        uint256 balanceSlot = MappingLib._getSlotForAddressMappingKey(
-            _basicStorage.balances,
-            _account
-        );
-        uint256 LABAFSlot = MappingLib._getSlotForAddressMappingKey(
-            _basicStorage_2.LABAF,
-            _account
-        );
-
-        _updateBalance(_ABAF, LABAF, balanceSlot);
-        _updateLABAF(_ABAF, LABAFSlot);
+    function _getABAFAdjusted() internal view virtual returns (uint256) {
+        return _getABAFAdjustedAt(_blockTimestamp());
     }
 
-    function _adjustPartitionBalanceFor(
-        uint256 _ABAF,
-        bytes32 _partition,
-        address _account,
-        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
-            storage _basicStorage,
-        ERC1410ScheduledTasksStorageWrapperRead.ERC1410BasicStorage_2
-            storage _basicStorage_2
-    ) internal {
-        uint256 partitionsIndex = _basicStorage.partitionToIndex[_account][
-            _partition
-        ];
-
-        if (partitionsIndex == 0) return;
-
-        uint256 LABAF = _basicStorage_2.LABAF_user_partition[_account][
-            partitionsIndex - 1
-        ];
-
-        if (_ABAF == LABAF) return;
-
-        uint256 partitionsBaseSlot = MappingLib._getSlotForAddressMappingKey(
-            _basicStorage.partitions,
-            _account
-        );
-        uint256 partitionsLABAFBaseSlot = MappingLib
-            ._getSlotForAddressMappingKey(
-                _basicStorage_2.LABAF_user_partition,
-                _account
-            );
-
-        uint256 partitionBaseSlot = ArrayLib._getSlotForDynamicArrayItem(
-            partitionsBaseSlot,
-            (partitionsIndex - 1),
-            _PARTITION_SIZE
-        );
-        uint256 partitionLABAFBaseSlot = ArrayLib._getSlotForDynamicArrayItem(
-            partitionsLABAFBaseSlot,
-            (partitionsIndex - 1),
-            1
-        );
-
-        _updateBalance(
-            _ABAF,
-            LABAF,
-            partitionBaseSlot + _PARTITION_AMOUNT_OFFSET
-        );
-        _updateLABAF(_ABAF, partitionLABAFBaseSlot);
-    }
-
-    function _updateBalance(
-        uint256 _ABAF,
-        uint256 _LABAF,
-        uint256 _balanceSlotPos
-    ) internal {
-        uint256 factor = _calculateFactor(_ABAF, _LABAF);
-        uint256 amount;
-
-        assembly {
-            amount := sload(_balanceSlotPos)
-        }
-
-        if (amount == 0) return;
-
-        amount *= factor;
-
-        assembly {
-            sstore(_balanceSlotPos, amount)
-        }
-    }
-
-    function _updateLABAF(uint256 _ABAF, uint256 _LABAFSlotPos) internal {
-        assembly {
-            sstore(_LABAFSlotPos, _ABAF)
-        }
-    }
-
-    function _calculateFactor(
-        uint256 _ABAF,
-        uint256 _LABAF
-    ) internal pure returns (uint256 factor_) {
-        if (_ABAF == 0) return 1;
-        if (_LABAF == 0) return _ABAF;
-        factor_ = _ABAF / _LABAF;
-    }
-
-    function _getPendingScheduledBalanceAdjustmentsAt(
-        ScheduledTasksLib.ScheduledTasksDataStorage
-            storage _scheduledBalanceAdjustments,
-        CorporateActionDataStorage storage _corporateActions,
+    function _getABAFAdjustedAt(
         uint256 _timestamp
-    ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
-        // * Initialization
-        pendingABAF_ = 1;
-        pendingDecimals_ = 0;
+    ) internal view virtual returns (uint256) {
+        uint256 ABAF = _getABAF();
+        if (ABAF == 0) ABAF = 1;
+        (uint256 pendingABAF, ) = AdjustBalanceLib
+            ._getPendingScheduledBalanceAdjustmentsAt(
+                _scheduledBalanceAdjustmentStorage(),
+                _corporateActionsStorage(),
+                _timestamp
+            );
+        return ABAF * pendingABAF;
+    }
 
-        uint256 scheduledTaskCount = ScheduledTasksLib._getScheduledTaskCount(
-            _scheduledBalanceAdjustments
+    function _getLABAFForUser(
+        address _account
+    ) internal view virtual returns (uint256) {
+        return _getERC1410BasicStorage_2().LABAF[_account];
+    }
+
+    function _getLABAFForPartition(
+        bytes32 _partition
+    ) internal view virtual returns (uint256) {
+        return _getERC1410BasicStorage_2().LABAF_partition[_partition];
+    }
+
+    function _getLABAFForUserAndPartition(
+        bytes32 _partition,
+        address _account
+    ) internal view virtual returns (uint256) {
+        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
+            _account
+        ][_partition];
+
+        if (partitionsIndex == 0) return 0;
+        return
+            _getERC1410BasicStorage_2().LABAF_user_partition[_account][
+                partitionsIndex - 1
+            ];
+    }
+
+    function _balanceOfAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
+    }
+
+    function _balanceOfAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            _getABAFAdjustedAt(_timestamp),
+            _getLABAFForUser(_tokenHolder)
         );
+        return _balanceOf(_tokenHolder) * factor;
+    }
 
-        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
-            uint256 pos = scheduledTaskCount - i;
+    function _balanceOfByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        return
+            _balanceOfByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                _blockTimestamp()
+            );
+    }
 
-            ScheduledTasksLib.ScheduledTask
-                memory scheduledTask = ScheduledTasksLib
-                    ._getScheduledTasksByIndex(
-                        _scheduledBalanceAdjustments,
-                        pos
-                    );
+    function _balanceOfByPartitionAdjustedAt(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib._calculateFactor(
+            _getABAFAdjustedAt(_timestamp),
+            _getLABAFForUserAndPartition(_partition, _tokenHolder)
+        );
+        return _balanceOfByPartition(_partition, _tokenHolder) * factor;
+    }
 
-            if (scheduledTask.scheduledTimestamp < _timestamp) {
-                bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
-
-                bytes memory balanceAdjustmentData = _corporateActions
-                    .actionsData[actionId]
-                    .data;
-
-                IEquity.ScheduledBalanceAdjustment
-                    memory balanceAdjustment = abi.decode(
-                        balanceAdjustmentData,
-                        (IEquity.ScheduledBalanceAdjustment)
-                    );
-                pendingABAF_ *= balanceAdjustment.factor;
-                pendingDecimals_ += balanceAdjustment.decimals;
-            } else {
-                break;
-            }
+    function _getERC1410BasicStorage_2()
+        internal
+        pure
+        virtual
+        returns (ERC1410BasicStorage_2 storage erc1410BasicStorage_2_)
+    {
+        bytes32 position = _ERC1410_BASIC_STORAGE_2_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1410BasicStorage_2_.slot := position
         }
     }
 }
