@@ -223,7 +223,6 @@ import {
   DiamondFacet__factory,
   EquityUSA__factory,
   ERC1410ScheduledTasks__factory,
-  ERC1410Snapshot__factory,
   ERC1643__factory,
   Factory__factory,
   Lock_2__factory,
@@ -1168,7 +1167,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `authorizing operator: ${targetId.toString()} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ERC1410Snapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
 
@@ -1199,7 +1198,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `revoking operator: ${targetId.toString()} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ERC1410Snapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
 
@@ -1231,7 +1230,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `authorizing operator: ${targetId.toString()} for security ${security.toString()} and partition ${partitionId}`,
     );
 
-    const factoryInstance = new ERC1410Snapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
 
@@ -1263,7 +1262,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `revoking operator: ${targetId.toString()} for security ${security.toString()} and partition ${partitionId}`,
     );
 
-    const factoryInstance = new ERC1410Snapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
 
@@ -1297,7 +1296,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()} from account ${sourceId.toString()} on partition ${partitionId}`,
     );
 
-    const factoryInstance = new ERC1410Snapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
 

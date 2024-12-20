@@ -206,7 +206,6 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { BigNumber } from 'ethers'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     ResolverProxy,
@@ -233,7 +232,7 @@ import {
 } from '../../../../scripts/factory'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
 
-const TIME = 30000
+const TIME = 20000
 const numberOfUnits = 1000
 let currentTimeInSeconds = 0
 let startingDate = 0
@@ -246,7 +245,7 @@ const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
 const info = 'info'
 
-const TIME_2 = 10000
+const TIME_2 = 2 * TIME
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
 const couponRate = 5
@@ -282,7 +281,8 @@ describe('Bond Tests', () => {
     })
 
     beforeEach(async () => {
-        currentTimeInSeconds = await time.latest()
+        currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
+            .timestamp
         startingDate = currentTimeInSeconds + TIME / 1000
         maturityDate = startingDate + numberOfCoupons * frequency
         firstCouponDate = startingDate + 1

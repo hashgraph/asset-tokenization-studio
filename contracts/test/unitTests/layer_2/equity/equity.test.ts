@@ -229,7 +229,6 @@ import {
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
 
 const TIME = 10000
 const DECIMALS = 7
@@ -341,7 +340,8 @@ describe('Equity Tests', () => {
             await diamond.address
         )
 
-        currentTimeInSeconds = await time.latest()
+        currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
+            .timestamp
         dividendsRecordDateInSeconds = currentTimeInSeconds + TIME / 1000
         dividendsExecutionDateInSeconds =
             currentTimeInSeconds + (10 * TIME) / 1000

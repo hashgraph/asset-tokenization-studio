@@ -229,7 +229,7 @@ import {
 } from '../../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 
-const TIME = 6000
+const TIME = 15000
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 const INITIAL_AMOUNT = 1000
