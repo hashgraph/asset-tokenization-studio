@@ -232,7 +232,7 @@ import {
 } from '../../../../scripts/factory'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
 
-const TIME = 10000
+const TIME = 20000
 const numberOfUnits = 1000
 let currentTimeInSeconds = 0
 let startingDate = 0
@@ -245,7 +245,7 @@ const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
 const info = 'info'
 
-const TIME_2 = 20000
+const TIME_2 = 2 * TIME
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
 const couponRate = 5
