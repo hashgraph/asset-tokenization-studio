@@ -211,6 +211,7 @@ export enum SupportedWallets {
   // HASHPACK = 'HashPack',
   //CLIENT = 'Client',
   DFNS = 'DFNS',
+  FIREBLOCKS = 'Fireblocks',
 }
 
 export default interface Wallet {
