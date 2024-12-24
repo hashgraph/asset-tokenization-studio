@@ -1,0 +1,201 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DigitalSecurityLockerForm should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-r8fju2"
+  >
+    <div
+      class="css-b2xmzl"
+    >
+      <div
+        class="chakra-stack css-1h4ws66"
+      >
+        <h2
+          class="css-1mk5tlk"
+        >
+          Locker
+        </h2>
+        <form
+          class="chakra-stack css-ip7fdm"
+          data-testid="balance-adjustment-form"
+        >
+          <div
+            class="chakra-stack css-1h0sumw"
+          >
+            <div
+              class="chakra-stack css-1nqqhpy"
+            >
+              <p
+                class="css-0"
+              >
+                Target ID*
+              </p>
+            </div>
+            <div
+              class="chakra-form-control css-1kxonj9"
+              role="group"
+            >
+              <label
+                class="css-1fey8w1"
+                for="targetId"
+              >
+                <div
+                  class="chakra-input__group css-pwmwmr"
+                  data-group="true"
+                >
+                  <input
+                    class="chakra-input css-ifstuv"
+                    data-testid="targetId"
+                    id="targetId"
+                    name="targetId"
+                    placeholder="0.0.12345"
+                    value=""
+                  />
+                </div>
+              </label>
+            </div>
+          </div>
+          <div
+            class="chakra-stack css-1h0sumw"
+          >
+            <div
+              class="chakra-stack css-1nqqhpy"
+            >
+              <p
+                class="css-0"
+              >
+                Amount*
+              </p>
+            </div>
+            <div
+              class="chakra-form-control css-1kxonj9"
+              role="group"
+            >
+              <label
+                class="css-1fey8w1"
+              >
+                <div
+                  class="chakra-input__group css-pwmwmr"
+                  data-group="true"
+                >
+                  <input
+                    class="chakra-input css-ifstuv"
+                    data-testid="amount"
+                    id="field-:r1:"
+                    inputmode="numeric"
+                    name="amount"
+                    placeholder="Amount"
+                    type="text"
+                    value=""
+                  />
+                </div>
+              </label>
+            </div>
+          </div>
+          <div
+            class="chakra-stack css-1h0sumw"
+          >
+            <div
+              class="chakra-stack css-1nqqhpy"
+            >
+              <p
+                class="css-0"
+              >
+                Expiration date*
+              </p>
+            </div>
+            <div
+              class="chakra-form-control css-1kxonj9"
+              role="group"
+            >
+              <label
+                class="css-1fey8w1"
+                for="popover-trigger-:r4:"
+              >
+                <div
+                  class="chakra-input__group css-pwmwmr"
+                  data-group="true"
+                >
+                  <div
+                    class="chakra-input__left-element css-irrpsr"
+                  >
+                    <svg
+                      class="chakra-icon css-kpbtv0"
+                      fill="currentColor"
+                      focusable="false"
+                      height="1em"
+                      viewBox="0 0 256 256"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    aria-controls="popover-content-:r4:"
+                    aria-expanded="false"
+                    aria-haspopup="dialog"
+                    aria-label="Date"
+                    autocomplete="off"
+                    class="chakra-input css-p6x41e"
+                    data-testid="expirationDate"
+                    id="popover-trigger-:r4:"
+                    name="expirationDate"
+                    placeholder="Select expiration date"
+                    value=""
+                  />
+                  <div
+                    class="chakra-input__right-element css-1akgnmh"
+                  >
+                    <svg
+                      aria-label="Select a date"
+                      class="chakra-icon css-c6odlo"
+                      fill="currentColor"
+                      focusable="false"
+                      height="1em"
+                      viewBox="0 0 256 256"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </label>
+              <div
+                class="chakra-popover__popper css-1qq679y"
+                style="visibility: hidden; position: absolute; min-width: max-content; inset: 0 auto auto 0;"
+              >
+                <section
+                  class="chakra-popover__content css-19djqmd"
+                  id="popover-content-:r4:"
+                  role="dialog"
+                  style="transform-origin: var(--popper-transform-origin); opacity: 0; visibility: hidden; transform: scale(0.95) translateZ(0);"
+                  tabindex="-1"
+                />
+              </div>
+            </div>
+          </div>
+          <button
+            class="chakra-button css-xhl63s"
+            data-testid="create-locker-button"
+            disabled=""
+            type="submit"
+          >
+            Send
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
