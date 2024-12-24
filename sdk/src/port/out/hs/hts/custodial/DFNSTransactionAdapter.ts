@@ -203,97 +203,53 @@
 
 */
 
-import { DFNSConfigRequest } from '../src/port/in/request/ConnectRequest.js';
-import Account from '../src/domain/context/account/Account.js';
-import PrivateKey from '../src/domain/context/account/PrivateKey.js';
-import PublicKey from '../src/domain/context/account/PublicKey.js';
-import { HederaId } from '../src/domain/context/shared/HederaId.js';
-import { config } from 'dotenv';
+import {
+	CustodialWalletService,
+	DFNSConfig,
+} from '@hashgraph/hedera-custodians-integration';
+import { singleton } from 'tsyringe';
+import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
+import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
+import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';
+import LogService from '../../../../../app/service/LogService';
+import DfnsSettings from '../../../../../domain/context/custodialWalletSettings/DfnsSettings';
 
-config();
+@singleton()
+export class DFNSTransactionAdapter extends CustodialTransactionAdapter {
+	init(): Promise<string> {
+		this.eventService.emit(WalletEvents.walletInit, {
+			wallet: SupportedWallets.DFNS,
+			initData: {},
+		});
+		LogService.logTrace('DFNS Initialized');
+		return Promise.resolve(this.networkService.environment);
+	}
 
-export const ENVIRONMENT = 'testnet';
-export const FACTORY_ADDRESS = process.env.FACTORY_ADDRESS ?? '';
-export const RESOLVER_ADDRESS = process.env.RESOLVER_ADDRESS ?? '';
+	initCustodialWalletService(settings: DfnsSettings): void {
+		this.custodialWalletService = new CustodialWalletService(
+			new DFNSConfig(
+				settings.serviceAccountSecretKey,
+				settings.serviceAccountCredentialId,
+				settings.serviceAccountAuthToken,
+				settings.appOrigin,
+				settings.appId,
+				settings.baseUrl,
+				settings.walletId,
+				settings.publicKey,
+			),
+		);
+	}
 
-export const CLIENT_PRIVATE_KEY_ECDSA = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ECDSA: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA = HederaId.from(CLIENT_ACCOUNT_ID_ECDSA);
+	getSupportedWallet(): SupportedWallets {
+		return SupportedWallets.DFNS;
+	}
 
-// DEMO ACCOUNTs
-
-// Account Z
-export const CLIENT_PRIVATE_KEY_ECDSA_Z = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA_Z = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA_Z =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA_Z =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ECDSA_Z: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA_Z,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA_Z,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA_Z,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA_Z,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA_Z = HederaId.from(
-  CLIENT_ACCOUNT_ID_ECDSA_Z,
-);
-
-// Account A
-export const CLIENT_PRIVATE_KEY_ECDSA_A = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_2 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA_A = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_2 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA_A =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_2 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA_A =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_2 ?? '';
-export const CLIENT_ACCOUNT_ECDSA_A: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA_A,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA_A,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA_A,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA_A,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA_A = HederaId.from(
-  CLIENT_ACCOUNT_ID_ECDSA_A,
-);
-
-export const DECIMALS = 2;
-
-export const DFNS_SETTINGS: DFNSConfigRequest = {
-	authorizationToken: process.env.DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN ?? '',
-	credentialId: process.env.DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID ?? '' ,
-	serviceAccountPrivateKey: process.env.DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH ?? '' ,
-	urlApplicationOrigin: process.env.DFNS_APP_ORIGIN ?? '' ,
-	applicationId: process.env.DFNS_APP_ID ?? '' ,
-	baseUrl: process.env.DFNS_BASE_URL ?? '' ,
-	walletId: process.env.DFNS_WALLET_ID ?? '' ,
-	hederaAccountId: process.env.DFNS_HEDERA_ACCOUNT_ID ?? '',
-	publicKey: process.env.DFNS_WALLET_PUBLIC_KEY ?? '',
-};
+	stop(): Promise<boolean> {
+		this.client?.close();
+		LogService.logTrace('DFNS stopped');
+		this.eventService.emit(WalletEvents.walletDisconnect, {
+			wallet: SupportedWallets.DFNS,
+		});
+		return Promise.resolve(true);
+	}
+}

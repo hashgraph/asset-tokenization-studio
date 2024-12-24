@@ -303,6 +303,7 @@ import { CastDividendType } from '../../../domain/context/equity/DividendType.js
 import { AdditionalSecurityData } from '../../../domain/context/factory/AdditionalSecurityData.js';
 import { Interface } from 'ethers/lib/utils.js';
 import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
+import { TransactionType } from '../TransactionResponseEnums.js';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -1634,5 +1635,8 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   // * Definition of the abstract methods
   abstract signAndSendTransaction(
     transaction: Transaction,
+    transactionType?: TransactionType,
+    functionName?: string,
+    abi?: object[],
   ): Promise<TransactionResponse>;
 }

@@ -220,6 +220,7 @@ import { CouponDetails } from '../../domain/context/bond/CouponDetails.js';
 import { EquityDetails } from '../../domain/context/equity/EquityDetails.js';
 import HWCSettings from '../../domain/context/walletConnect/HWCSettings';
 import { ContractId } from '@hashgraph/sdk';
+import DfnsSettings from '../../domain/context/custodialWalletSettings/DfnsSettings.js';
 
 export interface InitializationData {
   account?: Account;
@@ -258,7 +259,7 @@ interface ITransactionAdapter {
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse>;
   init(): Promise<Environment>;
-  register(input?: Account | HWCSettings): Promise<InitializationData>;
+  register(input?: Account | HWCSettings | DfnsSettings): Promise<InitializationData>;
   stop(): Promise<boolean>;
   balanceOf(
     security: HederaId,
@@ -648,7 +649,7 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   register(
-    input?: Account | HWCSettings,
+    input?: Account | HWCSettings | DfnsSettings,
     debug?: boolean,
   ): Promise<InitializationData> {
     throw new Error('Method not implemented.');

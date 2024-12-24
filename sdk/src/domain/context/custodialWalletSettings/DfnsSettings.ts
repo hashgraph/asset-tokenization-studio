@@ -203,97 +203,16 @@
 
 */
 
-import { DFNSConfigRequest } from '../src/port/in/request/ConnectRequest.js';
-import Account from '../src/domain/context/account/Account.js';
-import PrivateKey from '../src/domain/context/account/PrivateKey.js';
-import PublicKey from '../src/domain/context/account/PublicKey.js';
-import { HederaId } from '../src/domain/context/shared/HederaId.js';
-import { config } from 'dotenv';
-
-config();
-
-export const ENVIRONMENT = 'testnet';
-export const FACTORY_ADDRESS = process.env.FACTORY_ADDRESS ?? '';
-export const RESOLVER_ADDRESS = process.env.RESOLVER_ADDRESS ?? '';
-
-export const CLIENT_PRIVATE_KEY_ECDSA = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ECDSA: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA = HederaId.from(CLIENT_ACCOUNT_ID_ECDSA);
-
-// DEMO ACCOUNTs
-
-// Account Z
-export const CLIENT_PRIVATE_KEY_ECDSA_Z = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA_Z = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA_Z =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA_Z =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ECDSA_Z: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA_Z,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA_Z,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA_Z,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA_Z,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA_Z = HederaId.from(
-  CLIENT_ACCOUNT_ID_ECDSA_Z,
-);
-
-// Account A
-export const CLIENT_PRIVATE_KEY_ECDSA_A = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_2 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA_A = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_2 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA_A =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_2 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA_A =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_2 ?? '';
-export const CLIENT_ACCOUNT_ECDSA_A: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA_A,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA_A,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA_A,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA_A,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA_A = HederaId.from(
-  CLIENT_ACCOUNT_ID_ECDSA_A,
-);
-
-export const DECIMALS = 2;
-
-export const DFNS_SETTINGS: DFNSConfigRequest = {
-	authorizationToken: process.env.DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN ?? '',
-	credentialId: process.env.DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID ?? '' ,
-	serviceAccountPrivateKey: process.env.DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH ?? '' ,
-	urlApplicationOrigin: process.env.DFNS_APP_ORIGIN ?? '' ,
-	applicationId: process.env.DFNS_APP_ID ?? '' ,
-	baseUrl: process.env.DFNS_BASE_URL ?? '' ,
-	walletId: process.env.DFNS_WALLET_ID ?? '' ,
-	hederaAccountId: process.env.DFNS_HEDERA_ACCOUNT_ID ?? '',
-	publicKey: process.env.DFNS_WALLET_PUBLIC_KEY ?? '',
-};
+export default class DfnsSettings {
+	constructor(
+		public serviceAccountSecretKey: string,
+		public serviceAccountCredentialId: string,
+		public serviceAccountAuthToken: string,
+		public appOrigin: string,
+		public appId: string,
+		public baseUrl: string,
+		public walletId: string,
+		public hederaAccountId: string,
+		public publicKey: string,
+	) {}
+}

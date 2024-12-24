@@ -203,97 +203,190 @@
 
 */
 
-import { DFNSConfigRequest } from '../src/port/in/request/ConnectRequest.js';
-import Account from '../src/domain/context/account/Account.js';
-import PrivateKey from '../src/domain/context/account/PrivateKey.js';
-import PublicKey from '../src/domain/context/account/PublicKey.js';
-import { HederaId } from '../src/domain/context/shared/HederaId.js';
-import { config } from 'dotenv';
+import {
+	Client,
+	Transaction,
+	TransactionResponse as HTransactionResponse,
+} from '@hashgraph/sdk';
+import {
+	CustodialWalletService,
+	SignatureRequest,
+} from '@hashgraph/hedera-custodians-integration';
+import TransactionResponse from '../../../../../domain/context/transaction/TransactionResponse.js';
+import Account from '../../../../../domain/context/account/Account';
+import { InitializationData } from '../../../TransactionAdapter';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
+import EventService from '../../../../../app/service/event/EventService';
+import { MirrorNodeAdapter } from '../../../mirror/MirrorNodeAdapter';
+import NetworkService from '../../../../../app/service/NetworkService';
+import { Environment } from '../../../../../domain/context/network/Environment';
+import LogService from '../../../../../app/service/LogService';
+import { SigningError } from '../../error/SigningError';
+import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
+import {
+	WalletEvents,
+	WalletPairedEvent,
+} from '../../../../../app/service/event/WalletEvent';
+import Injectable from '../../../../../core/Injectable';
+import { TransactionType } from '../../../TransactionResponseEnums';
+import Hex from '../../../../../core/Hex.js';
+import { HederaTransactionAdapter } from '../../HederaTransactionAdapter.js';
+import { HTSTransactionResponseAdapter } from '../HTSTransactionResponseAdapter.js';
+import DfnsSettings from '../../../../../domain/context/custodialWalletSettings/DfnsSettings.js';
+import { HederaId } from '../../../../../domain/context/shared/HederaId.js';
 
-config();
+export abstract class CustodialTransactionAdapter extends HederaTransactionAdapter {
+	protected client: Client;
+	protected custodialWalletService: CustodialWalletService;
+	public account: Account;
+	protected network: Environment;
 
-export const ENVIRONMENT = 'testnet';
-export const FACTORY_ADDRESS = process.env.FACTORY_ADDRESS ?? '';
-export const RESOLVER_ADDRESS = process.env.RESOLVER_ADDRESS ?? '';
+	constructor(
+		@lazyInject(EventService) public readonly eventService: EventService,
+		@lazyInject(MirrorNodeAdapter)
+		public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+		@lazyInject(NetworkService)
+		public readonly networkService: NetworkService,
+	) {
+		super(mirrorNodeAdapter, networkService);
+	}
 
-export const CLIENT_PRIVATE_KEY_ECDSA = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ECDSA: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA = HederaId.from(CLIENT_ACCOUNT_ID_ECDSA);
+	protected initClient(accountId: string, publicKey: string): void {
+		const currentNetwork = this.networkService.environment;
+		switch (currentNetwork) {
+			case 'testnet':
+				this.client = Client.forTestnet();
+				break;
+			case 'mainnet':
+				this.client = Client.forMainnet();
+				break;
+			case 'previewnet':
+				this.client = Client.forPreviewnet();
+				break;
+			default:
+				throw new Error('Network not supported');
+		}
+		this.client.setOperatorWith(accountId, publicKey, this.signingService);
+	}
 
-// DEMO ACCOUNTs
+	protected signingService = async (
+		message: Uint8Array,
+	): Promise<Uint8Array> => {
+		const signatureRequest = new SignatureRequest(message);
+		return await this.custodialWalletService.signTransaction(
+			signatureRequest,
+		);
+	};
 
-// Account Z
-export const CLIENT_PRIVATE_KEY_ECDSA_Z = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA_Z = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA_Z =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA_Z =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ECDSA_Z: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA_Z,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA_Z,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA_Z,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA_Z,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA_Z = HederaId.from(
-  CLIENT_ACCOUNT_ID_ECDSA_Z,
-);
+	public signAndSendTransaction = async (
+		transaction: Transaction,
+		transactionType: TransactionType,
+		nameFunction?: string,
+		abi?: object[],
+	): Promise<TransactionResponse> => {
+		try {
+			LogService.logTrace(
+				'Custodial wallet signing and sending transaction:',
+				nameFunction,
+			);
 
-// Account A
-export const CLIENT_PRIVATE_KEY_ECDSA_A = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_2 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA_A = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_2 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA_A =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_2 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA_A =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_2 ?? '';
-export const CLIENT_ACCOUNT_ECDSA_A: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA_A,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA_A,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA_A,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA_A,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA_A = HederaId.from(
-  CLIENT_ACCOUNT_ID_ECDSA_A,
-);
+			const txResponse: HTransactionResponse = await transaction.execute(
+				this.client,
+			);
 
-export const DECIMALS = 2;
+			this.logTransaction(
+				txResponse.transactionId.toString(),
+				this.networkService.environment,
+			);
 
-export const DFNS_SETTINGS: DFNSConfigRequest = {
-	authorizationToken: process.env.DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN ?? '',
-	credentialId: process.env.DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID ?? '' ,
-	serviceAccountPrivateKey: process.env.DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH ?? '' ,
-	urlApplicationOrigin: process.env.DFNS_APP_ORIGIN ?? '' ,
-	applicationId: process.env.DFNS_APP_ID ?? '' ,
-	baseUrl: process.env.DFNS_BASE_URL ?? '' ,
-	walletId: process.env.DFNS_WALLET_ID ?? '' ,
-	hederaAccountId: process.env.DFNS_HEDERA_ACCOUNT_ID ?? '',
-	publicKey: process.env.DFNS_WALLET_PUBLIC_KEY ?? '',
-};
+			return HTSTransactionResponseAdapter.manageResponse(
+				this.networkService.environment,
+				txResponse,
+				transactionType,
+            this.client,
+				nameFunction,
+				abi,
+			);
+		} catch (error) {
+			LogService.logError(error);
+			throw new SigningError(error);
+		}
+	};
+
+	protected createWalletPairedEvent(
+		wallet: SupportedWallets,
+	): WalletPairedEvent {
+		return {
+			wallet: wallet,
+			data: {
+				account: this.account,
+				pairing: '',
+				topic: '',
+			},
+			network: {
+				name: this.networkService.environment,
+				recognized: true,
+				factoryId:
+					this.networkService.configuration?.factoryAddress ?? '',
+			},
+		};
+	}
+
+	protected abstract initCustodialWalletService(
+		settings:  DfnsSettings ,
+	): void;
+
+	protected abstract getSupportedWallet(): SupportedWallets;
+
+	async register(
+		settings: DfnsSettings,
+	): Promise<InitializationData> {
+		Injectable.registerTransactionHandler(this);
+		const accountMirror = await this.mirrorNodeAdapter.getAccountInfo(
+			new HederaId(settings.hederaAccountId),
+		);
+		if (!accountMirror.publicKey) {
+			throw new Error('PublicKey not found in the mirror node');
+		}
+
+		this.account = new Account({
+			id: settings.hederaAccountId,
+			publicKey: accountMirror.publicKey,
+		});
+
+		this.initCustodialWalletService(settings);
+		this.initClient(settings.hederaAccountId, accountMirror.publicKey.key);
+
+		const wallet = this.getSupportedWallet();
+		const eventData = this.createWalletPairedEvent(wallet);
+		this.eventService.emit(WalletEvents.walletPaired, eventData);
+		LogService.logTrace(`${wallet} registered as handler: `, eventData);
+
+		return { account: this.getAccount() };
+	}
+
+	public getAccount(): Account {
+		return this.account;
+	}
+
+	async sign(message: string): Promise<string> {
+		if (!this.custodialWalletService)
+			throw new SigningError('Custodial Wallet is empty');
+
+		try {
+			const encoded_message: Uint8Array = Hex.toUint8Array(message);
+			const encoded_signed_message = await this.signingService(
+				encoded_message,
+			);
+
+			const hexArray = Array.from(encoded_signed_message, (byte) =>
+				('0' + byte.toString(16)).slice(-2),
+			);
+
+			return hexArray.join('');
+		} catch (error) {
+			LogService.logError(error);
+			throw new SigningError(error);
+		}
+	}
+}

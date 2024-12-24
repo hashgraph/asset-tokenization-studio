@@ -203,97 +203,113 @@
 
 */
 
-import { DFNSConfigRequest } from '../src/port/in/request/ConnectRequest.js';
-import Account from '../src/domain/context/account/Account.js';
-import PrivateKey from '../src/domain/context/account/PrivateKey.js';
-import PublicKey from '../src/domain/context/account/PublicKey.js';
-import { HederaId } from '../src/domain/context/shared/HederaId.js';
-import { config } from 'dotenv';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import {
+	Client,
+	TransactionResponse as HTransactionResponse,
+	TransactionReceipt,
+	TransactionRecord,
+	TransactionId,
+} from '@hashgraph/sdk';
+import TransactionResponse from '../../../../domain/context/transaction/TransactionResponse.js';
+import { TransactionResponseError } from '../../error/TransactionResponseError.js';
+import { TransactionType } from '../../TransactionResponseEnums.js';
+import { TransactionResponseAdapter } from '../../TransactionResponseAdapter.js';
 
-config();
+export class HTSTransactionResponseAdapter extends TransactionResponseAdapter {
+	public static async manageResponse(
+		network: string,
+		transactionResponse: HTransactionResponse,
+      responseType: TransactionType,
+		client: Client,
+		nameFunction?: string,
+		abi?: object[],
+	): Promise<TransactionResponse> {
+		let results: Uint8Array = new Uint8Array();
+		if (responseType === TransactionType.RECEIPT) {
+			const transactionReceipt: TransactionReceipt | undefined =
+				await this.getReceipt(client, transactionResponse);
+			const transId = transactionResponse.transactionId;
+			return this.createTransactionResponse(
+				transId,
+				responseType,
+				results,
+				transactionReceipt,
+			);
+		}
 
-export const ENVIRONMENT = 'testnet';
-export const FACTORY_ADDRESS = process.env.FACTORY_ADDRESS ?? '';
-export const RESOLVER_ADDRESS = process.env.RESOLVER_ADDRESS ?? '';
+		if (responseType === TransactionType.RECORD) {
+			const transactionRecord:
+				| TransactionRecord
+				| Uint32Array
+				| undefined = await this.getRecord(client, transactionResponse);
+			let record: Uint8Array | Uint32Array | undefined;
+			if (nameFunction) {
+				if (transactionRecord instanceof TransactionRecord) {
+					record = transactionRecord?.contractFunctionResult?.bytes;
+				} else if (transactionRecord instanceof Uint32Array) {
+					record = transactionRecord;
+				}
+				if (!record)
+					throw new TransactionResponseError({
+						message: 'Invalid response type',
+						network: network,
+					});
+				results = this.decodeFunctionResult(
+					nameFunction,
+					record,
+					abi,
+					network,
+				);
+			}
+			if (record instanceof Uint32Array) {
+				return this.createTransactionResponse(
+					undefined,
+					responseType,
+					results,
+					undefined,
+				);
+			} else {
+				const tr = transactionRecord as TransactionRecord;
+				return this.createTransactionResponse(
+					tr?.transactionId,
+					responseType,
+					results,
+					tr?.receipt,
+				);
+			}
+		}
 
-export const CLIENT_PRIVATE_KEY_ECDSA = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ECDSA: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA = HederaId.from(CLIENT_ACCOUNT_ID_ECDSA);
+		throw new TransactionResponseError({
+			message: 'The response type is neither RECORD nor RECEIPT.',
+			network: network,
+		});
+	}
 
-// DEMO ACCOUNTs
+	private static async getRecord(
+		client: Client,
+		transactionResponse: HTransactionResponse,
+	): Promise<TransactionRecord | Uint32Array | undefined> {
+		return await transactionResponse.getRecord(client);
+	}
 
-// Account Z
-export const CLIENT_PRIVATE_KEY_ECDSA_Z = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA_Z = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA_Z =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA_Z =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ECDSA_Z: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA_Z,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA_Z,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA_Z,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA_Z,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA_Z = HederaId.from(
-  CLIENT_ACCOUNT_ID_ECDSA_Z,
-);
+	private static async getReceipt(
+		client: Client,
+		transactionResponse: HTransactionResponse,
+	): Promise<TransactionReceipt | undefined> {
+		return await transactionResponse.getReceipt(client);
+	}
 
-// Account A
-export const CLIENT_PRIVATE_KEY_ECDSA_A = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_2 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA_A = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_2 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA_A =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_2 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA_A =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_2 ?? '';
-export const CLIENT_ACCOUNT_ECDSA_A: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA_A,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA_A,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA_A,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA_A,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA_A = HederaId.from(
-  CLIENT_ACCOUNT_ID_ECDSA_A,
-);
-
-export const DECIMALS = 2;
-
-export const DFNS_SETTINGS: DFNSConfigRequest = {
-	authorizationToken: process.env.DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN ?? '',
-	credentialId: process.env.DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID ?? '' ,
-	serviceAccountPrivateKey: process.env.DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH ?? '' ,
-	urlApplicationOrigin: process.env.DFNS_APP_ORIGIN ?? '' ,
-	applicationId: process.env.DFNS_APP_ID ?? '' ,
-	baseUrl: process.env.DFNS_BASE_URL ?? '' ,
-	walletId: process.env.DFNS_WALLET_ID ?? '' ,
-	hederaAccountId: process.env.DFNS_HEDERA_ACCOUNT_ID ?? '',
-	publicKey: process.env.DFNS_WALLET_PUBLIC_KEY ?? '',
-};
+	public static createTransactionResponse(
+		transactionId: TransactionId | undefined,
+		responseType: TransactionType,
+		response: Uint8Array,
+		receipt?: TransactionReceipt,
+	): TransactionResponse {
+		return new TransactionResponse(
+			(transactionId ?? '').toString(),
+			response,
+		);
+	}
+}

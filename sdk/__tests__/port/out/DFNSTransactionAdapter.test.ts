@@ -203,97 +203,131 @@
 
 */
 
-import { DFNSConfigRequest } from '../src/port/in/request/ConnectRequest.js';
-import Account from '../src/domain/context/account/Account.js';
-import PrivateKey from '../src/domain/context/account/PrivateKey.js';
-import PublicKey from '../src/domain/context/account/PublicKey.js';
-import { HederaId } from '../src/domain/context/shared/HederaId.js';
-import { config } from 'dotenv';
+import {
+  SDK,
+  LoggerTransports,
+  CreateBondRequest,
+  SupportedWallets,
+  Network,
+  Bond,
+  InitializationRequest,
+} from '../../../src/index.js';
+import {
+  DFNS_SETTINGS,
+  FACTORY_ADDRESS,
+  RESOLVER_ADDRESS,
+} from '../../config.js';
+import ConnectRequest from '../../../src/port/in/request/ConnectRequest.js';
+import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
+import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
+import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';
+import Injectable from '../../../src/core/Injectable.js';
+import {
+  CastRegulationSubType,
+  CastRegulationType,
+  RegulationSubType,
+  RegulationType,
+} from '../../../src/domain/context/factory/RegulationType.js';
 
-config();
+SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
-export const ENVIRONMENT = 'testnet';
-export const FACTORY_ADDRESS = process.env.FACTORY_ADDRESS ?? '';
-export const RESOLVER_ADDRESS = process.env.RESOLVER_ADDRESS ?? '';
+const decimals = 0;
+const name = 'TEST_SECURITY_TOKEN';
+const symbol = 'TEST';
+const isin = 'ABCDE123456Z';
+const currency = '0x455552';
+const TIME = 30;
+const numberOfUnits = '1000';
+const nominalValue = '100';
+const currentTimeInSeconds = Math.floor(new Date().getTime() / 1000) + 1000;
+const startingDate = currentTimeInSeconds + TIME;
+const numberOfCoupons = 15;
+const couponFrequency = 7;
+const couponRate = '3';
+const maturityDate = startingDate + numberOfCoupons * couponFrequency;
+const firstCouponDate = startingDate + 1;
+const regulationType = RegulationType.REG_S;
+const regulationSubType = RegulationSubType.NONE;
+const countries = 'AF,HG,BN';
+const info = 'Anything';
+const configId =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const configVersion = 0;
 
-export const CLIENT_PRIVATE_KEY_ECDSA = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ECDSA: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA = HederaId.from(CLIENT_ACCOUNT_ID_ECDSA);
-
-// DEMO ACCOUNTs
-
-// Account Z
-export const CLIENT_PRIVATE_KEY_ECDSA_Z = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA_Z = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_1 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA_Z =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA_Z =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_1 ?? '';
-export const CLIENT_ACCOUNT_ECDSA_Z: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA_Z,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA_Z,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA_Z,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA_Z,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA_Z = HederaId.from(
-  CLIENT_ACCOUNT_ID_ECDSA_Z,
-);
-
-// Account A
-export const CLIENT_PRIVATE_KEY_ECDSA_A = new PrivateKey({
-  key: process.env.CLIENT_PRIVATE_KEY_ECDSA_2 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_PUBLIC_KEY_ECDSA_A = new PublicKey({
-  key: process.env.CLIENT_PUBLIC_KEY_ECDSA_2 ?? '',
-  type: 'ECDSA',
-});
-export const CLIENT_EVM_ADDRESS_ECDSA_A =
-  process.env.CLIENT_EVM_ADDRESS_ECDSA_2 ?? '';
-export const CLIENT_ACCOUNT_ID_ECDSA_A =
-  process.env.CLIENT_ACCOUNT_ID_ECDSA_2 ?? '';
-export const CLIENT_ACCOUNT_ECDSA_A: Account = new Account({
-  id: CLIENT_ACCOUNT_ID_ECDSA_A,
-  evmAddress: CLIENT_EVM_ADDRESS_ECDSA_A,
-  privateKey: CLIENT_PRIVATE_KEY_ECDSA_A,
-  publicKey: CLIENT_PUBLIC_KEY_ECDSA_A,
-});
-export const HEDERA_ID_ACCOUNT_ECDSA_A = HederaId.from(
-  CLIENT_ACCOUNT_ID_ECDSA_A,
-);
-
-export const DECIMALS = 2;
-
-export const DFNS_SETTINGS: DFNSConfigRequest = {
-	authorizationToken: process.env.DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN ?? '',
-	credentialId: process.env.DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID ?? '' ,
-	serviceAccountPrivateKey: process.env.DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH ?? '' ,
-	urlApplicationOrigin: process.env.DFNS_APP_ORIGIN ?? '' ,
-	applicationId: process.env.DFNS_APP_ID ?? '' ,
-	baseUrl: process.env.DFNS_BASE_URL ?? '' ,
-	walletId: process.env.DFNS_WALLET_ID ?? '' ,
-	hederaAccountId: process.env.DFNS_HEDERA_ACCOUNT_ID ?? '',
-	publicKey: process.env.DFNS_WALLET_PUBLIC_KEY ?? '',
+const mirrorNode: MirrorNode = {
+  name: 'testmirrorNode',
+  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
 };
+
+const rpcNode: JsonRpcRelay = {
+  name: 'testrpcNode',
+  baseUrl: 'http://localhost:7546',
+};
+
+describe('DFNS Transaction Adapter test', () => {
+  let bond: SecurityViewModel;
+
+  beforeAll(async () => {
+    await Network.connect(
+      new ConnectRequest({
+        network: 'testnet',
+        wallet: SupportedWallets.DFNS,
+        mirrorNode: mirrorNode,
+        rpcNode: rpcNode,
+        custodialWalletSettings: DFNS_SETTINGS,
+      }),
+    );
+    await Network.init(
+      new InitializationRequest({
+        network: 'testnet',
+        configuration: {
+          factoryAddress: FACTORY_ADDRESS,
+          resolverAddress: RESOLVER_ADDRESS,
+        },
+        mirrorNode: mirrorNode,
+        rpcNode: rpcNode,
+      }),
+    );
+
+    Injectable.resolveTransactionHandler();
+
+    //Create a security for example a bond
+    const requestST = new CreateBondRequest({
+      name: name,
+      symbol: symbol,
+      isin: isin,
+      decimals: decimals,
+      isWhiteList: false,
+      isControllable: true,
+      isMultiPartition: false,
+      diamondOwnerAccount: DFNS_SETTINGS.hederaAccountId,
+      currency: currency,
+      numberOfUnits: numberOfUnits.toString(),
+      nominalValue: nominalValue,
+      startingDate: startingDate.toString(),
+      maturityDate: maturityDate.toString(),
+      couponFrequency: couponFrequency.toString(),
+      couponRate: couponRate,
+      firstCouponDate: firstCouponDate.toString(),
+      regulationType: CastRegulationType.toNumber(regulationType),
+      regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
+      isCountryControlListWhiteList: true,
+      countries: countries,
+      info: info,
+      configId: configId,
+      configVersion: configVersion,
+    });
+
+    bond = (await Bond.create(requestST)).security;
+
+    console.log(bond.diamondAddress)
+    console.log(bond.evmDiamondAddress)
+
+    console.log('bond: ' + JSON.stringify(bond));
+  }, 600_000);
+
+
+  it('DFNS should create a Bond', async () => {
+    expect(bond).not.toBeNull();
+  }, 60_000);
+});

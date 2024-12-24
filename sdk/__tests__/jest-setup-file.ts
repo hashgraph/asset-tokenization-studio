@@ -237,6 +237,7 @@ import {
 import { ScheduledBalanceAdjustment } from '../src/domain/context/equity/ScheduledBalanceAdjustment.js';
 import { DividendFor } from '../src/domain/context/equity/DividendFor';
 import { VotingFor } from '../src/domain/context/equity/VotingFor';
+import DfnsSettings from '../src/domain/context/custodialWalletSettings/DfnsSettings.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -376,6 +377,60 @@ function decreaseBalance(targetId: EvmAddress, amount: BigDecimal): void {
       .toString();
     balances.set(account, accountBalance);
   }
+}
+
+function createBondMockImplementation(
+  _securityInfo: Security,
+  _bondInfo: BondDetails,
+  _couponInfo: CouponDetails,
+  _factory: EvmAddress,
+  _resolver: EvmAddress,
+  _configId: string,
+  _configVersion: number,
+  _diamondOwnerAccount?: EvmAddress,
+): Promise<TransactionResponse> {
+  securityInfo = _securityInfo;
+
+  const ids = identifiers(securityEvmAddress);
+  securityInfo.diamondAddress = HederaId.from(ids[0]);
+  securityInfo.evmDiamondAddress = new EvmAddress(ids[1]);
+  securityInfo.type = SecurityType.BOND;
+  securityInfo.regulation = {
+    type: _securityInfo.regulationType ?? '',
+    subType: _securityInfo.regulationsubType ?? '',
+    dealSize: '0',
+    accreditedInvestors: 'ACCREDITATION REQUIRED',
+    maxNonAccreditedInvestors: 0,
+    manualInvestorVerification:
+      'VERIFICATION INVESTORS FINANCIAL DOCUMENTS REQUIRED',
+    internationalInvestors: 'ALLOWED',
+    resaleHoldPeriod: 'NOT APPLICABLE',
+  };
+
+  bondInfo = _bondInfo;
+  couponInfo = _couponInfo;
+
+  configVersion = _configVersion;
+  configId = _configId;
+  resolverAddress = _resolver.toString();
+
+  const diff = bondInfo.maturityDate - couponInfo.firstCouponDate;
+  const numberOfCoupons = Math.ceil(diff / couponInfo.couponFrequency);
+
+  for (let i = 0; i < numberOfCoupons; i++) {
+    const timeStamp =
+      couponInfo.firstCouponDate + couponInfo.couponFrequency * i;
+    const coupon = new Coupon(timeStamp, timeStamp, couponInfo.couponRate, 0);
+    coupons.push(coupon);
+  }
+
+  return Promise.resolve({
+    status: 'success',
+    id: transactionId,
+    response: {
+      bondAddress: securityEvmAddress,
+    },
+  });
 }
 
 jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
@@ -912,66 +967,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     },
   );
 
-  singletonInstance.createBond = jest.fn(
-    async (
-      _securityInfo: Security,
-      _bondInfo: BondDetails,
-      _couponInfo: CouponDetails,
-      _factory: EvmAddress,
-      _resolver: EvmAddress,
-      _configId: string,
-      _configVersion: number,
-      _diamondOwnerAccount?: EvmAddress,
-    ) => {
-      securityInfo = _securityInfo;
-
-      const ids = identifiers(securityEvmAddress);
-      securityInfo.diamondAddress = HederaId.from(ids[0]);
-      securityInfo.evmDiamondAddress = new EvmAddress(ids[1]);
-      securityInfo.type = SecurityType.BOND;
-      securityInfo.regulation = {
-        type: _securityInfo.regulationType ?? '',
-        subType: _securityInfo.regulationsubType ?? '',
-        dealSize: '0',
-        accreditedInvestors: 'ACCREDITATION REQUIRED',
-        maxNonAccreditedInvestors: 0,
-        manualInvestorVerification:
-          'VERIFICATION INVESTORS FINANCIAL DOCUMENTS REQUIRED',
-        internationalInvestors: 'ALLOWED',
-        resaleHoldPeriod: 'NOT APPLICABLE',
-      };
-
-      bondInfo = _bondInfo;
-      couponInfo = _couponInfo;
-
-      configVersion = _configVersion;
-      configId = _configId;
-      resolverAddress = _resolver.toString();
-
-      const diff = bondInfo.maturityDate - couponInfo.firstCouponDate;
-      const numberOfCoupons = Math.ceil(diff / couponInfo.couponFrequency);
-
-      for (let i = 0; i < numberOfCoupons; i++) {
-        const timeStamp =
-          couponInfo.firstCouponDate + couponInfo.couponFrequency * i;
-        const coupon = new Coupon(
-          timeStamp,
-          timeStamp,
-          couponInfo.couponRate,
-          0,
-        );
-        coupons.push(coupon);
-      }
-
-      return {
-        status: 'success',
-        id: transactionId,
-        response: {
-          bondAddress: securityEvmAddress,
-        },
-      } as TransactionResponse;
-    },
-  );
+  singletonInstance.createBond = jest.fn(createBondMockImplementation);
 
   singletonInstance.init = jest.fn(async () => {
     return network;
@@ -1503,6 +1499,59 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),
+  };
+});
+
+jest.mock('../src/port/out/hs/hts/custodial/DFNSTransactionAdapter', () => {
+  const actual = jest.requireActual(
+    '../src/port/out/hs/hts/custodial/DFNSTransactionAdapter.ts',
+  );
+
+  const singletonInstance = new actual.DFNSTransactionAdapter();
+
+  singletonInstance.init = jest.fn(async () => {
+    return network;
+  });
+
+  return {
+    DFNSTransactionAdapter: jest.fn(() => singletonInstance),
+  };
+});
+
+jest.mock(
+  '../src/port/out/hs/hts/custodial/CustodialTransactionAdapter',
+  () => {
+    const actual = jest.requireActual(
+      '../src/port/out/hs/hts/custodial/CustodialTransactionAdapter.ts',
+    );
+
+    const singletonInstance = new actual.CustodialTransactionAdapter();
+
+    singletonInstance.register = jest.fn(async (settings: DfnsSettings) => {
+      Injectable.registerTransactionHandler(singletonInstance);
+      return {} as InitializationData;
+    });
+    return {
+      CustodialTransactionAdapter: jest.fn(() => singletonInstance),
+    };
+  },
+);
+
+jest.mock('../src/port/out/hs/HederaTransactionAdapter', () => {
+  const actual = jest.requireActual(
+    '../src/port/out/hs/HederaTransactionAdapter.ts',
+  );
+
+  const singletonInstance = new actual.HederaTransactionAdapter();
+
+  singletonInstance.createBond = jest.fn(createBondMockImplementation);
+
+  singletonInstance.setupDisconnectEventHandler = jest.fn(async () => {
+    return true;
+  });
+
+  return {
+    HederaTransactionAdapter: jest.fn(() => singletonInstance),
   };
 });
 

@@ -211,8 +211,9 @@ import Account from '../../../../domain/context/account/Account.js';
 import PublicKey from '../../../../domain/context/account/PublicKey.js';
 import { RequestAccount, RequestPublicKey } from '../BaseRequest.js';
 import ValidatedRequest from '../validation/ValidatedRequest.js';
-import { HWCRequestSettings } from '../ConnectRequest';
+import { DFNSConfigRequest, HWCRequestSettings } from '../ConnectRequest';
 import HWCSettings from '../../../../domain/context/walletConnect/HWCSettings';
+import DfnsSettings from '../../../../domain/context/custodialWalletSettings/DfnsSettings.js';
 
 export default class RequestMapper {
   public static isPublicKey = (val: any): val is RequestPublicKey => {
@@ -345,4 +346,20 @@ export default class RequestMapper {
       req.dappIcons,
     );
   }
+
+  public static dfnsRequestToDfnsSettings(
+		req: DFNSConfigRequest,
+	): DfnsSettings {
+		return new DfnsSettings(
+			req.serviceAccountPrivateKey,
+			req.credentialId,
+			req.authorizationToken,
+			req.urlApplicationOrigin,
+			req.applicationId,
+			req.baseUrl,
+			req.walletId,
+			req.hederaAccountId,
+			req.publicKey,
+		);
+	}
 }

@@ -214,6 +214,21 @@ import Validation from './validation/Validation.js';
 
 export { SupportedWallets };
 
+export interface DFNSConfigRequest {
+	authorizationToken: string;
+	credentialId: string;
+	serviceAccountPrivateKey: string;
+	urlApplicationOrigin: string;
+	applicationId: string;
+	baseUrl: string;
+	walletId: string;
+	hederaAccountId: string;
+	publicKey: string;
+}
+
+export type CustodialSettings =
+	| DFNSConfigRequest
+
 export type HWCRequestSettings = {
   projectId: string;
   dappName: string;
@@ -234,6 +249,7 @@ export default class ConnectRequest
   wallet: SupportedWallets;
   hwcSettings?: HWCRequestSettings;
   debug?: boolean;
+  custodialWalletSettings?: CustodialSettings;
 
   constructor({
     account,
@@ -243,6 +259,7 @@ export default class ConnectRequest
     wallet,
     hwcSettings,
     debug,
+    custodialWalletSettings
   }: {
     account?: RequestAccount;
     network: Environment;
@@ -251,6 +268,7 @@ export default class ConnectRequest
     wallet: SupportedWallets;
     hwcSettings?: HWCRequestSettings;
     debug?: boolean;
+    custodialWalletSettings?: CustodialSettings;
   }) {
     super({
       account: Validation.checkAccount(),
@@ -263,6 +281,7 @@ export default class ConnectRequest
     this.wallet = wallet;
     this.debug = debug;
     this.hwcSettings = hwcSettings;
+    this.custodialWalletSettings = custodialWalletSettings;
   }
 
   [n: string]: any;
