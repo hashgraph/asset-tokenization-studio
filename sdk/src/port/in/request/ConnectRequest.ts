@@ -215,19 +215,18 @@ import Validation from './validation/Validation.js';
 export { SupportedWallets };
 
 export interface DFNSConfigRequest {
-	authorizationToken: string;
-	credentialId: string;
-	serviceAccountPrivateKey: string;
-	urlApplicationOrigin: string;
-	applicationId: string;
-	baseUrl: string;
-	walletId: string;
-	hederaAccountId: string;
-	publicKey: string;
+  authorizationToken: string;
+  credentialId: string;
+  serviceAccountPrivateKey: string;
+  urlApplicationOrigin: string;
+  applicationId: string;
+  baseUrl: string;
+  walletId: string;
+  hederaAccountId: string;
+  publicKey: string;
 }
 
-export type CustodialSettings =
-	| DFNSConfigRequest
+export type CustodialSettings = DFNSConfigRequest;
 
 export type HWCRequestSettings = {
   projectId: string;
@@ -259,7 +258,7 @@ export default class ConnectRequest
     wallet,
     hwcSettings,
     debug,
-    custodialWalletSettings
+    custodialWalletSettings,
   }: {
     account?: RequestAccount;
     network: Environment;

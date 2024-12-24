@@ -226,7 +226,7 @@ export class ConnectCommand extends Command<ConnectCommandResponse> {
     public readonly account?: Account,
     public readonly HWCSettings?: HWCSettings,
     public readonly debug?: boolean,
-    public readonly custodialSettings?: DfnsSettings
+    public readonly custodialSettings?: DfnsSettings,
   ) {
     super();
   }

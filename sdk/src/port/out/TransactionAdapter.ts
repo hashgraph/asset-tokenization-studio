@@ -259,7 +259,9 @@ interface ITransactionAdapter {
     diamondOwnerAccount?: EvmAddress,
   ): Promise<TransactionResponse>;
   init(): Promise<Environment>;
-  register(input?: Account | HWCSettings | DfnsSettings): Promise<InitializationData>;
+  register(
+    input?: Account | HWCSettings | DfnsSettings,
+  ): Promise<InitializationData>;
   stop(): Promise<boolean>;
   balanceOf(
     security: HederaId,

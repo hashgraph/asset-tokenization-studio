@@ -348,18 +348,18 @@ export default class RequestMapper {
   }
 
   public static dfnsRequestToDfnsSettings(
-		req: DFNSConfigRequest,
-	): DfnsSettings {
-		return new DfnsSettings(
-			req.serviceAccountPrivateKey,
-			req.credentialId,
-			req.authorizationToken,
-			req.urlApplicationOrigin,
-			req.applicationId,
-			req.baseUrl,
-			req.walletId,
-			req.hederaAccountId,
-			req.publicKey,
-		);
-	}
+    req: DFNSConfigRequest,
+  ): DfnsSettings {
+    return new DfnsSettings(
+      req.serviceAccountPrivateKey,
+      req.credentialId,
+      req.authorizationToken,
+      req.urlApplicationOrigin,
+      req.applicationId,
+      req.baseUrl,
+      req.walletId,
+      req.hederaAccountId,
+      req.publicKey,
+    );
+  }
 }

@@ -204,8 +204,8 @@
 */
 
 import {
-	CustodialWalletService,
-	DFNSConfig,
+  CustodialWalletService,
+  DFNSConfig,
 } from '@hashgraph/hedera-custodians-integration';
 import { singleton } from 'tsyringe';
 import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
@@ -216,40 +216,40 @@ import DfnsSettings from '../../../../../domain/context/custodialWalletSettings/
 
 @singleton()
 export class DFNSTransactionAdapter extends CustodialTransactionAdapter {
-	init(): Promise<string> {
-		this.eventService.emit(WalletEvents.walletInit, {
-			wallet: SupportedWallets.DFNS,
-			initData: {},
-		});
-		LogService.logTrace('DFNS Initialized');
-		return Promise.resolve(this.networkService.environment);
-	}
+  init(): Promise<string> {
+    this.eventService.emit(WalletEvents.walletInit, {
+      wallet: SupportedWallets.DFNS,
+      initData: {},
+    });
+    LogService.logTrace('DFNS Initialized');
+    return Promise.resolve(this.networkService.environment);
+  }
 
-	initCustodialWalletService(settings: DfnsSettings): void {
-		this.custodialWalletService = new CustodialWalletService(
-			new DFNSConfig(
-				settings.serviceAccountSecretKey,
-				settings.serviceAccountCredentialId,
-				settings.serviceAccountAuthToken,
-				settings.appOrigin,
-				settings.appId,
-				settings.baseUrl,
-				settings.walletId,
-				settings.publicKey,
-			),
-		);
-	}
+  initCustodialWalletService(settings: DfnsSettings): void {
+    this.custodialWalletService = new CustodialWalletService(
+      new DFNSConfig(
+        settings.serviceAccountSecretKey,
+        settings.serviceAccountCredentialId,
+        settings.serviceAccountAuthToken,
+        settings.appOrigin,
+        settings.appId,
+        settings.baseUrl,
+        settings.walletId,
+        settings.publicKey,
+      ),
+    );
+  }
 
-	getSupportedWallet(): SupportedWallets {
-		return SupportedWallets.DFNS;
-	}
+  getSupportedWallet(): SupportedWallets {
+    return SupportedWallets.DFNS;
+  }
 
-	stop(): Promise<boolean> {
-		this.client?.close();
-		LogService.logTrace('DFNS stopped');
-		this.eventService.emit(WalletEvents.walletDisconnect, {
-			wallet: SupportedWallets.DFNS,
-		});
-		return Promise.resolve(true);
-	}
+  stop(): Promise<boolean> {
+    this.client?.close();
+    LogService.logTrace('DFNS stopped');
+    this.eventService.emit(WalletEvents.walletDisconnect, {
+      wallet: SupportedWallets.DFNS,
+    });
+    return Promise.resolve(true);
+  }
 }

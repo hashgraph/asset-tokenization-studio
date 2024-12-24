@@ -705,7 +705,7 @@ export default class Injectable {
     adapters.push(
       Injectable.resolve(RPCTransactionAdapter),
       Injectable.resolve(HederaWalletConnectTransactionAdapter),
-      Injectable.resolve(DFNSTransactionAdapter)
+      Injectable.resolve(DFNSTransactionAdapter),
     );
     return adapters;
   }

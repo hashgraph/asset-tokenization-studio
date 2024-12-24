@@ -320,12 +320,11 @@ describe('DFNS Transaction Adapter test', () => {
 
     bond = (await Bond.create(requestST)).security;
 
-    console.log(bond.diamondAddress)
-    console.log(bond.evmDiamondAddress)
+    console.log(bond.diamondAddress);
+    console.log(bond.evmDiamondAddress);
 
     console.log('bond: ' + JSON.stringify(bond));
   }, 600_000);
-
 
   it('DFNS should create a Bond', async () => {
     expect(bond).not.toBeNull();

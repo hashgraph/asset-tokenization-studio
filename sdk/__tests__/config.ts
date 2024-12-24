@@ -287,13 +287,15 @@ export const HEDERA_ID_ACCOUNT_ECDSA_A = HederaId.from(
 export const DECIMALS = 2;
 
 export const DFNS_SETTINGS: DFNSConfigRequest = {
-	authorizationToken: process.env.DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN ?? '',
-	credentialId: process.env.DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID ?? '' ,
-	serviceAccountPrivateKey: process.env.DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH ?? '' ,
-	urlApplicationOrigin: process.env.DFNS_APP_ORIGIN ?? '' ,
-	applicationId: process.env.DFNS_APP_ID ?? '' ,
-	baseUrl: process.env.DFNS_BASE_URL ?? '' ,
-	walletId: process.env.DFNS_WALLET_ID ?? '' ,
-	hederaAccountId: process.env.DFNS_HEDERA_ACCOUNT_ID ?? '',
-	publicKey: process.env.DFNS_WALLET_PUBLIC_KEY ?? '',
+  authorizationToken:
+    process.env.DFNS_SERVICE_ACCOUNT_AUTHORIZATION_TOKEN ?? '',
+  credentialId: process.env.DFNS_SERVICE_ACCOUNT_CREDENTIAL_ID ?? '',
+  serviceAccountPrivateKey:
+    process.env.DFNS_SERVICE_ACCOUNT_PRIVATE_KEY_PATH ?? '',
+  urlApplicationOrigin: process.env.DFNS_APP_ORIGIN ?? '',
+  applicationId: process.env.DFNS_APP_ID ?? '',
+  baseUrl: process.env.DFNS_BASE_URL ?? '',
+  walletId: process.env.DFNS_WALLET_ID ?? '',
+  hederaAccountId: process.env.DFNS_HEDERA_ACCOUNT_ID ?? '',
+  publicKey: process.env.DFNS_WALLET_PUBLIC_KEY ?? '',
 };

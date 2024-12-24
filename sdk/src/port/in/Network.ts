@@ -381,9 +381,23 @@ class NetworkInPort implements INetworkInPort {
       new SetNetworkCommand(req.network, req.mirrorNode, req.rpcNode),
     );
 
-    console.log('ConnectRequest', req.wallet, account, hwcSettings, debug, custodialSettings);
+    console.log(
+      'ConnectRequest',
+      req.wallet,
+      account,
+      hwcSettings,
+      debug,
+      custodialSettings,
+    );
     const res = await this.commandBus.execute(
-      new ConnectCommand(req.network, req.wallet, account, hwcSettings, debug, custodialSettings),
+      new ConnectCommand(
+        req.network,
+        req.wallet,
+        account,
+        hwcSettings,
+        debug,
+        custodialSettings,
+      ),
     );
     return res.payload;
   }
