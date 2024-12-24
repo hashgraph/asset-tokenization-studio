@@ -204,8 +204,8 @@
 */
 
 import {
-	CustodialWalletService,
-	FireblocksConfig,
+  CustodialWalletService,
+  FireblocksConfig,
 } from '@hashgraph/hedera-custodians-integration';
 import { singleton } from 'tsyringe';
 import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
@@ -217,39 +217,38 @@ import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';
 
 @singleton()
 export class FireblocksTransactionAdapter extends CustodialTransactionAdapter {
-	init(): Promise<string> {
-		this.eventService.emit(WalletEvents.walletInit, {
-			wallet: this.getSupportedWallet(),
-			initData: {},
-		});
-		LogService.logTrace('Fireblocks Initialized');
-		return Promise.resolve(this.networkService.environment);
-	}
+  init(): Promise<string> {
+    this.eventService.emit(WalletEvents.walletInit, {
+      wallet: this.getSupportedWallet(),
+      initData: {},
+    });
+    LogService.logTrace('Fireblocks Initialized');
+    return Promise.resolve(this.networkService.environment);
+  }
 
-	initCustodialWalletService(settings: FireblocksSettings): void {
-		const { apiKey, apiSecretKey, baseUrl, vaultAccountId, assetId } =
-			settings;
-		this.custodialWalletService = new CustodialWalletService(
-			new FireblocksConfig(
-				apiKey,
-				apiSecretKey,
-				baseUrl,
-				vaultAccountId,
-				assetId,
-			),
-		);
-	}
+  initCustodialWalletService(settings: FireblocksSettings): void {
+    const { apiKey, apiSecretKey, baseUrl, vaultAccountId, assetId } = settings;
+    this.custodialWalletService = new CustodialWalletService(
+      new FireblocksConfig(
+        apiKey,
+        apiSecretKey,
+        baseUrl,
+        vaultAccountId,
+        assetId,
+      ),
+    );
+  }
 
-	getSupportedWallet(): SupportedWallets {
-		return SupportedWallets.FIREBLOCKS;
-	}
+  getSupportedWallet(): SupportedWallets {
+    return SupportedWallets.FIREBLOCKS;
+  }
 
-	stop(): Promise<boolean> {
-		this.client?.close();
-		LogService.logTrace('Fireblocks stopped');
-		this.eventService.emit(WalletEvents.walletDisconnect, {
-			wallet: SupportedWallets.FIREBLOCKS,
-		});
-		return Promise.resolve(true);
-	}
+  stop(): Promise<boolean> {
+    this.client?.close();
+    LogService.logTrace('Fireblocks stopped');
+    this.eventService.emit(WalletEvents.walletDisconnect, {
+      wallet: SupportedWallets.FIREBLOCKS,
+    });
+    return Promise.resolve(true);
+  }
 }
