@@ -6,30 +6,7 @@
    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 
    1. Definitions.
-
-      "License" shall mean the terms and conditions for use, reproduction,
-      and distribution as defined by Sections 1 through 9 of this document.
-
-      "Licensor" shall mean the copyright owner or entity authorized by
-      the copyright owner that is granting the License.
-
-      "Legal Entity" shall mean the union of the acting entity and all
-      other entities that control, are controlled by, or are under common
-      control with that entity. For the purposes of this definition,
-      "control" means (i) the power, direct or indirect, to cause the
-      direction or management of such entity, whether by contract or
-      otherwise, or (ii) ownership of fifty percent (50%) or more of the
-      outstanding shares, or (iii) beneficial ownership of such entity.
-
-      "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
-
-      "Source" form shall mean the preferred form for making modifications,
-      including but not limited to software source code, documentation
-      source, and configuration files.
-
-      "Object" form shall mean any form resulting from mechanical
-      transformation or translation of a Source form, including but
+ewsd form, including but
       not limited to compiled object code, generated documentation,
       and conversions to other media types.
 
@@ -212,20 +189,20 @@ import {
 
 contract AdjustBalancesStorageWrapperRead {
     struct AdjustBalancesStorage {
-        // Mapping from investor to their partitions LABAF
-        mapping(address => uint256[]) LABAF_user_partition;
+        // Mapping from investor to their partitions labaf
+        mapping(address => uint256[]) labafUserPartition;
         // Aggregated Balance Adjustment
-        uint256 ABAF;
+        uint256 abaf;
         // Last Aggregated Balance Adjustment per account
-        mapping(address => uint256) LABAF;
+        mapping(address => uint256) labaf;
         // Last Aggregated Balance Adjustment per partition
-        mapping(bytes32 => uint256) LABAF_partition;
+        mapping(bytes32 => uint256) labafPartition;
         // Last Aggregated Balance Adjustment per allowance
-        mapping(address => mapping(address => uint256)) LABAFs_allowances;
+        mapping(address => mapping(address => uint256)) labafsAllowances;
         // Locks
-        mapping(address => uint256) LABAFs_TotalLocked;
-        mapping(address => mapping(bytes32 => uint256)) LABAFs_TotalLockedByPartition;
-        mapping(address => mapping(bytes32 => uint256[])) LABAF_locks;
+        mapping(address => uint256) labafsTotalLocked;
+        mapping(address => mapping(bytes32 => uint256)) labafsTotalLockedByPartition;
+        mapping(address => mapping(bytes32 => uint256[])) labafLocks;
     }
 
     function _getAdjustBalancesStorage()

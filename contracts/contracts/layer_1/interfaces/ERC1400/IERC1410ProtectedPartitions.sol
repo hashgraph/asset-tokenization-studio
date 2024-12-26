@@ -206,35 +206,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-library Snapshots_CD_Lib {
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (uint256 balance_) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature(
-                'balanceOfAtSnapshot(uint256,address)',
-                _snapshotID,
-                _tokenHolder
-            )
-        );
-        return abi.decode(data, (uint256));
-    }
+interface IERC1410ProtectedPartitions {
+    function protectedTransferFromByPartition(
+        bytes32 _partition,
+        address _from,
+        address _to,
+        uint256 _amount,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) external;
 
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (uint256 balance_) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature(
-                'lockedBalanceOfAtSnapshot(uint256,address)',
-                _snapshotID,
-                _tokenHolder
-            )
-        );
-        return abi.decode(data, (uint256));
-    }
+    function protectedRedeemFromByPartition(
+        bytes32 _partition,
+        address _from,
+        uint256 _amount,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) external;
 }

@@ -206,35 +206,69 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-library Snapshots_CD_Lib {
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (uint256 balance_) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature(
-                'balanceOfAtSnapshot(uint256,address)',
-                _snapshotID,
-                _tokenHolder
-            )
+import {
+    IERC1410ProtectedPartitions
+} from '../../interfaces/ERC1400/IERC1410ProtectedPartitions.sol';
+import {
+    ERC1410ProtectedPartitionsStorageWrapper
+} from './ERC1410ProtectedPartitionsStorageWrapper.sol';
+
+abstract contract ERC1410ProtectedPartitions is
+    IERC1410ProtectedPartitions,
+    ERC1410ProtectedPartitionsStorageWrapper
+{
+    function protectedTransferFromByPartition(
+        bytes32 _partition,
+        address _from,
+        address _to,
+        uint256 _amount,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_protectedPartitionsRole(_partition))
+        checkControlList(_from)
+        checkControlList(_to)
+        onlyProtectedPartitions
+    {
+        _protectedTransferFromByPartition(
+            _partition,
+            _from,
+            _to,
+            _amount,
+            _deadline,
+            _nounce,
+            _signature
         );
-        return abi.decode(data, (uint256));
     }
 
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (uint256 balance_) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature(
-                'lockedBalanceOfAtSnapshot(uint256,address)',
-                _snapshotID,
-                _tokenHolder
-            )
+    function protectedRedeemFromByPartition(
+        bytes32 _partition,
+        address _from,
+        uint256 _amount,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_protectedPartitionsRole(_partition))
+        checkControlList(_from)
+        onlyProtectedPartitions
+    {
+        _protectedRedeemFromByPartition(
+            _partition,
+            _from,
+            _amount,
+            _deadline,
+            _nounce,
+            _signature
         );
-        return abi.decode(data, (uint256));
     }
 }

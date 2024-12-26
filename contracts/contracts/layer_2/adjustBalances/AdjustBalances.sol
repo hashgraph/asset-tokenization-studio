@@ -288,14 +288,14 @@ contract AdjustBalances is
 
     function getTotalLockLABAF(
         address _tokenHolder
-    ) external view virtual override returns (uint256 LABAF_) {
+    ) external view virtual override returns (uint256 labaf_) {
         return _getTotalLockLABAF(_tokenHolder);
     }
 
     function getTotalLockLABAFByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual override returns (uint256 LABAF_) {
+    ) external view virtual override returns (uint256 labaf_) {
         return _getTotalLockLABAFByPartition(_partition, _tokenHolder);
     }
 
@@ -311,7 +311,7 @@ contract AdjustBalances is
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) external view virtual override returns (uint256 LABAF_) {
+    ) external view virtual override returns (uint256 labaf_) {
         return _getLockLABAFByPartition(_partition, _lockId, _tokenHolder);
     }
 

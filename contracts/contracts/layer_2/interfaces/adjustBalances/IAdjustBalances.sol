@@ -238,12 +238,12 @@ interface IAdjustBalances {
 
     function getTotalLockLABAF(
         address _tokenHolder
-    ) external view returns (uint256 LABAF_);
+    ) external view returns (uint256 labaf_);
 
     function getTotalLockLABAFByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view returns (uint256 LABAF_);
+    ) external view returns (uint256 labaf_);
 
     function getLockLABAFByIndex(
         bytes32 _partition,
@@ -255,5 +255,5 @@ interface IAdjustBalances {
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) external view returns (uint256 LABAF_);
+    ) external view returns (uint256 labaf_);
 }

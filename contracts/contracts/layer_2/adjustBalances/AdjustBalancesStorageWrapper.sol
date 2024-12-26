@@ -257,8 +257,8 @@ contract AdjustBalancesStorageWrapper is
 
         erc1410Storage.totalSupply *= _factor;
 
-        if (_getABAF() == 0) adjustBalancesStorage.ABAF = _factor;
-        else adjustBalancesStorage.ABAF *= _factor;
+        if (_getABAF() == 0) adjustBalancesStorage.abaf = _factor;
+        else adjustBalancesStorage.abaf *= _factor;
 
         erc20Storage.decimals += _decimals;
         capStorage.maxSupply *= _factor;
@@ -266,6 +266,7 @@ contract AdjustBalancesStorageWrapper is
         emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
     }
 
+    // solhint-disable no-unused-vars
     function _beforeBalanceAdjustment(
         uint256 _factor,
         uint8 _decimals
@@ -276,7 +277,7 @@ contract AdjustBalancesStorageWrapper is
     }
 
     function _getABAF() internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().ABAF;
+        return _getAdjustBalancesStorage().abaf;
     }
 
     function _getABAFAdjusted() internal view virtual returns (uint256) {
@@ -286,27 +287,27 @@ contract AdjustBalancesStorageWrapper is
     function _getABAFAdjustedAt(
         uint256 _timestamp
     ) internal view virtual returns (uint256) {
-        uint256 ABAF = _getABAF();
-        if (ABAF == 0) ABAF = 1;
+        uint256 abaf = _getABAF();
+        if (abaf == 0) abaf = 1;
         (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustmentsAt(
+            .getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
                 _corporateActionsStorage(),
                 _timestamp
             );
-        return ABAF * pendingABAF;
+        return abaf * pendingABAF;
     }
 
     function _getLABAFForUser(
         address _account
     ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().LABAF[_account];
+        return _getAdjustBalancesStorage().labaf[_account];
     }
 
     function _getLABAFForPartition(
         bytes32 _partition
     ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().LABAF_partition[_partition];
+        return _getAdjustBalancesStorage().labafPartition[_partition];
     }
 
     function _getLABAFForUserAndPartition(
@@ -319,7 +320,7 @@ contract AdjustBalancesStorageWrapper is
 
         if (partitionsIndex == 0) return 0;
         return
-            _getAdjustBalancesStorage().LABAF_user_partition[_account][
+            _getAdjustBalancesStorage().labafUserPartition[_account][
                 partitionsIndex - 1
             ];
     }
@@ -328,21 +329,21 @@ contract AdjustBalancesStorageWrapper is
         address _owner,
         address _spender
     ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().LABAFs_allowances[_owner][_spender];
+        return _getAdjustBalancesStorage().labafsAllowances[_owner][_spender];
     }
 
     function _getTotalLockLABAF(
         address _tokenHolder
-    ) internal view virtual returns (uint256 LABAF_) {
-        return _getAdjustBalancesStorage().LABAFs_TotalLocked[_tokenHolder];
+    ) internal view virtual returns (uint256 labaf_) {
+        return _getAdjustBalancesStorage().labafsTotalLocked[_tokenHolder];
     }
 
     function _getTotalLockLABAFByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view virtual returns (uint256 LABAF_) {
+    ) internal view virtual returns (uint256 labaf_) {
         return
-            _getAdjustBalancesStorage().LABAFs_TotalLockedByPartition[
+            _getAdjustBalancesStorage().labafsTotalLockedByPartition[
                 _tokenHolder
             ][_partition];
     }
@@ -353,7 +354,7 @@ contract AdjustBalancesStorageWrapper is
         uint256 _lockIndex
     ) internal view virtual returns (uint256) {
         return
-            _getAdjustBalancesStorage().LABAF_locks[_tokenHolder][_partition][
+            _getAdjustBalancesStorage().labafLocks[_tokenHolder][_partition][
                 _lockIndex - 1
             ];
     }
@@ -374,6 +375,8 @@ contract AdjustBalancesStorageWrapper is
         address to,
         uint256 amount
     ) internal virtual override {
+        // solhint-disable-next-line
         revert('Should never reach this part');
     }
+    // solhint-enable no-unused-vars
 }

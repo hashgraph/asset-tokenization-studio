@@ -207,7 +207,8 @@
 pragma solidity 0.8.18;
 
 import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
-
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
 library Lock_2_CD_Lib {
     function getLockedAmountForAdjusted(
         address _tokenHolder

@@ -238,6 +238,7 @@ contract TransferAndLock is
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 lockId_)
     {
         _transferByPartition(
@@ -279,6 +280,7 @@ contract TransferAndLock is
         onlyUnpaused
         onlyWithoutMultiPartition
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 lockId_)
     {
         _transferByPartition(

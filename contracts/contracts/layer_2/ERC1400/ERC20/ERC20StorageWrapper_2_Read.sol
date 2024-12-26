@@ -224,7 +224,8 @@ import {
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 abstract contract ERC20StorageWrapper_2_Read is
     ERC20StorageWrapper,
     ERC1410ScheduledTasksStorageWrapper
@@ -251,7 +252,7 @@ abstract contract ERC20StorageWrapper_2_Read is
         address _spender,
         uint256 _timestamp
     ) internal view virtual returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
+        uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
             AdjustBalances_CD_Lib.getAllowanceLABAF(_owner, _spender)
         );
@@ -276,7 +277,7 @@ abstract contract ERC20StorageWrapper_2_Read is
         returns (IERC20.ERC20Metadata memory erc20Metadata_)
     {
         (, uint8 pendingDecimals) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustmentsAt(
+            .getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
                 _corporateActionsStorage(),
                 _timestamp
@@ -405,3 +406,4 @@ abstract contract ERC20StorageWrapper_2_Read is
             );
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

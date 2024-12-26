@@ -281,7 +281,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         CapDataStorage storage capStorage = _capStorage();
 
         // adjust the total supply for the partition
-        AdjustBalanceLib._adjustTotalAndMaxSupplyForPartition(
+        AdjustBalanceLib.adjustTotalAndMaxSupplyForPartition(
             _partition,
             erc1410Storage,
             capStorage,
@@ -290,7 +290,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
 
         // adjust "from" total and partition balance
         if (_from != address(0))
-            AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
+            AdjustBalanceLib.adjustTotalBalanceAndPartitionBalanceFor(
                 _partition,
                 _from,
                 erc1410Storage,
@@ -299,7 +299,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
 
         // adjust "to" total and partition balance
         if (_to != address(0))
-            AdjustBalanceLib._adjustTotalBalanceAndPartitionBalanceFor(
+            AdjustBalanceLib.adjustTotalBalanceAndPartitionBalanceFor(
                 _partition,
                 _to,
                 erc1410Storage,
@@ -315,7 +315,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
-        adjustBalancesStorage.LABAF_user_partition[_account].push(
+        adjustBalancesStorage.labafUserPartition[_account].push(
             AdjustBalances_CD_Lib.getABAF()
         );
 
@@ -330,7 +330,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         uint256 _timestamp
     ) internal view virtual returns (uint256) {
         (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustmentsAt(
+            .getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
                 _corporateActionsStorage(),
                 _timestamp
@@ -341,7 +341,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
     function _totalSupplyByPartitionAdjusted(
         bytes32 _partition
     ) internal view virtual returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
+        uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjusted(),
             AdjustBalances_CD_Lib.getLABAFForPartition(_partition)
         );
@@ -402,7 +402,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         address _tokenHolder,
         uint256 _timestamp
     ) internal view virtual returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
+        uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
             AdjustBalances_CD_Lib.getLABAFForUser(_tokenHolder)
         );
@@ -426,7 +426,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         address _tokenHolder,
         uint256 _timestamp
     ) internal view virtual returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
+        uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
             AdjustBalances_CD_Lib.getLABAFForUserAndPartition(
                 _partition,

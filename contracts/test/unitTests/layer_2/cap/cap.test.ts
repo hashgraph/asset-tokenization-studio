@@ -254,6 +254,7 @@ describe('CAP Layer 2 Tests', () => {
     }
 
     const setupSignersAndAccounts = async () => {
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address

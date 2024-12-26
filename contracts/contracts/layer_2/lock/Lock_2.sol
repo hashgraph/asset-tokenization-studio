@@ -216,7 +216,8 @@ import {_LOCK_RESOLVER_KEY} from '../../layer_1/constants/resolverKeys.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 contract Lock_2 is Lock, LockStorageWrapper_2 {
     function getLockedAmountForByPartition(
         bytes32 _partition,
@@ -412,3 +413,4 @@ contract Lock_2 is Lock, LockStorageWrapper_2 {
         staticInterfaceIds_[selectorsIndex++] = type(ILock).interfaceId;
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

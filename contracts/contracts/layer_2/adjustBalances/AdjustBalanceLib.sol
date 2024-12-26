@@ -241,7 +241,7 @@ import {ScheduledTasksLib} from '../scheduledTasks/ScheduledTasksLib.sol';
     */
 
 library AdjustBalanceLib {
-    function _adjustTotalBalanceAndPartitionBalanceFor(
+    function adjustTotalBalanceAndPartitionBalanceFor(
         bytes32 _partition,
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
@@ -249,24 +249,24 @@ library AdjustBalanceLib {
         AdjustBalancesStorageWrapper.AdjustBalancesStorage
             storage _adjustBalanceStorage
     ) internal {
-        uint256 ABAF = _adjustBalanceStorage.ABAF;
+        uint256 abaf = _adjustBalanceStorage.abaf;
 
-        _adjustPartitionBalanceFor(
-            ABAF,
+        adjustPartitionBalanceFor(
+            abaf,
             _partition,
             _account,
             _basicStorage,
             _adjustBalanceStorage
         );
-        _adjustTotalBalanceFor(
-            ABAF,
+        adjustTotalBalanceFor(
+            abaf,
             _account,
             _basicStorage,
             _adjustBalanceStorage
         );
     }
 
-    function _adjustTotalAndMaxSupplyForPartition(
+    function adjustTotalAndMaxSupplyForPartition(
         bytes32 _partition,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
@@ -274,57 +274,57 @@ library AdjustBalanceLib {
         AdjustBalancesStorageWrapper.AdjustBalancesStorage
             storage _adjustBalanceStorage
     ) internal {
-        uint256 ABAF = _adjustBalanceStorage.ABAF;
-        uint256 LABAF = _adjustBalanceStorage.LABAF_partition[_partition];
+        uint256 abaf = _adjustBalanceStorage.abaf;
+        uint256 labaf = _adjustBalanceStorage.labafPartition[_partition];
 
-        if (ABAF == LABAF) return;
+        if (abaf == labaf) return;
 
-        uint256 totalSupplySlot = MappingLib._getSlotForBytes32MappingKey(
+        uint256 totalSupplySlot = MappingLib.getSlotForBytes32MappingKey(
             _basicStorage.totalSupplyByPartition,
             _partition
         );
-        uint256 maxSupplySlot = MappingLib._getSlotForBytes32MappingKey(
+        uint256 maxSupplySlot = MappingLib.getSlotForBytes32MappingKey(
             _capStorage.maxSupplyByPartition,
             _partition
         );
-        uint256 LABAFSlot = MappingLib._getSlotForBytes32MappingKey(
-            _adjustBalanceStorage.LABAF_partition,
+        uint256 labafSlot = MappingLib.getSlotForBytes32MappingKey(
+            _adjustBalanceStorage.labafPartition,
             _partition
         );
 
-        _updateBalance(ABAF, LABAF, totalSupplySlot);
+        updateBalance(abaf, labaf, totalSupplySlot);
 
-        _updateBalance(ABAF, LABAF, maxSupplySlot);
+        updateBalance(abaf, labaf, maxSupplySlot);
 
-        _updateLABAF(ABAF, LABAFSlot);
+        updateLABAF(abaf, labafSlot);
     }
 
-    function _adjustTotalBalanceFor(
-        uint256 _ABAF,
+    function adjustTotalBalanceFor(
+        uint256 _abaf,
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
         AdjustBalancesStorageWrapper.AdjustBalancesStorage
             storage _adjustBalanceStorage
     ) internal {
-        uint256 LABAF = _adjustBalanceStorage.LABAF[_account];
-        if (_ABAF == LABAF) return;
+        uint256 labaf = _adjustBalanceStorage.labaf[_account];
+        if (_abaf == labaf) return;
 
-        uint256 balanceSlot = MappingLib._getSlotForAddressMappingKey(
+        uint256 balanceSlot = MappingLib.getSlotForAddressMappingKey(
             _basicStorage.balances,
             _account
         );
-        uint256 LABAFSlot = MappingLib._getSlotForAddressMappingKey(
-            _adjustBalanceStorage.LABAF,
+        uint256 labafSlot = MappingLib.getSlotForAddressMappingKey(
+            _adjustBalanceStorage.labaf,
             _account
         );
 
-        _updateBalance(_ABAF, LABAF, balanceSlot);
-        _updateLABAF(_ABAF, LABAFSlot);
+        updateBalance(_abaf, labaf, balanceSlot);
+        updateLABAF(_abaf, labafSlot);
     }
 
-    function _adjustPartitionBalanceFor(
-        uint256 _ABAF,
+    function adjustPartitionBalanceFor(
+        uint256 _abaf,
         bytes32 _partition,
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
@@ -338,49 +338,50 @@ library AdjustBalanceLib {
 
         if (partitionsIndex == 0) return;
 
-        uint256 LABAF = _adjustBalanceStorage.LABAF_user_partition[_account][
+        uint256 labaf = _adjustBalanceStorage.labafUserPartition[_account][
             partitionsIndex - 1
         ];
 
-        if (_ABAF == LABAF) return;
+        if (_abaf == labaf) return;
 
-        uint256 partitionsBaseSlot = MappingLib._getSlotForAddressMappingKey(
+        uint256 partitionsBaseSlot = MappingLib.getSlotForAddressMappingKey(
             _basicStorage.partitions,
             _account
         );
         uint256 partitionsLABAFBaseSlot = MappingLib
-            ._getSlotForAddressMappingKey(
-                _adjustBalanceStorage.LABAF_user_partition,
+            .getSlotForAddressMappingKey(
+                _adjustBalanceStorage.labafUserPartition,
                 _account
             );
 
-        uint256 partitionBaseSlot = ArrayLib._getSlotForDynamicArrayItem(
+        uint256 partitionBaseSlot = ArrayLib.getSlotForDynamicArrayItem(
             partitionsBaseSlot,
             (partitionsIndex - 1),
             _PARTITION_SIZE
         );
-        uint256 partitionLABAFBaseSlot = ArrayLib._getSlotForDynamicArrayItem(
+        uint256 partitionLABAFBaseSlot = ArrayLib.getSlotForDynamicArrayItem(
             partitionsLABAFBaseSlot,
             (partitionsIndex - 1),
             1
         );
 
-        _updateBalance(
-            _ABAF,
-            LABAF,
+        updateBalance(
+            _abaf,
+            labaf,
             partitionBaseSlot + _PARTITION_AMOUNT_OFFSET
         );
-        _updateLABAF(_ABAF, partitionLABAFBaseSlot);
+        updateLABAF(_abaf, partitionLABAFBaseSlot);
     }
 
-    function _updateBalance(
-        uint256 _ABAF,
-        uint256 _LABAF,
+    function updateBalance(
+        uint256 _abaf,
+        uint256 _labaf,
         uint256 _balanceSlotPos
     ) internal {
-        uint256 factor = _calculateFactor(_ABAF, _LABAF);
+        uint256 factor = calculateFactor(_abaf, _labaf);
         uint256 amount;
 
+        // solhint-disable-next-line
         assembly {
             amount := sload(_balanceSlotPos)
         }
@@ -389,27 +390,29 @@ library AdjustBalanceLib {
 
         amount *= factor;
 
+        // solhint-disable-next-line
         assembly {
             sstore(_balanceSlotPos, amount)
         }
     }
 
-    function _updateLABAF(uint256 _ABAF, uint256 _LABAFSlotPos) internal {
+    function updateLABAF(uint256 _abaf, uint256 _labafSlotPos) internal {
+        // solhint-disable-next-line
         assembly {
-            sstore(_LABAFSlotPos, _ABAF)
+            sstore(_labafSlotPos, _abaf)
         }
     }
 
-    function _calculateFactor(
-        uint256 _ABAF,
-        uint256 _LABAF
+    function calculateFactor(
+        uint256 _abaf,
+        uint256 _labaf
     ) internal pure returns (uint256 factor_) {
-        if (_ABAF == 0) return 1;
-        if (_LABAF == 0) return _ABAF;
-        factor_ = _ABAF / _LABAF;
+        if (_abaf == 0) return 1;
+        if (_labaf == 0) return _abaf;
+        factor_ = _abaf / _labaf;
     }
 
-    function _getPendingScheduledBalanceAdjustmentsAt(
+    function getPendingScheduledBalanceAdjustmentsAt(
         ScheduledTasksLib.ScheduledTasksDataStorage
             storage _scheduledBalanceAdjustments,
         CorporateActionDataStorage storage _corporateActions,
@@ -419,7 +422,7 @@ library AdjustBalanceLib {
         pendingABAF_ = 1;
         pendingDecimals_ = 0;
 
-        uint256 scheduledTaskCount = ScheduledTasksLib._getScheduledTaskCount(
+        uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(
             _scheduledBalanceAdjustments
         );
 
@@ -428,7 +431,7 @@ library AdjustBalanceLib {
 
             ScheduledTasksLib.ScheduledTask
                 memory scheduledTask = ScheduledTasksLib
-                    ._getScheduledTasksByIndex(
+                    .getScheduledTasksByIndex(
                         _scheduledBalanceAdjustments,
                         pos
                     );

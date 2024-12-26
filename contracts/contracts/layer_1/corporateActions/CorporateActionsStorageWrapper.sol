@@ -219,7 +219,7 @@ import {
 } from '../constants/storagePositions.sol';
 import {LocalContext} from '../context/LocalContext.sol';
 
-contract CorporateActionsStorageWrapper is
+abstract contract CorporateActionsStorageWrapper is
     ICorporateActionsStorageWrapper,
     LocalContext
 {

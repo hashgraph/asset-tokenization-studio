@@ -205,7 +205,8 @@
 
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
-
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 interface ISnapshots_2 {
     function ABAFAtSnapshot(
         uint256 _snapshotID
@@ -215,3 +216,4 @@ interface ISnapshots_2 {
         uint256 _snapshotID
     ) external view returns (uint8 decimals_);
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
