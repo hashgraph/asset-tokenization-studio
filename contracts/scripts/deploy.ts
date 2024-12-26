@@ -206,33 +206,6 @@
 import { Client, ContractFunctionParameters, ContractId } from '@hashgraph/sdk'
 import { ContractFactory } from 'ethers'
 import {
-    AccessControl__factory,
-    BondUSA__factory,
-    BusinessLogicResolver__factory,
-    ControlList__factory,
-    CorporateActionsSecurity__factory,
-    DiamondFacet__factory,
-    EquityUSA__factory,
-    ERC1410ScheduledTasks__factory,
-    ERC1643__factory,
-    ERC1644_2__factory,
-    Factory__factory,
-    Pause__factory,
-    ProxyAdmin__factory,
-    ScheduledSnapshots__factory,
-    ScheduledBalanceAdjustments__factory,
-    Snapshots_2__factory,
-    TransferAndLock__factory,
-    TransparentUpgradeableProxy__factory,
-    Lock_2__factory,
-    ERC1594_2__factory,
-    ERC20_2__factory,
-    ScheduledTasks__factory,
-    Cap_2__factory,
-    AdjustBalances__factory,
-} from '../typechain-types'
-import {
-    getEnvVar,
     deployContractSDK,
     getClient,
     getContractInfo,
@@ -249,95 +222,6 @@ import {
     createConfiguration,
     registerBusinessLogics,
 } from './contractsMethods'
-//import { adjustBalances } from '../typechain-types/contracts/layer_2/index.js'
-
-const ExistingContractIds = {
-    resolver: {
-        proxy: ContractId.fromString(
-            getEnvVar({ name: 'RESOLVER_PROXY', defaultValue: '0.0.0' })
-        ),
-        proxyAdmin: ContractId.fromString(
-            getEnvVar({ name: 'RESOLVER_PROXY_ADMIN', defaultValue: '0.0.0' })
-        ),
-        contract: ContractId.fromString(
-            getEnvVar({ name: 'RESOLVER_CONTRACT', defaultValue: '0.0.0' })
-        ),
-    },
-    factory: {
-        proxy: ContractId.fromString(
-            getEnvVar({ name: 'FACTORY_PROXY', defaultValue: '0.0.0' })
-        ),
-        proxyAdmin: ContractId.fromString(
-            getEnvVar({ name: 'FACTORY_PROXY_ADMIN', defaultValue: '0.0.0' })
-        ),
-        contract: ContractId.fromString(
-            getEnvVar({ name: 'FACTORY_CONTRACT', defaultValue: '0.0.0' })
-        ),
-    },
-    accessControl: ContractId.fromString(
-        getEnvVar({ name: 'ACCESS_CONTROL', defaultValue: '0.0.0' })
-    ),
-    cap: ContractId.fromString(
-        getEnvVar({ name: 'CAP', defaultValue: '0.0.0' })
-    ),
-    controlList: ContractId.fromString(
-        getEnvVar({ name: 'CONTROL_LIST', defaultValue: '0.0.0' })
-    ),
-    pause: ContractId.fromString(
-        getEnvVar({ name: 'PAUSE', defaultValue: '0.0.0' })
-    ),
-    erc20: ContractId.fromString(
-        getEnvVar({ name: 'ERC20', defaultValue: '0.0.0' })
-    ),
-    erc1410: ContractId.fromString(
-        getEnvVar({ name: 'ERC1410', defaultValue: '0.0.0' })
-    ),
-    erc1594: ContractId.fromString(
-        getEnvVar({ name: 'ERC1594', defaultValue: '0.0.0' })
-    ),
-    erc1643: ContractId.fromString(
-        getEnvVar({ name: 'ERC1643', defaultValue: '0.0.0' })
-    ),
-    erc1644: ContractId.fromString(
-        getEnvVar({ name: 'ERC1644', defaultValue: '0.0.0' })
-    ),
-    snapshots: ContractId.fromString(
-        getEnvVar({ name: 'SNAPSHOTS', defaultValue: '0.0.0' })
-    ),
-    diamondFacet: ContractId.fromString(
-        getEnvVar({ name: 'DIAMOND_FACET', defaultValue: '0.0.0' })
-    ),
-    equity: ContractId.fromString(
-        getEnvVar({ name: 'EQUITY', defaultValue: '0.0.0' })
-    ),
-    bond: ContractId.fromString(
-        getEnvVar({ name: 'BOND', defaultValue: '0.0.0' })
-    ),
-    scheduledSnapshots: ContractId.fromString(
-        getEnvVar({ name: 'SCHEDULED_SNAPSHOTS', defaultValue: '0.0.0' })
-    ),
-    scheduledBalanceAdjustments: ContractId.fromString(
-        getEnvVar({
-            name: 'SCHEDULED_BALANCE_ADJUSTMENTS',
-            defaultValue: '0.0.0',
-        })
-    ),
-    scheduledTasks: ContractId.fromString(
-        getEnvVar({ name: 'SCHEDULED_TASKS', defaultValue: '0.0.0' })
-    ),
-    corporateActionsSecurity: ContractId.fromString(
-        getEnvVar({ name: 'CORPORATE_ACTIONS_SECURITY', defaultValue: '0.0.0' })
-    ),
-    lock: ContractId.fromString(
-        getEnvVar({ name: 'LOCK', defaultValue: '0.0.0' })
-    ),
-    transferAndLock: ContractId.fromString(
-        getEnvVar({ name: 'TRANSFER_AND_LOCK', defaultValue: '0.0.0' })
-    ),
-    adjustBalances: ContractId.fromString(
-        getEnvVar({ name: 'ADJUST_BALANCES', defaultValue: '0.0.0' })
-    ),
-}
 
 export interface DeployedContract {
     proxyAdmin?: IContract
@@ -440,16 +324,18 @@ export async function deployAtsFullInfrastructure({
     ): Promise<DeployedContract> => {
         if (useDeployed && existing.contract.num.toString() !== '0') {
             return {
-                contract: await getContractInfo(
-                    contractIdToString(existing.contract)
-                ),
+                contract: await getContractInfo({
+                    contractId: contractIdToString(existing.contract),
+                }),
                 proxy: existing.proxy
-                    ? await getContractInfo(contractIdToString(existing.proxy))
+                    ? await getContractInfo({
+                          contractId: contractIdToString(existing.proxy),
+                      })
                     : undefined,
                 proxyAdmin: existing.proxyAdmin
-                    ? await getContractInfo(
-                          contractIdToString(existing.proxyAdmin)
-                      )
+                    ? await getContractInfo({
+                          contractId: contractIdToString(existing.proxyAdmin),
+                      })
                     : undefined,
             }
         }
@@ -855,10 +741,10 @@ async function deployProxyAdmin({
     privateKey: string
     isED25519Type: boolean
 }): Promise<IContract> {
-    const AccountEvmAddress = await toEvmAddress(
-        clientOperator.operatorAccountId!.toString(),
-        isED25519Type
-    )
+    const AccountEvmAddress = await toEvmAddress({
+        accountId: clientOperator.operatorAccountId!.toString(),
+        isE25519: isED25519Type,
+    })
 
     const paramsProxyAdmin = new ContractFunctionParameters().addAddress(
         AccountEvmAddress

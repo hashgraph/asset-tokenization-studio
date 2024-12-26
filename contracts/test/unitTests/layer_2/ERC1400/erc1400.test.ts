@@ -246,7 +246,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { ADDRESS_0 } from '../../../../scripts/constants'
+import { ADDRESS_ZERO } from '../../../../scripts/constants'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
 import { BigNumber } from 'ethers'
 
@@ -1392,7 +1392,7 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
 
             const canTransfer = await erc1410Facet.canTransferByPartition(
-                ADDRESS_0,
+                ADDRESS_ZERO,
                 account_D,
                 _PARTITION_ID_1,
                 balanceOf_E_Original,
@@ -1402,7 +1402,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.operatorTransferByPartition(
                     _PARTITION_ID_1,
-                    ADDRESS_0,
+                    ADDRESS_ZERO,
                     account_D,
                     balanceOf_E_Original,
                     data,
@@ -1412,7 +1412,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    ADDRESS_0,
+                    ADDRESS_ZERO,
                     balanceOf_C_Original,
                     data
                 )
@@ -1425,7 +1425,7 @@ describe('ERC1400 Tests', () => {
             // transfer from with data fails
             erc1410Facet = erc1410Facet.connect(signer_E)
             const canRedeem = await erc1410Facet.canRedeemByPartition(
-                ADDRESS_0,
+                ADDRESS_ZERO,
                 _PARTITION_ID_1,
                 amount,
                 data,
@@ -1435,7 +1435,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.operatorRedeemByPartition(
                     _PARTITION_ID_1,
-                    ADDRESS_0,
+                    ADDRESS_ZERO,
                     balanceOf_E_Original,
                     data,
                     operatorData
@@ -1499,7 +1499,7 @@ describe('ERC1400 Tests', () => {
                 .to.emit(erc1410Facet, 'TransferByPartition')
                 .withArgs(
                     _PARTITION_ID_1,
-                    ADDRESS_0,
+                    ADDRESS_ZERO,
                     account_C,
                     account_D,
                     amount,
@@ -1864,7 +1864,7 @@ describe('ERC1400 Tests', () => {
                 .to.emit(erc1410Facet, 'RedeemedByPartition')
                 .withArgs(
                     _PARTITION_ID_1,
-                    ADDRESS_0,
+                    ADDRESS_ZERO,
                     account_C,
                     amount,
                     data,
@@ -3170,7 +3170,7 @@ describe('ERC1400 Tests', () => {
                     .to.emit(erc1410Facet, 'RedeemedByPartition')
                     .withArgs(
                         _PARTITION_ID_1,
-                        ADDRESS_0,
+                        ADDRESS_ZERO,
                         account_A,
                         amount * adjustFactor,
                         data,
@@ -3395,7 +3395,7 @@ describe('ERC1400 Tests', () => {
 
                 await expect(erc1594Facet.redeem(adjustAmount, '0x'))
                     .to.emit(erc1594Facet, 'Redeemed')
-                    .withArgs(ADDRESS_0, account_A, adjustAmount, '0x')
+                    .withArgs(ADDRESS_ZERO, account_A, adjustAmount, '0x')
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeemFrom succeeds', async () => {

@@ -225,7 +225,7 @@ import {
 } from '../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
-    ADDRESS_0,
+    ADDRESS_ZERO,
     _DEFAULT_ADMIN_ROLE,
     _CONTROL_LIST_ROLE,
     _CORPORATE_ACTION_ROLE,
@@ -402,7 +402,7 @@ describe('Factory Tests', () => {
                 nominalValue,
                 init_rbacs,
                 true,
-                ADDRESS_0
+                ADDRESS_ZERO
             )
 
             const factoryRegulationData = await setFactoryRegulationData(
@@ -704,7 +704,7 @@ describe('Factory Tests', () => {
                 firstCouponDate,
                 init_rbacs,
                 true,
-                ADDRESS_0
+                ADDRESS_ZERO
             )
 
             const factoryRegulationData = await setFactoryRegulationData(

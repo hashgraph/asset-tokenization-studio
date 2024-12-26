@@ -207,15 +207,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     Client,
-    AccountId,
     PrivateKey,
     ContractCreateFlow,
     ContractId,
 } from '@hashgraph/sdk'
 import axios from 'axios'
-import { ADDRESS_0, REGEX } from './constants'
-import * as dotenv from 'dotenv'
-dotenv.config()
+import { ADDRESS_ZERO, REGEX } from './constants'
+import Configuration, { Network, NETWORKS } from '../configuration'
 
 interface IAccount {
     evm_address: string
@@ -248,36 +246,6 @@ interface IKey {
     key: string
 }
 
-export function getEnvVar({
-    name,
-    defaultValue,
-}: {
-    name: string
-    defaultValue?: string
-}): string {
-    const value = process.env[name]
-    if (value) {
-        return value
-    }
-    if (defaultValue) {
-        console.warn(
-            `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
-        )
-        return defaultValue
-    }
-    throw new Error(`Environment variable ${name} is not defined`)
-}
-
-export const sleep = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms))
-
-export function oneYearLaterInSeconds(): number {
-    const currentDate: Date = new Date()
-    return Math.floor(
-        currentDate.setFullYear(currentDate.getFullYear() + 1) / 1000
-    )
-}
-
 export function getClient(network?: string): Client {
     if (!network) {
         const hre = require('hardhat')
@@ -303,6 +271,7 @@ export async function deployContractSDK(
     factory: any,
     privateKey: string,
     clientOperator: Client,
+    network: Network,
     constructorParameters?: any,
     adminKey?: PrivateKey,
     contractMemo?: string
@@ -323,33 +292,35 @@ export async function deployContractSDK(
     )
 
     const txResponse = await contractCreateSign.execute(clientOperator)
-    await sleep(2000)
+    await delay({ time: 2, unit: 'seconds' })
     const receipt = await txResponse.getReceipt(clientOperator)
-    await sleep(2000)
+    await delay({ time: 2, unit: 'seconds' })
     const contractId = receipt.contractId
     if (!contractId) {
         throw Error('Error deploying contractSDK')
     }
-    const contractInfo = await getContractInfo(contractId.toString())
+    const contractInfo = await getContractInfo({
+        contractId: contractId.toString(),
+        network,
+    })
     console.log(
         `${factory.name} - ${contractInfo.contract_id} - ${contractInfo.evm_address}`
     )
     return contractInfo
 }
 
-export async function toEvmAddress(
-    accountId: string,
-    isE25519: boolean
-): Promise<string> {
+export async function toEvmAddress({
+    accountId,
+    network,
+}: {
+    accountId: string
+    network: Network
+}): Promise<string> {
     try {
-        if (isE25519)
-            return '0x' + AccountId.fromString(accountId).toSolidityAddress()
-
-        const URI_BASE = `${getHederaNetworkMirrorNodeURL(
-            getEnvVar({ name: 'NETWORK' })
-        )}/api/v1/`
-        const url = URI_BASE + 'accounts/' + accountId
-        const res = await axios.get<IAccount>(url)
+        const mirrorUrl = `${
+            Configuration.endpoints[network ?? NETWORKS[0]]
+        }/api/v1/accounts/${accountId}`
+        const res = await axios.get<IAccount>(mirrorUrl)
         return res.data.evm_address
     } catch (error) {
         throw new Error('Error retrieving the Evm Address : ' + error)
@@ -380,7 +351,13 @@ export function toHashgraphKey({
         : PrivateKey.fromStringECDSA(privateKey)
 }
 
-export async function getContractInfo(contractId: string): Promise<IContract> {
+export async function getContractInfo({
+    contractId,
+    network,
+}: {
+    contractId: string
+    network: Network
+}): Promise<IContract> {
     try {
         if (
             !REGEX.contractId.test(contractId) &&
@@ -390,67 +367,109 @@ export async function getContractInfo(contractId: string): Promise<IContract> {
                 'Invalid contractId format. It must be like "0.0.XXXX" or "0xhexadecimal".'
             )
         }
-        const URI_BASE = `${getHederaNetworkMirrorNodeURL(
-            getEnvVar({ name: 'NETWORK' })
-        )}/api/v1/`
-        const url = URI_BASE + 'contracts/' + contractId
+        const mirrorUrl = `contracts/${contractId}`
 
-        console.log(url)
-        const retry = 10
-        let i = 0
-        let res = null
-        do {
-            res = await axios.get<IContract>(url)
-            i++
-            await sleep(1000)
-        } while (res.status !== 200 && i < retry)
+        const contractInfo = await getFromMirrorNode<IContract>({
+            url: mirrorUrl,
+            network,
+        })
+
+        if (!contractInfo) {
+            throw new Error('Error retrieving contract information')
+        }
 
         return {
-            ...res.data,
-            contractId: ContractId.fromString(res.data.contract_id),
+            ...contractInfo,
+            contractId: ContractId.fromString(contractInfo.contract_id),
         }
     } catch (error) {
-        throw new Error('Error retrieving the Evm Address : ' + error)
+        throw new Error('Error retrieving contract information: ' + error)
     }
 }
 
-export async function evmToHederaFormat(evmAddress: string): Promise<string> {
-    if (evmAddress === ADDRESS_0) return '0.0.0'
-    const URI_BASE = `${getHederaNetworkMirrorNodeURL(
-        getEnvVar({ name: 'NETWORK' })
-    )}/api/v1/`
-    const url = URI_BASE + 'accounts/' + evmAddress
-    const res = await axios.get<IAccount>(url)
-    return res.data.account
+export async function evmToHederaFormat({
+    evmAddress,
+    network,
+}: {
+    evmAddress: string
+    network: Network
+}): Promise<string> {
+    if (evmAddress === ADDRESS_ZERO) {
+        return '0.0.0'
+    }
+
+    const url = `accounts/${evmAddress}`
+    const res = await getFromMirrorNode<IAccount>({
+        url,
+        network,
+    })
+    if (!res) {
+        throw new Error(
+            `Error retrieving account information for ${evmAddress}`
+        )
+    }
+    return res.account
 }
 
-function getHederaNetworkMirrorNodeURL(network?: string): string {
-    if (!network) {
-        const hre = require('hardhat')
-        network = hre.network.name
+async function getFromMirrorNode<T>({
+    url,
+    network,
+    timeBetweenRetries = 1,
+    timeout = 10,
+}: {
+    url: string
+    network: Network
+    timeBetweenRetries?: number
+    timeout?: number
+}): Promise<T | undefined> {
+    const mirrorUrl = `${Configuration.endpoints[network].mirror}/api/v1/${
+        url.startsWith('/') ? url.slice(1) : url
+    }`
+    let timePassed = 0
+    while (timePassed <= timeout) {
+        try {
+            const res = await axios.get<T>(mirrorUrl)
+            if (res.status === 200) {
+                return res.data
+            }
+        } catch (error) {
+            console.error(
+                `Error retrieving data from Mirror Node: ${
+                    (error as Error).message
+                }`
+            )
+        }
+        await delay({ time: timeBetweenRetries, unit: 'seconds' })
+        timePassed += timeBetweenRetries
     }
-    switch (network) {
-        case 'local':
-            return getEnvVar({
-                name: 'MIRROR_NODE_URL_LOCAL',
-                defaultValue: 'http://localhost:5551',
-            })
-        case 'previewnet':
-            return getEnvVar({
-                name: 'MIRROR_NODE_URL_PREVIEWNET',
-                defaultValue: 'https://previewnet.mirrornode.hedera.com',
-            })
-        case 'testnet':
-            return getEnvVar({
-                name: 'MIRROR_NODE_URL_TESTNET',
-                defaultValue: 'https://testnet.mirrornode.hedera.com',
-            })
-        case 'mainnet':
-            return getEnvVar({
-                name: 'MIRROR_NODE_URL_MAINNET',
-                defaultValue: 'https://mainnet.mirrornode.hedera.com',
-            })
-        default:
-            return 'https://testnet.mirrornode.hedera.com'
+    return undefined
+}
+
+export async function delay({
+    time,
+    unit = 'ms',
+}: {
+    time: number
+    unit?: 'seconds' | 'milliseconds' | 'sec' | 'ms'
+}): Promise<boolean> {
+    let delayInMilliseconds: number
+    if (unit === 'seconds' || unit === 'sec') {
+        delayInMilliseconds = time * 1000
+    } else if (unit === 'milliseconds' || unit === 'ms') {
+        delayInMilliseconds = time
+    } else {
+        throw new Error(
+            'Invalid time unit. Please use "seconds", "milliseconds", "sec", or "ms".'
+        )
     }
+    return new Promise<boolean>((resolve) =>
+        setTimeout(() => resolve(true), delayInMilliseconds)
+    )
+}
+
+export function oneYearLaterInSeconds(): number {
+    const currentDate: Date = new Date()
+    return Math.floor(
+        currentDate.setFullYear(currentDate.getFullYear() + 1) / 1000
+    )
 }

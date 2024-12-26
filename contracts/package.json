@@ -75,7 +75,6 @@
   "author": "",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@hashgraph/hardhat-hethers": "^1.0.4",
     "@hashgraph/sdk": "^2.23.0",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.3",
     "@nomicfoundation/hardhat-network-helpers": "^1.0.12",
@@ -102,14 +101,12 @@
     "prettier-plugin-solidity": "^1.1.1",
     "solhint": "^3.3.7",
     "solhint-plugin-prettier": "^0.0.5",
+    "solidity-coverage": "^0.8.12",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typechain": "8.3.2",
     "typescript": "^5.2.2",
     "web3": "^4.2.2"
-  },
-  "dependencies": {
-    "solidity-coverage": "^0.8.12"
   },
   "overrides": {
     "ws": "7.5.10"

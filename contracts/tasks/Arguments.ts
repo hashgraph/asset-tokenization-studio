@@ -212,8 +212,8 @@ export interface GetClientResult {
 }
 
 interface BasicArgs {
-    account?: string
-    privateKey?: string
+    account: string
+    privateKey: string
     isEd25519: boolean
 }
 

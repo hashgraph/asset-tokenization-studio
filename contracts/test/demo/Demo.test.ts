@@ -229,7 +229,7 @@ import {
     _ISSUER_ROLE,
     _CONTROLLER_ROLE,
     _PAUSER_ROLE,
-    ADDRESS_0,
+    ADDRESS_ZERO,
 } from '../../scripts/constants'
 import {
     DividendType,
@@ -978,7 +978,7 @@ DiamondResume:
             .to.emit(erc1410Facet, 'TransferByPartition')
             .withArgs(
                 _PARTITION_ID_1,
-                ADDRESS_0,
+                ADDRESS_ZERO,
                 account_A,
                 account_C,
                 500,

@@ -204,7 +204,6 @@
 */
 
 import { subtask, task, types } from 'hardhat/config'
-import { HederaAccount } from '@hashgraph/hardhat-hethers/src/type-extensions'
 import { ContractId } from '@hashgraph/sdk'
 import {
     GetClientArgs,
@@ -222,15 +221,15 @@ import {
     getFacetsByConfigurationIdAndVersion,
     getBusinessLogicKeys,
 } from '../scripts/contractsMethods'
+import { Network } from '../configuration'
 
 subtask('getClient', 'Get the operator of the client')
-    .addOptionalParam(
+    .addParam(
         'account',
         'The Hedera account to use for deployment. 0.0.XXXX format',
-        undefined,
         types.string
     )
-    .addOptionalParam(
+    .addParam(
         'privateKey',
         'The private key of the account, Raw hexadecimal string',
         undefined,
@@ -244,16 +243,9 @@ subtask('getClient', 'Get the operator of the client')
     )
     .setAction(async (args: GetClientArgs, hre) => {
         console.log(`Executing getOperator on ${hre.network.name} ...`)
-        const accounts = hre.network.config.accounts as HederaAccount[]
         const client = getClient(hre.network.name)
-        if (!client) {
-            throw new Error('Client not found')
-        }
-        if (accounts.length === 0 || !accounts[0].account) {
-            throw new Error('No accounts found')
-        }
-        const account: string = args.account ?? accounts[0].account
-        const privateKey: string = args.privateKey ?? accounts[0].privateKey
+        const account: string = args.account
+        const privateKey: string = args.privateKey
         client.setOperator(
             account,
             toHashgraphKey({ privateKey, isED25519: args.isEd25519 })
@@ -317,17 +309,22 @@ task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
             isEd25519: args.isEd25519,
         })
 
-        const owner = await evmToHederaFormat(
-            await getOwner(ContractId.fromString(args.proxyAdmin), client)
-        )
+        const owner = await evmToHederaFormat({
+            evmAddress: await getOwner(
+                ContractId.fromString(args.proxyAdmin),
+                client
+            ),
+            network: hre.network.name as Network
+        })
 
-        const implementation = await evmToHederaFormat(
-            await getProxyImplementation(
+        const implementation = await evmToHederaFormat({
+            evmAddress: await getProxyImplementation(
                 ContractId.fromString(args.proxyAdmin),
                 client,
                 ContractId.fromString(args.proxy).toSolidityAddress()
-            )
-        )
+            ),
+            network: hre.network.name as Network
+        })
 
         console.log(`Owner: ${owner}, Implementation: ${implementation}`)
     })

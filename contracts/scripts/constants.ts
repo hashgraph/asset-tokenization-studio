@@ -242,7 +242,7 @@ export const _ALLOWANCE_REACHED_ERROR_ID = '0x49'
 
 export const _SUCCESS = '0x00'
 
-export const ADDRESS_0 = '0x0000000000000000000000000000000000000000'
+export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 
 export const EquityDeployedEvent = 'EquityDeployed'
 
