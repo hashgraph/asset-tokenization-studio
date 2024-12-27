@@ -226,17 +226,17 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     ADDRESS_ZERO,
-    _DEFAULT_ADMIN_ROLE,
-    _CONTROL_LIST_ROLE,
-    _CORPORATE_ACTION_ROLE,
-    _ISSUER_ROLE,
-    _DOCUMENTER_ROLE,
-    _CONTROLLER_ROLE,
-    _PAUSER_ROLE,
-    _SNAPSHOT_ROLE,
-    _LOCKER_ROLE,
-    EquityDeployedEvent,
-    BondDeployedEvent,
+    DEFAULT_ADMIN_ROLE,
+    CONTROL_LIST_ROLE,
+    CORPORATE_ACTION_ROLE,
+    ISSUER_ROLE,
+    DOCUMENTER_ROLE,
+    CONTROLLER_ROLE,
+    PAUSER_ROLE,
+    SNAPSHOT_ROLE,
+    LOCKER_ROLE,
+    EQUITY_DEPLOYED_EVENT,
+    BOND_DEPLOYED_EVENT,
 } from '../../../scripts/constants'
 import { transparentUpgradableProxy } from '../../../scripts/transparentUpgradableProxy'
 
@@ -302,15 +302,15 @@ describe('Factory Tests', () => {
     let erc20Facet: ERC20
 
     const listOfRoles = [
-        _DEFAULT_ADMIN_ROLE,
-        _CONTROL_LIST_ROLE,
-        _CORPORATE_ACTION_ROLE,
-        _ISSUER_ROLE,
-        _DOCUMENTER_ROLE,
-        _CONTROLLER_ROLE,
-        _PAUSER_ROLE,
-        _SNAPSHOT_ROLE,
-        _LOCKER_ROLE,
+        DEFAULT_ADMIN_ROLE,
+        CONTROL_LIST_ROLE,
+        CORPORATE_ACTION_ROLE,
+        ISSUER_ROLE,
+        DOCUMENTER_ROLE,
+        CONTROLLER_ROLE,
+        PAUSER_ROLE,
+        SNAPSHOT_ROLE,
+        LOCKER_ROLE,
     ]
     let listOfMembers: string[]
 
@@ -628,7 +628,7 @@ describe('Factory Tests', () => {
             )
             const events = (await result.wait()).events!
             const deployedEquityEvent = events.find(
-                (e) => e.event == EquityDeployedEvent
+                (e) => e.event == EQUITY_DEPLOYED_EVENT
             )
             const equityAddress = deployedEquityEvent!.args!.equityAddress
 
@@ -981,7 +981,7 @@ describe('Factory Tests', () => {
             )
             const events = (await result.wait()).events!
             const deployedBondEvent = events.find(
-                (e) => e.event == BondDeployedEvent
+                (e) => e.event == BOND_DEPLOYED_EVENT
             )
             const bondAddress = deployedBondEvent!.args!.bondAddress
 
@@ -1170,7 +1170,7 @@ describe('Factory Tests', () => {
             )
             const events = (await result.wait()).events!
             const deployedBondEvent = events.find(
-                (e) => e.event == BondDeployedEvent
+                (e) => e.event == BOND_DEPLOYED_EVENT
             )
             const bondAddress = deployedBondEvent!.args!.bondAddress
 

@@ -213,8 +213,8 @@ import {
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
-    _CORPORATE_ACTION_ROLE,
-    _PAUSER_ROLE,
+    CORPORATE_ACTION_ROLE,
+    PAUSER_ROLE,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -255,7 +255,7 @@ describe('Corporate Actions Tests', () => {
         await deployEnvironment()
 
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
@@ -316,7 +316,7 @@ describe('Corporate Actions Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _CORPORATE_ACTION_ROLE,
+            CORPORATE_ACTION_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -334,7 +334,7 @@ describe('Corporate Actions Tests', () => {
     it('GIVEN an account with corporateActions role WHEN addCorporateAction THEN transaction succeeds', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
         // Using account C (with role)
         corporateActionsFacet = corporateActionsFacet.connect(signer_C)
 

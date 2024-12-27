@@ -215,11 +215,11 @@ import {
 } from '../../../../../typechain-types'
 import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
 import {
-    _CORPORATE_ACTION_ROLE,
-    _PAUSER_ROLE,
-    _SNAPSHOT_TASK_TYPE,
-    _BALANCE_ADJUSTMENT_TASK_TYPE,
-    _ISSUER_ROLE,
+    CORPORATE_ACTION_ROLE,
+    PAUSER_ROLE,
+    SNAPSHOT_TASK_TYPE,
+    BALANCE_ADJUSTMENT_TASK_TYPE,
+    ISSUER_ROLE,
 } from '../../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -261,11 +261,11 @@ describe('Scheduled Tasks Tests', () => {
         await deployEnvironment()
 
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const rbacIssue: Rbac = {
-            role: _ISSUER_ROLE,
+            role: ISSUER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause, rbacIssue]
@@ -337,7 +337,7 @@ describe('Scheduled Tasks Tests', () => {
     it('GIVEN a token WHEN triggerTasks THEN transaction succeeds', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
 
         erc1410Facet = erc1410Facet.connect(signer_B)
         await erc1410Facet.issueByPartition(
@@ -416,10 +416,10 @@ describe('Scheduled Tasks Tests', () => {
         expect(scheduledTasks[3].scheduledTimestamp.toNumber()).to.equal(
             dividendsRecordDateInSeconds_1
         )
-        expect(scheduledTasks[0].data).to.equal(_BALANCE_ADJUSTMENT_TASK_TYPE)
-        expect(scheduledTasks[1].data).to.equal(_SNAPSHOT_TASK_TYPE)
-        expect(scheduledTasks[2].data).to.equal(_BALANCE_ADJUSTMENT_TASK_TYPE)
-        expect(scheduledTasks[3].data).to.equal(_SNAPSHOT_TASK_TYPE)
+        expect(scheduledTasks[0].data).to.equal(BALANCE_ADJUSTMENT_TASK_TYPE)
+        expect(scheduledTasks[1].data).to.equal(SNAPSHOT_TASK_TYPE)
+        expect(scheduledTasks[2].data).to.equal(BALANCE_ADJUSTMENT_TASK_TYPE)
+        expect(scheduledTasks[3].data).to.equal(SNAPSHOT_TASK_TYPE)
 
         // AFTER FIRST SCHEDULED TASKS ------------------------------------------------------------------
         scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
@@ -427,7 +427,7 @@ describe('Scheduled Tasks Tests', () => {
         await new Promise((f) => setTimeout(f, TIME + 1000 + 1))
 
         // Checking dividends For before triggering from the queue
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A) // Dumb transaciton that does not trigger scheduled tasks
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A) // Dumb transaciton that does not trigger scheduled tasks
         const BalanceOf_A_Dividend_1 = await equityFacet.getDividendsFor(
             2,
             account_A
@@ -456,13 +456,13 @@ describe('Scheduled Tasks Tests', () => {
         expect(scheduledTasks[1].scheduledTimestamp.toNumber()).to.equal(
             dividendsRecordDateInSeconds_2
         )
-        expect(scheduledTasks[0].data).to.equal(_BALANCE_ADJUSTMENT_TASK_TYPE)
-        expect(scheduledTasks[1].data).to.equal(_SNAPSHOT_TASK_TYPE)
+        expect(scheduledTasks[0].data).to.equal(BALANCE_ADJUSTMENT_TASK_TYPE)
+        expect(scheduledTasks[1].data).to.equal(SNAPSHOT_TASK_TYPE)
 
         // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
         await new Promise((f) => setTimeout(f, TIME + 1000 + 1))
         // Checking dividends For before triggering from the queue
-        await accessControlFacet.revokeRole(_ISSUER_ROLE, account_A) // Dumb transaciton that does not trigger scheduled tasks
+        await accessControlFacet.revokeRole(ISSUER_ROLE, account_A) // Dumb transaciton that does not trigger scheduled tasks
         BalanceOf_A_Dividend_2 = await equityFacet.getDividendsFor(1, account_A)
 
         expect(BalanceOf_A_Dividend_2.tokenBalance).to.equal(

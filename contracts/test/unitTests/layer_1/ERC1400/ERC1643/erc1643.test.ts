@@ -212,10 +212,7 @@ import {
     AccessControl,
 } from '../../../../../typechain-types'
 import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
-import {
-    _PAUSER_ROLE,
-    _DOCUMENTER_ROLE,
-} from '../../../../../scripts/constants'
+import { PAUSER_ROLE, DOCUMENTER_ROLE } from '../../../../../scripts/constants'
 import {
     deployEquityFromFactory,
     Rbac,
@@ -260,7 +257,7 @@ describe('ERC1643 Tests', () => {
         await deployEnvironment()
 
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
@@ -332,7 +329,7 @@ describe('ERC1643 Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _DOCUMENTER_ROLE,
+            DOCUMENTER_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -356,7 +353,7 @@ describe('ERC1643 Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _DOCUMENTER_ROLE,
+            DOCUMENTER_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -374,7 +371,7 @@ describe('ERC1643 Tests', () => {
     it('GIVEN a document with no name WHEN setDocument THEN transaction fails with EmptyName', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_DOCUMENTER_ROLE, account_C)
+        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
         // Using account C (with role)
         erc1643Facet = erc1643Facet.connect(signer_C)
 
@@ -391,7 +388,7 @@ describe('ERC1643 Tests', () => {
     it('GIVEN a document with no URI WHEN setDocument THEN transaction fails with EmptyURI', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_DOCUMENTER_ROLE, account_C)
+        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
         // Using account C (with role)
         erc1643Facet = erc1643Facet.connect(signer_C)
 
@@ -404,7 +401,7 @@ describe('ERC1643 Tests', () => {
     it('GIVEN a document with no HASH WHEN setDocument THEN transaction fails with EmptyHASH', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_DOCUMENTER_ROLE, account_C)
+        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
         // Using account C (with role)
         erc1643Facet = erc1643Facet.connect(signer_C)
 
@@ -421,7 +418,7 @@ describe('ERC1643 Tests', () => {
     it('GIVEN a document that does not exist WHEN removeDocument THEN transaction fails with DocumentDoesNotExist', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_DOCUMENTER_ROLE, account_C)
+        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
         // Using account C (with role)
         erc1643Facet = erc1643Facet.connect(signer_C)
 
@@ -435,7 +432,7 @@ describe('ERC1643 Tests', () => {
         // ADD TO LIST ------------------------------------------------------------------
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_DOCUMENTER_ROLE, account_C)
+        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
         // Using account C (with role)
         erc1643Facet = erc1643Facet.connect(signer_C)
 

@@ -223,12 +223,12 @@ import {
     environment,
 } from '../../scripts/deployEnvironmentByRpc'
 import {
-    _DEFAULT_ADMIN_ROLE,
-    _CONTROL_LIST_ROLE,
-    _CORPORATE_ACTION_ROLE,
-    _ISSUER_ROLE,
-    _CONTROLLER_ROLE,
-    _PAUSER_ROLE,
+    DEFAULT_ADMIN_ROLE,
+    CONTROL_LIST_ROLE,
+    CORPORATE_ACTION_ROLE,
+    ISSUER_ROLE,
+    CONTROLLER_ROLE,
+    PAUSER_ROLE,
     ADDRESS_ZERO,
 } from '../../scripts/constants'
 import {
@@ -827,34 +827,34 @@ DiamondResume:
             'Grant issuer, control list, corporate action and controller roles to account "I" using account "Z" => succeeds'
         )
         accessControlFacet = accessControlFacet.connect(signer_Z)
-        await expect(accessControlFacet.grantRole(_ISSUER_ROLE, account_I))
+        await expect(accessControlFacet.grantRole(ISSUER_ROLE, account_I))
             .to.emit(accessControlFacet, 'RoleGranted')
-            .withArgs(account_Z, account_I, _ISSUER_ROLE)
-        await accessControlFacet.grantRole(_CONTROL_LIST_ROLE, account_I)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_I)
-        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_I)
+            .withArgs(account_Z, account_I, ISSUER_ROLE)
+        await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_I)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_I)
+        await accessControlFacet.grantRole(CONTROLLER_ROLE, account_I)
 
         console.log(
             'Grant pauser role to account "P" using account "Z" => succeeds'
         )
         accessControlFacet = accessControlFacet.connect(signer_Z)
-        await accessControlFacet.grantRole(_PAUSER_ROLE, account_P)
+        await accessControlFacet.grantRole(PAUSER_ROLE, account_P)
 
         console.log('Check current roles')
         const adminMemberCount = await accessControlFacet.getRoleMemberCount(
-            _DEFAULT_ADMIN_ROLE
+            DEFAULT_ADMIN_ROLE
         )
         const issuerMemberCount = await accessControlFacet.getRoleMemberCount(
-            _ISSUER_ROLE
+            ISSUER_ROLE
         )
         const controlListMemberCount =
-            await accessControlFacet.getRoleMemberCount(_CONTROL_LIST_ROLE)
+            await accessControlFacet.getRoleMemberCount(CONTROL_LIST_ROLE)
         const corporateActionsMemberCount =
-            await accessControlFacet.getRoleMemberCount(_CORPORATE_ACTION_ROLE)
+            await accessControlFacet.getRoleMemberCount(CORPORATE_ACTION_ROLE)
         const controllerMemberCount =
-            await accessControlFacet.getRoleMemberCount(_CONTROLLER_ROLE)
+            await accessControlFacet.getRoleMemberCount(CONTROLLER_ROLE)
         const pauserMemberCount = await accessControlFacet.getRoleMemberCount(
-            _PAUSER_ROLE
+            PAUSER_ROLE
         )
         expect(adminMemberCount).to.be.equal(1)
         expect(issuerMemberCount).to.be.equal(1)
@@ -863,32 +863,32 @@ DiamondResume:
         expect(controllerMemberCount).to.be.equal(1)
         expect(pauserMemberCount).to.be.equal(1)
         const adminMembers = await accessControlFacet.getRoleMembers(
-            _DEFAULT_ADMIN_ROLE,
+            DEFAULT_ADMIN_ROLE,
             0,
             adminMemberCount
         )
         const issuerMembers = await accessControlFacet.getRoleMembers(
-            _ISSUER_ROLE,
+            ISSUER_ROLE,
             0,
             issuerMemberCount
         )
         const controlListMembers = await accessControlFacet.getRoleMembers(
-            _CONTROL_LIST_ROLE,
+            CONTROL_LIST_ROLE,
             0,
             controlListMemberCount
         )
         const corporateActionsMembers = await accessControlFacet.getRoleMembers(
-            _CORPORATE_ACTION_ROLE,
+            CORPORATE_ACTION_ROLE,
             0,
             corporateActionsMemberCount
         )
         const controllerMembers = await accessControlFacet.getRoleMembers(
-            _CONTROLLER_ROLE,
+            CONTROLLER_ROLE,
             0,
             controllerMemberCount
         )
         const pauserMembers = await accessControlFacet.getRoleMembers(
-            _PAUSER_ROLE,
+            PAUSER_ROLE,
             0,
             pauserMemberCount
         )
@@ -1170,7 +1170,7 @@ DiamondResume:
             'Revoke controller role from account "I" using account "Z" => succeeds'
         )
         accessControlFacet = accessControlFacet.connect(signer_Z)
-        await accessControlFacet.revokeRole(_CONTROLLER_ROLE, account_I)
+        await accessControlFacet.revokeRole(CONTROLLER_ROLE, account_I)
 
         console.log(
             'Force transfer 500 securities from account "A" to "C" using account "I" => fails (no permission)'
@@ -1210,7 +1210,7 @@ DiamondResume:
         )
         accessControlFacet = accessControlFacet.connect(signer_Z)
         await expect(
-            accessControlFacet.grantRole(_CONTROLLER_ROLE, account_I)
+            accessControlFacet.grantRole(CONTROLLER_ROLE, account_I)
         ).to.be.rejectedWith('TokenIsPaused')
 
         console.log(
@@ -1242,7 +1242,7 @@ DiamondResume:
             'Grant controller role to account “I” using account “Z” => succeeds'
         )
         accessControlFacet = accessControlFacet.connect(signer_Z)
-        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_I)
+        await accessControlFacet.grantRole(CONTROLLER_ROLE, account_I)
 
         console.log(
             'Transfer 500 securities from account “A” to “C” => succeeds'

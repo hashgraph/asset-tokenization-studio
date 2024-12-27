@@ -13,13 +13,14 @@
         "outDir": "./build",
         "resolveJsonModule": true,
         "paths": {
+            "@configuration": ["./Configuration"],
+            "@scripts": ["./scripts/index.ts"],
             "@typechain/*": [
                 "./typechain/*",
                 "./typechain/index.ts",
                 "../../typechain-types"
             ],
-            "@openzeppelin": ["./typechain/@openzeppelin/*"],
-            "@scripts": ["./scripts/index.ts"]
+            "@openzeppelin": ["./typechain/@openzeppelin/*"]
         }
     }
 

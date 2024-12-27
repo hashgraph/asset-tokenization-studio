@@ -216,10 +216,10 @@ import {
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
-    _ADJUSTMENT_BALANCE_ROLE,
-    _PAUSER_ROLE,
-    _ISSUER_ROLE,
-    _CORPORATE_ACTION_ROLE,
+    ADJUSTMENT_BALANCE_ROLE,
+    PAUSER_ROLE,
+    ISSUER_ROLE,
+    CORPORATE_ACTION_ROLE,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -318,7 +318,7 @@ describe('Adjust Balances Tests', () => {
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         return [rbacPause]
@@ -351,7 +351,7 @@ describe('Adjust Balances Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _ADJUSTMENT_BALANCE_ROLE,
+            ADJUSTMENT_BALANCE_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -369,7 +369,7 @@ describe('Adjust Balances Tests', () => {
     it('GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero', async () => {
         // Granting Role to account C and Pause
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_C)
+        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
 
         // Using account C (with role)
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -383,9 +383,9 @@ describe('Adjust Balances Tests', () => {
     it('GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_A)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_A)
+        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_A)
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
 
         erc1410Facet = erc1410Facet.connect(signer_A)
         equityFacet = equityFacet.connect(signer_A)

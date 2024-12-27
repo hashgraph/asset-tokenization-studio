@@ -219,7 +219,7 @@ import {
 } from './businessLogicResolverLogic'
 import { proxyAdmin } from './transparentUpgradableProxy'
 import { createResolverConfig } from './resolverDiamondCut'
-import { BondConfigId, EquityConfigId } from './constants'
+import { BOND_CONFIG_ID, EQUITY_CONFIG_ID } from './constants'
 
 export interface Environment {
     deployedBusinessLogics: DeployedBusinessLogics
@@ -286,13 +286,13 @@ export async function deployEnvironment() {
 
         await createResolverConfig(
             environment,
-            EquityConfigId,
+            EQUITY_CONFIG_ID,
             environment.facetIdsEquities,
             environment.facetVersionsEquities
         )
         await createResolverConfig(
             environment,
-            BondConfigId,
+            BOND_CONFIG_ID,
             environment.facetIdsBonds,
             environment.facetVersionsBonds
         )

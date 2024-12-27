@@ -211,7 +211,7 @@ import {
     AccessControl,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
-import { _PAUSER_ROLE } from '../../../../scripts/constants'
+import { PAUSER_ROLE } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
     RegulationSubType,
@@ -297,7 +297,7 @@ describe('Pause Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _PAUSER_ROLE,
+            PAUSER_ROLE,
             signer_A,
             signer_B,
             account_B
@@ -314,7 +314,7 @@ describe('Pause Tests', () => {
     it('GIVEN an unpause Token WHEN unpause THEN transaction fails with TokenIsUnpaused', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_PAUSER_ROLE, account_B)
+        await accessControlFacet.grantRole(PAUSER_ROLE, account_B)
         pauseFacet = pauseFacet.connect(signer_B)
 
         // unpause fails
@@ -328,7 +328,7 @@ describe('Pause Tests', () => {
         // PAUSE ------------------------------------------------------------------
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_PAUSER_ROLE, account_B)
+        await accessControlFacet.grantRole(PAUSER_ROLE, account_B)
         // Pausing the token
         pauseFacet = pauseFacet.connect(signer_B)
 

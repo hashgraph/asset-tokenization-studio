@@ -216,13 +216,13 @@ import {
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
-    _ADJUSTMENT_BALANCE_ROLE,
-    _PAUSER_ROLE,
-    _ISSUER_ROLE,
-    _CAP_ROLE,
-    _CONTROLLER_ROLE,
-    _LOCKER_ROLE,
-    _CORPORATE_ACTION_ROLE,
+    ADJUSTMENT_BALANCE_ROLE,
+    PAUSER_ROLE,
+    ISSUER_ROLE,
+    CAP_ROLE,
+    CONTROLLER_ROLE,
+    LOCKER_ROLE,
+    CORPORATE_ACTION_ROLE,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -324,11 +324,11 @@ describe('Locks Layer 2 Tests', () => {
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const corporateActionPause: Rbac = {
-            role: _CORPORATE_ACTION_ROLE,
+            role: CORPORATE_ACTION_ROLE,
             members: [account_B],
         }
         return [rbacPause, corporateActionPause]
@@ -337,11 +337,11 @@ describe('Locks Layer 2 Tests', () => {
     async function setPreBalanceAdjustment() {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_C)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(_CAP_ROLE, account_A)
-        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_A)
-        await accessControlFacet.grantRole(_LOCKER_ROLE, account_A)
+        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(CAP_ROLE, account_A)
+        await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
+        await accessControlFacet.grantRole(LOCKER_ROLE, account_A)
 
         // Using account C (with role)
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -455,7 +455,7 @@ describe('Locks Layer 2 Tests', () => {
 
         // wait for first scheduled balance adjustment only (run DUMB transaction)
         await new Promise((f) => setTimeout(f, 3000))
-        await accessControlFacet.grantRole(_PAUSER_ROLE, account_C) // DUMB transaction
+        await accessControlFacet.grantRole(PAUSER_ROLE, account_C) // DUMB transaction
 
         const lock_TotalAmount_After = await lockFacet.getLockedAmountFor(
             account_A

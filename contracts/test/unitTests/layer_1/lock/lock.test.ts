@@ -213,9 +213,9 @@ import {
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
-    _PAUSER_ROLE,
-    _LOCKER_ROLE,
-    _ISSUER_ROLE,
+    PAUSER_ROLE,
+    LOCKER_ROLE,
+    ISSUER_ROLE,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -280,15 +280,15 @@ describe('Lock Tests', () => {
     describe('Multi-partition enabled', () => {
         beforeEach(async () => {
             const rbacIssuer: Rbac = {
-                role: _ISSUER_ROLE,
+                role: ISSUER_ROLE,
                 members: [account_B],
             }
             const rbacLocker: Rbac = {
-                role: _LOCKER_ROLE,
+                role: LOCKER_ROLE,
                 members: [account_C],
             }
             const rbacPausable: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_D],
             }
             const init_rbacs: Rbac[] = [rbacIssuer, rbacLocker, rbacPausable]
@@ -684,15 +684,15 @@ describe('Lock Tests', () => {
     describe('Multi-partition disabled', () => {
         beforeEach(async () => {
             const rbacIssuer: Rbac = {
-                role: _ISSUER_ROLE,
+                role: ISSUER_ROLE,
                 members: [account_B],
             }
             const rbacLocker: Rbac = {
-                role: _LOCKER_ROLE,
+                role: LOCKER_ROLE,
                 members: [account_C],
             }
             const rbacPausable: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_D],
             }
             const init_rbacs: Rbac[] = [rbacIssuer, rbacLocker, rbacPausable]

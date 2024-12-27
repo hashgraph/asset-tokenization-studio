@@ -214,11 +214,11 @@ import {
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
-    _CAP_ROLE,
-    _CORPORATE_ACTION_ROLE,
-    _ISSUER_ROLE,
-    _PAUSER_ROLE,
-    _SNAPSHOT_ROLE,
+    CAP_ROLE,
+    CORPORATE_ACTION_ROLE,
+    ISSUER_ROLE,
+    PAUSER_ROLE,
+    SNAPSHOT_ROLE,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -261,8 +261,8 @@ describe('CAP Layer 2 Tests', () => {
     }
 
     const setupEnvironment = async () => {
-        const rbacPause = { role: _PAUSER_ROLE, members: [account_B] }
-        const rbaCap = { role: _CAP_ROLE, members: [account_B] }
+        const rbacPause = { role: PAUSER_ROLE, members: [account_B] }
+        const rbaCap = { role: CAP_ROLE, members: [account_B] }
         const init_rbacs = [rbacPause, rbaCap]
 
         diamond = await deployEquityFromFactory(
@@ -368,9 +368,9 @@ describe('CAP Layer 2 Tests', () => {
 
     it('GIVEN a token WHEN getMaxSupply or getMaxSupplyByPartition THEN balance adjustments are included', async () => {
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_CAP_ROLE, account_C)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
-        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A)
+        await accessControlFacet.grantRole(CAP_ROLE, account_C)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+        await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_A)
 
         capFacet = capFacet.connect(signer_C)
         equityFacet = equityFacet.connect(signer_C)
@@ -397,10 +397,10 @@ describe('CAP Layer 2 Tests', () => {
 
     it('GIVEN a token WHEN setMaxSupply THEN balance adjustments are included', async () => {
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_CAP_ROLE, account_C)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
-        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+        await accessControlFacet.grantRole(CAP_ROLE, account_C)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+        await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_A)
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
 
         capFacet = capFacet.connect(signer_C)
         equityFacet = equityFacet.connect(signer_C)
@@ -440,10 +440,10 @@ describe('CAP Layer 2 Tests', () => {
 
     it('GIVEN a token WHEN max supply and partition max supply are set THEN balance adjustments occur and resetting partition max supply fails with NewMaxSupplyForPartitionTooLow', async () => {
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_CAP_ROLE, account_C)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
-        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A)
+        await accessControlFacet.grantRole(CAP_ROLE, account_C)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+        await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_A)
 
         capFacet = capFacet.connect(signer_C)
         equityFacet = equityFacet.connect(signer_C)

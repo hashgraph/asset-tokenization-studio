@@ -203,31 +203,33 @@
 
 */
 
-import { Client, ContractFunctionParameters, ContractId } from '@hashgraph/sdk'
-import { ContractFactory } from 'ethers'
+import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
 import {
-    deployContractSDK,
     getClient,
     getContractInfo,
-    toEvmAddress,
     toHashgraphKey,
-    IContract,
     contractIdToString,
 } from './utils'
 import { BusinessLogicRegistryData } from './businessLogicResolverLogic'
-import { EquityConfigId, BondConfigId, _DEFAULT_ADMIN_ROLE } from './constants'
 import { contractCall } from './contractsLifeCycle/utils'
 import {
     getStaticResolverKey,
     createConfiguration,
     registerBusinessLogics,
 } from './contractsMethods'
+import Configuration from '@configuration'
+import {
+    EQUITY_CONFIG_ID,
+    BOND_CONFIG_ID,
+    DeployContractCommand,
+    DeployContractResult,
+} from '@scripts'
 
-export interface DeployedContract {
-    proxyAdmin?: IContract
-    proxy?: IContract
-    contract: IContract
-}
+// export interface DeployedContract {
+//     proxyAdmin?: IContract
+//     proxy?: IContract
+//     contract: IContract
+// }
 
 export function initializeClient(): [
     Client,
@@ -537,7 +539,7 @@ export async function deployAtsFullInfrastructure({
 
         // Create configuration for equities
         await createConfiguration(
-            EquityConfigId,
+            EQUITY_CONFIG_ID,
             facetIdsEquities,
             facetVersionsEquities,
             resolver.proxy.contractId,
@@ -545,7 +547,7 @@ export async function deployAtsFullInfrastructure({
         )
         // Create configuration for bonds
         await createConfiguration(
-            BondConfigId,
+            BOND_CONFIG_ID,
             facetIdsBonds,
             facetVersionsBonds,
             resolver.proxy.contractId,
@@ -595,201 +597,83 @@ export async function deployAtsFullInfrastructure({
 }
 
 export async function deployContract({
-    clientOperator,
-    privateKey,
-    contractName,
-    isED25519 = false,
-}: {
-    clientOperator: Client
-    privateKey: string
-    contractName: string
-    isED25519?: boolean
-}): Promise<DeployedContract> {
-    console.log(`Deploying ${contractName}. please wait...`)
+    name,
+    signer,
+    args,
+}: DeployContractCommand): Promise<DeployContractResult> {
+    console.log(`Deploying ${name}. please wait...`)
 
-    let contractFactory: typeof ContractFactory = ContractFactory
-    let deployProxy = false
-    const contractMap: {
-        [key: string]: {
-            factory: typeof ContractFactory
-            deployProxy?: boolean
-        }
-    } = {
-        factory: { factory: Factory__factory, deployProxy: true },
-        resolver: {
-            factory: BusinessLogicResolver__factory,
-            deployProxy: true,
-        },
-        accesscontrol: { factory: AccessControl__factory },
-        cap: { factory: Cap_2__factory },
-        controllist: { factory: ControlList__factory },
-        pause: { factory: Pause__factory },
-        erc20: { factory: ERC20_2__factory },
-        erc1410: { factory: ERC1410ScheduledTasks__factory },
-        erc1594: { factory: ERC1594_2__factory },
-        erc1643: { factory: ERC1643__factory },
-        erc1644: { factory: ERC1644_2__factory },
-        facet: { factory: DiamondFacet__factory },
-        equity: { factory: EquityUSA__factory },
-        bond: { factory: BondUSA__factory },
-        scheduledsnapshots: { factory: ScheduledSnapshots__factory },
-        scheduledbalanceadjustments: {
-            factory: ScheduledBalanceAdjustments__factory,
-        },
-        scheduledtasks: {
-            factory: ScheduledTasks__factory,
-        },
-        snapshots: { factory: Snapshots_2__factory },
-        corporateactions: { factory: CorporateActionsSecurity__factory },
-        transferandlock: { factory: TransferAndLock__factory },
-        lock: { factory: Lock_2__factory },
-        adjustbalances: { factory: AdjustBalances__factory },
+    const contractFactory = await getContractFactory(name, signer)
+    const contract = await contractFactory.deploy(...args)
+    const receipt = contract.deployTransaction.wait()
+
+    console.log(`${name} deployed at ${contract.address}`)
+
+    // if no proxy, return the contract (BREAK)
+    if (Configuration.contracts[name].deployType !== 'proxy') {
+        return new DeployContractResult({
+            name,
+            contract,
+            address: contract.address,
+            receipt: await receipt,
+        })
     }
 
-    const contractKey = Object.keys(contractMap).find((contractType) =>
-        contractName.toLowerCase().includes(contractType)
-    )
-    if (!contractKey) {
-        throw new Error(`Unknown contract type: ${contractName}`)
-    }
+    console.log(`Deploying ${name} Proxy Admin. please wait...`)
 
-    contractName = contractKey.charAt(0).toUpperCase() + contractKey.slice(1)
-    contractFactory = contractMap[contractKey].factory
-    deployProxy = contractMap[contractKey].deployProxy || false
-
-    const contract = await deployContractSDK(
-        contractFactory,
-        privateKey,
-        clientOperator
+    const { address: proxyAdminAddress } = await deployContract(
+        new DeployContractCommand({
+            name: 'ProxyAdmin',
+            signer,
+            args: [],
+        })
     )
 
-    console.log(
-        `${contractName} deployed at ${contract.evm_address} (${contract.contract_id})`
+    console.log(`${name} Proxy Admin deployed at ${proxyAdminAddress}`)
+
+    console.log(`Deploying ${name} Proxy. please wait...`)
+
+    const { address: proxyAddress } = await deployContract(
+        new DeployContractCommand({
+            name: 'TransparentUpgradeableProxy',
+            signer,
+            args: [contract.address, proxyAdminAddress, '0x'],
+        })
     )
 
-    if (!deployProxy) {
-        return { contract }
-    }
+    console.log(`${name} Proxy deployed at ${proxyAddress}`)
 
-    console.log(`Deploying ${contractName} Proxy Admin. please wait...`)
+    // if (contractKey === 'resolver') {
+    //     console.log('Initializing resolver. please wait...')
+    //     await contractCall(
+    //         proxy.contractId,
+    //         'initialize_BusinessLogicResolver',
+    //         [],
+    //         clientOperator,
+    //         8000000,
+    //         BusinessLogicResolver__factory.abi
+    //     )
 
-    const proxyAdmin = await deployProxyAdmin({
-        clientOperator,
-        privateKey,
-        isED25519Type: isED25519,
+    //     console.log('Resolver initialized successfully.')
+
+    //     const admin = await contractCall(
+    //         proxy.contractId,
+    //         'getRoleMembers',
+    //         [_DEFAULT_ADMIN_ROLE, '0', '1'],
+    //         clientOperator,
+    //         130000,
+    //         BusinessLogicResolver__factory.abi
+    //     )
+
+    //     console.log(`Resolver Admin: ${admin[0]}`)
+    // }
+
+    return new DeployContractResult({
+        name,
+        address: contract.address,
+        contract,
+        proxyAddress,
+        proxyAdminAddress,
+        receipt: await receipt,
     })
-
-    console.log(
-        `${contractName} Proxy Admin deployed at ${proxyAdmin.evm_address}(${proxyAdmin.contract_id})`
-    )
-
-    console.log(`Deploying ${contractName} Proxy. please wait...`)
-
-    const proxy = await deployTransparentProxy({
-        clientOperator,
-        privateKey,
-        proxyAdmin: proxyAdmin.evm_address,
-        implementation: contract.evm_address,
-    })
-
-    console.log(
-        `${contractName} Proxy deployed at ${proxy.evm_address}(${proxy.contract_id})`
-    )
-    if (contractKey === 'resolver') {
-        console.log('Initializing resolver. please wait...')
-        await contractCall(
-            proxy.contractId,
-            'initialize_BusinessLogicResolver',
-            [],
-            clientOperator,
-            8000000,
-            BusinessLogicResolver__factory.abi
-        )
-
-        console.log('Resolver initialized successfully.')
-
-        const admin = await contractCall(
-            proxy.contractId,
-            'getRoleMembers',
-            [_DEFAULT_ADMIN_ROLE, '0', '1'],
-            clientOperator,
-            130000,
-            BusinessLogicResolver__factory.abi
-        )
-
-        console.log(`Resolver Admin: ${admin[0]}`)
-    }
-
-    return { proxyAdmin, proxy, contract }
-}
-
-/**
- * Deploys a ProxyAdmin contract using the provided client operator and private key.
- *
- * @param params - The parameters for deploying the ProxyAdmin contract.
- * @param params.clientOperator - The client operator used for deployment.
- * @param params.privateKey - The private key associated with the client operator.
- * @param params.isED25519Type - Indicates whether the key type is ED25519.
- * @returns A promise that resolves to the deployed contract instance.
- */
-async function deployProxyAdmin({
-    clientOperator,
-    privateKey,
-    isED25519Type,
-}: {
-    clientOperator: Client
-    privateKey: string
-    isED25519Type: boolean
-}): Promise<IContract> {
-    const AccountEvmAddress = await toEvmAddress({
-        accountId: clientOperator.operatorAccountId!.toString(),
-        isE25519: isED25519Type,
-    })
-
-    const paramsProxyAdmin = new ContractFunctionParameters().addAddress(
-        AccountEvmAddress
-    )
-
-    return await deployContractSDK(
-        ProxyAdmin__factory,
-        privateKey,
-        clientOperator,
-        paramsProxyAdmin
-    )
-}
-
-/**
- * Deploys a transparent upgradeable proxy contract.
- *
- * @param params - The parameters for deploying the proxy.
- * @param params.clientOperator - The client operator instance.
- * @param params.privateKey - The private key for deployment.
- * @param params.proxyAdmin - The address of the proxy admin.
- * @param params.implementation - The address of the implementation.
- * @returns A promise that resolves to the deployed contract instance.
- */
-async function deployTransparentProxy({
-    clientOperator,
-    privateKey,
-    proxyAdmin,
-    implementation,
-}: {
-    clientOperator: Client
-    privateKey: string
-    proxyAdmin: string
-    implementation: string
-}): Promise<IContract> {
-    const params = new ContractFunctionParameters()
-        .addAddress(implementation)
-        .addAddress(proxyAdmin)
-        .addBytes(new Uint8Array([]))
-
-    return await deployContractSDK(
-        TransparentUpgradeableProxy__factory,
-        privateKey,
-        clientOperator,
-        params,
-        undefined,
-        proxyAdmin
-    )
 }

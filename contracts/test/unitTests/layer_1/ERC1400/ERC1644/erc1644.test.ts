@@ -216,11 +216,11 @@ import {
 } from '../../../../../typechain-types'
 import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
 import {
-    _CORPORATE_ACTION_ROLE,
-    _ISSUER_ROLE,
-    _CONTROLLER_ROLE,
-    _PAUSER_ROLE,
-    _DEFAULT_PARTITION,
+    CORPORATE_ACTION_ROLE,
+    ISSUER_ROLE,
+    CONTROLLER_ROLE,
+    PAUSER_ROLE,
+    DEFAULT_PARTITION,
 } from '../../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -270,15 +270,15 @@ describe('ERC1644 Tests', () => {
             await deployEnvironment()
 
             const rbacPause: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_B],
             }
             const rbacIssuable: Rbac = {
-                role: _ISSUER_ROLE,
+                role: ISSUER_ROLE,
                 members: [account_B],
             }
             const rbacController: Rbac = {
-                role: _CONTROLLER_ROLE,
+                role: CONTROLLER_ROLE,
                 members: [account_B],
             }
             const init_rbacs: Rbac[] = [rbacPause, rbacIssuable, rbacController]
@@ -349,7 +349,7 @@ describe('ERC1644 Tests', () => {
                 await grantRoleAndPauseToken(
                     accessControlFacet,
                     pauseFacet,
-                    _CONTROLLER_ROLE,
+                    CONTROLLER_ROLE,
                     signer_A,
                     signer_B,
                     account_C
@@ -432,7 +432,7 @@ describe('ERC1644 Tests', () => {
                 await erc1410Facet
                     .connect(signer_B)
                     .issueByPartition(
-                        _DEFAULT_PARTITION,
+                        DEFAULT_PARTITION,
                         account_D,
                         amount * 2,
                         data
@@ -475,18 +475,18 @@ describe('ERC1644 Tests', () => {
                     )
                     expect(
                         await erc1410Facet.totalSupplyByPartition(
-                            _DEFAULT_PARTITION
+                            DEFAULT_PARTITION
                         )
                     ).to.equal(amount * 2)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_D
                         )
                     ).to.equal(amount)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_E
                         )
                     ).to.equal(amount)
@@ -516,12 +516,12 @@ describe('ERC1644 Tests', () => {
                     )
                     expect(
                         await erc1410Facet.totalSupplyByPartition(
-                            _DEFAULT_PARTITION
+                            DEFAULT_PARTITION
                         )
                     ).to.equal(amount)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_D
                         )
                     ).to.equal(amount)
@@ -533,8 +533,8 @@ describe('ERC1644 Tests', () => {
             beforeEach(async () => {
                 // Using account C (non role)
                 accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_A)
-                await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
 
                 // controller finalize fails
                 erc1644Facet = erc1644Facet.connect(signer_A)
@@ -604,7 +604,7 @@ describe('ERC1644 Tests', () => {
             await deployEnvironment()
 
             const rbacPause: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_B],
             }
             const init_rbacs: Rbac[] = [rbacPause]
@@ -662,10 +662,10 @@ describe('ERC1644 Tests', () => {
                 // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_C)
-                await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+                await accessControlFacet.grantRole(CONTROLLER_ROLE, account_C)
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
                 await accessControlFacet.grantRole(
-                    _CORPORATE_ACTION_ROLE,
+                    CORPORATE_ACTION_ROLE,
                     account_C
                 )
                 // Using account C (with role)

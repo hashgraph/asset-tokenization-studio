@@ -221,23 +221,23 @@ import {
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
-    _ADJUSTMENT_BALANCE_ROLE,
-    _CAP_ROLE,
-    _CONTROLLER_ROLE,
-    _CONTROL_LIST_ROLE,
-    _CORPORATE_ACTION_ROLE,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _ISSUER_ROLE,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _IS_PAUSED_ERROR_ID,
-    _LOCKER_ROLE,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _PAUSER_ROLE,
-    _SUCCESS,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
+    ADJUSTMENT_BALANCE_ROLE,
+    CAP_ROLE,
+    CONTROLLER_ROLE,
+    CONTROL_LIST_ROLE,
+    CORPORATE_ACTION_ROLE,
+    FROM_ACCOUNT_BLOCKED_ERROR_ID,
+    FROM_ACCOUNT_NULL_ERROR_ID,
+    ISSUER_ROLE,
+    IS_NOT_OPERATOR_ERROR_ID,
+    IS_PAUSED_ERROR_ID,
+    LOCKER_ROLE,
+    NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+    OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
+    PAUSER_ROLE,
+    SUCCESS,
+    TO_ACCOUNT_BLOCKED_ERROR_ID,
+    WRONG_PARTITION_ERROR_ID,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -321,11 +321,11 @@ describe('ERC1400 Tests', () => {
 
     async function grantRolesToAccounts() {
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_C)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(_CAP_ROLE, account_A)
-        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_A)
-        await accessControlFacet.grantRole(_LOCKER_ROLE, account_A)
+        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(CAP_ROLE, account_A)
+        await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
+        await accessControlFacet.grantRole(LOCKER_ROLE, account_A)
     }
 
     async function connectFacetsToSigners() {
@@ -648,11 +648,11 @@ describe('ERC1400 Tests', () => {
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const corporateActionPause: Rbac = {
-            role: _CORPORATE_ACTION_ROLE,
+            role: CORPORATE_ACTION_ROLE,
             members: [account_B],
         }
         return [rbacPause, corporateActionPause]
@@ -672,7 +672,7 @@ describe('ERC1400 Tests', () => {
             await deployEnvironment()
 
             const rbacPause: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_B],
             }
             const init_rbacs: Rbac[] = [rbacPause]
@@ -725,7 +725,7 @@ describe('ERC1400 Tests', () => {
             )
 
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
             erc1410Facet = erc1410Facet.connect(signer_A)
 
             await erc1410Facet.issueByPartition(
@@ -854,7 +854,7 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(_IS_PAUSED_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(IS_PAUSED_ERROR_ID)
 
             // transfer from with data fails
             await expect(
@@ -868,7 +868,7 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canTransfer_2[0]).to.be.equal(false)
-            expect(canTransfer_2[1]).to.be.equal(_IS_PAUSED_ERROR_ID)
+            expect(canTransfer_2[1]).to.be.equal(IS_PAUSED_ERROR_ID)
         })
 
         it('GIVEN a paused Token WHEN issue THEN transaction fails with TokenIsPaused', async () => {
@@ -947,7 +947,7 @@ describe('ERC1400 Tests', () => {
                 erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount, data)
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(_IS_PAUSED_ERROR_ID)
+            expect(canRedeem[1]).to.be.equal(IS_PAUSED_ERROR_ID)
 
             // transfer from with data fails
             await expect(
@@ -960,13 +960,13 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canRedeem_2[0]).to.be.equal(false)
-            expect(canRedeem_2[1]).to.be.equal(_IS_PAUSED_ERROR_ID)
+            expect(canRedeem_2[1]).to.be.equal(IS_PAUSED_ERROR_ID)
         })
 
         it('GIVEN blocked accounts (sender, to, from) WHEN transfer THEN transaction fails with AccountIsBlocked', async () => {
             // Blacklisting accounts
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_CONTROL_LIST_ROLE, account_A)
+            await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
             controlList = controlList.connect(signer_A)
             await controlList.addToControlList(account_C)
 
@@ -1000,7 +1000,7 @@ describe('ERC1400 Tests', () => {
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(
-                _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID
+                OPERATOR_ACCOUNT_BLOCKED_ERROR_ID
             )
 
             // transfer from with data fails
@@ -1016,7 +1016,7 @@ describe('ERC1400 Tests', () => {
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(
-                _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID
+                OPERATOR_ACCOUNT_BLOCKED_ERROR_ID
             )
 
             // Update blacklist
@@ -1049,7 +1049,7 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(_TO_ACCOUNT_BLOCKED_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(TO_ACCOUNT_BLOCKED_ERROR_ID)
 
             // transfer from with data fails
             await expect(
@@ -1063,7 +1063,7 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
-            expect(canTransfer_2[1]).to.be.equal(_TO_ACCOUNT_BLOCKED_ERROR_ID)
+            expect(canTransfer_2[1]).to.be.equal(TO_ACCOUNT_BLOCKED_ERROR_ID)
 
             // Update blacklist
             await controlList.removeFromControlList(account_D)
@@ -1089,7 +1089,7 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
-            expect(canTransfer_2[1]).to.be.equal(_FROM_ACCOUNT_BLOCKED_ERROR_ID)
+            expect(canTransfer_2[1]).to.be.equal(FROM_ACCOUNT_BLOCKED_ERROR_ID)
         })
 
         it('GIVEN blocked accounts (to) USING WHITELIST WHEN issue THEN transaction fails with AccountIsBlocked', async () => {
@@ -1134,7 +1134,7 @@ describe('ERC1400 Tests', () => {
 
             // accounts are blacklisted by default (white list)
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
 
             // Using account A (with role)
             erc1410Facet = erc1410Facet.connect(signer_A)
@@ -1153,7 +1153,7 @@ describe('ERC1400 Tests', () => {
         it('GIVEN blocked accounts (sender, from) WHEN redeem THEN transaction fails with AccountIsBlocked', async () => {
             // Blacklisting accounts
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_CONTROL_LIST_ROLE, account_A)
+            await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
             controlList = controlList.connect(signer_A)
             await controlList.addToControlList(account_C)
 
@@ -1179,7 +1179,7 @@ describe('ERC1400 Tests', () => {
                 erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount, data)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(_OPERATOR_ACCOUNT_BLOCKED_ERROR_ID)
+            expect(canRedeem[1]).to.be.equal(OPERATOR_ACCOUNT_BLOCKED_ERROR_ID)
 
             // redeem from with data fails
             await expect(
@@ -1193,7 +1193,7 @@ describe('ERC1400 Tests', () => {
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canRedeem_2[0]).to.be.equal(false)
             expect(canRedeem_2[1]).to.be.equal(
-                _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID
+                OPERATOR_ACCOUNT_BLOCKED_ERROR_ID
             )
 
             // Update blacklist
@@ -1218,7 +1218,7 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canRedeem_2[0]).to.be.equal(false)
-            expect(canRedeem_2[1]).to.be.equal(_FROM_ACCOUNT_BLOCKED_ERROR_ID)
+            expect(canRedeem_2[1]).to.be.equal(FROM_ACCOUNT_BLOCKED_ERROR_ID)
         })
 
         it('GIVEN wrong partition WHEN transfer THEN transaction fails with InValidPartition', async () => {
@@ -1243,7 +1243,7 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejectedWith('InvalidPartition')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(_WRONG_PARTITION_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(WRONG_PARTITION_ERROR_ID)
         })
 
         it('GIVEN wrong partition WHEN redeem THEN transaction fails with InValidPartition', async () => {
@@ -1262,7 +1262,7 @@ describe('ERC1400 Tests', () => {
                 erc1410Facet.redeemByPartition(_PARTITION_ID_2, amount, data)
             ).to.be.rejectedWith('InvalidPartition')
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(_WRONG_PARTITION_ERROR_ID)
+            expect(canRedeem[1]).to.be.equal(WRONG_PARTITION_ERROR_ID)
         })
 
         it('GIVEN an account without issuer role WHEN issue THEN transaction fails with AccountHasNoRole', async () => {
@@ -1303,7 +1303,7 @@ describe('ERC1400 Tests', () => {
             ).to.be.rejected
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(
-                _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
+                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
             )
 
             // transfer from with data fails
@@ -1330,7 +1330,7 @@ describe('ERC1400 Tests', () => {
             ).to.be.rejected
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(
-                _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
+                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
             )
         })
 
@@ -1356,7 +1356,7 @@ describe('ERC1400 Tests', () => {
             ).to.be.rejected
             expect(canRedeem[0]).to.be.equal(false)
             expect(canRedeem[1]).to.be.equal(
-                _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
+                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
             )
 
             // transfer from with data fails
@@ -1383,7 +1383,7 @@ describe('ERC1400 Tests', () => {
             ).to.be.rejected
             expect(canRedeem_2[0]).to.be.equal(false)
             expect(canRedeem_2[1]).to.be.equal(
-                _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
+                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
             )
         })
 
@@ -1418,7 +1418,7 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejected
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(_FROM_ACCOUNT_NULL_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(FROM_ACCOUNT_NULL_ERROR_ID)
         })
 
         it('GIVEN an account WHEN redeem from address 0 THEN transaction fails', async () => {
@@ -1442,17 +1442,14 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejected
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(_FROM_ACCOUNT_NULL_ERROR_ID)
+            expect(canRedeem[1]).to.be.equal(FROM_ACCOUNT_NULL_ERROR_ID)
         })
 
         it('GIVEN an account WHEN transfer THEN transaction succeeds', async () => {
             // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
             equityFacet = equityFacet.connect(signer_C)
@@ -1578,13 +1575,10 @@ describe('ERC1400 Tests', () => {
 
             // dumb transactions just to create a new block with a new blocktimestamp without trigerring the snapshot
             await accessControlFacet.revokeRole(
-                _CORPORATE_ACTION_ROLE,
+                CORPORATE_ACTION_ROLE,
                 account_C
             )
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // dumb transactions just to create a new block with a new blocktimestamp without trigerring the snapshot
             dividend_1 = await equityFacet.getDividends(1)
             expect(dividend_1.snapshotId.toNumber()).to.equal(0)
@@ -1674,7 +1668,7 @@ describe('ERC1400 Tests', () => {
         it('GIVEN an account WHEN issue more than max supply THEN transaction fails with MaxSupplyReached or MaxSupplyReachedForPartition', async () => {
             // Using account C (non role)
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_CAP_ROLE, account_A)
+            await accessControlFacet.grantRole(CAP_ROLE, account_A)
             erc1410Facet = erc1410Facet.connect(signer_A)
             capFacet = await ethers.getContractAt('Cap_2', diamond.address)
             capFacet = capFacet.connect(signer_A)
@@ -1710,10 +1704,7 @@ describe('ERC1400 Tests', () => {
             // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_A)
             equityFacet = equityFacet.connect(signer_C)
@@ -1782,7 +1773,7 @@ describe('ERC1400 Tests', () => {
 
             // Set Max supplies to test
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_CAP_ROLE, account_A)
+            await accessControlFacet.grantRole(CAP_ROLE, account_A)
             capFacet = await ethers.getContractAt('Cap_2', diamond.address)
             capFacet = capFacet.connect(signer_A)
             await capFacet.setMaxSupply(
@@ -1819,10 +1810,7 @@ describe('ERC1400 Tests', () => {
             // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
             equityFacet = equityFacet.connect(signer_C)
@@ -2032,8 +2020,8 @@ describe('ERC1400 Tests', () => {
 
             // accounts are blacklisted by default (white list)
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-            await accessControlFacet.grantRole(_CONTROL_LIST_ROLE, account_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+            await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
 
             // Using account A (with role)
             erc1410Facet = erc1410Facet.connect(signer_A)
@@ -2053,7 +2041,7 @@ describe('ERC1400 Tests', () => {
         it('GIVEN an account without controller role WHEN controllerTransfer THEN transaction fails with AccountHasNoRole', async () => {
             // Using account C (non role)
             erc1410Facet = erc1410Facet.connect(signer_C)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             const balanceOf_D_Original = 4 * amount
             await erc1410Facet.issueByPartition(
                 _PARTITION_ID_1,
@@ -2083,13 +2071,13 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejectedWith('AccountHasNoRole')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(_IS_NOT_OPERATOR_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(IS_NOT_OPERATOR_ERROR_ID)
         })
 
         it('GIVEN an account without controller role WHEN controllerRedeem THEN transaction fails with AccountHasNoRole', async () => {
             // Using account C (non role)
             erc1410Facet = erc1410Facet.connect(signer_C)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             const balanceOf_D_Original = 4 * amount
             await erc1410Facet.issueByPartition(
                 _PARTITION_ID_1,
@@ -2117,7 +2105,7 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejectedWith('AccountHasNoRole')
             expect(canRedeem[0]).to.be.equal(false)
-            expect(canRedeem[1]).to.be.equal(_IS_NOT_OPERATOR_ERROR_ID)
+            expect(canRedeem[1]).to.be.equal(IS_NOT_OPERATOR_ERROR_ID)
         })
 
         it('GIVEN a paused Token WHEN controllerTransfer THEN transaction fails with TokenIsPaused', async () => {
@@ -2125,7 +2113,7 @@ describe('ERC1400 Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                _CONTROLLER_ROLE,
+                CONTROLLER_ROLE,
                 signer_A,
                 signer_B,
                 account_C
@@ -2152,7 +2140,7 @@ describe('ERC1400 Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                _CONTROLLER_ROLE,
+                CONTROLLER_ROLE,
                 signer_A,
                 signer_B,
                 account_C
@@ -2177,12 +2165,9 @@ describe('ERC1400 Tests', () => {
             // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_C)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CONTROLLER_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
             equityFacet = equityFacet.connect(signer_C)
@@ -2343,7 +2328,7 @@ describe('ERC1400 Tests', () => {
             await deployEnvironment()
 
             const rbacPause: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_B],
             }
             const init_rbacs: Rbac[] = [rbacPause]
@@ -2396,7 +2381,7 @@ describe('ERC1400 Tests', () => {
             )
 
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
             erc1410Facet = erc1410Facet.connect(signer_A)
 
             await erc1410Facet.issueByPartition(
@@ -2595,7 +2580,7 @@ describe('ERC1400 Tests', () => {
 
             // wait for first scheduled balance adjustment only (run DUMB transaction)
             await new Promise((f) => setTimeout(f, 3000))
-            await accessControlFacet.grantRole(_PAUSER_ROLE, account_C) // DUMB transaction
+            await accessControlFacet.grantRole(PAUSER_ROLE, account_C) // DUMB transaction
 
             // After Values Before Transaction
             const after: BalanceAdjustedValues =
@@ -2611,11 +2596,11 @@ describe('ERC1400 Tests', () => {
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
                 await accessControlFacet.grantRole(
-                    _ADJUSTMENT_BALANCE_ROLE,
+                    ADJUSTMENT_BALANCE_ROLE,
                     account_C
                 )
-                await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-                await accessControlFacet.grantRole(_CAP_ROLE, account_A)
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+                await accessControlFacet.grantRole(CAP_ROLE, account_A)
 
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -2677,11 +2662,11 @@ describe('ERC1400 Tests', () => {
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
                 await accessControlFacet.grantRole(
-                    _ADJUSTMENT_BALANCE_ROLE,
+                    ADJUSTMENT_BALANCE_ROLE,
                     account_C
                 )
-                await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-                await accessControlFacet.grantRole(_CAP_ROLE, account_A)
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+                await accessControlFacet.grantRole(CAP_ROLE, account_A)
 
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -2720,11 +2705,11 @@ describe('ERC1400 Tests', () => {
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
                 await accessControlFacet.grantRole(
-                    _ADJUSTMENT_BALANCE_ROLE,
+                    ADJUSTMENT_BALANCE_ROLE,
                     account_C
                 )
-                await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-                await accessControlFacet.grantRole(_CAP_ROLE, account_A)
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+                await accessControlFacet.grantRole(CAP_ROLE, account_A)
 
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -3014,7 +2999,7 @@ describe('ERC1400 Tests', () => {
                         adjustFactor * amount,
                         '0x'
                     )
-                ).to.be.deep.equal([true, _SUCCESS, ethers.constants.HashZero])
+                ).to.be.deep.equal([true, SUCCESS, ethers.constants.HashZero])
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferByPartition succeeds', async () => {
@@ -3037,7 +3022,7 @@ describe('ERC1400 Tests', () => {
                         '0x',
                         '0x'
                     )
-                ).to.be.deep.equal([true, _SUCCESS, ethers.constants.HashZero])
+                ).to.be.deep.equal([true, SUCCESS, ethers.constants.HashZero])
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferFrom succeeds', async () => {
@@ -3063,7 +3048,7 @@ describe('ERC1400 Tests', () => {
                         adjustFactor * amount,
                         '0x'
                     )
-                ).to.be.deep.equal([true, _SUCCESS, ethers.constants.HashZero])
+                ).to.be.deep.equal([true, SUCCESS, ethers.constants.HashZero])
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 transfer succeeds', async () => {

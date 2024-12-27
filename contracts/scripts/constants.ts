@@ -200,60 +200,69 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+   
+   */
 
-*/
-
-export const _DEFAULT_ADMIN_ROLE =
-    '0x0000000000000000000000000000000000000000000000000000000000000000'
-export const _CONTROL_LIST_ROLE =
-    '0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3'
-export const _CORPORATE_ACTION_ROLE =
-    '0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6'
-export const _ISSUER_ROLE =
-    '0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842'
-export const _DOCUMENTER_ROLE =
-    '0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41'
-export const _CONTROLLER_ROLE =
-    '0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f'
-export const _PAUSER_ROLE =
-    '0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb'
-export const _CAP_ROLE =
-    '0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571'
-export const _SNAPSHOT_ROLE =
-    '0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da'
-export const _LOCKER_ROLE =
-    '0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88'
-export const _ADJUSTMENT_BALANCE_ROLE =
-    '0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9'
-export const _BOND_MANAGER_ROLE =
-    '0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d'
-export const _DEFAULT_PARTITION =
-    '0x0000000000000000000000000000000000000000000000000000000000000001'
-export const _IS_PAUSED_ERROR_ID = '0x40'
-export const _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = '0x41'
-export const _FROM_ACCOUNT_BLOCKED_ERROR_ID = '0x42'
-export const _TO_ACCOUNT_BLOCKED_ERROR_ID = '0x43'
-export const _FROM_ACCOUNT_NULL_ERROR_ID = '0x44'
-export const _TO_ACCOUNT_NULL_ERROR_ID = '0x45'
-export const _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = '0x46'
-export const _IS_NOT_OPERATOR_ERROR_ID = '0x47'
-export const _WRONG_PARTITION_ERROR_ID = '0x48'
-export const _ALLOWANCE_REACHED_ERROR_ID = '0x49'
-
-export const _SUCCESS = '0x00'
-
+// * General
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
-
-export const EquityDeployedEvent = 'EquityDeployed'
-
-export const BondDeployedEvent = 'BondDeployed'
-
-export const EquityConfigId =
+export const DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
-
-export const BondConfigId =
+export const EQUITY_CONFIG_ID =
+    '0x0000000000000000000000000000000000000000000000000000000000000001'
+export const BOND_CONFIG_ID =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 
+// * Roles
+export const DEFAULT_ADMIN_ROLE =
+    '0x0000000000000000000000000000000000000000000000000000000000000000'
+export const CONTROL_LIST_ROLE =
+    '0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3'
+export const CORPORATE_ACTION_ROLE =
+    '0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6'
+export const ISSUER_ROLE =
+    '0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842'
+export const DOCUMENTER_ROLE =
+    '0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41'
+export const CONTROLLER_ROLE =
+    '0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f'
+export const PAUSER_ROLE =
+    '0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb'
+export const CAP_ROLE =
+    '0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571'
+export const SNAPSHOT_ROLE =
+    '0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da'
+export const LOCKER_ROLE =
+    '0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88'
+export const ADJUSTMENT_BALANCE_ROLE =
+    '0x6d0d63b623e69df3a6ea8aebd01f360a0250a880cbc44f7f10c49726a80a78a9'
+export const BOND_MANAGER_ROLE =
+    '0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d'
+
+// * Tasks
+export const BALANCE_ADJUSTMENT_TASK_TYPE =
+    '0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d'
+export const SNAPSHOT_TASK_TYPE =
+    '0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c'
+
+// * Errors
+export const IS_PAUSED_ERROR_ID = '0x40'
+export const OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = '0x41'
+export const FROM_ACCOUNT_BLOCKED_ERROR_ID = '0x42'
+export const TO_ACCOUNT_BLOCKED_ERROR_ID = '0x43'
+export const FROM_ACCOUNT_NULL_ERROR_ID = '0x44'
+export const TO_ACCOUNT_NULL_ERROR_ID = '0x45'
+export const NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = '0x46'
+export const IS_NOT_OPERATOR_ERROR_ID = '0x47'
+export const WRONG_PARTITION_ERROR_ID = '0x48'
+export const ALLOWANCE_REACHED_ERROR_ID = '0x49'
+
+export const SUCCESS = '0x00'
+
+// * Events
+export const EQUITY_DEPLOYED_EVENT = 'EquityDeployed'
+export const BOND_DEPLOYED_EVENT = 'BondDeployed'
+
+// * Regular expressions
 export const REGEX = {
     contractId: /^0\.0\.\d+$/,
     address: /^0x[a-fA-F0-9]{40}$/,
@@ -261,7 +270,12 @@ export const REGEX = {
     bytes: /^0x[a-fA-F0-9]*$/,
 }
 
-export const _BALANCE_ADJUSTMENT_TASK_TYPE =
-    '0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d'
-export const _SNAPSHOT_TASK_TYPE =
-    '0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c'
+// * Gas
+export const GAS_LIMIT = {
+    default: 3_000_000,
+    low: 1_000_000,
+    high: 5_000_000,
+    initilize: {
+        businessLogicResolver: 8_000_000,
+    },
+}

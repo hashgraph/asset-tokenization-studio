@@ -8,6 +8,9 @@ export const NETWORKS = [
 ] as const
 export type Network = (typeof NETWORKS)[number]
 
+export const DEPLOY_TYPES = ['proxy', 'direct'] as const
+export type DeployType = (typeof DEPLOY_TYPES)[number]
+
 export const CONTRACT_NAMES = [
     'TransparentUpgradeableProxy',
     'ProxyAdmin',
@@ -35,6 +38,7 @@ export const CONTRACT_NAMES = [
     'AdjustBalances',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]
+export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
 
 export const CONTRACT_FACTORY_NAMES = CONTRACT_NAMES.map(
     (name) => `${name}__factory`
@@ -55,6 +59,7 @@ export interface DeployedContract {
 export interface ContractConfig {
     name: ContractName
     factoryName: ContractFactoryName
+    deployType: DeployType
     addresses?: Record<Network, DeployedContract>
 }
 
@@ -103,6 +108,9 @@ export default class Configuration {
             contracts[contractName] = {
                 name: contractName,
                 factoryName: `${contractName}__factory`,
+                deployType: CONTRACT_NAMES_WITH_PROXY.includes(contractName)
+                    ? 'proxy'
+                    : 'direct',
                 addresses: Configuration._getDeployedAddresses({
                     contractName,
                 }),

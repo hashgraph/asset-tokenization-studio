@@ -314,7 +314,7 @@ task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
                 ContractId.fromString(args.proxyAdmin),
                 client
             ),
-            network: hre.network.name as Network
+            network: hre.network.name as Network,
         })
 
         const implementation = await evmToHederaFormat({
@@ -323,7 +323,7 @@ task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
                 client,
                 ContractId.fromString(args.proxy).toSolidityAddress()
             ),
-            network: hre.network.name as Network
+            network: hre.network.name as Network,
         })
 
         console.log(`Owner: ${owner}, Implementation: ${implementation}`)

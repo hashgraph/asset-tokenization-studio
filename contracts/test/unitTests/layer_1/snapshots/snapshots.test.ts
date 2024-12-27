@@ -215,10 +215,10 @@ import {
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
-    _SNAPSHOT_ROLE,
-    _PAUSER_ROLE,
-    _ISSUER_ROLE,
-    _LOCKER_ROLE,
+    SNAPSHOT_ROLE,
+    PAUSER_ROLE,
+    ISSUER_ROLE,
+    LOCKER_ROLE,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -265,11 +265,11 @@ describe('Snapshots Tests', () => {
         await deployEnvironment()
 
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const rbacLock: Rbac = {
-            role: _LOCKER_ROLE,
+            role: LOCKER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause, rbacLock]
@@ -337,7 +337,7 @@ describe('Snapshots Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _SNAPSHOT_ROLE,
+            SNAPSHOT_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -391,8 +391,8 @@ describe('Snapshots Tests', () => {
     it('GIVEN an account with snapshot role WHEN takeSnapshot THEN transaction succeeds', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_C)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_C)
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         // Using account C (with role)
         snapshotFacet = snapshotFacet.connect(signer_C)
         erc1410Facet = erc1410Facet.connect(signer_A)

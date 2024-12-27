@@ -214,9 +214,9 @@ import {
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
-    _CAP_ROLE,
-    _ISSUER_ROLE,
-    _PAUSER_ROLE,
+    CAP_ROLE,
+    ISSUER_ROLE,
+    PAUSER_ROLE,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -256,7 +256,7 @@ describe('CAP Tests', () => {
         await deployEnvironment()
 
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
@@ -363,8 +363,8 @@ describe('CAP Tests', () => {
     describe('New Max Supply Too low', () => {
         it('GIVEN a token WHEN setMaxSupply a value that is less than the current total supply THEN transaction fails with NewMaxSupplyTooLow', async () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
-            await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             erc1410Facet = erc1410Facet.connect(signer_C)
             await erc1410Facet.issueByPartition(
@@ -385,8 +385,8 @@ describe('CAP Tests', () => {
 
         it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyForPartitionTooLow', async () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
-            await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             erc1410Facet = erc1410Facet.connect(signer_C)
             await erc1410Facet.issueByPartition(
@@ -412,7 +412,7 @@ describe('CAP Tests', () => {
     describe('New Max Supply OK', () => {
         it('GIVEN a token WHEN setMaxSupply THEN transaction succeeds', async () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             capFacet = capFacet.connect(signer_C)
 
@@ -427,7 +427,7 @@ describe('CAP Tests', () => {
 
         it('GIVEN a token WHEN setMaxSupplyByPartition THEN transaction succeeds', async () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             capFacet = capFacet.connect(signer_C)
 

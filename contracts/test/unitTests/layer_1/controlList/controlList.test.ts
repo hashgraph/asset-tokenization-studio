@@ -212,7 +212,7 @@ import {
     AccessControl,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
-import { _CONTROL_LIST_ROLE, _PAUSER_ROLE } from '../../../../scripts/constants'
+import { CONTROL_LIST_ROLE, PAUSER_ROLE } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
     Rbac,
@@ -253,7 +253,7 @@ describe('Control List Tests', () => {
         await deployEnvironment()
 
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
@@ -330,7 +330,7 @@ describe('Control List Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _CONTROL_LIST_ROLE,
+            CONTROL_LIST_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -350,7 +350,7 @@ describe('Control List Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _CONTROL_LIST_ROLE,
+            CONTROL_LIST_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -369,7 +369,7 @@ describe('Control List Tests', () => {
         // ADD TO LIST ------------------------------------------------------------------
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_CONTROL_LIST_ROLE, account_C)
+        await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_C)
         // Using account C (with role)
         controlListFacet = controlListFacet.connect(signer_C)
 

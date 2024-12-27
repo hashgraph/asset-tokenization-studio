@@ -214,7 +214,7 @@ import {
 } from '../../../typechain-types'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { assertObject } from '../../assert'
-import { _DEFAULT_ADMIN_ROLE } from '../../../scripts/constants'
+import { DEFAULT_ADMIN_ROLE } from '../../../scripts/constants'
 import { FacetConfiguration } from '../../../scripts/resolverDiamondCut.js'
 import { BusinessLogicRegistryData } from '../../../scripts/businessLogicResolverLogic.js'
 
@@ -404,7 +404,7 @@ describe('ResolverProxy Tests', () => {
         )
 
         const GRANT_ROLE_SIGNATURE = '0x2f2ff15d'
-        await expect(accessControl.grantRole(_DEFAULT_ADMIN_ROLE, account_A))
+        await expect(accessControl.grantRole(DEFAULT_ADMIN_ROLE, account_A))
             .to.be.revertedWithCustomError(resolverProxy, 'FunctionNotFound')
             .withArgs(GRANT_ROLE_SIGNATURE)
         expect(await diamondLoupe.supportsInterface(GRANT_ROLE_SIGNATURE)).to.be
@@ -515,7 +515,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -553,7 +553,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -634,7 +634,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -673,7 +673,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -758,7 +758,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -803,7 +803,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]

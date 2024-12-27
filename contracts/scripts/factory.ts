@@ -210,11 +210,11 @@ import {
     deployTransparentUpgradeableProxy,
 } from './transparentUpgradableProxy'
 import {
-    EquityDeployedEvent,
-    _DEFAULT_ADMIN_ROLE,
-    BondDeployedEvent,
-    EquityConfigId,
-    BondConfigId,
+    EQUITY_DEPLOYED_EVENT,
+    DEFAULT_ADMIN_ROLE,
+    BOND_DEPLOYED_EVENT,
+    EQUITY_CONFIG_ID,
+    BOND_CONFIG_ID,
 } from './constants'
 import { environment } from './deployEnvironmentByRpc'
 
@@ -385,7 +385,7 @@ export async function setEquityData(
 
     if (addAdmin) {
         const rbacAdmin: Rbac = {
-            role: _DEFAULT_ADMIN_ROLE,
+            role: DEFAULT_ADMIN_ROLE,
             members: [adminAccount],
         }
         rbacs = [rbacAdmin]
@@ -396,7 +396,7 @@ export async function setEquityData(
     }
 
     const resolverProxyConfiguration: ResolverProxyConfiguration = {
-        key: EquityConfigId,
+        key: EQUITY_CONFIG_ID,
         version: 1,
     }
 
@@ -466,7 +466,7 @@ export async function setBondData(
 
     if (addAdmin) {
         const rbacAdmin: Rbac = {
-            role: _DEFAULT_ADMIN_ROLE,
+            role: DEFAULT_ADMIN_ROLE,
             members: [adminAccount],
         }
         rbacs = [rbacAdmin]
@@ -477,7 +477,7 @@ export async function setBondData(
     }
 
     const resolverProxyConfiguration: ResolverProxyConfiguration = {
-        key: BondConfigId,
+        key: BOND_CONFIG_ID,
         version: 1,
     }
 
@@ -591,7 +591,7 @@ export async function deployEquityFromFactory(
     )
     const events = (await result.wait()).events!
     const deployedEquityEvent = events.find(
-        (e) => e.event == EquityDeployedEvent
+        (e) => e.event == EQUITY_DEPLOYED_EVENT
     )
     const equityAddress = deployedEquityEvent!.args!.equityAddress
 
@@ -659,7 +659,7 @@ export async function deployBondFromFactory(
         factoryRegulationData
     )
     const events = (await result.wait()).events!
-    const deployedBondEvent = events.find((e) => e.event == BondDeployedEvent)
+    const deployedBondEvent = events.find((e) => e.event == BOND_DEPLOYED_EVENT)
     const bondAddress = deployedBondEvent!.args!.bondAddress
 
     return await ethers.getContractAt('Bond', bondAddress)

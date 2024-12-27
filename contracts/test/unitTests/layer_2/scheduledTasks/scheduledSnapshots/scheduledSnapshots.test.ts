@@ -214,8 +214,8 @@ import {
 } from '../../../../../typechain-types'
 import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
 import {
-    _CORPORATE_ACTION_ROLE,
-    _PAUSER_ROLE,
+    CORPORATE_ACTION_ROLE,
+    PAUSER_ROLE,
 } from '../../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -252,7 +252,7 @@ describe('Scheduled Snapshots Tests', () => {
         await deployEnvironment()
 
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
@@ -305,7 +305,7 @@ describe('Scheduled Snapshots Tests', () => {
     it('GIVEN a token WHEN triggerSnapshots THEN transaction succeeds', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_C)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
         // Using account C (with role)
         equityFacet = equityFacet.connect(signer_C)
 

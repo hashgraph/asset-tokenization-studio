@@ -215,11 +215,11 @@ import {
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
-    _CORPORATE_ACTION_ROLE,
-    _DEFAULT_PARTITION,
-    _ISSUER_ROLE,
-    _LOCKER_ROLE,
-    _PAUSER_ROLE,
+    CORPORATE_ACTION_ROLE,
+    DEFAULT_PARTITION,
+    ISSUER_ROLE,
+    LOCKER_ROLE,
+    PAUSER_ROLE,
 } from '../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -291,7 +291,7 @@ describe('Equity Tests', () => {
         await deployEnvironment()
 
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
@@ -381,7 +381,7 @@ describe('Equity Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                _CORPORATE_ACTION_ROLE,
+                CORPORATE_ACTION_ROLE,
                 signer_A,
                 signer_B,
                 account_C
@@ -399,10 +399,7 @@ describe('Equity Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             equityFacet = equityFacet.connect(signer_C)
 
@@ -433,10 +430,7 @@ describe('Equity Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setDividends THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             equityFacet = equityFacet.connect(signer_C)
 
@@ -485,12 +479,9 @@ describe('Equity Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setDividends and lock THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
-            await accessControlFacet.grantRole(_LOCKER_ROLE, account_C)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             // Using account C (with role)
             equityFacet = equityFacet.connect(signer_C)
             lockFacet = lockFacet.connect(signer_C)
@@ -501,7 +492,7 @@ describe('Equity Tests', () => {
             const LockedAmount = TotalAmount - 5
 
             await erc1410Facet.issueByPartition(
-                _DEFAULT_PARTITION,
+                DEFAULT_PARTITION,
                 account_A,
                 TotalAmount,
                 '0x'
@@ -522,7 +513,7 @@ describe('Equity Tests', () => {
 
             // check list members
             await new Promise((f) => setTimeout(f, TIME + 1))
-            await accessControlFacet.revokeRole(_ISSUER_ROLE, account_C)
+            await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
             const dividendFor = await equityFacet.getDividendsFor(1, account_A)
 
             expect(dividendFor.tokenBalance).to.equal(TotalAmount)
@@ -546,7 +537,7 @@ describe('Equity Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                _CORPORATE_ACTION_ROLE,
+                CORPORATE_ACTION_ROLE,
                 signer_A,
                 signer_B,
                 account_C
@@ -564,10 +555,7 @@ describe('Equity Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setVoting THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             equityFacet = equityFacet.connect(signer_C)
 
@@ -604,12 +592,9 @@ describe('Equity Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setVoting and lock THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
-            await accessControlFacet.grantRole(_LOCKER_ROLE, account_C)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             // Using account C (with role)
             equityFacet = equityFacet.connect(signer_C)
             lockFacet = lockFacet.connect(signer_C)
@@ -620,7 +605,7 @@ describe('Equity Tests', () => {
             const LockedAmount = TotalAmount - 5
 
             await erc1410Facet.issueByPartition(
-                _DEFAULT_PARTITION,
+                DEFAULT_PARTITION,
                 account_A,
                 TotalAmount,
                 '0x'
@@ -639,7 +624,7 @@ describe('Equity Tests', () => {
                 )
 
             await new Promise((f) => setTimeout(f, TIME + 1))
-            await accessControlFacet.revokeRole(_ISSUER_ROLE, account_C)
+            await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
             const votingFor = await equityFacet.getVotingFor(1, account_A)
 
             expect(votingFor.tokenBalance).to.equal(TotalAmount)
@@ -663,7 +648,7 @@ describe('Equity Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                _CORPORATE_ACTION_ROLE,
+                CORPORATE_ACTION_ROLE,
                 signer_A,
                 signer_B,
                 account_C
@@ -681,10 +666,7 @@ describe('Equity Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setBalanceAdjustment THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             equityFacet = equityFacet.connect(signer_C)
 

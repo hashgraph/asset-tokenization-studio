@@ -216,10 +216,10 @@ import {
 } from '../../../../../typechain-types'
 import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
 import {
-    _CONTROL_LIST_ROLE,
-    _PAUSER_ROLE,
-    _ISSUER_ROLE,
-    _DEFAULT_PARTITION,
+    CONTROL_LIST_ROLE,
+    PAUSER_ROLE,
+    ISSUER_ROLE,
+    DEFAULT_PARTITION,
 } from '../../../../../scripts/constants'
 import {
     deployEquityFromFactory,
@@ -269,11 +269,11 @@ describe('ERC20 Tests', () => {
             await deployEnvironment()
 
             const rbacPause: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_B],
             }
             const rbacControlList: Rbac = {
-                role: _CONTROL_LIST_ROLE,
+                role: CONTROL_LIST_ROLE,
                 members: [account_A],
             }
             const init_rbacs: Rbac[] = [rbacPause, rbacControlList]
@@ -472,7 +472,7 @@ describe('ERC20 Tests', () => {
             await deployEnvironment()
 
             const rbacIssuer: Rbac = {
-                role: _ISSUER_ROLE,
+                role: ISSUER_ROLE,
                 members: [account_B],
             }
             const init_rbacs: Rbac[] = [rbacIssuer]
@@ -668,19 +668,19 @@ describe('ERC20 Tests', () => {
                     expect(await erc1410Facet.totalSupply()).to.be.equal(amount)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_C
                         )
                     ).to.be.equal(amount / 2)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_E
                         )
                     ).to.be.equal(amount / 2)
                     expect(
                         await erc1410Facet.totalSupplyByPartition(
-                            _DEFAULT_PARTITION
+                            DEFAULT_PARTITION
                         )
                     ).to.be.equal(amount)
                 }
@@ -715,19 +715,19 @@ describe('ERC20 Tests', () => {
                     expect(await erc1410Facet.totalSupply()).to.be.equal(amount)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_C
                         )
                     ).to.be.equal(amount / 2)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_E
                         )
                     ).to.be.equal(amount / 2)
                     expect(
                         await erc1410Facet.totalSupplyByPartition(
-                            _DEFAULT_PARTITION
+                            DEFAULT_PARTITION
                         )
                     ).to.be.equal(amount)
                 }
