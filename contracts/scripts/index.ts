@@ -37,7 +37,11 @@ export {
 
 // * Commands
 export { default as DeployContractCommand } from './commands/DeployContractCommand'
+export { default as DeployAtsContractsCommand } from './commands/DeployAtsContractsCommand'
+export { default as DeployContractWithFactoryCommand } from './commands/DeployContractWithFactoryCommand'
 export { default as CallContractCommand } from './commands/CallContractCommand'
 
 // * Results
 export { default as DeployContractResult } from './results/DeployContractResult'
+export { default as DeployContractWithFactoryResult } from './results/DeployContractWithFactoryResult'
+export { default as DeployAtsContractsResult } from './results/DeployAtsContractsResult'

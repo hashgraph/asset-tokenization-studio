@@ -3,8 +3,7 @@ import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-contract-sizer'
 import 'solidity-coverage'
 import '@hashgraph/sdk'
-import Configuration from './configuration'
-
+import Configuration from './Configuration'
 // ! Uncomment the following lines to be able to use tasks AFTER compiling the project
 // import './tasks/utils'
 // import './tasks/deploy'

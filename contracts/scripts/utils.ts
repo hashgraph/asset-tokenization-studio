@@ -212,8 +212,9 @@ import {
     ContractId,
 } from '@hashgraph/sdk'
 import axios from 'axios'
+import { TransactionReceipt } from '@ethersproject/providers'
+import Configuration, { Network, NETWORKS } from '../Configuration'
 import { ADDRESS_ZERO, REGEX } from './constants'
-import Configuration, { Network, NETWORKS } from '../configuration'
 
 interface IAccount {
     evm_address: string
@@ -445,6 +446,21 @@ async function getFromMirrorNode<T>({
     return undefined
 }
 
+export function checkReceipts({
+    receipts,
+}: {
+    receipts: TransactionReceipt[]
+}) {
+    for (const receipt of receipts) {
+        if (receipt.status === 0) {
+            throw new Error(
+                `Transaction failed. Transaction status = 0 for transaction: ${receipt.transactionHash}`
+            )
+        }
+    }
+}
+
+// * Time
 export async function delay({
     time,
     unit = 'ms',
