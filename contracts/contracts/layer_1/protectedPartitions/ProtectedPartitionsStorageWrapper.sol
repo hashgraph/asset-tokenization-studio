@@ -61,7 +61,12 @@ abstract contract ProtectedPartitionsStorageWrapper is
         bytes32 _partition
     ) internal view virtual returns (bytes32) {
         return
-            keccak256(abi.encodePacked(_PROTECTED_PARTITIONS_ROLE, _partition));
+            keccak256(
+                abi.encodePacked(
+                    _PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
+                    _partition
+                )
+            );
     }
 
     function _arePartitionsProtected() internal view virtual returns (bool) {

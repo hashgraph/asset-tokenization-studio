@@ -271,6 +271,7 @@ describe('CAP Layer 2 Tests', () => {
             false,
             true,
             false,
+            false,
             'TEST_AccessControl',
             'TAC',
             6,
