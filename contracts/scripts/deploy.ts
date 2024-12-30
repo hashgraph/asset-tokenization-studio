@@ -251,6 +251,8 @@ import {
     GAS_LIMIT,
     MESSAGES,
     DeployAtsFullInfrastructureResult,
+    validateTxResponse,
+    ValidateTxResponseCommand,
 } from './index'
 
 export async function updateProxy(
@@ -301,6 +303,10 @@ export async function deployAtsFullInfrastructure({
     network,
     useDeployed,
 }: DeployAtsFullInfrastructureCommand): Promise<DeployAtsFullInfrastructureResult> {
+    const usingDeployed =
+        useDeployed &&
+        Configuration.contracts.BusinessLogicResolver.addresses?.[network]
+    // * Deploy all contracts
     const deployedContractsCommand = new DeployAtsContractsCommand({
         signer,
         network,
@@ -308,6 +314,7 @@ export async function deployAtsFullInfrastructure({
     })
     const deployedContracts = await deployAtsContracts(deployedContractsCommand)
 
+    // * Check if BusinessLogicResolver is deployed correctly
     const resolver = deployedContracts.businessLogicResolver
     if (
         !resolver.address ||
@@ -317,39 +324,38 @@ export async function deployAtsFullInfrastructure({
         throw new BusinessLogicResolverNotFound()
     }
 
-    const businessLogicRegistries: BusinessLogicRegistryData[] = []
-    for (const { contract } of Object.values(deployedContracts) as {
-        contract: BaseContract
-    }[]) {
-        const proxiedContract = IStaticFunctionSelectors__factory.connect(
-            contract.address,
-            contract.signer
+    // * Register business logic contracts
+    const businessLogicRegistries: BusinessLogicRegistryData[] =
+        await Promise.all(
+            Object.values(deployedContracts).map(async ({ contract }) => {
+                const proxiedContract =
+                    IStaticFunctionSelectors__factory.connect(
+                        contract.address,
+                        contract.signer
+                    )
+                const result = await proxiedContract.getStaticResolverKey({
+                    value: GAS_LIMIT.businessLogicResolver.getStaticResolverKey,
+                })
+
+                return {
+                    businessLogicKey: result,
+                    businessLogicAddress: contract.address.replace('0x', ''),
+                }
+            })
         )
-        const result = await proxiedContract.getStaticResolverKey({
-            value: GAS_LIMIT.businessLogicResolver.getStaticResolverKey,
-        })
 
-        businessLogicRegistries.push({
-            businessLogicKey: result,
-            businessLogicAddress: contract.address.replace('0x', ''),
-        })
-    }
-
-    if (
-        !useDeployed ||
-        !Configuration.contracts.BusinessLogicResolver.addresses?.[network]
-    ) {
+    if (!usingDeployed) {
         console.log(MESSAGES.businessLogicResolver.info.registering)
 
-        let receipt = await (
-            await resolver.contract.registerBusinessLogics(
-                businessLogicRegistries
-            )
-        ).wait()
-
-        if (receipt.status === 0) {
-            throw new Error(MESSAGES.businessLogicResolver.error.registering)
-        }
+        let response = await resolver.contract.registerBusinessLogics(
+            businessLogicRegistries
+        )
+        await validateTxResponse(
+            new ValidateTxResponseCommand({
+                txResponse: response,
+                errorMessage: MESSAGES.businessLogicResolver.error.registering,
+            })
+        )
 
         console.log(MESSAGES.businessLogicResolver.info.creatingConfigurations)
 
@@ -407,43 +413,43 @@ export async function deployAtsFullInfrastructure({
         const bondFacetVersionList = Array(bondFacetAddressList.length).fill(1)
 
         // Create configuration for equities
-        receipt = await (
-            await IDiamondCutManager__factory.connect(
-                resolver.proxyAddress,
-                signer
-            ).createConfiguration(
-                EQUITY_CONFIG_ID,
-                equityFacetAddressList.map((address, index) => ({
-                    id: address,
-                    version: equityFacetVersionList[index],
-                }))
-            )
-        ).wait()
 
-        if (receipt.status === 0) {
-            throw new Error(
-                MESSAGES.businessLogicResolver.error.creatingConfigurations
-            )
-        }
+        response = await IDiamondCutManager__factory.connect(
+            resolver.proxyAddress,
+            signer
+        ).createConfiguration(
+            EQUITY_CONFIG_ID,
+            equityFacetAddressList.map((address, index) => ({
+                id: address,
+                version: equityFacetVersionList[index],
+            }))
+        )
+        await validateTxResponse(
+            new ValidateTxResponseCommand({
+                txResponse: response,
+                errorMessage:
+                    MESSAGES.businessLogicResolver.error.creatingConfigurations,
+            })
+        )
+
         // Create configuration for bonds
-        receipt = await (
-            await IDiamondCutManager__factory.connect(
-                resolver.proxyAddress,
-                signer
-            ).createConfiguration(
-                BOND_CONFIG_ID,
-                bondFacetAddressList.map((address, index) => ({
-                    id: address,
-                    version: bondFacetVersionList[index],
-                }))
-            )
-        ).wait()
-
-        if (receipt.status === 0) {
-            throw new Error(
-                MESSAGES.businessLogicResolver.error.creatingConfigurations
-            )
-        }
+        response = await IDiamondCutManager__factory.connect(
+            resolver.proxyAddress,
+            signer
+        ).createConfiguration(
+            BOND_CONFIG_ID,
+            bondFacetAddressList.map((address, index) => ({
+                id: address,
+                version: bondFacetVersionList[index],
+            }))
+        )
+        await validateTxResponse(
+            new ValidateTxResponseCommand({
+                txResponse: response,
+                errorMessage:
+                    MESSAGES.businessLogicResolver.error.creatingConfigurations,
+            })
+        )
     }
 
     return new DeployAtsFullInfrastructureResult({
@@ -763,6 +769,22 @@ export async function deployContractWithFactory<
     })
 }
 
+/**
+ * Deploys a smart contract and optionally its proxy and proxy admin.
+ *
+ * @param {DeployContractCommand} params - The deployment parameters.
+ * @param {ContractName} params.name - The name of the contract to deploy.
+ * @param {Signer} params.signer - The signer to use for the deployment.
+ * @param {Array<any>} params.args - The arguments to pass to the contract constructor.
+ * @returns {Promise<DeployContractResult>} A promise that resolves to the deployment result.
+ *
+ * @example
+ * const result = await deployContract({
+ *   name: 'MyContract',
+ *   signer: mySigner,
+ *   args: [arg1, arg2],
+ * });
+ */
 export async function deployContract({
     name,
     signer,
@@ -809,31 +831,6 @@ export async function deployContract({
     )
 
     console.log(`${name} Proxy deployed at ${proxyAddress}`)
-
-    // if (contractKey === 'resolver') {
-    //     console.log('Initializing resolver. please wait...')
-    //     await contractCall(
-    //         proxy.contractId,
-    //         'initialize_BusinessLogicResolver',
-    //         [],
-    //         clientOperator,
-    //         8000000,
-    //         BusinessLogicResolver__factory.abi
-    //     )
-
-    //     console.log('Resolver initialized successfully.')
-
-    //     const admin = await contractCall(
-    //         proxy.contractId,
-    //         'getRoleMembers',
-    //         [_DEFAULT_ADMIN_ROLE, '0', '1'],
-    //         clientOperator,
-    //         130000,
-    //         BusinessLogicResolver__factory.abi
-    //     )
-
-    //     console.log(`Resolver Admin: ${admin[0]}`)
-    // }
 
     return new DeployContractResult({
         name,

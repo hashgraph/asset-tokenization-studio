@@ -288,6 +288,11 @@ export const GAS_LIMIT = {
 
 // * Messages
 export const MESSAGES = {
+    blockchain: {
+        validateTxResponse: {
+            error: ['Error validating transaction response.', ' Tx Hash: '],
+        },
+    },
     deploy: {
         success: 'Contract deployed successfully',
         error: 'Error deploying contract',
