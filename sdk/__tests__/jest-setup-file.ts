@@ -1519,6 +1519,25 @@ jest.mock('../src/port/out/hs/hts/custodial/DFNSTransactionAdapter', () => {
 });
 
 jest.mock(
+  '../src/port/out/hs/hts/custodial/FireblocksTransactionAdapter',
+  () => {
+    const actual = jest.requireActual(
+      '../src/port/out/hs/hts/custodial/FireblocksTransactionAdapter.ts',
+    );
+
+    const singletonInstance = new actual.FireblocksTransactionAdapter();
+
+    singletonInstance.init = jest.fn(async () => {
+      return network;
+    });
+
+    return {
+      FireblocksTransactionAdapter: jest.fn(() => singletonInstance),
+    };
+  },
+);
+
+jest.mock(
   '../src/port/out/hs/hts/custodial/CustodialTransactionAdapter',
   () => {
     const actual = jest.requireActual(

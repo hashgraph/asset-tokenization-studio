@@ -213,6 +213,7 @@ import { InvalidWalletTypeError } from '../../domain/context/network/error/Inval
 import LogService from './LogService.js';
 import { HederaWalletConnectTransactionAdapter } from '../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
 import { DFNSTransactionAdapter } from '../../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
+import { FireblocksTransactionAdapter } from '../../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
 
 @singleton()
 export default class TransactionService extends Service {
@@ -249,6 +250,12 @@ export default class TransactionService extends Service {
         }
         LogService.logTrace('DFNS TransactionAdapter');
         return Injectable.resolve(DFNSTransactionAdapter);
+      case SupportedWallets.FIREBLOCKS:
+        if (!Injectable.isWeb()) {
+          throw new InvalidWalletTypeError();
+        }
+        LogService.logTrace('FIREBLOCKS TransactionAdapter');
+        return Injectable.resolve(FireblocksTransactionAdapter);
       default:
         throw new Error('Invalid wallet type');
     }

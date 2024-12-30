@@ -211,9 +211,14 @@ import Account from '../../../../domain/context/account/Account.js';
 import PublicKey from '../../../../domain/context/account/PublicKey.js';
 import { RequestAccount, RequestPublicKey } from '../BaseRequest.js';
 import ValidatedRequest from '../validation/ValidatedRequest.js';
-import { DFNSConfigRequest, HWCRequestSettings } from '../ConnectRequest';
+import {
+  DFNSConfigRequest,
+  FireblocksConfigRequest,
+  HWCRequestSettings,
+} from '../ConnectRequest';
 import HWCSettings from '../../../../domain/context/walletConnect/HWCSettings';
 import DfnsSettings from '../../../../domain/context/custodialWalletSettings/DfnsSettings.js';
+import FireblocksSettings from '../../../../domain/context/custodialWalletSettings/FireblocksSettings.js';
 
 export default class RequestMapper {
   public static isPublicKey = (val: any): val is RequestPublicKey => {
@@ -360,6 +365,19 @@ export default class RequestMapper {
       req.walletId,
       req.hederaAccountId,
       req.publicKey,
+    );
+  }
+
+  public static fireblocksRequestToFireblocksSettings(
+    req: FireblocksConfigRequest,
+  ): FireblocksSettings {
+    return new FireblocksSettings(
+      req.apiKey,
+      req.apiSecretKey,
+      req.baseUrl,
+      req.assetId,
+      req.vaultAccountId,
+      req.hederaAccountId,
     );
   }
 }

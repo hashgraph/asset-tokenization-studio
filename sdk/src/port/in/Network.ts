@@ -210,6 +210,7 @@ import { InitializationData, NetworkData } from '../out/TransactionAdapter.js';
 import { ConnectCommand } from '../../app/usecase/command/network/connect/ConnectCommand.js';
 import ConnectRequest, {
   DFNSConfigRequest,
+  FireblocksConfigRequest,
   SupportedWallets,
 } from './request/ConnectRequest.js';
 import RequestMapper from './request/mapping/RequestMapper.js';
@@ -233,6 +234,8 @@ import { JsonRpcRelay } from '../../domain/context/network/JsonRpcRelay.js';
 import { HederaWalletConnectTransactionAdapter } from '../out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
 import { DFNSTransactionAdapter } from '../out/hs/hts/custodial/DFNSTransactionAdapter.js';
 import DfnsSettings from '../../domain/context/custodialWalletSettings/DfnsSettings.js';
+import { FireblocksTransactionAdapter } from '../out/hs/hts/custodial/FireblocksTransactionAdapter.js';
+import FireblocksSettings from '../../domain/context/custodialWalletSettings/FireblocksSettings.js';
 
 export { InitializationData, NetworkData, SupportedWallets };
 
@@ -350,6 +353,8 @@ class NetworkInPort implements INetworkInPort {
         wallets.push(SupportedWallets.HWALLETCONNECT);
       } else if (val instanceof DFNSTransactionAdapter) {
         wallets.push(SupportedWallets.DFNS);
+      } else if (val instanceof FireblocksTransactionAdapter) {
+        wallets.push(SupportedWallets.FIREBLOCKS);
       }
       await val.init();
 
@@ -402,13 +407,27 @@ class NetworkInPort implements INetworkInPort {
     return res.payload;
   }
 
-  private getCustodialSettings(req: ConnectRequest): DfnsSettings | undefined {
-    if (req.custodialWalletSettings && req.wallet === SupportedWallets.DFNS) {
-      return RequestMapper.dfnsRequestToDfnsSettings(
-        req.custodialWalletSettings as DFNSConfigRequest,
-      );
+  private getCustodialSettings(
+    req: ConnectRequest,
+  ): DfnsSettings | FireblocksSettings | undefined {
+    if (!req.custodialWalletSettings) {
+      return undefined;
     }
-    return undefined;
+
+    switch (req.wallet) {
+      case SupportedWallets.DFNS:
+        return RequestMapper.dfnsRequestToDfnsSettings(
+          req.custodialWalletSettings as DFNSConfigRequest,
+        );
+
+      case SupportedWallets.FIREBLOCKS:
+        return RequestMapper.fireblocksRequestToFireblocksSettings(
+          req.custodialWalletSettings as FireblocksConfigRequest,
+        );
+
+      default:
+        return undefined;
+    }
   }
 
   disconnect(): Promise<boolean> {

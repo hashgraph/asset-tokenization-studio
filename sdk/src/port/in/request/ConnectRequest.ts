@@ -226,7 +226,16 @@ export interface DFNSConfigRequest {
   publicKey: string;
 }
 
-export type CustodialSettings = DFNSConfigRequest;
+export interface FireblocksConfigRequest {
+  apiSecretKey: string;
+  apiKey: string;
+  baseUrl: string;
+  vaultAccountId: string;
+  assetId: string;
+  hederaAccountId: string;
+}
+
+export type CustodialSettings = DFNSConfigRequest | FireblocksConfigRequest;
 
 export type HWCRequestSettings = {
   projectId: string;

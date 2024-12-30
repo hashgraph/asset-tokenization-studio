@@ -204,185 +204,129 @@
 */
 
 import {
-  Client,
-  Transaction,
-  TransactionResponse as HTransactionResponse,
-} from '@hashgraph/sdk';
+  SDK,
+  LoggerTransports,
+  CreateBondRequest,
+  SupportedWallets,
+  Network,
+  Bond,
+  InitializationRequest,
+} from '../../../src/index.js';
 import {
-  CustodialWalletService,
-  SignatureRequest,
-} from '@hashgraph/hedera-custodians-integration';
-import TransactionResponse from '../../../../../domain/context/transaction/TransactionResponse.js';
-import Account from '../../../../../domain/context/account/Account';
-import { InitializationData } from '../../../TransactionAdapter';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
-import EventService from '../../../../../app/service/event/EventService';
-import { MirrorNodeAdapter } from '../../../mirror/MirrorNodeAdapter';
-import NetworkService from '../../../../../app/service/NetworkService';
-import { Environment } from '../../../../../domain/context/network/Environment';
-import LogService from '../../../../../app/service/LogService';
-import { SigningError } from '../../error/SigningError';
-import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
+  FACTORY_ADDRESS,
+  FIREBLOCKS_SETTINGS,
+  RESOLVER_ADDRESS,
+} from '../../config.js';
+import ConnectRequest from '../../../src/port/in/request/ConnectRequest.js';
+import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
+import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
+import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';
+import Injectable from '../../../src/core/Injectable.js';
 import {
-  WalletEvents,
-  WalletPairedEvent,
-} from '../../../../../app/service/event/WalletEvent';
-import Injectable from '../../../../../core/Injectable';
-import { TransactionType } from '../../../TransactionResponseEnums';
-import Hex from '../../../../../core/Hex.js';
-import { HederaTransactionAdapter } from '../../HederaTransactionAdapter.js';
-import { HTSTransactionResponseAdapter } from '../HTSTransactionResponseAdapter.js';
-import DfnsSettings from '../../../../../domain/context/custodialWalletSettings/DfnsSettings.js';
-import { HederaId } from '../../../../../domain/context/shared/HederaId.js';
-import FireblocksSettings from '../../../../../domain/context/custodialWalletSettings/FireblocksSettings.js';
+  CastRegulationSubType,
+  CastRegulationType,
+  RegulationSubType,
+  RegulationType,
+} from '../../../src/domain/context/factory/RegulationType.js';
 
-export abstract class CustodialTransactionAdapter extends HederaTransactionAdapter {
-  protected client: Client;
-  protected custodialWalletService: CustodialWalletService;
-  public account: Account;
-  protected network: Environment;
+SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
-  constructor(
-    @lazyInject(EventService) public readonly eventService: EventService,
-    @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(NetworkService)
-    public readonly networkService: NetworkService,
-  ) {
-    super(mirrorNodeAdapter, networkService);
-  }
+const decimals = 0;
+const name = 'TEST_SECURITY_TOKEN';
+const symbol = 'TEST';
+const isin = 'ABCDE123456Z';
+const currency = '0x455552';
+const TIME = 30;
+const numberOfUnits = '1000';
+const nominalValue = '100';
+const currentTimeInSeconds = Math.floor(new Date().getTime() / 1000) + 1000;
+const startingDate = currentTimeInSeconds + TIME;
+const numberOfCoupons = 15;
+const couponFrequency = 7;
+const couponRate = '3';
+const maturityDate = startingDate + numberOfCoupons * couponFrequency;
+const firstCouponDate = startingDate + 1;
+const regulationType = RegulationType.REG_S;
+const regulationSubType = RegulationSubType.NONE;
+const countries = 'AF,HG,BN';
+const info = 'Anything';
+const configId =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const configVersion = 0;
 
-  protected initClient(accountId: string, publicKey: string): void {
-    const currentNetwork = this.networkService.environment;
-    switch (currentNetwork) {
-      case 'testnet':
-        this.client = Client.forTestnet();
-        break;
-      case 'mainnet':
-        this.client = Client.forMainnet();
-        break;
-      case 'previewnet':
-        this.client = Client.forPreviewnet();
-        break;
-      default:
-        throw new Error('Network not supported');
-    }
-    this.client.setOperatorWith(accountId, publicKey, this.signingService);
-  }
+const mirrorNode: MirrorNode = {
+  name: 'testmirrorNode',
+  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
+};
 
-  protected signingService = async (
-    message: Uint8Array,
-  ): Promise<Uint8Array> => {
-    const signatureRequest = new SignatureRequest(message);
-    return await this.custodialWalletService.signTransaction(signatureRequest);
-  };
+const rpcNode: JsonRpcRelay = {
+  name: 'testrpcNode',
+  baseUrl: 'http://localhost:7546',
+};
 
-  public signAndSendTransaction = async (
-    transaction: Transaction,
-    transactionType: TransactionType,
-    nameFunction?: string,
-    abi?: object[],
-  ): Promise<TransactionResponse> => {
-    try {
-      LogService.logTrace(
-        'Custodial wallet signing and sending transaction:',
-        nameFunction,
-      );
+describe('Fireblocks Transaction Adapter test', () => {
+  let bond: SecurityViewModel;
 
-      const txResponse: HTransactionResponse = await transaction.execute(
-        this.client,
-      );
-
-      this.logTransaction(
-        txResponse.transactionId.toString(),
-        this.networkService.environment,
-      );
-
-      return HTSTransactionResponseAdapter.manageResponse(
-        this.networkService.environment,
-        txResponse,
-        transactionType,
-        this.client,
-        nameFunction,
-        abi,
-      );
-    } catch (error) {
-      LogService.logError(error);
-      throw new SigningError(error);
-    }
-  };
-
-  protected createWalletPairedEvent(
-    wallet: SupportedWallets,
-  ): WalletPairedEvent {
-    return {
-      wallet: wallet,
-      data: {
-        account: this.account,
-        pairing: '',
-        topic: '',
-      },
-      network: {
-        name: this.networkService.environment,
-        recognized: true,
-        factoryId: this.networkService.configuration?.factoryAddress ?? '',
-      },
-    };
-  }
-
-  protected abstract initCustodialWalletService(
-    settings: DfnsSettings | FireblocksSettings,
-  ): void;
-
-  protected abstract getSupportedWallet(): SupportedWallets;
-
-  async register(
-    settings: DfnsSettings | FireblocksSettings,
-  ): Promise<InitializationData> {
-    Injectable.registerTransactionHandler(this);
-    const accountMirror = await this.mirrorNodeAdapter.getAccountInfo(
-      new HederaId(settings.hederaAccountId),
+  beforeAll(async () => {
+    await Network.connect(
+      new ConnectRequest({
+        network: 'testnet',
+        wallet: SupportedWallets.FIREBLOCKS,
+        mirrorNode: mirrorNode,
+        rpcNode: rpcNode,
+        custodialWalletSettings: FIREBLOCKS_SETTINGS,
+      }),
     );
-    if (!accountMirror.publicKey) {
-      throw new Error('PublicKey not found in the mirror node');
-    }
+    await Network.init(
+      new InitializationRequest({
+        network: 'testnet',
+        configuration: {
+          factoryAddress: FACTORY_ADDRESS,
+          resolverAddress: RESOLVER_ADDRESS,
+        },
+        mirrorNode: mirrorNode,
+        rpcNode: rpcNode,
+      }),
+    );
 
-    this.account = new Account({
-      id: settings.hederaAccountId,
-      publicKey: accountMirror.publicKey,
+    Injectable.resolveTransactionHandler();
+
+    //Create a security for example a bond
+    const requestST = new CreateBondRequest({
+      name: name,
+      symbol: symbol,
+      isin: isin,
+      decimals: decimals,
+      isWhiteList: false,
+      isControllable: true,
+      isMultiPartition: false,
+      diamondOwnerAccount: FIREBLOCKS_SETTINGS.hederaAccountId,
+      currency: currency,
+      numberOfUnits: numberOfUnits.toString(),
+      nominalValue: nominalValue,
+      startingDate: startingDate.toString(),
+      maturityDate: maturityDate.toString(),
+      couponFrequency: couponFrequency.toString(),
+      couponRate: couponRate,
+      firstCouponDate: firstCouponDate.toString(),
+      regulationType: CastRegulationType.toNumber(regulationType),
+      regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
+      isCountryControlListWhiteList: true,
+      countries: countries,
+      info: info,
+      configId: configId,
+      configVersion: configVersion,
     });
 
-    this.initCustodialWalletService(settings);
-    this.initClient(settings.hederaAccountId, accountMirror.publicKey.key);
+    bond = (await Bond.create(requestST)).security;
 
-    const wallet = this.getSupportedWallet();
-    const eventData = this.createWalletPairedEvent(wallet);
-    this.eventService.emit(WalletEvents.walletPaired, eventData);
-    LogService.logTrace(`${wallet} registered as handler: `, eventData);
+    console.log(bond.diamondAddress);
+    console.log(bond.evmDiamondAddress);
 
-    return { account: this.getAccount() };
-  }
+    console.log('bond: ' + JSON.stringify(bond));
+  }, 600_000);
 
-  public getAccount(): Account {
-    return this.account;
-  }
-
-  async sign(message: string): Promise<string> {
-    if (!this.custodialWalletService)
-      throw new SigningError('Custodial Wallet is empty');
-
-    try {
-      const encoded_message: Uint8Array = Hex.toUint8Array(message);
-      const encoded_signed_message = await this.signingService(encoded_message);
-
-      const hexArray = Array.from(encoded_signed_message, (byte) =>
-        ('0' + byte.toString(16)).slice(-2),
-      );
-
-      return hexArray.join('');
-    } catch (error) {
-      LogService.logError(error);
-      throw new SigningError(error);
-    }
-  }
-}
+  it('Fireblocks should create a Bond', async () => {
+    expect(bond).not.toBeNull();
+  }, 60_000);
+});

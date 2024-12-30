@@ -203,7 +203,10 @@
 
 */
 
-import { DFNSConfigRequest } from '../src/port/in/request/ConnectRequest.js';
+import {
+  DFNSConfigRequest,
+  FireblocksConfigRequest,
+} from '../src/port/in/request/ConnectRequest.js';
 import Account from '../src/domain/context/account/Account.js';
 import PrivateKey from '../src/domain/context/account/PrivateKey.js';
 import PublicKey from '../src/domain/context/account/PublicKey.js';
@@ -298,4 +301,13 @@ export const DFNS_SETTINGS: DFNSConfigRequest = {
   walletId: process.env.DFNS_WALLET_ID ?? '',
   hederaAccountId: process.env.DFNS_HEDERA_ACCOUNT_ID ?? '',
   publicKey: process.env.DFNS_WALLET_PUBLIC_KEY ?? '',
+};
+
+export const FIREBLOCKS_SETTINGS: FireblocksConfigRequest = {
+  apiKey: process.env.FIREBLOCKS_API_KEY ?? '',
+  apiSecretKey: process.env.FIREBLOCKS_API_SECRET_KEY_PATH ?? '',
+  baseUrl: process.env.FIREBLOCKS_BASE_URL ?? '',
+  vaultAccountId: process.env.FIREBLOCKS_VAULT_ACCOUNT_ID ?? '',
+  assetId: process.env.FIREBLOCKS_ASSET_ID ?? '',
+  hederaAccountId: process.env.FIREBLOCKS_HEDERA_ACCOUNT_ID ?? '',
 };
