@@ -203,27 +203,8 @@
 
 */
 
+import { BaseContract, ContractFactory } from 'ethers'
 import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
-import { getContractInfo, contractIdToString, checkReceipts } from './utils'
-import { BusinessLogicRegistryData } from './businessLogicResolverLogic'
-import { contractCall } from './contractsLifeCycle/utils'
-import {
-    getStaticResolverKey,
-    createConfiguration,
-    registerBusinessLogics,
-} from './contractsMethods'
-import Configuration, { DeployedContract } from '../Configuration'
-import {
-    EQUITY_CONFIG_ID,
-    BOND_CONFIG_ID,
-    DeployContractCommand,
-    DeployContractResult,
-    DeployContractWithFactoryCommand,
-    DeployContractWithFactoryResult,
-    DeployAtsContractsCommand,
-    DeployAtsContractsResult,
-    DeployAtsFullInfrastructureCommand,
-} from '.'
 import {
     AccessControl__factory,
     AdjustBalances__factory,
@@ -240,6 +221,8 @@ import {
     ERC1644__factory,
     ERC20_2__factory,
     Factory__factory,
+    IDiamondCutManager__factory,
+    IStaticFunctionSelectors__factory,
     Lock_2__factory,
     Pause__factory,
     ProxyAdmin__factory,
@@ -250,7 +233,25 @@ import {
     TransferAndLock__factory,
     TransparentUpgradeableProxy__factory,
 } from '../typechain-types'
-import { BaseContract, ContractFactory } from 'ethers'
+import { checkReceipts } from './utils'
+import { BusinessLogicRegistryData } from './businessLogicResolverLogic'
+import { contractCall } from './contractsLifeCycle/utils'
+import Configuration from '../Configuration'
+import {
+    EQUITY_CONFIG_ID,
+    BOND_CONFIG_ID,
+    DeployContractCommand,
+    DeployContractResult,
+    DeployContractWithFactoryCommand,
+    DeployContractWithFactoryResult,
+    DeployAtsContractsCommand,
+    DeployAtsContractsResult,
+    DeployAtsFullInfrastructureCommand,
+    BusinessLogicResolverNotFound,
+    GAS_LIMIT,
+    MESSAGES,
+    DeployAtsFullInfrastructureResult,
+} from './index'
 
 export async function updateProxy(
     clientOperator: Client,
@@ -299,7 +300,7 @@ export async function deployAtsFullInfrastructure({
     signer,
     network,
     useDeployed,
-}: DeployAtsFullInfrastructureCommand) {
+}: DeployAtsFullInfrastructureCommand): Promise<DeployAtsFullInfrastructureResult> {
     const deployedContractsCommand = new DeployAtsContractsCommand({
         signer,
         network,
@@ -307,179 +308,147 @@ export async function deployAtsFullInfrastructure({
     })
     const deployedContracts = await deployAtsContracts(deployedContractsCommand)
 
-    const resolver = deployedContracts['resolver']
-    if (!resolver.proxy || !resolver.proxyAdmin) {
-        throw new Error('Resolver proxy or proxy admin not found')
+    const resolver = deployedContracts.businessLogicResolver
+    if (
+        !resolver.address ||
+        !resolver.proxyAddress ||
+        !resolver.proxyAdminAddress
+    ) {
+        throw new BusinessLogicResolverNotFound()
     }
 
-    const {
-        accesscontrol: accessControl,
-        cap,
-        controllist: controlList,
-        pause,
-        lock,
-        erc20,
-        erc1410,
-        erc1594,
-        erc1643,
-        erc1644,
-        snapshots,
-        diamondfacet: diamondFacet,
-        equity,
-        bond,
-        scheduledsnapshots: scheduledSnapshots,
-        scheduledbalanceadjustments: scheduledBalanceAdjustments,
-        scheduledtasks: scheduledTasks,
-        corporateactionssecurity: corporateActionsSecurity,
-        transferandlock: transferAndLock,
-        adjustbalances: adjustBalances,
-    } = deployedContracts
-
     const businessLogicRegistries: BusinessLogicRegistryData[] = []
-    for await (const { contract } of [
-        diamondFacet,
-        accessControl,
-        cap,
-        pause,
-        controlList,
-        erc20,
-        erc1644,
-        erc1410,
-        erc1594,
-        erc1643,
-        snapshots,
-        equity,
-        bond,
-        scheduledSnapshots,
-        scheduledBalanceAdjustments,
-        scheduledTasks,
-        corporateActionsSecurity,
-        lock,
-        transferAndLock,
-        adjustBalances,
-    ]) {
-        const businessLogicKey = await getStaticResolverKey(
-            contract.contractId,
-            clientOperator
+    for (const { contract } of Object.values(deployedContracts) as {
+        contract: BaseContract
+    }[]) {
+        const proxiedContract = IStaticFunctionSelectors__factory.connect(
+            contract.address,
+            contract.signer
         )
+        const result = await proxiedContract.getStaticResolverKey({
+            value: GAS_LIMIT.businessLogicResolver.getStaticResolverKey,
+        })
+
         businessLogicRegistries.push({
-            businessLogicKey,
-            businessLogicAddress: contract.evm_address.replace('0x', ''),
+            businessLogicKey: result,
+            businessLogicAddress: contract.address.replace('0x', ''),
         })
     }
 
     if (
         !useDeployed ||
-        ExistingContractIds.resolver.contract.num.toString() === '0'
+        !Configuration.contracts.BusinessLogicResolver.addresses?.[network]
     ) {
-        console.log('Registering business logics. please wait...')
-        await registerBusinessLogics(
-            businessLogicRegistries,
-            resolver.proxy!.contractId,
-            clientOperator
-        )
+        console.log(MESSAGES.businessLogicResolver.info.registering)
 
-        console.log('Creating configurations. please wait...')
-        const facetIdsCommon = await Promise.all(
-            [
-                diamondFacet,
-                accessControl,
-                cap,
-                pause,
-                controlList,
-                erc20,
-                erc1644,
-                erc1410,
-                erc1594,
-                erc1643,
-                snapshots,
-                scheduledSnapshots,
-                scheduledBalanceAdjustments,
-                scheduledTasks,
-                corporateActionsSecurity,
-                lock,
-                transferAndLock,
-                adjustBalances,
-            ].map(({ contract }) =>
-                getStaticResolverKey(contract.contractId, clientOperator)
+        let receipt = await (
+            await resolver.contract.registerBusinessLogics(
+                businessLogicRegistries
             )
-        )
+        ).wait()
 
-        const facetIdsEquities = [
-            ...facetIdsCommon,
-            await getStaticResolverKey(
-                equity.contract.contractId,
-                clientOperator
-            ),
-        ]
-        const facetVersionsEquities = Array(facetIdsEquities.length).fill(1)
+        if (receipt.status === 0) {
+            throw new Error(MESSAGES.businessLogicResolver.error.registering)
+        }
 
-        const facetIdsBonds = [
-            ...facetIdsCommon,
-            await getStaticResolverKey(
-                bond.contract.contractId,
-                clientOperator
-            ),
+        console.log(MESSAGES.businessLogicResolver.info.creatingConfigurations)
+
+        const commonFacetAddressList = {
+            diamondFacet: deployedContracts.diamondFacet.address,
+            accessControl: deployedContracts.accessControl.address,
+            cap: deployedContracts.cap.address,
+            pause: deployedContracts.pause.address,
+            controlList: deployedContracts.controlList.address,
+            erc20: deployedContracts.erc20.address,
+            erc1644: deployedContracts.erc1644.address,
+            erc1410ScheduledTasks:
+                deployedContracts.erc1410ScheduledTasks.address,
+            erc1594: deployedContracts.erc1594.address,
+            erc1643: deployedContracts.erc1643.address,
+            snapshots: deployedContracts.snapshots.address,
+            scheduledSnapshots: deployedContracts.scheduledSnapshots.address,
+            scheduledBalanceAdjustments:
+                deployedContracts.scheduledBalanceAdjustments.address,
+            scheduledTasks: deployedContracts.scheduledTasks.address,
+            corporateActionsSecurity:
+                deployedContracts.corporateActionsSecurity.address,
+            lock: deployedContracts.lock.address,
+            transferAndLock: deployedContracts.transferAndLock.address,
+            adjustBalances: deployedContracts.adjustBalances.address,
+        }
+
+        const equityResolverKey =
+            await IStaticFunctionSelectors__factory.connect(
+                deployedContracts.equityUSA.address,
+                deployedContracts.equityUSA.contract.signer
+            ).getStaticResolverKey({
+                value: GAS_LIMIT.businessLogicResolver.getStaticResolverKey,
+            })
+
+        const equityFacetAddressList = [
+            ...Object.values(commonFacetAddressList),
+            equityResolverKey,
         ]
-        const facetVersionsBonds = Array(facetIdsBonds.length).fill(1)
+        const equityFacetVersionList = Array(
+            equityFacetAddressList.length
+        ).fill(1)
+
+        const bondResolverKey = await IStaticFunctionSelectors__factory.connect(
+            deployedContracts.bondUSA.address,
+            deployedContracts.bondUSA.contract.signer
+        ).getStaticResolverKey({
+            value: GAS_LIMIT.businessLogicResolver.getStaticResolverKey,
+        })
+
+        const bondFacetAddressList = [
+            ...Object.values(commonFacetAddressList),
+            bondResolverKey,
+        ]
+        const bondFacetVersionList = Array(bondFacetAddressList.length).fill(1)
 
         // Create configuration for equities
-        await createConfiguration(
-            EQUITY_CONFIG_ID,
-            facetIdsEquities,
-            facetVersionsEquities,
-            resolver.proxy.contractId,
-            clientOperator
-        )
+        receipt = await (
+            await IDiamondCutManager__factory.connect(
+                resolver.proxyAddress,
+                signer
+            ).createConfiguration(
+                EQUITY_CONFIG_ID,
+                equityFacetAddressList.map((address, index) => ({
+                    id: address,
+                    version: equityFacetVersionList[index],
+                }))
+            )
+        ).wait()
+
+        if (receipt.status === 0) {
+            throw new Error(
+                MESSAGES.businessLogicResolver.error.creatingConfigurations
+            )
+        }
         // Create configuration for bonds
-        await createConfiguration(
-            BOND_CONFIG_ID,
-            facetIdsBonds,
-            facetVersionsBonds,
-            resolver.proxy.contractId,
-            clientOperator
-        )
+        receipt = await (
+            await IDiamondCutManager__factory.connect(
+                resolver.proxyAddress,
+                signer
+            ).createConfiguration(
+                BOND_CONFIG_ID,
+                bondFacetAddressList.map((address, index) => ({
+                    id: address,
+                    version: bondFacetVersionList[index],
+                }))
+            )
+        ).wait()
+
+        if (receipt.status === 0) {
+            throw new Error(
+                MESSAGES.businessLogicResolver.error.creatingConfigurations
+            )
+        }
     }
 
-    const factory = await deployOrUseExisting(
-        {
-            contract: ExistingContractIds.factory.contract,
-            proxy: ExistingContractIds.factory.proxy,
-            proxyAdmin: ExistingContractIds.factory.proxyAdmin,
-        },
-        () =>
-            deployContract({
-                clientOperator,
-                privateKey,
-                contractName: 'factory',
-                isED25519: isED25519,
-            })
-    )
-
-    return {
-        resolver,
-        accessControl,
-        cap,
-        controlList,
-        pause,
-        erc20,
-        erc1410,
-        erc1594,
-        erc1643,
-        erc1644,
-        snapshots,
-        diamondFacet,
-        equity,
-        bond,
-        scheduledSnapshots,
-        scheduledBalanceAdjustments,
-        scheduledTasks,
-        corporateActionsSecurity,
-        lock,
-        transferAndLock,
-        adjustBalances,
-        factory,
-    }
+    return new DeployAtsFullInfrastructureResult({
+        deployedContracts,
+    })
 }
 
 export async function deployAtsContracts({
@@ -491,140 +460,167 @@ export async function deployAtsContracts({
         factory: new DeployContractWithFactoryCommand({
             factory: new Factory__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.Factory.addresses?.[network],
+            deployProxy: true,
+            deployedContract: useDeployed
+                ? Configuration.contracts.Factory.addresses?.[network]
+                : undefined,
         }),
         businessLogicResolver: new DeployContractWithFactoryCommand({
             factory: new BusinessLogicResolver__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.BusinessLogicResolver.addresses?.[
-                    network
-                ],
+            deployProxy: true,
+            deployedContract: useDeployed
+                ? Configuration.contracts.BusinessLogicResolver.addresses?.[
+                      network
+                  ]
+                : undefined,
         }),
         accessControl: new DeployContractWithFactoryCommand({
             factory: new AccessControl__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.AccessControl.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.AccessControl.addresses?.[network]
+                : undefined,
         }),
         cap: new DeployContractWithFactoryCommand({
             factory: new Cap_2__factory(),
             signer,
-            deployedContract: Configuration.contracts.Cap.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.Cap.addresses?.[network]
+                : undefined,
         }),
         controlList: new DeployContractWithFactoryCommand({
             factory: new ControlList__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.ControlList.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.ControlList.addresses?.[network]
+                : undefined,
         }),
         pause: new DeployContractWithFactoryCommand({
             factory: new Pause__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.Pause.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.Pause.addresses?.[network]
+                : undefined,
         }),
         lock: new DeployContractWithFactoryCommand({
             factory: new Lock_2__factory(),
             signer,
-            deployedContract: Configuration.contracts.Lock.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.Lock.addresses?.[network]
+                : undefined,
         }),
         erc20: new DeployContractWithFactoryCommand({
             factory: new ERC20_2__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.ERC20.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC20.addresses?.[network]
+                : undefined,
         }),
         erc1410ScheduledTasks: new DeployContractWithFactoryCommand({
             factory: new ERC1410ScheduledTasks__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.ERC1410ScheduledTasks.addresses?.[
-                    network
-                ],
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC1410ScheduledTasks.addresses?.[
+                      network
+                  ]
+                : undefined,
         }),
         erc1594: new DeployContractWithFactoryCommand({
             factory: new ERC1594__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.ERC1594.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC1594.addresses?.[network]
+                : undefined,
         }),
         erc1643: new DeployContractWithFactoryCommand({
             factory: new ERC1643__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.ERC1643.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC1643.addresses?.[network]
+                : undefined,
         }),
         erc1644: new DeployContractWithFactoryCommand({
             factory: new ERC1644__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.ERC1644.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.ERC1644.addresses?.[network]
+                : undefined,
         }),
         snapshots: new DeployContractWithFactoryCommand({
             factory: new Snapshots_2__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.Snapshots.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.Snapshots.addresses?.[network]
+                : undefined,
         }),
         diamondFacet: new DeployContractWithFactoryCommand({
             factory: new DiamondFacet__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.DiamondFacet.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.DiamondFacet.addresses?.[network]
+                : undefined,
         }),
         equityUsa: new DeployContractWithFactoryCommand({
             factory: new EquityUSA__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.EquityUSA.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.EquityUSA.addresses?.[network]
+                : undefined,
         }),
         bondUsa: new DeployContractWithFactoryCommand({
             factory: new BondUSA__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.BondUSA.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.BondUSA.addresses?.[network]
+                : undefined,
         }),
         scheduledSnapshots: new DeployContractWithFactoryCommand({
             factory: new ScheduledSnapshots__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.ScheduledSnapshots.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.ScheduledSnapshots.addresses?.[
+                      network
+                  ]
+                : undefined,
         }),
         scheduledBalanceAdjustments: new DeployContractWithFactoryCommand({
             factory: new ScheduledBalanceAdjustments__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.ScheduledBalanceAdjustments.addresses?.[
-                    network
-                ],
+            deployedContract: useDeployed
+                ? Configuration.contracts.ScheduledBalanceAdjustments
+                      .addresses?.[network]
+                : undefined,
         }),
         scheduledTasks: new DeployContractWithFactoryCommand({
             factory: new ScheduledTasks__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.ScheduledTasks.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.ScheduledTasks.addresses?.[network]
+                : undefined,
         }),
         corporateActionsSecurity: new DeployContractWithFactoryCommand({
             factory: new CorporateActionsSecurity__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.CorporateActionsSecurity.addresses?.[
-                    network
-                ],
+            deployedContract: useDeployed
+                ? Configuration.contracts.CorporateActionsSecurity.addresses?.[
+                      network
+                  ]
+                : undefined,
         }),
         transferAndLock: new DeployContractWithFactoryCommand({
             factory: new TransferAndLock__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.TransferAndLock.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.TransferAndLock.addresses?.[network]
+                : undefined,
         }),
         adjustBalances: new DeployContractWithFactoryCommand({
             factory: new AdjustBalances__factory(),
             signer,
-            deployedContract:
-                Configuration.contracts.AdjustBalances.addresses?.[network],
+            deployedContract: useDeployed
+                ? Configuration.contracts.AdjustBalances.addresses?.[network]
+                : undefined,
         }),
     }
     return new DeployAtsContractsResult({
@@ -677,29 +673,62 @@ export async function deployContractWithFactory<
     signer,
     args,
     overrides,
+    deployProxy,
     deployedContract,
 }: DeployContractWithFactoryCommand<F>): Promise<
     DeployContractWithFactoryResult<C>
 > {
-    if (
-        deployedContract?.address &&
-        deployedContract?.proxyAddress &&
-        deployedContract?.proxyAdminAddress
-    ) {
-        return new DeployContractWithFactoryResult({
-            address: deployedContract.address,
-            contract: factory
-                .connect(signer)
-                .attach(deployedContract.address) as C,
-            proxyAddress: deployedContract.proxyAddress,
-            proxyAdminAddress: deployedContract.proxyAdminAddress,
-        })
+    if (deployProxy) {
+        if (
+            deployedContract?.address &&
+            deployedContract?.proxyAddress &&
+            deployedContract?.proxyAdminAddress
+        ) {
+            return new DeployContractWithFactoryResult({
+                address: deployedContract.address,
+                contract: factory
+                    .connect(signer)
+                    .attach(deployedContract.proxyAddress) as C,
+                proxyAddress: deployedContract.proxyAddress,
+                proxyAdminAddress: deployedContract.proxyAdminAddress,
+            })
+        }
+    } else {
+        if (deployedContract?.address) {
+            return new DeployContractWithFactoryResult({
+                address: deployedContract.address,
+                contract: factory
+                    .connect(signer)
+                    .attach(deployedContract.address) as C,
+            })
+        }
     }
 
     const contract = (await factory
         .connect(signer)
         .deploy(...args, overrides)) as C
     const receipt = await contract.deployTransaction.wait()
+
+    if (!deployProxy) {
+        try {
+            checkReceipts({
+                receipts: [receipt],
+            })
+        } catch (error) {
+            throw new Error(
+                `Error deploying contract with factory: ${JSON.stringify(
+                    error,
+                    null,
+                    2
+                )}`
+            )
+        }
+        return new DeployContractWithFactoryResult({
+            address: contract.address,
+            contract,
+            receipt,
+        })
+    }
 
     const proxyAdmin = await new ProxyAdmin__factory(signer).deploy()
     const proxyAdminReceipt = await proxyAdmin.deployTransaction.wait()
@@ -717,7 +746,11 @@ export async function deployContractWithFactory<
         })
     } catch (error) {
         throw new Error(
-            `Error deploying Factory: ${JSON.stringify(error, null, 2)}`
+            `Error deploying contract with factory: ${JSON.stringify(
+                error,
+                null,
+                2
+            )}`
         )
     }
 

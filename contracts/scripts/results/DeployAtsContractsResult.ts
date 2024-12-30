@@ -22,7 +22,7 @@ import {
     TransferAndLock,
     Lock,
 } from '../../typechain-types'
-import DeployContractWithFactoryResult from './DeployContractWithFactoryResult'
+import { DeployContractWithFactoryResult } from '../'
 
 export default class DeployAtsContractsResult {
     public readonly factory: DeployContractWithFactoryResult<Factory>

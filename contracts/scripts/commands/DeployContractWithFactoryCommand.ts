@@ -8,6 +8,7 @@ export default class DeployContractWithFactoryCommand<
     public readonly signer: Signer
     public readonly args: Array<any>
     public readonly overrides?: Overrides
+    public readonly deployProxy: boolean
     public readonly deployedContract?: DeployedContract
 
     constructor({
@@ -15,18 +16,21 @@ export default class DeployContractWithFactoryCommand<
         signer,
         args = [],
         overrides,
+        deployProxy = false,
         deployedContract,
     }: {
         factory: F
         signer: Signer
         args?: Array<any>
         overrides?: any
+        deployProxy?: boolean
         deployedContract?: DeployedContract
     }) {
         this.factory = factory
         this.signer = signer
         this.args = args
         this.overrides = overrides
+        this.deployProxy = deployProxy
         this.deployedContract = deployedContract
     }
 }

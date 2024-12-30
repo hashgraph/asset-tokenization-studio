@@ -203,6 +203,8 @@
    
    */
 
+import { getStaticResolverKey } from './contractsMethods'
+
 // * General
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const DEFAULT_PARTITION =
@@ -277,5 +279,28 @@ export const GAS_LIMIT = {
     high: 5_000_000,
     initilize: {
         businessLogicResolver: 8_000_000,
+    },
+    businessLogicResolver: {
+        getStaticResolverKey: 60_000,
+        registerBusinessLogics: 7_800_000,
+    },
+}
+
+// * Messages
+export const MESSAGES = {
+    deploy: {
+        success: 'Contract deployed successfully',
+        error: 'Error deploying contract',
+    },
+    businessLogicResolver: {
+        info: {
+            registering: 'Registering business logics. please wait...',
+            creatingConfigurations: 'Creating configurations. please wait...',
+        },
+        error: {
+            notFound: 'Business logic resolver not found',
+            registering: 'Error registering business logics',
+            creatingConfigurations: 'Error creating configurations',
+        },
     },
 }
