@@ -203,68 +203,130 @@
 
 */
 
-import { singleton } from 'tsyringe';
-import Injectable from '../../core/Injectable.js';
-import { RPCTransactionAdapter } from '../../port/out/rpc/RPCTransactionAdapter.js';
-import TransactionAdapter from '../../port/out/TransactionAdapter.js';
-import Service from './Service.js';
-import { SupportedWallets } from '../../domain/context/network/Wallet';
-import { InvalidWalletTypeError } from '../../domain/context/network/error/InvalidWalletAccountTypeError';
-import LogService from './LogService.js';
-import { HederaWalletConnectTransactionAdapter } from '../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
-import { DFNSTransactionAdapter } from '../../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
-import { FireblocksTransactionAdapter } from '../../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
-import { AWSKMSTransactionAdapter } from '../../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
+import {
+  SDK,
+  LoggerTransports,
+  CreateBondRequest,
+  SupportedWallets,
+  Network,
+  Bond,
+  InitializationRequest,
+} from '../../../src/index.js';
+import {
+  AWS_KMS_SETTINGS,
+  FACTORY_ADDRESS,
+  RESOLVER_ADDRESS,
+} from '../../config.js';
+import ConnectRequest from '../../../src/port/in/request/ConnectRequest.js';
+import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
+import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
+import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';
+import Injectable from '../../../src/core/Injectable.js';
+import {
+  CastRegulationSubType,
+  CastRegulationType,
+  RegulationSubType,
+  RegulationType,
+} from '../../../src/domain/context/factory/RegulationType.js';
 
-@singleton()
-export default class TransactionService extends Service {
-  constructor() {
-    super();
-  }
+SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
-  getHandler(): TransactionAdapter {
-    return Injectable.resolveTransactionHandler();
-  }
+const decimals = 0;
+const name = 'TEST_SECURITY_TOKEN';
+const symbol = 'TEST';
+const isin = 'ABCDE123456Z';
+const currency = '0x455552';
+const TIME = 30;
+const numberOfUnits = '1000';
+const nominalValue = '100';
+const currentTimeInSeconds = Math.floor(new Date().getTime() / 1000) + 1000;
+const startingDate = currentTimeInSeconds + TIME;
+const numberOfCoupons = 15;
+const couponFrequency = 7;
+const couponRate = '3';
+const maturityDate = startingDate + numberOfCoupons * couponFrequency;
+const firstCouponDate = startingDate + 1;
+const regulationType = RegulationType.REG_S;
+const regulationSubType = RegulationSubType.NONE;
+const countries = 'AF,HG,BN';
+const info = 'Anything';
+const configId =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const configVersion = 0;
 
-  setHandler(adp: TransactionAdapter): TransactionAdapter {
-    Injectable.registerTransactionHandler(adp);
-    return adp;
-  }
+const mirrorNode: MirrorNode = {
+  name: 'testmirrorNode',
+  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
+};
 
-  static getHandlerClass(type: SupportedWallets): TransactionAdapter {
-    switch (type) {
-      case SupportedWallets.METAMASK:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('METAMASK TransactionAdapter');
-        return Injectable.resolve(RPCTransactionAdapter);
-      case SupportedWallets.HWALLETCONNECT:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('HWALLETCONNECT TransactionAdapter');
-        return Injectable.resolve(HederaWalletConnectTransactionAdapter);
-      case SupportedWallets.DFNS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('DFNS TransactionAdapter');
-        return Injectable.resolve(DFNSTransactionAdapter);
-      case SupportedWallets.FIREBLOCKS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('FIREBLOCKS TransactionAdapter');
-        return Injectable.resolve(FireblocksTransactionAdapter);
-      case SupportedWallets.AWSKMS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('AWSKMS TransactionAdapter');
-        return Injectable.resolve(AWSKMSTransactionAdapter);
-      default:
-        throw new Error('Invalid wallet type');
-    }
-  }
-}
+const rpcNode: JsonRpcRelay = {
+  name: 'testrpcNode',
+  baseUrl: 'http://localhost:7546',
+};
+
+describe('AWSKMS Transaction Adapter test', () => {
+  let bond: SecurityViewModel;
+
+  beforeAll(async () => {
+    await Network.connect(
+      new ConnectRequest({
+        network: 'testnet',
+        wallet: SupportedWallets.AWSKMS,
+        mirrorNode: mirrorNode,
+        rpcNode: rpcNode,
+        custodialWalletSettings: AWS_KMS_SETTINGS,
+      }),
+    );
+    await Network.init(
+      new InitializationRequest({
+        network: 'testnet',
+        configuration: {
+          factoryAddress: FACTORY_ADDRESS,
+          resolverAddress: RESOLVER_ADDRESS,
+        },
+        mirrorNode: mirrorNode,
+        rpcNode: rpcNode,
+      }),
+    );
+
+    Injectable.resolveTransactionHandler();
+
+    //Create a security for example a bond
+    const requestST = new CreateBondRequest({
+      name: name,
+      symbol: symbol,
+      isin: isin,
+      decimals: decimals,
+      isWhiteList: false,
+      isControllable: true,
+      isMultiPartition: false,
+      diamondOwnerAccount: AWS_KMS_SETTINGS.hederaAccountId,
+      currency: currency,
+      numberOfUnits: numberOfUnits.toString(),
+      nominalValue: nominalValue,
+      startingDate: startingDate.toString(),
+      maturityDate: maturityDate.toString(),
+      couponFrequency: couponFrequency.toString(),
+      couponRate: couponRate,
+      firstCouponDate: firstCouponDate.toString(),
+      regulationType: CastRegulationType.toNumber(regulationType),
+      regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
+      isCountryControlListWhiteList: true,
+      countries: countries,
+      info: info,
+      configId: configId,
+      configVersion: configVersion,
+    });
+
+    bond = (await Bond.create(requestST)).security;
+
+    console.log(bond.diamondAddress);
+    console.log(bond.evmDiamondAddress);
+
+    console.log('bond: ' + JSON.stringify(bond));
+  }, 600_000);
+
+  it('AWSKMS should create a Bond', async () => {
+    expect(bond).not.toBeNull();
+  }, 60_000);
+});

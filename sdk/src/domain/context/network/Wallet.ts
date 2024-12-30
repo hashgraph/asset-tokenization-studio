@@ -212,6 +212,7 @@ export enum SupportedWallets {
   //CLIENT = 'Client',
   DFNS = 'DFNS',
   FIREBLOCKS = 'Fireblocks',
+  AWSKMS = 'AWSKMS'
 }
 
 export default interface Wallet {

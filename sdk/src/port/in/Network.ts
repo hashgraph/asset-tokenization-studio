@@ -209,6 +209,7 @@ import { CommandBus } from '../../core/command/CommandBus.js';
 import { InitializationData, NetworkData } from '../out/TransactionAdapter.js';
 import { ConnectCommand } from '../../app/usecase/command/network/connect/ConnectCommand.js';
 import ConnectRequest, {
+  AWSKMSConfigRequest,
   DFNSConfigRequest,
   FireblocksConfigRequest,
   SupportedWallets,
@@ -236,6 +237,7 @@ import { DFNSTransactionAdapter } from '../out/hs/hts/custodial/DFNSTransactionA
 import DfnsSettings from '../../domain/context/custodialWalletSettings/DfnsSettings.js';
 import { FireblocksTransactionAdapter } from '../out/hs/hts/custodial/FireblocksTransactionAdapter.js';
 import FireblocksSettings from '../../domain/context/custodialWalletSettings/FireblocksSettings.js';
+import { AWSKMSTransactionAdapter } from '../out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
 
 export { InitializationData, NetworkData, SupportedWallets };
 
@@ -355,6 +357,8 @@ class NetworkInPort implements INetworkInPort {
         wallets.push(SupportedWallets.DFNS);
       } else if (val instanceof FireblocksTransactionAdapter) {
         wallets.push(SupportedWallets.FIREBLOCKS);
+      } else if (val instanceof AWSKMSTransactionAdapter) {
+        wallets.push(SupportedWallets.AWSKMS);
       }
       await val.init();
 
@@ -409,7 +413,7 @@ class NetworkInPort implements INetworkInPort {
 
   private getCustodialSettings(
     req: ConnectRequest,
-  ): DfnsSettings | FireblocksSettings | undefined {
+  ): DfnsSettings | FireblocksSettings | AWSKMSConfigRequest | undefined {
     if (!req.custodialWalletSettings) {
       return undefined;
     }
@@ -423,6 +427,11 @@ class NetworkInPort implements INetworkInPort {
       case SupportedWallets.FIREBLOCKS:
         return RequestMapper.fireblocksRequestToFireblocksSettings(
           req.custodialWalletSettings as FireblocksConfigRequest,
+        );
+
+      case SupportedWallets.AWSKMS:
+        return RequestMapper.awsKmsRequestToAwsKmsSettings(
+          req.custodialWalletSettings as AWSKMSConfigRequest,
         );
 
       default:

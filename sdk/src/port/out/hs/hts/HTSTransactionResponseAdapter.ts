@@ -221,7 +221,7 @@ export class HTSTransactionResponseAdapter extends TransactionResponseAdapter {
   public static async manageResponse(
     network: string,
     transactionResponse: HTransactionResponse,
-    responseType: TransactionType,
+    responseType: TransactionType = TransactionType.RECEIPT,
     client: Client,
     nameFunction?: string,
     abi?: object[],

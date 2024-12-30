@@ -235,6 +235,7 @@ import { HTSTransactionResponseAdapter } from '../HTSTransactionResponseAdapter.
 import DfnsSettings from '../../../../../domain/context/custodialWalletSettings/DfnsSettings.js';
 import { HederaId } from '../../../../../domain/context/shared/HederaId.js';
 import FireblocksSettings from '../../../../../domain/context/custodialWalletSettings/FireblocksSettings.js';
+import AWSKMSSettings from '../../../../../domain/context/custodialWalletSettings/AWSKMSSettings.js';
 
 export abstract class CustodialTransactionAdapter extends HederaTransactionAdapter {
   protected client: Client;
@@ -331,7 +332,7 @@ export abstract class CustodialTransactionAdapter extends HederaTransactionAdapt
   }
 
   protected abstract initCustodialWalletService(
-    settings: DfnsSettings | FireblocksSettings,
+    settings: DfnsSettings | FireblocksSettings | AWSKMSSettings,
   ): void;
 
   protected abstract getSupportedWallet(): SupportedWallets;

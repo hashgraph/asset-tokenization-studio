@@ -212,6 +212,7 @@ import { InitializationData } from '../../../../../port/out/TransactionAdapter.j
 import HWCSettings from '../../../../../domain/context/walletConnect/HWCSettings';
 import DfnsSettings from '../../../../../domain/context/custodialWalletSettings/DfnsSettings.js';
 import FireblocksSettings from '../../../../../domain/context/custodialWalletSettings/FireblocksSettings.js';
+import AWSKMSSettings from '../../../../../domain/context/custodialWalletSettings/AWSKMSSettings.js';
 
 export class ConnectCommandResponse implements CommandResponse {
   constructor(
@@ -227,7 +228,10 @@ export class ConnectCommand extends Command<ConnectCommandResponse> {
     public readonly account?: Account,
     public readonly HWCSettings?: HWCSettings,
     public readonly debug?: boolean,
-    public readonly custodialSettings?: DfnsSettings | FireblocksSettings,
+    public readonly custodialSettings?:
+      | DfnsSettings
+      | FireblocksSettings
+      | AWSKMSSettings,
   ) {
     super();
   }

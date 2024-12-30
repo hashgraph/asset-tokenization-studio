@@ -299,6 +299,7 @@ import { GetAggregatedBalanceAdjustmentFactorQueryHandler } from '../app/usecase
 import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler.js';
 import { DFNSTransactionAdapter } from '../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
 import { FireblocksTransactionAdapter } from '../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
+import { AWSKMSTransactionAdapter } from '../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -625,6 +626,10 @@ const TRANSACTION_HANDLER = [
     token: TOKENS.TRANSACTION_HANDLER,
     useClass: FireblocksTransactionAdapter,
   },
+  {
+    token: TOKENS.TRANSACTION_HANDLER,
+    useClass: AWSKMSTransactionAdapter,
+  },
 ];
 
 const defaultNetworkProps: NetworkProps = {
@@ -712,6 +717,7 @@ export default class Injectable {
       Injectable.resolve(HederaWalletConnectTransactionAdapter),
       Injectable.resolve(DFNSTransactionAdapter),
       Injectable.resolve(FireblocksTransactionAdapter),
+      Injectable.resolve(AWSKMSTransactionAdapter),
     );
     return adapters;
   }

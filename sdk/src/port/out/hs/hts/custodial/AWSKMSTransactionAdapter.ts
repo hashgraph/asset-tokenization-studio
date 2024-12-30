@@ -203,68 +203,49 @@
 
 */
 
+import {
+	AWSKMSConfig,
+	CustodialWalletService,
+} from '@hashgraph/hedera-custodians-integration';
 import { singleton } from 'tsyringe';
-import Injectable from '../../core/Injectable.js';
-import { RPCTransactionAdapter } from '../../port/out/rpc/RPCTransactionAdapter.js';
-import TransactionAdapter from '../../port/out/TransactionAdapter.js';
-import Service from './Service.js';
-import { SupportedWallets } from '../../domain/context/network/Wallet';
-import { InvalidWalletTypeError } from '../../domain/context/network/error/InvalidWalletAccountTypeError';
-import LogService from './LogService.js';
-import { HederaWalletConnectTransactionAdapter } from '../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
-import { DFNSTransactionAdapter } from '../../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
-import { FireblocksTransactionAdapter } from '../../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
-import { AWSKMSTransactionAdapter } from '../../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
+import LogService from '../../../../../app/service/LogService';
+import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
+import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
+import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';
+import AWSKMSSettings from '../../../../../domain/context/custodialWalletSettings/AWSKMSSettings';
 
 @singleton()
-export default class TransactionService extends Service {
-  constructor() {
-    super();
-  }
+export class AWSKMSTransactionAdapter extends CustodialTransactionAdapter {
+	init(): Promise<string> {
+		this.eventService.emit(WalletEvents.walletInit, {
+			wallet: SupportedWallets.AWSKMS,
+			initData: {},
+		});
+		LogService.logTrace('AWS KMS Initialized');
+		return Promise.resolve(this.networkService.environment);
+	}
 
-  getHandler(): TransactionAdapter {
-    return Injectable.resolveTransactionHandler();
-  }
+	initCustodialWalletService(settings: AWSKMSSettings): void {
+		this.custodialWalletService = new CustodialWalletService(
+			new AWSKMSConfig(
+				settings.awsAccessKeyId,
+				settings.awsSecretAccessKey,
+				settings.awsRegion,
+				settings.awsKmsKeyId,
+			),
+		);
+	}
 
-  setHandler(adp: TransactionAdapter): TransactionAdapter {
-    Injectable.registerTransactionHandler(adp);
-    return adp;
-  }
+	getSupportedWallet(): SupportedWallets {
+		return SupportedWallets.AWSKMS;
+	}
 
-  static getHandlerClass(type: SupportedWallets): TransactionAdapter {
-    switch (type) {
-      case SupportedWallets.METAMASK:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('METAMASK TransactionAdapter');
-        return Injectable.resolve(RPCTransactionAdapter);
-      case SupportedWallets.HWALLETCONNECT:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('HWALLETCONNECT TransactionAdapter');
-        return Injectable.resolve(HederaWalletConnectTransactionAdapter);
-      case SupportedWallets.DFNS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('DFNS TransactionAdapter');
-        return Injectable.resolve(DFNSTransactionAdapter);
-      case SupportedWallets.FIREBLOCKS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('FIREBLOCKS TransactionAdapter');
-        return Injectable.resolve(FireblocksTransactionAdapter);
-      case SupportedWallets.AWSKMS:
-        if (!Injectable.isWeb()) {
-          throw new InvalidWalletTypeError();
-        }
-        LogService.logTrace('AWSKMS TransactionAdapter');
-        return Injectable.resolve(AWSKMSTransactionAdapter);
-      default:
-        throw new Error('Invalid wallet type');
-    }
-  }
+	stop(): Promise<boolean> {
+		this.client?.close();
+		LogService.logTrace('AWS KMS stopped');
+		this.eventService.emit(WalletEvents.walletDisconnect, {
+			wallet: SupportedWallets.AWSKMS,
+		});
+		return Promise.resolve(true);
+	}
 }

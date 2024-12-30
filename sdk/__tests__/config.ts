@@ -204,6 +204,7 @@
 */
 
 import {
+  AWSKMSConfigRequest,
   DFNSConfigRequest,
   FireblocksConfigRequest,
 } from '../src/port/in/request/ConnectRequest.js';
@@ -310,4 +311,12 @@ export const FIREBLOCKS_SETTINGS: FireblocksConfigRequest = {
   vaultAccountId: process.env.FIREBLOCKS_VAULT_ACCOUNT_ID ?? '',
   assetId: process.env.FIREBLOCKS_ASSET_ID ?? '',
   hederaAccountId: process.env.FIREBLOCKS_HEDERA_ACCOUNT_ID ?? '',
+};
+
+export const AWS_KMS_SETTINGS: AWSKMSConfigRequest = {
+	awsAccessKeyId: process.env.AWS_KMS_ACCESS_KEY_ID ?? '',
+	awsSecretAccessKey: process.env.AWS_KMS_SECRET_ACCESS_KEY ?? '',
+	awsRegion: process.env.AWS_KMS_REGION ?? '',
+	awsKmsKeyId: process.env.AWS_KMS_KEY_ID ?? '',
+	hederaAccountId: process.env.AWS_KMS_HEDERA_ACCOUNT_ID ?? '',
 };
