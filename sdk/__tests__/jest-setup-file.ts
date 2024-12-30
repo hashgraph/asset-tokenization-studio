@@ -1537,6 +1537,22 @@ jest.mock(
   },
 );
 
+jest.mock('../src/port/out/hs/hts/custodial/AWSKMSTransactionAdapter', () => {
+  const actual = jest.requireActual(
+    '../src/port/out/hs/hts/custodial/AWSKMSTransactionAdapter.ts',
+  );
+
+  const singletonInstance = new actual.AWSKMSTransactionAdapter();
+
+  singletonInstance.init = jest.fn(async () => {
+    return network;
+  });
+
+  return {
+    AWSKMSTransactionAdapter: jest.fn(() => singletonInstance),
+  };
+});
+
 jest.mock(
   '../src/port/out/hs/hts/custodial/CustodialTransactionAdapter',
   () => {

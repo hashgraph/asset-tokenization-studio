@@ -203,105 +203,130 @@
 
 */
 
-import { OptionalField } from '../../../core/decorator/OptionalDecorator.js';
-import { Environment } from '../../../domain/context/network/Environment.js';
-import { MirrorNode } from '../../../domain/context/network/MirrorNode.js';
-import { JsonRpcRelay } from '../../../domain/context/network/JsonRpcRelay.js';
-import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
-import { BaseRequest, RequestAccount } from './BaseRequest.js';
-import ValidatedRequest from './validation/ValidatedRequest.js';
-import Validation from './validation/Validation.js';
+import {
+  SDK,
+  LoggerTransports,
+  CreateBondRequest,
+  SupportedWallets,
+  Network,
+  Bond,
+  InitializationRequest,
+} from '../../../src/index.js';
+import {
+  AWS_KMS_SETTINGS,
+  FACTORY_ADDRESS,
+  RESOLVER_ADDRESS,
+} from '../../config.js';
+import ConnectRequest from '../../../src/port/in/request/ConnectRequest.js';
+import { MirrorNode } from '../../../src/domain/context/network/MirrorNode.js';
+import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay.js';
+import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel.js';
+import Injectable from '../../../src/core/Injectable.js';
+import {
+  CastRegulationSubType,
+  CastRegulationType,
+  RegulationSubType,
+  RegulationType,
+} from '../../../src/domain/context/factory/RegulationType.js';
 
-export { SupportedWallets };
+SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
-export interface DFNSConfigRequest {
-  authorizationToken: string;
-  credentialId: string;
-  serviceAccountPrivateKey: string;
-  urlApplicationOrigin: string;
-  applicationId: string;
-  baseUrl: string;
-  walletId: string;
-  hederaAccountId: string;
-  publicKey: string;
-}
+const decimals = 0;
+const name = 'TEST_SECURITY_TOKEN';
+const symbol = 'TEST';
+const isin = 'ABCDE123456Z';
+const currency = '0x455552';
+const TIME = 30;
+const numberOfUnits = '1000';
+const nominalValue = '100';
+const currentTimeInSeconds = Math.floor(new Date().getTime() / 1000) + 1000;
+const startingDate = currentTimeInSeconds + TIME;
+const numberOfCoupons = 15;
+const couponFrequency = 7;
+const couponRate = '3';
+const maturityDate = startingDate + numberOfCoupons * couponFrequency;
+const firstCouponDate = startingDate + 1;
+const regulationType = RegulationType.REG_S;
+const regulationSubType = RegulationSubType.NONE;
+const countries = 'AF,HG,BN';
+const info = 'Anything';
+const configId =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const configVersion = 0;
 
-export interface FireblocksConfigRequest {
-  apiSecretKey: string;
-  apiKey: string;
-  baseUrl: string;
-  vaultAccountId: string;
-  assetId: string;
-  hederaAccountId: string;
-}
-
-export interface AWSKMSConfigRequest {
-  awsAccessKeyId: string;
-  awsSecretAccessKey: string;
-  awsRegion: string;
-  awsKmsKeyId: string;
-  hederaAccountId: string;
-}
-
-export type CustodialSettings =
-  | DFNSConfigRequest
-  | FireblocksConfigRequest
-  | AWSKMSConfigRequest;
-
-export type HWCRequestSettings = {
-  projectId: string;
-  dappName: string;
-  dappDescription: string;
-  dappURL: string;
-  dappIcons: string[];
+const mirrorNode: MirrorNode = {
+  name: 'testmirrorNode',
+  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
 };
 
-export default class ConnectRequest
-  extends ValidatedRequest<ConnectRequest>
-  implements BaseRequest
-{
-  @OptionalField()
-  account?: RequestAccount;
-  network: Environment;
-  mirrorNode: MirrorNode;
-  rpcNode: JsonRpcRelay;
-  wallet: SupportedWallets;
-  hwcSettings?: HWCRequestSettings;
-  debug?: boolean;
-  custodialWalletSettings?: CustodialSettings;
+const rpcNode: JsonRpcRelay = {
+  name: 'testrpcNode',
+  baseUrl: 'http://localhost:7546',
+};
 
-  constructor({
-    account,
-    network,
-    mirrorNode,
-    rpcNode,
-    wallet,
-    hwcSettings,
-    debug,
-    custodialWalletSettings,
-  }: {
-    account?: RequestAccount;
-    network: Environment;
-    mirrorNode: MirrorNode;
-    rpcNode: JsonRpcRelay;
-    wallet: SupportedWallets;
-    hwcSettings?: HWCRequestSettings;
-    debug?: boolean;
-    custodialWalletSettings?: CustodialSettings;
-  }) {
-    super({
-      account: Validation.checkAccount(),
-      wallet: Validation.checkString({ emptyCheck: true }),
+describe('AWSKMS Transaction Adapter test', () => {
+  let bond: SecurityViewModel;
+
+  beforeAll(async () => {
+    await Network.connect(
+      new ConnectRequest({
+        network: 'testnet',
+        wallet: SupportedWallets.AWSKMS,
+        mirrorNode: mirrorNode,
+        rpcNode: rpcNode,
+        custodialWalletSettings: AWS_KMS_SETTINGS,
+      }),
+    );
+    await Network.init(
+      new InitializationRequest({
+        network: 'testnet',
+        configuration: {
+          factoryAddress: FACTORY_ADDRESS,
+          resolverAddress: RESOLVER_ADDRESS,
+        },
+        mirrorNode: mirrorNode,
+        rpcNode: rpcNode,
+      }),
+    );
+
+    Injectable.resolveTransactionHandler();
+
+    //Create a security for example a bond
+    const requestST = new CreateBondRequest({
+      name: name,
+      symbol: symbol,
+      isin: isin,
+      decimals: decimals,
+      isWhiteList: false,
+      isControllable: true,
+      isMultiPartition: false,
+      diamondOwnerAccount: AWS_KMS_SETTINGS.hederaAccountId,
+      currency: currency,
+      numberOfUnits: numberOfUnits.toString(),
+      nominalValue: nominalValue,
+      startingDate: startingDate.toString(),
+      maturityDate: maturityDate.toString(),
+      couponFrequency: couponFrequency.toString(),
+      couponRate: couponRate,
+      firstCouponDate: firstCouponDate.toString(),
+      regulationType: CastRegulationType.toNumber(regulationType),
+      regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
+      isCountryControlListWhiteList: true,
+      countries: countries,
+      info: info,
+      configId: configId,
+      configVersion: configVersion,
     });
-    this.account = account;
-    this.network = network;
-    this.mirrorNode = mirrorNode;
-    this.rpcNode = rpcNode;
-    this.wallet = wallet;
-    this.debug = debug;
-    this.hwcSettings = hwcSettings;
-    this.custodialWalletSettings = custodialWalletSettings;
-  }
 
-  [n: string]: any;
-}
+    bond = (await Bond.create(requestST)).security;
+
+    console.log(bond.diamondAddress);
+    console.log(bond.evmDiamondAddress);
+
+    console.log('bond: ' + JSON.stringify(bond));
+  }, 600_000);
+
+  it('AWSKMS should create a Bond', async () => {
+    expect(bond).not.toBeNull();
+  }, 60_000);
+});

@@ -203,105 +203,49 @@
 
 */
 
-import { OptionalField } from '../../../core/decorator/OptionalDecorator.js';
-import { Environment } from '../../../domain/context/network/Environment.js';
-import { MirrorNode } from '../../../domain/context/network/MirrorNode.js';
-import { JsonRpcRelay } from '../../../domain/context/network/JsonRpcRelay.js';
-import { SupportedWallets } from '../../../domain/context/network/Wallet.js';
-import { BaseRequest, RequestAccount } from './BaseRequest.js';
-import ValidatedRequest from './validation/ValidatedRequest.js';
-import Validation from './validation/Validation.js';
+import {
+  AWSKMSConfig,
+  CustodialWalletService,
+} from '@hashgraph/hedera-custodians-integration';
+import { singleton } from 'tsyringe';
+import LogService from '../../../../../app/service/LogService';
+import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
+import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
+import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';
+import AWSKMSSettings from '../../../../../domain/context/custodialWalletSettings/AWSKMSSettings';
 
-export { SupportedWallets };
-
-export interface DFNSConfigRequest {
-  authorizationToken: string;
-  credentialId: string;
-  serviceAccountPrivateKey: string;
-  urlApplicationOrigin: string;
-  applicationId: string;
-  baseUrl: string;
-  walletId: string;
-  hederaAccountId: string;
-  publicKey: string;
-}
-
-export interface FireblocksConfigRequest {
-  apiSecretKey: string;
-  apiKey: string;
-  baseUrl: string;
-  vaultAccountId: string;
-  assetId: string;
-  hederaAccountId: string;
-}
-
-export interface AWSKMSConfigRequest {
-  awsAccessKeyId: string;
-  awsSecretAccessKey: string;
-  awsRegion: string;
-  awsKmsKeyId: string;
-  hederaAccountId: string;
-}
-
-export type CustodialSettings =
-  | DFNSConfigRequest
-  | FireblocksConfigRequest
-  | AWSKMSConfigRequest;
-
-export type HWCRequestSettings = {
-  projectId: string;
-  dappName: string;
-  dappDescription: string;
-  dappURL: string;
-  dappIcons: string[];
-};
-
-export default class ConnectRequest
-  extends ValidatedRequest<ConnectRequest>
-  implements BaseRequest
-{
-  @OptionalField()
-  account?: RequestAccount;
-  network: Environment;
-  mirrorNode: MirrorNode;
-  rpcNode: JsonRpcRelay;
-  wallet: SupportedWallets;
-  hwcSettings?: HWCRequestSettings;
-  debug?: boolean;
-  custodialWalletSettings?: CustodialSettings;
-
-  constructor({
-    account,
-    network,
-    mirrorNode,
-    rpcNode,
-    wallet,
-    hwcSettings,
-    debug,
-    custodialWalletSettings,
-  }: {
-    account?: RequestAccount;
-    network: Environment;
-    mirrorNode: MirrorNode;
-    rpcNode: JsonRpcRelay;
-    wallet: SupportedWallets;
-    hwcSettings?: HWCRequestSettings;
-    debug?: boolean;
-    custodialWalletSettings?: CustodialSettings;
-  }) {
-    super({
-      account: Validation.checkAccount(),
-      wallet: Validation.checkString({ emptyCheck: true }),
+@singleton()
+export class AWSKMSTransactionAdapter extends CustodialTransactionAdapter {
+  init(): Promise<string> {
+    this.eventService.emit(WalletEvents.walletInit, {
+      wallet: SupportedWallets.AWSKMS,
+      initData: {},
     });
-    this.account = account;
-    this.network = network;
-    this.mirrorNode = mirrorNode;
-    this.rpcNode = rpcNode;
-    this.wallet = wallet;
-    this.debug = debug;
-    this.hwcSettings = hwcSettings;
-    this.custodialWalletSettings = custodialWalletSettings;
+    LogService.logTrace('AWS KMS Initialized');
+    return Promise.resolve(this.networkService.environment);
   }
 
-  [n: string]: any;
+  initCustodialWalletService(settings: AWSKMSSettings): void {
+    this.custodialWalletService = new CustodialWalletService(
+      new AWSKMSConfig(
+        settings.awsAccessKeyId,
+        settings.awsSecretAccessKey,
+        settings.awsRegion,
+        settings.awsKmsKeyId,
+      ),
+    );
+  }
+
+  getSupportedWallet(): SupportedWallets {
+    return SupportedWallets.AWSKMS;
+  }
+
+  stop(): Promise<boolean> {
+    this.client?.close();
+    LogService.logTrace('AWS KMS stopped');
+    this.eventService.emit(WalletEvents.walletDisconnect, {
+      wallet: SupportedWallets.AWSKMS,
+    });
+    return Promise.resolve(true);
+  }
 }

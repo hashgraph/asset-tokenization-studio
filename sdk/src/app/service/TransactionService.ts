@@ -214,6 +214,7 @@ import LogService from './LogService.js';
 import { HederaWalletConnectTransactionAdapter } from '../../port/out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
 import { DFNSTransactionAdapter } from '../../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
 import { FireblocksTransactionAdapter } from '../../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
+import { AWSKMSTransactionAdapter } from '../../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
 
 @singleton()
 export default class TransactionService extends Service {
@@ -256,6 +257,12 @@ export default class TransactionService extends Service {
         }
         LogService.logTrace('FIREBLOCKS TransactionAdapter');
         return Injectable.resolve(FireblocksTransactionAdapter);
+      case SupportedWallets.AWSKMS:
+        if (!Injectable.isWeb()) {
+          throw new InvalidWalletTypeError();
+        }
+        LogService.logTrace('AWSKMS TransactionAdapter');
+        return Injectable.resolve(AWSKMSTransactionAdapter);
       default:
         throw new Error('Invalid wallet type');
     }
