@@ -1,10 +1,10 @@
-import { BigNumber, Contract, Overrides } from 'ethers'
+import { Contract, Overrides } from 'ethers'
 
 export default class CallContractCommand {
-    private _contract: Contract
-    private _method: string
-    private _args: Array<any>
-    private _overrides?: Overrides
+    public readonly contract: Contract
+    public readonly method: string
+    public readonly args: Array<any>
+    public readonly overrides?: Overrides
 
     constructor({
         contract,
@@ -17,24 +17,9 @@ export default class CallContractCommand {
         args: Array<any>
         overrides?: Overrides
     }) {
-        this._contract = contract
-        this._method = method
-        this._args = args
-        this._overrides = overrides
-    }
-
-    get contract(): Contract {
-        return this._contract
-    }
-    get method(): string {
-        return this._method
-    }
-
-    get args(): Array<any> {
-        return this._args
-    }
-
-    get overrides(): Overrides | undefined {
-        return this._overrides
+        this.contract = contract
+        this.method = method
+        this.args = args
+        this.overrides = overrides
     }
 }

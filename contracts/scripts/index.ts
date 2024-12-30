@@ -36,8 +36,10 @@ export {
 } from './constants'
 
 // * Commands
+export { default as BaseCommand } from './commands/BaseCommand'
 export { default as DeployContractCommand } from './commands/DeployContractCommand'
 export { default as DeployAtsContractsCommand } from './commands/DeployAtsContractsCommand'
+export { default as DeployAtsFullInfrastructureCommand } from './commands/DeployAtsFullInfrastructureCommand'
 export { default as DeployContractWithFactoryCommand } from './commands/DeployContractWithFactoryCommand'
 export { default as CallContractCommand } from './commands/CallContractCommand'
 
