@@ -204,8 +204,8 @@
 */
 
 import {
-	AWSKMSConfig,
-	CustodialWalletService,
+  AWSKMSConfig,
+  CustodialWalletService,
 } from '@hashgraph/hedera-custodians-integration';
 import { singleton } from 'tsyringe';
 import LogService from '../../../../../app/service/LogService';
@@ -216,36 +216,36 @@ import AWSKMSSettings from '../../../../../domain/context/custodialWalletSetting
 
 @singleton()
 export class AWSKMSTransactionAdapter extends CustodialTransactionAdapter {
-	init(): Promise<string> {
-		this.eventService.emit(WalletEvents.walletInit, {
-			wallet: SupportedWallets.AWSKMS,
-			initData: {},
-		});
-		LogService.logTrace('AWS KMS Initialized');
-		return Promise.resolve(this.networkService.environment);
-	}
+  init(): Promise<string> {
+    this.eventService.emit(WalletEvents.walletInit, {
+      wallet: SupportedWallets.AWSKMS,
+      initData: {},
+    });
+    LogService.logTrace('AWS KMS Initialized');
+    return Promise.resolve(this.networkService.environment);
+  }
 
-	initCustodialWalletService(settings: AWSKMSSettings): void {
-		this.custodialWalletService = new CustodialWalletService(
-			new AWSKMSConfig(
-				settings.awsAccessKeyId,
-				settings.awsSecretAccessKey,
-				settings.awsRegion,
-				settings.awsKmsKeyId,
-			),
-		);
-	}
+  initCustodialWalletService(settings: AWSKMSSettings): void {
+    this.custodialWalletService = new CustodialWalletService(
+      new AWSKMSConfig(
+        settings.awsAccessKeyId,
+        settings.awsSecretAccessKey,
+        settings.awsRegion,
+        settings.awsKmsKeyId,
+      ),
+    );
+  }
 
-	getSupportedWallet(): SupportedWallets {
-		return SupportedWallets.AWSKMS;
-	}
+  getSupportedWallet(): SupportedWallets {
+    return SupportedWallets.AWSKMS;
+  }
 
-	stop(): Promise<boolean> {
-		this.client?.close();
-		LogService.logTrace('AWS KMS stopped');
-		this.eventService.emit(WalletEvents.walletDisconnect, {
-			wallet: SupportedWallets.AWSKMS,
-		});
-		return Promise.resolve(true);
-	}
+  stop(): Promise<boolean> {
+    this.client?.close();
+    LogService.logTrace('AWS KMS stopped');
+    this.eventService.emit(WalletEvents.walletDisconnect, {
+      wallet: SupportedWallets.AWSKMS,
+    });
+    return Promise.resolve(true);
+  }
 }

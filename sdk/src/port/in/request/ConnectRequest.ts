@@ -236,14 +236,17 @@ export interface FireblocksConfigRequest {
 }
 
 export interface AWSKMSConfigRequest {
-   awsAccessKeyId: string;
-   awsSecretAccessKey: string;
-   awsRegion: string;
-   awsKmsKeyId: string;
-   hederaAccountId: string;
+  awsAccessKeyId: string;
+  awsSecretAccessKey: string;
+  awsRegion: string;
+  awsKmsKeyId: string;
+  hederaAccountId: string;
 }
 
-export type CustodialSettings = DFNSConfigRequest | FireblocksConfigRequest | AWSKMSConfigRequest;
+export type CustodialSettings =
+  | DFNSConfigRequest
+  | FireblocksConfigRequest
+  | AWSKMSConfigRequest;
 
 export type HWCRequestSettings = {
   projectId: string;

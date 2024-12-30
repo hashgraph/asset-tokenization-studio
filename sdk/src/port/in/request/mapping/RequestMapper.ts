@@ -384,14 +384,14 @@ export default class RequestMapper {
   }
 
   public static awsKmsRequestToAwsKmsSettings(
-		req: AWSKMSConfigRequest,
-	): AWSKMSSettings {
-		return new AWSKMSSettings(
-			req.awsAccessKeyId,
-			req.awsSecretAccessKey,
-			req.awsRegion,
-			req.awsKmsKeyId,
-			req.hederaAccountId,
-		);
-	}
+    req: AWSKMSConfigRequest,
+  ): AWSKMSSettings {
+    return new AWSKMSSettings(
+      req.awsAccessKeyId,
+      req.awsSecretAccessKey,
+      req.awsRegion,
+      req.awsKmsKeyId,
+      req.hederaAccountId,
+    );
+  }
 }
