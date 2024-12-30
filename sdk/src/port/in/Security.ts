@@ -383,8 +383,6 @@ class SecurityInPort implements ISecurityInPort {
   async getLocksId(request: GetLocksIdRequest): Promise<string[]> {
     handleValidation('GetLocksIdRequest', request);
 
-    const lockIds: string[] = [];
-
     const res = (
       await this.queryBus.execute(
         new LocksIdQuery(
@@ -396,9 +394,7 @@ class SecurityInPort implements ISecurityInPort {
       )
     ).payload;
 
-    for (let i = 0; i < res.length; i++) {
-      lockIds.push(res.toString());
-    }
+    const lockIds: string[] = res.map((id) => id.toString());
 
     return lockIds;
   }

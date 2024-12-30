@@ -243,6 +243,7 @@ import { VotingRights } from "./Components/VotingRights/VotingRights";
 import { Coupons } from "./Components/Coupons/Coupons";
 import { Management } from "./Components/Management/Management";
 import { BalanceAdjustment } from "./Components/BalanceAdjustment/BalanceAdjustment";
+import { Locker } from "./Components/Locker/Locker";
 
 export const DigitalSecurityDetails = () => {
   const { t: tHeader } = useTranslation("security", {
@@ -385,6 +386,13 @@ export const DigitalSecurityDetails = () => {
       });
     }
 
+    if (!isPaused) {
+      adminTabs.push({
+        content: <Locker />,
+        header: tTabs("locker"),
+      });
+    }
+
     if (equityDetails?.votingRight && hasCorporateActionsRole && !isPaused) {
       adminTabs.push({
         content: <VotingRights />,
@@ -403,7 +411,6 @@ export const DigitalSecurityDetails = () => {
       adminTabs.push({ content: <Coupons />, header: tTabs("coupons") });
     }
 
-    // TODO: check if there are some permissions to display it
     adminTabs.push({
       content: <Management id={id} />,
       header: tTabs("management"),

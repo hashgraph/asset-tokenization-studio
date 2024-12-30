@@ -210,6 +210,7 @@ import { Environment } from '../../../../../domain/context/network/Environment.j
 import { SupportedWallets } from '../../../../../domain/context/network/Wallet.js';
 import { InitializationData } from '../../../../../port/out/TransactionAdapter.js';
 import HWCSettings from '../../../../../domain/context/walletConnect/HWCSettings';
+import DfnsSettings from '../../../../../domain/context/custodialWalletSettings/DfnsSettings.js';
 
 export class ConnectCommandResponse implements CommandResponse {
   constructor(
@@ -225,6 +226,7 @@ export class ConnectCommand extends Command<ConnectCommandResponse> {
     public readonly account?: Account,
     public readonly HWCSettings?: HWCSettings,
     public readonly debug?: boolean,
+    public readonly custodialSettings?: DfnsSettings,
   ) {
     super();
   }

@@ -297,6 +297,7 @@ import { GetScheduledBalanceAdjustmentCountQueryHandler } from '../app/usecase/q
 import { GetLastAggregatedBalanceAdjustmentFactorForQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQueryHandler.js';
 import { GetAggregatedBalanceAdjustmentFactorQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getAggregatedBalanceAdjustmentFactor/GetAggregatedBalanceAdjustmentFactorQueryHandler';
 import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler.js';
+import { DFNSTransactionAdapter } from '../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -615,6 +616,10 @@ const TRANSACTION_HANDLER = [
     token: TOKENS.TRANSACTION_HANDLER,
     useClass: HederaWalletConnectTransactionAdapter,
   },
+  {
+    token: TOKENS.TRANSACTION_HANDLER,
+    useClass: DFNSTransactionAdapter,
+  },
 ];
 
 const defaultNetworkProps: NetworkProps = {
@@ -700,6 +705,7 @@ export default class Injectable {
     adapters.push(
       Injectable.resolve(RPCTransactionAdapter),
       Injectable.resolve(HederaWalletConnectTransactionAdapter),
+      Injectable.resolve(DFNSTransactionAdapter),
     );
     return adapters;
   }

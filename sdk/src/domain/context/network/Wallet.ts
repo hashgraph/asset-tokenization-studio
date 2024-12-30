@@ -210,6 +210,7 @@ export enum SupportedWallets {
   HWALLETCONNECT = 'HWALLETCONNECT',
   // HASHPACK = 'HashPack',
   //CLIENT = 'Client',
+  DFNS = 'DFNS',
 }
 
 export default interface Wallet {
