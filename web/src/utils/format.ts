@@ -244,11 +244,14 @@ export const toDate = (date: string | Date = new Date()) =>
   date instanceof Date ? date : new Date(date);
 
 export const formatDate = (
-  date?: string | Date,
+  date?: string | Date | number,
   format = "dd/MM/yyyy",
   defaultValue = "",
 ) => {
   if (!date) return defaultValue;
+
+  if (typeof date === "number") return _formatDate(date, format);
+
   return _formatDate(toDate(date), format);
 };
 
