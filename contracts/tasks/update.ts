@@ -210,7 +210,7 @@ import {
     UpdateBusinessLogicKeysArgs,
     UpdateFactoryVersionArgs,
 } from './Arguments'
-import { BusinessLogicRegistryData } from '../scripts/businessLogicResolverLogic'
+import { BusinessLogicRegistryData } from '../scripts/businessLogicResolver'
 import { getProxyImpl, updateProxy } from '../scripts/deploy'
 import {
     getStaticResolverKey,

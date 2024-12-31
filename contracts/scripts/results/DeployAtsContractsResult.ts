@@ -1,3 +1,5 @@
+import { BaseContract } from 'ethers'
+import { AtsContracts } from '../../Configuration'
 import {
     Factory,
     BusinessLogicResolver,
@@ -22,9 +24,36 @@ import {
     TransferAndLock,
     Lock,
 } from '../../typechain-types'
-import { DeployContractWithFactoryResult } from '../'
+import { DeployContractWithFactoryResult } from '../index'
 
-export default class DeployAtsContractsResult {
+type DeployAtsContractsResultParams = {
+    factory: DeployContractWithFactoryResult<Factory>
+    businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
+    accessControl: DeployContractWithFactoryResult<AccessControl>
+    cap: DeployContractWithFactoryResult<Cap>
+    controlList: DeployContractWithFactoryResult<ControlList>
+    pause: DeployContractWithFactoryResult<Pause>
+    erc20: DeployContractWithFactoryResult<ERC20>
+    erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
+    erc1594: DeployContractWithFactoryResult<ERC1594>
+    erc1643: DeployContractWithFactoryResult<ERC1643>
+    erc1644: DeployContractWithFactoryResult<ERC1644>
+    diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
+    equityUSA: DeployContractWithFactoryResult<EquityUSA>
+    bondUSA: DeployContractWithFactoryResult<BondUSA>
+    scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
+    scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
+    scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
+    snapshots: DeployContractWithFactoryResult<Snapshots>
+    corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActionsSecurity>
+    transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
+    lock: DeployContractWithFactoryResult<Lock>
+    adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
+}
+
+export default class DeployAtsContractsResult extends AtsContracts<
+    DeployContractWithFactoryResult<BaseContract>
+> {
     public readonly factory: DeployContractWithFactoryResult<Factory>
     public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
     public readonly accessControl: DeployContractWithFactoryResult<AccessControl>
@@ -71,30 +100,8 @@ export default class DeployAtsContractsResult {
         transferAndLock,
         lock,
         adjustBalances,
-    }: {
-        factory: DeployContractWithFactoryResult<Factory>
-        businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-        accessControl: DeployContractWithFactoryResult<AccessControl>
-        cap: DeployContractWithFactoryResult<Cap>
-        controlList: DeployContractWithFactoryResult<ControlList>
-        pause: DeployContractWithFactoryResult<Pause>
-        erc20: DeployContractWithFactoryResult<ERC20>
-        erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
-        erc1594: DeployContractWithFactoryResult<ERC1594>
-        erc1643: DeployContractWithFactoryResult<ERC1643>
-        erc1644: DeployContractWithFactoryResult<ERC1644>
-        diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
-        equityUSA: DeployContractWithFactoryResult<EquityUSA>
-        bondUSA: DeployContractWithFactoryResult<BondUSA>
-        scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
-        scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
-        scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
-        snapshots: DeployContractWithFactoryResult<Snapshots>
-        corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActionsSecurity>
-        transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
-        lock: DeployContractWithFactoryResult<Lock>
-        adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
-    }) {
+    }: DeployAtsContractsResultParams) {
+        super()
         this.factory = factory
         this.businessLogicResolver = businessLogicResolver
         this.accessControl = accessControl

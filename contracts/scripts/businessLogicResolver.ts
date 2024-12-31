@@ -205,7 +205,11 @@
 
 //import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ethers } from 'hardhat'
-import { IBusinessLogicResolver } from '../typechain-types'
+import {
+    IBusinessLogicResolver,
+    IBusinessLogicResolver__factory,
+    IStaticFunctionSelectors__factory,
+} from '../typechain-types'
 import { IStaticFunctionSelectors } from '../typechain-types'
 import {
     transparentUpgradableProxy,
@@ -213,6 +217,14 @@ import {
     deployTransparentUpgradeableProxy,
 } from './transparentUpgradableProxy'
 import { expect } from 'chai'
+import {
+    GAS_LIMIT,
+    MESSAGES,
+    RegisterBusinessLogicsCommand,
+    validateTxResponse,
+    ValidateTxResponseCommand,
+} from '.'
+import { EVENTS } from './constants'
 
 export interface BusinessLogicRegistryData {
     businessLogicKey: string
@@ -305,22 +317,59 @@ export async function deployBusinessLogics(
     }
 }
 
-export async function registerBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    const businessLogicsData: BusinessLogicRegistryData[] = []
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        if (key === 'businessLogicResolver' || key === 'factory') {
-            continue
-        }
-        const businessLogic = deployedAndRegisteredBusinessLogics[key]
-        businessLogicsData.push({
-            businessLogicKey: await businessLogic.getStaticResolverKey(),
-            businessLogicAddress: businessLogic.address,
+/**
+ * Registers business logic contracts with a resolver.
+ *
+ * This function performs the following steps:
+ * 1. Gets business logic keys from each contract in the provided address list
+ * 2. Creates registry data objects containing keys and addresses
+ * 3. Registers the business logics with the resolver contract
+ * 4. Validates the transaction response
+ *
+ * @param deployedContractAddressList - Object containing addresses of deployed contracts to register
+ * @param businessLogicResolver - Address of the business logic resolver contract
+ * @param signer - Ethereum signer to execute transactions
+ *
+ * @throws Will throw an error if registration transaction fails validation
+ *
+ * @remarks
+ * Each contract in the address list must implement the IStaticFunctionSelectors interface
+ */
+export async function registerBusinessLogics({
+    deployedContractAddressList,
+    businessLogicResolver,
+    signer,
+}: RegisterBusinessLogicsCommand): Promise<void> {
+    const businessLogicRegistries: BusinessLogicRegistryData[] =
+        await Promise.all(
+            Object.values(deployedContractAddressList).map(async (address) => {
+                const proxiedContract =
+                    IStaticFunctionSelectors__factory.connect(address, signer)
+                const businessLogicKey =
+                    await proxiedContract.getStaticResolverKey({
+                        value: GAS_LIMIT.businessLogicResolver
+                            .getStaticResolverKey,
+                    })
+
+                return {
+                    businessLogicKey,
+                    businessLogicAddress: address.replace('0x', ''),
+                }
+            })
+        )
+
+    const resolverContract = IBusinessLogicResolver__factory.connect(
+        businessLogicResolver,
+        signer
+    )
+    const response = await resolverContract.registerBusinessLogics(
+        businessLogicRegistries
+    )
+    await validateTxResponse(
+        new ValidateTxResponseCommand({
+            txResponse: response,
+            confirmationEvent: EVENTS.businessLogicResolver.registered,
+            errorMessage: MESSAGES.businessLogicResolver.error.registering,
         })
-    }
-    await expect(
-        businessLogicResolver.registerBusinessLogics(businessLogicsData)
-    ).to.emit(businessLogicResolver, 'BusinessLogicsRegistered')
+    )
 }

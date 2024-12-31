@@ -216,7 +216,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { assertObject } from '../../assert'
 import { DEFAULT_ADMIN_ROLE } from '../../../scripts/constants'
 import { FacetConfiguration } from '../../../scripts/resolverDiamondCut.js'
-import { BusinessLogicRegistryData } from '../../../scripts/businessLogicResolverLogic.js'
+import { BusinessLogicRegistryData } from '../../../scripts/businessLogicResolver.js'
 
 describe('ResolverProxy Tests', () => {
     const CONFIG_ID =

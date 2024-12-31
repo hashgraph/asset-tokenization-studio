@@ -234,7 +234,6 @@ import {
     TransparentUpgradeableProxy__factory,
 } from '../typechain-types'
 import { checkReceipts } from './utils'
-import { BusinessLogicRegistryData } from './businessLogicResolverLogic'
 import { contractCall } from './contractsLifeCycle/utils'
 import Configuration from '../Configuration'
 import {
@@ -253,6 +252,8 @@ import {
     DeployAtsFullInfrastructureResult,
     validateTxResponse,
     ValidateTxResponseCommand,
+    registerBusinessLogics,
+    RegisterBusinessLogicsCommand,
 } from './index'
 
 export async function updateProxy(
@@ -327,36 +328,17 @@ export async function deployAtsFullInfrastructure({
     if (!usingDeployed) {
         // * Register business logic contracts
         console.log(MESSAGES.businessLogicResolver.info.registering)
-        const businessLogicRegistries: BusinessLogicRegistryData[] =
-            await Promise.all(
-                Object.values(deployedContracts).map(async ({ contract }) => {
-                    const proxiedContract =
-                        IStaticFunctionSelectors__factory.connect(
-                            contract.address,
-                            contract.signer
-                        )
-                    const result = await proxiedContract.getStaticResolverKey({
-                        value: GAS_LIMIT.businessLogicResolver
-                            .getStaticResolverKey,
-                    })
-
-                    return {
-                        businessLogicKey: result,
-                        businessLogicAddress: contract.address.replace(
-                            '0x',
-                            ''
-                        ),
-                    }
-                })
-            )
-
-        let response = await resolver.contract.registerBusinessLogics(
-            businessLogicRegistries
+        const { factory, businessLogicResolver, ...contractsToRegister } =
+            deployedContracts
+        const contractAddressList = Object.values(contractsToRegister).map(
+            (contract) => contract.address
         )
-        await validateTxResponse(
-            new ValidateTxResponseCommand({
-                txResponse: response,
-                errorMessage: MESSAGES.businessLogicResolver.error.registering,
+
+        await registerBusinessLogics(
+            new RegisterBusinessLogicsCommand({
+                deployedContractAddressList: contractAddressList,
+                businessLogicResolver: resolver.address,
+                signer,
             })
         )
 
@@ -418,7 +400,7 @@ export async function deployAtsFullInfrastructure({
 
         // Create configuration for equities
 
-        response = await IDiamondCutManager__factory.connect(
+        let response = await IDiamondCutManager__factory.connect(
             resolver.proxyAddress,
             signer
         ).createConfiguration(

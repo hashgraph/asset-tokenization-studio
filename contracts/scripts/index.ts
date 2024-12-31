@@ -29,11 +29,10 @@ export {
     WRONG_PARTITION_ERROR_ID,
     ALLOWANCE_REACHED_ERROR_ID,
     SUCCESS,
-    EQUITY_DEPLOYED_EVENT,
-    BOND_DEPLOYED_EVENT,
     REGEX,
-    GAS_LIMIT,
     MESSAGES,
+    GAS_LIMIT,
+    EVENTS,
 } from './constants'
 
 // * Commands
@@ -45,6 +44,7 @@ export { default as DeployAtsFullInfrastructureCommand } from './commands/Deploy
 export { default as DeployContractWithFactoryCommand } from './commands/DeployContractWithFactoryCommand'
 export { default as CallContractCommand } from './commands/CallContractCommand'
 export { default as ValidateTxResponseCommand } from './commands/ValidateTxResponseCommand'
+export { default as RegisterBusinessLogicsCommand } from './commands/RegisterBusinessLogicsCommand'
 
 // * Results
 export { default as DeployContractResult } from './results/DeployContractResult'
@@ -59,3 +59,6 @@ export { default as TransactionReceiptError } from './errors/TransactionReceiptE
 
 // * Bloackain functions
 export { validateTxResponse } from './blockchain'
+
+// * BusinessLogicResolver
+export { registerBusinessLogics } from './businessLogicResolver'

@@ -203,6 +203,8 @@
    
    */
 
+import { equity } from '../typechain-types/contracts/layer_2'
+import { businessLogicResolver } from './businessLogicResolver'
 import { getStaticResolverKey } from './contractsMethods'
 
 // * General
@@ -261,8 +263,17 @@ export const ALLOWANCE_REACHED_ERROR_ID = '0x49'
 export const SUCCESS = '0x00'
 
 // * Events
-export const EQUITY_DEPLOYED_EVENT = 'EquityDeployed'
-export const BOND_DEPLOYED_EVENT = 'BondDeployed'
+export const EVENTS = {
+    businessLogicResolver: {
+        registered: 'BusinessLogicRegistered',
+    },
+    equity: {
+        deployed: 'EquityDeployed',
+    },
+    bond: {
+        deployed: 'BondDeployed',
+    },
+}
 
 // * Regular expressions
 export const REGEX = {
