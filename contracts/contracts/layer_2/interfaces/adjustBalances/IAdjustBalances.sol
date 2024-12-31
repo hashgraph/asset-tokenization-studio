@@ -220,13 +220,13 @@ interface IAdjustBalances {
         uint256 _timestamp
     ) external view returns (uint256);
 
-    function getLABAFForUser(address _account) external view returns (uint256);
+    function getLABAFByUser(address _account) external view returns (uint256);
 
-    function getLABAFForPartition(
+    function getLABAFByPartition(
         bytes32 _partition
     ) external view returns (uint256);
 
-    function getLABAFForUserAndPartition(
+    function getLABAFByUserAndPartition(
         bytes32 _partition,
         address _account
     ) external view returns (uint256);

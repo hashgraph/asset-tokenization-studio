@@ -219,20 +219,20 @@ library AdjustBalances_CD_Lib {
         return abi.decode(data, (uint256));
     }
 
-    function getLABAFForUser(address _account) internal view returns (uint256) {
+    function getLABAFByUser(address _account) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('getLABAFForUser(address)', _account)
+            abi.encodeWithSignature('getLABAFByUser(address)', _account)
         );
         return abi.decode(data, (uint256));
     }
 
-    function getLABAFForUserAndPartition(
+    function getLABAFByUserAndPartition(
         bytes32 _partition,
         address _account
     ) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature(
-                'getLABAFForUserAndPartition(bytes32,address)',
+                'getLABAFByUserAndPartition(bytes32,address)',
                 _partition,
                 _account
             )
@@ -254,11 +254,11 @@ library AdjustBalances_CD_Lib {
         return abi.decode(data, (uint256));
     }
 
-    function getLABAFForPartition(
+    function getLABAFByPartition(
         bytes32 _partition
     ) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('getLABAFForPartition(bytes32)', _partition)
+            abi.encodeWithSignature('getLABAFByPartition(bytes32)', _partition)
         );
         return abi.decode(data, (uint256));
     }

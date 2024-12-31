@@ -264,7 +264,7 @@ abstract contract CapStorageWrapper_2 is
     ) internal view virtual returns (uint256 maxSupply_) {
         uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
-            AdjustBalances_CD_Lib.getLABAFForPartition(_partition)
+            AdjustBalances_CD_Lib.getLABAFByPartition(_partition)
         );
         return _getMaxSupplyByPartition(_partition) * factor;
     }

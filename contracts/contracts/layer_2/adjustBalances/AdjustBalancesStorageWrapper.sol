@@ -298,19 +298,19 @@ contract AdjustBalancesStorageWrapper is
         return abaf * pendingABAF;
     }
 
-    function _getLABAFForUser(
+    function _getLABAFByUser(
         address _account
     ) internal view virtual returns (uint256) {
         return _getAdjustBalancesStorage().labaf[_account];
     }
 
-    function _getLABAFForPartition(
+    function _getLABAFByPartition(
         bytes32 _partition
     ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().labafPartition[_partition];
+        return _getAdjustBalancesStorage().labafByPartition[_partition];
     }
 
-    function _getLABAFForUserAndPartition(
+    function _getLABAFByUserAndPartition(
         bytes32 _partition,
         address _account
     ) internal view virtual returns (uint256) {

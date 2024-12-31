@@ -260,23 +260,23 @@ contract AdjustBalances is
         return _getABAFAdjustedAt(_timestamp);
     }
 
-    function getLABAFForUser(
+    function getLABAFByUser(
         address _account
     ) external view virtual override returns (uint256) {
-        return _getLABAFForUser(_account);
+        return _getLABAFByUser(_account);
     }
 
-    function getLABAFForPartition(
+    function getLABAFByPartition(
         bytes32 _partition
     ) external view virtual override returns (uint256) {
-        return _getLABAFForPartition(_partition);
+        return _getLABAFByPartition(_partition);
     }
 
-    function getLABAFForUserAndPartition(
+    function getLABAFByUserAndPartition(
         bytes32 _partition,
         address _account
     ) external view virtual override returns (uint256) {
-        return _getLABAFForUserAndPartition(_partition, _account);
+        return _getLABAFByUserAndPartition(_partition, _account);
     }
 
     function getAllowanceLABAF(
@@ -345,13 +345,13 @@ contract AdjustBalances is
             .getABAFAdjustedAt
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLABAFForUser
+            .getLABAFByUser
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLABAFForPartition
+            .getLABAFByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLABAFForUserAndPartition
+            .getLABAFByUserAndPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getAllowanceLABAF

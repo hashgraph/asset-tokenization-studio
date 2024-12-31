@@ -275,7 +275,7 @@ library AdjustBalanceLib {
             storage _adjustBalanceStorage
     ) internal {
         uint256 abaf = _adjustBalanceStorage.abaf;
-        uint256 labaf = _adjustBalanceStorage.labafPartition[_partition];
+        uint256 labaf = _adjustBalanceStorage.labafByPartition[_partition];
 
         if (abaf == labaf) return;
 
@@ -288,7 +288,7 @@ library AdjustBalanceLib {
             _partition
         );
         uint256 labafSlot = MappingLib.getSlotForBytes32MappingKey(
-            _adjustBalanceStorage.labafPartition,
+            _adjustBalanceStorage.labafByPartition,
             _partition
         );
 

@@ -343,7 +343,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
     ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjusted(),
-            AdjustBalances_CD_Lib.getLABAFForPartition(_partition)
+            AdjustBalances_CD_Lib.getLABAFByPartition(_partition)
         );
         return _totalSupplyByPartition(_partition) * factor;
     }
@@ -404,7 +404,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
     ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
-            AdjustBalances_CD_Lib.getLABAFForUser(_tokenHolder)
+            AdjustBalances_CD_Lib.getLABAFByUser(_tokenHolder)
         );
         return _balanceOf(_tokenHolder) * factor;
     }
@@ -428,7 +428,7 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
     ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
-            AdjustBalances_CD_Lib.getLABAFForUserAndPartition(
+            AdjustBalances_CD_Lib.getLABAFByUserAndPartition(
                 _partition,
                 _tokenHolder
             )
