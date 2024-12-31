@@ -324,28 +324,31 @@ export async function deployAtsFullInfrastructure({
         throw new BusinessLogicResolverNotFound()
     }
 
-    // * Register business logic contracts
-    const businessLogicRegistries: BusinessLogicRegistryData[] =
-        await Promise.all(
-            Object.values(deployedContracts).map(async ({ contract }) => {
-                const proxiedContract =
-                    IStaticFunctionSelectors__factory.connect(
-                        contract.address,
-                        contract.signer
-                    )
-                const result = await proxiedContract.getStaticResolverKey({
-                    value: GAS_LIMIT.businessLogicResolver.getStaticResolverKey,
-                })
-
-                return {
-                    businessLogicKey: result,
-                    businessLogicAddress: contract.address.replace('0x', ''),
-                }
-            })
-        )
-
     if (!usingDeployed) {
+        // * Register business logic contracts
         console.log(MESSAGES.businessLogicResolver.info.registering)
+        const businessLogicRegistries: BusinessLogicRegistryData[] =
+            await Promise.all(
+                Object.values(deployedContracts).map(async ({ contract }) => {
+                    const proxiedContract =
+                        IStaticFunctionSelectors__factory.connect(
+                            contract.address,
+                            contract.signer
+                        )
+                    const result = await proxiedContract.getStaticResolverKey({
+                        value: GAS_LIMIT.businessLogicResolver
+                            .getStaticResolverKey,
+                    })
+
+                    return {
+                        businessLogicKey: result,
+                        businessLogicAddress: contract.address.replace(
+                            '0x',
+                            ''
+                        ),
+                    }
+                })
+            )
 
         let response = await resolver.contract.registerBusinessLogics(
             businessLogicRegistries
@@ -357,6 +360,7 @@ export async function deployAtsFullInfrastructure({
             })
         )
 
+        // * Create configurations for equities and bonds
         console.log(MESSAGES.businessLogicResolver.info.creatingConfigurations)
 
         const commonFacetAddressList = {

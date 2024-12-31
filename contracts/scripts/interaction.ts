@@ -6,6 +6,7 @@ import {
 } from '@ethersproject/providers'
 
 // * External functions
+
 export async function callReadContract({
     contract,
     method,
