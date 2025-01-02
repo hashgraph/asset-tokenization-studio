@@ -242,7 +242,7 @@ import {
   ISSUE_GAS,
   LOCK_GAS,
   MAX_ROLES_GAS,
-  PAUSE_GAS,
+  PAUSE_GAS, PROTECT_PARTITION_GAS,
   REDEEM_GAS,
   RELEASE_GAS,
   REMOVE_DOCUMENT_GAS,
@@ -1627,6 +1627,25 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setContractId(securityId)
       .setGas(SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS)
       .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async protectPartitions(
+      security: EvmAddress,
+      securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'protectPartitions';
+    LogService.logTrace(
+        `Protecting Partitions for security: ${security.toString()}`,
+    );
+
+    const functionParameters = new ContractFunctionParameters();
+
+    const transaction = new ContractExecuteTransaction()
+        .setContractId(securityId)
+        .setGas(PROTECT_PARTITION_GAS)
+        .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
   }

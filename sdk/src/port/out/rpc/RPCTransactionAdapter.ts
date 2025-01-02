@@ -290,7 +290,7 @@ import {
   UPDATE_RESOLVER_GAS,
   UPDATE_MATURITY_DATE_GAS,
   SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
-  SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS,
+  SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS, PROTECT_PARTITION_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -315,7 +315,7 @@ import {
   IBond,
   IEquity,
   Lock__factory,
-  Pause__factory,
+  Pause__factory, ProtectedPartitions__factory,
   ScheduledTasks__factory,
   Snapshots__factory,
   TransferAndLock__factory,
@@ -1649,6 +1649,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       }),
       this.networkService.environment,
       SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
+    );
+  }
+
+  async protectPartitions(
+      address: EvmAddress,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+        `Protecting Partitions for security: ${address.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+        await ProtectedPartitions__factory.connect(
+            address.toString(),
+            this.signerOrProvider,
+        ).protectPartitions({ gasLimit: PROTECT_PARTITION_GAS }),
+        this.networkService.environment,
     );
   }
 }
