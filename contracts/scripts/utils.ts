@@ -446,20 +446,6 @@ async function getFromMirrorNode<T>({
     return undefined
 }
 
-export function checkReceipts({
-    receipts,
-}: {
-    receipts: TransactionReceipt[]
-}) {
-    for (const receipt of receipts) {
-        if (receipt.status === 0) {
-            throw new Error(
-                `Transaction failed. Transaction status = 0 for transaction: ${receipt.transactionHash}`
-            )
-        }
-    }
-}
-
 // * Time
 export async function delay({
     time,

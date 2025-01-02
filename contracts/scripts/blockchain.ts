@@ -33,3 +33,13 @@ export async function validateTxResponse({
         txReceipt,
     })
 }
+
+export async function validateTxResponseList(
+    txResponseList: ValidateTxResponseCommand[]
+): Promise<ValidateTxResponseResult[]> {
+    return Promise.all(
+        txResponseList.map(async (txResponse) => {
+            return await validateTxResponse(txResponse)
+        })
+    )
+}

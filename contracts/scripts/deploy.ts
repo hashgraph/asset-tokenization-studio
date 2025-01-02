@@ -203,12 +203,7 @@
 
 */
 
-import {
-    BaseContract,
-    Contract,
-    ContractFactory,
-    ContractReceipt,
-} from 'ethers'
+import { Contract, ContractFactory, ContractTransaction } from 'ethers'
 import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
 import {
     AccessControl__factory,
@@ -236,8 +231,6 @@ import {
     TransferAndLock__factory,
     TransparentUpgradeableProxy__factory,
 } from '../typechain-types'
-import { checkReceipts } from './utils'
-import { contractCall } from './contractsLifeCycle/utils'
 import Configuration from '../Configuration'
 import {
     MESSAGES,
@@ -254,6 +247,8 @@ import {
     CreateAllConfigurationsCommand,
     registerBusinessLogics,
     createAllConfigurations,
+    validateTxResponseList,
+    ValidateTxResponseCommand,
 } from './index'
 
 export async function deployAtsFullInfrastructure({
@@ -536,7 +531,7 @@ export async function deployContractWithFactory<
     let implementationContract: C
     let proxyAddress: string | undefined
     let proxyAdminAddress: string | undefined
-    let receiptList: Promise<ContractReceipt>[] = []
+    let txResponseList: ContractTransaction[] = []
 
     if (deployedContract?.address) {
         implementationContract = factory.attach(deployedContract.address) as C
@@ -544,27 +539,23 @@ export async function deployContractWithFactory<
         implementationContract = (await factory
             .connect(signer)
             .deploy(...args, overrides)) as C
-        receiptList.push(implementationContract.deployTransaction.wait())
+        txResponseList.push(implementationContract.deployTransaction)
     }
 
     if (!withProxy) {
-        try {
-            checkReceipts({
-                receipts: await Promise.all(receiptList),
-            })
-        } catch (error) {
-            throw new Error(
-                `Error deploying contract with factory: ${JSON.stringify(
-                    error,
-                    null,
-                    2
-                )}`
+        await validateTxResponseList(
+            txResponseList.map(
+                (txResponse) =>
+                    new ValidateTxResponseCommand({
+                        txResponse,
+                        errorMessage: MESSAGES.deploy.error,
+                    })
             )
-        }
+        )
         return new DeployContractWithFactoryResult({
             address: implementationContract.address,
             contract: implementationContract,
-            receipt: await receiptList[0],
+            receipt: await txResponseList[0].wait(),
         })
     }
 
@@ -572,7 +563,7 @@ export async function deployContractWithFactory<
         proxyAdminAddress = deployedContract.proxyAdminAddress
     } else {
         const proxyAdmin = await new ProxyAdmin__factory(signer).deploy()
-        receiptList.push(proxyAdmin.deployTransaction.wait())
+        txResponseList.push(proxyAdmin.deployTransaction)
         proxyAdminAddress = proxyAdmin.address
     }
 
@@ -582,16 +573,26 @@ export async function deployContractWithFactory<
         const proxy = await new TransparentUpgradeableProxy__factory(
             signer
         ).deploy(implementationContract.address, proxyAdminAddress, '0x')
-        receiptList.push(proxy.deployTransaction.wait())
+        txResponseList.push(proxy.deployTransaction)
         proxyAddress = proxy.address
     }
+
+    await validateTxResponseList(
+        txResponseList.map(
+            (txResponse) =>
+                new ValidateTxResponseCommand({
+                    txResponse,
+                    errorMessage: MESSAGES.deploy.error,
+                })
+        )
+    )
 
     return new DeployContractWithFactoryResult({
         address: implementationContract.address,
         contract: factory.attach(proxyAddress) as C,
         proxyAddress: proxyAddress,
         proxyAdminAddress: proxyAdminAddress,
-        receipt: await receiptList[0],
+        receipt: await txResponseList[0].wait(),
     })
 }
 
