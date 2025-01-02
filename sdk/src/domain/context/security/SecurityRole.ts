@@ -203,6 +203,9 @@
 
 */
 
+import {ethers} from "ethers";
+import { keccak256 } from 'js-sha3';
+
 export enum SecurityRole {
   _DEFAULT_ADMIN_ROLE = '0x0000000000000000000000000000000000000000000000000000000000000000',
   _ISSUER_ROLE = '0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842',
@@ -219,6 +222,28 @@ export enum SecurityRole {
   _PROTECTED_PARTITIONS_PARTICIPANT_ROLE = '0xdaba153046c65d49da6a7597abc24374aa681e3eee7004426ca6185b3927a3f5',
   _WILD_CARD_ROLE = '0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46'
 }
+
+
+export function getProtectedPartitionRole(partitionId: string): string {
+  let partitionBytes32: string;
+
+  if (ethers.utils.isHexString(partitionId) && partitionId.length === 66) {
+    partitionBytes32 = partitionId;
+  } else {
+    partitionBytes32 = ethers.utils.formatBytes32String(partitionId);
+  }
+
+  const encodedValue = ethers.utils.defaultAbiCoder.encode(
+      ['bytes32', 'bytes32'],
+      [
+        ethers.utils.formatBytes32String(SecurityRole._PROTECTED_PARTITION_ROLE),
+        partitionBytes32,
+      ],
+  );
+  const hash = keccak256(encodedValue);
+  return hash;
+}
+
 
 export const MAX_ACCOUNTS_ROLES = 10;
 

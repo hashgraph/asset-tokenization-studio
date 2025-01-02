@@ -241,7 +241,7 @@ import {
   Factory__factory,
   Lock__factory,
   Security__factory,
-  DiamondFacet__factory,
+  DiamondFacet__factory, ProtectedPartitions__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -362,6 +362,18 @@ export class RPCQueryAdapter {
       snapshotId,
       target.toString(),
     );
+  }
+
+  async getNounceFor(
+      address: EvmAddress,
+      target: EvmAddress,
+  ): Promise<BigNumber> {
+    LogService.logTrace(`Getting Nounce`);
+
+    return await this.connect(
+        ProtectedPartitions__factory,
+        address.toString(),
+    ).getNounceFor(target.toString());
   }
 
   async partitionsOf(
