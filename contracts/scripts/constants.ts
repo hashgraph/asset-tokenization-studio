@@ -315,6 +315,7 @@ export const MESSAGES = {
         },
         error: {
             notFound: 'Business logic resolver not found',
+            proxyNotFound: 'Business logic resolver proxy not found',
             registering: 'Error registering business logics',
             creatingConfigurations: 'Error creating configurations',
         },

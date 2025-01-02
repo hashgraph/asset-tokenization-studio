@@ -208,6 +208,7 @@ import { ethers } from 'hardhat'
 import {
     IBusinessLogicResolver,
     IBusinessLogicResolver__factory,
+    IDiamondCutManager__factory,
     IStaticFunctionSelectors__factory,
 } from '../typechain-types'
 import { IStaticFunctionSelectors } from '../typechain-types'
@@ -218,13 +219,14 @@ import {
 } from './transparentUpgradableProxy'
 import { expect } from 'chai'
 import {
+    CreateAllConfigurationsCommand,
     GAS_LIMIT,
     MESSAGES,
     RegisterBusinessLogicsCommand,
     validateTxResponse,
     ValidateTxResponseCommand,
 } from '.'
-import { EVENTS } from './constants'
+import { BOND_CONFIG_ID, EQUITY_CONFIG_ID, EVENTS } from './constants'
 
 export interface BusinessLogicRegistryData {
     businessLogicKey: string
@@ -370,6 +372,78 @@ export async function registerBusinessLogics({
             txResponse: response,
             confirmationEvent: EVENTS.businessLogicResolver.registered,
             errorMessage: MESSAGES.businessLogicResolver.error.registering,
+        })
+    )
+}
+
+export async function createAllConfigurations({
+    commonFacetAddressList,
+    businessLogicResolverProxy,
+    equityUsa,
+    bondUsa,
+    signer,
+}: CreateAllConfigurationsCommand) {
+    // Get the resolver keys for the equities and bonds
+    const [equityResolverKey, bondResolverKey] = await Promise.all([
+        IStaticFunctionSelectors__factory.connect(
+            equityUsa,
+            signer
+        ).getStaticResolverKey({
+            value: GAS_LIMIT.businessLogicResolver.getStaticResolverKey,
+        }),
+        IStaticFunctionSelectors__factory.connect(
+            bondUsa,
+            signer
+        ).getStaticResolverKey({
+            value: GAS_LIMIT.businessLogicResolver.getStaticResolverKey,
+        }),
+    ])
+
+    const equityFacetAddressList = [
+        ...commonFacetAddressList,
+        equityResolverKey,
+    ]
+    const bondFacetAddressList = [...commonFacetAddressList, bondResolverKey]
+
+    const equityFacetVersionList = equityFacetAddressList.map(() => 1)
+    const bondFacetVersionList = bondFacetAddressList.map(() => 1)
+
+    // Create configuration for equities
+
+    let response = await IDiamondCutManager__factory.connect(
+        businessLogicResolverProxy,
+        signer
+    ).createConfiguration(
+        EQUITY_CONFIG_ID,
+        equityFacetAddressList.map((address, index) => ({
+            id: address,
+            version: equityFacetVersionList[index],
+        }))
+    )
+    await validateTxResponse(
+        new ValidateTxResponseCommand({
+            txResponse: response,
+            errorMessage:
+                MESSAGES.businessLogicResolver.error.creatingConfigurations,
+        })
+    )
+
+    // Create configuration for bonds
+    response = await IDiamondCutManager__factory.connect(
+        businessLogicResolverProxy,
+        signer
+    ).createConfiguration(
+        BOND_CONFIG_ID,
+        bondFacetAddressList.map((address, index) => ({
+            id: address,
+            version: bondFacetVersionList[index],
+        }))
+    )
+    await validateTxResponse(
+        new ValidateTxResponseCommand({
+            txResponse: response,
+            errorMessage:
+                MESSAGES.businessLogicResolver.error.creatingConfigurations,
         })
     )
 }

@@ -254,6 +254,8 @@ import {
     ValidateTxResponseCommand,
     registerBusinessLogics,
     RegisterBusinessLogicsCommand,
+    CreateAllConfigurationsCommand,
+    createAllConfigurations,
 } from './index'
 
 export async function updateProxy(
@@ -328,114 +330,29 @@ export async function deployAtsFullInfrastructure({
     if (!usingDeployed) {
         // * Register business logic contracts
         console.log(MESSAGES.businessLogicResolver.info.registering)
-        const { factory, businessLogicResolver, ...contractsToRegister } =
-            deployedContracts
+        const {
+            factory: notUsed0,
+            businessLogicResolver: notUsed1,
+            ...contractsToRegister
+        } = deployedContracts
         const contractAddressList = Object.values(contractsToRegister).map(
             (contract) => contract.address
         )
 
-        await registerBusinessLogics(
-            new RegisterBusinessLogicsCommand({
-                deployedContractAddressList: contractAddressList,
-                businessLogicResolver: resolver.address,
-                signer,
-            })
-        )
+        const registerCommand = new RegisterBusinessLogicsCommand({
+            deployedContractAddressList: contractAddressList,
+            businessLogicResolver: resolver.address,
+            signer,
+        })
+        await registerBusinessLogics(registerCommand)
 
         // * Create configurations for equities and bonds
         console.log(MESSAGES.businessLogicResolver.info.creatingConfigurations)
-
-        const commonFacetAddressList = {
-            diamondFacet: deployedContracts.diamondFacet.address,
-            accessControl: deployedContracts.accessControl.address,
-            cap: deployedContracts.cap.address,
-            pause: deployedContracts.pause.address,
-            controlList: deployedContracts.controlList.address,
-            erc20: deployedContracts.erc20.address,
-            erc1644: deployedContracts.erc1644.address,
-            erc1410ScheduledTasks:
-                deployedContracts.erc1410ScheduledTasks.address,
-            erc1594: deployedContracts.erc1594.address,
-            erc1643: deployedContracts.erc1643.address,
-            snapshots: deployedContracts.snapshots.address,
-            scheduledSnapshots: deployedContracts.scheduledSnapshots.address,
-            scheduledBalanceAdjustments:
-                deployedContracts.scheduledBalanceAdjustments.address,
-            scheduledTasks: deployedContracts.scheduledTasks.address,
-            corporateActionsSecurity:
-                deployedContracts.corporateActionsSecurity.address,
-            lock: deployedContracts.lock.address,
-            transferAndLock: deployedContracts.transferAndLock.address,
-            adjustBalances: deployedContracts.adjustBalances.address,
-        }
-
-        const equityResolverKey =
-            await IStaticFunctionSelectors__factory.connect(
-                deployedContracts.equityUSA.address,
-                deployedContracts.equityUSA.contract.signer
-            ).getStaticResolverKey({
-                value: GAS_LIMIT.businessLogicResolver.getStaticResolverKey,
-            })
-
-        const equityFacetAddressList = [
-            ...Object.values(commonFacetAddressList),
-            equityResolverKey,
-        ]
-        const equityFacetVersionList = Array(
-            equityFacetAddressList.length
-        ).fill(1)
-
-        const bondResolverKey = await IStaticFunctionSelectors__factory.connect(
-            deployedContracts.bondUSA.address,
-            deployedContracts.bondUSA.contract.signer
-        ).getStaticResolverKey({
-            value: GAS_LIMIT.businessLogicResolver.getStaticResolverKey,
+        const createCommand = new CreateAllConfigurationsCommand({
+            deployedContracts,
+            signer,
         })
-
-        const bondFacetAddressList = [
-            ...Object.values(commonFacetAddressList),
-            bondResolverKey,
-        ]
-        const bondFacetVersionList = Array(bondFacetAddressList.length).fill(1)
-
-        // Create configuration for equities
-
-        let response = await IDiamondCutManager__factory.connect(
-            resolver.proxyAddress,
-            signer
-        ).createConfiguration(
-            EQUITY_CONFIG_ID,
-            equityFacetAddressList.map((address, index) => ({
-                id: address,
-                version: equityFacetVersionList[index],
-            }))
-        )
-        await validateTxResponse(
-            new ValidateTxResponseCommand({
-                txResponse: response,
-                errorMessage:
-                    MESSAGES.businessLogicResolver.error.creatingConfigurations,
-            })
-        )
-
-        // Create configuration for bonds
-        response = await IDiamondCutManager__factory.connect(
-            resolver.proxyAddress,
-            signer
-        ).createConfiguration(
-            BOND_CONFIG_ID,
-            bondFacetAddressList.map((address, index) => ({
-                id: address,
-                version: bondFacetVersionList[index],
-            }))
-        )
-        await validateTxResponse(
-            new ValidateTxResponseCommand({
-                txResponse: response,
-                errorMessage:
-                    MESSAGES.businessLogicResolver.error.creatingConfigurations,
-            })
-        )
+        await createAllConfigurations(createCommand)
     }
 
     return new DeployAtsFullInfrastructureResult({

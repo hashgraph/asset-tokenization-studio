@@ -66,8 +66,8 @@ export default class DeployAtsContractsResult extends AtsContracts<
     public readonly erc1643: DeployContractWithFactoryResult<ERC1643>
     public readonly erc1644: DeployContractWithFactoryResult<ERC1644>
     public readonly diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
-    public readonly equityUSA: DeployContractWithFactoryResult<EquityUSA>
-    public readonly bondUSA: DeployContractWithFactoryResult<BondUSA>
+    public readonly equityUsa: DeployContractWithFactoryResult<EquityUSA>
+    public readonly bondUsa: DeployContractWithFactoryResult<BondUSA>
     public readonly scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
     public readonly scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     public readonly scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
@@ -114,8 +114,8 @@ export default class DeployAtsContractsResult extends AtsContracts<
         this.erc1643 = erc1643
         this.erc1644 = erc1644
         this.diamondFacet = diamondFacet
-        this.equityUSA = equityUSA
-        this.bondUSA = bondUSA
+        this.equityUsa = equityUSA
+        this.bondUsa = bondUSA
         this.scheduledSnapshots = scheduledSnapshots
         this.scheduledBalanceAdjustments = scheduledBalanceAdjustments
         this.scheduledTasks = scheduledTasks
