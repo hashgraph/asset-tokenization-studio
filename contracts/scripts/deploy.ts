@@ -221,8 +221,6 @@ import {
     ERC1644__factory,
     ERC20_2__factory,
     Factory__factory,
-    IDiamondCutManager__factory,
-    IStaticFunctionSelectors__factory,
     Lock_2__factory,
     Pause__factory,
     ProxyAdmin__factory,
@@ -237,8 +235,6 @@ import { checkReceipts } from './utils'
 import { contractCall } from './contractsLifeCycle/utils'
 import Configuration from '../Configuration'
 import {
-    EQUITY_CONFIG_ID,
-    BOND_CONFIG_ID,
     DeployContractCommand,
     DeployContractResult,
     DeployContractWithFactoryCommand,
@@ -247,11 +243,8 @@ import {
     DeployAtsContractsResult,
     DeployAtsFullInfrastructureCommand,
     BusinessLogicResolverNotFound,
-    GAS_LIMIT,
     MESSAGES,
     DeployAtsFullInfrastructureResult,
-    validateTxResponse,
-    ValidateTxResponseCommand,
     registerBusinessLogics,
     RegisterBusinessLogicsCommand,
     CreateAllConfigurationsCommand,
@@ -310,15 +303,15 @@ export async function deployAtsFullInfrastructure({
         useDeployed &&
         Configuration.contracts.BusinessLogicResolver.addresses?.[network]
     // * Deploy all contracts
-    const deployedContractsCommand = new DeployAtsContractsCommand({
+    const deployCommand = new DeployAtsContractsCommand({
         signer,
         network,
         useDeployed,
     })
-    const deployedContracts = await deployAtsContracts(deployedContractsCommand)
+    const deployedContractList = await deployAtsContracts(deployCommand)
 
     // * Check if BusinessLogicResolver is deployed correctly
-    const resolver = deployedContracts.businessLogicResolver
+    const resolver = deployedContractList.businessLogicResolver
     if (
         !resolver.address ||
         !resolver.proxyAddress ||
@@ -330,33 +323,24 @@ export async function deployAtsFullInfrastructure({
     if (!usingDeployed) {
         // * Register business logic contracts
         console.log(MESSAGES.businessLogicResolver.info.registering)
-        const {
-            factory: notUsed0,
-            businessLogicResolver: notUsed1,
-            ...contractsToRegister
-        } = deployedContracts
-        const contractAddressList = Object.values(contractsToRegister).map(
-            (contract) => contract.address
-        )
 
         const registerCommand = new RegisterBusinessLogicsCommand({
-            deployedContractAddressList: contractAddressList,
-            businessLogicResolver: resolver.address,
+            deployedContractList,
             signer,
         })
         await registerBusinessLogics(registerCommand)
 
-        // * Create configurations for equities and bonds
+        // * Create configurations for all Securities (EquityUSA, BondUSA)
         console.log(MESSAGES.businessLogicResolver.info.creatingConfigurations)
         const createCommand = new CreateAllConfigurationsCommand({
-            deployedContracts,
+            deployedContractList,
             signer,
         })
         await createAllConfigurations(createCommand)
     }
 
     return new DeployAtsFullInfrastructureResult({
-        deployedContracts,
+        deployedContracts: deployedContractList,
     })
 }
 

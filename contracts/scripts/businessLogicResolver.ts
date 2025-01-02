@@ -338,8 +338,8 @@ export async function deployBusinessLogics(
  * Each contract in the address list must implement the IStaticFunctionSelectors interface
  */
 export async function registerBusinessLogics({
-    deployedContractAddressList,
-    businessLogicResolver,
+    contractAddressListToRegister: deployedContractAddressList,
+    businessLogicResolverProxy: businessLogicResolver,
     signer,
 }: RegisterBusinessLogicsCommand): Promise<void> {
     const businessLogicRegistries: BusinessLogicRegistryData[] =

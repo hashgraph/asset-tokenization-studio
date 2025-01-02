@@ -5,7 +5,7 @@ import {
 } from '../index'
 
 interface CreateAllConfigurationsCommandParams {
-    readonly deployedContracts: DeployAtsContractsResult
+    readonly deployedContractList: DeployAtsContractsResult
     readonly signer: Signer
 }
 
@@ -17,7 +17,7 @@ export default class CreateAllConfigurationsCommand {
     public readonly signer: Signer
 
     constructor({
-        deployedContracts,
+        deployedContractList,
         signer,
     }: CreateAllConfigurationsCommandParams) {
         const {
@@ -26,15 +26,17 @@ export default class CreateAllConfigurationsCommand {
             bondUsa,
             equityUsa,
             ...commonFacetList
-        } = deployedContracts
-        const commonFacetAddressList = Object.values(commonFacetList).map(
+        } = deployedContractList
+
+        this.commonFacetAddressList = Object.values(commonFacetList).map(
             (contract) => contract.address
         )
+
         if (!businessLogicResolver.proxyAddress) {
             throw new BusinessLogicResolverProxyNotFound()
         }
-        this.commonFacetAddressList = commonFacetAddressList
         this.businessLogicResolverProxy = businessLogicResolver.proxyAddress
+
         this.equityUsa = equityUsa.address
         this.bondUsa = bondUsa.address
         this.signer = signer

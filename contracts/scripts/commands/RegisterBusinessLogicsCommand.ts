@@ -1,24 +1,38 @@
 import { Signer } from 'ethers'
+import {
+    BusinessLogicResolverProxyNotFound,
+    DeployAtsContractsResult,
+} from '../index'
 
 interface RegisterBusinessLogicsCommandParams {
-    deployedContractAddressList: string[]
-    businessLogicResolver: string
+    deployedContractList: DeployAtsContractsResult
     signer: Signer
 }
 
 export default class RegisterBusinessLogicsCommand {
-    // Don't forget to remove Factory and BusinessLogicResolver from the list of deployedContractAddressList
-    public readonly deployedContractAddressList: string[]
-    public readonly businessLogicResolver: string
+    public readonly contractAddressListToRegister: string[]
+    public readonly businessLogicResolverProxy: string
     public readonly signer: Signer
 
     constructor({
-        deployedContractAddressList,
-        businessLogicResolver,
+        deployedContractList,
         signer,
     }: RegisterBusinessLogicsCommandParams) {
-        this.deployedContractAddressList = deployedContractAddressList
-        this.businessLogicResolver = businessLogicResolver
+        const {
+            factory: _,
+            businessLogicResolver,
+            ...contractListToRegister
+        } = deployedContractList
+
+        this.contractAddressListToRegister = Object.values(
+            contractListToRegister
+        ).map((contract) => contract.address)
+
+        if (!businessLogicResolver.proxyAddress) {
+            throw new BusinessLogicResolverProxyNotFound()
+        }
+        this.businessLogicResolverProxy = businessLogicResolver.proxyAddress
+
         this.signer = signer
     }
 }
