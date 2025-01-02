@@ -2,7 +2,7 @@
 export * from './constants'
 
 // * Commands
-export { default as BaseCommand } from './commands/BaseCommand'
+export { default as BaseBusinessLogicResolverCommand } from './commands/base/BaseBusinessLogicResolverCommand'
 export { default as ErrorMessageCommand } from './commands/ErrorMessageCommand'
 export { default as DeployContractCommand } from './commands/DeployContractCommand'
 export { default as DeployAtsContractsCommand } from './commands/DeployAtsContractsCommand'

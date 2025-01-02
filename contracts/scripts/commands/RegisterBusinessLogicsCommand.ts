@@ -1,6 +1,6 @@
 import { Signer } from 'ethers'
 import {
-    BusinessLogicResolverProxyNotFound,
+    BaseBusinessLogicResolverCommand,
     DeployAtsContractsResult,
 } from '../index'
 
@@ -9,30 +9,16 @@ interface RegisterBusinessLogicsCommandParams {
     signer: Signer
 }
 
-export default class RegisterBusinessLogicsCommand {
+export default class RegisterBusinessLogicsCommand extends BaseBusinessLogicResolverCommand {
     public readonly contractAddressListToRegister: string[]
     public readonly businessLogicResolverProxy: string
-    public readonly signer: Signer
 
     constructor({
         deployedContractList,
         signer,
     }: RegisterBusinessLogicsCommandParams) {
-        const {
-            factory: _,
-            businessLogicResolver,
-            ...contractListToRegister
-        } = deployedContractList
-
-        this.contractAddressListToRegister = Object.values(
-            contractListToRegister
-        ).map((contract) => contract.address)
-
-        if (!businessLogicResolver.proxyAddress) {
-            throw new BusinessLogicResolverProxyNotFound()
-        }
-        this.businessLogicResolverProxy = businessLogicResolver.proxyAddress
-
-        this.signer = signer
+        super(deployedContractList, signer)
+        this.contractAddressListToRegister = this.contractAddressList
+        this.businessLogicResolverProxy = this.businessLogicResolverProxyAddress
     }
 }

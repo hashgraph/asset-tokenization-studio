@@ -1,6 +1,6 @@
 import { Signer } from 'ethers'
 import {
-    BusinessLogicResolverProxyNotFound,
+    BaseBusinessLogicResolverCommand,
     DeployAtsContractsResult,
 } from '../index'
 
@@ -9,36 +9,20 @@ interface CreateAllConfigurationsCommandParams {
     readonly signer: Signer
 }
 
-export default class CreateAllConfigurationsCommand {
+export default class CreateAllConfigurationsCommand extends BaseBusinessLogicResolverCommand {
     public readonly commonFacetAddressList: string[]
     public readonly businessLogicResolverProxy: string
     public readonly equityUsa: string
     public readonly bondUsa: string
-    public readonly signer: Signer
 
     constructor({
         deployedContractList,
         signer,
     }: CreateAllConfigurationsCommandParams) {
-        const {
-            factory: _,
-            businessLogicResolver,
-            bondUsa,
-            equityUsa,
-            ...commonFacetList
-        } = deployedContractList
-
-        this.commonFacetAddressList = Object.values(commonFacetList).map(
-            (contract) => contract.address
-        )
-
-        if (!businessLogicResolver.proxyAddress) {
-            throw new BusinessLogicResolverProxyNotFound()
-        }
-        this.businessLogicResolverProxy = businessLogicResolver.proxyAddress
-
-        this.equityUsa = equityUsa.address
-        this.bondUsa = bondUsa.address
-        this.signer = signer
+        super(deployedContractList, signer)
+        this.commonFacetAddressList = this.contractAddressList
+        this.businessLogicResolverProxy = this.businessLogicResolverProxyAddress
+        this.equityUsa = deployedContractList.equityUsa.address
+        this.bondUsa = deployedContractList.bondUsa.address
     }
 }

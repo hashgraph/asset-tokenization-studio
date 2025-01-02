@@ -1,9 +1,10 @@
 import { Signer } from 'ethers'
 import { Network } from '../../Configuration'
-import { BaseCommand } from '../'
 
-export default class DeployAtsContractsCommand extends BaseCommand {
+export default class DeployAtsContractsCommand {
     public readonly useDeployed: boolean
+    public readonly signer: Signer
+    public readonly network: Network
 
     constructor({
         signer,
@@ -14,7 +15,8 @@ export default class DeployAtsContractsCommand extends BaseCommand {
         network: Network
         useDeployed: boolean
     }) {
-        super({ signer, network })
         this.useDeployed = useDeployed
+        this.signer = signer
+        this.network = network
     }
 }
