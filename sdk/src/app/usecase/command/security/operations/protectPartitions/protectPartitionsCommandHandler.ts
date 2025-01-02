@@ -203,197 +203,75 @@
 
 */
 
-import BaseEntity from '../BaseEntity.js';
-import BaseError from '../../../core/error/BaseError.js';
-import CheckNums from '../../../core/checks/numbers/CheckNums.js';
-import CheckStrings from '../../../core/checks/strings/CheckStrings.js';
-import InvalidDecimalRange from './error/InvalidDecimalRange.js';
-import NameEmpty from './error/NameEmpty.js';
-import NameLength from './error/NameLength.js';
-import SymbolEmpty from './error/SymbolEmpty.js';
-import SymbolLength from './error/SymbolLength.js';
-import EvmAddress from '../contract/EvmAddress.js';
-import BigDecimal from '../shared/BigDecimal.js';
-import { HederaId } from '../shared/HederaId.js';
-import { InvalidType } from '../../../port/in/request/error/InvalidType.js';
-import InvalidAmount from './error/InvalidAmount.js';
-import { SecurityType } from '../factory/SecurityType.js';
-import { Regulation } from '../factory/Regulation.js';
-import {
-  RegulationSubType,
-  RegulationType,
-} from '../factory/RegulationType.js';
+import { CommandHandler } from "core/decorator/CommandHandlerDecorator";
+import {ProtectPartitionsCommand, ProtectPartitionsCommandResponse} from "./protectPartitionsCommand";
+import { ICommandHandler } from "core/command/CommandHandler";
+import {lazyInject} from "../../../../../../core/decorator/LazyInjectDecorator";
+import AccountService from "../../../../../service/AccountService";
+import SecurityService from "app/service/SecurityService";
+import TransactionService from "app/service/TransactionService";
+import { MirrorNodeAdapter } from "port/out/mirror/MirrorNodeAdapter";
+import { RPCQueryAdapter } from "port/out/rpc/RPCQueryAdapter";
+import {HEDERA_FORMAT_ID_REGEX} from "../../../../../../domain/context/shared/HederaId";
+import EvmAddress from "../../../../../../domain/context/contract/EvmAddress";
+import {SecurityRole} from "../../../../../../domain/context/security/SecurityRole";
+import { SecurityPaused } from "../../error/SecurityPaused";
+import {NotGrantedRole} from "../../error/NotGrantedRole";
+import {PartitionsProtected} from "../../error/PartitionsProtected";
 
-const TWELVE = 12;
-const TEN = 10;
-const ONE_HUNDRED = 100;
-const EIGHTEEN = 18;
-const ZERO = 0;
+@CommandHandler(ProtectPartitionsCommand)
+export class ProtectPartitionsCommandHandler
+    implements ICommandHandler<ProtectPartitionsCommand>
+{
+    constructor(
+        @lazyInject(SecurityService)
+        public readonly securityService: SecurityService,
+        @lazyInject(AccountService)
+        public readonly accountService: AccountService,
+        @lazyInject(TransactionService)
+        public readonly transactionService: TransactionService,
+        @lazyInject(MirrorNodeAdapter)
+        private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+        @lazyInject(RPCQueryAdapter)
+        private readonly rpcQueryAdapter: RPCQueryAdapter,
+    ) {}
 
-export interface SecurityProps {
-  name: string;
-  symbol: string;
-  isin: string;
-  type?: SecurityType;
-  decimals: number;
-  isWhiteList: boolean;
-  isControllable: boolean;
-  isMultiPartition: boolean;
-  isIssuable?: boolean;
-  totalSupply?: BigDecimal;
-  maxSupply?: BigDecimal;
-  diamondAddress?: HederaId;
-  evmDiamondAddress?: EvmAddress;
-  paused?: boolean;
-  regulationType?: RegulationType;
-  regulationsubType?: RegulationSubType;
-  regulation?: Regulation;
-  isCountryControlListWhiteList: boolean;
-  countries?: string;
-  info?: string;
-}
+    async execute(
+        command: ProtectPartitionsCommand,
+    ): Promise<ProtectPartitionsCommandResponse> {
+        const { securityId } = command;
+        const handler = this.transactionService.getHandler();
+        const account = this.accountService.getCurrentAccount();
+        const security = await this.securityService.get(securityId);
 
-export class Security extends BaseEntity implements SecurityProps {
-  name: string;
-  symbol: string;
-  isin: string;
-  type?: SecurityType;
-  decimals: number;
-  isWhiteList: boolean;
-  isControllable: boolean;
-  isMultiPartition: boolean;
-  arePartitionsProtected: boolean;
-  isIssuable?: boolean;
-  totalSupply?: BigDecimal;
-  maxSupply?: BigDecimal;
-  diamondAddress?: HederaId;
-  evmDiamondAddress?: EvmAddress;
-  paused?: boolean;
-  regulationType?: RegulationType;
-  regulationsubType?: RegulationSubType;
-  regulation?: Regulation;
-  isCountryControlListWhiteList: boolean;
-  countries?: string;
-  info?: string;
+        const securityEvmAddress: EvmAddress = new EvmAddress(
+            HEDERA_FORMAT_ID_REGEX.test(securityId)
+                ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+                : securityId.toString(),
+        );
 
-  constructor(params: SecurityProps) {
-    const {
-      name,
-      symbol,
-      isin,
-      type,
-      decimals,
-      isWhiteList,
-      isControllable,
-      isMultiPartition,
-      isIssuable,
-      totalSupply,
-      maxSupply,
-      diamondAddress,
-      evmDiamondAddress,
-      paused,
-      regulationType,
-      regulationsubType,
-      regulation,
-      isCountryControlListWhiteList,
-      countries,
-      info,
-    } = params;
-    super();
-    this.name = name;
-    this.symbol = symbol;
-    this.isin = isin;
-    this.type = type;
-    this.decimals = decimals;
-    this.isWhiteList = isWhiteList;
-    this.isControllable = isControllable;
-    this.isMultiPartition = isMultiPartition;
-    this.isIssuable = isIssuable ?? true;
-    this.totalSupply = totalSupply ?? BigDecimal.ZERO;
-    this.maxSupply = maxSupply ?? BigDecimal.ZERO;
-    this.diamondAddress = diamondAddress;
-    this.evmDiamondAddress = evmDiamondAddress;
-    this.paused = paused ?? false;
-    this.regulationType = regulationType;
-    this.regulationsubType = regulationsubType;
-    this.regulation = regulation;
-    this.isCountryControlListWhiteList = isCountryControlListWhiteList;
-    this.countries = countries;
-    this.info = info;
-  }
+        if (
+            account.evmAddress &&
+            !(await this.rpcQueryAdapter.hasRole(
+                securityEvmAddress,
+                new EvmAddress(account.evmAddress!),
+                SecurityRole._PROTECTED_PARTITION_ROLE,
+            ))
+        ) {
+            throw new NotGrantedRole(SecurityRole._PROTECTED_PARTITION_ROLE);
+        }
 
-  public static checkName(value: string): BaseError[] {
-    const maxNameLength = ONE_HUNDRED;
-    const errorList: BaseError[] = [];
+        if (await this.rpcQueryAdapter.isPaused(securityEvmAddress)) {
+            throw new SecurityPaused();
+        }
 
-    if (!CheckStrings.isNotEmpty(value)) errorList.push(new NameEmpty());
-    if (!CheckStrings.isLengthUnder(value, maxNameLength))
-      errorList.push(new NameLength(value, maxNameLength));
+        if (security.arePartitionsProtected) {
+            throw new PartitionsProtected();
+        }
 
-    return errorList;
-  }
-
-  public static checkSymbol(value: string): BaseError[] {
-    const maxSymbolLength = ONE_HUNDRED;
-    const errorList: BaseError[] = [];
-
-    if (!CheckStrings.isNotEmpty(value)) errorList.push(new SymbolEmpty());
-    if (!CheckStrings.isLengthUnder(value, maxSymbolLength))
-      errorList.push(new SymbolLength(value, maxSymbolLength));
-
-    return errorList;
-  }
-
-  public static checkISIN(value: string): BaseError[] {
-    const maxIsinLength = TWELVE;
-    const errorList: BaseError[] = [];
-
-    if (!CheckStrings.isNotEmpty(value)) errorList.push(new NameEmpty());
-    if (!CheckStrings.isLengthUnder(value, maxIsinLength))
-      errorList.push(new NameLength(value, maxIsinLength));
-
-    return errorList;
-  }
-
-  public static checkDecimals(value: number): BaseError[] {
-    const errorList: BaseError[] = [];
-    const min = ZERO;
-    const max = EIGHTEEN;
-
-    if (CheckNums.hasMoreDecimals(value.toString(), 0)) {
-      errorList.push(new InvalidType(value));
+        const res = await handler.protectPartitions(securityEvmAddress);
+        return Promise.resolve(
+            new ProtectPartitionsCommandResponse(res.error === undefined, res.id!),
+        );
     }
-    if (!CheckNums.isWithinRange(value, min, max))
-      errorList.push(new InvalidDecimalRange(value, min, max));
-
-    return errorList;
-  }
-
-  public static checkInteger(value: number): BaseError[] {
-    const errorList: BaseError[] = [];
-
-    if (!Number.isInteger(value)) {
-      return [new InvalidType(value)];
-    }
-
-    return errorList;
-  }
-
-  public getDecimalOperator(): number {
-    return TEN ** this.decimals;
-  }
-
-  public fromInteger(amount: number): number {
-    const res = amount / this.getDecimalOperator();
-    if (!this.isValidAmount(res)) {
-      throw new InvalidAmount(res, this.decimals);
-    }
-    return res;
-  }
-
-  public isValidAmount(amount: number): boolean {
-    const val = amount.toString().split('.');
-    const decimals = val.length > 1 ? val[1]?.length : 0;
-    return decimals <= this.decimals;
-  }
 }

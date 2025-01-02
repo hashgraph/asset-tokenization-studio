@@ -849,6 +849,12 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
+  protectPartitions(
+      security: EvmAddress,
+      securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    throw new Error('Method not implemented.');
+  }
   updateMaturityDate(
     security: EvmAddress,
     maturityDate: number,
