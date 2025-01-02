@@ -207,7 +207,7 @@ import { ethers } from 'hardhat'
 import { IFactory } from '../typechain-types'
 import {
     transparentUpgradableProxy,
-    deployTransparentUpgradeableProxy,
+    deployTransparentProxy,
 } from './transparentUpgradableProxy'
 import {
     EQUITY_DEPLOYED_EVENT,
@@ -223,7 +223,7 @@ export let factory: IFactory
 export async function deployProxyToFactory(
     factoryBusinessLogicAddress: string
 ) {
-    await deployTransparentUpgradeableProxy(factoryBusinessLogicAddress)
+    await deployTransparentProxy(factoryBusinessLogicAddress)
     factory = (await ethers.getContractAt(
         'Factory',
         transparentUpgradableProxy.address

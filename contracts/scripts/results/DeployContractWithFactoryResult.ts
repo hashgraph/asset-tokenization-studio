@@ -1,6 +1,6 @@
-import { BaseContract, Contract, ContractReceipt } from 'ethers'
+import { Contract, ContractReceipt } from 'ethers'
 
-export default class DeployContractWithFactoryResult<C extends BaseContract> {
+export default class DeployContractWithFactoryResult<C extends Contract> {
     public readonly address: string
     public readonly contract: C
     public readonly proxyAddress?: string

@@ -291,6 +291,9 @@ export const GAS_LIMIT = {
     initilize: {
         businessLogicResolver: 8_000_000,
     },
+    proxyAdmin: {
+        upgrade: 150_000,
+    },
     businessLogicResolver: {
         getStaticResolverKey: 60_000,
         registerBusinessLogics: 7_800_000,
@@ -316,6 +319,7 @@ export const MESSAGES = {
         error: {
             notFound: 'Business logic resolver not found',
             proxyNotFound: 'Business logic resolver proxy not found',
+            initializing: 'Error initializing business logic resolver',
             registering: 'Error registering business logics',
             creatingConfigurations: 'Error creating configurations',
         },

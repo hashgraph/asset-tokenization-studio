@@ -203,7 +203,12 @@
 
 */
 
-import { BaseContract, ContractFactory } from 'ethers'
+import {
+    BaseContract,
+    Contract,
+    ContractFactory,
+    ContractReceipt,
+} from 'ethers'
 import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
 import {
     AccessControl__factory,
@@ -235,6 +240,7 @@ import { checkReceipts } from './utils'
 import { contractCall } from './contractsLifeCycle/utils'
 import Configuration from '../Configuration'
 import {
+    MESSAGES,
     DeployContractCommand,
     DeployContractResult,
     DeployContractWithFactoryCommand,
@@ -242,57 +248,13 @@ import {
     DeployAtsContractsCommand,
     DeployAtsContractsResult,
     DeployAtsFullInfrastructureCommand,
-    BusinessLogicResolverNotFound,
-    MESSAGES,
     DeployAtsFullInfrastructureResult,
-    registerBusinessLogics,
+    BusinessLogicResolverNotFound,
     RegisterBusinessLogicsCommand,
     CreateAllConfigurationsCommand,
+    registerBusinessLogics,
     createAllConfigurations,
 } from './index'
-
-export async function updateProxy(
-    clientOperator: Client,
-    proxy: string, // ContractID
-    transparentProxy: string, // ContractID
-    newImplementation: string // ContractID
-) {
-    // Deploying Factory logic
-    console.log(`Upgrading proxy logic. please wait...`)
-    console.log('Admin proxy :' + proxy)
-    console.log('Transparent proxy :' + transparentProxy)
-    console.log('New Implementation :' + newImplementation)
-    console.log(ContractId.fromString(newImplementation).toSolidityAddress())
-    await contractCall(
-        ContractId.fromString(proxy),
-        'upgrade',
-        [
-            ContractId.fromString(transparentProxy).toSolidityAddress(),
-            ContractId.fromString(newImplementation).toSolidityAddress(),
-        ],
-        clientOperator,
-        150000,
-        ProxyAdmin__factory.abi
-    )
-}
-export async function getProxyImpl(
-    clientOperator: Client,
-    proxyadmin: string, // ContractID
-    transparent: string // ContractID
-) {
-    // Deploying Factory logic
-    console.log(`Getting implementation from proxy, please wait...`)
-    console.log(`ProxyAdmin: ${proxyadmin}`)
-    const address = await contractCall(
-        ContractId.fromString(proxyadmin),
-        'getProxyImplementation',
-        [ContractId.fromString(transparent).toSolidityAddress()],
-        clientOperator,
-        150000,
-        ProxyAdmin__factory.abi
-    )
-    console.log(`New Implementation: ${address[0]}`)
-}
 
 export async function deployAtsFullInfrastructure({
     signer,
@@ -353,7 +315,7 @@ export async function deployAtsContracts({
         factory: new DeployContractWithFactoryCommand({
             factory: new Factory__factory(),
             signer,
-            deployProxy: true,
+            withProxy: true,
             deployedContract: useDeployed
                 ? Configuration.contracts.Factory.addresses?.[network]
                 : undefined,
@@ -361,7 +323,7 @@ export async function deployAtsContracts({
         businessLogicResolver: new DeployContractWithFactoryCommand({
             factory: new BusinessLogicResolver__factory(),
             signer,
-            deployProxy: true,
+            withProxy: true,
             deployedContract: useDeployed
                 ? Configuration.contracts.BusinessLogicResolver.addresses?.[
                       network
@@ -560,52 +522,35 @@ export async function deployAtsContracts({
 
 export async function deployContractWithFactory<
     F extends ContractFactory,
-    C extends BaseContract
+    C extends Contract = ReturnType<F['attach']>
 >({
     factory,
     signer,
     args,
     overrides,
-    deployProxy,
+    withProxy,
     deployedContract,
 }: DeployContractWithFactoryCommand<F>): Promise<
     DeployContractWithFactoryResult<C>
 > {
-    if (deployProxy) {
-        if (
-            deployedContract?.address &&
-            deployedContract?.proxyAddress &&
-            deployedContract?.proxyAdminAddress
-        ) {
-            return new DeployContractWithFactoryResult({
-                address: deployedContract.address,
-                contract: factory
-                    .connect(signer)
-                    .attach(deployedContract.proxyAddress) as C,
-                proxyAddress: deployedContract.proxyAddress,
-                proxyAdminAddress: deployedContract.proxyAdminAddress,
-            })
-        }
+    let implementationContract: C
+    let proxyAddress: string | undefined
+    let proxyAdminAddress: string | undefined
+    let receiptList: Promise<ContractReceipt>[] = []
+
+    if (deployedContract?.address) {
+        implementationContract = factory.attach(deployedContract.address) as C
     } else {
-        if (deployedContract?.address) {
-            return new DeployContractWithFactoryResult({
-                address: deployedContract.address,
-                contract: factory
-                    .connect(signer)
-                    .attach(deployedContract.address) as C,
-            })
-        }
+        implementationContract = (await factory
+            .connect(signer)
+            .deploy(...args, overrides)) as C
+        receiptList.push(implementationContract.deployTransaction.wait())
     }
 
-    const contract = (await factory
-        .connect(signer)
-        .deploy(...args, overrides)) as C
-    const receipt = await contract.deployTransaction.wait()
-
-    if (!deployProxy) {
+    if (!withProxy) {
         try {
             checkReceipts({
-                receipts: [receipt],
+                receipts: await Promise.all(receiptList),
             })
         } catch (error) {
             throw new Error(
@@ -617,42 +562,36 @@ export async function deployContractWithFactory<
             )
         }
         return new DeployContractWithFactoryResult({
-            address: contract.address,
-            contract,
-            receipt,
+            address: implementationContract.address,
+            contract: implementationContract,
+            receipt: await receiptList[0],
         })
     }
 
-    const proxyAdmin = await new ProxyAdmin__factory(signer).deploy()
-    const proxyAdminReceipt = await proxyAdmin.deployTransaction.wait()
-
-    const proxy = await new TransparentUpgradeableProxy__factory(signer).deploy(
-        contract.address,
-        proxyAdmin.address,
-        '0x'
-    )
-    const proxyReceipt = await proxy.deployTransaction.wait()
-
-    try {
-        checkReceipts({
-            receipts: [receipt, proxyAdminReceipt, proxyReceipt],
-        })
-    } catch (error) {
-        throw new Error(
-            `Error deploying contract with factory: ${JSON.stringify(
-                error,
-                null,
-                2
-            )}`
-        )
+    if (deployedContract?.proxyAdminAddress) {
+        proxyAdminAddress = deployedContract.proxyAdminAddress
+    } else {
+        const proxyAdmin = await new ProxyAdmin__factory(signer).deploy()
+        receiptList.push(proxyAdmin.deployTransaction.wait())
+        proxyAdminAddress = proxyAdmin.address
     }
 
-    return new DeployContractWithFactoryResult<typeof contract>({
-        address: contract.address,
-        contract: factory.attach(proxy.address) as C,
-        proxyAddress: proxy.address,
-        proxyAdminAddress: proxyAdmin.address,
-        receipt,
+    if (deployedContract?.proxyAddress) {
+        proxyAddress = deployedContract.proxyAddress
+    } else {
+        const proxy = await new TransparentUpgradeableProxy__factory(
+            signer
+        ).deploy(implementationContract.address, proxyAdminAddress, '0x')
+        receiptList.push(proxy.deployTransaction.wait())
+        proxyAddress = proxy.address
+    }
+
+    return new DeployContractWithFactoryResult({
+        address: implementationContract.address,
+        contract: factory.attach(proxyAddress) as C,
+        proxyAddress: proxyAddress,
+        proxyAdminAddress: proxyAdminAddress,
+        receipt: await receiptList[0],
     })
 }
 

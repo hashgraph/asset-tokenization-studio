@@ -206,6 +206,7 @@
 //import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ethers } from 'hardhat'
 import {
+    BusinessLogicResolver__factory,
     IBusinessLogicResolver,
     IBusinessLogicResolver__factory,
     IDiamondCutManager__factory,
@@ -213,19 +214,16 @@ import {
 } from '../typechain-types'
 import { IStaticFunctionSelectors } from '../typechain-types'
 import {
-    transparentUpgradableProxy,
-    deployProxyAdmin,
-    deployTransparentUpgradeableProxy,
-} from './transparentUpgradableProxy'
-import { expect } from 'chai'
-import {
     CreateAllConfigurationsCommand,
+    deployContractWithFactory,
+    DeployContractWithFactoryCommand,
+    DeployProxyForBusinessLogicResolverCommand,
     GAS_LIMIT,
     MESSAGES,
     RegisterBusinessLogicsCommand,
     validateTxResponse,
     ValidateTxResponseCommand,
-} from '.'
+} from './index'
 import { BOND_CONFIG_ID, EQUITY_CONFIG_ID, EVENTS } from './constants'
 
 export interface BusinessLogicRegistryData {
@@ -260,17 +258,34 @@ export interface DeployedBusinessLogics {
 
 export let businessLogicResolver: IBusinessLogicResolver
 
-export async function deployProxyToBusinessLogicResolver(
-    businessLogicResolverLogicAddress: string
-) {
-    //await loadFixture(deployProxyAdmin)
-    await deployProxyAdmin()
-    await deployTransparentUpgradeableProxy(businessLogicResolverLogicAddress)
-    businessLogicResolver = (await ethers.getContractAt(
-        'BusinessLogicResolver',
-        transparentUpgradableProxy.address
-    )) as IBusinessLogicResolver
-    await businessLogicResolver.initialize_BusinessLogicResolver()
+export async function deployProxyForBusinessLogicResolver({
+    businessLogicResolverImplementationAddress,
+    proxyAdminAddress,
+    signer,
+    overrides,
+}: DeployProxyForBusinessLogicResolverCommand) {
+    const deployProxyCommand = new DeployContractWithFactoryCommand({
+        factory: new BusinessLogicResolver__factory(),
+        withProxy: true,
+        deployedContract: {
+            address: businessLogicResolverImplementationAddress,
+            proxyAdminAddress: proxyAdminAddress,
+        },
+        signer,
+        overrides,
+    })
+    const { contract: businessLogicResolver } = await deployContractWithFactory(
+        deployProxyCommand
+    )
+
+    const txResponse =
+        await businessLogicResolver.initialize_BusinessLogicResolver()
+    validateTxResponse(
+        new ValidateTxResponseCommand({
+            txResponse: txResponse,
+            errorMessage: MESSAGES.businessLogicResolver.error.initializing,
+        })
+    )
 }
 
 async function toStaticFunctionSelectors(
