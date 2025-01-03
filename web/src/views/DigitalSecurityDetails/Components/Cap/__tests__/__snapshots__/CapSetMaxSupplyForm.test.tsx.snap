@@ -11,16 +11,20 @@ exports[`CapSetMaxSupplyForm should render correctly 1`] = `
       <div
         class="chakra-stack css-1c05t7c"
       >
-        <h2
-          class="css-1mk5tlk"
+        <div
+          class="chakra-stack css-dp187j"
         >
-          Set Max Supply
-        </h2>
-        <p
-          class="css-j9h4p6"
-        >
-          Set the maximum supply of the security.
-        </p>
+          <h2
+            class="css-1mk5tlk"
+          >
+            Set Max Supply
+          </h2>
+          <p
+            class="css-j9h4p6"
+          >
+            Set the maximum supply of the security.
+          </p>
+        </div>
         <form
           class="chakra-stack css-ip7fdm"
           data-testid="set-max-supply-form"
@@ -88,7 +92,7 @@ exports[`CapSetMaxSupplyForm should render correctly 1`] = `
                   <input
                     class="chakra-input css-ifstuv"
                     data-testid="maxSupply"
-                    id="field-:r1:"
+                    id="field-:r3:"
                     inputmode="numeric"
                     name="maxSupply"
                     placeholder="Max Supply"
