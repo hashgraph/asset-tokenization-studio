@@ -1,0 +1,119 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CapSetMaxSupplyForm should render correctly 1`] = `
+<DocumentFragment>
+  <div
+    class="chakra-stack css-r8fju2"
+  >
+    <div
+      class="css-b2xmzl"
+    >
+      <div
+        class="chakra-stack css-1c05t7c"
+      >
+        <h2
+          class="css-1mk5tlk"
+        >
+          Set Max Supply
+        </h2>
+        <p
+          class="css-j9h4p6"
+        >
+          Set the maximum supply of the security.
+        </p>
+        <form
+          class="chakra-stack css-ip7fdm"
+          data-testid="set-max-supply-form"
+        >
+          <div
+            class="chakra-stack css-1h0sumw"
+          >
+            <div
+              class="chakra-stack css-1nqqhpy"
+            >
+              <p
+                class="css-0"
+              >
+                Security ID*
+              </p>
+            </div>
+            <div
+              class="chakra-form-control css-1kxonj9"
+              role="group"
+            >
+              <label
+                class="css-1fey8w1"
+                for="securityId"
+              >
+                <div
+                  class="chakra-input__group css-pwmwmr"
+                  data-group="true"
+                >
+                  <input
+                    class="chakra-input css-ifstuv"
+                    data-testid="securityId"
+                    disabled=""
+                    id="securityId"
+                    name="securityId"
+                    placeholder=""
+                    value=""
+                  />
+                </div>
+              </label>
+            </div>
+          </div>
+          <div
+            class="chakra-stack css-1h0sumw"
+          >
+            <div
+              class="chakra-stack css-1nqqhpy"
+            >
+              <p
+                class="css-0"
+              >
+                Max Supply*
+              </p>
+            </div>
+            <div
+              class="chakra-form-control css-1kxonj9"
+              role="group"
+            >
+              <label
+                class="css-1fey8w1"
+              >
+                <div
+                  class="chakra-input__group css-pwmwmr"
+                  data-group="true"
+                >
+                  <input
+                    class="chakra-input css-ifstuv"
+                    data-testid="maxSupply"
+                    id="field-:r1:"
+                    inputmode="numeric"
+                    name="maxSupply"
+                    placeholder="Max Supply"
+                    type="text"
+                    value=""
+                  />
+                </div>
+              </label>
+            </div>
+          </div>
+          <button
+            class="chakra-button css-xhl63s"
+            data-testid="set-max-supply-button"
+            disabled=""
+            type="submit"
+          >
+            Send
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <span
+    hidden=""
+    id="__chakra_env"
+  />
+</DocumentFragment>
+`;
