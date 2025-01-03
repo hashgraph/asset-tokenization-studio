@@ -55,7 +55,11 @@ describe(`${DigitalSecurityLockerForm.name}`, () => {
       target: { value: "10" },
     });
 
-    await selectCalendar(component, "expirationDate", new Date().getDate() + 1);
+    await selectCalendar(
+      component,
+      "expirationDate",
+      (new Date().getDate() + 1).toString().padStart(2, "0"),
+    );
 
     await waitFor(() => {
       expect(submitButton).toBeEnabled();

@@ -427,6 +427,14 @@ describe('🧪 Security tests', () => {
         role: SecurityRole._LOCKER_ROLE,
       }),
     );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CAP_ROLE,
+      }),
+    );
   }, 900_000);
 
   it('Get security', async () => {
