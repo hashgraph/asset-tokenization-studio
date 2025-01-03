@@ -203,214 +203,216 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import "../../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol";
+import {IProtectedPartitionsStorageWrapper} from "../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
+import {ITransferAndLock} from "../interfaces/ITransferAndLock.sol";
+import {LockStorageWrapper} from "../../layer_1/lock/LockStorageWrapper.sol";
 import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
-import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
+import {_DEFAULT_PARTITION} from "../../layer_1/constants/values.sol";
 import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
-    LockStorageWrapper_2
-} from '../../layer_2/lock/LockStorageWrapper_2.sol';
-import {Common} from '../../layer_1/common/Common.sol';
+getMessageHashTransferAndLockByPartition,
+getMessageHashTransferAndLock
+} from './signatureVerification.sol';
+import {
+TransferAndLockStorageWrapper
+} from './TransferAndLockStorageWrapper.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-contract TransferAndLock is
+abstract contract TransferAndLockStorageWrapper is
     ITransferAndLock,
-    IStaticFunctionSelectors,
-    Common,
-    LockStorageWrapper_2
+    LockStorageWrapper,
+    ERC1410ScheduledTasksStorageWrapper
 {
-    function transferAndLockByPartition(
+    function _protectedTransferAndLockByPartition(
         bytes32 _partition,
-        address _to,
-        uint256 _amount,
-        bytes calldata _data,
-        uint256 _expirationTimestamp
-    )
-        external
-        virtual
-        override
-        onlyRole(_LOCKER_ROLE)
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 lockId_)
-    {
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 lockId_) {
+        checkNounceAndDeadline(
+            _nounce,
+            _transferAndLock.from,
+            _getNounceFor(_transferAndLock.from),
+            _deadline,
+            _blockTimestamp()
+        );
+
+        _checkTransferAndLockByPartitionSignature(
+            _partition,
+            _transferAndLock,
+            _deadline,
+            _nounce,
+            _signature
+        );
+
+        _setNounce(_nounce, _transferAndLock.from);
+
         _transferByPartition(
             _msgSender(),
-            _to,
-            _amount,
+            _transferAndLock.to,
+            _transferAndLock.amount,
             _partition,
-            _data,
+            _transferAndLock.data,
             _msgSender(),
             ''
         );
         (success_, lockId_) = _lockByPartition(
             _partition,
-            _amount,
-            _to,
-            _expirationTimestamp
+            _transferAndLock.amount,
+            _transferAndLock.to,
+            _transferAndLock.expirationTimestamp
         );
         emit PartitionTransferredAndLocked(
             _partition,
             _msgSender(),
-            _to,
-            _amount,
-            _data,
-            _expirationTimestamp,
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
             lockId_
         );
     }
 
-    function transferAndLock(
-        address _to,
-        uint256 _amount,
-        bytes calldata _data,
-        uint256 _expirationTimestamp
-    )
-        external
-        virtual
-        override
-        onlyRole(_LOCKER_ROLE)
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyWithValidExpirationTimestamp(_expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 lockId_)
-    {
+    function _protectedTransferAndLock(
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 lockId_) {
+        checkNounceAndDeadline(
+            _nounce,
+            _transferAndLock.from,
+            _getNounceFor(_transferAndLock.from),
+            _deadline,
+            _blockTimestamp()
+        );
+
+        _checkTransferAndLockSignature(
+            _transferAndLock,
+            _deadline,
+            _nounce,
+            _signature
+        );
+
+        _setNounce(_nounce, _transferAndLock.from);
+
         _transferByPartition(
             _msgSender(),
-            _to,
-            _amount,
+            _transferAndLock.to,
+            _transferAndLock.amount,
             _DEFAULT_PARTITION,
-            _data,
+            _transferAndLock.data,
             _msgSender(),
             ''
         );
         (success_, lockId_) = _lockByPartition(
             _DEFAULT_PARTITION,
-            _amount,
-            _to,
-            _expirationTimestamp
+            _transferAndLock.amount,
+            _transferAndLock.to,
+            _transferAndLock.expirationTimestamp
         );
         emit PartitionTransferredAndLocked(
             _DEFAULT_PARTITION,
             _msgSender(),
-            _to,
-            _amount,
-            _data,
-            _expirationTimestamp,
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
             lockId_
         );
     }
 
-    function protectedTransferAndLockByPartition(
+    function _checkTransferAndLockByPartitionSignature(
         bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLockData,
+        TransferAndLockStruct calldata _transferAndLock,
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    )
-    external
-    virtual
-    override
-    onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
-    onlyRole(_protectedPartitionsRole(_partition))
-    onlyUnpaused
-    onlyDefaultPartitionWithSinglePartition(_partition)
-    onlyWithValidExpirationTimestamp(
-    _transferAndLockData.expirationTimestamp
-    )
-    onlyProtectedPartitions
-    returns (bool success_, uint256 lockId_)
-    {
-        _protectedTransferAndLockByPartition(
+    ) internal view virtual {
+        if (
+            !_isTransferAndLockByPartitionSignatureValid(
+                _partition,
+                _transferAndLock,
+                _deadline,
+                _nounce,
+                _signature
+            )
+        ) revert WrongSignature();
+    }
+
+    function _isTransferAndLockByPartitionSignatureValid(
+        bytes32 _partition,
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view virtual returns (bool) {
+        bytes32 functionHash = getMessageHashTransferAndLockByPartition(
             _partition,
-            _transferAndLockData,
+            _transferAndLock.from,
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
             _deadline,
-            _nounce,
-            _signature
+            _nounce
         );
+        return
+            verify(
+                _transferAndLock.from,
+                functionHash,
+                _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
+            );
     }
 
-    function protectedTransferAndLock(
-        TransferAndLockStruct calldata _transferAndLockData,
+    function _checkTransferAndLockSignature(
+        TransferAndLockStruct calldata _transferAndLock,
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    )
-    external
-    virtual
-    override
-    onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
-    onlyRole(_protectedPartitionsRole(_DEFAULT_PARTITION))
-    onlyUnpaused
-    onlyWithoutMultiPartition
-    onlyWithValidExpirationTimestamp(
-    _transferAndLockData.expirationTimestamp
-    )
-    onlyProtectedPartitions
-    returns (bool success_, uint256 lockId_)
-    {
-        _protectedTransferAndLock(
-            _transferAndLockData,
+    ) internal view virtual {
+        if (
+            !_isTransferAndLockSignatureValid(
+                _transferAndLock,
+                _deadline,
+                _nounce,
+                _signature
+            )
+        ) revert WrongSignature();
+    }
+
+    function _isTransferAndLockSignatureValid(
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view virtual returns (bool) {
+        bytes32 functionHash = getMessageHashTransferAndLock(
+            _transferAndLock.from,
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
             _deadline,
-            _nounce,
-            _signature
+            _nounce
         );
-    }
-
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override {
-        super._beforeTokenTransfer(partition, from, to, amount);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _TRANSFER_AND_LOCK_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](2);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .transferAndLockByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .transferAndLock
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ITransferAndLock)
-            .interfaceId;
+        return
+            verify(
+                _transferAndLock.from,
+                functionHash,
+                _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
+            );
     }
 }

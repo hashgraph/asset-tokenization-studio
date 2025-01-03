@@ -1720,7 +1720,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.networkService.environment,
     );
   }
-  //TODO: MARIO
+
   async protectedTransferAndLock(
       security: EvmAddress,
       amount: BigDecimal,

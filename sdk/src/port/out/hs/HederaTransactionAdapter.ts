@@ -1759,7 +1759,6 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     return this.signAndSendTransaction(transaction);
   }
 
-  //TODO: MARIO
   async protectedTransferAndLock(
       security: EvmAddress,
       amount: BigDecimal,
