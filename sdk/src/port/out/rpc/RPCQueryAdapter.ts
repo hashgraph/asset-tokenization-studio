@@ -531,6 +531,10 @@ export class RPCQueryAdapter {
       ERC1644__factory,
       address.toString(),
     ).isControllable();
+    const arePartitionsProtected = await this.connect(
+      ProtectedPartitions__factory,
+      address.toString(),
+    ).arePartitionsProtected();
     const isMultiPartition = await this.connect(
       ERC1410ScheduledTasks__factory,
       address.toString(),
@@ -582,6 +586,7 @@ export class RPCQueryAdapter {
       decimals: erc20Metadata.info.decimals,
       isWhiteList: isWhiteList,
       isControllable: isControllable,
+      arePartitionsProtected: arePartitionsProtected,
       isMultiPartition: isMultiPartition,
       isIssuable: isIssuable,
       totalSupply: new BigDecimal(totalSupply.toString()),
@@ -853,6 +858,17 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(Pause__factory, address.toString()).isPaused();
+  }
+
+  async arePartitionsProtected(address: EvmAddress): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the security: ${address.toString()} partitions are protected`,
+    );
+
+    return await this.connect(
+      ProtectedPartitions__factory,
+      address.toString(),
+    ).arePartitionsProtected();
   }
 
   async canTransferByPartition(

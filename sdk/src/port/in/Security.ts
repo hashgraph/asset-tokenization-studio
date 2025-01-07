@@ -260,6 +260,18 @@ import { LockCountQuery } from '../../app/usecase/query/security/lockCount/LockC
 import { LocksIdQuery } from '../../app/usecase/query/security/locksId/LocksIdQuery.js';
 import { GetLockQuery } from '../../app/usecase/query/security/getLock/GetLockQuery.js';
 import LockViewModel from './response/LockViewModel.js';
+import ProtectedTransferFromByPartitionRequest from './request/ProtectedTransferFromByPartitionRequest.js';
+import ProtectedRedeemFromByPartitionRequest from './request/ProtectedRedeemFromByPartitionRequest.js';
+import { ProtectedTransferFromByPartitionCommand } from '../../app/usecase/command/security/operations/transfer/ProtectedTransferFromByPartitionCommand.js';
+import { ProtectedRedeemFromByPartitionCommand } from '../../app/usecase/command/security/operations/redeem/ProtectedRedeemFromByPartitionCommand.js';
+import PartitionsProtectedRequest from './request/PartitionsProtectedRequest.js';
+import GetNounceRequest from './request/GetNounceRequest.js';
+import { PartitionsProtectedQuery } from '../../app/usecase/query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQuery.js';
+import { GetNounceQuery } from '../../app/usecase/query/security/protectedPartitions/getNounce/GetNounceQuery.js';
+import { ProtectPartitionsCommand } from '../../app/usecase/command/security/operations/protectPartitions/ProtectPartitionsCommand.js';
+import { UnprotectPartitionsCommand } from '../../app/usecase/command/security/operations/unprotectPartitions/UnprotectPartitionsCommand.js';
+import ProtectedTransferAndLockRequest from './request/ProtectedTransferAndLockRequest.js';
+import { ProtectedTransferAndLockCommand } from '../../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -678,6 +690,142 @@ class SecurityInPort implements ISecurityInPort {
     const maxSupply: MaxSupplyViewModel = { value: res.payload.toString() };
 
     return maxSupply;
+  }
+
+  @LogError
+  async protectedTransferFromByPartition(
+    request: ProtectedTransferFromByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      sourceId,
+      targetId,
+      amount,
+      deadline,
+      nounce,
+      signature,
+    } = request;
+    handleValidation('ProtectedTransferFromByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ProtectedTransferFromByPartitionCommand(
+        securityId,
+        partitionId,
+        sourceId,
+        targetId,
+        amount,
+        deadline,
+        nounce,
+        signature,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedRedeemFromByPartition(
+    request: ProtectedRedeemFromByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const {
+      securityId,
+      amount,
+      sourceId,
+      partitionId,
+      deadline,
+      nounce,
+      signature,
+    } = request;
+    handleValidation('ProtectedRedeemFromByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ProtectedRedeemFromByPartitionCommand(
+        securityId,
+        amount,
+        sourceId,
+        partitionId,
+        deadline,
+        nounce,
+        signature,
+      ),
+    );
+  }
+
+  @LogError
+  async arePartitionsProtected(
+    request: PartitionsProtectedRequest,
+  ): Promise<boolean> {
+    handleValidation('PartitionsProtectedRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new PartitionsProtectedQuery(request.securityId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getNounce(request: GetNounceRequest): Promise<number> {
+    handleValidation('GetNounceRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetNounceQuery(request.securityId, request.targetId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async protectPartitions(
+    request: PartitionsProtectedRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId } = request;
+    handleValidation('PartitionsProtectedRequest', request);
+
+    return await this.commandBus.execute(
+      new ProtectPartitionsCommand(securityId),
+    );
+  }
+
+  @LogError
+  async unprotectPartitions(
+    request: PartitionsProtectedRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId } = request;
+    handleValidation('PartitionsProtectedRequest', request);
+
+    return await this.commandBus.execute(
+      new UnprotectPartitionsCommand(securityId),
+    );
+  }
+
+  @LogError
+  async protectedTransferAndLock(
+    request: ProtectedTransferAndLockRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      amount,
+      targetId,
+      sourceId,
+      expirationDate,
+      deadline,
+      nounce,
+      signature,
+    } = request;
+    handleValidation('ProtectedTransferAndLockRequest', request);
+
+    return await this.commandBus.execute(
+      new ProtectedTransferAndLockCommand(
+        securityId,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+        deadline,
+        nounce,
+        signature,
+      ),
+    );
   }
 }
 

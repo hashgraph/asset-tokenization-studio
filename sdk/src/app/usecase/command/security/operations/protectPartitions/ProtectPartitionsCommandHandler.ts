@@ -207,7 +207,7 @@ import { CommandHandler } from 'core/decorator/CommandHandlerDecorator';
 import {
   ProtectPartitionsCommand,
   ProtectPartitionsCommandResponse,
-} from './protectPartitionsCommand';
+} from './ProtectPartitionsCommand';
 import { ICommandHandler } from 'core/command/CommandHandler';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import AccountService from '../../../../../service/AccountService';

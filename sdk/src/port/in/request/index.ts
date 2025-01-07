@@ -265,6 +265,11 @@ import GetAllScheduledBalanceAdjustmentsRequest from './GetAllScheduledBalanceAd
 import GetLastAggregatedBalanceAdjustmentFactorForRequest from './GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
 import GetAggregatedBalanceAdjustmentFactorRequest from './GetAggregatedBalanceAdjustmentFactorRequest.js';
 import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from './GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest.js';
+import ProtectedTransferFromByPartitionRequest from './ProtectedTransferFromByPartitionRequest.js';
+import ProtectedRedeemFromByPartitionRequest from './ProtectedRedeemFromByPartitionRequest.js';
+import GetNounceRequest from './GetNounceRequest.js';
+import PartitionsProtectedRequest from './PartitionsProtectedRequest.js';
+import ProtectedTransferAndLockRequest from './ProtectedTransferAndLockRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -329,4 +334,9 @@ export {
   GetLastAggregatedBalanceAdjustmentFactorForRequest,
   GetAggregatedBalanceAdjustmentFactorRequest,
   GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
+  ProtectedTransferFromByPartitionRequest,
+  ProtectedRedeemFromByPartitionRequest,
+  GetNounceRequest,
+  PartitionsProtectedRequest,
+  ProtectedTransferAndLockRequest,
 };
