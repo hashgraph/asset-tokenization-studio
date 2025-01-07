@@ -207,7 +207,6 @@
 pragma solidity 0.8.18;
 
 interface ITransferAndLock {
-
     struct TransferAndLockStruct {
         address from;
         address to;

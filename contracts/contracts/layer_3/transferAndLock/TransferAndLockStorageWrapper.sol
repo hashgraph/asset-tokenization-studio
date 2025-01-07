@@ -205,26 +205,39 @@
 
 pragma solidity 0.8.18;
 
-import "../../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol";
-import {IProtectedPartitionsStorageWrapper} from "../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol";
-import {ITransferAndLock} from "../interfaces/ITransferAndLock.sol";
-import {LockStorageWrapper} from "../../layer_1/lock/LockStorageWrapper.sol";
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
+    checkNounceAndDeadline,
+    verify
+} from '../../layer_1/protectedPartitions/signatureVerification.sol';
+import {
+    IProtectedPartitionsStorageWrapper
+} from '../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol';
+import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
+import {
+    LockStorageWrapper_2
+} from '../../layer_2/lock/LockStorageWrapper_2.sol';
+import {
+    LockStorageWrapper_2_Read
+} from '../../layer_2/lock/LockStorageWrapper_2_Read.sol';
 import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
-import {_DEFAULT_PARTITION} from "../../layer_1/constants/values.sol";
+import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
 import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
-getMessageHashTransferAndLockByPartition,
-getMessageHashTransferAndLock
+    getMessageHashTransferAndLockByPartition,
+    getMessageHashTransferAndLock
 } from './signatureVerification.sol';
 import {
-TransferAndLockStorageWrapper
+    TransferAndLockStorageWrapper
 } from './TransferAndLockStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract TransferAndLockStorageWrapper is
     ITransferAndLock,
-    LockStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
+    ERC1410ScheduledTasksStorageWrapper,
+    LockStorageWrapper_2
 {
     function _protectedTransferAndLockByPartition(
         bytes32 _partition,
@@ -414,5 +427,21 @@ abstract contract TransferAndLockStorageWrapper is
                 _blockChainid(),
                 address(this)
             );
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(ERC1410ScheduledTasksStorageWrapper, LockStorageWrapper_2_Read)
+    {
+        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
     }
 }
