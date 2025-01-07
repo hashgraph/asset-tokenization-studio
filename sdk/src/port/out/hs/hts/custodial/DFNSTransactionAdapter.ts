@@ -203,28 +203,53 @@
 
 */
 
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import TransactionService from '../../../../service/TransactionService.js';
-import { ConnectCommand, ConnectCommandResponse } from './ConnectCommand.js';
+import {
+  CustodialWalletService,
+  DFNSConfig,
+} from '@hashgraph/hedera-custodians-integration';
+import { singleton } from 'tsyringe';
+import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
+import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
+import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';
+import LogService from '../../../../../app/service/LogService';
+import DfnsSettings from '../../../../../domain/context/custodialWalletSettings/DfnsSettings';
 
-@CommandHandler(ConnectCommand)
-export class ConnectCommandHandler implements ICommandHandler<ConnectCommand> {
-  async execute(command: ConnectCommand): Promise<ConnectCommandResponse> {
-    const handler = TransactionService.getHandlerClass(command.wallet);
-    const debug = command.debug ? command.debug : false;
+@singleton()
+export class DFNSTransactionAdapter extends CustodialTransactionAdapter {
+  init(): Promise<string> {
+    this.eventService.emit(WalletEvents.walletInit, {
+      wallet: SupportedWallets.DFNS,
+      initData: {},
+    });
+    LogService.logTrace('DFNS Initialized');
+    return Promise.resolve(this.networkService.environment);
+  }
 
-    const input =
-      command.custodialSettings === undefined
-        ? command.HWCSettings === undefined
-          ? command.account
-          : command.HWCSettings
-        : command.custodialSettings;
-
-    const registration = await handler.register(input, debug);
-
-    return Promise.resolve(
-      new ConnectCommandResponse(registration, command.wallet),
+  initCustodialWalletService(settings: DfnsSettings): void {
+    this.custodialWalletService = new CustodialWalletService(
+      new DFNSConfig(
+        settings.serviceAccountSecretKey,
+        settings.serviceAccountCredentialId,
+        settings.serviceAccountAuthToken,
+        settings.appOrigin,
+        settings.appId,
+        settings.baseUrl,
+        settings.walletId,
+        settings.publicKey,
+      ),
     );
+  }
+
+  getSupportedWallet(): SupportedWallets {
+    return SupportedWallets.DFNS;
+  }
+
+  stop(): Promise<boolean> {
+    this.client?.close();
+    LogService.logTrace('DFNS stopped');
+    this.eventService.emit(WalletEvents.walletDisconnect, {
+      wallet: SupportedWallets.DFNS,
+    });
+    return Promise.resolve(true);
   }
 }

@@ -203,28 +203,52 @@
 
 */
 
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import TransactionService from '../../../../service/TransactionService.js';
-import { ConnectCommand, ConnectCommandResponse } from './ConnectCommand.js';
+import {
+  CustodialWalletService,
+  FireblocksConfig,
+} from '@hashgraph/hedera-custodians-integration';
+import { singleton } from 'tsyringe';
+import { WalletEvents } from '../../../../../app/service/event/WalletEvent';
+import LogService from '../../../../../app/service/LogService';
+import { SupportedWallets } from '../../../../../domain/context/network/Wallet';
+import FireblocksSettings from '../../../../../domain/context/custodialWalletSettings/FireblocksSettings';
 
-@CommandHandler(ConnectCommand)
-export class ConnectCommandHandler implements ICommandHandler<ConnectCommand> {
-  async execute(command: ConnectCommand): Promise<ConnectCommandResponse> {
-    const handler = TransactionService.getHandlerClass(command.wallet);
-    const debug = command.debug ? command.debug : false;
+import { CustodialTransactionAdapter } from './CustodialTransactionAdapter';
 
-    const input =
-      command.custodialSettings === undefined
-        ? command.HWCSettings === undefined
-          ? command.account
-          : command.HWCSettings
-        : command.custodialSettings;
+@singleton()
+export class FireblocksTransactionAdapter extends CustodialTransactionAdapter {
+  init(): Promise<string> {
+    this.eventService.emit(WalletEvents.walletInit, {
+      wallet: this.getSupportedWallet(),
+      initData: {},
+    });
+    LogService.logTrace('Fireblocks Initialized');
+    return Promise.resolve(this.networkService.environment);
+  }
 
-    const registration = await handler.register(input, debug);
-
-    return Promise.resolve(
-      new ConnectCommandResponse(registration, command.wallet),
+  initCustodialWalletService(settings: FireblocksSettings): void {
+    const { apiKey, apiSecretKey, baseUrl, vaultAccountId, assetId } = settings;
+    this.custodialWalletService = new CustodialWalletService(
+      new FireblocksConfig(
+        apiKey,
+        apiSecretKey,
+        baseUrl,
+        vaultAccountId,
+        assetId,
+      ),
     );
+  }
+
+  getSupportedWallet(): SupportedWallets {
+    return SupportedWallets.FIREBLOCKS;
+  }
+
+  stop(): Promise<boolean> {
+    this.client?.close();
+    LogService.logTrace('Fireblocks stopped');
+    this.eventService.emit(WalletEvents.walletDisconnect, {
+      wallet: SupportedWallets.FIREBLOCKS,
+    });
+    return Promise.resolve(true);
   }
 }

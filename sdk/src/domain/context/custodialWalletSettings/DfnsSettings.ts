@@ -203,28 +203,16 @@
 
 */
 
-import { ICommandHandler } from '../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator.js';
-import TransactionService from '../../../../service/TransactionService.js';
-import { ConnectCommand, ConnectCommandResponse } from './ConnectCommand.js';
-
-@CommandHandler(ConnectCommand)
-export class ConnectCommandHandler implements ICommandHandler<ConnectCommand> {
-  async execute(command: ConnectCommand): Promise<ConnectCommandResponse> {
-    const handler = TransactionService.getHandlerClass(command.wallet);
-    const debug = command.debug ? command.debug : false;
-
-    const input =
-      command.custodialSettings === undefined
-        ? command.HWCSettings === undefined
-          ? command.account
-          : command.HWCSettings
-        : command.custodialSettings;
-
-    const registration = await handler.register(input, debug);
-
-    return Promise.resolve(
-      new ConnectCommandResponse(registration, command.wallet),
-    );
-  }
+export default class DfnsSettings {
+  constructor(
+    public serviceAccountSecretKey: string,
+    public serviceAccountCredentialId: string,
+    public serviceAccountAuthToken: string,
+    public appOrigin: string,
+    public appId: string,
+    public baseUrl: string,
+    public walletId: string,
+    public hederaAccountId: string,
+    public publicKey: string,
+  ) {}
 }
