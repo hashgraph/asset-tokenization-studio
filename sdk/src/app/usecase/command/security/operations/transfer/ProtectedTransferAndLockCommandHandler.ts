@@ -203,8 +203,8 @@
 
 */
 
-import {ICommandHandler} from '../../../../../../core/command/CommandHandler.js';
-import {CommandHandler} from '../../../../../../core/decorator/CommandHandlerDecorator.js';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
 import AccountService from '../../../../../service/AccountService.js';
 import SecurityService from '../../../../../service/SecurityService.js';
 import {
@@ -212,22 +212,22 @@ import {
   ProtectedTransferAndLockCommandResponse,
 } from './ProtectedTransferAndLockCommand.js';
 import TransactionService from '../../../../../service/TransactionService.js';
-import {lazyInject} from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 import CheckNums from '../../../../../../core/checks/numbers/CheckNums.js';
-import {DecimalsOverRange} from '../../error/DecimalsOverRange.js';
-import {RPCQueryAdapter} from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import {InsufficientBalance} from '../../error/InsufficientBalance.js';
-import {SecurityPaused} from '../../error/SecurityPaused.js';
-import {HEDERA_FORMAT_ID_REGEX} from '../../../../../../domain/context/shared/HederaId.js';
-import {MirrorNodeAdapter} from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { DecimalsOverRange } from '../../error/DecimalsOverRange.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { InsufficientBalance } from '../../error/InsufficientBalance.js';
+import { SecurityPaused } from '../../error/SecurityPaused.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import {AccountInBlackList} from '../../error/AccountInBlackList.js';
-import {AccountNotInWhiteList} from '../../error/AccountNotInWhiteList.js';
-import {SecurityControlListType} from '../../../../../../domain/context/security/SecurityControlListType.js';
-import {BigNumber} from 'ethers';
-import {NounceAlreadyUsed} from '../../error/NounceAlreadyUsed.js';
-import {PartitionsUnProtected} from "../../error/PartitionsUnprotected";
+import { AccountInBlackList } from '../../error/AccountInBlackList.js';
+import { AccountNotInWhiteList } from '../../error/AccountNotInWhiteList.js';
+import { SecurityControlListType } from '../../../../../../domain/context/security/SecurityControlListType.js';
+import { BigNumber } from 'ethers';
+import { NounceAlreadyUsed } from '../../error/NounceAlreadyUsed.js';
+import { PartitionsUnProtected } from '../../error/PartitionsUnprotected';
 
 @CommandHandler(ProtectedTransferAndLockCommand)
 export class ProtectedTransferAndLockCommandHandler

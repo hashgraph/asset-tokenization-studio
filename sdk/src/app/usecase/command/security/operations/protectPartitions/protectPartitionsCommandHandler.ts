@@ -203,75 +203,78 @@
 
 */
 
-import { CommandHandler } from "core/decorator/CommandHandlerDecorator";
-import {ProtectPartitionsCommand, ProtectPartitionsCommandResponse} from "./protectPartitionsCommand";
-import { ICommandHandler } from "core/command/CommandHandler";
-import {lazyInject} from "../../../../../../core/decorator/LazyInjectDecorator";
-import AccountService from "../../../../../service/AccountService";
-import SecurityService from "app/service/SecurityService";
-import TransactionService from "app/service/TransactionService";
-import { MirrorNodeAdapter } from "port/out/mirror/MirrorNodeAdapter";
-import { RPCQueryAdapter } from "port/out/rpc/RPCQueryAdapter";
-import {HEDERA_FORMAT_ID_REGEX} from "../../../../../../domain/context/shared/HederaId";
-import EvmAddress from "../../../../../../domain/context/contract/EvmAddress";
-import {SecurityRole} from "../../../../../../domain/context/security/SecurityRole";
-import { SecurityPaused } from "../../error/SecurityPaused";
-import {NotGrantedRole} from "../../error/NotGrantedRole";
-import {PartitionsProtected} from "../../error/PartitionsProtected";
+import { CommandHandler } from 'core/decorator/CommandHandlerDecorator';
+import {
+  ProtectPartitionsCommand,
+  ProtectPartitionsCommandResponse,
+} from './protectPartitionsCommand';
+import { ICommandHandler } from 'core/command/CommandHandler';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
+import AccountService from '../../../../../service/AccountService';
+import SecurityService from 'app/service/SecurityService';
+import TransactionService from 'app/service/TransactionService';
+import { MirrorNodeAdapter } from 'port/out/mirror/MirrorNodeAdapter';
+import { RPCQueryAdapter } from 'port/out/rpc/RPCQueryAdapter';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
+import { SecurityPaused } from '../../error/SecurityPaused';
+import { NotGrantedRole } from '../../error/NotGrantedRole';
+import { PartitionsProtected } from '../../error/PartitionsProtected';
 
 @CommandHandler(ProtectPartitionsCommand)
 export class ProtectPartitionsCommandHandler
-    implements ICommandHandler<ProtectPartitionsCommand>
+  implements ICommandHandler<ProtectPartitionsCommand>
 {
-    constructor(
-        @lazyInject(SecurityService)
-        public readonly securityService: SecurityService,
-        @lazyInject(AccountService)
-        public readonly accountService: AccountService,
-        @lazyInject(TransactionService)
-        public readonly transactionService: TransactionService,
-        @lazyInject(MirrorNodeAdapter)
-        private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-        @lazyInject(RPCQueryAdapter)
-        private readonly rpcQueryAdapter: RPCQueryAdapter,
-    ) {}
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    private readonly rpcQueryAdapter: RPCQueryAdapter,
+  ) {}
 
-    async execute(
-        command: ProtectPartitionsCommand,
-    ): Promise<ProtectPartitionsCommandResponse> {
-        const { securityId } = command;
-        const handler = this.transactionService.getHandler();
-        const account = this.accountService.getCurrentAccount();
-        const security = await this.securityService.get(securityId);
+  async execute(
+    command: ProtectPartitionsCommand,
+  ): Promise<ProtectPartitionsCommandResponse> {
+    const { securityId } = command;
+    const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
+    const security = await this.securityService.get(securityId);
 
-        const securityEvmAddress: EvmAddress = new EvmAddress(
-            HEDERA_FORMAT_ID_REGEX.test(securityId)
-                ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-                : securityId.toString(),
-        );
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
 
-        if (
-            account.evmAddress &&
-            !(await this.rpcQueryAdapter.hasRole(
-                securityEvmAddress,
-                new EvmAddress(account.evmAddress!),
-                SecurityRole._PROTECTED_PARTITION_ROLE,
-            ))
-        ) {
-            throw new NotGrantedRole(SecurityRole._PROTECTED_PARTITION_ROLE);
-        }
-
-        if (await this.rpcQueryAdapter.isPaused(securityEvmAddress)) {
-            throw new SecurityPaused();
-        }
-
-        if (security.arePartitionsProtected) {
-            throw new PartitionsProtected();
-        }
-
-        const res = await handler.protectPartitions(securityEvmAddress);
-        return Promise.resolve(
-            new ProtectPartitionsCommandResponse(res.error === undefined, res.id!),
-        );
+    if (
+      account.evmAddress &&
+      !(await this.rpcQueryAdapter.hasRole(
+        securityEvmAddress,
+        new EvmAddress(account.evmAddress!),
+        SecurityRole._PROTECTED_PARTITION_ROLE,
+      ))
+    ) {
+      throw new NotGrantedRole(SecurityRole._PROTECTED_PARTITION_ROLE);
     }
+
+    if (await this.rpcQueryAdapter.isPaused(securityEvmAddress)) {
+      throw new SecurityPaused();
+    }
+
+    if (security.arePartitionsProtected) {
+      throw new PartitionsProtected();
+    }
+
+    const res = await handler.protectPartitions(securityEvmAddress);
+    return Promise.resolve(
+      new ProtectPartitionsCommandResponse(res.error === undefined, res.id!),
+    );
+  }
 }

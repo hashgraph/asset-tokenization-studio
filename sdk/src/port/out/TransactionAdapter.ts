@@ -427,44 +427,44 @@ interface ITransactionAdapter {
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   protectedTransferFromByPartition(
-      security: EvmAddress,
-      partitionId: string,
-      sourceId: EvmAddress,
-      targetId: EvmAddress,
-      amount: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   protectedRedeemFromByPartition(
-      security: EvmAddress,
-      partitionId: string,
-      sourceId: EvmAddress,
-      amount: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    amount: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   protectPartitions(
-      security: EvmAddress,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   unprotectPartitions(
-      security: EvmAddress,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   protectedTransferAndLock(
-      security: EvmAddress,
-      amount: BigDecimal,
-      sourceId: EvmAddress,
-      targetId: EvmAddress,
-      expirationDate: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
 }
 
@@ -890,52 +890,52 @@ export default abstract class TransactionAdapter
     throw new Error('Method not implemented.');
   }
   protectedTransferFromByPartition(
-      security: EvmAddress,
-      partitionId: string,
-      sourceId: EvmAddress,
-      targetId: EvmAddress,
-      amount: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   protectedRedeemFromByPartition(
-      security: EvmAddress,
-      partitionId: string,
-      sourceId: EvmAddress,
-      amount: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    amount: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   protectPartitions(
-      security: EvmAddress,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   unprotectPartitions(
-      security: EvmAddress,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   protectedTransferAndLock(
-      security: EvmAddress,
-      amount: BigDecimal,
-      sourceId: EvmAddress,
-      targetId: EvmAddress,
-      expirationDate: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-      securityId?: ContractId | string,
+    security: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }

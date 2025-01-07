@@ -203,16 +203,16 @@
 
 */
 
-import {SecurityRole} from "../../../../../domain/context/security/SecurityRole";
-import BaseError, {ErrorCode} from "../../../../../core/error/BaseError";
+import { SecurityRole } from '../../../../../domain/context/security/SecurityRole';
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError';
 
 export class PartitionsProtected extends BaseError {
-    constructor(role?: SecurityRole | string) {
-        super(
-            ErrorCode.PartitionsProtected,
-            role
-                ? `Partitions are protected and account does not have the role (${role})`
-                : `Partitions are protected`,
-        );
-    }
+  constructor(role?: SecurityRole | string) {
+    super(
+      ErrorCode.PartitionsProtected,
+      role
+        ? `Partitions are protected and account does not have the role (${role})`
+        : `Partitions are protected`,
+    );
+  }
 }

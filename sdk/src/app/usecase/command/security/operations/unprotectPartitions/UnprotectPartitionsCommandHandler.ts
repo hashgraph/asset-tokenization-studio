@@ -204,20 +204,23 @@
 */
 
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import {ICommandHandler} from '../../../../../../core/command/CommandHandler.js';
-import {CommandHandler} from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import {lazyInject} from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import AccountService from '../../../../../service/AccountService.js';
 import SecurityService from '../../../../../service/SecurityService.js';
 import TransactionService from '../../../../../service/TransactionService.js';
-import {UnprotectPartitionsCommand, UnprotectPartitionsCommandResponse,} from './UnprotectPartitionsCommand.js';
-import {HEDERA_FORMAT_ID_REGEX} from '../../../../../../domain/context/shared/HederaId.js';
-import {MirrorNodeAdapter} from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import {RPCQueryAdapter} from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import {NotGrantedRole} from '../../error/NotGrantedRole.js';
-import {SecurityRole} from '../../../../../../domain/context/security/SecurityRole.js';
-import {SecurityPaused} from '../../error/SecurityPaused.js';
-import {PartitionsUnProtected} from "../../error/PartitionsUnprotected";
+import {
+  UnprotectPartitionsCommand,
+  UnprotectPartitionsCommandResponse,
+} from './UnprotectPartitionsCommand.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { NotGrantedRole } from '../../error/NotGrantedRole.js';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
+import { SecurityPaused } from '../../error/SecurityPaused.js';
+import { PartitionsUnProtected } from '../../error/PartitionsUnprotected';
 
 @CommandHandler(UnprotectPartitionsCommand)
 export class UnprotectPartitionsCommandHandler

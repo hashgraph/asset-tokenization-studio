@@ -242,7 +242,11 @@ import {
   ISSUE_GAS,
   LOCK_GAS,
   MAX_ROLES_GAS,
-  PAUSE_GAS, PROTECT_PARTITION_GAS, PROTECTED_REDEEM_GAS, PROTECTED_TRANSFER_AND_LOCK_GAS, PROTECTED_TRANSFER_GAS,
+  PAUSE_GAS,
+  PROTECT_PARTITION_GAS,
+  PROTECTED_REDEEM_GAS,
+  PROTECTED_TRANSFER_AND_LOCK_GAS,
+  PROTECTED_TRANSFER_GAS,
   REDEEM_GAS,
   RELEASE_GAS,
   REMOVE_DOCUMENT_GAS,
@@ -260,7 +264,8 @@ import {
   TRANSFER_GAS,
   TRANSFER_OPERATOR_GAS,
   TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS,
-  UNPAUSE_GAS, UNPROTECT_PARTITION_GAS,
+  UNPAUSE_GAS,
+  UNPROTECT_PARTITION_GAS,
   UPDATE_CONFIG_GAS,
   UPDATE_CONFIG_VERSION_GAS,
   UPDATE_MATURITY_DATE_GAS,
@@ -303,7 +308,7 @@ import { CastDividendType } from '../../../domain/context/equity/DividendType.js
 import { AdditionalSecurityData } from '../../../domain/context/factory/AdditionalSecurityData.js';
 import { Interface } from 'ethers/lib/utils.js';
 import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
-import {TransferAndLock} from "../../../domain/context/security/TransferAndLock";
+import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -397,6 +402,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       };
 
       const security: SecurityData = {
+        arePartitionsProtected: securityInfo.arePartitionsProtected,
         isMultiPartition: securityInfo.isMultiPartition,
         resolver: resolver.toString(),
         resolverProxyConfiguration: resolverProxyConfiguration,
@@ -511,6 +517,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       };
 
       const security: SecurityData = {
+        arePartitionsProtected: securityInfo.arePartitionsProtected,
         isMultiPartition: securityInfo.isMultiPartition,
         resolver: resolver.toString(),
         resolverProxyConfiguration: resolverProxyConfiguration,
@@ -1633,153 +1640,151 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   }
 
   async protectPartitions(
-      security: EvmAddress,
-      securityId: ContractId | string,
+    security: EvmAddress,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'protectPartitions';
     LogService.logTrace(
-        `Protecting Partitions for security: ${security.toString()}`,
+      `Protecting Partitions for security: ${security.toString()}`,
     );
 
     const functionParameters = new ContractFunctionParameters();
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
-        .setGas(PROTECT_PARTITION_GAS)
-        .setFunction(FUNCTION_NAME, functionParameters);
+      .setContractId(securityId)
+      .setGas(PROTECT_PARTITION_GAS)
+      .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async unprotectPartitions(
-      security: EvmAddress,
-      securityId: ContractId | string,
+    security: EvmAddress,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'unprotectPartitions';
     LogService.logTrace(
-        `Unprotecting Partitions for security: ${security.toString()}`,
+      `Unprotecting Partitions for security: ${security.toString()}`,
     );
 
     const functionParameters = new ContractFunctionParameters();
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
-        .setGas(UNPROTECT_PARTITION_GAS)
-        .setFunction(FUNCTION_NAME, functionParameters);
+      .setContractId(securityId)
+      .setGas(UNPROTECT_PARTITION_GAS)
+      .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
   }
 
-
   async protectedRedeemFromByPartition(
-      security: EvmAddress,
-      partitionId: string,
-      sourceId: EvmAddress,
-      amount: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-      securityId: ContractId | string,
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    amount: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'protectedRedeemFromByPartition';
     LogService.logTrace(
-        `Protected Redeeming ${amount} securities from account ${sourceId.toString()}`,
+      `Protected Redeeming ${amount} securities from account ${sourceId.toString()}`,
     );
 
     const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-        security.toString(),
+      security.toString(),
     );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-        FUNCTION_NAME,
-        [
-          partitionId,
-          sourceId.toString(),
-          amount.toBigNumber(),
-          deadline.toBigNumber(),
-          nounce.toBigNumber(),
-          signature,
-        ],
+      FUNCTION_NAME,
+      [
+        partitionId,
+        sourceId.toString(),
+        amount.toBigNumber(),
+        deadline.toBigNumber(),
+        nounce.toBigNumber(),
+        signature,
+      ],
     );
 
     const functionDataEncoded = new Uint8Array(
-        Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
-        .setGas(PROTECTED_REDEEM_GAS)
-        .setFunctionParameters(functionDataEncoded);
+      .setContractId(securityId)
+      .setGas(PROTECTED_REDEEM_GAS)
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async protectedTransferFromByPartition(
-      security: EvmAddress,
-      partitionId: string,
-      sourceId: EvmAddress,
-      targetId: EvmAddress,
-      amount: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-      securityId: ContractId | string,
+    security: EvmAddress,
+    partitionId: string,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'protectedTransferFromByPartition';
     LogService.logTrace(
-        `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()}`,
+      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
     const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
-        security.toString(),
+      security.toString(),
     );
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-        FUNCTION_NAME,
-        [
-          partitionId,
-          sourceId.toString(),
-          targetId.toString(),
-          amount.toBigNumber(),
-          deadline.toBigNumber(),
-          nounce.toBigNumber(),
-          signature,
-        ],
+      FUNCTION_NAME,
+      [
+        partitionId,
+        sourceId.toString(),
+        targetId.toString(),
+        amount.toBigNumber(),
+        deadline.toBigNumber(),
+        nounce.toBigNumber(),
+        signature,
+      ],
     );
 
     const functionDataEncoded = new Uint8Array(
-        Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
-        .setGas(PROTECTED_TRANSFER_GAS)
-        .setFunctionParameters(functionDataEncoded);
+      .setContractId(securityId)
+      .setGas(PROTECTED_TRANSFER_GAS)
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }
 
   async protectedTransferAndLock(
-      security: EvmAddress,
-      amount: BigDecimal,
-      sourceId: EvmAddress,
-      targetId: EvmAddress,
-      expirationDate: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-      securityId: ContractId | string,
+    security: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nounce: BigDecimal,
+    signature: string,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'protectedTransferAndLock';
     LogService.logTrace(
-        `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
+      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
     );
 
     const factoryInstance = new TransferAndLock__factory().attach(
-        security.toString(),
+      security.toString(),
     );
 
-    // @ts-ignore
     const transferAndLockData: TransferAndLock = {
       from: sourceId.toString(),
       to: targetId.toString(),
@@ -1789,23 +1794,23 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     };
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-        FUNCTION_NAME,
-        [
-          transferAndLockData,
-          deadline.toBigNumber(),
-          nounce.toBigNumber(),
-          signature,
-        ],
+      FUNCTION_NAME,
+      [
+        transferAndLockData,
+        deadline.toBigNumber(),
+        nounce.toBigNumber(),
+        signature,
+      ],
     );
 
     const functionDataEncoded = new Uint8Array(
-        Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
 
     const transaction = new ContractExecuteTransaction()
-        .setContractId(securityId)
-        .setGas(PROTECTED_TRANSFER_AND_LOCK_GAS)
-        .setFunctionParameters(functionDataEncoded);
+      .setContractId(securityId)
+      .setGas(PROTECTED_TRANSFER_AND_LOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
   }

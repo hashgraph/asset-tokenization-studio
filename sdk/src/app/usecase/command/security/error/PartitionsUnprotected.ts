@@ -203,10 +203,10 @@
 
 */
 
-import BaseError, {ErrorCode} from "../../../../../core/error/BaseError";
+import BaseError, { ErrorCode } from '../../../../../core/error/BaseError';
 
 export class PartitionsUnProtected extends BaseError {
-    constructor() {
-        super(ErrorCode.PartitionsUnprotected, `Partitions are not protected`);
-    }
+  constructor() {
+    super(ErrorCode.PartitionsUnprotected, `Partitions are not protected`);
+  }
 }
