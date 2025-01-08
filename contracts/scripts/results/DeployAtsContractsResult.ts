@@ -1,5 +1,3 @@
-import { BaseContract } from 'ethers'
-import { AtsContracts } from '../../Configuration'
 import {
     Factory,
     BusinessLogicResolver,
@@ -51,9 +49,7 @@ type DeployAtsContractsResultParams = {
     adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
 }
 
-export default class DeployAtsContractsResult extends AtsContracts<
-    DeployContractWithFactoryResult<BaseContract>
-> {
+export default class DeployAtsContractsResult {
     public readonly factory: DeployContractWithFactoryResult<Factory>
     public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
     public readonly accessControl: DeployContractWithFactoryResult<AccessControl>
@@ -101,7 +97,6 @@ export default class DeployAtsContractsResult extends AtsContracts<
         lock,
         adjustBalances,
     }: DeployAtsContractsResultParams) {
-        super()
         this.factory = factory
         this.businessLogicResolver = businessLogicResolver
         this.accessControl = accessControl

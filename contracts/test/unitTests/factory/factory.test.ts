@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
 import {
     type AccessControl,
     type ControlList,
@@ -212,7 +212,6 @@ import {
     type ERC20,
     type Factory,
 } from '../../../typechain-types'
-import { deployEnvironment } from '../../../scripts/deployEnvironmentByRpc'
 import {
     Rbac,
     setEquityData,
@@ -235,10 +234,13 @@ import {
     PAUSER_ROLE,
     SNAPSHOT_ROLE,
     LOCKER_ROLE,
-    EQUITY_DEPLOYED_EVENT,
-    BOND_DEPLOYED_EVENT,
+    EVENTS,
 } from '../../../scripts/constants'
-import { transparentUpgradableProxy } from '../../../scripts/transparentUpgradableProxy'
+import {
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '../../../scripts'
+import { Network } from '../../../Configuration'
 
 describe('Factory Tests', () => {
     let signer_A: SignerWithAddress
@@ -362,7 +364,19 @@ describe('Factory Tests', () => {
             account_H,
         ]
 
-        await deployEnvironment()
+        for (const member of listOfMembers) {
+            console.log('Member: ', member)
+        }
+
+        const { deployedContracts } = await deployAtsFullInfrastructure(
+            new DeployAtsFullInfrastructureCommand({
+                signer: signer_A,
+                network: network.name as Network,
+                useDeployed: false,
+            })
+        )
+
+        factory = deployedContracts.factory.contract
 
         for (let i = 1; i < listOfMembers.length; i++) {
             const rbac: Rbac = {
@@ -371,11 +385,6 @@ describe('Factory Tests', () => {
             }
             init_rbacs.push(rbac)
         }
-
-        factory = await ethers.getContractAt(
-            'Factory',
-            transparentUpgradableProxy.address
-        )
     })
 
     describe('Equity tests', () => {
@@ -628,7 +637,7 @@ describe('Factory Tests', () => {
             )
             const events = (await result.wait()).events!
             const deployedEquityEvent = events.find(
-                (e) => e.event == EQUITY_DEPLOYED_EVENT
+                (e) => e.event == EVENTS.equity.deployed
             )
             const equityAddress = deployedEquityEvent!.args!.equityAddress
 
@@ -981,7 +990,7 @@ describe('Factory Tests', () => {
             )
             const events = (await result.wait()).events!
             const deployedBondEvent = events.find(
-                (e) => e.event == BOND_DEPLOYED_EVENT
+                (e) => e.event == EVENTS.bond.deployed
             )
             const bondAddress = deployedBondEvent!.args!.bondAddress
 
@@ -1170,7 +1179,7 @@ describe('Factory Tests', () => {
             )
             const events = (await result.wait()).events!
             const deployedBondEvent = events.find(
-                (e) => e.event == BOND_DEPLOYED_EVENT
+                (e) => e.event == EVENTS.bond.deployed
             )
             const bondAddress = deployedBondEvent!.args!.bondAddress
 

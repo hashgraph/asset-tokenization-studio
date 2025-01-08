@@ -363,10 +363,7 @@ export async function registerBusinessLogics({
                 const proxiedContract =
                     IStaticFunctionSelectors__factory.connect(address, signer)
                 const businessLogicKey =
-                    await proxiedContract.getStaticResolverKey({
-                        value: GAS_LIMIT.businessLogicResolver
-                            .getStaticResolverKey,
-                    })
+                    await proxiedContract.getStaticResolverKey()
 
                 return {
                     businessLogicKey,
@@ -380,7 +377,10 @@ export async function registerBusinessLogics({
         signer
     )
     const response = await resolverContract.registerBusinessLogics(
-        businessLogicRegistries
+        businessLogicRegistries,
+        {
+            gasLimit: GAS_LIMIT.high,
+        }
     )
     await validateTxResponse(
         new ValidateTxResponseCommand({
@@ -403,15 +403,11 @@ export async function createAllConfigurations({
         IStaticFunctionSelectors__factory.connect(
             equityUsa,
             signer
-        ).getStaticResolverKey({
-            value: GAS_LIMIT.businessLogicResolver.getStaticResolverKey,
-        }),
+        ).getStaticResolverKey(),
         IStaticFunctionSelectors__factory.connect(
             bondUsa,
             signer
-        ).getStaticResolverKey({
-            value: GAS_LIMIT.businessLogicResolver.getStaticResolverKey,
-        }),
+        ).getStaticResolverKey(),
     ])
 
     const equityFacetAddressList = [
@@ -433,7 +429,10 @@ export async function createAllConfigurations({
         equityFacetAddressList.map((address, index) => ({
             id: address,
             version: equityFacetVersionList[index],
-        }))
+        })),
+        {
+            gasLimit: GAS_LIMIT.high,
+        }
     )
     await validateTxResponse(
         new ValidateTxResponseCommand({
@@ -452,7 +451,10 @@ export async function createAllConfigurations({
         bondFacetAddressList.map((address, index) => ({
             id: address,
             version: bondFacetVersionList[index],
-        }))
+        })),
+        {
+            gasLimit: GAS_LIMIT.high,
+        }
     )
     await validateTxResponse(
         new ValidateTxResponseCommand({
