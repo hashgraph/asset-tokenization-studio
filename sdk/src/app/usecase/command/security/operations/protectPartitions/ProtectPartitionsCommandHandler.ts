@@ -203,18 +203,18 @@
 
 */
 
-import { CommandHandler } from 'core/decorator/CommandHandlerDecorator';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
 import {
   ProtectPartitionsCommand,
   ProtectPartitionsCommandResponse,
 } from './ProtectPartitionsCommand';
-import { ICommandHandler } from 'core/command/CommandHandler';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import AccountService from '../../../../../service/AccountService';
-import SecurityService from 'app/service/SecurityService';
-import TransactionService from 'app/service/TransactionService';
-import { MirrorNodeAdapter } from 'port/out/mirror/MirrorNodeAdapter';
-import { RPCQueryAdapter } from 'port/out/rpc/RPCQueryAdapter';
+import SecurityService from '../../../../..//service/SecurityService';
+import TransactionService from '../../../../..//service/TransactionService';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
 import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';

@@ -218,6 +218,7 @@ import {
   GetLocksIdRequest,
   IssueRequest,
   LoggerTransports,
+  PartitionsProtectedRequest,
   PauseRequest,
   ReleaseRequest,
   Role,
@@ -426,6 +427,14 @@ describe('🧪 Security tests', () => {
         securityId: equity.evmDiamondAddress!,
         targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
         role: SecurityRole._LOCKER_ROLE,
+      }),
+    );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._PROTECTED_PARTITION_ROLE,
       }),
     );
   }, 900_000);
@@ -896,4 +905,38 @@ describe('🧪 Security tests', () => {
       ),
     ).toBe(SecurityControlListType.BLACKLIST);
   });
+
+  it('Protect and UnProtect a security', async () => {
+    expect(
+      (
+        await Security.protectPartitions(
+          new PartitionsProtectedRequest({
+            securityId: equity.evmDiamondAddress!,
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    expect(
+      await Security.arePartitionsProtected(
+        new PartitionsProtectedRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      ),
+    ).toBe(true);
+
+    await Security.unprotectPartitions(
+      new PartitionsProtectedRequest({
+        securityId: equity.evmDiamondAddress!,
+      }),
+    );
+
+    expect(
+      await Security.arePartitionsProtected(
+        new PartitionsProtectedRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      ),
+    ).toBe(false);
+  }, 120000);
 });

@@ -223,7 +223,7 @@ import {
   ProtectedRedeemFromByPartitionCommand,
   ProtectedRedeemFromByPartitionCommandResponse,
 } from './ProtectedRedeemFromByPartitionCommand';
-import { SecurityControlListType } from '../../../../../../port/in';
+import { SecurityControlListType } from '../../../../../../domain/context/security/SecurityControlListType.js';
 import { PartitionsUnProtected } from '../../error/PartitionsUnprotected';
 import {
   getProtectedPartitionRole,

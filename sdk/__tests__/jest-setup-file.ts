@@ -856,6 +856,12 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       return Math.random();
     });
 
+  singletonInstance.arePartitionsProtected = jest.fn(
+    async (address: EvmAddress) => {
+      return securityInfo.arePartitionsProtected ?? false;
+    },
+  );
+
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
   };
@@ -1495,6 +1501,22 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     scheduledBalanceAdjustments.pop();
     scheduledBalanceAdjustments.push(scheduledBalanceAdjustment);
 
+    return {
+      status: 'success',
+      id: transactionId,
+    } as TransactionResponse;
+  });
+
+  singletonInstance.protectPartitions = jest.fn(async () => {
+    securityInfo.arePartitionsProtected = true;
+    return {
+      status: 'success',
+      id: transactionId,
+    } as TransactionResponse;
+  });
+
+  singletonInstance.unprotectPartitions = jest.fn(async () => {
+    securityInfo.arePartitionsProtected = false;
     return {
       status: 'success',
       id: transactionId,
