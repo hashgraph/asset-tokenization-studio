@@ -1,28 +1,19 @@
-import { Signer } from 'ethers'
 import {
     BaseBusinessLogicResolverCommand,
-    DeployAtsContractsResult,
+    BaseBusinessLogicResolverCommandParams,
 } from '../index'
 
-interface CreateAllConfigurationsCommandParams {
-    readonly deployedContractList: DeployAtsContractsResult
-    readonly signer: Signer
-}
+interface CreateAllConfigurationsCommandParams
+    extends BaseBusinessLogicResolverCommandParams {}
 
 export default class CreateAllConfigurationsCommand extends BaseBusinessLogicResolverCommand {
     public readonly commonFacetAddressList: string[]
-    public readonly businessLogicResolverProxy: string
-    public readonly equityUsa: string
-    public readonly bondUsa: string
 
     constructor({
         deployedContractList,
         signer,
     }: CreateAllConfigurationsCommandParams) {
-        super(deployedContractList, signer)
+        super({ deployedContractList, signer })
         this.commonFacetAddressList = this.contractAddressList
-        this.businessLogicResolverProxy = this.businessLogicResolverProxyAddress
-        this.equityUsa = deployedContractList.equityUsa.address
-        this.bondUsa = deployedContractList.bondUsa.address
     }
 }

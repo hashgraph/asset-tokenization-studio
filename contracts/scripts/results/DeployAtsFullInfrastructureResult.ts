@@ -1,12 +1,24 @@
-import { DeployAtsContractsResult } from '../index'
-export default class DeployAtsFullInfrastructureResult {
-    public readonly deployedContracts: DeployAtsContractsResult
+import { Signer } from 'ethers'
+import { Factory } from '../../typechain-types'
+import {
+    DeployAtsContractsResult,
+    DeployAtsContractsResultParams,
+    DeployContractWithFactoryResult,
+} from '../index'
+
+interface DeployAtsFullInfrastructureResultParams
+    extends DeployAtsContractsResultParams {
+    factory: DeployContractWithFactoryResult<Factory>
+}
+
+export default class DeployAtsFullInfrastructureResult extends DeployAtsContractsResult {
+    public readonly factory: DeployContractWithFactoryResult<Factory>
 
     constructor({
-        deployedContracts,
-    }: {
-        deployedContracts: DeployAtsContractsResult
-    }) {
-        this.deployedContracts = deployedContracts
+        factory,
+        ...params
+    }: DeployAtsFullInfrastructureResultParams) {
+        super(params)
+        this.factory = factory
     }
 }

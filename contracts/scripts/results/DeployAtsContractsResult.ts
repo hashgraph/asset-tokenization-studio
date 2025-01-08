@@ -1,5 +1,5 @@
+import { Signer } from 'ethers'
 import {
-    Factory,
     BusinessLogicResolver,
     AccessControl,
     AdjustBalances,
@@ -24,8 +24,7 @@ import {
 } from '../../typechain-types'
 import { DeployContractWithFactoryResult } from '../index'
 
-type DeployAtsContractsResultParams = {
-    factory: DeployContractWithFactoryResult<Factory>
+export interface DeployAtsContractsResultParams {
     businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
     accessControl: DeployContractWithFactoryResult<AccessControl>
     cap: DeployContractWithFactoryResult<Cap>
@@ -37,8 +36,8 @@ type DeployAtsContractsResultParams = {
     erc1643: DeployContractWithFactoryResult<ERC1643>
     erc1644: DeployContractWithFactoryResult<ERC1644>
     diamondFacet: DeployContractWithFactoryResult<DiamondFacet>
-    equityUSA: DeployContractWithFactoryResult<EquityUSA>
-    bondUSA: DeployContractWithFactoryResult<BondUSA>
+    equityUsa: DeployContractWithFactoryResult<EquityUSA>
+    bondUsa: DeployContractWithFactoryResult<BondUSA>
     scheduledSnapshots: DeployContractWithFactoryResult<ScheduledSnapshots>
     scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
@@ -47,10 +46,10 @@ type DeployAtsContractsResultParams = {
     transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     lock: DeployContractWithFactoryResult<Lock>
     adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
+    deployer?: Signer
 }
 
 export default class DeployAtsContractsResult {
-    public readonly factory: DeployContractWithFactoryResult<Factory>
     public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
     public readonly accessControl: DeployContractWithFactoryResult<AccessControl>
     public readonly cap: DeployContractWithFactoryResult<Cap>
@@ -72,9 +71,9 @@ export default class DeployAtsContractsResult {
     public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     public readonly lock: DeployContractWithFactoryResult<Lock>
     public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
+    public readonly deployer?: Signer
 
     constructor({
-        factory,
         businessLogicResolver,
         accessControl,
         cap,
@@ -86,8 +85,8 @@ export default class DeployAtsContractsResult {
         erc1643,
         erc1644,
         diamondFacet,
-        equityUSA,
-        bondUSA,
+        equityUsa,
+        bondUsa,
         scheduledSnapshots,
         scheduledBalanceAdjustments,
         scheduledTasks,
@@ -96,8 +95,8 @@ export default class DeployAtsContractsResult {
         transferAndLock,
         lock,
         adjustBalances,
+        deployer,
     }: DeployAtsContractsResultParams) {
-        this.factory = factory
         this.businessLogicResolver = businessLogicResolver
         this.accessControl = accessControl
         this.cap = cap
@@ -109,8 +108,8 @@ export default class DeployAtsContractsResult {
         this.erc1643 = erc1643
         this.erc1644 = erc1644
         this.diamondFacet = diamondFacet
-        this.equityUsa = equityUSA
-        this.bondUsa = bondUSA
+        this.equityUsa = equityUsa
+        this.bondUsa = bondUsa
         this.scheduledSnapshots = scheduledSnapshots
         this.scheduledBalanceAdjustments = scheduledBalanceAdjustments
         this.scheduledTasks = scheduledTasks
@@ -119,5 +118,6 @@ export default class DeployAtsContractsResult {
         this.transferAndLock = transferAndLock
         this.lock = lock
         this.adjustBalances = adjustBalances
+        this.deployer = deployer
     }
 }

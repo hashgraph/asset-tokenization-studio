@@ -6,7 +6,10 @@ export {
     default as BaseBlockchainCommand,
     BaseBlockchainCommandParams,
 } from './commands/base/BaseBlockchainCommand'
-export { default as BaseBusinessLogicResolverCommand } from './commands/base/BaseBusinessLogicResolverCommand'
+export {
+    default as BaseBusinessLogicResolverCommand,
+    BaseBusinessLogicResolverCommandParams,
+} from './commands/base/BaseBusinessLogicResolverCommand'
 export { default as ErrorMessageCommand } from './commands/ErrorMessageCommand'
 export { default as DeployContractCommand } from './commands/DeployContractCommand'
 export { default as DeployAtsContractsCommand } from './commands/DeployAtsContractsCommand'
@@ -31,7 +34,10 @@ export { default as ProxyImplementationQuery } from './queries/ProxyImplementati
 // * Results
 export { default as DeployContractResult } from './results/DeployContractResult'
 export { default as DeployContractWithFactoryResult } from './results/DeployContractWithFactoryResult'
-export { default as DeployAtsContractsResult } from './results/DeployAtsContractsResult'
+export {
+    default as DeployAtsContractsResult,
+    DeployAtsContractsResultParams,
+} from './results/DeployAtsContractsResult'
 export { default as DeployAtsFullInfrastructureResult } from './results/DeployAtsFullInfrastructureResult'
 export { default as ValidateTxResponseResult } from './results/ValidateTxResponseResult'
 

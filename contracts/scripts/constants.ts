@@ -265,7 +265,8 @@ export const SUCCESS = '0x00'
 // * Events
 export const EVENTS = {
     businessLogicResolver: {
-        registered: 'BusinessLogicRegistered',
+        registered: 'BusinessLogicsRegistered',
+        configurationCreated: 'DiamondConfigurationCreated',
     },
     equity: {
         deployed: 'EquityDeployed',
@@ -297,6 +298,7 @@ export const GAS_LIMIT = {
     businessLogicResolver: {
         getStaticResolverKey: 60_000,
         registerBusinessLogics: 7_800_000,
+        createConfiguration: 12_000_000,
     },
 }
 
@@ -313,8 +315,11 @@ export const MESSAGES = {
     },
     businessLogicResolver: {
         info: {
+            initializing:
+                'Initializing business logic resolver. please wait...',
             registering: 'Registering business logics. please wait...',
             creatingConfigurations: 'Creating configurations. please wait...',
+            configured: 'Business logic resolver configured successfully',
         },
         error: {
             notFound: 'Business logic resolver not found',
@@ -322,6 +327,12 @@ export const MESSAGES = {
             initializing: 'Error initializing business logic resolver',
             registering: 'Error registering business logics',
             creatingConfigurations: 'Error creating configurations',
+        },
+    },
+    factory: {
+        info: {
+            deploying: 'Deploying factory. please wait...',
+            deployed: 'Factory deployed successfully',
         },
     },
 }

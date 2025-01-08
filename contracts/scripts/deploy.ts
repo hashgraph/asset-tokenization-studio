@@ -249,6 +249,8 @@ import {
     createAllConfigurations,
     validateTxResponseList,
     ValidateTxResponseCommand,
+    GAS_LIMIT,
+    validateTxResponse,
 } from './index'
 
 export async function deployAtsFullInfrastructure({
@@ -259,13 +261,16 @@ export async function deployAtsFullInfrastructure({
     const usingDeployed =
         useDeployed &&
         Configuration.contracts.BusinessLogicResolver.addresses?.[network]
+
     // * Deploy all contracts
     const deployCommand = new DeployAtsContractsCommand({
         signer,
         network,
         useDeployed,
     })
-    const deployedContractList = await deployAtsContracts(deployCommand)
+    const { deployer, ...deployedContractList } = await deployAtsContracts(
+        deployCommand
+    )
 
     // * Check if BusinessLogicResolver is deployed correctly
     const resolver = deployedContractList.businessLogicResolver
@@ -278,6 +283,18 @@ export async function deployAtsFullInfrastructure({
     }
 
     if (!usingDeployed) {
+        // * Initialize BusinessLogicResolver
+        console.log(MESSAGES.businessLogicResolver.info.initializing)
+        const initResponse =
+            await resolver.contract.initialize_BusinessLogicResolver({
+                gasLimit: GAS_LIMIT.initilize.businessLogicResolver,
+            })
+        await validateTxResponse(
+            new ValidateTxResponseCommand({
+                txResponse: initResponse,
+                errorMessage: MESSAGES.businessLogicResolver.error.initializing,
+            })
+        )
         // * Register business logic contracts
         console.log(MESSAGES.businessLogicResolver.info.registering)
 
@@ -295,9 +312,22 @@ export async function deployAtsFullInfrastructure({
         })
         await createAllConfigurations(createCommand)
     }
+    console.log(MESSAGES.businessLogicResolver.info.configured)
+    console.log(MESSAGES.factory.info.deploying)
+    const factoryDeployCommand = new DeployContractWithFactoryCommand({
+        factory: new Factory__factory(),
+        signer,
+        withProxy: true,
+        deployedContract: useDeployed
+            ? Configuration.contracts.Factory.addresses?.[network]
+            : undefined,
+    })
+    const factory = await deployContractWithFactory(factoryDeployCommand)
 
     return new DeployAtsFullInfrastructureResult({
-        deployedContracts: deployedContractList,
+        ...deployedContractList,
+        factory: factory,
+        deployer: deployer,
     })
 }
 
@@ -307,14 +337,6 @@ export async function deployAtsContracts({
     useDeployed,
 }: DeployAtsContractsCommand) {
     const commands = {
-        factory: new DeployContractWithFactoryCommand({
-            factory: new Factory__factory(),
-            signer,
-            withProxy: true,
-            deployedContract: useDeployed
-                ? Configuration.contracts.Factory.addresses?.[network]
-                : undefined,
-        }),
         businessLogicResolver: new DeployContractWithFactoryCommand({
             factory: new BusinessLogicResolver__factory(),
             signer,
@@ -474,7 +496,6 @@ export async function deployAtsContracts({
         }),
     }
     return new DeployAtsContractsResult({
-        factory: await deployContractWithFactory(commands.factory),
         businessLogicResolver: await deployContractWithFactory(
             commands.businessLogicResolver
         ),
@@ -492,8 +513,8 @@ export async function deployAtsContracts({
         erc1644: await deployContractWithFactory(commands.erc1644),
         snapshots: await deployContractWithFactory(commands.snapshots),
         diamondFacet: await deployContractWithFactory(commands.diamondFacet),
-        equityUSA: await deployContractWithFactory(commands.equityUsa),
-        bondUSA: await deployContractWithFactory(commands.bondUsa),
+        equityUsa: await deployContractWithFactory(commands.equityUsa),
+        bondUsa: await deployContractWithFactory(commands.bondUsa),
         scheduledSnapshots: await deployContractWithFactory(
             commands.scheduledSnapshots
         ),
@@ -512,6 +533,7 @@ export async function deployAtsContracts({
         adjustBalances: await deployContractWithFactory(
             commands.adjustBalances
         ),
+        deployer: signer,
     })
 }
 
@@ -589,7 +611,7 @@ export async function deployContractWithFactory<
 
     return new DeployContractWithFactoryResult({
         address: implementationContract.address,
-        contract: factory.attach(proxyAddress) as C,
+        contract: factory.connect(signer).attach(proxyAddress) as C,
         proxyAddress: proxyAddress,
         proxyAdminAddress: proxyAdminAddress,
         receipt: await txResponseList[0].wait(),

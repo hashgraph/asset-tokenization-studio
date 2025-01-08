@@ -225,6 +225,7 @@ import {
 } from './index'
 import { BOND_CONFIG_ID, EQUITY_CONFIG_ID, EVENTS } from './constants'
 import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
+import { FacetConfiguration } from './resolverDiamondCut'
 
 export interface BusinessLogicRegistryData {
     businessLogicKey: string
@@ -279,7 +280,9 @@ export async function deployProxyForBusinessLogicResolver({
     )
 
     const txResponse =
-        await businessLogicResolver.initialize_BusinessLogicResolver()
+        await businessLogicResolver.initialize_BusinessLogicResolver({
+            gasLimit: GAS_LIMIT.initilize.businessLogicResolver,
+        })
     validateTxResponse(
         new ValidateTxResponseCommand({
             txResponse: txResponse,
@@ -345,27 +348,32 @@ export async function deployBusinessLogics(
  * Each contract in the address list must implement the IStaticFunctionSelectors interface
  */
 export async function registerBusinessLogics({
-    contractAddressListToRegister: deployedContractAddressList,
-    businessLogicResolverProxy: businessLogicResolver,
+    contractAddressListToRegister,
+    businessLogicResolverProxyAddress,
     signer,
 }: RegisterBusinessLogicsCommand): Promise<void> {
     const businessLogicRegistries: BusinessLogicRegistryData[] =
         await Promise.all(
-            Object.values(deployedContractAddressList).map(async (address) => {
-                const proxiedContract =
-                    IStaticFunctionSelectors__factory.connect(address, signer)
-                const businessLogicKey =
-                    await proxiedContract.getStaticResolverKey()
+            Object.values(contractAddressListToRegister).map(
+                async (address) => {
+                    const proxiedContract =
+                        IStaticFunctionSelectors__factory.connect(
+                            address,
+                            signer
+                        )
+                    const businessLogicKey =
+                        await proxiedContract.getStaticResolverKey()
 
-                return {
-                    businessLogicKey,
-                    businessLogicAddress: address.replace('0x', ''),
+                    return {
+                        businessLogicKey,
+                        businessLogicAddress: address.replace('0x', ''),
+                    }
                 }
-            })
+            )
         )
 
     const resolverContract = IBusinessLogicResolver__factory.connect(
-        businessLogicResolver,
+        businessLogicResolverProxyAddress,
         signer
     )
     const response = await resolverContract.registerBusinessLogics(
@@ -385,50 +393,56 @@ export async function registerBusinessLogics({
 
 export async function createAllConfigurations({
     commonFacetAddressList,
-    businessLogicResolverProxy,
-    equityUsa,
-    bondUsa,
+    businessLogicResolverProxyAddress,
+    equityUsaAddress,
+    bondUsaAddress,
     signer,
 }: CreateAllConfigurationsCommand) {
+    const commonFacetIdList = await Promise.all(
+        commonFacetAddressList.map(async (address) => {
+            return await IStaticFunctionSelectors__factory.connect(
+                address,
+                signer
+            ).getStaticResolverKey()
+        })
+    )
     // Get the resolver keys for the equities and bonds
     const [equityResolverKey, bondResolverKey] = await Promise.all([
         IStaticFunctionSelectors__factory.connect(
-            equityUsa,
+            equityUsaAddress,
             signer
         ).getStaticResolverKey(),
         IStaticFunctionSelectors__factory.connect(
-            bondUsa,
+            bondUsaAddress,
             signer
         ).getStaticResolverKey(),
     ])
 
-    const equityFacetAddressList = [
-        ...commonFacetAddressList,
-        equityResolverKey,
-    ]
-    const bondFacetAddressList = [...commonFacetAddressList, bondResolverKey]
+    const equityFacetIdList = [...commonFacetIdList, equityResolverKey]
+    const bondFacetIdList = [...commonFacetIdList, bondResolverKey]
 
-    const equityFacetVersionList = equityFacetAddressList.map(() => 1)
-    const bondFacetVersionList = bondFacetAddressList.map(() => 1)
+    const equityFacetVersionList = Array(equityFacetIdList.length).fill(1)
+    const bondFacetVersionList = Array(bondFacetIdList.length).fill(1)
 
     // Create configuration for equities
-
     let response = await IDiamondCutManager__factory.connect(
-        businessLogicResolverProxy,
+        businessLogicResolverProxyAddress,
         signer
     ).createConfiguration(
         EQUITY_CONFIG_ID,
-        equityFacetAddressList.map((address, index) => ({
-            id: address,
+        equityFacetIdList.map((id, index) => ({
+            id,
             version: equityFacetVersionList[index],
-        })),
+        })) as FacetConfiguration[],
         {
-            gasLimit: GAS_LIMIT.high,
+            gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
         }
     )
     await validateTxResponse(
         new ValidateTxResponseCommand({
             txResponse: response,
+            confirmationEvent:
+                EVENTS.businessLogicResolver.configurationCreated,
             errorMessage:
                 MESSAGES.businessLogicResolver.error.creatingConfigurations,
         })
@@ -436,21 +450,23 @@ export async function createAllConfigurations({
 
     // Create configuration for bonds
     response = await IDiamondCutManager__factory.connect(
-        businessLogicResolverProxy,
+        businessLogicResolverProxyAddress,
         signer
     ).createConfiguration(
         BOND_CONFIG_ID,
-        bondFacetAddressList.map((address, index) => ({
-            id: address,
+        bondFacetIdList.map((id, index) => ({
+            id,
             version: bondFacetVersionList[index],
         })),
         {
-            gasLimit: GAS_LIMIT.high,
+            gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
         }
     )
     await validateTxResponse(
         new ValidateTxResponseCommand({
             txResponse: response,
+            confirmationEvent:
+                EVENTS.businessLogicResolver.configurationCreated,
             errorMessage:
                 MESSAGES.businessLogicResolver.error.creatingConfigurations,
         })
