@@ -204,7 +204,6 @@
 */
 
 //import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ethers } from 'hardhat'
 import {
     BusinessLogicResolver__factory,
     IBusinessLogicResolver,
@@ -225,6 +224,7 @@ import {
     ValidateTxResponseCommand,
 } from './index'
 import { BOND_CONFIG_ID, EQUITY_CONFIG_ID, EVENTS } from './constants'
+import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
 
 export interface BusinessLogicRegistryData {
     businessLogicKey: string
@@ -288,15 +288,6 @@ export async function deployProxyForBusinessLogicResolver({
     )
 }
 
-async function toStaticFunctionSelectors(
-    address: string
-): Promise<IStaticFunctionSelectors> {
-    return (await ethers.getContractAt(
-        'IStaticFunctionSelectors',
-        address
-    )) as IStaticFunctionSelectors
-}
-
 function capitalizeFirst(str: string) {
     return str.charAt(0).toUpperCase() + str.slice(1)
 }
@@ -313,9 +304,7 @@ export async function deployBusinessLogics(
         contractToDeploy: string
     ) {
         async function deployContract() {
-            return await (
-                await ethers.getContractFactory(contractToDeploy)
-            ).deploy()
+            return await (await getContractFactory(contractToDeploy)).deploy()
         }
         //await loadFixture(deployContract)
         const deployedContract = await deployContract()
@@ -323,7 +312,10 @@ export async function deployBusinessLogics(
             uncapitalizeFirst(contractToDeploy)
         deployedAndRegisteredBusinessLogics[
             deployedAndRegisteredBusinessLogics_Property as keyof DeployedBusinessLogics
-        ] = await toStaticFunctionSelectors(deployedContract.address)
+        ] = IStaticFunctionSelectors__factory.connect(
+            deployedContract.address,
+            deployedContract.signer
+        )
     }
     let key: keyof typeof deployedAndRegisteredBusinessLogics
     for (key in deployedAndRegisteredBusinessLogics) {

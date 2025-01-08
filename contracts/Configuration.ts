@@ -205,9 +205,9 @@ export default class Configuration {
             return value
         }
         if (defaultValue !== undefined) {
-            console.warn(
-                `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
-            )
+            // console.warn(
+            //     `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
+            // )
             return defaultValue
         }
         throw new Error(

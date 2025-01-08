@@ -212,7 +212,6 @@ import {
     ContractId,
 } from '@hashgraph/sdk'
 import axios from 'axios'
-import { TransactionReceipt } from '@ethersproject/providers'
 import Configuration, { Network, NETWORKS } from '../Configuration'
 import { ADDRESS_ZERO, REGEX } from './constants'
 
