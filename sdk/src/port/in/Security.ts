@@ -740,9 +740,9 @@ class SecurityInPort implements ISecurityInPort {
     return await this.commandBus.execute(
       new ProtectedRedeemFromByPartitionCommand(
         securityId,
-        amount,
-        sourceId,
         partitionId,
+        sourceId,
+        amount,
         deadline,
         nounce,
         signature,

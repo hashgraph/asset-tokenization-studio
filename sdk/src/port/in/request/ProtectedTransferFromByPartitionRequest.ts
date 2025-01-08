@@ -33,7 +33,7 @@ export default class ProtectedTransferFromByPartitionRequest extends ValidatedRe
   }) {
     super({
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkNumber(),
+      partitionId: Validation.checkBytes32Format(),
       sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
       targetId: Validation.checkHederaIdFormatOrEvmAddress(),
       amount: Validation.checkAmount(),

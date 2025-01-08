@@ -212,7 +212,6 @@ import { HederaId } from '../../domain/context/shared/HederaId.js';
 import { MirrorNodeAdapter } from './mirror/MirrorNodeAdapter.js';
 import { Environment } from '../../domain/context/network/Environment.js';
 import LogService from '../../app/service/LogService.js';
-import { SecurityRole } from '../../domain/context/security/SecurityRole.js';
 import { Security } from '../../domain/context/security/Security.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress.js';
 import { BondDetails } from '../../domain/context/bond/BondDetails.js';
@@ -472,31 +471,31 @@ interface RoleTransactionAdapter {
   grantRole(
     security: EvmAddress,
     targetId: EvmAddress,
-    role: SecurityRole,
+    role: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   applyRoles(
     security: EvmAddress,
     targetId: EvmAddress,
-    roles: SecurityRole[],
+    roles: string[],
     actives: boolean[],
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   revokeRole(
     security: EvmAddress,
     targetId: EvmAddress,
-    role: SecurityRole,
+    role: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   renounceRole(
     security: EvmAddress,
-    role: SecurityRole,
+    role: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
   hasRole(
     security: EvmAddress,
     targetId: EvmAddress,
-    role: SecurityRole,
+    role: string,
   ): Promise<TransactionResponse<boolean, Error>>;
   getRolesFor(
     security: EvmAddress,
@@ -506,7 +505,7 @@ interface RoleTransactionAdapter {
   ): Promise<TransactionResponse<string[], Error>>;
   getRoleMembers(
     security: EvmAddress,
-    role: SecurityRole,
+    role: string,
     start: number,
     end: number,
   ): Promise<TransactionResponse<string[], Error>>;
@@ -516,7 +515,7 @@ interface RoleTransactionAdapter {
   ): Promise<TransactionResponse<number, Error>>;
   getRoleMemberCount(
     security: EvmAddress,
-    role: SecurityRole,
+    role: string,
   ): Promise<TransactionResponse<number, Error>>;
 }
 
@@ -604,7 +603,7 @@ export default abstract class TransactionAdapter
   }
   getRoleMembers(
     security: EvmAddress,
-    role: SecurityRole,
+    role: string,
     start: number,
     end: number,
   ): Promise<TransactionResponse<string[], Error>> {
@@ -618,7 +617,7 @@ export default abstract class TransactionAdapter
   }
   getRoleMemberCount(
     security: EvmAddress,
-    role: SecurityRole,
+    role: string,
   ): Promise<TransactionResponse<number, Error>> {
     throw new Error('Method not implemented.');
   }
@@ -648,7 +647,7 @@ export default abstract class TransactionAdapter
   grantRole(
     security: EvmAddress,
     targetId: EvmAddress,
-    role: SecurityRole,
+    role: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
@@ -656,7 +655,7 @@ export default abstract class TransactionAdapter
   applyRoles(
     security: EvmAddress,
     targetId: EvmAddress,
-    roles: SecurityRole[],
+    roles: string[],
     actives: boolean[],
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
@@ -665,14 +664,14 @@ export default abstract class TransactionAdapter
   revokeRole(
     security: EvmAddress,
     targetId: EvmAddress,
-    role: SecurityRole,
+    role: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   renounceRole(
     security: EvmAddress,
-    role: SecurityRole,
+    role: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
@@ -680,7 +679,7 @@ export default abstract class TransactionAdapter
   hasRole(
     security: EvmAddress,
     targetId: EvmAddress,
-    role: SecurityRole,
+    role: string,
   ): Promise<TransactionResponse<boolean, Error>> {
     throw new Error('Method not implemented.');
   }

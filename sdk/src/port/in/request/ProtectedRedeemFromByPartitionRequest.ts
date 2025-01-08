@@ -30,7 +30,7 @@ export default class ProtectedRedeemFromByPartitionRequest extends ValidatedRequ
   }) {
     super({
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkNumber(),
+      partitionId: Validation.checkBytes32Format(),
       sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
       amount: Validation.checkAmount(),
       deadline: (val) => {

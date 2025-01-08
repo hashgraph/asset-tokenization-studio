@@ -203,13 +203,12 @@
 
 */
 
-import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
 import ValidatedRequest from './validation/ValidatedRequest.js';
 import Validation from './validation/Validation.js';
 
 export default class GetRoleMembersRequest extends ValidatedRequest<GetRoleMembersRequest> {
   securityId: string;
-  role: SecurityRole | undefined;
+  role: string;
   start: number;
   end: number;
 
@@ -220,7 +219,7 @@ export default class GetRoleMembersRequest extends ValidatedRequest<GetRoleMembe
     end,
   }: {
     securityId: string;
-    role: SecurityRole | undefined;
+    role: string;
     start: number;
     end: number;
   }) {

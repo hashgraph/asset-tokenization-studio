@@ -234,13 +234,10 @@ export function getProtectedPartitionRole(partitionId: string): string {
 
   const encodedValue = ethers.utils.defaultAbiCoder.encode(
     ['bytes32', 'bytes32'],
-    [
-      ethers.utils.formatBytes32String(SecurityRole._PROTECTED_PARTITION_ROLE),
-      partitionBytes32,
-    ],
+    [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
   );
   const hash = keccak256(encodedValue);
-  return hash;
+  return '0x' + hash;
 }
 
 export const MAX_ACCOUNTS_ROLES = 10;

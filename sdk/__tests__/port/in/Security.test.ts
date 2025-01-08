@@ -220,6 +220,8 @@ import {
   LoggerTransports,
   PartitionsProtectedRequest,
   PauseRequest,
+  ProtectedRedeemFromByPartitionRequest,
+  ProtectedTransferFromByPartitionRequest,
   ReleaseRequest,
   Role,
   RoleRequest,
@@ -253,6 +255,7 @@ import {
   RegulationType,
 } from '../../../src/domain/context/factory/RegulationType.js';
 import Account from '../../../src/domain/context/account/Account.js';
+import { keccak256 } from 'js-sha3';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -939,4 +942,103 @@ describe('🧪 Security tests', () => {
       ),
     ).toBe(false);
   }, 120000);
+
+  it('Protected transfer and redeem securities', async () => {
+    const issueAmount = '100';
+    const protectedTransferAmount = '50';
+    const protectedRedeemAmount = '5';
+    const partitionBytes32 =
+      '0x0000000000000000000000000000000000000000000000000000000000000001';
+
+    await Security.issue(
+      new IssueRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        amount: issueAmount,
+      }),
+    );
+
+    await Security.protectPartitions(
+      new PartitionsProtectedRequest({
+        securityId: equity.evmDiamondAddress!,
+      }),
+    );
+
+    const encodedValue = ethers.utils.defaultAbiCoder.encode(
+      ['bytes32', 'bytes32'],
+      [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
+    );
+    const hash = keccak256(encodedValue);
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: '0x' + hash,
+      }),
+    );
+
+    expect(
+      (
+        await Security.protectedTransferFromByPartition(
+          new ProtectedTransferFromByPartitionRequest({
+            securityId: equity.evmDiamondAddress!,
+            partitionId: partitionBytes32,
+            sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+            amount: protectedTransferAmount,
+            deadline: '9999999999',
+            nounce: 1,
+            signature: 'vvvv',
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    expect(
+      (
+        await Security.protectedRedeemFromByPartition(
+          new ProtectedRedeemFromByPartitionRequest({
+            securityId: equity.evmDiamondAddress!,
+            partitionId: partitionBytes32,
+            sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            amount: protectedRedeemAmount,
+            deadline: '9999999999',
+            nounce: 2,
+            signature: 'vvvv',
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    // check if transfer origin account has correct balance securities
+    expect(
+      (
+        await Security.getBalanceOf(
+          new GetAccountBalanceRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          }),
+        )
+      ).value,
+    ).toEqual(
+      (
+        +issueAmount -
+        +protectedTransferAmount -
+        +protectedRedeemAmount
+      ).toString(),
+    );
+
+    // check if transfer origin account has correct balance securities
+    expect(
+      (
+        await Security.getBalanceOf(
+          new GetAccountBalanceRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          }),
+        )
+      ).value,
+    ).toEqual((+protectedTransferAmount).toString());
+  }, 600_000);
 });

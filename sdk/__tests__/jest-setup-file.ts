@@ -285,6 +285,7 @@ const locksIds = new Map<string, number[]>();
 const locks = new Map<string, lock>();
 const lastLockIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
+const nonces = new Map<string, number>();
 
 let controlList: string[] = [];
 
@@ -859,6 +860,13 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
   singletonInstance.arePartitionsProtected = jest.fn(
     async (address: EvmAddress) => {
       return securityInfo.arePartitionsProtected ?? false;
+    },
+  );
+
+  singletonInstance.getNounceFor = jest.fn(
+    async (address: EvmAddress, target: EvmAddress) => {
+      const account = '0x' + target.toString().toUpperCase().substring(2);
+      return nonces.get(account) ?? 0;
     },
   );
 
@@ -1522,6 +1530,46 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       id: transactionId,
     } as TransactionResponse;
   });
+
+  singletonInstance.protectedTransferFromByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      sourceId: EvmAddress,
+      targetId: EvmAddress,
+      amount: BigDecimal,
+      deadline: BigDecimal,
+      nounce: BigDecimal,
+      signature: string,
+    ) => {
+      increaseBalance(targetId, amount);
+      decreaseBalance(sourceId, amount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.protectedRedeemFromByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      sourceId: EvmAddress,
+      amount: BigDecimal,
+      deadline: BigDecimal,
+      nounce: BigDecimal,
+      signature: string,
+    ) => {
+      decreaseBalance(sourceId, amount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
 
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),

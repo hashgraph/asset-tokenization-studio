@@ -214,7 +214,6 @@ import { singleton } from 'tsyringe';
 import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
 import NetworkService from '../../../app/service/NetworkService.js';
 import LogService from '../../../app/service/LogService.js';
-import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
 import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
 import { Security } from '../../../domain/context/security/Security.js';
@@ -449,7 +448,7 @@ export class RPCQueryAdapter {
 
   async getRoleMembers(
     address: EvmAddress,
-    role: SecurityRole,
+    role: string,
     start: number,
     end: number,
   ): Promise<string[]> {
@@ -477,10 +476,7 @@ export class RPCQueryAdapter {
     return roleCount.toNumber();
   }
 
-  async getRoleMemberCount(
-    address: EvmAddress,
-    role: SecurityRole,
-  ): Promise<number> {
+  async getRoleMemberCount(address: EvmAddress, role: string): Promise<number> {
     LogService.logTrace(`Getting role member count for ${role}`);
 
     const membersCount = await this.connect(
@@ -494,7 +490,7 @@ export class RPCQueryAdapter {
   async hasRole(
     address: EvmAddress,
     target: EvmAddress,
-    role: SecurityRole,
+    role: string,
   ): Promise<boolean> {
     LogService.logTrace(
       `Getting if the account ${target.toString()} has the role ${address.toString()}`,
