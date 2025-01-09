@@ -509,7 +509,10 @@ describe('ProtectedPartitions Tests', () => {
                     0,
                     '0x1234'
                 )
-            ).to.be.rejectedWith('AccountIsBlocked')
+            ).to.be.revertedWithCustomError(
+                controlListFacet,
+                'AccountIsBlocked'
+            )
         })
 
         it('GIVEN a blacklisted account WHEN performing a protected transfer to it THEN transaction fails with AccountIsBlocked', async () => {

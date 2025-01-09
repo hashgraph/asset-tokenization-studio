@@ -325,6 +325,7 @@ describe('🧪 Management tests', () => {
         decimals,
         isWhiteList: false,
         isControllable: true,
+        arePartitionsProtected: false,
         isMultiPartition: false,
         diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
         votingRight,

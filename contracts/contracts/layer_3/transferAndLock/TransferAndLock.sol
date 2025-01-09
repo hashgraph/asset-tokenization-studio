@@ -216,13 +216,13 @@ import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     LockStorageWrapper_2
 } from '../../layer_2/lock/LockStorageWrapper_2.sol';
-import {Common} from '../../layer_1/common/Common.sol';
+import {
+    TransferAndLockStorageWrapper
+} from './TransferAndLockStorageWrapper.sol';
 
 contract TransferAndLock is
-    ITransferAndLock,
     IStaticFunctionSelectors,
-    Common,
-    LockStorageWrapper_2
+    TransferAndLockStorageWrapper
 {
     function transferAndLockByPartition(
         bytes32 _partition,
@@ -306,6 +306,62 @@ contract TransferAndLock is
             _data,
             _expirationTimestamp,
             lockId_
+        );
+    }
+
+    function protectedTransferAndLockByPartition(
+        bytes32 _partition,
+        TransferAndLockStruct calldata _transferAndLockData,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    )
+        external
+        virtual
+        override
+        onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
+        onlyRole(_protectedPartitionsRole(_partition))
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(
+            _transferAndLockData.expirationTimestamp
+        )
+        onlyProtectedPartitions
+        returns (bool success_, uint256 lockId_)
+    {
+        _protectedTransferAndLockByPartition(
+            _partition,
+            _transferAndLockData,
+            _deadline,
+            _nounce,
+            _signature
+        );
+    }
+
+    function protectedTransferAndLock(
+        TransferAndLockStruct calldata _transferAndLockData,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    )
+        external
+        virtual
+        override
+        onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
+        onlyRole(_protectedPartitionsRole(_DEFAULT_PARTITION))
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyWithValidExpirationTimestamp(
+            _transferAndLockData.expirationTimestamp
+        )
+        onlyProtectedPartitions
+        returns (bool success_, uint256 lockId_)
+    {
+        _protectedTransferAndLock(
+            _transferAndLockData,
+            _deadline,
+            _nounce,
+            _signature
         );
     }
 
