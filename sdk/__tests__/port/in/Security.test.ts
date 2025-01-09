@@ -438,6 +438,14 @@ describe('🧪 Security tests', () => {
       new RoleRequest({
         securityId: equity.evmDiamondAddress!,
         targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._CAP_ROLE,
+      }),
+    );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
         role: SecurityRole._PROTECTED_PARTITION_ROLE,
       }),
     );
