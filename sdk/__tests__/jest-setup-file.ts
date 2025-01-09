@@ -1571,6 +1571,56 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     },
   );
 
+  singletonInstance.protectedTransferAndLockByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      amount: BigDecimal,
+      sourceId: EvmAddress,
+      targetId: EvmAddress,
+      expirationDate: BigDecimal,
+      deadline: BigDecimal,
+      nounce: BigDecimal,
+      signature: string,
+    ) => {
+      const account = '0x' + targetId.toString().toUpperCase().substring(2);
+
+      const accountLocks = locks.get(account);
+      const lockIds = locksIds.get(account);
+      const lastLockId = lastLockIds.get(account) ?? 0;
+
+      const newLastLockId = lastLockId + 1;
+
+      if (!lockIds) locksIds.set(account, [newLastLockId]);
+      else {
+        lockIds.push(newLastLockId);
+        locksIds.set(account, lockIds);
+      }
+      if (!accountLocks) {
+        const newLock: lock = new Map();
+        newLock.set(newLastLockId, [
+          expirationDate.toString(),
+          amount.toString(),
+        ]);
+        locks.set(account, newLock);
+      } else {
+        accountLocks.set(newLastLockId, [
+          expirationDate.toString(),
+          amount.toString(),
+        ]);
+        locks.set(account, accountLocks);
+      }
+
+      increaseLockedBalance(targetId, amount);
+      decreaseBalance(sourceId, amount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),
   };

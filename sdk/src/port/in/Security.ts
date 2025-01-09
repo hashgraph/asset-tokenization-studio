@@ -270,8 +270,8 @@ import { PartitionsProtectedQuery } from '../../app/usecase/query/security/prote
 import { GetNounceQuery } from '../../app/usecase/query/security/protectedPartitions/getNounce/GetNounceQuery.js';
 import { ProtectPartitionsCommand } from '../../app/usecase/command/security/operations/protectPartitions/ProtectPartitionsCommand.js';
 import { UnprotectPartitionsCommand } from '../../app/usecase/command/security/operations/unprotectPartitions/UnprotectPartitionsCommand.js';
-import ProtectedTransferAndLockRequest from './request/ProtectedTransferAndLockRequest.js';
-import { ProtectedTransferAndLockCommand } from '../../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockCommand.js';
+import { ProtectedTransferAndLockByPartitionCommand } from '../../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommand.js';
+import ProtectedTransferAndLockByPartitionRequest from './request/ProtectedTransferAndLockByPartitionRequest.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -799,11 +799,12 @@ class SecurityInPort implements ISecurityInPort {
   }
 
   @LogError
-  async protectedTransferAndLock(
-    request: ProtectedTransferAndLockRequest,
+  async protectedTransferAndLockByPartition(
+    request: ProtectedTransferAndLockByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }> {
     const {
       securityId,
+      partitionId,
       amount,
       targetId,
       sourceId,
@@ -812,11 +813,12 @@ class SecurityInPort implements ISecurityInPort {
       nounce,
       signature,
     } = request;
-    handleValidation('ProtectedTransferAndLockRequest', request);
+    handleValidation('ProtectedTransferAndLockByPartitionRequest', request);
 
     return await this.commandBus.execute(
-      new ProtectedTransferAndLockCommand(
+      new ProtectedTransferAndLockByPartitionCommand(
         securityId,
+        partitionId,
         amount,
         sourceId,
         targetId,

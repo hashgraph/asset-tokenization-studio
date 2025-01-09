@@ -454,8 +454,9 @@ interface ITransactionAdapter {
     security: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-  protectedTransferAndLock(
+  protectedTransferAndLockByPartition(
     security: EvmAddress,
+    partitionId: string,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -925,8 +926,9 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
-  protectedTransferAndLock(
+  protectedTransferAndLockByPartition(
     security: EvmAddress,
+    partitionId: string,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,

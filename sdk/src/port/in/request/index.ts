@@ -269,7 +269,7 @@ import ProtectedTransferFromByPartitionRequest from './ProtectedTransferFromByPa
 import ProtectedRedeemFromByPartitionRequest from './ProtectedRedeemFromByPartitionRequest.js';
 import GetNounceRequest from './GetNounceRequest.js';
 import PartitionsProtectedRequest from './PartitionsProtectedRequest.js';
-import ProtectedTransferAndLockRequest from './ProtectedTransferAndLockRequest.js';
+import ProtectedTransferAndLockByPartitionRequest from './ProtectedTransferAndLockByPartitionRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -338,5 +338,5 @@ export {
   ProtectedRedeemFromByPartitionRequest,
   GetNounceRequest,
   PartitionsProtectedRequest,
-  ProtectedTransferAndLockRequest,
+  ProtectedTransferAndLockByPartitionRequest,
 };

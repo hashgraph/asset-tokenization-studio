@@ -2,8 +2,9 @@ import { SecurityDate } from '../../../domain/context/shared/SecurityDate.js';
 import ValidatedRequest from './validation/ValidatedRequest.js';
 import Validation from './validation/Validation.js';
 
-export default class ProtectedTransferAndLockRequest extends ValidatedRequest<ProtectedTransferAndLockRequest> {
+export default class ProtectedTransferAndLockByPartitionRequest extends ValidatedRequest<ProtectedTransferAndLockByPartitionRequest> {
   securityId: string;
+  partitionId: string;
   sourceId: string;
   targetId: string;
   amount: string;
@@ -14,6 +15,7 @@ export default class ProtectedTransferAndLockRequest extends ValidatedRequest<Pr
 
   constructor({
     securityId,
+    partitionId,
     amount,
     sourceId,
     targetId,
@@ -23,6 +25,7 @@ export default class ProtectedTransferAndLockRequest extends ValidatedRequest<Pr
     signature,
   }: {
     securityId: string;
+    partitionId: string;
     amount: string;
     sourceId: string;
     targetId: string;
@@ -33,6 +36,7 @@ export default class ProtectedTransferAndLockRequest extends ValidatedRequest<Pr
   }) {
     super({
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: Validation.checkBytes32Format(),
       targetId: Validation.checkHederaIdFormatOrEvmAddress(),
       sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
       amount: Validation.checkAmount(),
@@ -46,6 +50,7 @@ export default class ProtectedTransferAndLockRequest extends ValidatedRequest<Pr
     });
 
     this.securityId = securityId;
+    this.partitionId = partitionId;
     this.amount = amount;
     this.sourceId = sourceId;
     this.targetId = targetId;

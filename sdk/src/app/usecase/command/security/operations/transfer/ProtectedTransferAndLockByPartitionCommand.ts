@@ -203,204 +203,30 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
-import SecurityService from '../../../../../service/SecurityService.js';
-import {
-  ProtectedTransferAndLockCommand,
-  ProtectedTransferAndLockCommandResponse,
-} from './ProtectedTransferAndLockCommand.js';
-import TransactionService from '../../../../../service/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../error/DecimalsOverRange.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { InsufficientBalance } from '../../error/InsufficientBalance.js';
-import { SecurityPaused } from '../../error/SecurityPaused.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { AccountInBlackList } from '../../error/AccountInBlackList.js';
-import { AccountNotInWhiteList } from '../../error/AccountNotInWhiteList.js';
-import { SecurityControlListType } from '../../../../../../domain/context/security/SecurityControlListType.js';
-import { BigNumber } from 'ethers';
-import { NounceAlreadyUsed } from '../../error/NounceAlreadyUsed.js';
-import { PartitionsUnProtected } from '../../error/PartitionsUnprotected';
+import { Command } from '../../../../../../core/command/Command.js';
+import { CommandResponse } from '../../../../../../core/command/CommandResponse.js';
 
-@CommandHandler(ProtectedTransferAndLockCommand)
-export class ProtectedTransferAndLockCommandHandler
-  implements ICommandHandler<ProtectedTransferAndLockCommand>
+export class ProtectedTransferAndLockByPartitionCommandResponse
+  implements CommandResponse
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    public readonly payload: number,
+    public readonly transactionId: string,
   ) {}
+}
 
-  async execute(
-    command: ProtectedTransferAndLockCommand,
-  ): Promise<ProtectedTransferAndLockCommandResponse> {
-    const {
-      securityId,
-      amount,
-      sourceId,
-      targetId,
-      expirationDate,
-      deadline,
-      nounce,
-      signature,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
-
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
-    const controListType = (await this.queryAdapter.getControlListType(
-      securityEvmAddress,
-    ))
-      ? SecurityControlListType.WHITELIST
-      : SecurityControlListType.BLACKLIST;
-    const controlListCount =
-      await this.queryAdapter.getControlListCount(securityEvmAddress);
-    const controlListMembers = (
-      await this.queryAdapter.getControlListMembers(
-        securityEvmAddress,
-        0,
-        controlListCount,
-      )
-    ).map(function (x) {
-      return x.toUpperCase();
-    });
-
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    if (!security.arePartitionsProtected) {
-      throw new PartitionsUnProtected();
-    }
-
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
-
-    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
-      : new EvmAddress(sourceId);
-
-    if (
-      controListType === SecurityControlListType.BLACKLIST &&
-      controlListMembers.includes(sourceEvmAddress.toString().toUpperCase())
-    ) {
-      throw new AccountInBlackList(sourceEvmAddress.toString());
-    }
-
-    if (
-      controListType === SecurityControlListType.BLACKLIST &&
-      controlListMembers.includes(targetEvmAddress.toString().toUpperCase())
-    ) {
-      throw new AccountInBlackList(targetEvmAddress.toString());
-    }
-
-    if (
-      controListType === SecurityControlListType.WHITELIST &&
-      !controlListMembers.includes(sourceEvmAddress.toString().toUpperCase())
-    ) {
-      throw new AccountNotInWhiteList(sourceEvmAddress.toString());
-    }
-
-    if (
-      controListType === SecurityControlListType.WHITELIST &&
-      !controlListMembers.includes(targetEvmAddress.toString().toUpperCase())
-    ) {
-      throw new AccountNotInWhiteList(targetEvmAddress.toString());
-    }
-
-    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const amountBd: BigDecimal = BigDecimal.fromString(
-      amount,
-      security.decimals,
-    );
-
-    if (
-      account.evmAddress &&
-      (
-        await this.queryAdapter.balanceOf(
-          securityEvmAddress,
-          new EvmAddress(sourceEvmAddress.toString()),
-        )
-      ).lt(amountBd.toBigNumber())
-    ) {
-      throw new InsufficientBalance();
-    }
-
-    const nextNounce = await this.queryAdapter.getNounceFor(
-      securityEvmAddress,
-      sourceEvmAddress,
-    );
-
-    if (BigNumber.from(nounce).lte(nextNounce)) {
-      throw new NounceAlreadyUsed(nounce);
-    }
-
-    const res = await handler.protectedTransferAndLock(
-      securityEvmAddress,
-      amountBd,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      BigDecimal.fromString(deadline),
-      BigDecimal.fromString(nounce.toString()),
-      signature,
-    );
-
-    if (!res.id)
-      throw new Error(
-        'Protected Transfer and Lock Command Handler response id empty',
-      );
-
-    let lockId: string;
-
-    if (res.response && res.response.lockId) {
-      lockId = res.response.lockId;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
-      }
-
-      lockId = results[1];
-    }
-
-    return Promise.resolve(
-      new ProtectedTransferAndLockCommandResponse(
-        parseInt(lockId, 16),
-        res.id!,
-      ),
-    );
+export class ProtectedTransferAndLockByPartitionCommand extends Command<ProtectedTransferAndLockByPartitionCommandResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly partitionId: string,
+    public readonly amount: string,
+    public readonly sourceId: string,
+    public readonly targetId: string,
+    public readonly expirationDate: string,
+    public readonly deadline: string,
+    public readonly nounce: number,
+    public readonly signature: string,
+  ) {
+    super();
   }
 }

@@ -1725,8 +1725,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
   }
 
-  async protectedTransferAndLock(
+  async protectedTransferAndLockByPartition(
     security: EvmAddress,
+    partitionId: string,
     amount: BigDecimal,
     sourceId: EvmAddress,
     targetId: EvmAddress,
@@ -1751,7 +1752,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await TransferAndLock__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).protectedTransferAndLock(
+      ).protectedTransferAndLockByPartition(
+        partitionId,
         transferAndLockData,
         deadline.toBigNumber(),
         nounce.toBigNumber(),

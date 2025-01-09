@@ -301,7 +301,7 @@ import { ProtectPartitionsCommandHandler } from '../app/usecase/command/security
 import { UnprotectPartitionsCommandHandler } from '../app/usecase/command/security/operations/unprotectPartitions/UnprotectPartitionsCommandHandler.js';
 import { ProtectedRedeemFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/redeem/ProtectedRedeemFromByPartitionCommandHandler.js';
 import { ProtectedTransferFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/transfer/ProtectedTransferFromByPartitionCommandHandler.js';
-import { ProtectedTransferAndLockCommandHandler } from '../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockCommandHandler.js';
+import { ProtectedTransferAndLockByPartitionCommandHandler } from '../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommandHandler.js';
 import { PartitionsProtectedQueryHandler } from '../app/usecase/query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQueryHandler';
 import { GetNounceQueryHandler } from '../app/usecase/query/security/protectedPartitions/getNounce/GetNounceQueryHandler';
 
@@ -405,7 +405,7 @@ const COMMAND_HANDLERS = [
   },
   {
     token: TOKENS.COMMAND_HANDLER,
-    useClass: ProtectedTransferAndLockCommandHandler,
+    useClass: ProtectedTransferAndLockByPartitionCommandHandler,
   },
   // Bond Operations
   {

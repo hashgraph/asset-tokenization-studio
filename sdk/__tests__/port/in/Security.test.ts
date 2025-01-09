@@ -221,6 +221,7 @@ import {
   PartitionsProtectedRequest,
   PauseRequest,
   ProtectedRedeemFromByPartitionRequest,
+  ProtectedTransferAndLockByPartitionRequest,
   ProtectedTransferFromByPartitionRequest,
   ReleaseRequest,
   Role,
@@ -947,6 +948,7 @@ describe('🧪 Security tests', () => {
     const issueAmount = '100';
     const protectedTransferAmount = '50';
     const protectedRedeemAmount = '5';
+    const protectedTransferAndLockAmount = '1';
     const partitionBytes32 =
       '0x0000000000000000000000000000000000000000000000000000000000000001';
 
@@ -1011,6 +1013,24 @@ describe('🧪 Security tests', () => {
       ).payload,
     ).toBe(true);
 
+    expect(
+      (
+        await Security.protectedTransferAndLockByPartition(
+          new ProtectedTransferAndLockByPartitionRequest({
+            securityId: equity.evmDiamondAddress!,
+            partitionId: partitionBytes32,
+            sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+            expirationDate: '9999999999',
+            amount: protectedTransferAndLockAmount,
+            deadline: '9999999999',
+            nounce: 3,
+            signature: 'vvvv',
+          }),
+        )
+      ).payload,
+    ).toBe(1);
+
     // check if transfer origin account has correct balance securities
     expect(
       (
@@ -1025,7 +1045,8 @@ describe('🧪 Security tests', () => {
       (
         +issueAmount -
         +protectedTransferAmount -
-        +protectedRedeemAmount
+        +protectedRedeemAmount -
+        +protectedTransferAndLockAmount
       ).toString(),
     );
 
