@@ -425,7 +425,7 @@ export async function createAllConfigurations({
     const bondFacetVersionList = Array(bondFacetIdList.length).fill(1)
 
     // Create configuration for equities
-    let response = await IDiamondCutManager__factory.connect(
+    let equityTxResponse = await IDiamondCutManager__factory.connect(
         businessLogicResolverProxyAddress,
         signer
     ).createConfiguration(
@@ -440,7 +440,7 @@ export async function createAllConfigurations({
     )
     await validateTxResponse(
         new ValidateTxResponseCommand({
-            txResponse: response,
+            txResponse: equityTxResponse,
             confirmationEvent:
                 EVENTS.businessLogicResolver.configurationCreated,
             errorMessage:
@@ -449,7 +449,7 @@ export async function createAllConfigurations({
     )
 
     // Create configuration for bonds
-    response = await IDiamondCutManager__factory.connect(
+    const bondTxResponse = await IDiamondCutManager__factory.connect(
         businessLogicResolverProxyAddress,
         signer
     ).createConfiguration(
@@ -464,7 +464,7 @@ export async function createAllConfigurations({
     )
     await validateTxResponse(
         new ValidateTxResponseCommand({
-            txResponse: response,
+            txResponse: bondTxResponse,
             confirmationEvent:
                 EVENTS.businessLogicResolver.configurationCreated,
             errorMessage:
