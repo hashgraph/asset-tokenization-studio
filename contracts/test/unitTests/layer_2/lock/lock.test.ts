@@ -272,6 +272,7 @@ describe('Locks Layer 2 Tests', () => {
             account_A,
             false,
             true,
+            false,
             multiPartition,
             'TEST_AccessControl',
             'TAC',
@@ -299,7 +300,7 @@ describe('Locks Layer 2 Tests', () => {
         await setFacets(diamond)
     }
 
-    async function setFacets(diamond: any) {
+    async function setFacets(diamond: ResolverProxy) {
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address

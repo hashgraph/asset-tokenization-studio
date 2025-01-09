@@ -238,6 +238,7 @@ export interface SecurityProps {
   decimals: number;
   isWhiteList: boolean;
   isControllable: boolean;
+  arePartitionsProtected: boolean;
   isMultiPartition: boolean;
   isIssuable?: boolean;
   totalSupply?: BigDecimal;
@@ -262,6 +263,7 @@ export class Security extends BaseEntity implements SecurityProps {
   isWhiteList: boolean;
   isControllable: boolean;
   isMultiPartition: boolean;
+  arePartitionsProtected: boolean;
   isIssuable?: boolean;
   totalSupply?: BigDecimal;
   maxSupply?: BigDecimal;
@@ -284,6 +286,7 @@ export class Security extends BaseEntity implements SecurityProps {
       decimals,
       isWhiteList,
       isControllable,
+      arePartitionsProtected,
       isMultiPartition,
       isIssuable,
       totalSupply,
@@ -306,6 +309,7 @@ export class Security extends BaseEntity implements SecurityProps {
     this.decimals = decimals;
     this.isWhiteList = isWhiteList;
     this.isControllable = isControllable;
+    this.arePartitionsProtected = arePartitionsProtected;
     this.isMultiPartition = isMultiPartition;
     this.isIssuable = isIssuable ?? true;
     this.totalSupply = totalSupply ?? BigDecimal.ZERO;

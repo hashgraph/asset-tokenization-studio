@@ -222,3 +222,21 @@ bytes1 constant _WRONG_PARTITION_ERROR_ID = 0x48;
 bytes1 constant _ALLOWANCE_REACHED_ERROR_ID = 0x49;
 
 bytes1 constant _SUCCESS = 0x00;
+
+// solhint-disable max-line-length
+//keccak256(
+//    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
+//);
+bytes32 constant _DOMAIN_TYPE_HASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
+string constant _SALT = '\x19\x01';
+string constant _CONTRACT_NAME = 'ASSET_TOKENIZATION';
+string constant _CONTRACT_VERSION = '1.0.0';
+//keccak256(
+//    'protectedTransferFromByPartition(bytes32 _partition,address _from,address _to,uint256 _amount,uint256 _deadline,uint256 _nounce)'
+//);
+bytes32 constant _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH = 0x2d745a289deb1f3b76a62c3c841fc26cbf0bc208da63068e1eec99f929bbdc9e;
+//keccak256(
+//    'protectedRedeemFromByPartition(bytes32 _partition,address _from,uint256 _amount,uint256 _deadline,uint256 _nounce)'
+//);
+bytes32 constant _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH = 0x5075effccf2d386f2a3f230b6a45274e523d872e1b1b33a0cf97bef34dfa14e7;
+// solhint-enable max-line-length

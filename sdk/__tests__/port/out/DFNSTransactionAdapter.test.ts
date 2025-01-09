@@ -299,6 +299,7 @@ describe('DFNS Transaction Adapter test', () => {
       decimals: decimals,
       isWhiteList: false,
       isControllable: true,
+      arePartitionsProtected: false,
       isMultiPartition: false,
       diamondOwnerAccount: DFNS_SETTINGS.hederaAccountId,
       currency: currency,

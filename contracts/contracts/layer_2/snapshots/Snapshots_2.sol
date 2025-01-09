@@ -220,7 +220,8 @@ import {
     ScheduledTasks_CD_Lib
 } from '../scheduledTasks/scheduledTasks/ScheduledTasks_CD_Lib.sol';
 import {SnapshotsStorageWrapper_2} from './SnapshotsStorageWrapper_2.sol';
-
+// TODO: Remove those errors of solhint
+// solhint-disable  contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
     function takeSnapshot()
         external
@@ -411,3 +412,4 @@ contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
         staticInterfaceIds_[selectorsIndex++] = type(ISnapshots_2).interfaceId;
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

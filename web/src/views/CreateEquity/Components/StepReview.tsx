@@ -298,6 +298,7 @@ export const StepReview = () => {
       decimals: decimals,
       isWhiteList: !isBlocklist,
       isControllable: isControllable,
+      arePartitionsProtected: false,
       isMultiPartition: false,
       diamondOwnerAccount: address,
       votingRight: rights.votingRights,

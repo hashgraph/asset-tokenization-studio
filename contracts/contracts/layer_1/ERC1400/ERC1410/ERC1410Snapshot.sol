@@ -206,6 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {ERC1410ProtectedPartitions} from './ERC1410ProtectedPartitions.sol';
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
@@ -217,11 +218,13 @@ import {
 } from './ERC1410SnapshotStorageWrapper.sol';
 import {ERC1410Standard} from './ERC1410Standard.sol';
 
+// solhint-disable-next-line
 abstract contract ERC1410Snapshot is
     IStaticFunctionSelectors,
     ERC1410Basic,
     ERC1410Operator,
     ERC1410Standard,
     ERC1410Controller,
+    ERC1410ProtectedPartitions,
     ERC1410SnapshotStorageWrapper
 {}

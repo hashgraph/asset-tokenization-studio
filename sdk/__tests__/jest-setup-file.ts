@@ -286,6 +286,7 @@ const locksIds = new Map<string, number[]>();
 const locks = new Map<string, lock>();
 const lastLockIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
+const nonces = new Map<string, number>();
 
 let controlList: string[] = [];
 
@@ -911,6 +912,19 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       return Math.random();
     });
 
+  singletonInstance.arePartitionsProtected = jest.fn(
+    async (address: EvmAddress) => {
+      return securityInfo.arePartitionsProtected ?? false;
+    },
+  );
+
+  singletonInstance.getNounceFor = jest.fn(
+    async (address: EvmAddress, target: EvmAddress) => {
+      const account = '0x' + target.toString().toUpperCase().substring(2);
+      return nonces.get(account) ?? 0;
+    },
+  );
+
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
   };
@@ -1496,6 +1510,112 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       id: transactionId,
     } as TransactionResponse;
   });
+
+  singletonInstance.protectPartitions = jest.fn(async () => {
+    securityInfo.arePartitionsProtected = true;
+    return {
+      status: 'success',
+      id: transactionId,
+    } as TransactionResponse;
+  });
+
+  singletonInstance.unprotectPartitions = jest.fn(async () => {
+    securityInfo.arePartitionsProtected = false;
+    return {
+      status: 'success',
+      id: transactionId,
+    } as TransactionResponse;
+  });
+
+  singletonInstance.protectedTransferFromByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      sourceId: EvmAddress,
+      targetId: EvmAddress,
+      amount: BigDecimal,
+      deadline: BigDecimal,
+      nounce: BigDecimal,
+      signature: string,
+    ) => {
+      increaseBalance(targetId, amount);
+      decreaseBalance(sourceId, amount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.protectedRedeemFromByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      sourceId: EvmAddress,
+      amount: BigDecimal,
+      deadline: BigDecimal,
+      nounce: BigDecimal,
+      signature: string,
+    ) => {
+      decreaseBalance(sourceId, amount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.protectedTransferAndLockByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      amount: BigDecimal,
+      sourceId: EvmAddress,
+      targetId: EvmAddress,
+      expirationDate: BigDecimal,
+      deadline: BigDecimal,
+      nounce: BigDecimal,
+      signature: string,
+    ) => {
+      const account = '0x' + targetId.toString().toUpperCase().substring(2);
+
+      const accountLocks = locks.get(account);
+      const lockIds = locksIds.get(account);
+      const lastLockId = lastLockIds.get(account) ?? 0;
+
+      const newLastLockId = lastLockId + 1;
+
+      if (!lockIds) locksIds.set(account, [newLastLockId]);
+      else {
+        lockIds.push(newLastLockId);
+        locksIds.set(account, lockIds);
+      }
+      if (!accountLocks) {
+        const newLock: lock = new Map();
+        newLock.set(newLastLockId, [
+          expirationDate.toString(),
+          amount.toString(),
+        ]);
+        locks.set(account, newLock);
+      } else {
+        accountLocks.set(newLastLockId, [
+          expirationDate.toString(),
+          amount.toString(),
+        ]);
+        locks.set(account, accountLocks);
+      }
+
+      increaseLockedBalance(targetId, amount);
+      decreaseBalance(sourceId, amount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
 
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),

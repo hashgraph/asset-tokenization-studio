@@ -209,7 +209,8 @@ import {Cap} from '../../layer_1/cap/Cap.sol';
 import {CapStorageWrapper_2} from './CapStorageWrapper_2.sol';
 import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
 contract Cap_2 is Cap, CapStorageWrapper_2 {
     function getMaxSupply()
         external

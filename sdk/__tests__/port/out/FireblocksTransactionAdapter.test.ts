@@ -299,6 +299,7 @@ describe('Fireblocks Transaction Adapter test', () => {
       decimals: decimals,
       isWhiteList: false,
       isControllable: true,
+      arePartitionsProtected: false,
       isMultiPartition: false,
       diamondOwnerAccount: FIREBLOCKS_SETTINGS.hederaAccountId,
       currency: currency,
