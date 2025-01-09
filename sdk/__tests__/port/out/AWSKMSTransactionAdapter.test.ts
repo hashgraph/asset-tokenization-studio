@@ -299,6 +299,7 @@ describe('AWSKMS Transaction Adapter test', () => {
       decimals: decimals,
       isWhiteList: false,
       isControllable: true,
+      arePartitionsProtected: false,
       isMultiPartition: false,
       diamondOwnerAccount: AWS_KMS_SETTINGS.hederaAccountId,
       currency: currency,
