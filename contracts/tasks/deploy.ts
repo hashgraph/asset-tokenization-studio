@@ -223,6 +223,12 @@ task(
         types.string
     )
     .addOptionalParam(
+        'useDeployed',
+        'Use already deployed contracts',
+        true,
+        types.boolean
+    )
+    .addOptionalParam(
         'privateKey',
         'The private key of the account in raw hexadecimal format',
         undefined,
