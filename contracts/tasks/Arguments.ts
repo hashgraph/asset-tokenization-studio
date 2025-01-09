@@ -203,21 +203,21 @@
 
 */
 
-import { Client } from '@hashgraph/sdk'
+import { Signer } from 'ethers'
 
-export interface GetClientResult {
-    client: Client
-    account: string
+export interface GetSignerResult {
+    signer: Signer
+    address: string
     privateKey: string
 }
 
 interface BasicArgs {
-    account: string
-    privateKey: string
-    isEd25519: boolean
+    privateKey?: string
+    signerAddress?: string
+    signerPosition?: number
 }
 
-export type GetClientArgs = BasicArgs
+export type GetSignerArgs = BasicArgs
 
 // * Utils
 export interface GetProxyAdminConfigArgs extends BasicArgs {

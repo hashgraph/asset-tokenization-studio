@@ -5,7 +5,7 @@ import 'solidity-coverage'
 import '@hashgraph/sdk'
 import Configuration from './Configuration'
 // ! Uncomment the following lines to be able to use tasks AFTER compiling the project
-// import './tasks/utils'
+import './tasks/utils'
 import './tasks/deploy'
 // import './tasks/update'
 

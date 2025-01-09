@@ -206,7 +206,7 @@
 import { task, types } from 'hardhat/config'
 import { ContractId } from '@hashgraph/sdk'
 import {
-    GetClientResult,
+    GetSignerResult,
     UpdateBusinessLogicKeysArgs,
     UpdateFactoryVersionArgs,
 } from './Arguments'
@@ -250,7 +250,7 @@ task('updateFactoryVersion', 'Updates the factory version')
     )
     .setAction(async (args: UpdateFactoryVersionArgs, hre) => {
         console.log(`Executing updateFactoryVersion on ${hre.network.name} ...`)
-        const { client }: GetClientResult = await hre.run('getClient', {
+        const { client }: GetSignerResult = await hre.run('getClient', {
             account: args.account,
             privateKey: args.privateKey,
             isEd25519: args.isEd25519,
@@ -296,7 +296,7 @@ task('updateBusinessLogicKeys', 'Update the address of a business logic key')
         console.log(
             `Executing updateBusinessLogicKeys on ${hre.network.name} ...`
         )
-        const { client }: GetClientResult = await hre.run('getClient', {
+        const { client }: GetSignerResult = await hre.run('getClient', {
             account: args.account,
             privateKey: args.privateKey,
             isEd25519: args.isEd25519,

@@ -204,10 +204,13 @@
 */
 
 import { task, types } from 'hardhat/config'
-import { Signer, Wallet } from 'ethers'
-import { DeployAllArgs, DeployArgs, GetClientResult } from './Arguments'
-import { deployAtsFullInfrastructure } from '../scripts'
-import { Network } from '../Configuration'
+import { CONTRACT_NAMES, ContractName, Network } from '../Configuration'
+import {
+    deployAtsFullInfrastructure,
+    deployContract,
+    DeployContractCommand,
+} from '../scripts'
+import { DeployAllArgs, DeployArgs, GetSignerResult } from './Arguments'
 
 task(
     'deployAll',
@@ -219,40 +222,32 @@ task(
         undefined,
         types.string
     )
-    .addOptionalPositionalParam(
+    .addOptionalParam(
         'privateKey',
-        'The private key of the account, Raw hexadecimal string',
+        'The private key of the account in raw hexadecimal format',
         undefined,
         types.string
     )
     .addOptionalParam(
-        'clientIsEd25519',
-        'Client is ED25519 key type',
-        false,
-        types.boolean
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
     )
     .addOptionalParam(
-        'useDeployed',
-        'Use already deployed contracts',
-        true,
-        types.boolean
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
     )
     .setAction(async (args: DeployAllArgs, hre) => {
         console.log(`Executing deployAll on ${hre.network.name} ...`)
-        // const { client, privateKey }: GetClientResult = await hre.run(
-        //     'getClient',
-        //     {
-        //         account: args.account,
-        //         privateKey: args.privateKey,
-        //         isEd25519: args.isEd25519,
-        //     }
-        // )
-        let signer: Signer
-        if (args.privateKey) {
-            signer = new Wallet(args.privateKey, hre.ethers.provider)
-        } else {
-            signer = (await hre.ethers.getSigners())[0]
-        }
+        const { signer }: GetSignerResult = await hre.run('getSigner', {
+            privateKey: args.privateKey,
+            signerAddress: args.signerAddress,
+            signerPosition: args.signerPosition,
+        })
+
         // * Deploy the full infrastructure
         const {
             factory,
@@ -321,58 +316,60 @@ task(
         }
     })
 
-// task('deploy', 'Deploy new contract')
-//     .addPositionalParam(
-//         'contractName',
-//         'The name of the contract to deploy',
-//         undefined,
-//         types.string
-//     )
-//     .addOptionalParam(
-//         'account',
-//         'The Hedera account to use for deployment. 0.0.XXXX format',
-//         undefined,
-//         types.string
-//     )
-//     .addOptionalParam(
-//         'privateKey',
-//         'The private key of the account, Raw hexadecimal string',
-//         undefined,
-//         types.string
-//     )
-//     .addOptionalParam(
-//         'isEd25519',
-//         'Client is ED25519 key type',
-//         false,
-//         types.boolean
-//     )
-//     .setAction(async (args: DeployArgs, hre) => {
-//         console.log(`Executing deploy on ${hre.network.name} ...`)
-//         const { client, privateKey }: GetClientResult = await hre.run(
-//             'getClient',
-//             {
-//                 account: args.account,
-//                 privateKey: args.privateKey,
-//                 isEd25519: args.isEd25519,
-//             }
-//         )
-//         // * Deploy the contract
-//         const { proxyAdmin, proxy, contract } = await deployContract({
-//             clientOperator: client,
-//             privateKey: privateKey,
-//             isED25519: args.isEd25519,
-//             contractName: args.contractName,
-//         })
+task('deploy', 'Deploy new contract')
+    .addPositionalParam(
+        'contractName',
+        'The name of the contract to deploy',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'privateKey',
+        'The private key of the account in raw hexadecimal format',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
+    )
+    .setAction(async (args: DeployArgs, hre) => {
+        console.log(`Executing deploy on ${hre.network.name} ...`)
+        if (!CONTRACT_NAMES.includes(args.contractName as ContractName)) {
+            throw new Error(
+                `Contract name ${args.contractName} is not in the list of deployable contracts`
+            )
+        }
+        const contractName = args.contractName as ContractName
+        const { signer }: GetSignerResult = await hre.run('getSigner', {
+            privateKey: args.privateKey,
+            signerAddress: args.signerAddress,
+            signerPosition: args.signerPosition,
+        })
+        // * Deploy the contract
+        const { proxyAdminAddress, proxyAddress, address } =
+            await deployContract(
+                new DeployContractCommand({
+                    name: contractName,
+                    signer,
+                })
+            )
 
-//         if (proxyAdmin) {
-//             console.log(
-//                 `Proxy Admin: ${proxyAdmin.evm_address}(${proxyAdmin.contract_id})`
-//             )
-//         }
-//         if (proxy) {
-//             console.log(`Proxy: ${proxy.evm_address}(${proxy.contract_id})`)
-//         }
-//         console.log(
-//             `Implementation: ${contract.evm_address}(${contract.contract_id})`
-//         )
-//     })
+        if (proxyAdminAddress) {
+            console.log(`Proxy Admin: ${proxyAdminAddress}(<<ContractIdhere>>)`)
+        }
+        if (proxyAddress) {
+            console.log(`Proxy: ${proxyAddress}(<<ContractIdhere>>)`)
+        }
+        console.log(
+            `Implementation: ${address}(<<ContractIdhere>>) for ${contractName}`
+        )
+    })

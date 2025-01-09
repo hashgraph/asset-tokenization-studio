@@ -204,58 +204,67 @@
 */
 
 import { subtask, task, types } from 'hardhat/config'
-import { ContractId } from '@hashgraph/sdk'
+import { Signer, Wallet } from 'ethers'
 import {
-    GetClientArgs,
-    GetClientResult,
+    IBusinessLogicResolver__factory,
+    IDiamondCutManager__factory,
+    ProxyAdmin__factory,
+} from '../typechain-types'
+import {
+    GetSignerResult,
     GetConfigurationInfoArgs,
     GetProxyAdminConfigArgs,
     GetResolverBusinessLogicsArgs,
+    GetSignerArgs,
 } from './Arguments'
-import { evmToHederaFormat, getClient, toHashgraphKey } from '../scripts/utils'
-import {
-    getOwner,
-    getProxyImplementation,
-    getLatestVersionByConfiguration,
-    getFacetsLengthByConfigurationIdAndVersion,
-    getFacetsByConfigurationIdAndVersion,
-    getBusinessLogicKeys,
-} from '../scripts/contractsMethods'
-import { Network } from '../configuration'
 
-subtask('getClient', 'Get the operator of the client')
-    .addParam(
-        'account',
-        'The Hedera account to use for deployment. 0.0.XXXX format',
-        types.string
-    )
-    .addParam(
+subtask(
+    'getSigner',
+    'Retrieve the signer for deployment. Defaults to the primary signer if none is specified'
+)
+    .addOptionalParam(
         'privateKey',
-        'The private key of the account, Raw hexadecimal string',
+        'The private key of the account in raw hexadecimal format',
         undefined,
         types.string
     )
     .addOptionalParam(
-        'isEd25519',
-        'Client is ED25519 key type',
-        false,
-        types.boolean
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
     )
-    .setAction(async (args: GetClientArgs, hre) => {
-        console.log(`Executing getOperator on ${hre.network.name} ...`)
-        const client = getClient(hre.network.name)
-        const account: string = args.account
-        const privateKey: string = args.privateKey
-        client.setOperator(
-            account,
-            toHashgraphKey({ privateKey, isED25519: args.isEd25519 })
-        )
-        console.log(`Operator: ${account}`)
+    .addOptionalParam(
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
+    )
+    .setAction(async (args: GetSignerArgs, hre) => {
+        console.log(`Executing getSigner on ${hre.network.name} ...`)
+        const signers = await hre.ethers.getSigners()
+        let signer: Signer | undefined
+
+        if (args.privateKey) {
+            signer = new Wallet(args.privateKey, hre.ethers.provider)
+        } else if (args.signerPosition !== undefined) {
+            signer = signers[args.signerPosition]
+        } else if (args.signerAddress) {
+            signer = signers.find(
+                async (signer) =>
+                    (await signer.getAddress()) === args.signerAddress
+            )
+        }
+
+        if (!signer) {
+            signer = signers[0]
+        }
+
         return {
-            client: client,
-            account: account,
-            privateKey: privateKey,
-        } as GetClientResult
+            signer,
+            address: await signer.getAddress(),
+            privateKey: args.privateKey,
+        } as GetSignerResult
     })
 
 task('keccak256', 'Prints the keccak256 hash of a string')
@@ -284,47 +293,37 @@ task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
         types.string
     )
     .addOptionalParam(
-        'account',
-        'The Hedera account to use for deployment. 0.0.XXXX format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
         'privateKey',
-        'The private key of the account, Raw hexadecimal string',
+        'The private key of the account in raw hexadecimal format',
         undefined,
         types.string
     )
     .addOptionalParam(
-        'isEd25519',
-        'Client is ED25519 key type',
-        false,
-        types.boolean
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
     )
     .setAction(async (args: GetProxyAdminConfigArgs, hre) => {
         console.log(`Executing getProxyAdminConfig on ${hre.network.name} ...`)
-        const { client } = await hre.run('getClient', {
-            account: args.account,
+        const { signer } = await hre.run('getSigner', {
             privateKey: args.privateKey,
-            isEd25519: args.isEd25519,
+            signerAddress: args.signerAddress,
+            signerPosition: args.signerPosition,
         })
 
-        const owner = await evmToHederaFormat({
-            evmAddress: await getOwner(
-                ContractId.fromString(args.proxyAdmin),
-                client
-            ),
-            network: hre.network.name as Network,
-        })
+        const proxyAdmin = ProxyAdmin__factory.connect(args.proxyAdmin, signer)
 
-        const implementation = await evmToHederaFormat({
-            evmAddress: await getProxyImplementation(
-                ContractId.fromString(args.proxyAdmin),
-                client,
-                ContractId.fromString(args.proxy).toSolidityAddress()
-            ),
-            network: hre.network.name as Network,
-        })
+        const owner = await proxyAdmin.owner()
+        const implementation = await proxyAdmin.getProxyImplementation(
+            args.proxy
+        )
 
         console.log(`Owner: ${owner}, Implementation: ${implementation}`)
     })
@@ -338,38 +337,44 @@ task('getConfigurationInfo', 'Get all info for a given configuration')
     )
     .addPositionalParam('configId', 'The config ID', undefined, types.string)
     .addOptionalParam(
-        'account',
-        'The Hedera account to use for deployment. 0.0.XXXX format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
         'privateKey',
-        'The private key of the account, Raw hexadecimal string',
+        'The private key of the account in raw hexadecimal format',
         undefined,
         types.string
     )
     .addOptionalParam(
-        'isEd25519',
-        'Client is ED25519 key type',
-        false,
-        types.boolean
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
     )
     .setAction(async (args: GetConfigurationInfoArgs, hre) => {
         console.log(`Executing getConfigurationInfo on ${hre.network.name} ...`)
 
-        const { client } = await hre.run('getClient', {
-            account: args.account,
+        const { signer } = await hre.run('getSigner', {
             privateKey: args.privateKey,
-            isEd25519: args.isEd25519,
+            signerAddress: args.signerAddress,
+            signerPosition: args.signerPosition,
         })
 
+        const diamondCutManager = IDiamondCutManager__factory.connect(
+            args.resolver,
+            signer
+        )
+
+        const configVersionLatestRaw =
+            await diamondCutManager.getLatestVersionByConfiguration(
+                args.configId
+            )
+
         const configVersionLatest = parseInt(
-            await getLatestVersionByConfiguration(
-                args.configId,
-                ContractId.fromString(args.resolver),
-                client
-            ),
+            configVersionLatestRaw.toHexString(),
             16
         )
 
@@ -382,30 +387,29 @@ task('getConfigurationInfo', 'Get all info for a given configuration')
             currentVersion <= configVersionLatest;
             currentVersion++
         ) {
-            const facetLength = parseInt(
-                await getFacetsLengthByConfigurationIdAndVersion(
+            const facetListLengthRaw =
+                await diamondCutManager.getFacetsLengthByConfigurationIdAndVersion(
                     args.configId,
-                    currentVersion,
-                    ContractId.fromString(args.resolver),
-                    client
-                ),
+                    currentVersion
+                )
+            const facetListLength = parseInt(
+                facetListLengthRaw.toHexString(),
                 16
             )
 
             console.log(
-                `Number of Facets for Config ${args.configId} and Version ${currentVersion}: ${facetLength}`
+                `Number of Facets for Config ${args.configId} and Version ${currentVersion}: ${facetListLength}`
             )
 
-            const facets = await getFacetsByConfigurationIdAndVersion(
-                args.configId,
-                currentVersion,
-                0,
-                facetLength,
-                ContractId.fromString(args.resolver),
-                client
-            )
+            const facetList =
+                await diamondCutManager.getFacetsByConfigurationIdAndVersion(
+                    args.configId,
+                    currentVersion,
+                    0,
+                    facetListLength
+                )
 
-            for (const [index, facet] of facets[0].entries()) {
+            for (const [index, facet] of facetList.entries()) {
                 console.log(`Facet ${index + 1}:`)
                 console.log(`  ID: ${facet.id}`)
                 console.log(`  Address: ${facet.addr}`)
@@ -432,45 +436,44 @@ task('getResolverBusinessLogics', 'Get business logics from resolver')
         types.string
     )
     .addOptionalParam(
-        'account',
-        'The Hedera account to use for deployment. 0.0.XXXX format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
         'privateKey',
-        'The private key of the account, Raw hexadecimal string',
+        'The private key of the account in raw hexadecimal format',
         undefined,
         types.string
     )
     .addOptionalParam(
-        'isEd25519',
-        'Client is ED25519 key type',
-        false,
-        types.boolean
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
     )
     .setAction(async (args: GetResolverBusinessLogicsArgs, hre) => {
         console.log(
             `Executing getResolverBusinessLogics on ${hre.network.name} ...`
         )
 
-        // Get the client
-        const { client } = await hre.run('getClient', {
-            account: args.account,
+        // Get the Signer
+        const { signer } = await hre.run('getSigner', {
             privateKey: args.privateKey,
-            isEd25519: args.isEd25519,
+            signerAddress: args.signerAddress,
+            signerPosition: args.signerPosition,
         })
 
         // Fetch business logic keys
-        const result = await getBusinessLogicKeys(
-            ContractId.fromString(args.resolver),
-            client
-        )
+        const businessLogicKeys = await IBusinessLogicResolver__factory.connect(
+            args.resolver,
+            signer
+        ).getBusinessLogicKeys(0, 100)
 
         // Log the business logic keys
         console.log('Business Logic Keys:')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        result.forEach((key: any, index: number) => {
+        businessLogicKeys.forEach((key: string, index: number) => {
             console.log(`  Key ${index + 1}: ${key}`)
         })
     })
