@@ -219,7 +219,6 @@ import {
     RegulationType,
     RegulationSubType,
 } from '../../../../scripts/factory'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
 
 const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
@@ -251,7 +250,8 @@ describe('Security USA Tests', () => {
         ;[signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
 
-        currentTimeInSeconds = await time.latest()
+        currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
+            .timestamp
         startingDate = currentTimeInSeconds + TIME
         maturityDate = startingDate + numberOfCoupons * frequency
         firstCouponDate = startingDate + 1

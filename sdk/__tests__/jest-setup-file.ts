@@ -234,7 +234,6 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../src/domain/context/factory/RegulationType.js';
-import ConfigInfoViewModel from '../src/port/in/response/ConfigInfoViewModel';
 import { ScheduledBalanceAdjustment } from '../src/domain/context/equity/ScheduledBalanceAdjustment.js';
 import { DividendFor } from '../src/domain/context/equity/DividendFor';
 import { VotingFor } from '../src/domain/context/equity/VotingFor';

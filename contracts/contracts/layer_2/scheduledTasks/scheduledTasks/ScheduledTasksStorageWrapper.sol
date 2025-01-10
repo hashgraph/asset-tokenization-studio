@@ -212,7 +212,7 @@ import {
 import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
 import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 
-abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
+contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
     function onScheduledTaskTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,

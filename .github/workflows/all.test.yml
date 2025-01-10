@@ -40,7 +40,7 @@ jobs:
           npm run build
 
       - name: Install Yarn
-        run: npm install -g yarn@1.22.19
+        run: npm install -g yarn@1.22.22
 
 #      # No tests for UI components yet
 #      - name: Install dependencies UI Components
@@ -50,6 +50,10 @@ jobs:
       - name: Install dependencies web
         working-directory: web
         run: yarn install
+
+      - name: Build web
+        working-directory: web
+        run: yarn build
 
       - name: Create .env file in SDK
         working-directory: sdk

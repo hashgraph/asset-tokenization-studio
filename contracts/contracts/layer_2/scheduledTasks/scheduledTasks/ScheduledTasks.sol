@@ -209,6 +209,7 @@ pragma solidity 0.8.18;
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
 import {_SCHEDULED_TASKS_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {
     CorporateActionsStorageWrapperSecurity
@@ -224,6 +225,7 @@ import {
 contract ScheduledTasks is
     IStaticFunctionSelectors,
     IScheduledTasks,
+    Common,
     CorporateActionsStorageWrapperSecurity
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;

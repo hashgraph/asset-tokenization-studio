@@ -36,7 +36,7 @@ Ensure the following tools are installed with these versions:
 
 - **Node:**`v20.17.0`
 - **NPM:** `v10.8.3`
-- **Yarn:** `v1.22.19`
+- **Yarn:** `v1.22.22`
 
 # Installation
 
@@ -114,8 +114,8 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 
     REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
     REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
-    REACT_APP_RPC_RESOLVER='0.0.5233366'
-    REACT_APP_RPC_FACTORY='0.0.5233468'
+    REACT_APP_RPC_RESOLVER='0.0.5308085'
+    REACT_APP_RPC_FACTORY='0.0.5308160'
 
     REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
     REACT_APP_DAPP_NAME="Asset Tokenization Studio"
