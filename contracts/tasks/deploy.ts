@@ -205,11 +205,6 @@
 
 import { task, types } from 'hardhat/config'
 import { CONTRACT_NAMES, ContractName, Network } from '../Configuration'
-import {
-    deployAtsFullInfrastructure,
-    deployContract,
-    DeployContractCommand,
-} from '../scripts'
 import { DeployAllArgs, DeployArgs, GetSignerResult } from './Arguments'
 
 task(
@@ -255,6 +250,7 @@ task(
         })
 
         // * Deploy the full infrastructure
+        const { deployAtsFullInfrastructure } = await import('../scripts')
         const {
             factory,
             businessLogicResolver,
@@ -361,6 +357,9 @@ task('deploy', 'Deploy new contract')
             signerPosition: args.signerPosition,
         })
         // * Deploy the contract
+        const { deployContract, DeployContractCommand } = await import(
+            '../scripts'
+        )
         const { proxyAdminAddress, proxyAddress, address } =
             await deployContract(
                 new DeployContractCommand({

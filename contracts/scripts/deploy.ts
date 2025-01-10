@@ -252,6 +252,7 @@ import {
     GAS_LIMIT,
     validateTxResponse,
 } from './index'
+import { ethers } from 'hardhat'
 
 export async function deployAtsFullInfrastructure({
     signer,
@@ -641,7 +642,7 @@ export async function deployContract({
 }: DeployContractCommand): Promise<DeployContractResult> {
     console.log(`Deploying ${name}. please wait...`)
 
-    const contractFactory = await getContractFactory(name, signer)
+    const contractFactory = await ethers.getContractFactory(name, signer)
     const contract = await contractFactory.deploy(...args)
     const receipt = contract.deployTransaction.wait()
 
