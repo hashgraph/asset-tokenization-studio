@@ -212,7 +212,6 @@ import {
 import {
     ERC1410SnapshotStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {_SNAPSHOTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
 
 abstract contract Snapshots is
@@ -253,49 +252,30 @@ abstract contract Snapshots is
         return _totalSupplyAtSnapshot(_snapshotID);
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
+    function totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    ) external view virtual override returns (uint256 totalSupply_) {
+        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .partitionsOfAtSnapshot
-            .selector;
+    function lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 balance_) {
+        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
+    function lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 balance_) {
+        return
+            _lockedBalanceOfAtSnapshotByPartition(
+                _partition,
+                _snapshotID,
+                _tokenHolder
+            );
     }
 }

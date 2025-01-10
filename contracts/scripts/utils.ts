@@ -284,6 +284,8 @@ export function getClient(network?: string): Client {
         network = hre.network.name
     }
     switch (network) {
+        case 'local':
+            return Client.forLocalNode()
         case 'previewnet':
             return Client.forPreviewnet()
         case 'testnet':
@@ -343,7 +345,9 @@ export async function toEvmAddress(
         if (isE25519)
             return '0x' + AccountId.fromString(accountId).toSolidityAddress()
 
-        const URI_BASE = `${getHederaNetworkMirrorNodeURL()}/api/v1/`
+        const URI_BASE = `${getHederaNetworkMirrorNodeURL(
+            getEnvVar({ name: 'NETWORK' })
+        )}/api/v1/`
         const url = URI_BASE + 'accounts/' + accountId
         const res = await axios.get<IAccount>(url)
         return res.data.evm_address
@@ -386,7 +390,9 @@ export async function getContractInfo(contractId: string): Promise<IContract> {
                 'Invalid contractId format. It must be like "0.0.XXXX" or "0xhexadecimal".'
             )
         }
-        const URI_BASE = `${getHederaNetworkMirrorNodeURL()}/api/v1/`
+        const URI_BASE = `${getHederaNetworkMirrorNodeURL(
+            getEnvVar({ name: 'NETWORK' })
+        )}/api/v1/`
         const url = URI_BASE + 'contracts/' + contractId
 
         console.log(url)
@@ -410,7 +416,9 @@ export async function getContractInfo(contractId: string): Promise<IContract> {
 
 export async function evmToHederaFormat(evmAddress: string): Promise<string> {
     if (evmAddress === ADDRESS_0) return '0.0.0'
-    const URI_BASE = `${getHederaNetworkMirrorNodeURL()}/api/v1/`
+    const URI_BASE = `${getHederaNetworkMirrorNodeURL(
+        getEnvVar({ name: 'NETWORK' })
+    )}/api/v1/`
     const url = URI_BASE + 'accounts/' + evmAddress
     const res = await axios.get<IAccount>(url)
     return res.data.account
@@ -422,12 +430,26 @@ function getHederaNetworkMirrorNodeURL(network?: string): string {
         network = hre.network.name
     }
     switch (network) {
-        case 'mainnet':
-            return 'https://mainnet-public.mirrornode.hedera.com'
+        case 'local':
+            return getEnvVar({
+                name: 'MIRROR_NODE_URL_LOCAL',
+                defaultValue: 'http://localhost:5551',
+            })
         case 'previewnet':
-            return 'https://previewnet.mirrornode.hedera.com'
+            return getEnvVar({
+                name: 'MIRROR_NODE_URL_PREVIEWNET',
+                defaultValue: 'https://previewnet.mirrornode.hedera.com',
+            })
         case 'testnet':
-            return 'https://testnet.mirrornode.hedera.com'
+            return getEnvVar({
+                name: 'MIRROR_NODE_URL_TESTNET',
+                defaultValue: 'https://testnet.mirrornode.hedera.com',
+            })
+        case 'mainnet':
+            return getEnvVar({
+                name: 'MIRROR_NODE_URL_MAINNET',
+                defaultValue: 'https://mainnet.mirrornode.hedera.com',
+            })
         default:
             return 'https://testnet.mirrornode.hedera.com'
     }

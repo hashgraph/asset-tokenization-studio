@@ -214,7 +214,7 @@ import {
 } from '../../constants/storagePositions.sol';
 import {_DEFAULT_PARTITION} from '../../constants/values.sol';
 
-abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
+contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
     // Represents a fungible set of tokens.
     struct Partition {
         uint256 amount;
@@ -273,8 +273,32 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
 
         uint256 index = erc1410Storage.partitionToIndex[_from][_partition] - 1;
 
-        erc1410Storage.partitions[_from][index].amount -= _value;
+        if (erc1410Storage.partitions[_from][index].amount == _value) {
+            _deletePartitionForHolder(_from, _partition, index);
+        } else {
+            erc1410Storage.partitions[_from][index].amount -= _value;
+        }
+
         erc1410Storage.balances[_from] -= _value;
+    }
+
+    function _deletePartitionForHolder(
+        address _holder,
+        bytes32 _partition,
+        uint256 index
+    ) internal virtual {
+        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+        if (index != erc1410Storage.partitions[_holder].length - 1) {
+            erc1410Storage.partitions[_holder][index] = erc1410Storage
+                .partitions[_holder][
+                    erc1410Storage.partitions[_holder].length - 1
+                ];
+            erc1410Storage.partitionToIndex[_holder][
+                erc1410Storage.partitions[_holder][index].partition
+            ] = index + 1;
+        }
+        delete erc1410Storage.partitionToIndex[_holder][_partition];
+        erc1410Storage.partitions[_holder].pop();
     }
 
     function _increaseBalanceByPartition(
@@ -292,6 +316,21 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
 
         erc1410Storage.partitions[_from][index].amount += _value;
         erc1410Storage.balances[_from] += _value;
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    ) internal virtual {
+        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+
+        erc1410Storage.partitions[_account].push(Partition(_value, _partition));
+        erc1410Storage.partitionToIndex[_account][
+            _partition
+        ] = _getERC1410BasicStorage().partitions[_account].length;
+
+        if (_value != 0) erc1410Storage.balances[_account] += _value;
     }
 
     function _totalSupply() internal view virtual returns (uint256) {
@@ -367,13 +406,10 @@ abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
         address _to
     ) internal view virtual returns (bool) {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        for (uint256 i = 0; i < erc1410Storage.partitions[_to].length; i++) {
-            if (erc1410Storage.partitions[_to][i].partition == _partition) {
-                return true;
-            }
-        }
 
-        return false;
+        uint256 index = erc1410Storage.partitionToIndex[_to][_partition];
+
+        return index != 0;
     }
 
     function _getERC1410BasicStorage()

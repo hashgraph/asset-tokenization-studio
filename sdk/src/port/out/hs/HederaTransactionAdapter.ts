@@ -207,7 +207,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-asserted-optional-chain */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable no-case-declarations */
-import {ContractExecuteTransaction, ContractFunctionParameters, ContractId, Signer, Transaction,} from '@hashgraph/sdk';
+import {
+  ContractExecuteTransaction,
+  ContractFunctionParameters,
+  ContractId,
+  Signer,
+  Transaction,
+} from '@hashgraph/sdk';
 import {
   AccessControl__factory,
   Bond__factory,
@@ -217,7 +223,6 @@ import {
   DiamondFacet__factory,
   EquityUSA__factory,
   ERC1410ScheduledTasks__factory,
-  ERC1410Snapshot__factory,
   ERC1643__factory,
   Factory__factory,
   Lock_2__factory,
@@ -262,8 +267,8 @@ import {
   UPDATE_RESOLVER_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
-import {MirrorNodeAdapter} from '../mirror/MirrorNodeAdapter.js';
-import {SigningError} from '../error/SigningError.js';
+import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
+import { SigningError } from '../error/SigningError.js';
 import NetworkService from '../../../app/service/NetworkService.js';
 import LogService from '../../../app/service/LogService.js';
 import {
@@ -271,30 +276,33 @@ import {
   FactoryEquityToken,
   FactoryRegulationData,
 } from '../../../domain/context/factory/FactorySecurityToken.js';
-import {CastRegulationSubType, CastRegulationType,} from '../../../domain/context/factory/RegulationType.js';
+import {
+  CastRegulationSubType,
+  CastRegulationType,
+} from '../../../domain/context/factory/RegulationType.js';
 import TransactionResponse from '../../../domain/context/transaction/TransactionResponse.js';
-import {MirrorNodes} from '../../../domain/context/network/MirrorNode.js';
-import {JsonRpcRelays} from '../../../domain/context/network/JsonRpcRelay.js';
-import {Factories} from '../../../domain/context/factory/Factories.js';
+import { MirrorNodes } from '../../../domain/context/network/MirrorNode.js';
+import { JsonRpcRelays } from '../../../domain/context/network/JsonRpcRelay.js';
+import { Factories } from '../../../domain/context/factory/Factories.js';
 import BigDecimal from '../../../domain/context/shared/BigDecimal.js';
-import {Security} from '../../../domain/context/security/Security.js';
-import {Rbac} from '../../../domain/context/factory/Rbac.js';
-import {SecurityRole} from '../../../domain/context/security/SecurityRole.js';
-import {ERC20MetadataInfo} from '../../../domain/context/factory/ERC20Metadata.js';
-import {Resolvers} from '../../../domain/context/factory/Resolvers.js';
-import {BusinessLogicKeys} from '../../../domain/context/factory/BusinessLogicKeys.js';
+import { Security } from '../../../domain/context/security/Security.js';
+import { Rbac } from '../../../domain/context/factory/Rbac.js';
+import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
+import { ERC20MetadataInfo } from '../../../domain/context/factory/ERC20Metadata.js';
+import { Resolvers } from '../../../domain/context/factory/Resolvers.js';
+import { BusinessLogicKeys } from '../../../domain/context/factory/BusinessLogicKeys.js';
 import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
-import {BondDetails} from '../../../domain/context/bond/BondDetails.js';
-import {CouponDetails} from '../../../domain/context/bond/CouponDetails.js';
-import {BondDetailsData} from '../../../domain/context/factory/BondDetailsData.js';
-import {CouponDetailsData} from '../../../domain/context/factory/CouponDetailsData.js';
-import {EquityDetails} from '../../../domain/context/equity/EquityDetails.js';
-import {EquityDetailsData} from '../../../domain/context/factory/EquityDetailsData.js';
-import {SecurityData} from '../../../domain/context/factory/SecurityData.js';
-import {CastDividendType} from '../../../domain/context/equity/DividendType.js';
-import {AdditionalSecurityData} from '../../../domain/context/factory/AdditionalSecurityData.js';
-import {Interface} from 'ethers/lib/utils.js';
-import {ResolverProxyConfiguration} from '../../../domain/context/factory/ResolverProxyConfiguration.js';
+import { BondDetails } from '../../../domain/context/bond/BondDetails.js';
+import { CouponDetails } from '../../../domain/context/bond/CouponDetails.js';
+import { BondDetailsData } from '../../../domain/context/factory/BondDetailsData.js';
+import { CouponDetailsData } from '../../../domain/context/factory/CouponDetailsData.js';
+import { EquityDetails } from '../../../domain/context/equity/EquityDetails.js';
+import { EquityDetailsData } from '../../../domain/context/factory/EquityDetailsData.js';
+import { SecurityData } from '../../../domain/context/factory/SecurityData.js';
+import { CastDividendType } from '../../../domain/context/equity/DividendType.js';
+import { AdditionalSecurityData } from '../../../domain/context/factory/AdditionalSecurityData.js';
+import { Interface } from 'ethers/lib/utils.js';
+import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -1159,7 +1167,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `authorizing operator: ${targetId.toString()} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ERC1410Snapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
 
@@ -1190,7 +1198,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `revoking operator: ${targetId.toString()} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new ERC1410Snapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
 
@@ -1222,7 +1230,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `authorizing operator: ${targetId.toString()} for security ${security.toString()} and partition ${partitionId}`,
     );
 
-    const factoryInstance = new ERC1410Snapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
 
@@ -1254,7 +1262,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `revoking operator: ${targetId.toString()} for security ${security.toString()} and partition ${partitionId}`,
     );
 
-    const factoryInstance = new ERC1410Snapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
 
@@ -1288,7 +1296,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()} from account ${sourceId.toString()} on partition ${partitionId}`,
     );
 
-    const factoryInstance = new ERC1410Snapshot__factory().attach(
+    const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
 

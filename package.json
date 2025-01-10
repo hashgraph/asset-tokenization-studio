@@ -1,6 +1,6 @@
 {
   "name": "hedera-asset-tokenization",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "description": "asset tokenization",
   "scripts": {
     "install:all": "node install.js && npm run prepare",
@@ -28,7 +28,8 @@
     "prettier": "concurrently \"npm run prettier:sdk\" \"npm run prettier:web\" \"npm run prettier:contracts\"",
     "prettier:sdk": "cd sdk && npm run prettier",
     "prettier:web": "cd web && npm run prettier",
-    "prettier:contracts": "cd contracts && npm run prettier"
+    "prettier:contracts": "cd contracts && npm run prettier",
+    "pre-commit:sdk": "cd sdk && npm run pre-commit"
   },
   "keywords": [],
   "author": "",

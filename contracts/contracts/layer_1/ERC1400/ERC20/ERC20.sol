@@ -354,8 +354,5 @@ abstract contract ERC20 is
         external
         view
         virtual
-        returns (ERC20Metadata memory)
-    {
-        return _getERC20Metadata();
-    }
+        returns (ERC20Metadata memory);
 }

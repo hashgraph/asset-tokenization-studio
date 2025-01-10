@@ -213,5 +213,5 @@ interface ISnapshots_2 {
 
     function decimalsAtSnapshot(
         uint256 _snapshotID
-    ) external view returns (uint256 decimals_);
+    ) external view returns (uint8 decimals_);
 }

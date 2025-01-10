@@ -204,16 +204,16 @@
 */
 
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LocalContext} from '../context/LocalContext.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
-import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {LocalContext} from '../context/LocalContext.sol';
+import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract CapStorageWrapper is
+contract CapStorageWrapper is
     ICapStorageWrapper,
     ERC1410BasicStorageWrapperRead,
     LocalContext
@@ -226,33 +226,17 @@ abstract contract CapStorageWrapper is
 
     // modifiers
     modifier checkMaxSupply(uint256 _amount) {
-        uint256 newTotalSupply = _totalSupply() + _amount;
-        if (!_checkMaxSupply(newTotalSupply)) {
-            revert MaxSupplyReached(_capStorage().maxSupply);
-        }
+        _checkNewTotalSupply(_amount);
         _;
     }
 
     modifier checkMaxSupplyForPartition(bytes32 _partition, uint256 _amount) {
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            _partition
-        ) + _amount;
-        if (
-            !_checkMaxSupplyByPartition(_partition, newTotalSupplyForPartition)
-        ) {
-            revert MaxSupplyReachedForPartition(
-                _partition,
-                _capStorage().maxSupplyByPartition[_partition]
-            );
-        }
+        _checkNewTotalSupplyForPartition(_partition, _amount);
         _;
     }
 
     modifier checkNewMaxSupply(uint256 _newMaxSupply) {
-        uint256 totalSupply = _totalSupply();
-        if (_newMaxSupply != 0 && totalSupply > _newMaxSupply) {
-            revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
-        }
+        _checkNewMaxSupply(_newMaxSupply);
         _;
     }
 
@@ -260,14 +244,7 @@ abstract contract CapStorageWrapper is
         bytes32 _partition,
         uint256 _newMaxSupply
     ) {
-        uint256 totalSupplyForPartition = _totalSupplyByPartition(_partition);
-        if (_newMaxSupply != 0 && totalSupplyForPartition > _newMaxSupply) {
-            revert NewMaxSupplyForPartitionTooLow(
-                _partition,
-                _newMaxSupply,
-                totalSupplyForPartition
-            );
-        }
+        _checkNewMaxSupplyForPartition(_partition, _newMaxSupply);
         _;
     }
 
@@ -312,27 +289,45 @@ abstract contract CapStorageWrapper is
     function _checkMaxSupply(
         uint256 _amount
     ) internal view virtual returns (bool) {
-        return _checkMaxSupplyCommon(_amount, _capStorage().maxSupply);
+        revert('Should not reach this function');
     }
 
-    function _checkMaxSupplyByPartition(
+    function _checkMaxSupplyForPartition(
         bytes32 _partition,
         uint256 _amount
     ) internal view virtual returns (bool) {
-        return
-            _checkMaxSupplyCommon(
-                _amount,
-                _capStorage().maxSupplyByPartition[_partition]
-            );
+        revert('Should not reach this function');
     }
 
     function _checkMaxSupplyCommon(
         uint256 _amount,
         uint256 _maxSupply
-    ) private pure returns (bool) {
+    ) internal pure returns (bool) {
         if (_maxSupply == 0) return true;
         if (_amount <= _maxSupply) return true;
         return false;
+    }
+
+    function _checkNewMaxSupply(uint256 _newMaxSupply) internal virtual {
+        revert('Should not reach this function');
+    }
+
+    function _checkNewTotalSupply(uint256 _amount) internal virtual {
+        revert('Should not reach this function');
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    ) internal view virtual returns (bool) {
+        revert('Should not reach this function');
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual {
+        revert('Should not reach this function');
     }
 
     function _capStorage()
