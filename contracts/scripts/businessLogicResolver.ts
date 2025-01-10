@@ -213,13 +213,14 @@ import {
 } from '../typechain-types'
 import { IStaticFunctionSelectors } from '../typechain-types'
 import {
-    CreateAllConfigurationsCommand,
+    CreateConfigurationsForDeployedContractsCommand,
     deployContractWithFactory,
     DeployContractWithFactoryCommand,
     DeployProxyForBusinessLogicResolverCommand,
     GAS_LIMIT,
     MESSAGES,
     RegisterBusinessLogicsCommand,
+    RegisterDeployedContractBusinessLogicsCommand,
     validateTxResponse,
     ValidateTxResponseCommand,
 } from './index'
@@ -329,6 +330,21 @@ export async function deployBusinessLogics(
     }
 }
 
+export async function registerDeployedContractBusinessLogics({
+    deployedContractAddressList,
+    businessLogicResolverProxyAddress,
+    signer,
+    overrides,
+}: RegisterDeployedContractBusinessLogicsCommand) {
+    const registerBusinessLogicsCommand = new RegisterBusinessLogicsCommand({
+        contractAddressList: deployedContractAddressList,
+        businessLogicResolverProxyAddress,
+        signer,
+        overrides,
+    })
+    await registerBusinessLogics(registerBusinessLogicsCommand)
+}
+
 /**
  * Registers business logic contracts with a resolver.
  *
@@ -351,7 +367,9 @@ export async function registerBusinessLogics({
     contractAddressListToRegister,
     businessLogicResolverProxyAddress,
     signer,
+    overrides,
 }: RegisterBusinessLogicsCommand): Promise<void> {
+    console.log('contractAddressListToRegister', contractAddressListToRegister)
     const businessLogicRegistries: BusinessLogicRegistryData[] =
         await Promise.all(
             Object.values(contractAddressListToRegister).map(
@@ -379,7 +397,8 @@ export async function registerBusinessLogics({
     const response = await resolverContract.registerBusinessLogics(
         businessLogicRegistries,
         {
-            gasLimit: GAS_LIMIT.high,
+            gasLimit: GAS_LIMIT.businessLogicResolver.registerBusinessLogics,
+            ...overrides,
         }
     )
     await validateTxResponse(
@@ -391,13 +410,13 @@ export async function registerBusinessLogics({
     )
 }
 
-export async function createAllConfigurations({
+export async function createConfigurationsForDeployedContracts({
     commonFacetAddressList,
     businessLogicResolverProxyAddress,
     equityUsaAddress,
     bondUsaAddress,
     signer,
-}: CreateAllConfigurationsCommand) {
+}: CreateConfigurationsForDeployedContractsCommand) {
     const commonFacetIdList = await Promise.all(
         commonFacetAddressList.map(async (address) => {
             return await IStaticFunctionSelectors__factory.connect(

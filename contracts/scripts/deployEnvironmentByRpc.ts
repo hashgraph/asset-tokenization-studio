@@ -217,7 +217,7 @@ import {
     deployBusinessLogics,
     registerBusinessLogics,
 } from './businessLogicResolver'
-import { proxyAdmin } from './transparentUpgradableProxy'
+import { proxyAdmin } from './transparentUpgradeableProxy'
 import { createResolverConfig } from './resolverDiamondCut'
 import { BOND_CONFIG_ID, EQUITY_CONFIG_ID } from './constants'
 

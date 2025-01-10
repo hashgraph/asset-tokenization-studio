@@ -200,11 +200,11 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+   
+   */
 
-*/
-
+import { ethers } from 'hardhat'
 import { Contract, ContractFactory, ContractTransaction } from 'ethers'
-import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
 import {
     AccessControl__factory,
     AdjustBalances__factory,
@@ -243,16 +243,15 @@ import {
     DeployAtsFullInfrastructureCommand,
     DeployAtsFullInfrastructureResult,
     BusinessLogicResolverNotFound,
-    RegisterBusinessLogicsCommand,
-    CreateAllConfigurationsCommand,
-    registerBusinessLogics,
-    createAllConfigurations,
+    CreateConfigurationsForDeployedContractsCommand,
+    createConfigurationsForDeployedContracts,
     validateTxResponseList,
     ValidateTxResponseCommand,
     GAS_LIMIT,
     validateTxResponse,
+    RegisterDeployedContractBusinessLogicsCommand,
+    registerDeployedContractBusinessLogics,
 } from './index'
-import { ethers } from 'hardhat'
 
 export async function deployAtsFullInfrastructure({
     signer,
@@ -299,19 +298,21 @@ export async function deployAtsFullInfrastructure({
         // * Register business logic contracts
         console.log(MESSAGES.businessLogicResolver.info.registering)
 
-        const registerCommand = new RegisterBusinessLogicsCommand({
-            deployedContractList,
-            signer,
-        })
-        await registerBusinessLogics(registerCommand)
+        const registerCommand =
+            new RegisterDeployedContractBusinessLogicsCommand({
+                deployedContractList,
+                signer,
+            })
+        await registerDeployedContractBusinessLogics(registerCommand)
 
         // * Create configurations for all Securities (EquityUSA, BondUSA)
         console.log(MESSAGES.businessLogicResolver.info.creatingConfigurations)
-        const createCommand = new CreateAllConfigurationsCommand({
-            deployedContractList,
-            signer,
-        })
-        await createAllConfigurations(createCommand)
+        const createCommand =
+            new CreateConfigurationsForDeployedContractsCommand({
+                deployedContractList,
+                signer,
+            })
+        await createConfigurationsForDeployedContracts(createCommand)
     }
     console.log(MESSAGES.businessLogicResolver.info.configured)
     console.log(MESSAGES.factory.info.deploying)

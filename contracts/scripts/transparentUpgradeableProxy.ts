@@ -203,6 +203,7 @@
 
 */
 
+import { ContractReceipt } from 'ethers'
 import {
     ProxyAdmin__factory,
     TransparentUpgradeableProxy__factory,
@@ -213,7 +214,9 @@ import {
     DeployProxyAdminCommand,
     DeployUpgradeableProxyCommand,
     ProxyImplementationQuery,
-    UpdateProxyCommand,
+    UpgradeProxyImplementationCommand,
+    validateTxResponse,
+    ValidateTxResponseCommand,
 } from './index'
 
 export async function deployProxyAdmin({
@@ -242,19 +245,23 @@ export async function deployTransparentProxy({
     return await deployContractWithFactory(deployCommand)
 }
 
-export async function updateProxy({
+export async function upgradeProxyImplementation({
     proxyAdminAddress,
     transparentProxyAddress,
     newImplementationAddress,
     signer,
     overrides,
-}: UpdateProxyCommand) {
+}: UpgradeProxyImplementationCommand): Promise<ContractReceipt> {
     const proxyAdmin = new ProxyAdmin__factory(signer).attach(proxyAdminAddress)
-    return await proxyAdmin.upgrade(
+    const txResponse = await proxyAdmin.upgrade(
         transparentProxyAddress,
         newImplementationAddress,
         overrides
     )
+    const { txReceipt } = await validateTxResponse(
+        new ValidateTxResponseCommand({ txResponse })
+    )
+    return txReceipt
 }
 
 // * Read functions

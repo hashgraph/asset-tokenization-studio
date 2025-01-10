@@ -204,130 +204,129 @@
 */
 
 import { task, types } from 'hardhat/config'
-import { ContractId } from '@hashgraph/sdk'
 import {
     GetSignerResult,
     UpdateBusinessLogicKeysArgs,
     UpdateFactoryVersionArgs,
 } from './Arguments'
-import { BusinessLogicRegistryData } from '../scripts/businessLogicResolver'
-import { getProxyImpl, updateProxy } from '../scripts/deploy'
-import {
-    getStaticResolverKey,
-    registerBusinessLogics,
-} from '../scripts/contractsMethods'
 
 task('updateFactoryVersion', 'Updates the factory version')
+    .addPositionalParam('proxyAdminAddress', 'The proxy admin contract address')
     .addPositionalParam(
-        'proxyadmin',
-        'The proxy admin contract ID. 0.0.XXXX format'
+        'transparentProxyAddress',
+        'The transparent proxy contract address'
     )
     .addPositionalParam(
-        'transparentproxy',
-        'The transparent proxy contract ID. 0.0.XXXX format'
-    )
-    .addPositionalParam(
-        'implementation',
-        'The new implementation contract ID. 0.0.XXXX format'
-    )
-    .addOptionalParam(
-        'account',
-        'The Hedera account to use for deployment. 0.0.XXXX format',
-        undefined,
-        types.string
+        'newImplementationAddress',
+        'The new implementation contract address'
     )
     .addOptionalParam(
         'privateKey',
-        'The private key of the account, Raw hexadecimal string',
+        'The private key of the account in raw hexadecimal format',
         undefined,
         types.string
     )
     .addOptionalParam(
-        'isEd25519',
-        'Client is ED25519 key type',
-        false,
-        types.boolean
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
     )
     .setAction(async (args: UpdateFactoryVersionArgs, hre) => {
+        // Inlined import due to circular dependency
+        const {
+            upgradeProxyImplementation,
+            UpgradeProxyImplementationCommand,
+        } = await import('../scripts/')
         console.log(`Executing updateFactoryVersion on ${hre.network.name} ...`)
-        const { client }: GetSignerResult = await hre.run('getClient', {
-            account: args.account,
-            privateKey: args.privateKey,
-            isEd25519: args.isEd25519,
+        const {
+            privateKey,
+            signerAddress,
+            signerPosition,
+            proxyAdminAddress,
+            transparentProxyAddress,
+            newImplementationAddress,
+        } = args
+        const { signer }: GetSignerResult = await hre.run('getSigner', {
+            privateKey: privateKey,
+            signerAddress: signerAddress,
+            signerPosition: signerPosition,
         })
-
-        await updateProxy(
-            client,
-            args.proxyAdmin,
-            args.proxy,
-            args.newImplementation
+        await upgradeProxyImplementation(
+            new UpgradeProxyImplementationCommand({
+                proxyAdminAddress,
+                transparentProxyAddress,
+                newImplementationAddress,
+                signer,
+            })
         )
-
-        await getProxyImpl(client, args.proxyAdmin, args.proxy)
 
         console.log('Factory version updated')
     })
 
 task('updateBusinessLogicKeys', 'Update the address of a business logic key')
-    .addPositionalParam('resolver', 'The resolver Contract ID. 0.0.XXXX format')
     .addPositionalParam(
-        'implementations',
-        'The implementations to update. List of comma separated contract IDs. 0.0.XXXX format'
+        'resolverAddress',
+        'The BusinessLogicResolver Contract address',
+        undefined,
+        types.string
     )
-    .addOptionalParam(
-        'account',
-        'The Hedera account to use for deployment. 0.0.XXXX format',
+    .addPositionalParam(
+        'implementationAddressList',
+        'The implementation contract list to update. List of comma separated contract addresses',
         undefined,
         types.string
     )
     .addOptionalParam(
         'privateKey',
-        'The private key of the account, Raw hexadecimal string',
+        'The private key of the account in raw hexadecimal format',
         undefined,
         types.string
     )
     .addOptionalParam(
-        'isEd25519',
-        'Client is ED25519 key type',
-        false,
-        types.boolean
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
     )
     .setAction(async (args: UpdateBusinessLogicKeysArgs, hre) => {
+        // Inlined import due to circular dependency
+        const { registerBusinessLogics, RegisterBusinessLogicsCommand } =
+            await import('../scripts/')
         console.log(
             `Executing updateBusinessLogicKeys on ${hre.network.name} ...`
         )
-        const { client }: GetSignerResult = await hre.run('getClient', {
-            account: args.account,
-            privateKey: args.privateKey,
-            isEd25519: args.isEd25519,
+        const {
+            privateKey,
+            signerAddress,
+            signerPosition,
+            resolverAddress,
+            implementationAddressList,
+        } = args
+        const { signer }: GetSignerResult = await hre.run('getSigner', {
+            privateKey: privateKey,
+            signerAddress: signerAddress,
+            signerPosition: signerPosition,
         })
 
-        const businessLogicRegistries: BusinessLogicRegistryData[] = []
-
-        const implementationList = args.implementations.split(',')
-
-        for (let i = 0; i < implementationList.length; i++) {
-            const facet = ContractId.fromString(implementationList[i])
-
-            console.log(implementationList[i])
-
-            const businessLogicKey = await getStaticResolverKey(facet, client)
-
-            console.log(businessLogicKey)
-
-            businessLogicRegistries.push({
-                businessLogicKey: businessLogicKey,
-                businessLogicAddress: ContractId.fromString(
-                    implementationList[i]
-                ).toSolidityAddress(),
-            })
-        }
-
-        const resolverContract = ContractId.fromString(args.resolver)
-
+        const implementationList = implementationAddressList.split(',')
         await registerBusinessLogics(
-            businessLogicRegistries,
-            resolverContract,
-            client
+            new RegisterBusinessLogicsCommand({
+                contractAddressList: implementationList,
+                businessLogicResolverProxyAddress: resolverAddress,
+                signer,
+            })
         )
     })

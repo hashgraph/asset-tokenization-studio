@@ -242,6 +242,8 @@ task(
         types.int
     )
     .setAction(async (args: DeployAllArgs, hre) => {
+        // Inlined to avoid circular dependency
+        const { deployAtsFullInfrastructure } = await import('../scripts')
         console.log(`Executing deployAll on ${hre.network.name} ...`)
         const { signer }: GetSignerResult = await hre.run('getSigner', {
             privateKey: args.privateKey,
@@ -250,7 +252,6 @@ task(
         })
 
         // * Deploy the full infrastructure
-        const { deployAtsFullInfrastructure } = await import('../scripts')
         const {
             factory,
             businessLogicResolver,
@@ -344,6 +345,10 @@ task('deploy', 'Deploy new contract')
         types.int
     )
     .setAction(async (args: DeployArgs, hre) => {
+        // Inlined to avoid circular dependency
+        const { deployContract, DeployContractCommand } = await import(
+            '../scripts'
+        )
         console.log(`Executing deploy on ${hre.network.name} ...`)
         if (!CONTRACT_NAMES.includes(args.contractName as ContractName)) {
             throw new Error(
@@ -357,9 +362,6 @@ task('deploy', 'Deploy new contract')
             signerPosition: args.signerPosition,
         })
         // * Deploy the contract
-        const { deployContract, DeployContractCommand } = await import(
-            '../scripts'
-        )
         const { proxyAdminAddress, proxyAddress, address } =
             await deployContract(
                 new DeployContractCommand({

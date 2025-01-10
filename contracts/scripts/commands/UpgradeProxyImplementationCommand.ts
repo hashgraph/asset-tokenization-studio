@@ -1,12 +1,13 @@
 import { BaseBlockchainCommand, BaseBlockchainCommandParams } from '../index'
 
-interface UpdateProxyCommandParams extends BaseBlockchainCommandParams {
+interface UpgradeProxyImplementationCommandParams
+    extends BaseBlockchainCommandParams {
     proxyAdminAddress: string
     transparentProxyAddress: string
     newImplementationAddress: string
 }
 
-export default class UpdateProxyCommand extends BaseBlockchainCommand {
+export default class UpgradeProxyImplementationCommand extends BaseBlockchainCommand {
     public readonly proxyAdminAddress: string
     public readonly transparentProxyAddress: string
     public readonly newImplementationAddress: string
@@ -17,7 +18,7 @@ export default class UpdateProxyCommand extends BaseBlockchainCommand {
         newImplementationAddress,
         signer,
         overrides,
-    }: UpdateProxyCommandParams) {
+    }: UpgradeProxyImplementationCommandParams) {
         super({ signer, overrides })
         this.proxyAdminAddress = proxyAdminAddress
         this.transparentProxyAddress = transparentProxyAddress

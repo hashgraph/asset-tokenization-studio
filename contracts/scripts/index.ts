@@ -7,9 +7,9 @@ export {
     BaseBlockchainCommandParams,
 } from './commands/base/BaseBlockchainCommand'
 export {
-    default as BaseBusinessLogicResolverCommand,
-    BaseBusinessLogicResolverCommandParams,
-} from './commands/base/BaseBusinessLogicResolverCommand'
+    default as BaseAtsContractListCommand,
+    BaseAtsContractListCommandParams,
+} from './commands/base/BaseAtsContractListCommand'
 export { default as ErrorMessageCommand } from './commands/ErrorMessageCommand'
 export { default as DeployContractCommand } from './commands/DeployContractCommand'
 export { default as DeployAtsContractsCommand } from './commands/DeployAtsContractsCommand'
@@ -18,11 +18,12 @@ export { default as DeployContractWithFactoryCommand } from './commands/DeployCo
 export { default as DeployProxyAdminCommand } from './commands/DeployProxyAdminCommand'
 export { default as DeployUpgradeableProxyCommand } from './commands/DeployTransparentProxyCommand'
 export { default as DeployProxyForBusinessLogicResolverCommand } from './commands/DeployProxyForBusinessLogicResolverCommand'
-export { default as UpdateProxyCommand } from './commands/UpdateProxyCommand'
+export { default as UpgradeProxyImplementationCommand } from './commands/UpgradeProxyImplementationCommand'
 export { default as CallContractCommand } from './commands/CallContractCommand'
 export { default as ValidateTxResponseCommand } from './commands/ValidateTxResponseCommand'
 export { default as RegisterBusinessLogicsCommand } from './commands/RegisterBusinessLogicsCommand'
-export { default as CreateAllConfigurationsCommand } from './commands/CreateAllConfigurationsCommand'
+export { default as RegisterDeployedContractBusinessLogicsCommand } from './commands/RegisterDeployedContractBusinessLogicsCommand'
+export { default as CreateConfigurationsForDeployedContractsCommand } from './commands/CreateConfigurationsForDeployedContractsCommand'
 
 // * Queries
 export {
@@ -51,6 +52,9 @@ export * from './blockchain'
 
 // * Deploy functions
 export * from './deploy'
+
+// * Proxy functions
+export * from './transparentUpgradeableProxy'
 
 // * BusinessLogicResolver
 export * from './businessLogicResolver'

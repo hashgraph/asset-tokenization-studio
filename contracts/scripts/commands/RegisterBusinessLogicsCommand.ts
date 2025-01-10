@@ -1,25 +1,27 @@
-import { Signer } from 'ethers'
 import {
-    BaseBusinessLogicResolverCommand,
-    BaseBusinessLogicResolverCommandParams,
-    DeployAtsContractsResult,
+    BaseAtsContractListCommand,
+    BaseAtsContractListCommandParams,
 } from '../index'
 
 interface RegisterBusinessLogicsCommandParams
-    extends BaseBusinessLogicResolverCommandParams {}
+    extends BaseAtsContractListCommandParams {}
 
-export default class RegisterBusinessLogicsCommand extends BaseBusinessLogicResolverCommand {
-    public readonly contractAddressListToRegister: string[]
-
+export default class RegisterBusinessLogicsCommand extends BaseAtsContractListCommand {
     constructor({
-        deployedContractList,
+        contractAddressList,
+        businessLogicResolverProxyAddress,
         signer,
+        overrides,
     }: RegisterBusinessLogicsCommandParams) {
-        super({ deployedContractList, signer })
-        this.contractAddressListToRegister = [
-            ...this.contractAddressList,
-            this.equityUsaAddress,
-            this.bondUsaAddress,
-        ]
+        super({
+            contractAddressList,
+            businessLogicResolverProxyAddress,
+            signer,
+            overrides,
+        })
+    }
+
+    get contractAddressListToRegister() {
+        return this.contractAddressList
     }
 }

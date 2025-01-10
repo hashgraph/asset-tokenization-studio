@@ -1,25 +1,24 @@
-import { Signer } from 'ethers'
 import {
     DeployAtsContractsResult,
     BusinessLogicResolverProxyNotFound,
-} from '../../index'
+    BaseAtsContractListCommand,
+    BaseBlockchainCommandParams,
+} from '../index'
 
-export interface BaseBusinessLogicResolverCommandParams {
+interface CreateConfigurationsForDeployedContractsCommandParams
+    extends BaseBlockchainCommandParams {
     readonly deployedContractList: DeployAtsContractsResult
-    readonly signer: Signer
 }
 
-export default abstract class BaseBusinessLogicResolverCommand {
-    public readonly contractAddressList: string[]
-    public readonly businessLogicResolverProxyAddress: string
+export default class CreateConfigurationsForDeployedContractsCommand extends BaseAtsContractListCommand {
     public readonly equityUsaAddress: string
     public readonly bondUsaAddress: string
-    public readonly signer: Signer
 
     constructor({
         deployedContractList,
         signer,
-    }: BaseBusinessLogicResolverCommandParams) {
+        overrides,
+    }: CreateConfigurationsForDeployedContractsCommandParams) {
         const {
             deployer: _,
             businessLogicResolver,
@@ -27,8 +26,7 @@ export default abstract class BaseBusinessLogicResolverCommand {
             bondUsa,
             ...contractListToRegister
         } = deployedContractList
-
-        this.contractAddressList = Object.values(contractListToRegister).map(
+        const contractAddressList = Object.values(contractListToRegister).map(
             (contract) => contract.address
         )
 
@@ -36,10 +34,17 @@ export default abstract class BaseBusinessLogicResolverCommand {
             throw new BusinessLogicResolverProxyNotFound()
         }
 
-        this.businessLogicResolverProxyAddress =
-            businessLogicResolver.proxyAddress
+        super({
+            contractAddressList,
+            businessLogicResolverProxyAddress:
+                businessLogicResolver.proxyAddress,
+            signer,
+            overrides,
+        })
         this.equityUsaAddress = equityUsa.address
         this.bondUsaAddress = bondUsa.address
-        this.signer = signer
+    }
+    get commonFacetAddressList() {
+        return this.contractAddressList
     }
 }

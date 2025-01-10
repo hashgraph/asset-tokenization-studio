@@ -245,12 +245,12 @@ export interface DeployAllArgs extends BasicArgs {
 
 // * Update
 export interface UpdateFactoryVersionArgs extends BasicArgs {
-    proxyAdmin: string
-    proxy: string
-    newImplementation: string
+    proxyAdminAddress: string
+    transparentProxyAddress: string
+    newImplementationAddress: string
 }
 
 export interface UpdateBusinessLogicKeysArgs extends BasicArgs {
-    resolver: string
-    implementations: string // * Comma separated list
+    resolverAddress: string
+    implementationAddressList: string // * Comma separated list
 }
