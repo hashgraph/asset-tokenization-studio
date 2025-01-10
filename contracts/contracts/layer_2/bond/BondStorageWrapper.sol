@@ -215,6 +215,12 @@ import {
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {ERC20_2_CD_Lib} from '../ERC1400/ERC20/ERC20_2_CD_Lib.sol';
+import {Snapshots_CD_Lib} from '../../layer_1/snapshots/Snapshots_CD_Lib.sol';
+import {
+    ERC1410Basic_CD_Lib
+} from '../../layer_1/ERC1400/ERC1410/ERC1410Basic_CD_Lib.sol';
+import {Lock_CD_Lib} from '../../layer_1/lock/Lock_CD_Lib.sol';
 
 abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -372,10 +378,18 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
             couponFor_.recordDateReached = true;
 
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? _balanceOfAtSnapshot(registeredCoupon.snapshotId, _account)
-                : _balanceOf(_account);
+                ? (Snapshots_CD_Lib.balanceOfAtSnapshot(
+                    registeredCoupon.snapshotId,
+                    _account
+                ) +
+                    Snapshots_CD_Lib.lockedBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
+                    ))
+                : (ERC1410Basic_CD_Lib.balanceOf(_account) +
+                    Lock_CD_Lib.getLockedAmountFor(_account));
 
-            couponFor_.decimals = _decimals();
+            couponFor_.decimals = ERC20_2_CD_Lib.decimalsAdjusted();
         }
     }
 

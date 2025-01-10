@@ -368,7 +368,7 @@ describe('ERC1644 Tests', () => {
                         '0x',
                         '0x'
                     )
-                ).to.eventually.be.rejectedWith(Error)
+                ).to.be.revertedWithCustomError(erc1644Facet, 'TokenIsPaused')
             })
 
             it('GIVEN a paused Token WHEN controllerRedeem THEN transaction fails with TokenIsPaused', async () => {
@@ -378,7 +378,7 @@ describe('ERC1644 Tests', () => {
                 // remove document
                 await expect(
                     erc1644Facet.controllerRedeem(account_D, amount, '0x', '0x')
-                ).to.eventually.be.rejectedWith(Error)
+                ).to.be.revertedWithCustomError(erc1644Facet, 'TokenIsPaused')
             })
         })
 

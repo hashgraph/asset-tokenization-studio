@@ -207,23 +207,25 @@
 pragma solidity 0.8.18;
 
 import {
+    ERC1410BasicStorageWrapperRead
+} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {Common} from '../common/Common.sol';
+import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {
+    ISnapshotsStorageWrapper
+} from '../interfaces/snapshots/ISnapshotsStorageWrapper.sol';
+import {LockStorageWrapperRead} from '../lock/LockStorageWrapperRead.sol';
+import {
     ArraysUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
 import {
     CountersUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {
-    ISnapshotsStorageWrapper
-} from '../interfaces/snapshots/ISnapshotsStorageWrapper.sol';
-import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {Common} from '../common/Common.sol';
 
 abstract contract SnapshotsStorageWrapper is
     ISnapshotsStorageWrapper,
     ERC1410BasicStorageWrapperRead,
+    LockStorageWrapperRead,
     Common
 {
     using ArraysUpgradeable for uint256[];
@@ -251,6 +253,9 @@ abstract contract SnapshotsStorageWrapper is
         Snapshots totalSupplySnapshots;
         // Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
         CountersUpgradeable.Counter currentSnapshotId;
+        mapping(address => Snapshots) accountLockedBalanceSnapshots;
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
+        mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
     }
 
     event SnapshotTriggered(address indexed operator, uint256 snapshotId);
@@ -335,10 +340,30 @@ abstract contract SnapshotsStorageWrapper is
         );
     }
 
-    function _updateTotalSupplySnapshot() internal virtual {
+    function _updateAccountLockedBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual {
+        _updateSnapshot(
+            _snapshotStorage().accountLockedBalanceSnapshots[account],
+            _getLockedAmountFor(account)
+        );
+        _updateSnapshot(
+            _snapshotStorage().accountPartitionLockedBalanceSnapshots[account][
+                partition
+            ],
+            _getLockedAmountForByPartition(partition, account)
+        );
+    }
+
+    function _updateTotalSupplySnapshot(bytes32 partition) internal virtual {
         _updateSnapshot(
             _snapshotStorage().totalSupplySnapshots,
             _totalSupply()
+        );
+        _updateSnapshot(
+            _snapshotStorage().totalSupplyByPartitionSnapshots[partition],
+            _totalSupplyByPartition(partition)
         );
     }
 
@@ -382,12 +407,7 @@ abstract contract SnapshotsStorageWrapper is
         address account,
         uint256 snapshotId
     ) internal view virtual returns (uint256) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            snapshotId,
-            _snapshotStorage().accountBalanceSnapshots[account]
-        );
-
-        return snapshotted ? value : _balanceOf(account);
+        revert('Should not reach this function');
     }
 
     /**
@@ -398,14 +418,29 @@ abstract contract SnapshotsStorageWrapper is
         address account,
         uint256 snapshotId
     ) internal view virtual returns (uint256) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            snapshotId,
-            _snapshotStorage().accountPartitionBalanceSnapshots[account][
-                _partition
-            ]
-        );
+        revert('Should not reach this function');
+    }
 
-        return snapshotted ? value : _balanceOfByPartition(_partition, account);
+    function _totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    ) internal view virtual returns (uint256 totalSupply_) {
+        revert('Should not reach this function');
+    }
+
+    function _lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_) {
+        revert('Should not reach this function');
+    }
+
+    function _lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_) {
+        revert('Should not reach this function');
     }
 
     /**

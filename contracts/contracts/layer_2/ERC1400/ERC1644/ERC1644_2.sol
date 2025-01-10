@@ -209,9 +209,10 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 import {ERC1644} from '../../../layer_1/ERC1400/ERC1644/ERC1644.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
@@ -239,7 +240,7 @@ contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
         internal
         virtual
         override(
-            ERC1410BasicStorageWrapper,
+            ERC1410BasicStorageWrapperRead,
             ERC1410ScheduledTasksStorageWrapper
         )
     {
@@ -248,5 +249,85 @@ contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
             _account,
             _partition
         );
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupply(_amount);
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return ERC1410ScheduledTasksStorageWrapper._checkMaxSupply(_amount);
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
+                _partition,
+                _newMaxSupply
+            );
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 }

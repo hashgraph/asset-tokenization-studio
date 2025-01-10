@@ -210,11 +210,17 @@ import {
     ERC1410BasicStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
 import {
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {
     ERC20StorageWrapper
 } from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
-import {_ERC20_2_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
 import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
@@ -223,18 +229,6 @@ abstract contract ERC20StorageWrapper_2_Read is
     ERC20StorageWrapper,
     ERC1410ScheduledTasksStorageWrapper
 {
-    struct ERC20Storage_2 {
-        mapping(address => mapping(address => uint256)) LABAFs_allowances;
-    }
-
-    function _getAllowanceLABAF(
-        address _owner,
-        address _spender
-    ) internal view virtual returns (uint256) {
-        ERC20Storage_2 storage erc20Storage_2 = _getErc20Storage_2();
-        return erc20Storage_2.LABAFs_allowances[_owner][_spender];
-    }
-
     function _decimalsAdjusted() internal view virtual returns (uint8) {
         return _decimalsAdjustedAt(_blockTimestamp());
     }
@@ -258,23 +252,10 @@ abstract contract ERC20StorageWrapper_2_Read is
         uint256 _timestamp
     ) internal view virtual returns (uint256) {
         uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjustedAt(_timestamp),
-            _getAllowanceLABAF(_owner, _spender)
+            AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
+            AdjustBalances_CD_Lib.getAllowanceLABAF(_owner, _spender)
         );
         return _allowance(_owner, _spender) * factor;
-    }
-
-    function _getErc20Storage_2()
-        internal
-        view
-        virtual
-        returns (ERC20Storage_2 storage erc20Storage_2_)
-    {
-        bytes32 position = _ERC20_2_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc20Storage_2_.slot := position
-        }
     }
 
     function _getERC20MetadataAdjusted()
@@ -333,7 +314,7 @@ abstract contract ERC20StorageWrapper_2_Read is
         internal
         virtual
         override(
-            ERC1410BasicStorageWrapper,
+            ERC1410BasicStorageWrapperRead,
             ERC1410ScheduledTasksStorageWrapper
         )
     {
@@ -342,5 +323,85 @@ abstract contract ERC20StorageWrapper_2_Read is
             _account,
             _partition
         );
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupply(_amount);
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return ERC1410ScheduledTasksStorageWrapper._checkMaxSupply(_amount);
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
+                _partition,
+                _newMaxSupply
+            );
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 }
