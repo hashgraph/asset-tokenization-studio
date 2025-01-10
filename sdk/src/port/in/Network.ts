@@ -208,12 +208,7 @@ import Injectable from '../../core/Injectable.js';
 import { CommandBus } from '../../core/command/CommandBus.js';
 import { InitializationData, NetworkData } from '../out/TransactionAdapter.js';
 import { ConnectCommand } from '../../app/usecase/command/network/connect/ConnectCommand.js';
-import ConnectRequest, {
-  AWSKMSConfigRequest,
-  DFNSConfigRequest,
-  FireblocksConfigRequest,
-  SupportedWallets,
-} from './request/ConnectRequest.js';
+import ConnectRequest, { SupportedWallets } from './request/ConnectRequest.js';
 import RequestMapper from './request/mapping/RequestMapper.js';
 import TransactionService from '../../app/service/TransactionService.js';
 import NetworkService from '../../app/service/NetworkService.js';
@@ -233,11 +228,6 @@ import { handleValidation } from './Common.js';
 import { MirrorNode } from '../../domain/context/network/MirrorNode.js';
 import { JsonRpcRelay } from '../../domain/context/network/JsonRpcRelay.js';
 import { HederaWalletConnectTransactionAdapter } from '../out/hs/hederawalletconnect/HederaWalletConnectTransactionAdapter';
-import { DFNSTransactionAdapter } from '../out/hs/hts/custodial/DFNSTransactionAdapter.js';
-import DfnsSettings from '../../domain/context/custodialWalletSettings/DfnsSettings.js';
-import { FireblocksTransactionAdapter } from '../out/hs/hts/custodial/FireblocksTransactionAdapter.js';
-import FireblocksSettings from '../../domain/context/custodialWalletSettings/FireblocksSettings.js';
-import { AWSKMSTransactionAdapter } from '../out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
 
 export { InitializationData, NetworkData, SupportedWallets };
 
@@ -353,12 +343,6 @@ class NetworkInPort implements INetworkInPort {
         wallets.push(SupportedWallets.METAMASK);
       } else if (val instanceof HederaWalletConnectTransactionAdapter) {
         wallets.push(SupportedWallets.HWALLETCONNECT);
-      } else if (val instanceof DFNSTransactionAdapter) {
-        wallets.push(SupportedWallets.DFNS);
-      } else if (val instanceof FireblocksTransactionAdapter) {
-        wallets.push(SupportedWallets.FIREBLOCKS);
-      } else if (val instanceof AWSKMSTransactionAdapter) {
-        wallets.push(SupportedWallets.AWSKMS);
       }
       await val.init();
 
@@ -384,59 +368,17 @@ class NetworkInPort implements INetworkInPort {
     const hwcSettings = req.hwcSettings
       ? RequestMapper.hwcRequestToHWCSettings(req.hwcSettings)
       : undefined;
-    const custodialSettings = this.getCustodialSettings(req);
+
     console.log('SetNetworkCommand', req.network, req.mirrorNode, req.rpcNode);
     await this.commandBus.execute(
       new SetNetworkCommand(req.network, req.mirrorNode, req.rpcNode),
     );
 
-    console.log(
-      'ConnectRequest',
-      req.wallet,
-      account,
-      hwcSettings,
-      debug,
-      custodialSettings,
-    );
+    console.log('ConnectRequest', req.wallet, account, hwcSettings, debug);
     const res = await this.commandBus.execute(
-      new ConnectCommand(
-        req.network,
-        req.wallet,
-        account,
-        hwcSettings,
-        debug,
-        custodialSettings,
-      ),
+      new ConnectCommand(req.network, req.wallet, account, hwcSettings, debug),
     );
     return res.payload;
-  }
-
-  private getCustodialSettings(
-    req: ConnectRequest,
-  ): DfnsSettings | FireblocksSettings | AWSKMSConfigRequest | undefined {
-    if (!req.custodialWalletSettings) {
-      return undefined;
-    }
-
-    switch (req.wallet) {
-      case SupportedWallets.DFNS:
-        return RequestMapper.dfnsRequestToDfnsSettings(
-          req.custodialWalletSettings as DFNSConfigRequest,
-        );
-
-      case SupportedWallets.FIREBLOCKS:
-        return RequestMapper.fireblocksRequestToFireblocksSettings(
-          req.custodialWalletSettings as FireblocksConfigRequest,
-        );
-
-      case SupportedWallets.AWSKMS:
-        return RequestMapper.awsKmsRequestToAwsKmsSettings(
-          req.custodialWalletSettings as AWSKMSConfigRequest,
-        );
-
-      default:
-        return undefined;
-    }
   }
 
   disconnect(): Promise<boolean> {

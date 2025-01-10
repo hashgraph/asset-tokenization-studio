@@ -241,6 +241,7 @@ export default class LogService {
           })
           .join('\t');
       };
+      // @ts-expect-error typescript issue
       return `${timestamp} - [${level}]\t${message}\t${formatOther(other)}`;
     },
   );

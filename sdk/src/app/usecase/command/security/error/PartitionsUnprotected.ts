@@ -203,21 +203,10 @@
 
 */
 
-<<<<<<<< HEAD:sdk/src/port/in/response/ScheduledBalanceAdjustmentViewModel.ts
-import { QueryResponse } from '../../../core/query/QueryResponse.js';
-
-export default interface ScheduledBalanceAdjustmentViewModel
-  extends QueryResponse {
-  id: number;
-  executionDate: Date;
-  factor: string;
-  decimals: string;
-========
 import BaseError, { ErrorCode } from '../../../../../core/error/BaseError';
 
 export class PartitionsUnProtected extends BaseError {
   constructor() {
     super(ErrorCode.PartitionsUnprotected, `Partitions are not protected`);
   }
->>>>>>>> 28f6214 (Applying changes patch from sprint-8 to sprint-8-patch):sdk/src/app/usecase/command/security/error/PartitionsUnprotected.ts
 }
