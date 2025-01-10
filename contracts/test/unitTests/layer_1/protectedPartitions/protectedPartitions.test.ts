@@ -533,7 +533,10 @@ describe('ProtectedPartitions Tests', () => {
                     0,
                     '0x1234'
                 )
-            ).to.be.rejectedWith('AccountIsBlocked')
+            ).to.be.revertedWithCustomError(
+                controlListFacet,
+                'AccountIsBlocked'
+            )
         })
     })
 
