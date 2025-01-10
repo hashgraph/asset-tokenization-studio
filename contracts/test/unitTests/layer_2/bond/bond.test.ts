@@ -303,30 +303,30 @@ describe('Bond Tests', () => {
         }
         const init_rbacs: Rbac[] = [rbacPause]
 
-        diamond = await deployBondFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            'TEST_AccessControl',
-            'TAC',
-            6,
-            'ABCDEF123456',
-            '0x455552',
+        diamond = await deployBondFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: 'ABCDEF123456',
+            currency: '0x455552',
             numberOfUnits,
-            100,
+            nominalValue: 100,
             startingDate,
             maturityDate,
-            frequency,
-            rate,
+            couponFrequency: frequency,
+            couponRate: rate,
             firstCouponDate,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_C,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_C,
             countriesControlListType,
             listOfCountries,
             info,
-            init_rbacs
-        )
+            init_rbacs,
+        })
 
         bondFacet = await ethers.getContractAt('Bond', diamond.address)
 

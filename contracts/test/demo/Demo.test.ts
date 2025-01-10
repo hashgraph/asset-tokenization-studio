@@ -572,15 +572,15 @@ Deployed contracts:
         const numberOfShares = 200000
         const nominalValue = 100
 
-        diamond = await deployEquityFromFactory(
-            account_Z,
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_Z,
             isWhiteList,
             isControllable,
             isMultiPartition,
-            TokenName,
-            TokenSymbol,
-            TokenDecimals,
-            TokenISIN,
+            name: TokenName,
+            symbol: TokenSymbol,
+            decimals: TokenDecimals,
+            isin: TokenISIN,
             votingRight,
             informationRight,
             liquidationRight,
@@ -592,12 +592,12 @@ Deployed contracts:
             currency,
             numberOfShares,
             nominalValue,
-            RegulationType.REG_S,
-            RegulationSubType.NONE,
-            true,
-            'ES,FR,CH',
-            'nothing'
-        )
+            regulationType: RegulationType.REG_S,
+            regulationSubType: RegulationSubType.NONE,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+        })
         console.log(`    Diamond: ${diamond.address}`)
 
         const loupeFacet: DiamondLoupeFacet = await ethers.getContractAt(

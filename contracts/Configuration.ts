@@ -1,3 +1,8 @@
+import dotenv from 'dotenv'
+
+// Load the `.env` file
+dotenv.config()
+
 const EMPTY_STRING = ''
 export const NETWORKS = [
     'hardhat',
@@ -200,7 +205,7 @@ export default class Configuration {
         name: string
         defaultValue?: string
     }): string {
-        const value = process.env[name]
+        const value = process.env?.[name]
         if (value) {
             return value
         }

@@ -288,7 +288,8 @@ export const REGEX = {
 export const GAS_LIMIT = {
     default: 3_000_000,
     low: 1_000_000,
-    high: 5_000_000,
+    high: 10_000_000,
+    max: 30_000_000,
     initilize: {
         businessLogicResolver: 8_000_000,
     },
@@ -298,7 +299,7 @@ export const GAS_LIMIT = {
     businessLogicResolver: {
         getStaticResolverKey: 60_000,
         registerBusinessLogics: 7_800_000,
-        createConfiguration: 12_000_000,
+        createConfiguration: 13_000_000,
     },
 }
 

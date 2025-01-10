@@ -318,7 +318,7 @@ task(
 
         console.log('\n 🟢 Deployed IDs:')
         for (const [key, value] of Object.entries(ids)) {
-            console.log(`   --> ${key}: ${value} (<<ContractIDhere>>)`)
+            console.log(`   --> ${key}: ${value} (<<ContractIdhere>>)`)
         }
     })
 

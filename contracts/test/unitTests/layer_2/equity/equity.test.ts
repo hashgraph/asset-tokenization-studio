@@ -296,33 +296,33 @@ describe('Equity Tests', () => {
         }
         const init_rbacs: Rbac[] = [rbacPause]
 
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            'TEST_AccessControl',
-            'TAC',
-            DECIMALS,
-            'ABCDEF123456',
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            number_Of_Shares,
-            100,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_B,
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: DECIMALS,
+            isin: 'ABCDEF123456',
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: number_Of_Shares,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
             countriesControlListType,
             listOfCountries,
             info,
-            init_rbacs
-        )
+            init_rbacs,
+        })
 
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
