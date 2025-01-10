@@ -302,15 +302,6 @@ abstract contract LockStorageWrapper is SnapshotsStorageWrapper {
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }
 
-    function _beforeLock(
-        bytes32 _partition,
-        uint256 _amount,
-        address _tokenHolder,
-        uint256 _expirationTimestamp
-    ) internal virtual {
-        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
-    }
-
     function _beforeRelease(
         bytes32 _partition,
         uint256 _lockId,
