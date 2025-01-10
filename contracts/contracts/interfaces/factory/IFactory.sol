@@ -231,6 +231,7 @@ interface IFactory {
 
     // TODO: Separete common data in new struct
     struct SecurityData {
+        bool arePartitionsProtected;
         bool isMultiPartition;
         IBusinessLogicResolver resolver;
         ResolverProxyConfiguration resolverProxyConfiguration;

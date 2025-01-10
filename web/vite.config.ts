@@ -13,16 +13,16 @@ export default {
     react(),
     EnvironmentPlugin("all"),
     pluginRewriteAll(),
-    {
-      name: "singleHMR",
-      handleHotUpdate({ modules }) {
-        modules.map((m) => {
-          m.importedModules = new Set();
-          m.importers = new Set();
-        });
-        return modules;
-      },
-    },
+    // {
+    //   name: "singleHMR",
+    //   handleHotUpdate({ modules }) {
+    //     modules.map((m) => {
+    //       m.importedModules = new Set();
+    //       m.importers = new Set();
+    //     });
+    //     return modules;
+    //   },
+    // },
     tsconfigPaths(),
     {
       name: "fix-node-globals-polyfill",

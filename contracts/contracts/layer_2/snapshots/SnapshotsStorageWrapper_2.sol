@@ -219,7 +219,8 @@ import {
     ERC1410ScheduledTasks_CD_Lib
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
 import {Lock_2_CD_Lib} from '../lock/Lock_2_CD_Lib.sol';
-
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
     struct SnapshotStorage_2 {
         Snapshots ABAFSnapshots;
@@ -275,9 +276,9 @@ contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
         if (currentSnapshotId == 0) return;
 
         uint256 ABAFAtCurrentSnapshot = _ABAFAtSnapshot(currentSnapshotId);
-        uint256 ABAF = AdjustBalances_CD_Lib.getABAFAdjusted();
+        uint256 abaf = AdjustBalances_CD_Lib.getABAFAdjusted();
 
-        if (ABAF == ABAFAtCurrentSnapshot) {
+        if (abaf == ABAFAtCurrentSnapshot) {
             super._updateAccountSnapshot(account, partition);
             return;
         }
@@ -288,7 +289,7 @@ contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
         );
         uint256 balanceForPartition = ERC1410ScheduledTasks_CD_Lib
             .balanceOfByPartitionAdjusted(partition, account);
-        uint256 factor = ABAF / ABAFAtCurrentSnapshot;
+        uint256 factor = abaf / ABAFAtCurrentSnapshot;
 
         balance /= factor;
         balanceForPartition /= factor;
@@ -390,12 +391,12 @@ contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
         if (snapshotted) return value;
 
         uint256 ABAFAtSnapshot = _ABAFAtSnapshot(_snapshotId);
-        uint256 ABAF = AdjustBalances_CD_Lib.getABAF();
+        uint256 abaf = AdjustBalances_CD_Lib.getABAF();
 
-        if (ABAFAtSnapshot == ABAF) return _currentBalanceAdjusted;
+        if (ABAFAtSnapshot == abaf) return _currentBalanceAdjusted;
         if (ABAFAtSnapshot == 0) ABAFAtSnapshot = 1;
 
-        uint256 factor = ABAF / ABAFAtSnapshot;
+        uint256 factor = abaf / ABAFAtSnapshot;
 
         return _currentBalanceAdjusted / factor;
     }
@@ -413,3 +414,4 @@ contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
         }
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

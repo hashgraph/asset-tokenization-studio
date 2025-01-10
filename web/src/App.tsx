@@ -281,6 +281,7 @@ function App() {
   ) : !showDisclaimer || accepted ? (
     <I18nextProvider i18n={i18n}>
       <QueryClientProvider client={queryClient}>
+        {/* <ReactQueryDevtools initialIsOpen={false}  /> */}
         <ChakraProvider theme={theme}>
           <InterFonts />
           <AppRouter />

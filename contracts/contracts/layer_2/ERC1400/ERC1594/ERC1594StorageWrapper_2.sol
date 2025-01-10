@@ -234,7 +234,8 @@ import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
 abstract contract ERC1594StorageWrapper_2 is
     ERC1594StorageWrapper,
     ERC20StorageWrapper_2

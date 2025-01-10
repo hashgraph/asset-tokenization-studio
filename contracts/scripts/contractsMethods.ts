@@ -287,7 +287,7 @@ export async function createConfiguration(
         'createConfiguration',
         params,
         client,
-        15000000,
+        12000000,
         DiamondCutManager__factory.abi
     )
 }

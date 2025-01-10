@@ -223,7 +223,8 @@ import {
 import {
     ERC1410ScheduledTasks_CD_Lib
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
-
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
 abstract contract CapStorageWrapper_2 is
     CapStorageWrapper,
     CorporateActionsStorageWrapper,
@@ -242,7 +243,7 @@ abstract contract CapStorageWrapper_2 is
         uint256 _timestamp
     ) internal view virtual returns (uint256 maxSupply_) {
         (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustmentsAt(
+            .getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
                 _corporateActionsStorage(),
                 _timestamp
@@ -261,9 +262,9 @@ abstract contract CapStorageWrapper_2 is
         bytes32 _partition,
         uint256 _timestamp
     ) internal view virtual returns (uint256 maxSupply_) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
+        uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
-            AdjustBalances_CD_Lib.getLABAFForPartition(_partition)
+            AdjustBalances_CD_Lib.getLABAFByPartition(_partition)
         );
         return _getMaxSupplyByPartition(_partition) * factor;
     }

@@ -209,9 +209,9 @@ pragma solidity 0.8.18;
 import {
     ERC1410BasicStorageWrapperRead
 } from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-
+// solhint-disable var-name-mixedcase, no-inline-assembly
 library MappingLib {
-    function _getSlotForBytes32MappingKey(
+    function getSlotForBytes32MappingKey(
         mapping(bytes32 => uint256) storage _mapping,
         bytes32 _key
     ) internal pure returns (uint256) {
@@ -224,7 +224,7 @@ library MappingLib {
         return uint256(keccak256(abi.encode(_key, MappingSlot)));
     }
 
-    function _getSlotForAddressMappingKey(
+    function getSlotForAddressMappingKey(
         mapping(address => uint256) storage _mapping,
         address _key
     ) internal pure returns (uint256) {
@@ -237,7 +237,7 @@ library MappingLib {
         return uint256(keccak256(abi.encode(_key, MappingSlot)));
     }
 
-    function _getSlotForAddressMappingKey(
+    function getSlotForAddressMappingKey(
         mapping(address => uint256[]) storage _mapping,
         address _key
     ) internal pure returns (uint256) {
@@ -250,7 +250,7 @@ library MappingLib {
         return uint256(keccak256(abi.encode(_key, MappingSlot)));
     }
 
-    function _getSlotForAddressMappingKey(
+    function getSlotForAddressMappingKey(
         mapping(address => ERC1410BasicStorageWrapperRead.Partition[])
             storage _mapping,
         address _key
@@ -264,3 +264,4 @@ library MappingLib {
         return uint256(keccak256(abi.encode(_key, MappingSlot)));
     }
 }
+// solhint-enable var-name-mixedcase, no-inline-assembly
