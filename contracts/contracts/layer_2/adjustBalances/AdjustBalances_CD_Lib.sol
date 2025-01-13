@@ -207,7 +207,8 @@
 pragma solidity 0.8.18;
 
 import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
-
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
 library AdjustBalances_CD_Lib {
     function getABAFAdjustedAt(
         uint256 _timestamp
@@ -218,20 +219,20 @@ library AdjustBalances_CD_Lib {
         return abi.decode(data, (uint256));
     }
 
-    function getLABAFForUser(address _account) internal view returns (uint256) {
+    function getLABAFByUser(address _account) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('getLABAFForUser(address)', _account)
+            abi.encodeWithSignature('getLABAFByUser(address)', _account)
         );
         return abi.decode(data, (uint256));
     }
 
-    function getLABAFForUserAndPartition(
+    function getLABAFByUserAndPartition(
         bytes32 _partition,
         address _account
     ) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature(
-                'getLABAFForUserAndPartition(bytes32,address)',
+                'getLABAFByUserAndPartition(bytes32,address)',
                 _partition,
                 _account
             )
@@ -253,11 +254,11 @@ library AdjustBalances_CD_Lib {
         return abi.decode(data, (uint256));
     }
 
-    function getLABAFForPartition(
+    function getLABAFByPartition(
         bytes32 _partition
     ) internal view returns (uint256) {
         bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('getLABAFForPartition(bytes32)', _partition)
+            abi.encodeWithSignature('getLABAFByPartition(bytes32)', _partition)
         );
         return abi.decode(data, (uint256));
     }
@@ -278,7 +279,7 @@ library AdjustBalances_CD_Lib {
 
     function getTotalLockLABAF(
         address _tokenHolder
-    ) internal view returns (uint256 LABAF_) {
+    ) internal view returns (uint256 labaf_) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature('getTotalLockLABAF(address)', _tokenHolder)
         );
@@ -288,7 +289,7 @@ library AdjustBalances_CD_Lib {
     function getTotalLockLABAFByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view returns (uint256 LABAF_) {
+    ) internal view returns (uint256 labaf_) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature(
                 'getTotalLockLABAFByPartition(bytes32,address)',
@@ -319,7 +320,7 @@ library AdjustBalances_CD_Lib {
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) internal view returns (uint256 LABAF_) {
+    ) internal view returns (uint256 labaf_) {
         bytes memory data = CD_Lib.staticCall(
             abi.encodeWithSignature(
                 'getLockLABAFByPartition(bytes32,uint256,address)',

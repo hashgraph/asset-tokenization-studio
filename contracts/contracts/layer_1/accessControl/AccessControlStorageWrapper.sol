@@ -243,6 +243,11 @@ abstract contract AccessControlStorageWrapper is
         _;
     }
 
+    modifier onlyRoleFor(bytes32 role, address account) {
+        _checkRole(role, account);
+        _;
+    }
+
     modifier onlySameRolesAndActivesLength(
         uint256 _rolesLength,
         uint256 _activesLength

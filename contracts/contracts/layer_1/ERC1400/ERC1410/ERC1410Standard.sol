@@ -256,6 +256,7 @@ abstract contract ERC1410Standard is
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
         checkControlList(_msgSender())
+        onlyUnProtectedPartitionsOrWildCardRole
     {
         // Add the function to validate the `_data` parameter
         _redeemByPartition(
@@ -290,6 +291,7 @@ abstract contract ERC1410Standard is
         checkControlList(_tokenHolder)
         checkControlList(_msgSender())
         onlyOperator(_partition, _tokenHolder)
+        onlyUnProtectedPartitionsOrWildCardRole
     {
         _redeemByPartition(
             _partition,

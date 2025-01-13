@@ -290,6 +290,7 @@ export interface CouponDetailsData {
 }
 
 export interface SecurityData {
+    arePartitionsProtected: boolean
     isMultiPartition: boolean
     resolver: string
     resolverProxyConfiguration: ResolverProxyConfiguration
@@ -361,6 +362,7 @@ export async function setEquityData(
     adminAccount: string,
     isWhiteList: boolean,
     isControllable: boolean,
+    arePartitionsProtected: boolean,
     isMultiPartition: boolean,
     name: string,
     symbol: string,
@@ -410,6 +412,7 @@ export async function setEquityData(
     }
 
     const security: SecurityData = {
+        arePartitionsProtected: arePartitionsProtected,
         isMultiPartition: isMultiPartition,
         resolver: resolver,
         resolverProxyConfiguration: resolverProxyConfiguration,
@@ -445,6 +448,7 @@ export async function setBondData(
     adminAccount: string,
     isWhiteList: boolean,
     isControllable: boolean,
+    arePartitionsProtected: boolean,
     isMultiPartition: boolean,
     name: string,
     symbol: string,
@@ -491,6 +495,7 @@ export async function setBondData(
     }
 
     const security: SecurityData = {
+        arePartitionsProtected: arePartitionsProtected,
         isMultiPartition: isMultiPartition,
         resolver: resolver,
         resolverProxyConfiguration: resolverProxyConfiguration,
@@ -527,6 +532,7 @@ export async function deployEquityFromFactory(
     adminAccount: string,
     isWhiteList: boolean,
     isControllable: boolean,
+    arePartitionsProtected: boolean,
     isMultiPartition: boolean,
     name: string,
     symbol: string,
@@ -556,6 +562,7 @@ export async function deployEquityFromFactory(
         adminAccount,
         isWhiteList,
         isControllable,
+        arePartitionsProtected,
         isMultiPartition,
         name,
         symbol,
@@ -602,6 +609,7 @@ export async function deployBondFromFactory(
     adminAccount: string,
     isWhiteList: boolean,
     isControllable: boolean,
+    arePartitionsProtected: boolean,
     isMultiPartition: boolean,
     name: string,
     symbol: string,
@@ -628,6 +636,7 @@ export async function deployBondFromFactory(
         adminAccount,
         isWhiteList,
         isControllable,
+        arePartitionsProtected,
         isMultiPartition,
         name,
         symbol,

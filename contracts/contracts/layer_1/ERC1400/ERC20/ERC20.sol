@@ -267,6 +267,7 @@ abstract contract ERC20 is
         checkControlList(_msgSender())
         checkControlList(to)
         onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool)
     {
         return _transfer(_msgSender(), to, value);
@@ -285,6 +286,7 @@ abstract contract ERC20 is
         checkControlList(from)
         checkControlList(to)
         onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool)
     {
         return _transferFrom(_msgSender(), from, to, value);
