@@ -505,8 +505,8 @@ describe('ProtectedPartitions Tests', () => {
                     account_A,
                     account_B,
                     amount,
+                    999999999999999,
                     1,
-                    0,
                     '0x1234'
                 )
             ).to.be.revertedWithCustomError(
