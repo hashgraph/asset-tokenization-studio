@@ -484,8 +484,8 @@ describe('ProtectedPartitions Tests', () => {
                     account_A,
                     account_B,
                     amount,
+                    99999999999999,
                     1,
-                    0,
                     '0x1234'
                 )
             ).to.be.rejectedWith('AccountHasNoRole')
@@ -505,8 +505,8 @@ describe('ProtectedPartitions Tests', () => {
                     account_A,
                     account_B,
                     amount,
+                    99999999999999,
                     1,
-                    0,
                     '0x1234'
                 )
             ).to.be.revertedWithCustomError(

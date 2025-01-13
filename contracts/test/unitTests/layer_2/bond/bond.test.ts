@@ -232,7 +232,7 @@ import {
 } from '../../../../scripts/factory'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
 
-const TIME = 20000
+const TIME = 30000
 const numberOfUnits = 1000
 let currentTimeInSeconds = 0
 let startingDate = 0
