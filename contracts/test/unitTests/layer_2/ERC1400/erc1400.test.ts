@@ -590,6 +590,7 @@ describe('ERC1400 Tests', () => {
             account_A,
             false,
             true,
+            false,
             multiPartition,
             'TEST_AccessControl',
             'TAC',
@@ -617,7 +618,7 @@ describe('ERC1400 Tests', () => {
         await setFacets(diamond)
     }
 
-    async function setFacets(diamond: any) {
+    async function setFacets(diamond: ResolverProxy) {
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address
@@ -681,6 +682,7 @@ describe('ERC1400 Tests', () => {
                 account_A,
                 false,
                 true,
+                false,
                 true,
                 'TEST_AccessControl',
                 'TAC',
@@ -1099,6 +1101,7 @@ describe('ERC1400 Tests', () => {
                 account_A,
                 isWhiteList,
                 true,
+                false,
                 true,
                 'TEST_AccessControl',
                 'TAC',
@@ -1992,6 +1995,7 @@ describe('ERC1400 Tests', () => {
                 account_A,
                 isWhiteList,
                 true,
+                false,
                 true,
                 'TEST_AccessControl',
                 'TAC',
@@ -2352,6 +2356,7 @@ describe('ERC1400 Tests', () => {
                 account_A,
                 false,
                 true,
+                false,
                 false,
                 'TEST_AccessControl',
                 'TAC',

@@ -302,6 +302,7 @@ abstract contract ERC1410Operator is
         checkControlList(_from)
         checkControlList(_to)
         onlyOperator(_partition, _from)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bytes32)
     {
         {

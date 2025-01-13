@@ -219,4 +219,5 @@ export default {
   [RouteName.DigitalSecurityForceTransfer]: "Force Transfer digital security",
   [RouteName.DigitalSecurityRedeem]: "Redeem digital security",
   [RouteName.DigitalSecurityForceRedeem]: "Force Redeem digital security",
+  [RouteName.DigitalSecurityLock]: "Locker digital security",
 };

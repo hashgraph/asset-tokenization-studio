@@ -301,6 +301,7 @@ describe('Equity Tests', () => {
             false,
             true,
             false,
+            false,
             'TEST_AccessControl',
             'TAC',
             DECIMALS,

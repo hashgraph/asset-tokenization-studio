@@ -256,6 +256,7 @@ contract ERC1594 is
         checkControlList(_msgSender())
         checkControlList(_to)
         onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
     {
         // Add a function to validate the `_data` parameter
         _transfer(_msgSender(), _to, _value);
@@ -288,6 +289,7 @@ contract ERC1594 is
         checkControlList(_to)
         checkControlList(_from)
         onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
     {
         // Add a function to validate the `_data` parameter
         _transferFrom(_msgSender(), _from, _to, _value);
@@ -337,6 +339,7 @@ contract ERC1594 is
         onlyUnpaused
         checkControlList(_msgSender())
         onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
     {
         _redeem(_value, _data);
     }
@@ -362,6 +365,7 @@ contract ERC1594 is
         checkControlList(_msgSender())
         checkControlList(_tokenHolder)
         onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
     {
         _redeemFrom(_tokenHolder, _value, _data);
     }

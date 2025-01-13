@@ -203,24 +203,17 @@
 
 */
 
-import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
 import ValidatedRequest from './validation/ValidatedRequest.js';
 import Validation from './validation/Validation.js';
 
 export default class GetRoleMemberCountRequest extends ValidatedRequest<GetRoleMemberCountRequest> {
   securityId: string;
-  role: SecurityRole | undefined;
+  role: string;
 
-  constructor({
-    securityId,
-    role,
-  }: {
-    securityId: string;
-    role: SecurityRole | undefined;
-  }) {
+  constructor({ securityId, role }: { securityId: string; role: string }) {
     super({
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      role: Validation.checkRole(),
+      role: Validation.checkBytes32Format(),
     });
     this.securityId = securityId;
     this.role = role;
