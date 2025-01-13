@@ -230,7 +230,7 @@ import {
     RegulationSubType,
     RegulationType,
 } from '../../../../scripts/factory'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+import { grantRoleAndPauseToken } from '../../../common'
 
 const TIME = 20000
 const numberOfUnits = 1000

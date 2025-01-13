@@ -60,3 +60,6 @@ export * from './transparentUpgradeableProxy'
 
 // * BusinessLogicResolver
 export * from './businessLogicResolver'
+
+// * Factory
+export * from './factory'

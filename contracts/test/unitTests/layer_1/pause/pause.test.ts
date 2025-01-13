@@ -204,21 +204,25 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
     type Pause,
     AccessControl,
+    IFactory,
+    BusinessLogicResolver,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
-import { PAUSER_ROLE } from '../../../../scripts/constants'
+import { Network } from '../../../../Configuration'
 import {
+    PAUSER_ROLE,
     deployEquityFromFactory,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '../../../../scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 describe('Pause Tests', () => {
     let diamond: ResolverProxy
@@ -228,16 +232,30 @@ describe('Pause Tests', () => {
     let account_A: string
     let account_B: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
     beforeEach(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                new DeployAtsFullInfrastructureCommand({
+                    signer: signer_A,
+                    network: network.name as Network,
+                    useDeployed: false,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -264,6 +282,8 @@ describe('Pause Tests', () => {
             countriesControlListType: true,
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
+            factory: factory,
+            businessLogicResolver: businessLogicResolver.address,
         })
 
         accessControlFacet = await ethers.getContractAt(
@@ -277,7 +297,6 @@ describe('Pause Tests', () => {
     it('GIVEN an account without pause role WHEN pause THEN transaction fails with AccountHasNoRole', async () => {
         // Using account B (non role)
         pauseFacet = pauseFacet.connect(signer_B)
-
         // pause fails
         await expect(pauseFacet.pause()).to.be.rejectedWith('AccountHasNoRole')
     })

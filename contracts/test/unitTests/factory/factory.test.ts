@@ -205,6 +205,8 @@
 
 import { expect } from 'chai'
 import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { Network } from '../../../Configuration'
 import {
     BusinessLogicResolver,
     type AccessControl,
@@ -213,16 +215,6 @@ import {
     type ERC20,
     type Factory,
 } from '../../../typechain-types'
-import {
-    Rbac,
-    setEquityData,
-    setBondData,
-    DividendType,
-    SecurityType,
-    setFactoryRegulationData,
-    RegulationType,
-    RegulationSubType,
-} from '../../../scripts/factory'
 import {
     ADDRESS_ZERO,
     DEFAULT_ADMIN_ROLE,
@@ -236,15 +228,18 @@ import {
     LOCKER_ROLE,
     EVENTS,
     GAS_LIMIT,
-} from '../../../scripts/constants'
-import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     DeployAtsFullInfrastructureResult,
+    Rbac,
+    setEquityData,
+    setBondData,
+    DividendType,
+    SecurityType,
+    setFactoryRegulationData,
+    RegulationType,
+    RegulationSubType,
 } from '../../../scripts'
-import { Network } from '../../../Configuration'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { SigningKey, computeAddress } from 'ethers/lib/utils'
 
 describe('Factory Tests', () => {
     let signer_A: SignerWithAddress
@@ -289,8 +284,6 @@ describe('Factory Tests', () => {
     const listOfCountries = 'ES,FR,CH'
     const info = 'info'
 
-    let deployer: SignerWithAddress
-    let deployedContracts: DeployAtsFullInfrastructureResult
     let factory: Factory
     let businessLogicResolver: BusinessLogicResolver
     let accessControlFacet: AccessControl
@@ -329,18 +322,11 @@ describe('Factory Tests', () => {
 
     before(async () => {
         // mute | mock console.log
-        //! console.log = () => {};
-        console.log('Deploying contracts...')
+        console.log = () => {}
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
-        console.log('Account A:', account_A)
-        console.log('Account B:', account_B)
-        console.log(
-            computeAddress(
-                '0x7f109a9e3b0d8ecfba9cc23a3614433ce0fa7ddcc80f2a8f10b222179a5a80d6'
-            )
-        )
 
         listOfMembers = [account_A, account_B]
 

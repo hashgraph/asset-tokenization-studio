@@ -204,13 +204,16 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
     type AccessControl,
     type Pause,
+    IFactory,
+    BusinessLogicResolver,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+import { Network } from '../../../../Configuration'
 import {
     DEFAULT_ADMIN_ROLE,
     PAUSER_ROLE,
@@ -219,14 +222,13 @@ import {
     CORPORATE_ACTION_ROLE,
     DOCUMENTER_ROLE,
     LOCKER_ROLE,
-} from '../../../../scripts/constants'
-import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '../../../../scripts'
 
 describe('Access Control Tests', () => {
     let diamond: ResolverProxy
@@ -240,10 +242,14 @@ describe('Access Control Tests', () => {
     let account_C: string
     let account_D: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
     beforeEach(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
@@ -251,7 +257,17 @@ describe('Access Control Tests', () => {
         account_C = signer_C.address
         account_D = signer_D.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                new DeployAtsFullInfrastructureCommand({
+                    signer: signer_A,
+                    network: network.name as Network,
+                    useDeployed: false,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
@@ -285,6 +301,8 @@ describe('Access Control Tests', () => {
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory: factory,
         })
 
         accessControlFacet = await ethers.getContractAt(

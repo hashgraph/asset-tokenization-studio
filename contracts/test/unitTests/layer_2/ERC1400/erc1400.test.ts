@@ -247,7 +247,7 @@ import {
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { ADDRESS_ZERO } from '../../../../scripts/constants'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+import { grantRoleAndPauseToken } from '../../../common'
 import { BigNumber } from 'ethers'
 
 const amount = 1

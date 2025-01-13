@@ -204,23 +204,28 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
     type ControlList,
     type Pause,
     AccessControl,
+    IFactory,
+    BusinessLogicResolver,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
-import { CONTROL_LIST_ROLE, PAUSER_ROLE } from '../../../../scripts/constants'
+import { Network } from '../../../../Configuration'
 import {
+    CONTROL_LIST_ROLE,
+    PAUSER_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '../../../../scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 describe('Control List Tests', () => {
     let diamond: ResolverProxy
@@ -236,11 +241,15 @@ describe('Control List Tests', () => {
     let account_D: string
     let account_E: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let controlListFacet: ControlList
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
     beforeEach(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
             await ethers.getSigners()
@@ -250,7 +259,17 @@ describe('Control List Tests', () => {
         account_D = signer_D.address
         account_E = signer_E.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                new DeployAtsFullInfrastructureCommand({
+                    signer: signer_A,
+                    network: network.name as Network,
+                    useDeployed: false,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
@@ -284,6 +303,8 @@ describe('Control List Tests', () => {
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory: factory,
         })
 
         accessControlFacet = await ethers.getContractAt(

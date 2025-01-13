@@ -204,7 +204,8 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
     type ERC1644,
@@ -213,23 +214,24 @@ import {
     type AccessControl,
     type Equity,
     ERC1410ScheduledTasks,
+    IFactory,
+    BusinessLogicResolver,
 } from '../../../../../typechain-types'
-import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
 import {
     CORPORATE_ACTION_ROLE,
     ISSUER_ROLE,
     CONTROLLER_ROLE,
     PAUSER_ROLE,
     DEFAULT_PARTITION,
-} from '../../../../../scripts/constants'
-import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../../scripts/testCommon'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '../../../../../scripts'
+import { Network } from '../../../../../Configuration'
+import { grantRoleAndPauseToken } from '../../../../common'
 
 const amount = 1
 const data = '0x1234'
@@ -249,6 +251,8 @@ describe('ERC1644 Tests', () => {
     let account_D: string
     let account_E: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1644Facet: ERC1644
     let erc1594Facet: ERC1594
     let accessControlFacet: AccessControl
@@ -258,6 +262,8 @@ describe('ERC1644 Tests', () => {
 
     describe('single partition', () => {
         beforeEach(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
@@ -267,7 +273,18 @@ describe('ERC1644 Tests', () => {
             account_D = signer_D.address
             account_E = signer_E.address
 
-            await deployEnvironment()
+            const { deployer, ...deployedContracts } =
+                await deployAtsFullInfrastructure(
+                    new DeployAtsFullInfrastructureCommand({
+                        signer: signer_A,
+                        network: network.name as Network,
+                        useDeployed: false,
+                    })
+                )
+
+            factory = deployedContracts.factory.contract
+            businessLogicResolver =
+                deployedContracts.businessLogicResolver.contract
 
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
@@ -309,6 +326,8 @@ describe('ERC1644 Tests', () => {
                 listOfCountries: 'ES,FR,CH',
                 info: 'nothing',
                 init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
             })
 
             accessControlFacet = await ethers.getContractAt(
@@ -601,7 +620,18 @@ describe('ERC1644 Tests', () => {
             account_D = signer_D.address
             account_E = signer_E.address
 
-            await deployEnvironment()
+            const { deployer, ...deployedContracts } =
+                await deployAtsFullInfrastructure(
+                    new DeployAtsFullInfrastructureCommand({
+                        signer: signer_A,
+                        network: network.name as Network,
+                        useDeployed: false,
+                    })
+                )
+
+            factory = deployedContracts.factory.contract
+            businessLogicResolver =
+                deployedContracts.businessLogicResolver.contract
 
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
@@ -635,6 +665,8 @@ describe('ERC1644 Tests', () => {
                 listOfCountries: 'ES,FR,CH',
                 info: 'nothing',
                 init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
             })
 
             accessControlFacet = await ethers.getContractAt(

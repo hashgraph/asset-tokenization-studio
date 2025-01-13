@@ -228,7 +228,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+import { grantRoleAndPauseToken } from '../../../common'
 
 const TIME = 10000
 const DECIMALS = 7

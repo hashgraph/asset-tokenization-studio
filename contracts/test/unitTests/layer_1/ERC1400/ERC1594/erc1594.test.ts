@@ -204,7 +204,8 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
     type Pause,
@@ -213,8 +214,10 @@ import {
     type ControlList,
     type ERC1410Snapshot,
     ERC20,
+    IFactory,
+    BusinessLogicResolver,
 } from '../../../../../typechain-types'
-import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
+import { Network } from '../../../../../Configuration'
 import {
     CONTROL_LIST_ROLE,
     DEFAULT_PARTITION,
@@ -229,14 +232,13 @@ import {
     TO_ACCOUNT_NULL_ERROR_ID,
     ALLOWANCE_REACHED_ERROR_ID,
     OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-} from '../../../../../scripts/constants'
-import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '../../../../../scripts'
 
 const amount = 1000
 const balanceOf_C_Original = 2 * amount
@@ -257,6 +259,8 @@ describe('ERC1594 Tests', () => {
     let account_D: string
     let account_E: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1594Facet: ERC1594
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
@@ -264,6 +268,8 @@ describe('ERC1594 Tests', () => {
 
     describe('Multi partition mode', () => {
         beforeEach(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
@@ -273,7 +279,18 @@ describe('ERC1594 Tests', () => {
             account_D = signer_D.address
             account_E = signer_E.address
 
-            await deployEnvironment()
+            const { deployer, ...deployedContracts } =
+                await deployAtsFullInfrastructure(
+                    new DeployAtsFullInfrastructureCommand({
+                        signer: signer_A,
+                        network: network.name as Network,
+                        useDeployed: false,
+                    })
+                )
+
+            factory = deployedContracts.factory.contract
+            businessLogicResolver =
+                deployedContracts.businessLogicResolver.contract
 
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
@@ -307,6 +324,8 @@ describe('ERC1594 Tests', () => {
                 listOfCountries: 'ES,FR,CH',
                 info: 'nothing',
                 init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
             })
 
             accessControlFacet = await ethers.getContractAt(
@@ -490,6 +509,8 @@ describe('ERC1594 Tests', () => {
                     listOfCountries: 'ES,FR,CH',
                     info: 'nothing',
                     init_rbacs: [],
+                    factory,
+                    businessLogicResolver: businessLogicResolver.address,
                 })
                 accessControlFacet = await ethers.getContractAt(
                     'AccessControl',
@@ -696,7 +717,18 @@ describe('ERC1594 Tests', () => {
             account_D = signer_D.address
             account_E = signer_E.address
 
-            await deployEnvironment()
+            const { deployer, ...deployedContracts } =
+                await deployAtsFullInfrastructure(
+                    new DeployAtsFullInfrastructureCommand({
+                        signer: signer_A,
+                        network: network.name as Network,
+                        useDeployed: false,
+                    })
+                )
+
+            factory = deployedContracts.factory.contract
+            businessLogicResolver =
+                deployedContracts.businessLogicResolver.contract
 
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
@@ -734,6 +766,8 @@ describe('ERC1594 Tests', () => {
                 listOfCountries: 'ES,FR,CH',
                 info: 'nothing',
                 init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
             })
 
             accessControlFacet = await ethers.getContractAt(

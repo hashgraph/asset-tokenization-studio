@@ -204,7 +204,8 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
     type Snapshots_2,
@@ -212,22 +213,23 @@ import {
     type ERC1410ScheduledTasks,
     type AccessControl,
     type Lock_2,
+    IFactory,
+    BusinessLogicResolver,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+import { Network } from '../../../../Configuration'
 import {
     SNAPSHOT_ROLE,
     PAUSER_ROLE,
     ISSUER_ROLE,
     LOCKER_ROLE,
-} from '../../../../scripts/constants'
-import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+    DeployAtsFullInfrastructureCommand,
+    deployAtsFullInfrastructure,
+} from '../../../../scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 const amount = 1000
 const balanceOf_C_Original = 2 * amount
@@ -249,6 +251,8 @@ describe('Snapshots Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
     let snapshotFacet: Snapshots_2
     let accessControlFacet: AccessControl
@@ -256,13 +260,25 @@ describe('Snapshots Tests', () => {
     let lockFacet: Lock_2
 
     beforeEach(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                new DeployAtsFullInfrastructureCommand({
+                    signer: signer_A,
+                    network: network.name as Network,
+                    useDeployed: false,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
@@ -300,6 +316,8 @@ describe('Snapshots Tests', () => {
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
         })
 
         accessControlFacet = await ethers.getContractAt(

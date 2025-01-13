@@ -223,7 +223,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+import { grantRoleAndPauseToken } from '../../../common'
 
 const actionType =
     '0x000000000000000000000000000000000000000000000000000000000000aa23'

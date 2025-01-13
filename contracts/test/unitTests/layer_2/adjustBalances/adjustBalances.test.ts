@@ -204,7 +204,8 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
     type AdjustBalances,
@@ -213,22 +214,23 @@ import {
     type AccessControl,
     Equity,
     ScheduledTasks,
+    BusinessLogicResolver,
+    IFactory,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+import { Network } from '../../../../Configuration'
 import {
     ADJUSTMENT_BALANCE_ROLE,
     PAUSER_ROLE,
     ISSUER_ROLE,
     CORPORATE_ACTION_ROLE,
-} from '../../../../scripts/constants'
-import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '../../../../scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 const amount = 1
 const balanceOf_B_Original = [20 * amount, 200 * amount]
@@ -249,6 +251,8 @@ describe('Adjust Balances Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
     let adjustBalancesFacet: AdjustBalances
     let accessControlFacet: AccessControl
@@ -256,7 +260,15 @@ describe('Adjust Balances Tests', () => {
     let equityFacet: Equity
     let scheduledTasksFacet: ScheduledTasks
 
-    async function deployAsset(multiPartition: boolean) {
+    async function deployAsset({
+        multiPartition,
+        factory,
+        businessLogicResolver,
+    }: {
+        multiPartition: boolean
+        factory: IFactory
+        businessLogicResolver: BusinessLogicResolver
+    }) {
         const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
@@ -285,6 +297,8 @@ describe('Adjust Balances Tests', () => {
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
         })
 
         await setFacets(diamond)
@@ -324,16 +338,34 @@ describe('Adjust Balances Tests', () => {
         return [rbacPause]
     }
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
+    })
 
-        await deployEnvironment()
+    beforeEach(async () => {
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                new DeployAtsFullInfrastructureCommand({
+                    signer: signer_A,
+                    network: network.name as Network,
+                    useDeployed: false,
+                })
+            )
 
-        await deployAsset(true)
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+
+        await deployAsset({
+            multiPartition: true,
+            factory,
+            businessLogicResolver,
+        })
     })
 
     it('GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole', async () => {

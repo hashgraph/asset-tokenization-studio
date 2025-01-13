@@ -210,6 +210,7 @@ import {
     EQUITY_CONFIG_ID,
     BOND_CONFIG_ID,
     EVENTS,
+    GAS_LIMIT,
 } from './constants'
 
 export let factory: IFactory
@@ -574,6 +575,7 @@ export async function deployEquityFromFactory({
     init_rbacs,
     addAdmin = true,
     businessLogicResolver,
+    factory,
 }: {
     adminAccount: string
     isWhiteList: boolean
@@ -600,8 +602,9 @@ export async function deployEquityFromFactory({
     listOfCountries: string
     info: string
     init_rbacs?: Rbac[]
-    addAdmin: boolean
+    addAdmin?: boolean
     businessLogicResolver: string
+    factory: IFactory
 }) {
     const equityData = await setEquityData({
         adminAccount,
@@ -636,7 +639,11 @@ export async function deployEquityFromFactory({
         info
     )
 
-    const result = await factory.deployEquity(equityData, factoryRegulationData)
+    const result = await factory.deployEquity(
+        equityData,
+        factoryRegulationData,
+        { gasLimit: GAS_LIMIT.max }
+    )
     const events = (await result.wait()).events!
     const deployedEquityEvent = events.find(
         (e) => e.event == EVENTS.equity.deployed

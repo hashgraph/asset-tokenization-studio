@@ -204,28 +204,30 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { takeSnapshot, time } from '@nomicfoundation/hardhat-network-helpers'
+import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
 import {
     type ResolverProxy,
     type Lock,
     Pause,
     ERC1410ScheduledTasks,
+    IFactory,
+    BusinessLogicResolver,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+import { Network } from '../../../../Configuration'
 import {
     PAUSER_ROLE,
     LOCKER_ROLE,
     ISSUER_ROLE,
-} from '../../../../scripts/constants'
-import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { takeSnapshot, time } from '@nomicfoundation/hardhat-network-helpers'
-import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
+    DeployAtsFullInfrastructureCommand,
+    deployAtsFullInfrastructure,
+} from '../../../../scripts'
 
 const _NON_DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000011'
@@ -245,6 +247,8 @@ describe('Lock Tests', () => {
     let account_C: string
     let account_D: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let lockFacet: Lock
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
@@ -264,6 +268,8 @@ describe('Lock Tests', () => {
     })
 
     beforeEach(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
@@ -271,7 +277,17 @@ describe('Lock Tests', () => {
         account_C = signer_C.address
         account_D = signer_D.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                new DeployAtsFullInfrastructureCommand({
+                    signer: signer_A,
+                    network: network.name as Network,
+                    useDeployed: false,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
         expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
@@ -319,6 +335,8 @@ describe('Lock Tests', () => {
                 listOfCountries: 'ES,FR,CH',
                 info: 'nothing',
                 init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
             })
 
             lockFacet = await ethers.getContractAt(
@@ -723,6 +741,8 @@ describe('Lock Tests', () => {
                 listOfCountries: 'ES,FR,CH',
                 info: 'nothing',
                 init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
             })
 
             lockFacet = await ethers.getContractAt(

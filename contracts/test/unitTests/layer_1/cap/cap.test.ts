@@ -204,27 +204,29 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
     type Cap_2,
     AccessControl,
     Pause,
     ERC1410ScheduledTasks,
+    IFactory,
+    BusinessLogicResolver,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+import { Network } from '../../../../Configuration'
 import {
     CAP_ROLE,
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
     ISSUER_ROLE,
     PAUSER_ROLE,
-} from '../../../../scripts/constants'
-import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+} from '../../../../scripts'
 
 const maxSupply = 1
 const maxSupplyByPartition = 1
@@ -241,19 +243,33 @@ describe('CAP Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let capFacet: Cap_2
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
 
     beforeEach(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                new DeployAtsFullInfrastructureCommand({
+                    signer: signer_A,
+                    network: network.name as Network,
+                    useDeployed: false,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
@@ -287,6 +303,8 @@ describe('CAP Tests', () => {
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory: factory,
         })
 
         capFacet = await ethers.getContractAt('Cap_2', diamond.address)
