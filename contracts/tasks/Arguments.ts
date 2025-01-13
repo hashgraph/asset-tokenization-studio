@@ -211,46 +211,52 @@ export interface GetSignerResult {
     privateKey: string
 }
 
-interface BasicArgs {
+interface WithSigner {
     privateKey?: string
     signerAddress?: string
     signerPosition?: number
 }
 
-export type GetSignerArgs = BasicArgs
+export type GetSignerArgs = WithSigner
 
 // * Utils
-export interface GetProxyAdminConfigArgs extends BasicArgs {
+
+export interface Keccak256Args {
+    input: string
+}
+
+// * Deploy
+export interface DeployArgs extends WithSigner {
+    contractName: string
+}
+
+export interface DeployAllArgs extends WithSigner {
+    useDeployed: boolean
+}
+
+// * Transparent Upgradeable Proxy
+export interface GetProxyAdminConfigArgs {
     proxyAdmin: string
     proxy: string
 }
 
-export interface GetConfigurationInfoArgs extends BasicArgs {
-    resolver: string
-    configId: string
-}
-
-export interface GetResolverBusinessLogicsArgs extends BasicArgs {
-    resolver: string
-}
-
-// * Deploy
-export interface DeployArgs extends BasicArgs {
-    contractName: string
-}
-
-export interface DeployAllArgs extends BasicArgs {
-    useDeployed: boolean
-}
-
-// * Update
-export interface UpdateFactoryVersionArgs extends BasicArgs {
+export interface UpdateFactoryVersionArgs extends WithSigner {
     proxyAdminAddress: string
     transparentProxyAddress: string
     newImplementationAddress: string
 }
 
-export interface UpdateBusinessLogicKeysArgs extends BasicArgs {
+// * Business Logic Resolver
+export interface GetConfigurationInfoArgs {
+    resolver: string
+    configurationId: string
+}
+
+export interface GetResolverBusinessLogicsArgs {
+    resolver: string
+}
+
+export interface UpdateBusinessLogicKeysArgs extends WithSigner {
     resolverAddress: string
     implementationAddressList: string // * Comma separated list
 }

@@ -31,6 +31,7 @@ export {
     BaseBlockchainQueryParams,
 } from './queries/base/BaseBlockchainQuery'
 export { default as ProxyImplementationQuery } from './queries/ProxyImplementationQuery'
+export { default as GetFacetsByConfigurationIdAndVersionQuery } from './queries/GetFacetsByConfigurationIdAndVersionQuery'
 
 // * Results
 export { default as DeployContractResult } from './results/DeployContractResult'
@@ -41,6 +42,7 @@ export {
 } from './results/DeployAtsContractsResult'
 export { default as DeployAtsFullInfrastructureResult } from './results/DeployAtsFullInfrastructureResult'
 export { default as ValidateTxResponseResult } from './results/ValidateTxResponseResult'
+export { default as GetFacetsByConfigurationIdAndVersionResult } from './results/GetFacetsByConfigurationIdAndVersionResult'
 
 // * Errors
 export { default as BusinessLogicResolverNotFound } from './errors/BusinessLogicResolverNotFound'

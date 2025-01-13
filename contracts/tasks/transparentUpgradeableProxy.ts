@@ -205,10 +205,10 @@
 
 import { task, types } from 'hardhat/config'
 import {
+    GetProxyAdminConfigArgs,
     GetSignerResult,
-    UpdateBusinessLogicKeysArgs,
     UpdateFactoryVersionArgs,
-} from './Arguments'
+} from './index'
 
 task('updateFactoryVersion', 'Updates the factory version')
     .addPositionalParam('proxyAdminAddress', 'The proxy admin contract address')
@@ -243,7 +243,7 @@ task('updateFactoryVersion', 'Updates the factory version')
         const {
             upgradeProxyImplementation,
             UpgradeProxyImplementationCommand,
-        } = await import('../scripts/')
+        } = await import('../scripts')
         console.log(`Executing updateFactoryVersion on ${hre.network.name} ...`)
         const {
             privateKey,
@@ -270,63 +270,32 @@ task('updateFactoryVersion', 'Updates the factory version')
         console.log('Factory version updated')
     })
 
-task('updateBusinessLogicKeys', 'Update the address of a business logic key')
+task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
     .addPositionalParam(
-        'resolverAddress',
-        'The BusinessLogicResolver Contract address',
+        'proxyAdmin',
+        'The proxy admin contract ID. 0.0.XXXX format',
         undefined,
         types.string
     )
     .addPositionalParam(
-        'implementationAddressList',
-        'The implementation contract list to update. List of comma separated contract addresses',
+        'proxy',
+        'The proxy contrac ID. 0.0.XXXX format',
         undefined,
         types.string
     )
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account in raw hexadecimal format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerAddress',
-        'The address of the signer to select from the Hardhat signers array',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerPosition',
-        'The index of the signer in the Hardhat signers array',
-        undefined,
-        types.int
-    )
-    .setAction(async (args: UpdateBusinessLogicKeysArgs, hre) => {
-        // Inlined import due to circular dependency
-        const { registerBusinessLogics, RegisterBusinessLogicsCommand } =
-            await import('../scripts/')
-        console.log(
-            `Executing updateBusinessLogicKeys on ${hre.network.name} ...`
-        )
-        const {
-            privateKey,
-            signerAddress,
-            signerPosition,
-            resolverAddress,
-            implementationAddressList,
-        } = args
-        const { signer }: GetSignerResult = await hre.run('getSigner', {
-            privateKey: privateKey,
-            signerAddress: signerAddress,
-            signerPosition: signerPosition,
-        })
+    .setAction(async (args: GetProxyAdminConfigArgs, hre) => {
+        console.log(`Executing getProxyAdminConfig on ${hre.network.name} ...`)
+        const { ProxyAdmin__factory } = await import('../typechain-types')
 
-        const implementationList = implementationAddressList.split(',')
-        await registerBusinessLogics(
-            new RegisterBusinessLogicsCommand({
-                contractAddressList: implementationList,
-                businessLogicResolverProxyAddress: resolverAddress,
-                signer,
-            })
+        const proxyAdmin = ProxyAdmin__factory.connect(
+            args.proxyAdmin,
+            hre.ethers.provider
         )
+
+        const owner = await proxyAdmin.owner()
+        const implementation = await proxyAdmin.getProxyImplementation(
+            args.proxy
+        )
+
+        console.log(`Owner: ${owner}, Implementation: ${implementation}`)
     })

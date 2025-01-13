@@ -209,6 +209,7 @@ import {
     IBusinessLogicResolver,
     IBusinessLogicResolver__factory,
     IDiamondCutManager__factory,
+    IDiamondLoupe,
     IStaticFunctionSelectors__factory,
 } from '../typechain-types'
 import { IStaticFunctionSelectors } from '../typechain-types'
@@ -218,6 +219,8 @@ import {
     DeployContractWithFactoryCommand,
     DeployProxyForBusinessLogicResolverCommand,
     GAS_LIMIT,
+    GetFacetsByConfigurationIdAndVersionQuery,
+    GetFacetsByConfigurationIdAndVersionResult,
     MESSAGES,
     RegisterBusinessLogicsCommand,
     RegisterDeployedContractBusinessLogicsCommand,
@@ -298,6 +301,59 @@ function capitalizeFirst(str: string) {
 
 function uncapitalizeFirst(str: string) {
     return str.charAt(0).toLowerCase() + str.slice(1)
+}
+
+export async function getFacetsByConfigurationIdAndVersion({
+    businessLogicResolverAddress,
+    configurationId,
+    provider,
+    overrides,
+}: GetFacetsByConfigurationIdAndVersionQuery): Promise<GetFacetsByConfigurationIdAndVersionResult> {
+    const diamondCutManager = IDiamondCutManager__factory.connect(
+        businessLogicResolverAddress,
+        provider
+    )
+    const latestConfigVersionRaw =
+        await diamondCutManager.getLatestVersionByConfiguration(
+            configurationId,
+            overrides
+        )
+
+    const lastestConfigVersion = parseInt(
+        latestConfigVersionRaw.toHexString(),
+        16
+    )
+
+    console.log(
+        `Number of Versions for Config ${configurationId}: ${lastestConfigVersion}`
+    )
+
+    const result = new GetFacetsByConfigurationIdAndVersionResult({
+        facetListRecord: [],
+    })
+    for (
+        let currentVersion = 1;
+        currentVersion <= lastestConfigVersion;
+        currentVersion++
+    ) {
+        const facetListLengthRaw =
+            await diamondCutManager.getFacetsLengthByConfigurationIdAndVersion(
+                configurationId,
+                currentVersion,
+                overrides
+            )
+        const facetListLength = parseInt(facetListLengthRaw.toHexString(), 16)
+
+        result.facetListRecord[currentVersion] =
+            await diamondCutManager.getFacetsByConfigurationIdAndVersion(
+                configurationId,
+                currentVersion,
+                0,
+                facetListLength,
+                overrides
+            )
+    }
+    return result
 }
 
 export async function deployBusinessLogics(
