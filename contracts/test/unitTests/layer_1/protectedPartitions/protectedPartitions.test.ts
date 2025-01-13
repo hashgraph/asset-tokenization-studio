@@ -468,8 +468,8 @@ describe('ProtectedPartitions Tests', () => {
                     account_A,
                     account_B,
                     amount,
+                    9999999999999,
                     1,
-                    0,
                     '0x1234'
                 )
             ).to.be.rejectedWith('TokenIsPaused')
@@ -484,8 +484,8 @@ describe('ProtectedPartitions Tests', () => {
                     account_A,
                     account_B,
                     amount,
+                    9999999999999,
                     1,
-                    0,
                     '0x1234'
                 )
             ).to.be.rejectedWith('AccountHasNoRole')
@@ -505,7 +505,7 @@ describe('ProtectedPartitions Tests', () => {
                     account_A,
                     account_B,
                     amount,
-                    999999999999999,
+                    9999999999999,
                     1,
                     '0x1234'
                 )
@@ -529,7 +529,7 @@ describe('ProtectedPartitions Tests', () => {
                     account_A,
                     account_B,
                     amount,
-                    999999999999,
+                    9999999999999,
                     1,
                     '0x1234'
                 )
@@ -552,8 +552,8 @@ describe('ProtectedPartitions Tests', () => {
                     _DEFAULT_PARTITION,
                     account_A,
                     amount,
+                    9999999999999,
                     1,
-                    0,
                     '0x1234'
                 )
             ).to.be.rejectedWith('TokenIsPaused')
@@ -567,8 +567,8 @@ describe('ProtectedPartitions Tests', () => {
                     _DEFAULT_PARTITION,
                     account_A,
                     amount,
+                    9999999999999,
                     1,
-                    0,
                     '0x1234'
                 )
             ).to.be.rejectedWith('AccountHasNoRole')
@@ -587,8 +587,8 @@ describe('ProtectedPartitions Tests', () => {
                     _DEFAULT_PARTITION,
                     account_A,
                     amount,
+                    9999999999999,
                     1,
-                    0,
                     '0x1234'
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
