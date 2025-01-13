@@ -376,7 +376,7 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     function getLockedAmountFor(
         address _tokenHolder
     ) external view virtual override returns (uint256 amount_) {
-        return _getLockedAmountForByPartition(_DEFAULT_PARTITION, _tokenHolder);
+        return _getLockedAmountFor(_tokenHolder);
     }
 
     function getLockCountFor(

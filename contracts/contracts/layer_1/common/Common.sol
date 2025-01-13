@@ -219,7 +219,7 @@ import {
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
 
 // solhint-disable no-empty-blocks
-abstract contract Common is
+contract Common is
     AccessControlStorageWrapper,
     PauseStorageWrapper,
     ControlListStorageWrapper,
