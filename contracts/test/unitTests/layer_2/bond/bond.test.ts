@@ -359,7 +359,7 @@ describe('Bond Tests', () => {
 
         erc1410Facet = await ethers.getContractAt(
             'ERC1410ScheduledTasks',
-            await diamond.address
+            diamond.address
         )
     })
 

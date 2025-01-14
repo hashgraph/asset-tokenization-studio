@@ -227,7 +227,6 @@ import {
     EQUITY_CONFIG_ID,
     PAUSER_ROLE,
 } from '../../../scripts'
-import { Network } from '../../../Configuration'
 import { BaseContract } from 'ethers'
 
 describe('DiamondCutManager', () => {
@@ -258,9 +257,8 @@ describe('DiamondCutManager', () => {
 
         const { deployer, facetLists, ...deployedContracts } =
             await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
+                await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
-                    network: network.name as Network,
                     useDeployed: false,
                 })
             )

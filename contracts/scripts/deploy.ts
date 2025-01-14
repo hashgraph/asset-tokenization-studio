@@ -264,9 +264,8 @@ export async function deployAtsFullInfrastructure({
         Configuration.contracts.BusinessLogicResolver.addresses?.[network]
 
     // * Deploy all contracts
-    const deployCommand = new DeployAtsContractsCommand({
+    const deployCommand = await DeployAtsContractsCommand.newInstance({
         signer,
-        network,
         useDeployed,
     })
     const { deployer, ...deployedContractList } = await deployAtsContracts(
