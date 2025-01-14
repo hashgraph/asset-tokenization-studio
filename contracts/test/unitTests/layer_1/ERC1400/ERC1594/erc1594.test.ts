@@ -238,6 +238,7 @@ import {
 } from '../../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { MAX_UINT256 } from '../../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const amount = 1000
 const balanceOf_C_Original = 2 * amount
@@ -290,7 +291,7 @@ describe('ERC1594 Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -476,7 +477,7 @@ describe('ERC1594 Tests', () => {
                     'TEST_AccessControl',
                     'TAC',
                     6,
-                    'SJ5633813320',
+                    isinGenerator(),
                     false,
                     false,
                     false,
@@ -720,7 +721,7 @@ describe('ERC1594 Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,

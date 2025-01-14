@@ -226,6 +226,7 @@ import {
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { MAX_UINT256 } from '../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const _NON_DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000011'
@@ -292,7 +293,7 @@ describe('Transfer and lock Tests', () => {
                 'TEST_Lock',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -568,7 +569,7 @@ describe('Transfer and lock Tests', () => {
                 'TEST_Lock',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,

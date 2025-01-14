@@ -230,6 +230,7 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { assertObject } from '../../../../assert'
 import { MAX_UINT256 } from '../../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const amount = 1000
 
@@ -254,7 +255,7 @@ describe('ERC20 Tests', () => {
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
     const decimals = 6
-    const isin = 'SJ5633813320'
+    const isin = isinGenerator()
 
     describe('Multi partition', () => {
         beforeEach(async () => {

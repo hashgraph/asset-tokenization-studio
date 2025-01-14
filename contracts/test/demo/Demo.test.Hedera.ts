@@ -269,6 +269,7 @@ import {
     RegulationType,
     RegulationSubType,
 } from '../../scripts/factory'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const _MINUTE_1 = 6000
 const _BUSINESS_LOGIC_COUNT = 17
@@ -963,7 +964,7 @@ describe('Demo RedSwam', () => {
         const TokenName = 'TEST_DEMO'
         const TokenSymbol = 'TD'
         const TokenDecimals = 6
-        const TokenISIN = 'SJ5633813320'
+        const TokenISIN = isinGenerator()
         const TokenType = 1 // equity
         const isWhiteList = false
         const isControllable = true

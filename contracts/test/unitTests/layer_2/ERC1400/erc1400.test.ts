@@ -215,10 +215,8 @@ import {
     ERC20_2,
     ERC1594,
     ERC1644,
-    Lock_2,
     AdjustBalances,
     Cap_2,
-    ScheduledBalanceAdjustments,
 } from '../../../../typechain-types'
 import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
@@ -249,6 +247,7 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { ADDRESS_0 } from '../../../../scripts/constants'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -686,7 +685,7 @@ describe('ERC1400 Tests', () => {
             'TEST_AccessControl',
             'TAC',
             decimals_Original,
-            'SJ5633813320',
+            isinGenerator(),
             false,
             false,
             false,
@@ -777,7 +776,7 @@ describe('ERC1400 Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -1195,7 +1194,7 @@ describe('ERC1400 Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -2079,7 +2078,7 @@ describe('ERC1400 Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -2439,7 +2438,7 @@ describe('ERC1400 Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,

@@ -228,6 +228,7 @@ import {
     MAX_UINT256,
 } from '../../../../scripts/testCommon'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const TIME = 10000
 let currentTimeInSeconds = 0
@@ -320,7 +321,7 @@ describe('Equity Tests', () => {
             'TEST_AccessControl',
             'TAC',
             6,
-            'SJ5633813320',
+            isinGenerator(),
             false,
             false,
             false,

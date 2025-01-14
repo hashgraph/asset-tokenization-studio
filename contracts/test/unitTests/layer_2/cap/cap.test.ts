@@ -209,8 +209,6 @@ import {
     type ResolverProxy,
     type Cap_2,
     AccessControl,
-    Pause,
-    ERC1410ScheduledTasks,
     Equity,
     Snapshots_2,
 } from '../../../../typechain-types'
@@ -218,7 +216,6 @@ import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     _CAP_ROLE,
     _CORPORATE_ACTION_ROLE,
-    _ISSUER_ROLE,
     _PAUSER_ROLE,
     _SNAPSHOT_ROLE,
 } from '../../../../scripts/constants'
@@ -230,6 +227,7 @@ import {
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { MAX_UINT256 } from '../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -277,7 +275,7 @@ describe('CAP Layer 2 Tests', () => {
             'TEST_AccessControl',
             'TAC',
             6,
-            'SJ5633813320',
+            isinGenerator(),
             false,
             false,
             false,

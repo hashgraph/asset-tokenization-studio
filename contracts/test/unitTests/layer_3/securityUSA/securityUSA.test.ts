@@ -221,6 +221,7 @@ import {
 } from '../../../../scripts/factory'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
 import { MAX_UINT256 } from '../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
@@ -279,7 +280,7 @@ describe('Security USA Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -350,7 +351,7 @@ describe('Security USA Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -421,7 +422,7 @@ describe('Security USA Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -494,7 +495,7 @@ describe('Security USA Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 '0x455552',
                 numberOfUnits,
                 100,
@@ -562,7 +563,7 @@ describe('Security USA Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 '0x455552',
                 numberOfUnits,
                 100,
@@ -630,7 +631,7 @@ describe('Security USA Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'SJ5633813320',
+                isinGenerator(),
                 '0x455552',
                 numberOfUnits,
                 100,
