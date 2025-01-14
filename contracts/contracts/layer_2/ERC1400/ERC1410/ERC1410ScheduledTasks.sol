@@ -457,7 +457,7 @@ contract ERC1410ScheduledTasks is
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](28);
+        staticFunctionSelectors_ = new bytes4[](30);
         uint256 selectorIndex = 0;
         staticFunctionSelectors_[selectorIndex++] = this
             .balanceOfAdjusted
@@ -534,6 +534,12 @@ contract ERC1410ScheduledTasks is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .totalSupplyAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedTransferFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedRedeemFromByPartition
             .selector;
     }
 

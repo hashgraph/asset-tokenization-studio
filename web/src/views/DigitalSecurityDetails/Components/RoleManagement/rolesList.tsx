@@ -269,4 +269,9 @@ export const rolesList: TRole[] = [
     value: SecurityRole._LOCKER_ROLE,
     allowedSecurities: ["BOND", "EQUITY"],
   },
+  {
+    label: "cap",
+    value: SecurityRole._CAP_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
+  },
 ];

@@ -305,6 +305,7 @@ export const StepReview = () => {
       decimals,
       isWhiteList: !isBlocklist,
       isControllable,
+      arePartitionsProtected: false,
       isMultiPartition: false,
       diamondOwnerAccount: address,
       numberOfUnits: numberToExponential(numberOfUnits, decimals),

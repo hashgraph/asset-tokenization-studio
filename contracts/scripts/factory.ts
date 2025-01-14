@@ -273,6 +273,7 @@ export interface CouponDetailsData {
 }
 
 export interface SecurityData {
+    arePartitionsProtected: boolean
     isMultiPartition: boolean
     resolver: string
     resolverProxyConfiguration: ResolverProxyConfiguration
@@ -414,6 +415,7 @@ export async function setEquityData({
     }
 
     const security: SecurityData = {
+        arePartitionsProtected: arePartitionsProtected,
         isMultiPartition: isMultiPartition,
         resolver: businessLogicResolver,
         resolverProxyConfiguration: resolverProxyConfiguration,
@@ -513,6 +515,7 @@ export async function setBondData({
     }
 
     const security: SecurityData = {
+        arePartitionsProtected: arePartitionsProtected,
         isMultiPartition: isMultiPartition,
         resolver: businessLogicResolver,
         resolverProxyConfiguration: resolverProxyConfiguration,
@@ -608,6 +611,7 @@ export async function deployEquityFromFactory({
         adminAccount,
         isWhiteList,
         isControllable,
+        arePartitionsProtected,
         isMultiPartition,
         name,
         symbol,
@@ -708,6 +712,7 @@ export async function deployBondFromFactory({
         adminAccount,
         isWhiteList,
         isControllable,
+        arePartitionsProtected,
         isMultiPartition,
         name,
         symbol,

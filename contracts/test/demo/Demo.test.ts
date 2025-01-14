@@ -239,7 +239,7 @@ import {
 } from '../../scripts'
 
 const _MINUTE_1 = 6000
-const _BUSINESS_LOGIC_COUNT = 20
+const _BUSINESS_LOGIC_COUNT = 21
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 
@@ -561,6 +561,7 @@ Deployed contracts:
         const TokenType = 1 // equity
         const isWhiteList = false
         const isControllable = true
+        const arePartitionsProtected = false
         const isMultiPartition = false
         const votingRight = true
         const informationRight = false
@@ -578,6 +579,7 @@ Deployed contracts:
             adminAccount: account_A,
             isWhiteList,
             isControllable,
+            arePartitionsProtected,
             isMultiPartition,
             name: TokenName,
             symbol: TokenSymbol,

@@ -304,7 +304,7 @@ describe('Adjust Balances Tests', () => {
         await setFacets(diamond)
     }
 
-    async function setFacets(diamond: any) {
+    async function setFacets(diamond: ResolverProxy) {
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address

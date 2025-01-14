@@ -205,7 +205,8 @@
 
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-
+// TODO: Remove _ in contract name
+// solhint-disable contract-name-camelcase, avoid-low-level-calls, no-inline-assembly
 library CD_Lib {
     function delegateCall(
         bytes memory encodedCallData
@@ -213,7 +214,7 @@ library CD_Lib {
         (bool success, bytes memory data) = address(this).delegatecall(
             encodedCallData
         );
-        _checkSuccess(success, data);
+        checkSuccess(success, data);
         return data;
     }
 
@@ -223,11 +224,11 @@ library CD_Lib {
         (bool success, bytes memory data) = address(this).staticcall(
             encodedCallData
         );
-        _checkSuccess(success, data);
+        checkSuccess(success, data);
         return data;
     }
 
-    function _checkSuccess(bool success, bytes memory data) internal pure {
+    function checkSuccess(bool success, bytes memory data) internal pure {
         if (!success) {
             assembly {
                 let returndata_size := mload(data)
@@ -236,3 +237,4 @@ library CD_Lib {
         }
     }
 }
+// solhint-enable contract-name-camelcase, avoid-low-level-calls, no-inline-assembly

@@ -211,6 +211,7 @@ import allowedList from "./allowedList";
 import votingRights from "./votingRight";
 import balanceAdjustment from "./balanceAdjustment";
 import locker from "./locker";
+import cap from "./cap";
 
 export default {
   header: {
@@ -265,6 +266,7 @@ export default {
   allowedList,
   votingRights,
   locker,
+  cap,
   benefits: {
     dividends: "Dividends",
     balanceAdjustments: "Balance Adjustments",

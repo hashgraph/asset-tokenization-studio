@@ -220,7 +220,7 @@ library ScheduledTasksLib {
         bool autoCalling;
     }
 
-    function _addScheduledTask(
+    function addScheduledTask(
         ScheduledTasksDataStorage storage _scheduledTasks,
         uint256 _newScheduledTimestamp,
         bytes memory _newData
@@ -230,7 +230,7 @@ library ScheduledTasksLib {
             _newData
         );
 
-        uint256 scheduledTasksLength = _getScheduledTaskCount(_scheduledTasks);
+        uint256 scheduledTasksLength = getScheduledTaskCount(_scheduledTasks);
 
         uint256 newScheduledTaskId = scheduledTasksLength;
 
@@ -266,13 +266,13 @@ library ScheduledTasksLib {
         }
     }
 
-    function _triggerScheduledTasks(
+    function triggerScheduledTasks(
         ScheduledTasksDataStorage storage _scheduledTasks,
         bytes4 onScheduledTaskTriggeredSelector,
         uint256 _max,
         uint256 _timestamp
     ) internal returns (uint256) {
-        uint256 scheduledTasksLength = _getScheduledTaskCount(_scheduledTasks);
+        uint256 scheduledTasksLength = getScheduledTaskCount(_scheduledTasks);
 
         if (scheduledTasksLength == 0) {
             return 0;
@@ -290,7 +290,7 @@ library ScheduledTasksLib {
             uint256 pos = scheduledTasksLength - j;
 
             ScheduledTask
-                memory currentScheduledTask = _getScheduledTasksByIndex(
+                memory currentScheduledTask = getScheduledTasksByIndex(
                     _scheduledTasks,
                     pos
                 );
@@ -300,6 +300,7 @@ library ScheduledTasksLib {
 
                 _scheduledTasks.autoCalling = true;
 
+                // solhint-disable-next-line
                 (bool success, bytes memory data) = address(this).delegatecall(
                     abi.encodeWithSelector(
                         onScheduledTaskTriggeredSelector,
@@ -310,11 +311,13 @@ library ScheduledTasksLib {
                 );
                 if (!success) {
                     if (data.length > 0) {
+                        // solhint-disable-next-line
                         assembly {
                             let returndata_size := mload(data)
                             revert(add(32, data), returndata_size)
                         }
                     } else {
+                        // solhint-disable-next-line
                         revert(
                             'onScheduledTaskTriggered method failed without reason'
                         );
@@ -330,13 +333,13 @@ library ScheduledTasksLib {
         return newTaskID;
     }
 
-    function _getScheduledTaskCount(
+    function getScheduledTaskCount(
         ScheduledTasksDataStorage storage _scheduledTasks
     ) internal view returns (uint256) {
         return _scheduledTasks.scheduledTaskCount;
     }
 
-    function _getScheduledTasksByIndex(
+    function getScheduledTasksByIndex(
         ScheduledTasksDataStorage storage _scheduledTasks,
         uint256 _index
     ) internal view returns (ScheduledTask memory) {
@@ -372,7 +375,7 @@ library ScheduledTasksLib {
     function _popScheduledTask(
         ScheduledTasksDataStorage storage _scheduledTasks
     ) private {
-        uint256 scheduledTasksLength = _getScheduledTaskCount(_scheduledTasks);
+        uint256 scheduledTasksLength = getScheduledTaskCount(_scheduledTasks);
         if (scheduledTasksLength == 0) {
             return;
         }
@@ -380,7 +383,7 @@ library ScheduledTasksLib {
         _scheduledTasks.scheduledTaskCount--;
     }
 
-    function _getScheduledTasks(
+    function getScheduledTasks(
         ScheduledTasksDataStorage storage _scheduledTasks,
         uint256 _pageIndex,
         uint256 _pageLength
@@ -394,12 +397,12 @@ library ScheduledTasksLib {
             LibCommon.getSize(
                 start,
                 end,
-                _getScheduledTaskCount(_scheduledTasks)
+                getScheduledTaskCount(_scheduledTasks)
             )
         );
 
         for (uint256 i = 0; i < scheduledTask_.length; i++) {
-            scheduledTask_[i] = _getScheduledTasksByIndex(
+            scheduledTask_[i] = getScheduledTasksByIndex(
                 _scheduledTasks,
                 start + i
             );

@@ -210,6 +210,7 @@ import {Cap_CD_Lib} from './Cap_CD_Lib.sol';
 import {ERC1410Basic_CD_Lib} from '../ERC1400/ERC1410/ERC1410Basic_CD_Lib.sol';
 import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
 
+// solhint-disable-next-line
 contract Cap_Modifiers is ICapStorageWrapper {
     modifier checkMaxSupply(uint256 _amount) {
         uint256 newTotalSupply = ERC1410Basic_CD_Lib.totalSupply() + _amount;

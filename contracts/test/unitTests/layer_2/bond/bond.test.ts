@@ -234,7 +234,7 @@ import {
 import { grantRoleAndPauseToken } from '../../../common'
 import { Network } from '../../../../Configuration'
 
-const TIME = 20000
+const TIME = 30000
 const numberOfUnits = 1000
 let currentTimeInSeconds = 0
 let startingDate = 0
