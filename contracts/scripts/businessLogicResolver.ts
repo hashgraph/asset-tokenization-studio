@@ -215,6 +215,7 @@ import {
 import { IStaticFunctionSelectors } from '../typechain-types'
 import {
     CreateConfigurationsForDeployedContractsCommand,
+    CreateConfigurationsForDeployedContractsResult,
     deployContractWithFactory,
     DeployContractWithFactoryCommand,
     DeployProxyForBusinessLogicResolverCommand,
@@ -425,7 +426,6 @@ export async function registerBusinessLogics({
     signer,
     overrides,
 }: RegisterBusinessLogicsCommand): Promise<void> {
-    console.log('contractAddressListToRegister', contractAddressListToRegister)
     const businessLogicRegistries: BusinessLogicRegistryData[] =
         await Promise.all(
             Object.values(contractAddressListToRegister).map(
@@ -472,8 +472,9 @@ export async function createConfigurationsForDeployedContracts({
     equityUsaAddress,
     bondUsaAddress,
     signer,
-}: CreateConfigurationsForDeployedContractsCommand) {
-    const commonFacetIdList = await Promise.all(
+}: CreateConfigurationsForDeployedContractsCommand): Promise<CreateConfigurationsForDeployedContractsResult> {
+    let result = CreateConfigurationsForDeployedContractsResult.empty()
+    result.commonFacetIdList = await Promise.all(
         commonFacetAddressList.map(async (address) => {
             return await IStaticFunctionSelectors__factory.connect(
                 address,
@@ -493,11 +494,13 @@ export async function createConfigurationsForDeployedContracts({
         ).getStaticResolverKey(),
     ])
 
-    const equityFacetIdList = [...commonFacetIdList, equityResolverKey]
-    const bondFacetIdList = [...commonFacetIdList, bondResolverKey]
+    result.equityFacetIdList = [...result.commonFacetIdList, equityResolverKey]
+    result.bondFacetIdList = [...result.commonFacetIdList, bondResolverKey]
 
-    const equityFacetVersionList = Array(equityFacetIdList.length).fill(1)
-    const bondFacetVersionList = Array(bondFacetIdList.length).fill(1)
+    result.equityFacetVersionList = Array(result.equityFacetIdList.length).fill(
+        1
+    )
+    result.bondFacetVersionList = Array(result.bondFacetIdList.length).fill(1)
 
     // Create configuration for equities
     let equityTxResponse = await IDiamondCutManager__factory.connect(
@@ -505,9 +508,9 @@ export async function createConfigurationsForDeployedContracts({
         signer
     ).createConfiguration(
         EQUITY_CONFIG_ID,
-        equityFacetIdList.map((id, index) => ({
+        result.equityFacetIdList.map((id, index) => ({
             id,
-            version: equityFacetVersionList[index],
+            version: result.equityFacetVersionList[index],
         })) as FacetConfiguration[],
         {
             gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
@@ -529,9 +532,9 @@ export async function createConfigurationsForDeployedContracts({
         signer
     ).createConfiguration(
         BOND_CONFIG_ID,
-        bondFacetIdList.map((id, index) => ({
+        result.bondFacetIdList.map((id, index) => ({
             id,
-            version: bondFacetVersionList[index],
+            version: result.bondFacetVersionList[index],
         })),
         {
             gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
@@ -546,4 +549,5 @@ export async function createConfigurationsForDeployedContracts({
                 MESSAGES.businessLogicResolver.error.creatingConfigurations,
         })
     )
+    return result
 }

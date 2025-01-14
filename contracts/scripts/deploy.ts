@@ -251,6 +251,7 @@ import {
     validateTxResponse,
     RegisterDeployedContractBusinessLogicsCommand,
     registerDeployedContractBusinessLogics,
+    CreateConfigurationsForDeployedContractsResult,
 } from './index'
 
 export async function deployAtsFullInfrastructure({
@@ -282,6 +283,7 @@ export async function deployAtsFullInfrastructure({
         throw new BusinessLogicResolverNotFound()
     }
 
+    let facetLists = CreateConfigurationsForDeployedContractsResult.empty()
     if (!usingDeployed) {
         // * Initialize BusinessLogicResolver
         console.log(MESSAGES.businessLogicResolver.info.initializing)
@@ -312,7 +314,9 @@ export async function deployAtsFullInfrastructure({
                 deployedContractList,
                 signer,
             })
-        await createConfigurationsForDeployedContracts(createCommand)
+        facetLists = await createConfigurationsForDeployedContracts(
+            createCommand
+        )
     }
     console.log(MESSAGES.businessLogicResolver.info.configured)
     console.log(MESSAGES.factory.info.deploying)
@@ -330,6 +334,7 @@ export async function deployAtsFullInfrastructure({
         ...deployedContractList,
         factory: factory,
         deployer: deployer,
+        facetLists,
     })
 }
 

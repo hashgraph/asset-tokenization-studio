@@ -204,28 +204,30 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
     type Snapshots_2,
     type Equity,
     type ERC1410ScheduledTasks,
     type AccessControl,
+    BusinessLogicResolver,
+    IFactory,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+import { Network } from '../../../../Configuration'
 import {
     SNAPSHOT_ROLE,
     PAUSER_ROLE,
     ISSUER_ROLE,
     CORPORATE_ACTION_ROLE,
-} from '../../../../scripts/constants'
-import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '../../../../scripts'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -247,25 +249,41 @@ describe('Snapshots Layer 2 Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
     let snapshotFacet: Snapshots_2
     let accessControlFacet: AccessControl
     let equityFacet: Equity
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
+    })
 
-        await deployEnvironment()
-
+    beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                new DeployAtsFullInfrastructureCommand({
+                    signer: signer_A,
+                    network: network.name as Network,
+                    useDeployed: false,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -293,6 +311,8 @@ describe('Snapshots Layer 2 Tests', () => {
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory,
         })
 
         accessControlFacet = await ethers.getContractAt(

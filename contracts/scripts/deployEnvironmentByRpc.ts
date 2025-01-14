@@ -203,23 +203,23 @@
 
 */
 
-import { deployProxyToFactory, factory } from './factory'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 import {
     IBusinessLogicResolver,
+    IBusinessLogicResolver__factory,
     IFactory,
+    IFactory__factory,
     IStaticFunctionSelectors,
     ProxyAdmin,
+    ProxyAdmin__factory,
 } from '../typechain-types'
 import {
-    businessLogicResolver,
-    deployProxyToBusinessLogicResolver,
     DeployedBusinessLogics,
-    deployBusinessLogics,
-    registerBusinessLogics,
-} from './businessLogicResolver'
-import { proxyAdmin } from './transparentUpgradeableProxy'
-import { createResolverConfig } from './resolverDiamondCut'
-import { BOND_CONFIG_ID, EQUITY_CONFIG_ID } from './constants'
+    DeployAtsFullInfrastructureCommand,
+    deployAtsFullInfrastructure,
+} from './index'
+import { Network } from '../Configuration'
+import { network } from 'hardhat'
 
 export interface Environment {
     deployedBusinessLogics: DeployedBusinessLogics
@@ -235,68 +235,37 @@ export interface Environment {
 export const environment: Environment = buildEmptyEnvironment()
 let environmentInitialized = false
 
-async function deployResolverInEnvironment() {
-    await deployProxyToBusinessLogicResolver(
-        environment.deployedBusinessLogics.businessLogicResolver.address
-    )
-    environment.proxyAdmin = proxyAdmin
-    environment.resolver = businessLogicResolver
-}
-
-async function deployFactoryInEnvironment() {
-    await deployProxyToFactory(
-        environment.deployedBusinessLogics.factory.address
-    )
-    environment.factory = factory
-}
-
-export async function deployEnvironment() {
+export async function deployEnvironment({
+    signer,
+}: {
+    signer: SignerWithAddress
+}) {
     if (!environmentInitialized) {
-        await deployBusinessLogics(environment.deployedBusinessLogics)
-        await deployResolverInEnvironment()
-        await registerBusinessLogics(environment.deployedBusinessLogics)
-        environment.facetIdsEquities = await Promise.all(
-            Object.entries(environment.deployedBusinessLogics)
-                .filter(
-                    ([key]) =>
-                        !key.startsWith('factory') &&
-                        !key.startsWith('businessLogicResolver') &&
-                        !key.startsWith('bondUSA')
-                )
-                .map(
-                    async ([, value]) => `${await value.getStaticResolverKey()}`
-                )
+        const {
+            deployer,
+            factory,
+            businessLogicResolver,
+            ...deployedContracts
+        } = await deployAtsFullInfrastructure(
+            new DeployAtsFullInfrastructureCommand({
+                signer: signer,
+                network: network.name as Network,
+                useDeployed: false,
+            })
         )
-        environment.facetIdsBonds = await Promise.all(
-            Object.entries(environment.deployedBusinessLogics)
-                .filter(
-                    ([key]) =>
-                        !key.startsWith('factory') &&
-                        !key.startsWith('businessLogicResolver') &&
-                        !key.startsWith('equityUSA')
-                )
-                .map(
-                    async ([, value]) => `${await value.getStaticResolverKey()}`
-                )
-        )
-        environment.facetVersionsEquities = environment.facetIdsEquities.map(
-            () => 1
-        )
-        environment.facetVersionsBonds = environment.facetIdsBonds.map(() => 1)
 
-        await createResolverConfig(
-            environment,
-            EQUITY_CONFIG_ID,
-            environment.facetIdsEquities,
-            environment.facetVersionsEquities
+        environment.proxyAdmin = ProxyAdmin__factory.connect(
+            businessLogicResolver.proxyAdminAddress!,
+            deployer!
         )
-        await createResolverConfig(
-            environment,
-            BOND_CONFIG_ID,
-            environment.facetIdsBonds,
-            environment.facetVersionsBonds
+        environment.resolver = IBusinessLogicResolver__factory.connect(
+            businessLogicResolver.proxyAddress!,
+            deployer!
         )
-        await deployFactoryInEnvironment()
+        environment.factory = IFactory__factory.connect(
+            factory.proxyAddress!,
+            deployer!
+        )
         environmentInitialized = true
     }
 }

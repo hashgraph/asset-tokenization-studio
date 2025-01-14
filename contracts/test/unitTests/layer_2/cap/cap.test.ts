@@ -204,28 +204,35 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     AccessControl,
+    AccessControl__factory,
+    BusinessLogicResolver,
     type Cap_2,
+    Cap_2__factory,
     Equity,
+    Equity__factory,
     ERC1410ScheduledTasks,
+    ERC1410ScheduledTasks__factory,
+    IFactory,
     Snapshots_2,
+    Snapshots_2__factory,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+import { Network } from '../../../../Configuration'
 import {
     CAP_ROLE,
     CORPORATE_ACTION_ROLE,
     ISSUER_ROLE,
     PAUSER_ROLE,
     SNAPSHOT_ROLE,
-} from '../../../../scripts/constants'
-import {
     deployEquityFromFactory,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '../../../../scripts'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -236,7 +243,9 @@ const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const TIME = 6000
 describe('CAP Layer 2 Tests', () => {
-    let diamond: Equity,
+    let factory: IFactory,
+        businessLogicResolver: BusinessLogicResolver,
+        diamond: Equity,
         capFacet: Cap_2,
         accessControlFacet: AccessControl,
         equityFacet: Equity,
@@ -254,6 +263,8 @@ describe('CAP Layer 2 Tests', () => {
     }
 
     const setupSignersAndAccounts = async () => {
+        // mute | mock console.log
+        console.log = () => {}
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
@@ -264,6 +275,18 @@ describe('CAP Layer 2 Tests', () => {
         const rbacPause = { role: PAUSER_ROLE, members: [account_B] }
         const rbaCap = { role: CAP_ROLE, members: [account_B] }
         const init_rbacs = [rbacPause, rbaCap]
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                new DeployAtsFullInfrastructureCommand({
+                    signer: signer_A,
+                    network: network.name as Network,
+                    useDeployed: false,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -291,25 +314,20 @@ describe('CAP Layer 2 Tests', () => {
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
         })
 
-        capFacet = await ethers.getContractAt('Cap_2', diamond.address)
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        capFacet = Cap_2__factory.connect(diamond.address, signer_A)
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
-        snapshotFacet = await ethers.getContractAt(
-            'Snapshots_2',
-            diamond.address
-        )
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
-        )
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
+        equityFacet = Equity__factory.connect(diamond.address, signer_A)
+        snapshotFacet = Snapshots_2__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
         )
     }
 
@@ -336,7 +354,6 @@ describe('CAP Layer 2 Tests', () => {
 
     beforeEach(async () => {
         await setupSignersAndAccounts()
-        await deployEnvironment()
         await setupEnvironment()
     })
 

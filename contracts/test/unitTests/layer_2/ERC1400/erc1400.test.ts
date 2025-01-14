@@ -204,7 +204,9 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { BigNumber } from 'ethers'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
     type Pause,
@@ -218,8 +220,9 @@ import {
     AdjustBalances,
     Cap_2,
     IERC20,
+    IFactory,
+    BusinessLogicResolver,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     ADJUSTMENT_BALANCE_ROLE,
     CAP_ROLE,
@@ -238,17 +241,16 @@ import {
     SUCCESS,
     TO_ACCOUNT_BLOCKED_ERROR_ID,
     WRONG_PARTITION_ERROR_ID,
-} from '../../../../scripts/constants'
-import {
+    ADDRESS_ZERO,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { ADDRESS_ZERO } from '../../../../scripts/constants'
+    DeployAtsFullInfrastructureCommand,
+    deployAtsFullInfrastructure,
+} from '../../../../scripts'
 import { grantRoleAndPauseToken } from '../../../common'
-import { BigNumber } from 'ethers'
+import { Network } from '../../../../Configuration'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -301,6 +303,8 @@ describe('ERC1400 Tests', () => {
     let account_D: string
     let account_E: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
@@ -583,7 +587,15 @@ describe('ERC1400 Tests', () => {
         expect(after.metadata?.info?.decimals).to.be.equal(after.decimals)
     }
 
-    async function deployAsset(multiPartition: boolean) {
+    async function deployAsset({
+        multiPartition,
+        factory,
+        businessLogicResolverAddress,
+    }: {
+        multiPartition: boolean
+        factory: IFactory
+        businessLogicResolverAddress: string
+    }) {
         const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
@@ -612,6 +624,8 @@ describe('ERC1400 Tests', () => {
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
+            businessLogicResolver: businessLogicResolverAddress,
+            factory,
         })
 
         await setFacets(diamond)
@@ -659,7 +673,9 @@ describe('ERC1400 Tests', () => {
     }
 
     describe('Multi partition ', () => {
-        beforeEach(async () => {
+        before(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
@@ -668,14 +684,26 @@ describe('ERC1400 Tests', () => {
             account_C = signer_C.address
             account_D = signer_D.address
             account_E = signer_E.address
-
-            await deployEnvironment()
-
+        })
+        beforeEach(async () => {
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
                 members: [account_B],
             }
             const init_rbacs: Rbac[] = [rbacPause]
+
+            const { deployer, ...deployedContracts } =
+                await deployAtsFullInfrastructure(
+                    new DeployAtsFullInfrastructureCommand({
+                        signer: signer_A,
+                        network: network.name as Network,
+                        useDeployed: false,
+                    })
+                )
+
+            factory = deployedContracts.factory.contract
+            businessLogicResolver =
+                deployedContracts.businessLogicResolver.contract
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -703,6 +731,8 @@ describe('ERC1400 Tests', () => {
                 listOfCountries: 'ES,FR,CH',
                 info: 'nothing',
                 init_rbacs,
+                businessLogicResolver: businessLogicResolver.address,
+                factory,
             })
 
             accessControlFacet = await ethers.getContractAt(
@@ -2537,7 +2567,7 @@ describe('ERC1400 Tests', () => {
 
             await deployEnvironment()
 
-            await deployAsset(true)
+            await deployAsset({ multiPartition: true })
         })
 
         it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN transaction succeeds', async () => {
@@ -2591,7 +2621,7 @@ describe('ERC1400 Tests', () => {
 
         describe('Issues', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 Issue succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
@@ -2657,7 +2687,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 Issue with max supply succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
@@ -2859,7 +2889,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1644 controllerTransfer succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -2889,7 +2919,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 transferWithData succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -2913,7 +2943,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 transferFromWithData succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -2945,7 +2975,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 transferFromWithData with expected allowance amount succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -2981,7 +3011,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransfer succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3003,7 +3033,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferByPartition succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3026,7 +3056,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferFrom succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3052,7 +3082,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 transfer succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3076,7 +3106,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 transferFrom succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3284,7 +3314,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1644 controllerRedeem succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3312,7 +3342,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1644 controllerRedeem with the expected adjusted amount succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3338,7 +3368,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeem succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3363,7 +3393,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeem with the expected adjusted amount succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3384,7 +3414,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeemFrom succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3412,7 +3442,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeemFrom with the expected adjusted amount succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3440,7 +3470,7 @@ describe('ERC1400 Tests', () => {
 
         describe('Allowances', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 allowance succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3470,7 +3500,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 increaseAllowance succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 
@@ -3518,7 +3548,7 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 decreaseAllowance succeeds', async () => {
-                await deployAsset(false)
+                await deployAsset({ multiPartition: false })
 
                 await setPreBalanceAdjustment(true)
 

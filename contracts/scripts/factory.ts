@@ -213,8 +213,6 @@ import {
     GAS_LIMIT,
 } from './constants'
 
-export let factory: IFactory
-
 export interface Rbac {
     role: string
     members: string[]
@@ -677,6 +675,7 @@ export async function deployBondFromFactory({
     info,
     init_rbacs,
     addAdmin = true,
+    factory,
     businessLogicResolver,
 }: {
     adminAccount: string
@@ -701,7 +700,8 @@ export async function deployBondFromFactory({
     listOfCountries: string
     info: string
     init_rbacs?: Rbac[]
-    addAdmin: boolean
+    addAdmin?: boolean
+    factory: IFactory
     businessLogicResolver: string
 }) {
     const bondData = await setBondData({
@@ -734,7 +734,9 @@ export async function deployBondFromFactory({
         info
     )
 
-    const result = await factory.deployBond(bondData, factoryRegulationData)
+    const result = await factory.deployBond(bondData, factoryRegulationData, {
+        gasLimit: GAS_LIMIT.max,
+    })
     const events = (await result.wait()).events!
     const deployedBondEvent = events.find(
         (e) => e.event == EVENTS.bond.deployed

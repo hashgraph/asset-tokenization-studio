@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
 import { BigNumber } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
@@ -214,8 +214,9 @@ import {
     Pause,
     Lock_2,
     ERC1410ScheduledTasks,
+    IFactory,
+    BusinessLogicResolver,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
 import {
     CORPORATE_ACTION_ROLE,
     PAUSER_ROLE,
@@ -223,14 +224,15 @@ import {
     LOCKER_ROLE,
     ISSUER_ROLE,
     DEFAULT_PARTITION,
-} from '../../../../scripts/constants'
-import {
     Rbac,
     deployBondFromFactory,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '../../../../scripts'
 import { grantRoleAndPauseToken } from '../../../common'
+import { Network } from '../../../../Configuration'
 
 const TIME = 20000
 const numberOfUnits = 1000
@@ -266,6 +268,8 @@ describe('Bond Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let bondFacet: Bond
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
@@ -273,6 +277,8 @@ describe('Bond Tests', () => {
     let erc1410Facet: ERC1410ScheduledTasks
 
     before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
@@ -295,7 +301,17 @@ describe('Bond Tests', () => {
             rate: couponRate,
         }
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                new DeployAtsFullInfrastructureCommand({
+                    signer: signer_A,
+                    network: network.name as Network,
+                    useDeployed: false,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
@@ -326,6 +342,8 @@ describe('Bond Tests', () => {
             listOfCountries,
             info,
             init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
         })
 
         bondFacet = await ethers.getContractAt('Bond', diamond.address)

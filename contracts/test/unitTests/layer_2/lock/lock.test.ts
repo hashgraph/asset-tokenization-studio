@@ -204,7 +204,9 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { time } from '@nomicfoundation/hardhat-network-helpers'
 import {
     type ResolverProxy,
     type AdjustBalances,
@@ -213,8 +215,10 @@ import {
     Lock_2,
     Equity,
     Cap_2,
+    IFactory,
+    BusinessLogicResolver,
 } from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+import { Network } from '../../../../Configuration'
 import {
     ADJUSTMENT_BALANCE_ROLE,
     PAUSER_ROLE,
@@ -223,15 +227,13 @@ import {
     CONTROLLER_ROLE,
     LOCKER_ROLE,
     CORPORATE_ACTION_ROLE,
-} from '../../../../scripts/constants'
-import {
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
+    DeployAtsFullInfrastructureCommand,
+    deployAtsFullInfrastructure,
+} from '../../../../scripts'
 
 const amount = 1
 const balanceOf_A_Original = [10 * amount, 100 * amount]
@@ -258,6 +260,8 @@ describe('Locks Layer 2 Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
     let adjustBalancesFacet: AdjustBalances
     let accessControlFacet: AccessControl
@@ -294,6 +298,8 @@ describe('Locks Layer 2 Tests', () => {
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
         })
 
         await setFacets(diamond)
@@ -384,14 +390,27 @@ describe('Locks Layer 2 Tests', () => {
         )
     }
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
+    })
 
-        await deployEnvironment()
+    beforeEach(async () => {
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                new DeployAtsFullInfrastructureCommand({
+                    signer: signer_A,
+                    network: network.name as Network,
+                    useDeployed: false,
+                })
+            )
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         await deployAsset(true)
     })

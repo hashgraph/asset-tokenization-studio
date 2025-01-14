@@ -43,6 +43,7 @@ export {
 export { default as DeployAtsFullInfrastructureResult } from './results/DeployAtsFullInfrastructureResult'
 export { default as ValidateTxResponseResult } from './results/ValidateTxResponseResult'
 export { default as GetFacetsByConfigurationIdAndVersionResult } from './results/GetFacetsByConfigurationIdAndVersionResult'
+export { default as CreateConfigurationsForDeployedContractsResult } from './results/CreateConfigurationsForDeployedContractsResult'
 
 // * Errors
 export { default as BusinessLogicResolverNotFound } from './errors/BusinessLogicResolverNotFound'
