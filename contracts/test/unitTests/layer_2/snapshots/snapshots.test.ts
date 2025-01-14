@@ -226,6 +226,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -276,7 +277,7 @@ describe('Snapshots Layer 2 Tests', () => {
             'TEST_AccessControl',
             'TAC',
             DECIMALS,
-            'SJ5633813320',
+            isinGenerator(),
             false,
             false,
             false,

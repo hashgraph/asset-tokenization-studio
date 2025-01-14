@@ -227,6 +227,7 @@ import {
     grantRoleAndPauseToken,
     MAX_UINT256,
 } from '../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const actionType =
     '0x000000000000000000000000000000000000000000000000000000000000aa23'
@@ -271,7 +272,7 @@ describe('Corporate Actions Tests', () => {
             'TEST_AccessControl',
             'TAC',
             6,
-            'SJ5633813320',
+            isinGenerator(),
             false,
             false,
             false,

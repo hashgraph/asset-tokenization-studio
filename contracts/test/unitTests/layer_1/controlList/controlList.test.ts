@@ -224,6 +224,7 @@ import {
     grantRoleAndPauseToken,
     MAX_UINT256,
 } from '../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 describe('Control List Tests', () => {
     let diamond: ResolverProxy
@@ -269,7 +270,7 @@ describe('Control List Tests', () => {
             'TEST_AccessControl',
             'TAC',
             6,
-            'SJ5633813320',
+            isinGenerator(),
             false,
             false,
             false,

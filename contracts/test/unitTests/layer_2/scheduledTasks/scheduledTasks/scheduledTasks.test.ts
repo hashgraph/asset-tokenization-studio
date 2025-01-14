@@ -209,7 +209,6 @@ import {
     type ResolverProxy,
     type Equity,
     type Pause,
-    type ScheduledSnapshots,
     type AccessControl,
     ScheduledTasks,
 } from '../../../../../typechain-types'
@@ -228,6 +227,7 @@ import {
 } from '../../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { MAX_UINT256 } from '../../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const TIME = 6000
 
@@ -242,7 +242,6 @@ describe('Scheduled Tasks Tests', () => {
     let account_C: string
 
     let equityFacet: Equity
-    let scheduledSnapshotsFacet: ScheduledSnapshots
     let scheduledTasksFacet: ScheduledTasks
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
@@ -270,7 +269,7 @@ describe('Scheduled Tasks Tests', () => {
             'TEST_AccessControl',
             'TAC',
             6,
-            'SJ5633813320',
+            isinGenerator(),
             false,
             false,
             false,
@@ -297,10 +296,6 @@ describe('Scheduled Tasks Tests', () => {
 
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
 
-        scheduledSnapshotsFacet = await ethers.getContractAt(
-            'ScheduledSnapshots',
-            diamond.address
-        )
         scheduledTasksFacet = await ethers.getContractAt(
             'ScheduledTasks',
             diamond.address

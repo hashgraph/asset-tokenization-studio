@@ -239,6 +239,7 @@ import {
     BondDeployedEvent,
 } from '../../../scripts/constants'
 import { transparentUpgradableProxy } from '../../../scripts/transparentUpgradableProxy'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 describe('Factory Tests', () => {
     let signer_A: SignerWithAddress
@@ -264,7 +265,7 @@ describe('Factory Tests', () => {
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
     const decimals = 6
-    const isin = 'SJ5633813320'
+    const isin = isinGenerator()
     const isWhitelist = false
     const isControllable = true
     const isMultiPartition = false
