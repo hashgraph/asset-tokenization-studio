@@ -732,7 +732,10 @@ describe('ProtectedPartitions Tests', () => {
                         '0x1234',
                         '0x1234'
                     )
-                ).to.be.rejectedWith('PartitionsAreProtectedAndNoRole')
+                ).to.be.revertedWithCustomError(
+                    erc1410Facet,
+                    'PartitionsAreProtectedAndNoRole'
+                )
             })
 
             it('GIVEN a protected token WHEN performing a ERC1594 transfer with Data THEN transaction fails with PartitionsAreProtectedAndNoRole', async () => {
