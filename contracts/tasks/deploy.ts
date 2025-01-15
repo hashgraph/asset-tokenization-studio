@@ -206,6 +206,7 @@
 import { task, types } from 'hardhat/config'
 import { CONTRACT_NAMES, ContractName, Network } from '../Configuration'
 import { DeployAllArgs, DeployArgs, GetSignerResult } from './Arguments'
+import { DeployAtsFullInfrastructureCommand } from '../scripts'
 
 task(
     'deployAll',
@@ -275,11 +276,14 @@ task(
             lock,
             transferAndLock,
             adjustBalances,
-        } = await deployAtsFullInfrastructure({
-            signer: signer,
-            network: hre.network.name as Network,
-            useDeployed: args.useDeployed,
-        })
+        } = await deployAtsFullInfrastructure(
+            new DeployAtsFullInfrastructureCommand({
+                signer: signer,
+                network: hre.network.name as Network,
+                useDeployed: args.useDeployed,
+                useEnvironment: false,
+            })
+        )
 
         // * Display the deployed addresses
         const ids = {

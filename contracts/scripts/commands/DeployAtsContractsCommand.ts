@@ -14,7 +14,7 @@ export interface DeployAtsContractsCommandParams
 
 export default class DeployAtsContractsCommand {
     public readonly useDeployed: boolean
-    public readonly useEnvironment: boolean
+    public readonly useEnvironment: boolean = false
     public readonly signer: Signer
     public readonly network: Network
 
