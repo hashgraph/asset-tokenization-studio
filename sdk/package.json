@@ -31,7 +31,11 @@
     "prettierCheck": "prettier --config .prettierrc --check",
     "prepack": "npm run build",
     "cleanCache": "npx jest --clearCache",
-    "prepare": "husky"
+    "prepare": "husky",
+    "t3:compile": "tsc ./scripts/*.ts",
+    "t3:create": "node ./scripts/createVC-T3.js",
+    "t3:verify": "node ./scripts/verifyVC-T3.js"
+
   },
   "license": "Apache-2.0",
   "devDependencies": {
@@ -63,6 +67,13 @@
     "@hashgraph/sdk": "2.51.0",
     "@metamask/detect-provider": "^2.0.0",
     "@metamask/providers": "^12.0.0",
+    "@terminal3/bbs_vc": "^0.2.16",
+    "@terminal3/ecdsa_vc": "^0.1.14",
+    "@terminal3/revoke_vc": "^0.1.13",
+    "@terminal3/vc_cast": "^0.1.12",
+    "@terminal3/vc_core": "^0.0.17",
+    "@terminal3/verify_vc": "^0.0.18",
+    "@terminal3/verify_vp": "^0.0.28",
     "@walletconnect/modal": "^2.6.2",
     "axios": "^1.5.0",
     "cd": "^0.3.3",
