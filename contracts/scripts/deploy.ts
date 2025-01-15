@@ -343,6 +343,9 @@ export async function deployAtsContracts({
     network,
     useDeployed,
 }: DeployAtsContractsCommand) {
+    const overrides = {
+        gasLimit: GAS_LIMIT.high,
+    }
     const commands = {
         businessLogicResolver: new DeployContractWithFactoryCommand({
             factory: new BusinessLogicResolver__factory(),
@@ -353,6 +356,7 @@ export async function deployAtsContracts({
                       network
                   ]
                 : undefined,
+            overrides,
         }),
         accessControl: new DeployContractWithFactoryCommand({
             factory: new AccessControl__factory(),
@@ -360,6 +364,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.AccessControl.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         cap: new DeployContractWithFactoryCommand({
             factory: new Cap_2__factory(),
@@ -367,6 +372,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.Cap.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         controlList: new DeployContractWithFactoryCommand({
             factory: new ControlList__factory(),
@@ -374,6 +380,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.ControlList.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         pause: new DeployContractWithFactoryCommand({
             factory: new Pause__factory(),
@@ -381,6 +388,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.Pause.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         lock: new DeployContractWithFactoryCommand({
             factory: new Lock_2__factory(),
@@ -388,6 +396,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.Lock.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         erc20: new DeployContractWithFactoryCommand({
             factory: new ERC20_2__factory(),
@@ -395,6 +404,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.ERC20.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         erc1410ScheduledTasks: new DeployContractWithFactoryCommand({
             factory: new ERC1410ScheduledTasks__factory(),
@@ -404,6 +414,7 @@ export async function deployAtsContracts({
                       network
                   ]
                 : undefined,
+            overrides,
         }),
         erc1594: new DeployContractWithFactoryCommand({
             factory: new ERC1594_2__factory(),
@@ -411,6 +422,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.ERC1594.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         erc1643: new DeployContractWithFactoryCommand({
             factory: new ERC1643__factory(),
@@ -418,6 +430,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.ERC1643.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         erc1644: new DeployContractWithFactoryCommand({
             factory: new ERC1644_2__factory(),
@@ -425,6 +438,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.ERC1644.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         snapshots: new DeployContractWithFactoryCommand({
             factory: new Snapshots_2__factory(),
@@ -432,6 +446,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.Snapshots.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         diamondFacet: new DeployContractWithFactoryCommand({
             factory: new DiamondFacet__factory(),
@@ -439,6 +454,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.DiamondFacet.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         equityUsa: new DeployContractWithFactoryCommand({
             factory: new EquityUSA__factory(),
@@ -446,6 +462,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.EquityUSA.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         bondUsa: new DeployContractWithFactoryCommand({
             factory: new BondUSA__factory(),
@@ -453,6 +470,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.BondUSA.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         scheduledSnapshots: new DeployContractWithFactoryCommand({
             factory: new ScheduledSnapshots__factory(),
@@ -462,6 +480,7 @@ export async function deployAtsContracts({
                       network
                   ]
                 : undefined,
+            overrides,
         }),
         scheduledBalanceAdjustments: new DeployContractWithFactoryCommand({
             factory: new ScheduledBalanceAdjustments__factory(),
@@ -470,6 +489,7 @@ export async function deployAtsContracts({
                 ? Configuration.contracts.ScheduledBalanceAdjustments
                       .addresses?.[network]
                 : undefined,
+            overrides,
         }),
         scheduledTasks: new DeployContractWithFactoryCommand({
             factory: new ScheduledTasks__factory(),
@@ -477,6 +497,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.ScheduledTasks.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         corporateActionsSecurity: new DeployContractWithFactoryCommand({
             factory: new CorporateActionsSecurity__factory(),
@@ -486,6 +507,7 @@ export async function deployAtsContracts({
                       network
                   ]
                 : undefined,
+            overrides,
         }),
         transferAndLock: new DeployContractWithFactoryCommand({
             factory: new TransferAndLock__factory(),
@@ -493,6 +515,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.TransferAndLock.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         adjustBalances: new DeployContractWithFactoryCommand({
             factory: new AdjustBalances__factory(),
@@ -500,6 +523,7 @@ export async function deployAtsContracts({
             deployedContract: useDeployed
                 ? Configuration.contracts.AdjustBalances.addresses?.[network]
                 : undefined,
+            overrides,
         }),
         protectedPartitions: new DeployContractWithFactoryCommand({
             factory: new ProtectedPartitions__factory(),
@@ -509,6 +533,7 @@ export async function deployAtsContracts({
                       network
                   ]
                 : undefined,
+            overrides,
         }),
     }
     return new DeployAtsContractsResult({
