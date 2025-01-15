@@ -209,7 +209,6 @@ import {
     IBusinessLogicResolver,
     IBusinessLogicResolver__factory,
     IDiamondCutManager__factory,
-    IDiamondLoupe,
     IStaticFunctionSelectors__factory,
 } from '../typechain-types'
 import { IStaticFunctionSelectors } from '../typechain-types'

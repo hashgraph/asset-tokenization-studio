@@ -206,7 +206,6 @@
 import { task, types } from 'hardhat/config'
 import { CONTRACT_NAMES, ContractName, Network } from '../Configuration'
 import { DeployAllArgs, DeployArgs, GetSignerResult } from './Arguments'
-import { DeployAtsFullInfrastructureCommand } from '../scripts'
 
 task(
     'deployAll',
@@ -244,7 +243,10 @@ task(
     )
     .setAction(async (args: DeployAllArgs, hre) => {
         // Inlined to avoid circular dependency
-        const { deployAtsFullInfrastructure } = await import('../scripts')
+        const {
+            deployAtsFullInfrastructure,
+            DeployAtsFullInfrastructureCommand,
+        } = await import('../scripts')
         console.log(`Executing deployAll on ${hre.network.name} ...`)
         const { signer }: GetSignerResult = await hre.run('getSigner', {
             privateKey: args.privateKey,
