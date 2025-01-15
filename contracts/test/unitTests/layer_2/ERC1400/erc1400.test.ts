@@ -1132,6 +1132,7 @@ describe('ERC1400 Tests', () => {
                 isWhiteList,
                 isControllable: true,
                 isMultiPartition: true,
+                arePartitionsProtected: false,
                 name: 'TEST_AccessControl',
                 symbol: 'TAC',
                 decimals: 6,
