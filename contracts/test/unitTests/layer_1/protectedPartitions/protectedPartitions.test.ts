@@ -350,7 +350,7 @@ describe('ProtectedPartitions Tests', () => {
         await setFacets(diamond_UnprotectedPartitions.address)
     }
 
-    beforeEach(async () => {
+    before(async () => {
         // mute | mock console.log
         console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -358,7 +358,8 @@ describe('ProtectedPartitions Tests', () => {
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
-
+    })
+    beforeEach(async () => {
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
                 await DeployAtsFullInfrastructureCommand.newInstance({
@@ -935,6 +936,12 @@ describe('ProtectedPartitions Tests', () => {
                     account_A,
                     amount,
                     DEFAULT_PARTITION
+                )
+                console.log(
+                    `wild card account: ${account_C} ${await businessLogicResolver.hasRole(
+                        WILD_CARD_ROLE,
+                        account_C
+                    )}`
                 )
 
                 await erc20Facet.approve(account_C, amount)

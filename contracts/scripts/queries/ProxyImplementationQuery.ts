@@ -12,9 +12,10 @@ export default class ProxyImplementationQuery extends BaseBlockchainQuery {
     constructor({
         proxyAdminAddress,
         transparentProxyAddress,
+        provider,
         overrides,
     }: ProxyImplementationQueryParams) {
-        super({ overrides })
+        super({ provider, overrides })
         this.proxyAdminAddress = proxyAdminAddress
         this.transparentProxyAddress = transparentProxyAddress
     }

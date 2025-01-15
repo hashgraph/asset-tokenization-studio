@@ -216,9 +216,9 @@ import {
     DiamondFacet__factory,
     EquityUSA__factory,
     ERC1410ScheduledTasks__factory,
-    ERC1594__factory,
+    ERC1594_2__factory,
     ERC1643__factory,
-    ERC1644__factory,
+    ERC1644_2__factory,
     ERC20_2__factory,
     Factory__factory,
     Lock_2__factory,
@@ -254,7 +254,6 @@ import {
     registerDeployedContractBusinessLogics,
     CreateConfigurationsForDeployedContractsResult,
 } from './index'
-import { protectedPartitions } from '../typechain-types/contracts/layer_1'
 
 export async function deployAtsFullInfrastructure({
     signer,
@@ -407,7 +406,7 @@ export async function deployAtsContracts({
                 : undefined,
         }),
         erc1594: new DeployContractWithFactoryCommand({
-            factory: new ERC1594__factory(),
+            factory: new ERC1594_2__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.ERC1594.addresses?.[network]
@@ -421,7 +420,7 @@ export async function deployAtsContracts({
                 : undefined,
         }),
         erc1644: new DeployContractWithFactoryCommand({
-            factory: new ERC1644__factory(),
+            factory: new ERC1644_2__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.ERC1644.addresses?.[network]
