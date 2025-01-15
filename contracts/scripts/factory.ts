@@ -346,6 +346,7 @@ export async function setEquityData({
     isWhiteList,
     isControllable,
     isMultiPartition,
+    arePartitionsProtected,
     name,
     symbol,
     decimals,
@@ -369,6 +370,7 @@ export async function setEquityData({
     isWhiteList: boolean
     isControllable: boolean
     isMultiPartition: boolean
+    arePartitionsProtected: boolean
     name: string
     symbol: string
     decimals: number
@@ -452,6 +454,7 @@ export async function setBondData({
     isWhiteList,
     isControllable,
     isMultiPartition,
+    arePartitionsProtected,
     name,
     symbol,
     decimals,
@@ -472,6 +475,7 @@ export async function setBondData({
     isWhiteList: boolean
     isControllable: boolean
     isMultiPartition: boolean
+    arePartitionsProtected: boolean
     name: string
     symbol: string
     decimals: number
@@ -553,6 +557,7 @@ export async function deployEquityFromFactory({
     isWhiteList,
     isControllable,
     isMultiPartition,
+    arePartitionsProtected,
     name,
     symbol,
     decimals,
@@ -582,6 +587,7 @@ export async function deployEquityFromFactory({
     isWhiteList: boolean
     isControllable: boolean
     isMultiPartition: boolean
+    arePartitionsProtected: boolean
     name: string
     symbol: string
     decimals: number
@@ -660,6 +666,7 @@ export async function deployBondFromFactory({
     isWhiteList,
     isControllable,
     isMultiPartition,
+    arePartitionsProtected,
     name,
     symbol,
     decimals,
@@ -686,6 +693,7 @@ export async function deployBondFromFactory({
     isWhiteList: boolean
     isControllable: boolean
     isMultiPartition: boolean
+    arePartitionsProtected: boolean
     name: string
     symbol: string
     decimals: number
