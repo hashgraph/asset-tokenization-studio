@@ -21,6 +21,7 @@ import {
     Snapshots,
     TransferAndLock,
     Lock,
+    ProtectedPartitions,
 } from '../../typechain-types'
 import { DeployContractWithFactoryResult } from '../index'
 
@@ -46,6 +47,7 @@ export interface DeployAtsContractsResultParams {
     transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     lock: DeployContractWithFactoryResult<Lock>
     adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
+    protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
     deployer?: Signer
 }
 
@@ -71,6 +73,7 @@ export default class DeployAtsContractsResult {
     public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     public readonly lock: DeployContractWithFactoryResult<Lock>
     public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
+    public readonly protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
     public readonly deployer?: Signer
 
     constructor({
@@ -95,6 +98,7 @@ export default class DeployAtsContractsResult {
         transferAndLock,
         lock,
         adjustBalances,
+        protectedPartitions,
         deployer,
     }: DeployAtsContractsResultParams) {
         this.businessLogicResolver = businessLogicResolver
@@ -118,6 +122,8 @@ export default class DeployAtsContractsResult {
         this.transferAndLock = transferAndLock
         this.lock = lock
         this.adjustBalances = adjustBalances
+        this.protectedPartitions = protectedPartitions
+        // Deployer
         this.deployer = deployer
     }
 }

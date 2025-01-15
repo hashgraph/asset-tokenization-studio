@@ -223,6 +223,7 @@ import {
     Factory__factory,
     Lock_2__factory,
     Pause__factory,
+    ProtectedPartitions__factory,
     ProxyAdmin__factory,
     ScheduledBalanceAdjustments__factory,
     ScheduledSnapshots__factory,
@@ -253,6 +254,7 @@ import {
     registerDeployedContractBusinessLogics,
     CreateConfigurationsForDeployedContractsResult,
 } from './index'
+import { protectedPartitions } from '../typechain-types/contracts/layer_1'
 
 export async function deployAtsFullInfrastructure({
     signer,
@@ -500,6 +502,15 @@ export async function deployAtsContracts({
                 ? Configuration.contracts.AdjustBalances.addresses?.[network]
                 : undefined,
         }),
+        protectedPartitions: new DeployContractWithFactoryCommand({
+            factory: new ProtectedPartitions__factory(),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ProtectedPartitions.addresses?.[
+                      network
+                  ]
+                : undefined,
+        }),
     }
     return new DeployAtsContractsResult({
         businessLogicResolver: await deployContractWithFactory(
@@ -538,6 +549,9 @@ export async function deployAtsContracts({
         ),
         adjustBalances: await deployContractWithFactory(
             commands.adjustBalances
+        ),
+        protectedPartitions: await deployContractWithFactory(
+            commands.protectedPartitions
         ),
         deployer: signer,
     })

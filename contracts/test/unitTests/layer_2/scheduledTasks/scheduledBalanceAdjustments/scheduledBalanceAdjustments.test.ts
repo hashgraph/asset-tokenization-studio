@@ -279,6 +279,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
             adminAccount: account_A,
             isWhiteList: false,
             isControllable: true,
+            arePartitionsProtected: false,
             isMultiPartition: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',

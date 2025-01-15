@@ -295,6 +295,7 @@ describe('Snapshots Tests', () => {
             isWhiteList: false,
             isControllable: true,
             isMultiPartition: true,
+            arePartitionsProtected: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: 6,

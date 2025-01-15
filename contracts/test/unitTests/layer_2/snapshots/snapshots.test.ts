@@ -289,6 +289,7 @@ describe('Snapshots Layer 2 Tests', () => {
             adminAccount: account_A,
             isWhiteList: false,
             isControllable: true,
+            arePartitionsProtected: false,
             isMultiPartition: true,
             name: 'TEST_AccessControl',
             symbol: 'TAC',

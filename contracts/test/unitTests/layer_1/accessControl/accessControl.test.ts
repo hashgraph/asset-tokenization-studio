@@ -280,6 +280,7 @@ describe('Access Control Tests', () => {
             isWhiteList: false,
             isControllable: true,
             isMultiPartition: false,
+            arePartitionsProtected: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: 6,

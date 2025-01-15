@@ -275,6 +275,7 @@ describe('Adjust Balances Tests', () => {
             adminAccount: account_A,
             isWhiteList: false,
             isControllable: true,
+            arePartitionsProtected: false,
             isMultiPartition: multiPartition,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
