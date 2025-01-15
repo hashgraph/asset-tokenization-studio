@@ -24,6 +24,7 @@ const config: HardhatUserConfig = {
     networks: {
         hardhat: {
             chainId: 1337,
+            blockGasLimit: 30_000_000,
         },
         local: {
             url: Configuration.endpoints.local.jsonRpc,
