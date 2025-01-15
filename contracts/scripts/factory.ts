@@ -650,7 +650,7 @@ export async function deployEquityFromFactory({
     const result = await factory.deployEquity(
         equityData,
         factoryRegulationData,
-        { gasLimit: GAS_LIMIT.max }
+        { gasLimit: GAS_LIMIT.high }
     )
     const events = (await result.wait()).events!
     const deployedEquityEvent = events.find(
