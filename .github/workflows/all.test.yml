@@ -12,7 +12,7 @@ jobs:
       NODE_OPTIONS: "--max-old-space-size=32768"
     permissions:
       contents: read
-    
+
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@f086349bfa2bd1361f7909c78558e816508cdc10 # v2.8.0
@@ -33,6 +33,14 @@ jobs:
           npm ci
           npm run compile:force
 
+      - name: TEST TEST contracts only access control
+        working-directory: contracts
+        run: npm run test:accessControl
+
+      - name: Test Contracts
+        working-directory: contracts
+        run: npm run test-coverage
+
       - name: Install dependencies SDK
         working-directory: sdk
         run: |
@@ -42,11 +50,11 @@ jobs:
       - name: Install Yarn
         run: npm install -g yarn@1.22.22
 
-#      # No tests for UI components yet
-#      - name: Install dependencies UI Components
-#        working-directory: uiComponents
-#        run: yarn install
-      
+      #      # No tests for UI components yet
+      #      - name: Install dependencies UI Components
+      #        working-directory: uiComponents
+      #        run: yarn install
+
       - name: Install dependencies web
         working-directory: web
         run: yarn install
@@ -95,18 +103,14 @@ jobs:
         working-directory: web
         run: npm run test
 
-      - name: Test Contracts
-        working-directory: contracts
-        run: npm run test-coverage
-
       - name: Test sdk
         working-directory: sdk
         run: npm run test
 
-#      # No tests for UI components yet
-#      - name: Test UI Components
-#        working-directory: uiComponents
-#        run: ${{ steps.cgroup.outputs.exec }} npm run test
+      #      # No tests for UI components yet
+      #      - name: Test UI Components
+      #        working-directory: uiComponents
+      #        run: ${{ steps.cgroup.outputs.exec }} npm run test
 
       - name: Upload coverage report
         if: ${{ !cancelled() && always() }}

@@ -362,7 +362,7 @@ export async function deployAtsContracts({
     useDeployed,
 }: DeployAtsContractsCommand) {
     const overrides = {
-        gasLimit: GAS_LIMIT.high,
+        // gasLimit: GAS_LIMIT.high,
     }
     const commands = {
         businessLogicResolver: new DeployContractWithFactoryCommand({
