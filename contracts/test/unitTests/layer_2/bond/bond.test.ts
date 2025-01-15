@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { BigNumber } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
@@ -232,7 +232,6 @@ import {
     DeployAtsFullInfrastructureCommand,
 } from '../../../../scripts'
 import { grantRoleAndPauseToken } from '../../../common'
-import { Network } from '../../../../Configuration'
 
 const TIME = 30000
 const numberOfUnits = 1000
@@ -289,7 +288,7 @@ describe('Bond Tests', () => {
     beforeEach(async () => {
         currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
             .timestamp
-        startingDate = currentTimeInSeconds + TIME / 1000
+        startingDate = currentTimeInSeconds + TIME / 1000 + 5
         maturityDate = startingDate + numberOfCoupons * frequency
         firstCouponDate = startingDate + 1
         couponRecordDateInSeconds = currentTimeInSeconds + TIME_2 / 1000
@@ -303,9 +302,8 @@ describe('Bond Tests', () => {
 
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
+                await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
-                    network: network.name as Network,
                     useDeployed: false,
                 })
             )
