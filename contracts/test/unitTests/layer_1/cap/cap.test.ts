@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
@@ -214,8 +214,11 @@ import {
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
+    Cap_2__factory,
+    AccessControl__factory,
+    ERC1410ScheduledTasks__factory,
+    Pause__factory,
 } from '../../../../typechain-types'
-import { Network } from '../../../../Configuration'
 import {
     CAP_ROLE,
     deployAtsFullInfrastructure,
@@ -250,7 +253,7 @@ describe('CAP Tests', () => {
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
 
-    beforeEach(async () => {
+    before(async () => {
         // mute | mock console.log
         console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -261,16 +264,18 @@ describe('CAP Tests', () => {
 
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
+                await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
-                    network: network.name as Network,
                     useDeployed: false,
+                    useEnvironment: true,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
+    beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
@@ -308,15 +313,15 @@ describe('CAP Tests', () => {
             factory: factory,
         })
 
-        capFacet = await ethers.getContractAt('Cap_2', diamond.address)
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        capFacet = Cap_2__factory.connect(diamond.address, signer_A)
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
+        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
         )
     })
 

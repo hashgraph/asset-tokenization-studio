@@ -4,6 +4,7 @@ import { Network } from '../../Configuration'
 interface DeployAtsContractsCommandNewParams {
     signer: Signer
     useDeployed?: boolean
+    useEnvironment?: boolean
 }
 
 export interface DeployAtsContractsCommandParams
@@ -13,6 +14,7 @@ export interface DeployAtsContractsCommandParams
 
 export default class DeployAtsContractsCommand {
     public readonly useDeployed: boolean
+    public readonly useEnvironment: boolean
     public readonly signer: Signer
     public readonly network: Network
 
@@ -20,8 +22,10 @@ export default class DeployAtsContractsCommand {
         signer,
         network,
         useDeployed = true,
+        useEnvironment = false,
     }: DeployAtsContractsCommandParams) {
         this.useDeployed = useDeployed
+        this.useEnvironment = useEnvironment
         this.network = network!
         this.signer = signer
     }
@@ -29,6 +33,7 @@ export default class DeployAtsContractsCommand {
     public static async newInstance({
         signer,
         useDeployed = true,
+        useEnvironment = false,
     }: DeployAtsContractsCommandNewParams): Promise<DeployAtsContractsCommand> {
         if (!signer.provider) {
             throw new Error('Signer must have a provider')
@@ -37,6 +42,7 @@ export default class DeployAtsContractsCommand {
             signer,
             network: (await signer.provider.getNetwork()).name as Network,
             useDeployed,
+            useEnvironment,
         })
     }
 }

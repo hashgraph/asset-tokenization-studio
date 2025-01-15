@@ -254,12 +254,19 @@ import {
     registerDeployedContractBusinessLogics,
     CreateConfigurationsForDeployedContractsResult,
 } from './index'
+import Environment from './Environment'
+
+export let environment = Environment.empty()
 
 export async function deployAtsFullInfrastructure({
     signer,
     network,
     useDeployed,
+    useEnvironment,
 }: DeployAtsFullInfrastructureCommand): Promise<DeployAtsFullInfrastructureResult> {
+    if (useEnvironment && environment.initialized) {
+        return environment.toDeployAtsFullInfrastructureResult()
+    }
     const usingDeployed =
         useDeployed &&
         Configuration.contracts.BusinessLogicResolver.addresses?.[network]
@@ -329,6 +336,17 @@ export async function deployAtsFullInfrastructure({
             : undefined,
     })
     const factory = await deployContractWithFactory(factoryDeployCommand)
+
+    environment = new Environment({
+        commonFacetIdList: facetLists.commonFacetIdList,
+        equityFacetIdList: facetLists.equityFacetIdList,
+        bondFacetIdList: facetLists.bondFacetIdList,
+        equityFacetVersionList: facetLists.equityFacetVersionList,
+        bondFacetVersionList: facetLists.bondFacetVersionList,
+        businessLogicResolver: resolver.contract,
+        factory: factory.contract,
+        deployedContracts: { deployer, ...deployedContractList },
+    })
 
     return new DeployAtsFullInfrastructureResult({
         ...deployedContractList,
