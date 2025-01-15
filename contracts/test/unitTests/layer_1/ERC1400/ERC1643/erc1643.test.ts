@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
@@ -225,7 +225,6 @@ import {
     deployAtsFullInfrastructure,
 } from '../../../../../scripts'
 import { grantRoleAndPauseToken } from '../../../../common'
-import { Network } from '../../../../../Configuration'
 
 const documentName_1 =
     '0x000000000000000000000000000000000000000000000000000000000000aa23'
@@ -254,7 +253,7 @@ describe('ERC1643 Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
-    beforeEach(async () => {
+    before(async () => {
         // mute | mock console.log
         console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -265,16 +264,17 @@ describe('ERC1643 Tests', () => {
 
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
+                await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
-                    network: network.name as Network,
                     useDeployed: false,
+                    useEnvironment: true,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
-
+    })
+    beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],

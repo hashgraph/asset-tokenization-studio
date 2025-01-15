@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
@@ -217,7 +217,6 @@ import {
     IFactory,
     BusinessLogicResolver,
 } from '../../../../../typechain-types'
-import { Network } from '../../../../../Configuration'
 import {
     CONTROL_LIST_ROLE,
     DEFAULT_PARTITION,
@@ -267,7 +266,7 @@ describe('ERC1594 Tests', () => {
     let controlList: ControlList
 
     describe('Multi partition mode', () => {
-        beforeEach(async () => {
+        before(async () => {
             // mute | mock console.log
             console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -281,17 +280,19 @@ describe('ERC1594 Tests', () => {
 
             const { deployer, ...deployedContracts } =
                 await deployAtsFullInfrastructure(
-                    new DeployAtsFullInfrastructureCommand({
+                    await DeployAtsFullInfrastructureCommand.newInstance({
                         signer: signer_A,
-                        network: network.name as Network,
                         useDeployed: false,
+                        useEnvironment: true,
                     })
                 )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
+        })
 
+        beforeEach(async () => {
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
                 members: [account_B],
@@ -709,7 +710,9 @@ describe('ERC1594 Tests', () => {
         let erc1594Approved: ERC1594
         let erc1410SnapshotFacet: ERC1410Snapshot
         let erc20Facet: ERC20
-        beforeEach(async () => {
+        before(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
@@ -721,17 +724,18 @@ describe('ERC1594 Tests', () => {
 
             const { deployer, ...deployedContracts } =
                 await deployAtsFullInfrastructure(
-                    new DeployAtsFullInfrastructureCommand({
+                    await DeployAtsFullInfrastructureCommand.newInstance({
                         signer: signer_A,
-                        network: network.name as Network,
                         useDeployed: false,
+                        useEnvironment: true,
                     })
                 )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
-
+        })
+        beforeEach(async () => {
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
                 members: [account_B],

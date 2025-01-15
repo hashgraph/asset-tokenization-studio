@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
@@ -216,7 +216,6 @@ import {
     IFactory,
     BusinessLogicResolver,
 } from '../../../../typechain-types'
-import { Network } from '../../../../Configuration'
 import {
     SNAPSHOT_ROLE,
     PAUSER_ROLE,
@@ -259,7 +258,7 @@ describe('Snapshots Tests', () => {
     let pauseFacet: Pause
     let lockFacet: Lock_2
 
-    beforeEach(async () => {
+    before(async () => {
         // mute | mock console.log
         console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -270,16 +269,18 @@ describe('Snapshots Tests', () => {
 
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
+                await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
-                    network: network.name as Network,
                     useDeployed: false,
+                    useEnvironment: true,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
+    beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],

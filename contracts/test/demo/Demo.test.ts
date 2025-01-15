@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import {
     type ResolverProxy,
     type DiamondLoupeFacet,
@@ -297,6 +297,7 @@ describe('Demo RedSwam', () => {
             await DeployAtsFullInfrastructureCommand.newInstance({
                 signer: signer_A,
                 useDeployed: false,
+                useEnvironment: false,
             })
         )
 

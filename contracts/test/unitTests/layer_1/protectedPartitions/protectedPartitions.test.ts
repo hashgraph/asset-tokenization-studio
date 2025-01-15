@@ -358,8 +358,7 @@ describe('ProtectedPartitions Tests', () => {
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
-    })
-    beforeEach(async () => {
+
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
                 await DeployAtsFullInfrastructureCommand.newInstance({
@@ -370,7 +369,8 @@ describe('ProtectedPartitions Tests', () => {
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
-
+    })
+    beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],

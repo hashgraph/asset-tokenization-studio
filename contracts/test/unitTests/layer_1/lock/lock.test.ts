@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { takeSnapshot, time } from '@nomicfoundation/hardhat-network-helpers'
 import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
@@ -216,7 +216,6 @@ import {
     IFactory,
     BusinessLogicResolver,
 } from '../../../../typechain-types'
-import { Network } from '../../../../Configuration'
 import {
     PAUSER_ROLE,
     LOCKER_ROLE,
@@ -261,13 +260,6 @@ describe('Lock Tests', () => {
 
     before(async () => {
         snapshot = await takeSnapshot()
-    })
-
-    after(async () => {
-        await snapshot.restore()
-    })
-
-    beforeEach(async () => {
         // mute | mock console.log
         console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -279,16 +271,21 @@ describe('Lock Tests', () => {
 
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
+                await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
-                    network: network.name as Network,
                     useDeployed: false,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
+    after(async () => {
+        await snapshot.restore()
+    })
+
+    beforeEach(async () => {
         currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
         expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
     })

@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
@@ -217,7 +217,6 @@ import {
     BusinessLogicResolver,
     IFactory,
 } from '../../../../../typechain-types'
-import { Network } from '../../../../../Configuration'
 import {
     CONTROL_LIST_ROLE,
     PAUSER_ROLE,
@@ -261,7 +260,7 @@ describe('ERC20 Tests', () => {
     const isin = 'ABCDEF123456'
 
     describe('Multi partition', () => {
-        beforeEach(async () => {
+        before(async () => {
             // mute | mock console.log
             console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -274,17 +273,19 @@ describe('ERC20 Tests', () => {
 
             const { deployer, ...deployedContracts } =
                 await deployAtsFullInfrastructure(
-                    new DeployAtsFullInfrastructureCommand({
+                    await DeployAtsFullInfrastructureCommand.newInstance({
                         signer: signer_A,
-                        network: network.name as Network,
                         useDeployed: false,
+                        useEnvironment: true,
                     })
                 )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
+        })
 
+        beforeEach(async () => {
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
                 members: [account_B],
@@ -480,7 +481,9 @@ describe('ERC20 Tests', () => {
         let erc20SignerE: ERC20
         let erc1410Facet: ERC1410Snapshot
 
-        beforeEach(async () => {
+        before(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_E] =
                 await ethers.getSigners()
@@ -491,17 +494,19 @@ describe('ERC20 Tests', () => {
 
             const { deployer, ...deployedContracts } =
                 await deployAtsFullInfrastructure(
-                    new DeployAtsFullInfrastructureCommand({
+                    await DeployAtsFullInfrastructureCommand.newInstance({
                         signer: signer_A,
-                        network: network.name as Network,
                         useDeployed: false,
+                        useEnvironment: true,
                     })
                 )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
+        })
 
+        beforeEach(async () => {
             const rbacIssuer: Rbac = {
                 role: ISSUER_ROLE,
                 members: [account_B],
