@@ -246,7 +246,9 @@ task(
         const {
             deployAtsFullInfrastructure,
             DeployAtsFullInfrastructureCommand,
+            addresstoHederaId,
         } = await import('../scripts')
+        const network = hre.network.name as Network
         console.log(`Executing deployAll on ${hre.network.name} ...`)
         const { signer }: GetSignerResult = await hre.run('getSigner', {
             privateKey: args.privateKey,
@@ -288,7 +290,7 @@ task(
         )
 
         // * Display the deployed addresses
-        const ids = {
+        const addressList = {
             'Business Logic Resolver Proxy': businessLogicResolver.proxyAddress,
             'Business Logic Resolver Proxy Admin':
                 businessLogicResolver.proxyAdminAddress,
@@ -319,9 +321,16 @@ task(
             'Adjust Balances': adjustBalances.address,
         }
 
-        console.log('\n 🟢 Deployed IDs:')
-        for (const [key, value] of Object.entries(ids)) {
-            console.log(`   --> ${key}: ${value} (<<ContractIdhere>>)`)
+        console.log('\n 🟢 Deployed ATS Contract List:')
+        for (const [key, address] of Object.entries(addressList)) {
+            if (!address) {
+                continue
+            }
+            const contractId = await addresstoHederaId({
+                address,
+                network,
+            })
+            console.log(`   --> ${key}: ${address} (${contractId})`)
         }
     })
 
@@ -352,10 +361,13 @@ task('deploy', 'Deploy new contract')
     )
     .setAction(async (args: DeployArgs, hre) => {
         // Inlined to avoid circular dependency
-        const { deployContract, DeployContractCommand } = await import(
-            '../scripts'
-        )
-        console.log(`Executing deploy on ${hre.network.name} ...`)
+        const {
+            deployContract,
+            DeployContractCommand,
+            addressListToHederaIdList,
+        } = await import('../scripts')
+        const network = hre.network.name as Network
+        console.log(`Executing deploy on ${network} ...`)
         if (!CONTRACT_NAMES.includes(args.contractName as ContractName)) {
             throw new Error(
                 `Contract name ${args.contractName} is not in the list of deployable contracts`
@@ -367,6 +379,7 @@ task('deploy', 'Deploy new contract')
             signerAddress: args.signerAddress,
             signerPosition: args.signerPosition,
         })
+        console.log(`Using signer: ${signer.address}`)
         // * Deploy the contract
         const { proxyAdminAddress, proxyAddress, address } =
             await deployContract(
@@ -376,13 +389,24 @@ task('deploy', 'Deploy new contract')
                 })
             )
 
+        const [contractId, proxyContractId, proxyAdminContractId] =
+            await addressListToHederaIdList({
+                addressList: [address, proxyAddress, proxyAdminAddress].filter(
+                    (addr): addr is string => !!addr
+                ),
+                network,
+            })
+
+        console.log('\n 🟢 Deployed Contract:')
         if (proxyAdminAddress) {
-            console.log(`Proxy Admin: ${proxyAdminAddress}(<<ContractIdhere>>)`)
+            console.log(
+                `Proxy Admin: ${proxyAdminAddress} (${proxyAdminContractId})`
+            )
         }
         if (proxyAddress) {
-            console.log(`Proxy: ${proxyAddress}(<<ContractIdhere>>)`)
+            console.log(`Proxy: ${proxyAddress} (${proxyContractId})`)
         }
         console.log(
-            `Implementation: ${address}(<<ContractIdhere>>) for ${contractName}`
+            `Implementation: ${address} (${contractId}) for ${contractName}`
         )
     })

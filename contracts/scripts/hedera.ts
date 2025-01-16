@@ -205,15 +205,10 @@
 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-    Client,
-    PrivateKey,
-    ContractCreateFlow,
-    ContractId,
-} from '@hashgraph/sdk'
 import axios from 'axios'
-import Configuration, { Network, NETWORKS } from '../Configuration'
-import { ADDRESS_ZERO, REGEX } from './constants'
+import Configuration, { Network } from '../Configuration'
+import { ADDRESS_ZERO } from './constants'
+import { delay } from './index'
 
 interface IAccount {
     evm_address: string
@@ -221,192 +216,41 @@ interface IAccount {
     account: string
 }
 
-export interface IContract {
-    admin_key: IKey
-    nullable: boolean
-    auto_renew_account: string
-    auto_renew_period: string
-    contract_id: string
-    contractId: ContractId
-    created_timestamp: string
-    deleted: string
-    evm_address: string
-    expiration_timestamp: string
-    file_id: string
-    max_automatic_token_associations: string
-    memo: string
-    obtainer_id: string
-    permanent_removal: string
-    proxy_account_id: string
-    timestamp: string
-}
-
 interface IKey {
     _type: string
     key: string
 }
 
-export function getClient(network?: string): Client {
-    if (!network) {
-        const hre = require('hardhat')
-        network = hre.network.name
-    }
-    switch (network) {
-        case 'local':
-            return Client.forLocalNode()
-        case 'previewnet':
-            return Client.forPreviewnet()
-        case 'testnet':
-            return Client.forTestnet()
-        case 'mainnet':
-            return Client.forMainnet()
-        default:
-            throw new Error(
-                'Network not supported for Hedera Operations. Check NETWORK env variable'
-            )
-    }
-}
-
-export async function deployContractSDK(
-    factory: any,
-    privateKey: string,
-    clientOperator: Client,
-    network: Network,
-    constructorParameters?: any,
-    adminKey?: PrivateKey,
-    contractMemo?: string
-): Promise<IContract> {
-    const transaction = new ContractCreateFlow()
-        .setBytecode(factory.bytecode)
-        .setGas(15000000)
-    //.setAdminKey(Key)
-    if (contractMemo) {
-        transaction.setContractMemo(contractMemo)
-    }
-    if (constructorParameters) {
-        transaction.setConstructorParameters(constructorParameters)
-    }
-
-    const contractCreateSign = await transaction.sign(
-        PrivateKey.fromStringED25519(privateKey)
-    )
-
-    const txResponse = await contractCreateSign.execute(clientOperator)
-    await delay({ time: 2, unit: 'seconds' })
-    const receipt = await txResponse.getReceipt(clientOperator)
-    await delay({ time: 2, unit: 'seconds' })
-    const contractId = receipt.contractId
-    if (!contractId) {
-        throw Error('Error deploying contractSDK')
-    }
-    const contractInfo = await getContractInfo({
-        contractId: contractId.toString(),
-        network,
-    })
-    console.log(
-        `${factory.name} - ${contractInfo.contract_id} - ${contractInfo.evm_address}`
-    )
-    return contractInfo
-}
-
-export async function toEvmAddress({
-    accountId,
+export async function addressListToHederaIdList({
+    addressList,
     network,
 }: {
-    accountId: string
+    addressList: string[]
+    network: Network
+}): Promise<string[]> {
+    return Promise.all(
+        addressList.map((address) => addresstoHederaId({ address, network }))
+    )
+}
+
+export async function addresstoHederaId({
+    address: address,
+    network,
+}: {
+    address: string
     network: Network
 }): Promise<string> {
-    try {
-        const mirrorUrl = `${
-            Configuration.endpoints[network ?? NETWORKS[0]]
-        }/api/v1/accounts/${accountId}`
-        const res = await axios.get<IAccount>(mirrorUrl)
-        return res.data.evm_address
-    } catch (error) {
-        throw new Error('Error retrieving the Evm Address : ' + error)
-    }
-}
-
-export function contractIdToString(contractId: ContractId): string {
-    return `${contractId.shard.toString()}.${contractId.realm.toString()}.${contractId.num.toString()}`
-}
-
-/**
- * Converts a private key string to a Hashgraph PrivateKey object.
- *
- * @param params - An object containing the private key string and a boolean indicating the key type.
- * @param params.privateKey - The private key string.
- * @param params.isED25519 - A boolean indicating whether the key is ED25519 (true) or ECDSA (false).
- * @returns A Hashgraph PrivateKey object.
- */
-export function toHashgraphKey({
-    privateKey,
-    isED25519,
-}: {
-    privateKey: string
-    isED25519: boolean
-}): PrivateKey {
-    return isED25519
-        ? PrivateKey.fromStringED25519(privateKey)
-        : PrivateKey.fromStringECDSA(privateKey)
-}
-
-export async function getContractInfo({
-    contractId,
-    network,
-}: {
-    contractId: string
-    network: Network
-}): Promise<IContract> {
-    try {
-        if (
-            !REGEX.contractId.test(contractId) &&
-            !REGEX.address.test(contractId)
-        ) {
-            throw new Error(
-                'Invalid contractId format. It must be like "0.0.XXXX" or "0xhexadecimal".'
-            )
-        }
-        const mirrorUrl = `contracts/${contractId}`
-
-        const contractInfo = await getFromMirrorNode<IContract>({
-            url: mirrorUrl,
-            network,
-        })
-
-        if (!contractInfo) {
-            throw new Error('Error retrieving contract information')
-        }
-
-        return {
-            ...contractInfo,
-            contractId: ContractId.fromString(contractInfo.contract_id),
-        }
-    } catch (error) {
-        throw new Error('Error retrieving contract information: ' + error)
-    }
-}
-
-export async function evmToHederaFormat({
-    evmAddress,
-    network,
-}: {
-    evmAddress: string
-    network: Network
-}): Promise<string> {
-    if (evmAddress === ADDRESS_ZERO) {
+    if (address === ADDRESS_ZERO) {
         return '0.0.0'
     }
 
-    const url = `accounts/${evmAddress}`
+    const url = `accounts/${address}`
     const res = await getFromMirrorNode<IAccount>({
         url,
         network,
     })
     if (!res) {
-        throw new Error(
-            `Error retrieving account information for ${evmAddress}`
-        )
+        throw new Error(`Error retrieving account information for ${address}`)
     }
     return res.account
 }
@@ -443,34 +287,4 @@ async function getFromMirrorNode<T>({
         timePassed += timeBetweenRetries
     }
     return undefined
-}
-
-// * Time
-export async function delay({
-    time,
-    unit = 'ms',
-}: {
-    time: number
-    unit?: 'seconds' | 'milliseconds' | 'sec' | 'ms'
-}): Promise<boolean> {
-    let delayInMilliseconds: number
-    if (unit === 'seconds' || unit === 'sec') {
-        delayInMilliseconds = time * 1000
-    } else if (unit === 'milliseconds' || unit === 'ms') {
-        delayInMilliseconds = time
-    } else {
-        throw new Error(
-            'Invalid time unit. Please use "seconds", "milliseconds", "sec", or "ms".'
-        )
-    }
-    return new Promise<boolean>((resolve) =>
-        setTimeout(() => resolve(true), delayInMilliseconds)
-    )
-}
-
-export function oneYearLaterInSeconds(): number {
-    const currentDate: Date = new Date()
-    return Math.floor(
-        currentDate.setFullYear(currentDate.getFullYear() + 1) / 1000
-    )
 }

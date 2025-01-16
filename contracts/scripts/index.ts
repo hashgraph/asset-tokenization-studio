@@ -50,11 +50,14 @@ export { default as BusinessLogicResolverNotFound } from './errors/BusinessLogic
 export { default as BusinessLogicResolverProxyNotFound } from './errors/BusinessLogicResolverProxyNotFound'
 export { default as TransactionReceiptError } from './errors/TransactionReceiptError'
 
-// * Utils
-export * from './utils'
+// * Time functions
+export * from './time'
 
 // * Blockain functions
 export * from './blockchain'
+
+// * Hedera functions
+export * from './hedera'
 
 // * Deploy functions
 export * from './deploy'

@@ -203,10 +203,10 @@
 
 */
 
-import { Signer } from 'ethers'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 export interface GetSignerResult {
-    signer: Signer
+    signer: SignerWithAddress
     address: string
     privateKey: string
 }

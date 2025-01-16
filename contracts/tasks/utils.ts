@@ -205,7 +205,9 @@
 
 import { subtask, task, types } from 'hardhat/config'
 import { Signer, Wallet } from 'ethers'
+import { keccak256 } from 'ethers/lib/utils'
 import { GetSignerResult, GetSignerArgs, Keccak256Args } from './index'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 subtask(
     'getSigner',
@@ -231,28 +233,27 @@ subtask(
     )
     .setAction(async (args: GetSignerArgs, hre) => {
         console.log(`Executing getSigner on ${hre.network.name} ...`)
+        const { privateKey, signerAddress, signerPosition } = args
         const signers = await hre.ethers.getSigners()
-        let signer: Signer | undefined
 
-        if (args.privateKey) {
-            signer = new Wallet(args.privateKey, hre.ethers.provider)
-        } else if (args.signerPosition !== undefined) {
-            signer = signers[args.signerPosition]
-        } else if (args.signerAddress) {
-            signer = signers.find(
-                async (signer) =>
-                    (await signer.getAddress()) === args.signerAddress
-            )
-        }
-
-        if (!signer) {
-            signer = signers[0]
+        let signer: Signer | SignerWithAddress = signers[0]
+        if (privateKey) {
+            signer = new Wallet(privateKey, hre.ethers.provider)
+        } else if (signerPosition) {
+            signer = signers[signerPosition]
+        } else if (signerAddress) {
+            signer =
+                signers.find((signer) => {
+                    return (
+                        keccak256(signer.address) === keccak256(signerAddress)
+                    )
+                }) ?? signers[0]
         }
 
         return {
             signer,
             address: await signer.getAddress(),
-            privateKey: args.privateKey,
+            privateKey: privateKey,
         } as GetSignerResult
     })
 
@@ -264,6 +265,6 @@ task('keccak256', 'Prints the keccak256 hash of a string')
         types.string
     )
     .setAction(async ({ input }: Keccak256Args, hre) => {
-        const hash = hre.ethers.utils.keccak256(Buffer.from(input, 'utf-8'))
+        const hash = keccak256(Buffer.from(input, 'utf-8'))
         console.log(`The keccak256 hash of the input "${input}" is: ${hash}`)
     })
