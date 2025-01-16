@@ -272,6 +272,10 @@ import { ProtectPartitionsCommand } from '../../app/usecase/command/security/ope
 import { UnprotectPartitionsCommand } from '../../app/usecase/command/security/operations/unprotectPartitions/UnprotectPartitionsCommand.js';
 import { ProtectedTransferAndLockByPartitionCommand } from '../../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommand.js';
 import ProtectedTransferAndLockByPartitionRequest from './request/ProtectedTransferAndLockByPartitionRequest.js';
+import { SignedCredential } from '@terminal3/vc_core';
+import { createVcT3 } from '../../core/createVC-T3.js';
+import { verifyVcT3 } from '../../core/verifyVC-T3.js';
+
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -330,6 +334,8 @@ interface ISecurityInPort {
   getLockedBalanceOf(
     request: GetLockedBalanceRequest,
   ): Promise<BalanceViewModel>;
+  createVC(): Promise<boolean>;
+  verifyVC(vc: SignedCredential): Promise<boolean>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -340,6 +346,18 @@ class SecurityInPort implements ISecurityInPort {
       MirrorNodeAdapter,
     ),
   ) {}
+
+  @LogError
+  async createVC(): Promise<boolean>{
+    await createVcT3();
+    return true;
+  }
+
+  @LogError
+  async verifyVC(vc: SignedCredential): Promise<boolean>{
+    await verifyVcT3(vc);
+    return true;
+  }
 
   @LogError
   async lock(
