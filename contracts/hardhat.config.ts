@@ -4,10 +4,7 @@ import 'hardhat-contract-sizer'
 import 'solidity-coverage'
 import '@hashgraph/sdk'
 import Configuration from './Configuration'
-// ! Uncomment the following lines to be able to use tasks AFTER compiling the project
-import './tasks/utils'
-import './tasks/deploy'
-// import './tasks/update'
+import './tasks/index'
 
 const config: HardhatUserConfig = {
     solidity: {
