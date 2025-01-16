@@ -206,24 +206,35 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface ILock_2 {
-    function getTotalLockLABAF(
+import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+library Snapshots_CD_Lib {
+    function balanceOfAtSnapshot(
+        uint256 _snapshotID,
         address _tokenHolder
-    ) external returns (uint256 LABAF_);
+    ) internal view returns (uint256 balance_) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'balanceOfAtSnapshot(uint256,address)',
+                _snapshotID,
+                _tokenHolder
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
 
-    function getTotalLockLABAFByPartition(
-        bytes32 _partition,
+    function lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
         address _tokenHolder
-    ) external returns (uint256 LABAF_);
-
-    function getLockLABAFByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) external returns (uint256 LABAF_);
-
-    function getLockLABAF(
-        uint256 _lockId,
-        address _tokenHolder
-    ) external returns (uint256 LABAF_);
+    ) internal view returns (uint256 balance_) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'lockedBalanceOfAtSnapshot(uint256,address)',
+                _snapshotID,
+                _tokenHolder
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
 }

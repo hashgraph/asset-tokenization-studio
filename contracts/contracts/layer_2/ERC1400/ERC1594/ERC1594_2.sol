@@ -209,24 +209,28 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {ERC1594} from '../../../layer_1/ERC1400/ERC1594/ERC1594.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {
     ERC1410BasicStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
-import {ERC1594StorageWrapper_2} from './ERC1594StorageWrapper_2.sol';
+import {ERC1594} from '../../../layer_1/ERC1400/ERC1594/ERC1594.sol';
 import {
     ERC1594StorageWrapper
 } from '../../../layer_1/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
 import {
     ERC20StorageWrapper
 } from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
-import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
-
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
+    ERC20StorageWrapper_2_Read
+} from '../ERC20/ERC20StorageWrapper_2_Read.sol';
+import {ERC1594StorageWrapper_2} from './ERC1594StorageWrapper_2.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
 contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
     function _beforeTokenTransfer(
         bytes32 partition,
@@ -236,7 +240,11 @@ contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
     )
         internal
         virtual
-        override(ERC1410BasicStorageWrapper, ERC1594, ERC20StorageWrapper_2)
+        override(
+            ERC1410BasicStorageWrapper,
+            ERC1594,
+            ERC20StorageWrapper_2_Read
+        )
     {
         ERC1410ScheduledTasksStorageWrapper._beforeTokenTransfer(
             partition,
@@ -253,7 +261,7 @@ contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
     )
         internal
         virtual
-        override(ERC1410BasicStorageWrapper, ERC1594StorageWrapper_2)
+        override(ERC1410BasicStorageWrapperRead, ERC1594StorageWrapper_2)
     {
         ERC1594StorageWrapper_2._addPartitionTo(_value, _account, _partition);
     }
@@ -300,5 +308,73 @@ contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
             _amount,
             _isIncrease
         );
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override(CapStorageWrapper, ERC1594StorageWrapper_2) {
+        ERC1594StorageWrapper_2._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC1594StorageWrapper_2) {
+        ERC1594StorageWrapper_2._checkNewTotalSupply(_amount);
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC1594StorageWrapper_2) {
+        ERC1594StorageWrapper_2._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1594StorageWrapper_2)
+        returns (bool)
+    {
+        return ERC1594StorageWrapper_2._checkMaxSupply(_amount);
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1594StorageWrapper_2)
+        returns (bool)
+    {
+        return
+            ERC1594StorageWrapper_2._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1594StorageWrapper_2)
+        returns (bool)
+    {
+        return
+            ERC1594StorageWrapper_2._checkNewMaxSupplyForPartition(
+                _partition,
+                _newMaxSupply
+            );
     }
 }

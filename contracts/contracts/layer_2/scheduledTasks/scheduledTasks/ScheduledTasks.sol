@@ -207,8 +207,9 @@
 pragma solidity 0.8.18;
 
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
 import {_SCHEDULED_TASKS_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {
     CorporateActionsStorageWrapperSecurity
@@ -216,25 +217,27 @@ import {
 import {
     IScheduledTasks
 } from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 contract ScheduledTasks is
     IStaticFunctionSelectors,
     IScheduledTasks,
+    Common,
     CorporateActionsStorageWrapperSecurity
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
+    // solhint-disable no-unused-vars
     function onScheduledTaskTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
     ) external virtual override onlyAutoCalling(_scheduledTaskStorage()) {
         _onScheduledTaskTriggered(_data);
-    }
+    } // solhint-enable no-unused-vars
 
     function triggerPendingScheduledTasks()
         external

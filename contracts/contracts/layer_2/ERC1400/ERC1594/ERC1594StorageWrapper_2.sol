@@ -223,14 +223,19 @@ import {
     _ALLOWANCE_REACHED_ERROR_ID,
     _SUCCESS
 } from '../../../layer_1/constants/values.sol';
-import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
 import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
+import {
+    ERC20StorageWrapper_2_Read
+} from '../ERC20/ERC20StorageWrapper_2_Read.sol';
 import {
     ERC20StorageWrapper
 } from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
-
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
 abstract contract ERC1594StorageWrapper_2 is
     ERC1594StorageWrapper,
     ERC20StorageWrapper_2
@@ -300,7 +305,7 @@ abstract contract ERC1594StorageWrapper_2 is
     )
         internal
         virtual
-        override(ERC1410BasicStorageWrapper, ERC20StorageWrapper_2)
+        override(ERC1410BasicStorageWrapperRead, ERC20StorageWrapper_2_Read)
     {
         ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
             _value,
@@ -321,5 +326,73 @@ abstract contract ERC1594StorageWrapper_2 is
             _amount,
             _isIncrease
         );
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewTotalSupply(_amount);
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return ERC20StorageWrapper_2_Read._checkMaxSupply(_amount);
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return
+            ERC20StorageWrapper_2_Read._checkNewMaxSupplyForPartition(
+                _partition,
+                _newMaxSupply
+            );
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return
+            ERC20StorageWrapper_2_Read._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 }

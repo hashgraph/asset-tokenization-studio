@@ -206,36 +206,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {SnapshotsStorageWrapper_2} from './SnapshotsStorageWrapper_2.sol';
-import {
-    SnapshotsStorageWrapper
-} from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
-import {Snapshots} from '../../layer_1/snapshots/Snapshots.sol';
-import {
-    ERC1410BasicStorageWrapper
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 import {
     _SNAPSHOTS_RESOLVER_KEY
 } from '../../layer_1/constants/resolverKeys.sol';
-import {ISnapshots} from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
-import {ISnapshots_2} from '../interfaces/snapshots/ISnapshots_2.sol';
 import {_SNAPSHOT_ROLE} from '../../layer_1/constants/roles.sol';
+import {ISnapshots} from '../../layer_1/interfaces/snapshots/ISnapshots.sol';
+import {Snapshots} from '../../layer_1/snapshots/Snapshots.sol';
 import {
-    ScheduledTasksStorageWrapper
-} from '../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
-
-contract Snapshots_2 is
-    ISnapshots_2,
-    ScheduledTasksStorageWrapper,
-    Snapshots,
-    SnapshotsStorageWrapper_2
-{
+    SnapshotsStorageWrapper
+} from '../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
+import {ISnapshots_2} from '../interfaces/snapshots/ISnapshots_2.sol';
+import {
+    ScheduledTasks_CD_Lib
+} from '../scheduledTasks/scheduledTasks/ScheduledTasks_CD_Lib.sol';
+import {SnapshotsStorageWrapper_2} from './SnapshotsStorageWrapper_2.sol';
+// TODO: Remove those errors of solhint
+// solhint-disable  contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
     function takeSnapshot()
         external
         virtual
@@ -244,7 +231,7 @@ contract Snapshots_2 is
         onlyRole(_SNAPSHOT_ROLE)
         returns (uint256 snapshotID)
     {
-        _triggerScheduledTasks(0);
+        ScheduledTasks_CD_Lib.triggerScheduledTasks(0);
         return _takeSnapshot();
     }
 
@@ -256,7 +243,7 @@ contract Snapshots_2 is
 
     function decimalsAtSnapshot(
         uint256 _snapshotID
-    ) external view returns (uint256 decimals_) {
+    ) external view virtual override returns (uint8 decimals_) {
         return _decimalsAtSnapshot(_snapshotID);
     }
 
@@ -288,6 +275,9 @@ contract Snapshots_2 is
         return SnapshotsStorageWrapper_2._balanceOfAt(account, snapshotId);
     }
 
+    /**
+     * @dev Retrieves the balance of `account` for 'partition' at the time `snapshotId` was created.
+     */
     function _balanceOfAtByPartition(
         bytes32 _partition,
         address account,
@@ -304,6 +294,59 @@ contract Snapshots_2 is
                 _partition,
                 account,
                 snapshotId
+            );
+    }
+
+    function _totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256 totalSupply_)
+    {
+        return
+            SnapshotsStorageWrapper_2._totalSupplyAtSnapshotByPartition(
+                _partition,
+                _snapshotID
+            );
+    }
+
+    function _lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256 balance_)
+    {
+        return
+            SnapshotsStorageWrapper_2._lockedBalanceOfAtSnapshot(
+                _snapshotID,
+                _tokenHolder
+            );
+    }
+
+    function _lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256 balance_)
+    {
+        return
+            SnapshotsStorageWrapper_2._lockedBalanceOfAtSnapshotByPartition(
+                _partition,
+                _snapshotID,
+                _tokenHolder
             );
     }
 
@@ -325,7 +368,7 @@ contract Snapshots_2 is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_ = new bytes4[](10);
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .balanceOfAtSnapshot
@@ -338,6 +381,15 @@ contract Snapshots_2 is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .partitionsOfAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyAtSnapshotByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .lockedBalanceOfAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .lockedBalanceOfAtSnapshotByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .ABAFAtSnapshot
@@ -360,3 +412,4 @@ contract Snapshots_2 is
         staticInterfaceIds_[selectorsIndex++] = type(ISnapshots_2).interfaceId;
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

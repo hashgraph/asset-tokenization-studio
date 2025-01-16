@@ -207,8 +207,9 @@
 pragma solidity 0.8.18;
 
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
 import {
     _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY
 } from '../../constants/resolverKeys.sol';
@@ -218,18 +219,20 @@ import {
 import {
     IScheduledBalanceAdjustments
 } from '../../interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 contract ScheduledBalanceAdjustments is
     IStaticFunctionSelectors,
     IScheduledBalanceAdjustments,
+    Common,
     CorporateActionsStorageWrapperSecurity
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
+    // solhint-disable no-unused-vars
     function onScheduledBalanceAdjustmentTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,
@@ -241,7 +244,7 @@ contract ScheduledBalanceAdjustments is
         onlyAutoCalling(_scheduledBalanceAdjustmentStorage())
     {
         _onScheduledBalanceAdjustmentTriggered(_data);
-    }
+    } // solhint-enable no-unused-vars
 
     function scheduledBalanceAdjustmentCount()
         external

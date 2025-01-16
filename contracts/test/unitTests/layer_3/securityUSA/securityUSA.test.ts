@@ -219,7 +219,6 @@ import {
     RegulationType,
     RegulationSubType,
 } from '../../../../scripts/factory'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
 import { MAX_UINT256 } from '../../../../scripts/testCommon'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 
@@ -253,12 +252,10 @@ describe('Security USA Tests', () => {
         ;[signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
 
-        currentTimeInSeconds = await time.latest()
-
+        currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
+            .timestamp
         startingDate = currentTimeInSeconds + TIME
-
         maturityDate = startingDate + numberOfCoupons * frequency
-
         firstCouponDate = startingDate + 1
 
         expect(startingDate).to.be.gt(currentTimeInSeconds)
@@ -276,6 +273,7 @@ describe('Security USA Tests', () => {
                 account_A,
                 false,
                 true,
+                false,
                 false,
                 'TEST_AccessControl',
                 'TAC',
@@ -348,6 +346,7 @@ describe('Security USA Tests', () => {
                 false,
                 true,
                 false,
+                false,
                 'TEST_AccessControl',
                 'TAC',
                 6,
@@ -418,6 +417,7 @@ describe('Security USA Tests', () => {
                 account_A,
                 false,
                 true,
+                false,
                 false,
                 'TEST_AccessControl',
                 'TAC',
@@ -492,6 +492,7 @@ describe('Security USA Tests', () => {
                 false,
                 true,
                 false,
+                false,
                 'TEST_AccessControl',
                 'TAC',
                 6,
@@ -560,6 +561,7 @@ describe('Security USA Tests', () => {
                 false,
                 true,
                 false,
+                false,
                 'TEST_AccessControl',
                 'TAC',
                 6,
@@ -627,6 +629,7 @@ describe('Security USA Tests', () => {
                 account_A,
                 false,
                 true,
+                false,
                 false,
                 'TEST_AccessControl',
                 'TAC',

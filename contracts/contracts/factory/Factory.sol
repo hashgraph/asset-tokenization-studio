@@ -232,6 +232,9 @@ import {
 } from '../layer_3/constants/regulation.sol';
 import {IEquityUSA} from '../layer_3/interfaces/IEquityUSA.sol';
 import {IBondUSA} from '../layer_3/interfaces/IBondUSA.sol';
+import {
+    IProtectedPartitions
+} from '../layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol';
 import {validateISIN} from './isinValidator.sol';
 
 contract Factory is IFactory, LocalContext {
@@ -400,7 +403,14 @@ contract Factory is IFactory, LocalContext {
         IERC1594(securityAddress_).initialize_ERC1594();
 
         // configure issue flag
-        ICap(securityAddress_).initialize_Cap(_securityData.maxSupply);
+        ICap(securityAddress_).initialize_Cap(
+            _securityData.maxSupply,
+            new ICap.PartitionCap[](0)
+        );
+
+        IProtectedPartitions(securityAddress_).initialize_ProtectedPartitions(
+            _securityData.arePartitionsProtected
+        );
     }
 
     function getAppliedRegulationData(

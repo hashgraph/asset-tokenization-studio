@@ -299,6 +299,7 @@ describe('Lock Tests', () => {
                 account_A,
                 false,
                 true,
+                false,
                 true,
                 'TEST_Lock',
                 'TAC',
@@ -438,7 +439,10 @@ describe('Lock Tests', () => {
                         account_A,
                         currentTimestamp - ONE_YEAR_IN_SECONDS
                     )
-                ).to.eventually.be.rejectedWith(Error)
+                ).to.be.revertedWithCustomError(
+                    lockFacet,
+                    'WrongExpirationTimestamp'
+                )
             })
 
             it('GIVEN a non valid partition WHEN lockByPartition THEN transaction fails with InvalidPartition', async () => {
@@ -701,6 +705,7 @@ describe('Lock Tests', () => {
                 false,
                 true,
                 false,
+                false,
                 'TEST_Lock',
                 'TAC',
                 6,
@@ -861,7 +866,10 @@ describe('Lock Tests', () => {
                         account_A,
                         currentTimestamp - ONE_YEAR_IN_SECONDS
                     )
-                ).to.eventually.be.rejectedWith(Error)
+                ).to.be.revertedWithCustomError(
+                    lockFacet,
+                    'WrongExpirationTimestamp'
+                )
             })
 
             it('GIVEN a valid partition WHEN lock with enough balance THEN transaction success', async () => {

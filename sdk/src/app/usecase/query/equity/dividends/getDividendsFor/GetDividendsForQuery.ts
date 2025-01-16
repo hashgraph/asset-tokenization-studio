@@ -208,7 +208,10 @@ import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
 
 export class GetDividendsForQueryResponse implements QueryResponse {
-  constructor(public readonly payload: BigDecimal) {}
+  constructor(
+    public readonly tokenBalance: BigDecimal,
+    public readonly decimals: number,
+  ) {}
 }
 
 export class GetDividendsForQuery extends Query<GetDividendsForQueryResponse> {

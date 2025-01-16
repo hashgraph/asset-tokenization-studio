@@ -209,16 +209,26 @@ pragma solidity 0.8.18;
 import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
 import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+    CorporateActionsStorageWrapper
+} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
 import {
     CorporateActionsStorageWrapper
 } from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
-
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+import {
+    ERC1410ScheduledTasks_CD_Lib
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
 abstract contract CapStorageWrapper_2 is
-    CorporateActionsStorageWrapper,
     CapStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
+    CorporateActionsStorageWrapper,
+    ScheduledBalanceAdjustmentsStorageWrapper
 {
     function _getMaxSupplyAdjusted()
         internal
@@ -226,10 +236,17 @@ abstract contract CapStorageWrapper_2 is
         virtual
         returns (uint256 maxSupply_)
     {
+        return _getMaxSupplyAdjustedAt(_blockTimestamp());
+    }
+
+    function _getMaxSupplyAdjustedAt(
+        uint256 _timestamp
+    ) internal view virtual returns (uint256 maxSupply_) {
         (uint256 pendingABAF, ) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
+            .getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
+                _corporateActionsStorage(),
+                _timestamp
             );
         return _getMaxSupply() * pendingABAF;
     }
@@ -237,10 +254,95 @@ abstract contract CapStorageWrapper_2 is
     function _getMaxSupplyByPartitionAdjusted(
         bytes32 _partition
     ) internal view virtual returns (uint256 maxSupply_) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
-            _getLABAFForPartition(_partition)
+        return
+            _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
+    }
+
+    function _getMaxSupplyByPartitionAdjustedAt(
+        bytes32 _partition,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256 maxSupply_) {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
+            AdjustBalances_CD_Lib.getLABAFByPartition(_partition)
         );
         return _getMaxSupplyByPartition(_partition) * factor;
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override {
+        if (_newMaxSupply == 0) {
+            revert NewMaxSupplyCannotBeZero();
+        }
+        uint256 totalSupply = ERC1410ScheduledTasks_CD_Lib
+            .totalSupplyAdjusted();
+        if (totalSupply > _newMaxSupply) {
+            revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
+        }
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    ) internal view virtual override returns (bool) {
+        if (_newMaxSupply == 0) return true;
+        uint256 totalSupplyForPartition = ERC1410ScheduledTasks_CD_Lib
+            .totalSupplyByPartitionAdjusted(_partition);
+        if (totalSupplyForPartition > _newMaxSupply) {
+            revert NewMaxSupplyForPartitionTooLow(
+                _partition,
+                _newMaxSupply,
+                totalSupplyForPartition
+            );
+        }
+        uint256 maxSupplyOverall = _getMaxSupplyAdjusted();
+        if (_newMaxSupply > maxSupplyOverall) {
+            revert NewMaxSupplyByPartitionTooHigh(
+                _partition,
+                _newMaxSupply,
+                maxSupplyOverall
+            );
+        }
+        return true;
+    }
+
+    function _checkNewTotalSupply(uint256 _amount) internal virtual override {
+        uint256 newTotalSupply = ERC1410ScheduledTasks_CD_Lib
+            .totalSupplyAdjusted() + _amount;
+        if (!_checkMaxSupply(newTotalSupply)) {
+            revert MaxSupplyReached(_getMaxSupplyAdjusted());
+        }
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual override {
+        uint256 newTotalSupply = ERC1410ScheduledTasks_CD_Lib
+            .totalSupplyByPartitionAdjusted(_partition) + _amount;
+        if (!_checkMaxSupplyForPartition(_partition, newTotalSupply)) {
+            revert MaxSupplyReachedForPartition(
+                _partition,
+                _getMaxSupplyByPartitionAdjusted(_partition)
+            );
+        }
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    ) internal view virtual override returns (bool) {
+        return _checkMaxSupplyCommon(_amount, _getMaxSupplyAdjusted());
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal view virtual override returns (bool) {
+        return
+            _checkMaxSupplyCommon(
+                _amount,
+                _getMaxSupplyByPartitionAdjusted(_partition)
+            );
     }
 }

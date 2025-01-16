@@ -211,4 +211,49 @@ interface IAdjustBalances {
         uint256 factor,
         uint8 decimals
     ) external returns (bool success_);
+
+    function getABAF() external view returns (uint256);
+
+    function getABAFAdjusted() external view returns (uint256);
+
+    function getABAFAdjustedAt(
+        uint256 _timestamp
+    ) external view returns (uint256);
+
+    function getLABAFByUser(address _account) external view returns (uint256);
+
+    function getLABAFByPartition(
+        bytes32 _partition
+    ) external view returns (uint256);
+
+    function getLABAFByUserAndPartition(
+        bytes32 _partition,
+        address _account
+    ) external view returns (uint256);
+
+    function getAllowanceLABAF(
+        address _owner,
+        address _spender
+    ) external view returns (uint256);
+
+    function getTotalLockLABAF(
+        address _tokenHolder
+    ) external view returns (uint256 labaf_);
+
+    function getTotalLockLABAFByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 labaf_);
+
+    function getLockLABAFByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex
+    ) external view returns (uint256);
+
+    function getLockLABAFByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) external view returns (uint256 labaf_);
 }

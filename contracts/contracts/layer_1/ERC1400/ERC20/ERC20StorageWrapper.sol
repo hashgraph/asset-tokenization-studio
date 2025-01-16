@@ -384,21 +384,27 @@ abstract contract ERC20StorageWrapper is
         address spender,
         uint256 value
     ) private {
+        _beforeAllowanceUpdate(from, spender, value, false);
+
         ERC20Storage storage erc20Storage = _getErc20Storage();
+
         if (value > erc20Storage.allowed[from][spender]) {
             revert InsufficientAllowance(spender, from);
         }
-        _beforeAllowanceUpdate(_msgSender(), spender, value, false);
 
         erc20Storage.allowed[from][spender] -= value;
     }
 
+    // solhint-disable no-unused-vars, custom-errors
     function _beforeAllowanceUpdate(
         address _owner,
         address _spender,
         uint256 _amount,
         bool _isIncrease
-    ) internal virtual {}
+    ) internal virtual {
+        revert('Should not reach this function');
+    }
+    // solhint-enable no-unused-vars, custom-errors
 
     function _emitTransferEvent(
         address from,

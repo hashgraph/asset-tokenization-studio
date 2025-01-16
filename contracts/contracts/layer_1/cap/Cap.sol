@@ -223,7 +223,8 @@ abstract contract Cap is
 {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(
-        uint256 maxSupply
+        uint256 maxSupply,
+        PartitionCap[] calldata partitionCap
     )
         external
         virtual
@@ -234,6 +235,12 @@ abstract contract Cap is
         CapDataStorage storage capStorage = _capStorage();
 
         capStorage.maxSupply = maxSupply;
+
+        for (uint256 i = 0; i < partitionCap.length; i++) {
+            capStorage.maxSupplyByPartition[
+                partitionCap[i].partition
+            ] = partitionCap[i].maxSupply;
+        }
 
         capStorage.initialized = true;
     }
@@ -262,7 +269,6 @@ abstract contract Cap is
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
-        onlyWithMultiPartition
         checkNewMaxSupplyForPartition(_partition, _maxSupply)
         returns (bool success_)
     {

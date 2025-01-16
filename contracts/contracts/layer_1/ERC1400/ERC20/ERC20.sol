@@ -205,7 +205,6 @@
 
 // SPDX-License-Identifier: MIT
 // Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
 
 import {ERC20StorageWrapper} from './ERC20StorageWrapper.sol';
@@ -213,7 +212,6 @@ import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC20_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 
 abstract contract ERC20 is
     IERC20,
@@ -266,6 +264,7 @@ abstract contract ERC20 is
         checkControlList(_msgSender())
         checkControlList(to)
         onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool)
     {
         return _transfer(_msgSender(), to, value);
@@ -284,6 +283,7 @@ abstract contract ERC20 is
         checkControlList(from)
         checkControlList(to)
         onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool)
     {
         return _transferFrom(_msgSender(), from, to, value);
@@ -353,8 +353,5 @@ abstract contract ERC20 is
         external
         view
         virtual
-        returns (ERC20Metadata memory)
-    {
-        return _getERC20Metadata();
-    }
+        returns (ERC20Metadata memory);
 }

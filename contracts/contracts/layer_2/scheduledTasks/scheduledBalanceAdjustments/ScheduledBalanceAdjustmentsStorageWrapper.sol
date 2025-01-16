@@ -209,27 +209,27 @@ pragma solidity 0.8.18;
 import {
     _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
-
-import {LibCommon} from '../../../layer_1/common/LibCommon.sol';
 import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
     ScheduledTasksCommon
 {
+    // TODO: Remove the method
+    // solhint-disable no-unused-vars, custom-errors
     function onScheduledBalanceAdjustmentTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
     ) external virtual {
         revert('This method should never be executed, it should be overriden');
-    }
+    } // solhint-enable no-unused-vars, custom-errors
 
     function _addScheduledBalanceAdjustment(
         uint256 _newScheduledTimestamp,
         bytes memory _newData
     ) internal virtual {
-        ScheduledTasksLib._addScheduledTask(
+        ScheduledTasksLib.addScheduledTask(
             _scheduledBalanceAdjustmentStorage(),
             _newScheduledTimestamp,
             _newData
@@ -240,10 +240,11 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
         uint256 _max
     ) internal virtual returns (uint256) {
         return
-            ScheduledTasksLib._triggerScheduledTasks(
+            ScheduledTasksLib.triggerScheduledTasks(
                 _scheduledBalanceAdjustmentStorage(),
                 this.onScheduledBalanceAdjustmentTriggered.selector,
-                _max
+                _max,
+                _blockTimestamp()
             );
     }
 
@@ -254,7 +255,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
         returns (uint256)
     {
         return
-            ScheduledTasksLib._getScheduledTaskCount(
+            ScheduledTasksLib.getScheduledTaskCount(
                 _scheduledBalanceAdjustmentStorage()
             );
     }
@@ -271,7 +272,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
         )
     {
         return
-            ScheduledTasksLib._getScheduledTasks(
+            ScheduledTasksLib.getScheduledTasks(
                 _scheduledBalanceAdjustmentStorage(),
                 _pageIndex,
                 _pageLength

@@ -217,7 +217,6 @@ import { UpdateResolverCommand } from '../../app/usecase/command/management/upda
 import ContractId from '../../domain/context/contract/ContractId.js';
 import { GetConfigInfoQuery } from '../../app/usecase/query/management/GetConfigInfoQuery';
 import ConfigInfoViewModel from './response/ConfigInfoViewModel';
-import { DiamondConfiguration } from '../../domain/context/security/DiamondConfiguration';
 import { MirrorNodeAdapter } from '../out/mirror/MirrorNodeAdapter';
 import { lazyInject } from '../../core/decorator/LazyInjectDecorator';
 import { UpdateConfigRequest } from './request';

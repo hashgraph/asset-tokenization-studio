@@ -206,16 +206,23 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {IEquity} from '../interfaces/equity/IEquity.sol';
+import {Snapshots_CD_Lib} from '../../layer_1/snapshots/Snapshots_CD_Lib.sol';
 import {
-    CorporateActionsStorageWrapperSecurity
-} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+    ERC1410ScheduledTasks_CD_Lib
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
+import {ERC20_2_CD_Lib} from '../ERC1400/ERC20/ERC20_2_CD_Lib.sol';
+import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from '../constants/values.sol';
+import {
+    CorporateActionsStorageWrapperSecurity
+} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+import {IEquity} from '../interfaces/equity/IEquity.sol';
+import {Lock_2_CD_Lib} from '../lock/Lock_2_CD_Lib.sol';
+import {Snapshots_2_CD_Lib} from '../snapshots/Snapshots_2_CD_Lib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
@@ -306,13 +313,15 @@ abstract contract EquityStorageWrapper is
         dividendFor_.recordDate = registeredDividend.dividend.recordDate;
         dividendFor_.executionDate = registeredDividend.dividend.executionDate;
 
-        if (registeredDividend.dividend.recordDate < _blockTimestamp()) {
-            dividendFor_.recordDateReached = true;
-
-            dividendFor_.tokenBalance = (registeredDividend.snapshotId != 0)
-                ? _balanceOfAtSnapshot(registeredDividend.snapshotId, _account)
-                : _balanceOfAdjusted(_account);
-        }
+        (
+            dividendFor_.tokenBalance,
+            dividendFor_.decimals,
+            dividendFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredDividend.dividend.recordDate,
+            registeredDividend.snapshotId,
+            _account
+        );
     }
 
     function _getDividendsCount()
@@ -374,13 +383,15 @@ abstract contract EquityStorageWrapper is
         votingFor_.recordDate = registeredVoting.voting.recordDate;
         votingFor_.data = registeredVoting.voting.data;
 
-        if (registeredVoting.voting.recordDate < _blockTimestamp()) {
-            votingFor_.recordDateReached = true;
-
-            votingFor_.tokenBalance = (registeredVoting.snapshotId != 0)
-                ? _balanceOfAtSnapshot(registeredVoting.snapshotId, _account)
-                : _balanceOf(_account);
-        }
+        (
+            votingFor_.tokenBalance,
+            votingFor_.decimals,
+            votingFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredVoting.voting.recordDate,
+            registeredVoting.snapshotId,
+            _account
+        );
     }
 
     function _getVotingCount()
@@ -446,6 +457,36 @@ abstract contract EquityStorageWrapper is
             _getCorporateActionCountByType(
                 BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
             );
+    }
+
+    function _getSnapshotBalanceForIfDateReached(
+        uint256 _date,
+        uint256 _snapshotId,
+        address _account
+    )
+        internal
+        view
+        virtual
+        returns (uint256 balance_, uint8 decimals_, bool dateReached_)
+    {
+        if (_date < _blockTimestamp()) {
+            dateReached_ = true;
+
+            balance_ = (_snapshotId != 0)
+                ? (Snapshots_CD_Lib.balanceOfAtSnapshot(_snapshotId, _account) +
+                    Snapshots_CD_Lib.lockedBalanceOfAtSnapshot(
+                        _snapshotId,
+                        _account
+                    ))
+                : (ERC1410ScheduledTasks_CD_Lib.balanceOfAdjustedAt(
+                    _account,
+                    _date
+                ) + Lock_2_CD_Lib.getLockedAmountForAdjusted(_account));
+
+            decimals_ = (_snapshotId != 0)
+                ? Snapshots_2_CD_Lib.decimalsAtSnapshot(_snapshotId)
+                : ERC20_2_CD_Lib.decimalsAdjustedAt(_date);
+        }
     }
 
     function _equityStorage()

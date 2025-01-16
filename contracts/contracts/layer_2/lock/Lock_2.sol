@@ -207,14 +207,18 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {LockStorageWrapper_2} from './LockStorageWrapper_2.sol';
+import {LockStorageWrapper_2_Read} from './LockStorageWrapper_2_Read.sol';
 import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
 import {Lock} from '../../layer_1/lock/Lock.sol';
-import {ILock_2} from '../interfaces/lock/ILock_2.sol';
 import {ILock} from '../../layer_1/interfaces/lock/ILock.sol';
 import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
 import {_LOCK_RESOLVER_KEY} from '../../layer_1/constants/resolverKeys.sol';
-
-contract Lock_2 is ILock_2, Lock, LockStorageWrapper_2 {
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+contract Lock_2 is Lock, LockStorageWrapper_2 {
     function getLockedAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
@@ -265,33 +269,17 @@ contract Lock_2 is ILock_2, Lock, LockStorageWrapper_2 {
             );
     }
 
-    function getTotalLockLABAFByPartition(
+    function getLockedAmountForAdjusted(
+        address _tokenHolder
+    ) external view virtual returns (uint256 amount_) {
+        return _getLockedAmountForAdjusted(_tokenHolder);
+    }
+
+    function getLockedAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual returns (uint256 LABAF_) {
-        return _getTotalLockLABAFByPartition(_partition, _tokenHolder);
-    }
-
-    function getLockLABAFByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) external view virtual returns (uint256 LABAF_) {
-        return _getLockLABAFByPartition(_partition, _lockId, _tokenHolder);
-    }
-
-    function getTotalLockLABAF(
-        address _tokenHolder
-    ) external view virtual onlyWithoutMultiPartition returns (uint256 LABAF_) {
-        return _getTotalLockLABAFByPartition(_DEFAULT_PARTITION, _tokenHolder);
-    }
-
-    function getLockLABAF(
-        uint256 _lockId,
-        address _tokenHolder
-    ) external view virtual onlyWithoutMultiPartition returns (uint256 LABAF_) {
-        return
-            _getLockLABAFByPartition(_DEFAULT_PARTITION, _lockId, _tokenHolder);
+    ) external view virtual returns (uint256 amount_) {
+        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function _lockByPartition(
@@ -346,6 +334,18 @@ contract Lock_2 is ILock_2, Lock, LockStorageWrapper_2 {
         );
     }
 
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(ERC1410BasicStorageWrapperRead, LockStorageWrapper_2_Read)
+    {
+        LockStorageWrapper_2_Read._addPartitionTo(_value, _account, _partition);
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -364,7 +364,7 @@ contract Lock_2 is ILock_2, Lock, LockStorageWrapper_2 {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](16);
+        staticFunctionSelectors_ = new bytes4[](14);
         staticFunctionSelectors_[selectorIndex++] = this
             .lockByPartition
             .selector;
@@ -394,15 +394,11 @@ contract Lock_2 is ILock_2, Lock, LockStorageWrapper_2 {
         staticFunctionSelectors_[selectorIndex++] = this.getLocksIdFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getLockFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLABAFByPartition
+            .getLockedAmountForAdjusted
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLockLABAFByPartition
+            .getLockedAmountForByPartitionAdjusted
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLABAF
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getLockLABAF.selector;
     }
 
     function getStaticInterfaceIds()
@@ -412,9 +408,9 @@ contract Lock_2 is ILock_2, Lock, LockStorageWrapper_2 {
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {
-        staticInterfaceIds_ = new bytes4[](2);
+        staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(ILock).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(ILock_2).interfaceId;
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

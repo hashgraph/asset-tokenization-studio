@@ -341,6 +341,7 @@ class EquityInPort implements IEquityInPort {
       decimals: req.decimals,
       isWhiteList: req.isWhiteList,
       isControllable: req.isControllable,
+      arePartitionsProtected: req.arePartitionsProtected,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfShares),
       regulationType: CastRegulationType.fromNumber(req.regulationType),
@@ -447,7 +448,8 @@ class EquityInPort implements IEquityInPort {
     );
 
     const votingFor: VotingRightsForViewModel = {
-      value: res.payload.toString(),
+      tokenBalance: res.tokenBalance.toString(),
+      decimals: res.decimals.toString(),
     };
 
     return votingFor;
@@ -540,7 +542,8 @@ class EquityInPort implements IEquityInPort {
     );
 
     const dividendsFor: DividendsForViewModel = {
-      value: res.payload.toString(),
+      tokenBalance: res.tokenBalance.toString(),
+      decimals: res.decimals.toString(),
     };
 
     return dividendsFor;

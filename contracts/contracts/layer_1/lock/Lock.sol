@@ -204,24 +204,17 @@
 */
 
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {ILock} from '../interfaces/lock/ILock.sol';
-import {_LOCKER_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {Common} from '../common/Common.sol';
-import {LockStorageWrapper} from './LockStorageWrapper.sol';
+import {_LOCKER_ROLE} from '../constants/roles.sol';
 import {_DEFAULT_PARTITION} from '../constants/values.sol';
+import {ILock} from '../interfaces/lock/ILock.sol';
+import {LockStorageWrapper} from './LockStorageWrapper.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract Lock is
-    ILock,
-    IStaticFunctionSelectors,
-    LockStorageWrapper,
-    Common
-{
+abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     function lockByPartition(
         bytes32 _partition,
         uint256 _amount,
@@ -383,7 +376,7 @@ abstract contract Lock is
     function getLockedAmountFor(
         address _tokenHolder
     ) external view virtual override returns (uint256 amount_) {
-        return _getLockedAmountForByPartition(_DEFAULT_PARTITION, _tokenHolder);
+        return _getLockedAmountFor(_tokenHolder);
     }
 
     function getLockCountFor(

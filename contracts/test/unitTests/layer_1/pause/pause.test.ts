@@ -248,6 +248,7 @@ describe('Pause Tests', () => {
             false,
             true,
             false,
+            false,
             'TEST_AccessControl',
             'TAC',
             6,
@@ -309,7 +310,10 @@ describe('Pause Tests', () => {
 
         // pause fails
         pauseFacet = pauseFacet.connect(signer_B)
-        await expect(pauseFacet.pause()).to.eventually.be.rejectedWith(Error)
+        await expect(pauseFacet.pause()).to.be.revertedWithCustomError(
+            pauseFacet,
+            'TokenIsPaused'
+        )
     })
 
     it('GIVEN an unpause Token WHEN unpause THEN transaction fails with TokenIsUnpaused', async () => {
@@ -319,7 +323,10 @@ describe('Pause Tests', () => {
         pauseFacet = pauseFacet.connect(signer_B)
 
         // unpause fails
-        await expect(pauseFacet.unpause()).to.eventually.be.rejectedWith(Error)
+        await expect(pauseFacet.unpause()).to.be.revertedWithCustomError(
+            pauseFacet,
+            'TokenIsUnpaused'
+        )
     })
 
     it('GIVEN an account with pause role WHEN pause and unpause THEN transaction succeeds', async () => {

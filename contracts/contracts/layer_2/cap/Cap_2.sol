@@ -204,12 +204,13 @@
 */
 
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {CapStorageWrapper_2} from './CapStorageWrapper_2.sol';
 import {Cap} from '../../layer_1/cap/Cap.sol';
+import {CapStorageWrapper_2} from './CapStorageWrapper_2.sol';
 import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
-
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
 contract Cap_2 is Cap, CapStorageWrapper_2 {
     function getMaxSupply()
         external
@@ -225,5 +226,73 @@ contract Cap_2 is Cap, CapStorageWrapper_2 {
         bytes32 _partition
     ) external view virtual override returns (uint256 maxSupply_) {
         return _getMaxSupplyByPartitionAdjusted(_partition);
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
+        CapStorageWrapper_2._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
+        CapStorageWrapper_2._checkNewTotalSupply(_amount);
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
+        CapStorageWrapper_2._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, CapStorageWrapper_2)
+        returns (bool)
+    {
+        return CapStorageWrapper_2._checkMaxSupply(_amount);
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, CapStorageWrapper_2)
+        returns (bool)
+    {
+        return
+            CapStorageWrapper_2._checkNewMaxSupplyForPartition(
+                _partition,
+                _newMaxSupply
+            );
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, CapStorageWrapper_2)
+        returns (bool)
+    {
+        return
+            CapStorageWrapper_2._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 }

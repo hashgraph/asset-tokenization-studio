@@ -214,7 +214,6 @@ import { singleton } from 'tsyringe';
 import { lazyInject } from '../../../core/decorator/LazyInjectDecorator.js';
 import NetworkService from '../../../app/service/NetworkService.js';
 import LogService from '../../../app/service/LogService.js';
-import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
 import EvmAddress from '../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
 import { Security } from '../../../domain/context/security/Security.js';
@@ -242,6 +241,7 @@ import {
   Lock__factory,
   Security__factory,
   DiamondFacet__factory,
+  ProtectedPartitions__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -260,6 +260,8 @@ import {
   CastRegulationType,
 } from '../../../domain/context/factory/RegulationType.js';
 import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
+import { DividendFor } from '../../../domain/context/equity/DividendFor';
+import { VotingFor } from '../../../domain/context/equity/VotingFor';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -362,6 +364,18 @@ export class RPCQueryAdapter {
     );
   }
 
+  async getNounceFor(
+    address: EvmAddress,
+    target: EvmAddress,
+  ): Promise<BigNumber> {
+    LogService.logTrace(`Getting Nounce`);
+
+    return await this.connect(
+      ProtectedPartitions__factory,
+      address.toString(),
+    ).getNounceFor(target.toString());
+  }
+
   async partitionsOf(
     address: EvmAddress,
     targetId: EvmAddress,
@@ -434,7 +448,7 @@ export class RPCQueryAdapter {
 
   async getRoleMembers(
     address: EvmAddress,
-    role: SecurityRole,
+    role: string,
     start: number,
     end: number,
   ): Promise<string[]> {
@@ -462,10 +476,7 @@ export class RPCQueryAdapter {
     return roleCount.toNumber();
   }
 
-  async getRoleMemberCount(
-    address: EvmAddress,
-    role: SecurityRole,
-  ): Promise<number> {
+  async getRoleMemberCount(address: EvmAddress, role: string): Promise<number> {
     LogService.logTrace(`Getting role member count for ${role}`);
 
     const membersCount = await this.connect(
@@ -479,7 +490,7 @@ export class RPCQueryAdapter {
   async hasRole(
     address: EvmAddress,
     target: EvmAddress,
-    role: SecurityRole,
+    role: string,
   ): Promise<boolean> {
     LogService.logTrace(
       `Getting if the account ${target.toString()} has the role ${address.toString()}`,
@@ -516,6 +527,10 @@ export class RPCQueryAdapter {
       ERC1644__factory,
       address.toString(),
     ).isControllable();
+    const arePartitionsProtected = await this.connect(
+      ProtectedPartitions__factory,
+      address.toString(),
+    ).arePartitionsProtected();
     const isMultiPartition = await this.connect(
       ERC1410ScheduledTasks__factory,
       address.toString(),
@@ -567,6 +582,7 @@ export class RPCQueryAdapter {
       decimals: erc20Metadata.info.decimals,
       isWhiteList: isWhiteList,
       isControllable: isControllable,
+      arePartitionsProtected: arePartitionsProtected,
       isMultiPartition: isMultiPartition,
       isIssuable: isIssuable,
       totalSupply: new BigDecimal(totalSupply.toString()),
@@ -698,7 +714,7 @@ export class RPCQueryAdapter {
     address: EvmAddress,
     target: EvmAddress,
     dividend: number,
-  ): Promise<BigNumber> {
+  ): Promise<DividendFor> {
     LogService.logTrace(`Getting dividends for`);
 
     const dividendFor = await this.connect(
@@ -706,7 +722,10 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getDividendsFor(dividend, target.toString());
 
-    return dividendFor.tokenBalance;
+    return new DividendFor(
+      new BigDecimal(dividendFor.tokenBalance),
+      dividendFor.decimals,
+    );
   }
 
   async getDividends(address: EvmAddress, dividend: number): Promise<Dividend> {
@@ -740,7 +759,7 @@ export class RPCQueryAdapter {
     address: EvmAddress,
     target: EvmAddress,
     voting: number,
-  ): Promise<BigNumber> {
+  ): Promise<VotingFor> {
     LogService.logTrace(`Getting voting for`);
 
     const votingFor = await this.connect(
@@ -748,7 +767,10 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getVotingFor(voting, target.toString());
 
-    return votingFor.tokenBalance;
+    return new VotingFor(
+      new BigDecimal(votingFor.tokenBalance),
+      votingFor.decimals,
+    );
   }
 
   async getVoting(address: EvmAddress, voting: number): Promise<VotingRights> {
@@ -832,6 +854,17 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(Pause__factory, address.toString()).isPaused();
+  }
+
+  async arePartitionsProtected(address: EvmAddress): Promise<boolean> {
+    LogService.logTrace(
+      `Checking if the security: ${address.toString()} partitions are protected`,
+    );
+
+    return await this.connect(
+      ProtectedPartitions__factory,
+      address.toString(),
+    ).arePartitionsProtected();
   }
 
   async canTransferByPartition(

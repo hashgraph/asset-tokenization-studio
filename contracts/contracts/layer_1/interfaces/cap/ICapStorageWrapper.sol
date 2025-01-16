@@ -207,11 +207,6 @@
 pragma solidity 0.8.18;
 
 interface ICapStorageWrapper {
-    struct PartitionCap {
-        bytes32 partition;
-        uint256 maxSupply;
-    }
-
     /**
      * @dev Emitted when the token max supply is set
      *

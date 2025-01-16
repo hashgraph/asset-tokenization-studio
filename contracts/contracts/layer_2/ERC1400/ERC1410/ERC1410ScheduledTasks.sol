@@ -209,39 +209,73 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from './ERC1410ScheduledTasksStorageWrapper.sol';
+    ERC1410BasicStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {
+    ERC1410ControllerStorageWrapper
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
 import {
     ERC1410Snapshot
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410Snapshot.sol';
 import {
     ERC1410SnapshotStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+    _ERC1410_RESOLVER_KEY
+} from '../../../layer_1/constants/resolverKeys.sol';
+import {IERC1410} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 import {
-    SnapshotsStorageWrapper
-} from '../../../layer_1/snapshots/SnapshotsStorageWrapper.sol';
+    IERC1410ScheduledTasks
+} from '../../interfaces/ERC1400/IERC1410ScheduledTasks.sol';
 import {
-    SnapshotsStorageWrapper_2
-} from '../../snapshots/SnapshotsStorageWrapper_2.sol';
-import {
-    ERC1410ControllerStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
+    ERC1410ScheduledTasksStorageWrapper
+} from './ERC1410ScheduledTasksStorageWrapper.sol';
 
 contract ERC1410ScheduledTasks is
+    IERC1410ScheduledTasks,
     ERC1410Snapshot,
     ERC1410ScheduledTasksStorageWrapper
 {
-    function totalSupply() external view virtual override returns (uint256) {
+    function triggerAndSyncAll(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) external virtual onlyUnpaused {
+        _triggerAndSyncAll(_partition, _from, _to);
+    }
+
+    function totalSupplyAdjusted() external view virtual returns (uint256) {
         return _totalSupplyAdjusted();
     }
 
-    function totalSupplyByPartition(
+    function totalSupplyByPartitionAdjusted(
         bytes32 _partition
-    ) external view virtual override returns (uint256) {
+    ) external view virtual returns (uint256) {
         return _totalSupplyByPartitionAdjusted(_partition);
+    }
+
+    function balanceOfAdjusted(
+        address _tokenHolder
+    ) external view virtual returns (uint256) {
+        return _balanceOfAdjusted(_tokenHolder);
+    }
+
+    function balanceOfAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) external view virtual returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, _timestamp);
+    }
+
+    function balanceOfByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual returns (uint256) {
+        return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function balanceOf(
@@ -287,7 +321,7 @@ contract ERC1410ScheduledTasks is
         internal
         virtual
         override(
-            ERC1410BasicStorageWrapper,
+            ERC1410BasicStorageWrapperRead,
             ERC1410ScheduledTasksStorageWrapper
         )
     {
@@ -326,50 +360,198 @@ contract ERC1410ScheduledTasks is
             );
     }
 
-    function _updateAccountSnapshot(
-        address account,
-        bytes32 partition
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
     )
         internal
         virtual
-        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
     {
-        return
-            SnapshotsStorageWrapper_2._updateAccountSnapshot(
-                account,
-                partition
-            );
+        ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupply(_newMaxSupply);
     }
 
-    function _balanceOfAt(
-        address account,
-        uint256 snapshotId
+    function _checkNewTotalSupply(
+        uint256 _amount
     )
         internal
-        view
         virtual
-        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
-        returns (uint256)
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
     {
-        return SnapshotsStorageWrapper_2._balanceOfAt(account, snapshotId);
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupply(_amount);
     }
 
-    function _balanceOfAtByPartition(
+    function _checkNewTotalSupplyForPartition(
         bytes32 _partition,
-        address account,
-        uint256 snapshotId
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
     )
         internal
         view
         virtual
-        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
-        returns (uint256)
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return ERC1410ScheduledTasksStorageWrapper._checkMaxSupply(_amount);
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
     {
         return
-            SnapshotsStorageWrapper_2._balanceOfAtByPartition(
+            ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
                 _partition,
-                account,
-                snapshotId
+                _newMaxSupply
             );
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _ERC1410_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](30);
+        uint256 selectorIndex = 0;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfAdjustedAt
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfByPartitionAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .initialize_ERC1410_Basic
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .transferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .isMultiPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.balanceOf.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.partitionsOf.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.totalSupply.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyByPartitionAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .authorizeOperator
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .revokeOperator
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .authorizeOperatorByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .revokeOperatorByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isOperator.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .isOperatorForPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .redeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .issueByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .canTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .canRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .triggerAndSyncAll
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedTransferFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedRedeemFromByPartition
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC1410).interfaceId;
     }
 }

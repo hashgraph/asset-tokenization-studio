@@ -206,11 +206,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ICapStorageWrapper} from './ICapStorageWrapper.sol';
+interface ICap {
+    struct PartitionCap {
+        bytes32 partition;
+        uint256 maxSupply;
+    }
 
-interface ICap is ICapStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_Cap(uint256 maxSupply) external;
+    function initialize_Cap(
+        uint256 maxSupply,
+        PartitionCap[] calldata partitionCap
+    ) external;
 
     /**
      * @dev Set a max supply for the token

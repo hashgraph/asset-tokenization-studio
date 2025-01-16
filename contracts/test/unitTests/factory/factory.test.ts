@@ -237,6 +237,10 @@ import {
     _LOCKER_ROLE,
     EquityDeployedEvent,
     BondDeployedEvent,
+    _PROTECTED_PARTITIONS_ROLE,
+    _PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
+    _WILD_CARD_ROLE,
+    _DEFAULT_PARTITION,
 } from '../../../scripts/constants'
 import { transparentUpgradableProxy } from '../../../scripts/transparentUpgradableProxy'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
@@ -250,6 +254,10 @@ describe('Factory Tests', () => {
     let signer_F: SignerWithAddress
     let signer_G: SignerWithAddress
     let signer_H: SignerWithAddress
+    let signer_I: SignerWithAddress
+    let signer_J: SignerWithAddress
+    let signer_K: SignerWithAddress
+    let signer_L: SignerWithAddress
 
     let account_A: string
     let account_B: string
@@ -259,6 +267,10 @@ describe('Factory Tests', () => {
     let account_F: string
     let account_G: string
     let account_H: string
+    let account_I: string
+    let account_J: string
+    let account_K: string
+    let account_L: string
 
     const init_rbacs: Rbac[] = []
 
@@ -269,6 +281,7 @@ describe('Factory Tests', () => {
     const isWhitelist = false
     const isControllable = true
     const isMultiPartition = false
+    const arePartitionsProtected = false
 
     const votingRight = true
     const informationRight = false
@@ -312,6 +325,8 @@ describe('Factory Tests', () => {
         _PAUSER_ROLE,
         _SNAPSHOT_ROLE,
         _LOCKER_ROLE,
+        _PROTECTED_PARTITIONS_ROLE,
+        _WILD_CARD_ROLE,
     ]
     let listOfMembers: string[]
 
@@ -342,6 +357,10 @@ describe('Factory Tests', () => {
             signer_F,
             signer_G,
             signer_H,
+            signer_I,
+            signer_J,
+            signer_K,
+            signer_L,
         ] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
@@ -351,6 +370,10 @@ describe('Factory Tests', () => {
         account_F = signer_F.address
         account_G = signer_G.address
         account_H = signer_H.address
+        account_I = signer_I.address
+        account_J = signer_J.address
+        account_K = signer_K.address
+        account_L = signer_L.address
 
         listOfMembers = [
             account_A,
@@ -361,6 +384,9 @@ describe('Factory Tests', () => {
             account_F,
             account_G,
             account_H,
+            account_I,
+            account_J,
+            account_K,
         ]
 
         await deployEnvironment()
@@ -372,6 +398,19 @@ describe('Factory Tests', () => {
             }
             init_rbacs.push(rbac)
         }
+        const packedData = ethers.utils.defaultAbiCoder.encode(
+            ['bytes32', 'bytes32'],
+            [_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION]
+        )
+        const packedDataWithoutPrefix = packedData.slice(2)
+
+        const ProtectedPartitionRole_1 = ethers.utils.keccak256(
+            '0x' + packedDataWithoutPrefix
+        )
+        init_rbacs.push({
+            role: ProtectedPartitionRole_1,
+            members: [account_L],
+        })
 
         factory = await ethers.getContractAt(
             'Factory',
@@ -385,6 +424,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -424,6 +464,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -467,6 +508,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -506,6 +548,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -550,6 +593,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -594,6 +638,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -681,7 +726,7 @@ describe('Factory Tests', () => {
             expect(equityMetadata.currency).to.equal(currency)
             expect(equityMetadata.nominalValue).to.equal(nominalValue)
 
-            const capFacet = await ethers.getContractAt('Cap', equityAddress)
+            const capFacet = await ethers.getContractAt('Cap_2', equityAddress)
 
             const maxSupply = await capFacet.getMaxSupply()
             expect(maxSupply).to.equal(numberOfShares)
@@ -694,6 +739,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -730,6 +776,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -770,6 +817,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -808,6 +856,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -862,6 +911,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -912,6 +962,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -954,6 +1005,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -1021,7 +1073,7 @@ describe('Factory Tests', () => {
             expect(metadata.info.isin).to.be.equal(isin)
             expect(metadata.securityType).to.be.equal(SecurityType.BOND)
 
-            const capFacet = await ethers.getContractAt('Cap', bondAddress)
+            const capFacet = await ethers.getContractAt('Cap_2', bondAddress)
             const maxSupply = await capFacet.getMaxSupply()
             expect(maxSupply).to.equal(numberOfUnits)
 
@@ -1059,6 +1111,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -1098,6 +1151,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -1143,6 +1197,7 @@ describe('Factory Tests', () => {
                 account_A,
                 isWhitelist,
                 isControllable,
+                arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
@@ -1210,7 +1265,7 @@ describe('Factory Tests', () => {
             expect(metadata.info.isin).to.be.equal(isin)
             expect(metadata.securityType).to.be.equal(SecurityType.BOND)
 
-            const capFacet = await ethers.getContractAt('Cap', bondAddress)
+            const capFacet = await ethers.getContractAt('Cap_2', bondAddress)
             const maxSupply = await capFacet.getMaxSupply()
             expect(maxSupply).to.equal(numberOfUnits)
 

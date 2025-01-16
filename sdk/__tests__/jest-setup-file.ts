@@ -234,7 +234,9 @@ import {
   CastRegulationSubType,
   CastRegulationType,
 } from '../src/domain/context/factory/RegulationType.js';
-import ConfigInfoViewModel from '../src/port/in/response/ConfigInfoViewModel';
+import { DividendFor } from '../src/domain/context/equity/DividendFor';
+import { VotingFor } from '../src/domain/context/equity/VotingFor';
+import DfnsSettings from '../src/domain/context/custodialWalletSettings/DfnsSettings.js';
 import { ScheduledBalanceAdjustment } from '../src/domain/context/equity/ScheduledBalanceAdjustment.js';
 
 //* Mock console.log() method
@@ -284,6 +286,7 @@ const locksIds = new Map<string, number[]>();
 const locks = new Map<string, lock>();
 const lastLockIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
+const nonces = new Map<string, number>();
 
 let controlList: string[] = [];
 
@@ -375,6 +378,60 @@ function decreaseBalance(targetId: EvmAddress, amount: BigDecimal): void {
       .toString();
     balances.set(account, accountBalance);
   }
+}
+
+function createBondMockImplementation(
+  _securityInfo: Security,
+  _bondInfo: BondDetails,
+  _couponInfo: CouponDetails,
+  _factory: EvmAddress,
+  _resolver: EvmAddress,
+  _configId: string,
+  _configVersion: number,
+  _diamondOwnerAccount?: EvmAddress,
+): Promise<TransactionResponse> {
+  securityInfo = _securityInfo;
+
+  const ids = identifiers(securityEvmAddress);
+  securityInfo.diamondAddress = HederaId.from(ids[0]);
+  securityInfo.evmDiamondAddress = new EvmAddress(ids[1]);
+  securityInfo.type = SecurityType.BOND;
+  securityInfo.regulation = {
+    type: _securityInfo.regulationType ?? '',
+    subType: _securityInfo.regulationsubType ?? '',
+    dealSize: '0',
+    accreditedInvestors: 'ACCREDITATION REQUIRED',
+    maxNonAccreditedInvestors: 0,
+    manualInvestorVerification:
+      'VERIFICATION INVESTORS FINANCIAL DOCUMENTS REQUIRED',
+    internationalInvestors: 'ALLOWED',
+    resaleHoldPeriod: 'NOT APPLICABLE',
+  };
+
+  bondInfo = _bondInfo;
+  couponInfo = _couponInfo;
+
+  configVersion = _configVersion;
+  configId = _configId;
+  resolverAddress = _resolver.toString();
+
+  const diff = bondInfo.maturityDate - couponInfo.firstCouponDate;
+  const numberOfCoupons = Math.ceil(diff / couponInfo.couponFrequency);
+
+  for (let i = 0; i < numberOfCoupons; i++) {
+    const timeStamp =
+      couponInfo.firstCouponDate + couponInfo.couponFrequency * i;
+    const coupon = new Coupon(timeStamp, timeStamp, couponInfo.couponRate, 0);
+    coupons.push(coupon);
+  }
+
+  return Promise.resolve({
+    status: 'success',
+    id: transactionId,
+    response: {
+      bondAddress: securityEvmAddress,
+    },
+  });
 }
 
 jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
@@ -574,13 +631,24 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       const dividendsBalances = dividendsFor.get(dividend);
 
       if (!dividendsBalances)
-        return BigDecimal.fromString('0', securityInfo.decimals);
+        return new DividendFor(
+          BigDecimal.fromString('0', securityInfo.decimals),
+          securityInfo.decimals,
+        );
 
       const balance = dividendsBalances.get(
         '0x' + target.toString().toUpperCase().substring(2),
       );
-      if (balance) return BigDecimal.fromString(balance, securityInfo.decimals);
-      return BigDecimal.fromString('0', securityInfo.decimals);
+      if (balance)
+        return new DividendFor(
+          BigDecimal.fromString(balance, securityInfo.decimals),
+          securityInfo.decimals,
+        );
+
+      return new DividendFor(
+        BigDecimal.fromString('0', securityInfo.decimals),
+        securityInfo.decimals,
+      );
     },
   );
 
@@ -600,13 +668,23 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       const votingBalances = votingRightsFor.get(voting);
 
       if (!votingBalances)
-        return BigDecimal.fromString('0', securityInfo.decimals);
+        return new VotingFor(
+          BigDecimal.fromString('0', securityInfo.decimals),
+          securityInfo.decimals,
+        );
 
       const balance = votingBalances.get(
         '0x' + target.toString().toUpperCase().substring(2),
       );
-      if (balance) return BigDecimal.fromString(balance, securityInfo.decimals);
-      return BigDecimal.fromString('0', securityInfo.decimals);
+      if (balance)
+        return new VotingFor(
+          BigDecimal.fromString(balance, securityInfo.decimals),
+          securityInfo.decimals,
+        );
+      return new VotingFor(
+        BigDecimal.fromString('0', securityInfo.decimals),
+        securityInfo.decimals,
+      );
     },
   );
 
@@ -834,6 +912,19 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       return Math.random();
     });
 
+  singletonInstance.arePartitionsProtected = jest.fn(
+    async (address: EvmAddress) => {
+      return securityInfo.arePartitionsProtected ?? false;
+    },
+  );
+
+  singletonInstance.getNounceFor = jest.fn(
+    async (address: EvmAddress, target: EvmAddress) => {
+      const account = '0x' + target.toString().toUpperCase().substring(2);
+      return nonces.get(account) ?? 0;
+    },
+  );
+
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
   };
@@ -890,66 +981,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     },
   );
 
-  singletonInstance.createBond = jest.fn(
-    async (
-      _securityInfo: Security,
-      _bondInfo: BondDetails,
-      _couponInfo: CouponDetails,
-      _factory: EvmAddress,
-      _resolver: EvmAddress,
-      _configId: string,
-      _configVersion: number,
-      _diamondOwnerAccount?: EvmAddress,
-    ) => {
-      securityInfo = _securityInfo;
-
-      const ids = identifiers(securityEvmAddress);
-      securityInfo.diamondAddress = HederaId.from(ids[0]);
-      securityInfo.evmDiamondAddress = new EvmAddress(ids[1]);
-      securityInfo.type = SecurityType.BOND;
-      securityInfo.regulation = {
-        type: _securityInfo.regulationType ?? '',
-        subType: _securityInfo.regulationsubType ?? '',
-        dealSize: '0',
-        accreditedInvestors: 'ACCREDITATION REQUIRED',
-        maxNonAccreditedInvestors: 0,
-        manualInvestorVerification:
-          'VERIFICATION INVESTORS FINANCIAL DOCUMENTS REQUIRED',
-        internationalInvestors: 'ALLOWED',
-        resaleHoldPeriod: 'NOT APPLICABLE',
-      };
-
-      bondInfo = _bondInfo;
-      couponInfo = _couponInfo;
-
-      configVersion = _configVersion;
-      configId = _configId;
-      resolverAddress = _resolver.toString();
-
-      const diff = bondInfo.maturityDate - couponInfo.firstCouponDate;
-      const numberOfCoupons = Math.ceil(diff / couponInfo.couponFrequency);
-
-      for (let i = 0; i < numberOfCoupons; i++) {
-        const timeStamp =
-          couponInfo.firstCouponDate + couponInfo.couponFrequency * i;
-        const coupon = new Coupon(
-          timeStamp,
-          timeStamp,
-          couponInfo.couponRate,
-          0,
-        );
-        coupons.push(coupon);
-      }
-
-      return {
-        status: 'success',
-        id: transactionId,
-        response: {
-          bondAddress: securityEvmAddress,
-        },
-      } as TransactionResponse;
-    },
-  );
+  singletonInstance.createBond = jest.fn(createBondMockImplementation);
 
   singletonInstance.init = jest.fn(async () => {
     return network;
@@ -1479,8 +1511,202 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     } as TransactionResponse;
   });
 
+  singletonInstance.protectPartitions = jest.fn(async () => {
+    securityInfo.arePartitionsProtected = true;
+    return {
+      status: 'success',
+      id: transactionId,
+    } as TransactionResponse;
+  });
+
+  singletonInstance.unprotectPartitions = jest.fn(async () => {
+    securityInfo.arePartitionsProtected = false;
+    return {
+      status: 'success',
+      id: transactionId,
+    } as TransactionResponse;
+  });
+
+  singletonInstance.protectedTransferFromByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      sourceId: EvmAddress,
+      targetId: EvmAddress,
+      amount: BigDecimal,
+      deadline: BigDecimal,
+      nounce: BigDecimal,
+      signature: string,
+    ) => {
+      increaseBalance(targetId, amount);
+      decreaseBalance(sourceId, amount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.protectedRedeemFromByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      sourceId: EvmAddress,
+      amount: BigDecimal,
+      deadline: BigDecimal,
+      nounce: BigDecimal,
+      signature: string,
+    ) => {
+      decreaseBalance(sourceId, amount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.protectedTransferAndLockByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      amount: BigDecimal,
+      sourceId: EvmAddress,
+      targetId: EvmAddress,
+      expirationDate: BigDecimal,
+      deadline: BigDecimal,
+      nounce: BigDecimal,
+      signature: string,
+    ) => {
+      const account = '0x' + targetId.toString().toUpperCase().substring(2);
+
+      const accountLocks = locks.get(account);
+      const lockIds = locksIds.get(account);
+      const lastLockId = lastLockIds.get(account) ?? 0;
+
+      const newLastLockId = lastLockId + 1;
+
+      if (!lockIds) locksIds.set(account, [newLastLockId]);
+      else {
+        lockIds.push(newLastLockId);
+        locksIds.set(account, lockIds);
+      }
+      if (!accountLocks) {
+        const newLock: lock = new Map();
+        newLock.set(newLastLockId, [
+          expirationDate.toString(),
+          amount.toString(),
+        ]);
+        locks.set(account, newLock);
+      } else {
+        accountLocks.set(newLastLockId, [
+          expirationDate.toString(),
+          amount.toString(),
+        ]);
+        locks.set(account, accountLocks);
+      }
+
+      increaseLockedBalance(targetId, amount);
+      decreaseBalance(sourceId, amount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
   return {
     RPCTransactionAdapter: jest.fn(() => singletonInstance),
+  };
+});
+
+jest.mock('../src/port/out/hs/hts/custodial/DFNSTransactionAdapter', () => {
+  const actual = jest.requireActual(
+    '../src/port/out/hs/hts/custodial/DFNSTransactionAdapter.ts',
+  );
+
+  const singletonInstance = new actual.DFNSTransactionAdapter();
+
+  singletonInstance.init = jest.fn(async () => {
+    return network;
+  });
+
+  return {
+    DFNSTransactionAdapter: jest.fn(() => singletonInstance),
+  };
+});
+
+jest.mock(
+  '../src/port/out/hs/hts/custodial/FireblocksTransactionAdapter',
+  () => {
+    const actual = jest.requireActual(
+      '../src/port/out/hs/hts/custodial/FireblocksTransactionAdapter.ts',
+    );
+
+    const singletonInstance = new actual.FireblocksTransactionAdapter();
+
+    singletonInstance.init = jest.fn(async () => {
+      return network;
+    });
+
+    return {
+      FireblocksTransactionAdapter: jest.fn(() => singletonInstance),
+    };
+  },
+);
+
+jest.mock('../src/port/out/hs/hts/custodial/AWSKMSTransactionAdapter', () => {
+  const actual = jest.requireActual(
+    '../src/port/out/hs/hts/custodial/AWSKMSTransactionAdapter.ts',
+  );
+
+  const singletonInstance = new actual.AWSKMSTransactionAdapter();
+
+  singletonInstance.init = jest.fn(async () => {
+    return network;
+  });
+
+  return {
+    AWSKMSTransactionAdapter: jest.fn(() => singletonInstance),
+  };
+});
+
+jest.mock(
+  '../src/port/out/hs/hts/custodial/CustodialTransactionAdapter',
+  () => {
+    const actual = jest.requireActual(
+      '../src/port/out/hs/hts/custodial/CustodialTransactionAdapter.ts',
+    );
+
+    const singletonInstance = new actual.CustodialTransactionAdapter();
+
+    singletonInstance.register = jest.fn(async (settings: DfnsSettings) => {
+      Injectable.registerTransactionHandler(singletonInstance);
+      return {} as InitializationData;
+    });
+    return {
+      CustodialTransactionAdapter: jest.fn(() => singletonInstance),
+    };
+  },
+);
+
+jest.mock('../src/port/out/hs/HederaTransactionAdapter', () => {
+  const actual = jest.requireActual(
+    '../src/port/out/hs/HederaTransactionAdapter.ts',
+  );
+
+  const singletonInstance = new actual.HederaTransactionAdapter();
+
+  singletonInstance.createBond = jest.fn(createBondMockImplementation);
+
+  singletonInstance.setupDisconnectEventHandler = jest.fn(async () => {
+    return true;
+  });
+
+  return {
+    HederaTransactionAdapter: jest.fn(() => singletonInstance),
   };
 });
 

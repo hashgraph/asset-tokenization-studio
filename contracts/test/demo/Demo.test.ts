@@ -240,7 +240,7 @@ import {
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const _MINUTE_1 = 6000
-const _BUSINESS_LOGIC_COUNT = 20
+const _BUSINESS_LOGIC_COUNT = 21
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 
@@ -531,6 +531,7 @@ Deployed contracts:
                 await environment.deployedBusinessLogics.pause.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.controlList.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey(),
+                await environment.deployedBusinessLogics.protectedPartitions.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.eRC20_2.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.eRC1644_2.getStaticResolverKey(),
                 await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticResolverKey(),
@@ -560,6 +561,7 @@ Deployed contracts:
         const TokenType = 1 // equity
         const isWhiteList = false
         const isControllable = true
+        const arePartitionsProtected = false
         const isMultiPartition = false
         const votingRight = true
         const informationRight = false
@@ -577,6 +579,7 @@ Deployed contracts:
             account_Z,
             isWhiteList,
             isControllable,
+            arePartitionsProtected,
             isMultiPartition,
             TokenName,
             TokenSymbol,
@@ -789,7 +792,7 @@ DiamondResume:
         console.log('Check token name, symbol and decimals')
         const retrieved_name = await erc20Facet.name()
         const retrieved_symbol = await erc20Facet.symbol()
-        const retrieved_decimals = await erc20Facet.decimals()
+        const retrieved_decimals = await erc20Facet.decimalsAdjusted()
 
         expect(retrieved_name).to.equal(TokenName)
         expect(retrieved_symbol).to.equal(TokenSymbol)
@@ -1101,7 +1104,9 @@ DiamondResume:
         expect(accountABalanceAtSnapshot).to.be.equal(9500)
         expect(accountCBalanceAtSnapshot).to.be.equal(500)
         expect(dividend_For_A.tokenBalance).to.be.equal(9500)
+        expect(dividend_For_A.decimals).to.be.equal(TokenDecimals)
         expect(dividend_For_C.tokenBalance).to.be.equal(500)
+        expect(dividend_For_C.decimals).to.be.equal(TokenDecimals)
         expect(accountABalance).to.be.equal(10000)
         expect(accountCBalance).to.be.equal(0)
         expect(accountABalanceByPartition).to.be.equal(accountABalance)

@@ -243,6 +243,7 @@ abstract contract ERC1410Basic is IERC1410Basic, ERC1410BasicStorageWrapper {
         checkControlList(_msgSender())
         checkControlList(_to)
         onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bytes32)
     {
         // Add a function to verify the `_data` parameter

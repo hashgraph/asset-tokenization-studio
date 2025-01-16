@@ -204,16 +204,17 @@
 */
 
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LocalContext} from '../context/LocalContext.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
-import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {LocalContext} from '../context/LocalContext.sol';
+import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract CapStorageWrapper is
+// solhint-disable no-unused-vars, custom-errors
+contract CapStorageWrapper is
     ICapStorageWrapper,
     ERC1410BasicStorageWrapperRead,
     LocalContext
@@ -226,26 +227,12 @@ abstract contract CapStorageWrapper is
 
     // modifiers
     modifier checkMaxSupply(uint256 _amount) {
-        uint256 newTotalSupply = _totalSupply() + _amount;
-        if (!_checkMaxSupply(newTotalSupply)) {
-            revert MaxSupplyReached(_capStorage().maxSupply);
-        }
+        _checkNewTotalSupply(_amount);
         _;
     }
 
     modifier checkMaxSupplyForPartition(bytes32 _partition, uint256 _amount) {
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            _partition
-        ) + _amount;
-
-        if (
-            !_checkMaxSupplyByPartition(_partition, newTotalSupplyForPartition)
-        ) {
-            revert MaxSupplyReachedForPartition(
-                _partition,
-                _capStorage().maxSupplyByPartition[_partition]
-            );
-        }
+        _checkNewTotalSupplyForPartition(_partition, _amount);
         _;
     }
 
@@ -300,52 +287,48 @@ abstract contract CapStorageWrapper is
         return _capStorage().maxSupplyByPartition[_partition];
     }
 
-    function _checkNewMaxSupply(uint256 _newMaxSupply) private view {
-        if (_newMaxSupply == 0) {
-            revert NewMaxSupplyCannotBeZero();
-        }
-        uint256 totalSupply = _totalSupply();
-        if (totalSupply > _newMaxSupply) {
-            revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
-        }
+    function _checkMaxSupply(
+        uint256 _amount
+    ) internal view virtual returns (bool) {
+        revert('Should not reach this function');
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal view virtual returns (bool) {
+        revert('Should not reach this function');
+    }
+
+    function _checkMaxSupplyCommon(
+        uint256 _amount,
+        uint256 _maxSupply
+    ) internal pure returns (bool) {
+        if (_maxSupply == 0) return true;
+        if (_amount <= _maxSupply) return true;
+        return false;
+    }
+
+    function _checkNewMaxSupply(uint256 _newMaxSupply) internal virtual {
+        revert('Should not reach this function');
+    }
+
+    function _checkNewTotalSupply(uint256 _amount) internal virtual {
+        revert('Should not reach this function');
     }
 
     function _checkNewMaxSupplyForPartition(
         bytes32 _partition,
         uint256 _newMaxSupply
-    ) private view {
-        if (_newMaxSupply == 0) return;
-        uint256 totalSupplyForPartition = _totalSupplyByPartition(_partition);
-        if (totalSupplyForPartition > _newMaxSupply) {
-            revert NewMaxSupplyForPartitionTooLow(
-                _partition,
-                _newMaxSupply,
-                totalSupplyForPartition
-            );
-        }
-        uint256 maxSupplyOverall = _getMaxSupply();
-        if (_newMaxSupply > maxSupplyOverall) {
-            revert NewMaxSupplyByPartitionTooHigh(
-                _partition,
-                _newMaxSupply,
-                maxSupplyOverall
-            );
-        }
-    }
-
-    function _checkMaxSupply(
-        uint256 _amount
     ) internal view virtual returns (bool) {
-        return _amount <= _getMaxSupply();
+        revert('Should not reach this function');
     }
 
-    function _checkMaxSupplyByPartition(
+    function _checkNewTotalSupplyForPartition(
         bytes32 _partition,
         uint256 _amount
-    ) internal view virtual returns (bool) {
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(_partition);
-        if (maxSupplyForPartition == 0) return true;
-        return _amount <= maxSupplyForPartition;
+    ) internal virtual {
+        revert('Should not reach this function');
     }
 
     function _capStorage()
@@ -361,3 +344,4 @@ abstract contract CapStorageWrapper is
         }
     }
 }
+// solhint-enable no-unused-vars, custom-errors

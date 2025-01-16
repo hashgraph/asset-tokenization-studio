@@ -264,6 +264,7 @@ describe('Adjust Balances Tests', () => {
             account_A,
             false,
             true,
+            false,
             multiPartition,
             'TEST_AccessControl',
             'TAC',
@@ -291,7 +292,7 @@ describe('Adjust Balances Tests', () => {
         await setFacets(diamond)
     }
 
-    async function setFacets(diamond: any) {
+    async function setFacets(diamond: ResolverProxy) {
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address
@@ -378,7 +379,7 @@ describe('Adjust Balances Tests', () => {
         // adjustBalances fails
         await expect(
             adjustBalancesFacet.adjustBalances(0, adjustDecimals)
-        ).to.be.rejectedWith(Error)
+        ).to.be.revertedWithCustomError(adjustBalancesFacet, 'FactorIsZero')
     })
 
     it('GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds', async () => {

@@ -273,6 +273,7 @@ describe('Snapshots Layer 2 Tests', () => {
             account_A,
             false,
             true,
+            false,
             true,
             'TEST_AccessControl',
             'TAC',
@@ -430,12 +431,16 @@ describe('Snapshots Layer 2 Tests', () => {
         )
 
         expect(dividendFor_C_1.tokenBalance).to.be.equal(balanceOf_C_Original)
+        expect(dividendFor_C_1.decimals).to.be.equal(DECIMALS)
         expect(dividendFor_C_2.tokenBalance).to.be.equal(
             balanceOf_C_Original * adjustmentFactor_1
         )
+        expect(dividendFor_C_2.decimals).to.be.equal(DECIMALS + decimalFactor_1)
+
         expect(dividendFor_C_3.tokenBalance).to.be.equal(
             balanceOf_C_Original * adjustmentFactor_2
         )
+        expect(dividendFor_C_3.decimals).to.be.equal(DECIMALS + decimalFactor_2)
         expect(balance_C_At_Snapshot_4).to.be.equal(
             balanceOf_C_Original * adjustmentFactor_3
         )

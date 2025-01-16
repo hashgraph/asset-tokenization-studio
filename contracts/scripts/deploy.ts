@@ -230,6 +230,7 @@ import {
     ScheduledTasks__factory,
     Cap_2__factory,
     AdjustBalances__factory,
+    ProtectedPartitions__factory,
 } from '../typechain-types'
 import {
     getEnvVar,
@@ -240,7 +241,7 @@ import {
     toHashgraphKey,
     IContract,
     contractIdToString,
-} from '../scripts/utils'
+} from './utils'
 import { BusinessLogicRegistryData } from './businessLogicResolverLogic'
 import { EquityConfigId, BondConfigId, _DEFAULT_ADMIN_ROLE } from './constants'
 import { contractCall } from './contractsLifeCycle/utils'
@@ -253,54 +254,92 @@ import {
 
 const ExistingContractIds = {
     resolver: {
-        proxy: ContractId.fromString(getEnvVar({ name: 'RESOLVER_PROXY' })),
+        proxy: ContractId.fromString(
+            getEnvVar({ name: 'RESOLVER_PROXY', defaultValue: '0.0.0' })
+        ),
         proxyAdmin: ContractId.fromString(
-            getEnvVar({ name: 'RESOLVER_PROXY_ADMIN' })
+            getEnvVar({ name: 'RESOLVER_PROXY_ADMIN', defaultValue: '0.0.0' })
         ),
         contract: ContractId.fromString(
-            getEnvVar({ name: 'RESOLVER_CONTRACT' })
+            getEnvVar({ name: 'RESOLVER_CONTRACT', defaultValue: '0.0.0' })
         ),
     },
     factory: {
-        proxy: ContractId.fromString(getEnvVar({ name: 'FACTORY_PROXY' })),
+        proxy: ContractId.fromString(
+            getEnvVar({ name: 'FACTORY_PROXY', defaultValue: '0.0.0' })
+        ),
         proxyAdmin: ContractId.fromString(
-            getEnvVar({ name: 'FACTORY_PROXY_ADMIN' })
+            getEnvVar({ name: 'FACTORY_PROXY_ADMIN', defaultValue: '0.0.0' })
         ),
         contract: ContractId.fromString(
-            getEnvVar({ name: 'FACTORY_CONTRACT' })
+            getEnvVar({ name: 'FACTORY_CONTRACT', defaultValue: '0.0.0' })
         ),
     },
-    accessControl: ContractId.fromString(getEnvVar({ name: 'ACCESS_CONTROL' })),
-    cap: ContractId.fromString(getEnvVar({ name: 'CAP' })),
-    controlList: ContractId.fromString(getEnvVar({ name: 'CONTROL_LIST' })),
-    pause: ContractId.fromString(getEnvVar({ name: 'PAUSE' })),
-    erc20: ContractId.fromString(getEnvVar({ name: 'ERC20' })),
-    erc1410: ContractId.fromString(getEnvVar({ name: 'ERC1410' })),
-    erc1594: ContractId.fromString(getEnvVar({ name: 'ERC1594' })),
-    erc1643: ContractId.fromString(getEnvVar({ name: 'ERC1643' })),
-    erc1644: ContractId.fromString(getEnvVar({ name: 'ERC1644' })),
-    snapshots: ContractId.fromString(getEnvVar({ name: 'SNAPSHOTS' })),
-    diamondFacet: ContractId.fromString(getEnvVar({ name: 'DIAMOND_FACET' })),
-    equity: ContractId.fromString(getEnvVar({ name: 'EQUITY' })),
-    bond: ContractId.fromString(getEnvVar({ name: 'BOND' })),
+    accessControl: ContractId.fromString(
+        getEnvVar({ name: 'ACCESS_CONTROL', defaultValue: '0.0.0' })
+    ),
+    cap: ContractId.fromString(
+        getEnvVar({ name: 'CAP', defaultValue: '0.0.0' })
+    ),
+    controlList: ContractId.fromString(
+        getEnvVar({ name: 'CONTROL_LIST', defaultValue: '0.0.0' })
+    ),
+    pause: ContractId.fromString(
+        getEnvVar({ name: 'PAUSE', defaultValue: '0.0.0' })
+    ),
+    erc20: ContractId.fromString(
+        getEnvVar({ name: 'ERC20', defaultValue: '0.0.0' })
+    ),
+    erc1410: ContractId.fromString(
+        getEnvVar({ name: 'ERC1410', defaultValue: '0.0.0' })
+    ),
+    erc1594: ContractId.fromString(
+        getEnvVar({ name: 'ERC1594', defaultValue: '0.0.0' })
+    ),
+    erc1643: ContractId.fromString(
+        getEnvVar({ name: 'ERC1643', defaultValue: '0.0.0' })
+    ),
+    erc1644: ContractId.fromString(
+        getEnvVar({ name: 'ERC1644', defaultValue: '0.0.0' })
+    ),
+    snapshots: ContractId.fromString(
+        getEnvVar({ name: 'SNAPSHOTS', defaultValue: '0.0.0' })
+    ),
+    diamondFacet: ContractId.fromString(
+        getEnvVar({ name: 'DIAMOND_FACET', defaultValue: '0.0.0' })
+    ),
+    equity: ContractId.fromString(
+        getEnvVar({ name: 'EQUITY', defaultValue: '0.0.0' })
+    ),
+    bond: ContractId.fromString(
+        getEnvVar({ name: 'BOND', defaultValue: '0.0.0' })
+    ),
     scheduledSnapshots: ContractId.fromString(
-        getEnvVar({ name: 'SCHEDULED_SNAPSHOTS' })
+        getEnvVar({ name: 'SCHEDULED_SNAPSHOTS', defaultValue: '0.0.0' })
     ),
     scheduledBalanceAdjustments: ContractId.fromString(
-        getEnvVar({ name: 'SCHEDULED_BALANCE_ADJUSTMENTS' })
+        getEnvVar({
+            name: 'SCHEDULED_BALANCE_ADJUSTMENTS',
+            defaultValue: '0.0.0',
+        })
     ),
     scheduledTasks: ContractId.fromString(
-        getEnvVar({ name: 'SCHEDULED_TASKS' })
+        getEnvVar({ name: 'SCHEDULED_TASKS', defaultValue: '0.0.0' })
     ),
     corporateActionsSecurity: ContractId.fromString(
-        getEnvVar({ name: 'CORPORATE_ACTIONS_SECURITY' })
+        getEnvVar({ name: 'CORPORATE_ACTIONS_SECURITY', defaultValue: '0.0.0' })
     ),
-    lock: ContractId.fromString(getEnvVar({ name: 'LOCK' })),
+    lock: ContractId.fromString(
+        getEnvVar({ name: 'LOCK', defaultValue: '0.0.0' })
+    ),
     transferAndLock: ContractId.fromString(
-        getEnvVar({ name: 'TRANSFER_AND_LOCK' })
+        getEnvVar({ name: 'TRANSFER_AND_LOCK', defaultValue: '0.0.0' })
     ),
     adjustBalances: ContractId.fromString(
-        getEnvVar({ name: 'ADJUST_BALANCES' })
+        getEnvVar({ name: 'ADJUST_BALANCES', defaultValue: '0.0.0' })
+    ),
+    protectedPartitions: ContractId.fromString(
+        getEnvVar({ name: 'PROTECTED_PARTITIONS', defaultValue: '0.0.0' })
     ),
 }
 
@@ -478,6 +517,10 @@ export async function deployAtsFullInfrastructure({
                 name: 'adjustbalances',
                 ids: { contract: ExistingContractIds.adjustBalances },
             },
+            {
+                name: 'protectedpartitions',
+                ids: { contract: ExistingContractIds.protectedPartitions },
+            },
         ]
 
         const deployedContracts: { [key: string]: DeployedContract } = {}
@@ -524,6 +567,7 @@ export async function deployAtsFullInfrastructure({
         corporateactionssecurity: corporateActionsSecurity,
         transferandlock: transferAndLock,
         adjustbalances: adjustBalances,
+        protectedpartitions: protectedPartitions,
     } = deployedContracts
 
     const businessLogicRegistries: BusinessLogicRegistryData[] = []
@@ -548,6 +592,7 @@ export async function deployAtsFullInfrastructure({
         lock,
         transferAndLock,
         adjustBalances,
+        protectedPartitions,
     ]) {
         const businessLogicKey = await getStaticResolverKey(
             contract.contractId,
@@ -591,6 +636,7 @@ export async function deployAtsFullInfrastructure({
                 lock,
                 transferAndLock,
                 adjustBalances,
+                protectedPartitions,
             ].map(({ contract }) =>
                 getStaticResolverKey(contract.contractId, clientOperator)
             )
@@ -669,6 +715,7 @@ export async function deployAtsFullInfrastructure({
         lock,
         transferAndLock,
         adjustBalances,
+        protectedPartitions,
         factory,
     }
 }
@@ -723,6 +770,7 @@ export async function deployContract({
         transferandlock: { factory: TransferAndLock__factory },
         lock: { factory: Lock_2__factory },
         adjustbalances: { factory: AdjustBalances__factory },
+        protectedpartitions: { factory: ProtectedPartitions__factory },
     }
 
     const contractKey = Object.keys(contractMap).find((contractType) =>

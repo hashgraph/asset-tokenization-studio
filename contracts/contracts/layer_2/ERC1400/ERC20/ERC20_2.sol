@@ -209,23 +209,20 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 import {ERC20} from '../../../layer_1/ERC1400/ERC20/ERC20.sol';
 import {
     ERC20StorageWrapper
 } from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
-import {ERC20StorageWrapper_2} from './ERC20StorageWrapper_2.sol';
-import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {_ERC20_RESOLVER_KEY} from '../../../layer_1/constants/resolverKeys.sol';
+import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
+import {ERC20StorageWrapper_2} from './ERC20StorageWrapper_2.sol';
+import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
 import {IERC20_2} from '../../interfaces/ERC1400/IERC20_2.sol';
-
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors
 contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
     function allowance(
         address owner,
@@ -234,15 +231,14 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         return _allowanceAdjusted(owner, spender);
     }
 
-    function decimals() external view override returns (uint8) {
+    function decimalsAdjusted() external view virtual returns (uint8) {
         return _decimalsAdjusted();
     }
 
-    function getAllowanceLABAF(
-        address _owner,
-        address _spender
-    ) external view returns (uint256) {
-        return _getAllowanceLABAF(_owner, _spender);
+    function decimalsAdjustedAt(
+        uint256 _timestamp
+    ) external view virtual returns (uint8) {
+        return _decimalsAdjustedAt(_timestamp);
     }
 
     function _beforeTokenTransfer(
@@ -250,8 +246,13 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         address from,
         address to,
         uint256 amount
-    ) internal virtual override(ERC20, ERC20StorageWrapper_2) {
-        ERC20StorageWrapper_2._beforeTokenTransfer(partition, from, to, amount);
+    ) internal virtual override(ERC20, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._beforeTokenTransfer(
+            partition,
+            from,
+            to,
+            amount
+        );
     }
 
     function _addPartitionTo(
@@ -261,9 +262,13 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
     )
         internal
         virtual
-        override(ERC1410BasicStorageWrapper, ERC20StorageWrapper_2)
+        override(ERC1410BasicStorageWrapperRead, ERC20StorageWrapper_2_Read)
     {
-        ERC20StorageWrapper_2._addPartitionTo(_value, _account, _partition);
+        ERC20StorageWrapper_2_Read._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
     }
 
     function _beforeAllowanceUpdate(
@@ -278,6 +283,114 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
             _amount,
             _isIncrease
         );
+    }
+
+    function _totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    ) internal view virtual override returns (uint256 totalSupply_) {
+        revert('Should not reach this function');
+    }
+
+    function _lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 balance_) {
+        revert('Should not reach this function');
+    }
+
+    function _lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 balance_) {
+        revert('Should not reach this function');
+    }
+
+    function _balanceOfAt(
+        address account,
+        uint256 snapshotId
+    ) internal view virtual override returns (uint256) {
+        revert('Should not reach this function');
+    }
+
+    /**
+     * @dev Retrieves the balance of `account` for 'partition' at the time `snapshotId` was created.
+     */
+    function _balanceOfAtByPartition(
+        bytes32 _partition,
+        address account,
+        uint256 snapshotId
+    ) internal view virtual override returns (uint256) {
+        revert('Should not reach this function');
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewTotalSupply(_amount);
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return ERC20StorageWrapper_2_Read._checkMaxSupply(_amount);
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return
+            ERC20StorageWrapper_2_Read._checkNewMaxSupplyForPartition(
+                _partition,
+                _newMaxSupply
+            );
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return
+            ERC20StorageWrapper_2_Read._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 
     function getStaticResolverKey()
@@ -297,7 +410,7 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](12);
+        staticFunctionSelectors_ = new bytes4[](13);
         uint256 selectorsIndex;
         staticFunctionSelectors_[selectorsIndex++] = this
             .initialize_ERC20
@@ -319,7 +432,10 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         staticFunctionSelectors_[selectorsIndex++] = this.symbol.selector;
         staticFunctionSelectors_[selectorsIndex++] = this.decimals.selector;
         staticFunctionSelectors_[selectorsIndex++] = this
-            .getAllowanceLABAF
+            .decimalsAdjustedAt
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .decimalsAdjusted
             .selector;
     }
 
@@ -335,4 +451,14 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         staticInterfaceIds_[selectorsIndex++] = type(IERC20).interfaceId;
         staticInterfaceIds_[selectorsIndex++] = type(IERC20_2).interfaceId;
     }
+
+    function getERC20Metadata()
+        external
+        view
+        override
+        returns (ERC20Metadata memory)
+    {
+        return _getERC20MetadataAdjusted();
+    }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors

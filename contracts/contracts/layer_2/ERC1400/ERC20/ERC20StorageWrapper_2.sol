@@ -206,67 +206,22 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    ERC20StorageWrapper
-} from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
 import {_DEFAULT_PARTITION} from '../../../layer_1/constants/values.sol';
-import {_ERC20_2_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
-
-abstract contract ERC20StorageWrapper_2 is
-    ERC20StorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
+import {
+    AdjustBalancesStorageWrapperRead
+} from '../../adjustBalances/AdjustBalancesStorageWrapperRead.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+contract ERC20StorageWrapper_2 is
+    AdjustBalancesStorageWrapperRead,
+    ERC20StorageWrapper_2_Read
 {
-    struct ERC20Storage_2 {
-        mapping(address => mapping(address => uint256)) LABAFs_allowances;
-    }
-
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    )
-        internal
-        virtual
-        override(
-            ERC1410BasicStorageWrapper,
-            ERC1410ScheduledTasksStorageWrapper
-        )
-    {
-        ERC1410ScheduledTasksStorageWrapper._beforeTokenTransfer(
-            partition,
-            from,
-            to,
-            amount
-        );
-    }
-
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(
-            ERC1410BasicStorageWrapper,
-            ERC1410ScheduledTasksStorageWrapper
-        )
-    {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
-        );
-    }
-
+    // solhint-disable no-unused-vars
     function _beforeAllowanceUpdate(
         address _owner,
         address _spender,
@@ -276,40 +231,42 @@ abstract contract ERC20StorageWrapper_2 is
         _triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
 
         _updateAllowanceAndLABAF(_owner, _spender);
-
-        super._beforeAllowanceUpdate(_owner, _spender, _amount, _isIncrease);
     }
+    // solhint-disable no-unused-vars
 
     function _updateAllowanceAndLABAF(
         address _owner,
         address _spender
     ) internal virtual {
-        ERC20Storage_2 storage erc20Storage_2 = _getErc20Storage_2();
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
-        uint256 ABAF = _getABAF();
-        uint256 LABAF = _getAllowanceLABAF(_owner, _spender);
+        uint256 abaf = AdjustBalances_CD_Lib.getABAF();
+        uint256 labaf = AdjustBalances_CD_Lib.getAllowanceLABAF(
+            _owner,
+            _spender
+        );
 
-        if (ABAF == LABAF) return;
+        if (abaf == labaf) return;
 
-        uint256 factor = AdjustBalanceLib._calculateFactor(ABAF, LABAF);
+        uint256 factor = AdjustBalanceLib.calculateFactor(abaf, labaf);
 
         _getErc20Storage().allowed[_owner][_spender] *= factor;
-        erc20Storage_2.LABAFs_allowances[_owner][_spender] = ABAF;
+        adjustBalancesStorage.labafsAllowances[_owner][_spender] = abaf;
     }
 
-    function _getAllowanceLABAF(
-        address _owner,
-        address _spender
-    ) internal view virtual returns (uint256) {
-        ERC20Storage_2 storage erc20Storage_2 = _getErc20Storage_2();
-        return erc20Storage_2.LABAFs_allowances[_owner][_spender];
-    }
-
-    function _decimalsAdjusted() internal view virtual returns (uint8) {
+    function _decimalsAdjusted()
+        internal
+        view
+        virtual
+        override
+        returns (uint8)
+    {
         (, uint8 pendingDecimals) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustments(
+            .getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage()
+                _corporateActionsStorage(),
+                _blockTimestamp()
             );
 
         return _decimals() + pendingDecimals;
@@ -318,24 +275,12 @@ abstract contract ERC20StorageWrapper_2 is
     function _allowanceAdjusted(
         address _owner,
         address _spender
-    ) internal view virtual returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
-            _getABAFAdjusted(),
-            _getAllowanceLABAF(_owner, _spender)
+    ) internal view virtual override returns (uint256) {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getAllowanceLABAF(_owner, _spender)
         );
         return _allowance(_owner, _spender) * factor;
     }
-
-    function _getErc20Storage_2()
-        internal
-        view
-        virtual
-        returns (ERC20Storage_2 storage erc20Storage_2_)
-    {
-        bytes32 position = _ERC20_2_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc20Storage_2_.slot := position
-        }
-    }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

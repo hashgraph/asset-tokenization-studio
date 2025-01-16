@@ -208,7 +208,6 @@ pragma solidity 0.8.18;
 
 interface IERC1410StorageWrapper {
     error NotAllowedInMultiPartitionMode();
-    error OnlyAllowedInMultiPartitionMode();
     error PartitionNotAllowedInSinglePartitionMode(bytes32 partition);
     error ZeroAddressNotAllowed();
 

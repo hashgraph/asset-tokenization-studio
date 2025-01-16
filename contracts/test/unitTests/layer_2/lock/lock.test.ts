@@ -274,6 +274,7 @@ describe('Locks Layer 2 Tests', () => {
             account_A,
             false,
             true,
+            false,
             multiPartition,
             'TEST_AccessControl',
             'TAC',
@@ -301,7 +302,7 @@ describe('Locks Layer 2 Tests', () => {
         await setFacets(diamond)
     }
 
-    async function setFacets(diamond: any) {
+    async function setFacets(diamond: ResolverProxy) {
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
             diamond.address
@@ -661,7 +662,7 @@ describe('Locks Layer 2 Tests', () => {
             currentTimestamp + ONE_SECOND
         )
         const TotalLockLABAF_Before =
-            await lockFacet.getTotalLockLABAFByPartition(
+            await adjustBalancesFacet.getTotalLockLABAFByPartition(
                 _PARTITION_ID_1,
                 account_A
             )
@@ -677,11 +678,12 @@ describe('Locks Layer 2 Tests', () => {
             currentTimestamp + 100 * ONE_SECOND
         )
 
-        const LockLABAF_Before = await lockFacet.getLockLABAFByPartition(
-            _PARTITION_ID_1,
-            2,
-            account_A
-        )
+        const LockLABAF_Before =
+            await adjustBalancesFacet.getLockLABAFByPartition(
+                _PARTITION_ID_1,
+                2,
+                account_A
+            )
 
         // RELEASE LOCK
         await time.setNextBlockTimestamp(
@@ -691,15 +693,16 @@ describe('Locks Layer 2 Tests', () => {
         await lockFacet.releaseByPartition(_PARTITION_ID_1, 1, account_A)
 
         const TotalLockLABAF_After =
-            await lockFacet.getTotalLockLABAFByPartition(
+            await adjustBalancesFacet.getTotalLockLABAFByPartition(
                 _PARTITION_ID_1,
                 account_A
             )
-        const LockLABAF_After = await lockFacet.getLockLABAFByPartition(
-            _PARTITION_ID_1,
-            2,
-            account_A
-        )
+        const LockLABAF_After =
+            await adjustBalancesFacet.getLockLABAFByPartition(
+                _PARTITION_ID_1,
+                2,
+                account_A
+            )
 
         expect(LockLABAF_Before).to.be.equal(LockLABAF_After)
         expect(TotalLockLABAF_Before).to.be.equal(0)

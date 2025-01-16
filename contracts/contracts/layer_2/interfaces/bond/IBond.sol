@@ -236,6 +236,7 @@ interface IBond {
         uint256 rate;
         uint256 recordDate;
         uint256 executionDate;
+        uint8 decimals;
         bool recordDateReached;
     }
 

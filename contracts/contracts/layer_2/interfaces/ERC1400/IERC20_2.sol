@@ -207,10 +207,13 @@
 // Contract copy-pasted form OZ and extended
 
 pragma solidity 0.8.18;
-
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 interface IERC20_2 {
-    function getAllowanceLABAF(
-        address _owner,
-        address _spender
-    ) external returns (uint256);
+    function decimalsAdjusted() external view returns (uint8);
+
+    function decimalsAdjustedAt(
+        uint256 _timestamp
+    ) external view returns (uint8);
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
