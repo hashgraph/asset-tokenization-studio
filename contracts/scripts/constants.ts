@@ -304,7 +304,7 @@ export const GAS_LIMIT = {
     businessLogicResolver: {
         getStaticResolverKey: 60_000,
         registerBusinessLogics: 7_800_000,
-        createConfiguration: 13_000_000,
+        createConfiguration: 15_000_000,
     },
 }
 

@@ -33,13 +33,9 @@ jobs:
           npm ci
           npm run compile:force
 
-      - name: TEST TEST contracts only access control
-        working-directory: contracts
-        run: npm run test:accessControl
-
       - name: Test Contracts
         working-directory: contracts
-        run: npm run test-coverage
+        run: npm run test:coverage
 
       - name: Install dependencies SDK
         working-directory: sdk
