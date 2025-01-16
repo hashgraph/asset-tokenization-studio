@@ -767,10 +767,10 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                   <p
                     class="css-kwpule"
                   >
-                    Account Balance
+                    Total Balance
                   </p>
                   <div
-                    class="chakra-stack css-1kn39y0"
+                    class="chakra-stack css-apqn8k"
                   >
                     <p
                       class="css-1ysbn4y"
@@ -780,6 +780,41 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                         class="css-650xeh"
                       />
                     </p>
+                  </div>
+                  <div
+                    class="chakra-stack css-1ok80jm"
+                  >
+                    <div
+                      class="chakra-stack css-1h4ws66"
+                    >
+                      <p
+                        class="css-ncp2jn"
+                      >
+                        Available balance
+                      </p>
+                      <p
+                        class="css-vzbq89"
+                      >
+                        - 
+                      </p>
+                    </div>
+                    <div
+                      class="chakra-stack css-nkhb6s"
+                    />
+                    <div
+                      class="chakra-stack css-1h4ws66"
+                    >
+                      <p
+                        class="css-ncp2jn"
+                      >
+                        Locked balance
+                      </p>
+                      <p
+                        class="css-vzbq89"
+                      >
+                        - 
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
