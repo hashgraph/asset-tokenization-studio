@@ -361,9 +361,7 @@ export async function deployAtsContracts({
     network,
     useDeployed,
 }: DeployAtsContractsCommand) {
-    const overrides = {
-        // gasLimit: GAS_LIMIT.high,
-    }
+    const overrides = {} // If you want to override the default parameters
     const commands = {
         businessLogicResolver: new DeployContractWithFactoryCommand({
             factory: new BusinessLogicResolver__factory(),

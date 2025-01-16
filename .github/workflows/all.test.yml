@@ -35,7 +35,7 @@ jobs:
 
       - name: Test Contracts
         working-directory: contracts
-        run: npm run test:coverage
+        run: npm run test
 
       - name: Install dependencies SDK
         working-directory: sdk
