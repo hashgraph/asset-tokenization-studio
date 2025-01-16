@@ -212,6 +212,8 @@ import {
     AccessControl,
     IFactory,
     BusinessLogicResolver,
+    AccessControl__factory,
+    Pause__factory,
 } from '../../../../typechain-types'
 import {
     PAUSER_ROLE,
@@ -288,12 +290,11 @@ describe('Pause Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
     })
 
     it('GIVEN an account without pause role WHEN pause THEN transaction fails with AccountHasNoRole', async () => {

@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     AccessControl,
@@ -220,7 +220,6 @@ import {
     Snapshots_2,
     Snapshots_2__factory,
 } from '../../../../typechain-types'
-import { Network } from '../../../../Configuration'
 import {
     CAP_ROLE,
     CORPORATE_ACTION_ROLE,
@@ -262,31 +261,10 @@ describe('CAP Layer 2 Tests', () => {
         decimals: number
     }
 
-    const setupSignersAndAccounts = async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-    }
-
     const setupEnvironment = async () => {
         const rbacPause = { role: PAUSER_ROLE, members: [account_B] }
         const rbaCap = { role: CAP_ROLE, members: [account_B] }
         const init_rbacs = [rbacPause, rbaCap]
-
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
-                    signer: signer_A,
-                    network: network.name as Network,
-                    useDeployed: false,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -353,8 +331,29 @@ describe('CAP Layer 2 Tests', () => {
         }))
     }
 
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
     beforeEach(async () => {
-        await setupSignersAndAccounts()
         await setupEnvironment()
     })
 

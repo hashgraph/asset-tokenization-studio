@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
@@ -213,8 +213,10 @@ import {
     type AccessControl,
     IFactory,
     BusinessLogicResolver,
+    AccessControl__factory,
+    CorporateActionsSecurity__factory,
+    Pause__factory,
 } from '../../../../typechain-types'
-import { Network } from '../../../../Configuration'
 import {
     CORPORATE_ACTION_ROLE,
     PAUSER_ROLE,
@@ -249,7 +251,7 @@ describe('Corporate Actions Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
-    beforeEach(async () => {
+    before(async () => {
         // mute | mock console.log
         console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
@@ -260,16 +262,18 @@ describe('Corporate Actions Tests', () => {
 
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
+                await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
-                    network: network.name as Network,
                     useDeployed: false,
+                    useEnvironment: true,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
+    beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
@@ -307,17 +311,15 @@ describe('Corporate Actions Tests', () => {
             factory,
         })
 
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        corporateActionsFacet = await ethers.getContractAt(
-            'CorporateActionsSecurity',
-            diamond.address
+        corporateActionsFacet = CorporateActionsSecurity__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
+        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
     })
 
     it('GIVEN an account without corporateActions role WHEN addCorporateAction THEN transaction fails with AccountHasNoRole', async () => {

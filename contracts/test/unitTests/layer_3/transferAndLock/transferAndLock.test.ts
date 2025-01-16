@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
@@ -214,8 +214,11 @@ import {
     TransferAndLock,
     BusinessLogicResolver,
     IFactory,
+    Lock__factory,
+    TransferAndLock__factory,
+    Pause__factory,
+    ERC1410ScheduledTasks__factory,
 } from '../../../../typechain-types'
-import { Network } from '../../../../Configuration'
 import {
     PAUSER_ROLE,
     LOCKER_ROLE,
@@ -266,21 +269,21 @@ describe('Transfer and lock Tests', () => {
         account_B = signer_B.address
         account_C = signer_C.address
         account_D = signer_D.address
-    })
 
-    beforeEach(async () => {
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
+                await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
-                    network: network.name as Network,
                     useDeployed: false,
+                    useEnvironment: true,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
+    beforeEach(async () => {
         currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
         expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
     })
@@ -332,23 +335,13 @@ describe('Transfer and lock Tests', () => {
                 factory,
             })
 
-            lockFacet = await ethers.getContractAt(
-                'Lock',
+            lockFacet = Lock__factory.connect(diamond.address, signer_C)
+            transferAndLockFacet = TransferAndLock__factory.connect(
                 diamond.address,
                 signer_C
             )
-            transferAndLockFacet = await ethers.getContractAt(
-                'TransferAndLock',
-                diamond.address,
-                signer_C
-            )
-            pauseFacet = await ethers.getContractAt(
-                'Pause',
-                diamond.address,
-                signer_D
-            )
-            erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
+            pauseFacet = Pause__factory.connect(diamond.address, signer_D)
+            erc1410Facet = ERC1410ScheduledTasks__factory.connect(
                 diamond.address,
                 signer_B
             )

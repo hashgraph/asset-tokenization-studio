@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
@@ -217,7 +217,6 @@ import {
     BusinessLogicResolver,
     IFactory,
 } from '../../../../typechain-types'
-import { Network } from '../../../../Configuration'
 import {
     ADJUSTMENT_BALANCE_ROLE,
     PAUSER_ROLE,
@@ -347,21 +346,21 @@ describe('Adjust Balances Tests', () => {
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
-    })
 
-    beforeEach(async () => {
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
+                await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
-                    network: network.name as Network,
                     useDeployed: false,
+                    useEnvironment: true,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
+    beforeEach(async () => {
         await deployAsset({
             multiPartition: true,
             factory,

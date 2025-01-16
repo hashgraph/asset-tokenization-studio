@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { BigNumber } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
@@ -222,6 +222,11 @@ import {
     IERC20,
     IFactory,
     BusinessLogicResolver,
+    AccessControl__factory,
+    ControlList__factory,
+    Equity__factory,
+    ERC1410ScheduledTasks__factory,
+    Pause__factory,
 } from '../../../../typechain-types'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -250,7 +255,6 @@ import {
     deployAtsFullInfrastructure,
 } from '../../../../scripts'
 import { grantRoleAndPauseToken } from '../../../common'
-import { Network } from '../../../../Configuration'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -685,26 +689,27 @@ describe('ERC1400 Tests', () => {
             account_C = signer_C.address
             account_D = signer_D.address
             account_E = signer_E.address
-        })
-        beforeEach(async () => {
-            const rbacPause: Rbac = {
-                role: PAUSER_ROLE,
-                members: [account_B],
-            }
-            const init_rbacs: Rbac[] = [rbacPause]
 
             const { deployer, ...deployedContracts } =
                 await deployAtsFullInfrastructure(
-                    new DeployAtsFullInfrastructureCommand({
+                    await DeployAtsFullInfrastructureCommand.newInstance({
                         signer: signer_A,
-                        network: network.name as Network,
                         useDeployed: false,
+                        useEnvironment: true,
                     })
                 )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
+        })
+
+        beforeEach(async () => {
+            const rbacPause: Rbac = {
+                role: PAUSER_ROLE,
+                members: [account_B],
+            }
+            const init_rbacs: Rbac[] = [rbacPause]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -737,28 +742,22 @@ describe('ERC1400 Tests', () => {
                 factory,
             })
 
-            accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
-                diamond.address
+            accessControlFacet = AccessControl__factory.connect(
+                diamond.address,
+                signer_A
+            )
+            erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+                diamond.address,
+                signer_A
+            )
+            equityFacet = Equity__factory.connect(diamond.address, signer_A)
+            pauseFacet = Pause__factory.connect(diamond.address, signer_B)
+            controlList = ControlList__factory.connect(
+                diamond.address,
+                signer_A
             )
 
-            erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
-                diamond.address
-            )
-
-            equityFacet = await ethers.getContractAt('Equity', diamond.address)
-
-            pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-
-            controlList = await ethers.getContractAt(
-                'ControlList',
-                diamond.address
-            )
-
-            accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-            erc1410Facet = erc1410Facet.connect(signer_A)
 
             await erc1410Facet.issueByPartition(
                 _PARTITION_ID_1,
@@ -2353,7 +2352,9 @@ describe('ERC1400 Tests', () => {
     })
 
     describe('Single partition ', () => {
-        beforeEach(async () => {
+        before(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
@@ -2368,13 +2369,15 @@ describe('ERC1400 Tests', () => {
                     await DeployAtsFullInfrastructureCommand.newInstance({
                         signer: signer_A,
                         useDeployed: false,
+                        useEnvironment: true,
                     })
                 )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
-
+        })
+        beforeEach(async () => {
             const rbacPause: Rbac = {
                 role: PAUSER_ROLE,
                 members: [account_B],
@@ -2412,28 +2415,22 @@ describe('ERC1400 Tests', () => {
                 factory,
             })
 
-            accessControlFacet = await ethers.getContractAt(
-                'AccessControl',
-                diamond.address
+            accessControlFacet = AccessControl__factory.connect(
+                diamond.address,
+                signer_A
+            )
+            erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+                diamond.address,
+                signer_A
+            )
+            equityFacet = Equity__factory.connect(diamond.address, signer_A)
+            pauseFacet = Pause__factory.connect(diamond.address, signer_B)
+            controlList = ControlList__factory.connect(
+                diamond.address,
+                signer_A
             )
 
-            erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
-                diamond.address
-            )
-
-            equityFacet = await ethers.getContractAt('Equity', diamond.address)
-
-            pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-
-            controlList = await ethers.getContractAt(
-                'ControlList',
-                diamond.address
-            )
-
-            accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-            erc1410Facet = erc1410Facet.connect(signer_A)
 
             await erc1410Facet.issueByPartition(
                 _PARTITION_ID_1,
@@ -2579,7 +2576,9 @@ describe('ERC1400 Tests', () => {
     })
 
     describe('Adjust balances', () => {
-        beforeEach(async () => {
+        before(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
             account_A = signer_A.address
@@ -2591,13 +2590,15 @@ describe('ERC1400 Tests', () => {
                     await DeployAtsFullInfrastructureCommand.newInstance({
                         signer: signer_A,
                         useDeployed: false,
+                        useEnvironment: true,
                     })
                 )
 
             factory = deployedContracts.factory.contract
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
-
+        })
+        beforeEach(async () => {
             await deployAsset({
                 multiPartition: true,
                 factory,

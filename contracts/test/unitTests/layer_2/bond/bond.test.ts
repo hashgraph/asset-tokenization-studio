@@ -216,6 +216,11 @@ import {
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
+    ERC1410ScheduledTasks__factory,
+    Lock_2__factory,
+    Pause__factory,
+    AccessControl__factory,
+    Bond__factory,
 } from '../../../../typechain-types'
 import {
     CORPORATE_ACTION_ROLE,
@@ -283,12 +288,24 @@ describe('Bond Tests', () => {
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
     })
 
     beforeEach(async () => {
         currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
             .timestamp
-        startingDate = currentTimeInSeconds + TIME / 1000 + 5
+        startingDate = currentTimeInSeconds + TIME / 1000 + 5 // ! Had to add 5 seconds to avoid timestamp issues
         maturityDate = startingDate + numberOfCoupons * frequency
         firstCouponDate = startingDate + 1
         couponRecordDateInSeconds = currentTimeInSeconds + TIME_2 / 1000
@@ -299,17 +316,6 @@ describe('Bond Tests', () => {
             executionDate: couponExecutionDateInSeconds.toString(),
             rate: couponRate,
         }
-
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
@@ -345,20 +351,16 @@ describe('Bond Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        bondFacet = await ethers.getContractAt('Bond', diamond.address)
-
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        bondFacet = Bond__factory.connect(diamond.address, signer_A)
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-
-        lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
-
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
+        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
         )
     })
 

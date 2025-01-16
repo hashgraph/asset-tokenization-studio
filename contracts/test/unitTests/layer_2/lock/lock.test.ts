@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
 import {
@@ -217,8 +217,13 @@ import {
     Cap_2,
     IFactory,
     BusinessLogicResolver,
+    AccessControl__factory,
+    ERC1410ScheduledTasks__factory,
+    AdjustBalances__factory,
+    Cap_2__factory,
+    Lock_2__factory,
+    Equity__factory,
 } from '../../../../typechain-types'
-import { Network } from '../../../../Configuration'
 import {
     ADJUSTMENT_BALANCE_ROLE,
     PAUSER_ROLE,
@@ -234,6 +239,7 @@ import {
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
 } from '../../../../scripts'
+import { providers } from 'ethers'
 
 const amount = 1
 const balanceOf_A_Original = [10 * amount, 100 * amount]
@@ -303,30 +309,31 @@ describe('Locks Layer 2 Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        await setFacets(diamond)
+        await setFacets({ diamond, defaultSigner: signer_A })
     }
 
-    async function setFacets(diamond: ResolverProxy) {
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+    async function setFacets({
+        diamond,
+        defaultSigner = ethers.provider,
+    }: {
+        diamond: ResolverProxy
+        defaultSigner?: SignerWithAddress | providers.Provider
+    }) {
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            defaultSigner
         )
-
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            defaultSigner
         )
-
-        adjustBalancesFacet = await ethers.getContractAt(
-            'AdjustBalances',
-            diamond.address
+        adjustBalancesFacet = AdjustBalances__factory.connect(
+            diamond.address,
+            defaultSigner
         )
-
-        capFacet = await ethers.getContractAt('Cap_2', diamond.address)
-
-        lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
-
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
+        capFacet = Cap_2__factory.connect(diamond.address, defaultSigner)
+        lockFacet = Lock_2__factory.connect(diamond.address, defaultSigner)
+        equityFacet = Equity__factory.connect(diamond.address, defaultSigner)
     }
 
     function set_initRbacs(): Rbac[] {
@@ -399,20 +406,21 @@ describe('Locks Layer 2 Tests', () => {
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
     })
 
     beforeEach(async () => {
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
-                    signer: signer_A,
-                    network: network.name as Network,
-                    useDeployed: false,
-                })
-            )
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-
         await deployAsset(true)
     })
 

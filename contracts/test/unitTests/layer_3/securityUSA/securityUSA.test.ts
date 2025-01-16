@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
@@ -213,7 +213,6 @@ import {
     BusinessLogicResolver,
     IFactory,
 } from '../../../../typechain-types'
-import { Network } from '../../../../Configuration'
 import {
     Rbac,
     deployBondFromFactory,
@@ -257,6 +256,18 @@ describe('Security USA Tests', () => {
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+
         currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
             .timestamp
         startingDate = currentTimeInSeconds + TIME
@@ -266,20 +277,6 @@ describe('Security USA Tests', () => {
         expect(startingDate).to.be.gt(currentTimeInSeconds)
         expect(maturityDate).to.be.gt(startingDate)
         expect(firstCouponDate).to.be.gt(startingDate)
-    })
-
-    beforeEach(async () => {
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
-                    signer: signer_A,
-                    network: network.name as Network,
-                    useDeployed: false,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
     })
 
     describe('equity USA', () => {

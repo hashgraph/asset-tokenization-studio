@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
@@ -214,6 +214,10 @@ import {
     ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
+    AccessControl__factory,
+    Equity__factory,
+    ScheduledBalanceAdjustments__factory,
+    ScheduledTasks__factory,
 } from '../../../../../typechain-types'
 import {
     CORPORATE_ACTION_ROLE,
@@ -225,7 +229,6 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
 } from '../../../../../scripts'
-import { Network } from '../../../../../Configuration'
 
 const TIME = 6000
 
@@ -254,21 +257,21 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
-    })
 
-    beforeEach(async () => {
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
+                await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
-                    network: network.name as Network,
                     useDeployed: false,
+                    useEnvironment: true,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
+    beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
@@ -306,20 +309,19 @@ describe('Scheduled BalanceAdjustments Tests', () => {
             factory,
         })
 
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
-
-        scheduledBalanceAdjustmentsFacet = await ethers.getContractAt(
-            'ScheduledBalanceAdjustments',
-            diamond.address
-        )
-        scheduledTasksFacet = await ethers.getContractAt(
-            'ScheduledTasks',
-            diamond.address
+        equityFacet = Equity__factory.connect(diamond.address, signer_A)
+        scheduledBalanceAdjustmentsFacet =
+            ScheduledBalanceAdjustments__factory.connect(
+                diamond.address,
+                signer_A
+            )
+        scheduledTasksFacet = ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
         )
     })
 

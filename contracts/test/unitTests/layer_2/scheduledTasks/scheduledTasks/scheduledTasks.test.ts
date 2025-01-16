@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
@@ -215,8 +215,12 @@ import {
     ERC1410ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
+    AccessControl__factory,
+    Equity__factory,
+    Pause__factory,
+    ERC1410ScheduledTasks__factory,
+    ScheduledTasks__factory,
 } from '../../../../../typechain-types'
-import { Network } from '../../../../../Configuration'
 import {
     CORPORATE_ACTION_ROLE,
     PAUSER_ROLE,
@@ -263,6 +267,18 @@ describe('Scheduled Tasks Tests', () => {
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
     })
 
     beforeEach(async () => {
@@ -275,18 +291,6 @@ describe('Scheduled Tasks Tests', () => {
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause, rbacIssue]
-
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
-                    signer: signer_A,
-                    network: network.name as Network,
-                    useDeployed: false,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -319,22 +323,19 @@ describe('Scheduled Tasks Tests', () => {
             factory,
         })
 
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
-        scheduledTasksFacet = await ethers.getContractAt(
-            'ScheduledTasks',
-            diamond.address
+        equityFacet = Equity__factory.connect(diamond.address, signer_A)
+        scheduledTasksFacet = ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
+        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
         )
     })
 

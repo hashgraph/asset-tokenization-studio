@@ -211,6 +211,9 @@ import {
     type Pause,
     DiamondFacet,
     DiamondLoupeFacet,
+    DiamondFacet__factory,
+    AccessControl__factory,
+    Pause__factory,
 } from '../../../typechain-types'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { DEFAULT_ADMIN_ROLE } from '../../../scripts/constants'
@@ -236,15 +239,9 @@ describe('ResolverProxy Tests', () => {
     async function deployContracts() {
         resolver = await deployResolver()
 
-        diamondFacet = await (
-            await ethers.getContractFactory('DiamondFacet')
-        ).deploy()
-
-        accessControlImpl = await (
-            await ethers.getContractFactory('AccessControl')
-        ).deploy()
-
-        pauseImpl = await (await ethers.getContractFactory('Pause')).deploy()
+        diamondFacet = await new DiamondFacet__factory(signer_A).deploy()
+        accessControlImpl = await new AccessControl__factory(signer_A).deploy()
+        pauseImpl = await new Pause__factory(signer_A).deploy()
     }
 
     async function setUpResolver(

@@ -205,7 +205,7 @@
 
 //import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     AccessControl,
@@ -220,7 +220,6 @@ import {
 } from '../../../typechain-types'
 import {
     BOND_CONFIG_ID,
-    CreateConfigurationsForDeployedContractsResult,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     DeployContractWithFactoryResult,

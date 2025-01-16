@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
@@ -214,8 +214,11 @@ import {
     ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
+    AccessControl__factory,
+    Equity__factory,
+    ScheduledTasks__factory,
+    ScheduledSnapshots__factory,
 } from '../../../../../typechain-types'
-import { Network } from '../../../../../Configuration'
 import {
     CORPORATE_ACTION_ROLE,
     PAUSER_ROLE,
@@ -254,6 +257,18 @@ describe('Scheduled Snapshots Tests', () => {
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
     })
 
     beforeEach(async () => {
@@ -262,18 +277,6 @@ describe('Scheduled Snapshots Tests', () => {
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
-
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                new DeployAtsFullInfrastructureCommand({
-                    signer: signer_A,
-                    network: network.name as Network,
-                    useDeployed: false,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -306,20 +309,18 @@ describe('Scheduled Snapshots Tests', () => {
             factory,
         })
 
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
-
-        scheduledSnapshotsFacet = await ethers.getContractAt(
-            'ScheduledSnapshots',
-            diamond.address
+        equityFacet = Equity__factory.connect(diamond.address, signer_A)
+        scheduledSnapshotsFacet = ScheduledSnapshots__factory.connect(
+            diamond.address,
+            signer_A
         )
-        scheduledTasksFacet = await ethers.getContractAt(
-            'ScheduledTasks',
-            diamond.address
+        scheduledTasksFacet = ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
         )
     })
 
