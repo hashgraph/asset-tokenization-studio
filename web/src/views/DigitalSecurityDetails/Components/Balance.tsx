@@ -211,10 +211,12 @@ import { useTranslation } from "react-i18next";
 import { isHederaValidAddress, required } from "../../../utils/rules";
 import {
   GetAccountBalanceRequest,
+  GetLocksIdRequest,
   SecurityViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useGetBalanceOf } from "../../../hooks/queries/useGetSecurityDetails";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useGetLockers } from "../../../hooks/queries/useGetLockers";
 
 interface BalanceProps {
   id?: string;
@@ -269,10 +271,24 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
     },
   );
 
+  const { data: lockers, refetch: refetchLockers } = useGetLockers(
+    new GetLocksIdRequest({
+      securityId: id!,
+      targetId: targetId ?? "",
+      start: 0,
+      end: 100,
+    }),
+    {
+      enabled: !!targetId,
+      refetchOnWindowFocus: false,
+    },
+  );
+
   useEffect(() => {
     if (targetId) {
       setIsLoading(true);
       refetch();
+      refetchLockers();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetId]);
@@ -280,6 +296,16 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
   const onSubmit = ({ search }: BalanceSearchFieldValue) => {
     setTagetId(search);
   };
+
+  const lockBalance = useMemo(() => {
+    if (!lockers) {
+      return 0;
+    }
+
+    return lockers.reduce((acc, current) => {
+      return acc + Number(current.amount);
+    }, 0);
+  }, [lockers]);
 
   return (
     <VStack gap={6}>
@@ -334,19 +360,36 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
             layerStyle="container"
           />
         </Stack>
-        <Stack layerStyle="container" gap={2} p={6} pb={9}>
-          <Text textStyle="ElementsSemiboldMD">
-            {tProperties("accountBalance")}
-          </Text>
-          <VStack gap={0}>
-            <Text textStyle="ElementsSemibold2XL">
-              {balance?.value ?? "-"}
-              <Text ml={1} as="span" textStyle="ElementsRegularMD">
-                {tProperties(detailsResponse.symbol ?? "")}
-              </Text>
+        <VStack w={"full"}>
+          <Stack layerStyle="container" gap={2} p={6} pb={9}>
+            <Text textStyle="ElementsSemiboldMD">
+              {tProperties("accountBalance")}
             </Text>
-          </VStack>
-        </Stack>
+            <VStack gap={0}>
+              <Text textStyle="ElementsSemibold2XL">
+                {balance?.value ?? "-"}
+                <Text ml={1} as="span" textStyle="ElementsRegularMD">
+                  {tProperties(detailsResponse.symbol ?? "")}
+                </Text>
+              </Text>
+            </VStack>
+          </Stack>
+          {lockBalance > 0 && (
+            <Stack layerStyle="container" gap={2} p={6} pb={9}>
+              <Text textStyle="ElementsSemiboldMD">
+                {tProperties("lockBalance")}
+              </Text>
+              <VStack gap={0}>
+                <Text textStyle="ElementsSemibold2XL">
+                  {lockBalance ?? "-"}
+                  <Text ml={1} as="span" textStyle="ElementsRegularMD">
+                    {tProperties(detailsResponse.symbol ?? "")}
+                  </Text>
+                </Text>
+              </VStack>
+            </Stack>
+          )}
+        </VStack>
       </HStack>
     </VStack>
   );

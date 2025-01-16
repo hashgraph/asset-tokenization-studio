@@ -255,6 +255,7 @@ export default {
     maxSupply: "Max Supply",
     pendingToBeMinted: "Pending to be minted",
     accountBalance: "Account Balance",
+    lockBalance: "Lock Balance",
     currentAvailableBalance: "Current Available balance",
     overallBalance: "Overall balance",
     tokenSymbol: "TOK",
