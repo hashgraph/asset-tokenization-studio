@@ -205,6 +205,7 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     type ResolverProxy,
     type AdjustBalances,
@@ -213,22 +214,22 @@ import {
     type AccessControl,
     Equity,
     ScheduledTasks,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+    BusinessLogicResolver,
+    IFactory,
+} from '@typechain'
 import {
-    _ADJUSTMENT_BALANCE_ROLE,
-    _PAUSER_ROLE,
-    _ISSUER_ROLE,
-    _CORPORATE_ACTION_ROLE,
-} from '../../../../scripts/constants'
-import {
+    ADJUSTMENT_BALANCE_ROLE,
+    PAUSER_ROLE,
+    ISSUER_ROLE,
+    CORPORATE_ACTION_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 const amount = 1
 const balanceOf_B_Original = [20 * amount, 200 * amount]
@@ -250,6 +251,8 @@ describe('Adjust Balances Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
     let adjustBalancesFacet: AdjustBalances
     let accessControlFacet: AccessControl
@@ -257,37 +260,47 @@ describe('Adjust Balances Tests', () => {
     let equityFacet: Equity
     let scheduledTasksFacet: ScheduledTasks
 
-    async function deployAsset(multiPartition: boolean) {
+    async function deployAsset({
+        multiPartition,
+        factory,
+        businessLogicResolver,
+    }: {
+        multiPartition: boolean
+        factory: IFactory
+        businessLogicResolver: BusinessLogicResolver
+    }) {
         const init_rbacs: Rbac[] = set_initRbacs()
 
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            multiPartition,
-            'TEST_AccessControl',
-            'TAC',
-            decimals_Original,
-            'RO3682287482',
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            BigInt(maxSupply_Original),
-            100,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_B,
-            true,
-            'ES,FR,CH',
-            'nothing',
-            init_rbacs
-        )
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: multiPartition,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: decimals_Original,
+            isin: 'RO3682287482',
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: BigInt(maxSupply_Original),
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
 
         await setFacets(diamond)
     }
@@ -320,22 +333,40 @@ describe('Adjust Balances Tests', () => {
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         return [rbacPause]
     }
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
-        await deployAsset(true)
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
+        await deployAsset({
+            multiPartition: true,
+            factory,
+            businessLogicResolver,
+        })
     })
 
     it('GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole', async () => {
@@ -353,7 +384,7 @@ describe('Adjust Balances Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _ADJUSTMENT_BALANCE_ROLE,
+            ADJUSTMENT_BALANCE_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -371,7 +402,7 @@ describe('Adjust Balances Tests', () => {
     it('GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero', async () => {
         // Granting Role to account C and Pause
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_C)
+        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
 
         // Using account C (with role)
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -385,9 +416,9 @@ describe('Adjust Balances Tests', () => {
     it('GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_A)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_A)
+        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_A)
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
 
         erc1410Facet = erc1410Facet.connect(signer_A)
         equityFacet = equityFacet.connect(signer_A)

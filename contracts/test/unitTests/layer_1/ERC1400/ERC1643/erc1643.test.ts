@@ -205,29 +205,28 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type ERC1643,
     type Pause,
     AccessControl,
-} from '../../../../../typechain-types'
-import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
+    IFactory,
+    BusinessLogicResolver,
+} from '@typechain'
 import {
-    _PAUSER_ROLE,
-    _DOCUMENTER_ROLE,
-} from '../../../../../scripts/constants'
-import {
+    PAUSER_ROLE,
+    DOCUMENTER_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import {
-    grantRoleAndPauseToken,
+    DeployAtsFullInfrastructureCommand,
+    deployAtsFullInfrastructure,
     MAX_UINT256,
-} from '../../../../../scripts/testCommon'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../../common'
 
 const documentName_1 =
     '0x000000000000000000000000000000000000000000000000000000000000aa23'
@@ -250,53 +249,70 @@ describe('ERC1643 Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1643Facet: ERC1643
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+    beforeEach(async () => {
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
 
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            false,
-            'TEST_AccessControl',
-            'TAC',
-            6,
-            isinGenerator(),
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            MAX_UINT256,
-            100,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_C,
-            true,
-            'ES,FR,CH',
-            'nothing',
-            init_rbacs
-        )
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_C,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
 
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
@@ -337,7 +353,7 @@ describe('ERC1643 Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _DOCUMENTER_ROLE,
+            DOCUMENTER_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -361,7 +377,7 @@ describe('ERC1643 Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _DOCUMENTER_ROLE,
+            DOCUMENTER_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -379,7 +395,7 @@ describe('ERC1643 Tests', () => {
     it('GIVEN a document with no name WHEN setDocument THEN transaction fails with EmptyName', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_DOCUMENTER_ROLE, account_C)
+        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
         // Using account C (with role)
         erc1643Facet = erc1643Facet.connect(signer_C)
 
@@ -396,7 +412,7 @@ describe('ERC1643 Tests', () => {
     it('GIVEN a document with no URI WHEN setDocument THEN transaction fails with EmptyURI', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_DOCUMENTER_ROLE, account_C)
+        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
         // Using account C (with role)
         erc1643Facet = erc1643Facet.connect(signer_C)
 
@@ -409,7 +425,7 @@ describe('ERC1643 Tests', () => {
     it('GIVEN a document with no HASH WHEN setDocument THEN transaction fails with EmptyHASH', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_DOCUMENTER_ROLE, account_C)
+        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
         // Using account C (with role)
         erc1643Facet = erc1643Facet.connect(signer_C)
 
@@ -426,7 +442,7 @@ describe('ERC1643 Tests', () => {
     it('GIVEN a document that does not exist WHEN removeDocument THEN transaction fails with DocumentDoesNotExist', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_DOCUMENTER_ROLE, account_C)
+        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
         // Using account C (with role)
         erc1643Facet = erc1643Facet.connect(signer_C)
 
@@ -440,7 +456,7 @@ describe('ERC1643 Tests', () => {
         // ADD TO LIST ------------------------------------------------------------------
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_DOCUMENTER_ROLE, account_C)
+        await accessControlFacet.grantRole(DOCUMENTER_ROLE, account_C)
         // Using account C (with role)
         erc1643Facet = erc1643Facet.connect(signer_C)
 

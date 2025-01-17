@@ -203,254 +203,35 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-    Client,
-    AccountId,
-    PrivateKey,
-    ContractCreateFlow,
-    ContractId,
-} from '@hashgraph/sdk'
-import axios from 'axios'
-import { ADDRESS_0, REGEX } from './constants'
-import * as dotenv from 'dotenv'
-dotenv.config()
+import { Contract, ContractReceipt } from 'ethers'
+import { ContractName } from '@configuration'
+import DeployContractWithFactoryResult from './DeployContractWithFactoryResult'
 
-interface IAccount {
-    evm_address: string
-    key: IKey
-    account: string
-}
+export default class DeployContractResult extends DeployContractWithFactoryResult<Contract> {
+    public readonly name: ContractName
 
-export interface IContract {
-    admin_key: IKey
-    nullable: boolean
-    auto_renew_account: string
-    auto_renew_period: string
-    contract_id: string
-    contractId: ContractId
-    created_timestamp: string
-    deleted: string
-    evm_address: string
-    expiration_timestamp: string
-    file_id: string
-    max_automatic_token_associations: string
-    memo: string
-    obtainer_id: string
-    permanent_removal: string
-    proxy_account_id: string
-    timestamp: string
-}
-
-interface IKey {
-    _type: string
-    key: string
-}
-
-export function getEnvVar({
-    name,
-    defaultValue,
-}: {
-    name: string
-    defaultValue?: string
-}): string {
-    const value = process.env[name]
-    if (value) {
-        return value
-    }
-    if (defaultValue) {
-        console.warn(
-            `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
-        )
-        return defaultValue
-    }
-    throw new Error(`Environment variable ${name} is not defined`)
-}
-
-export const sleep = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms))
-
-export function oneYearLaterInSeconds(): number {
-    const currentDate: Date = new Date()
-    return Math.floor(
-        currentDate.setFullYear(currentDate.getFullYear() + 1) / 1000
-    )
-}
-
-export function getClient(network?: string): Client {
-    if (!network) {
-        const hre = require('hardhat')
-        network = hre.network.name
-    }
-    switch (network) {
-        case 'local':
-            return Client.forLocalNode()
-        case 'previewnet':
-            return Client.forPreviewnet()
-        case 'testnet':
-            return Client.forTestnet()
-        case 'mainnet':
-            return Client.forMainnet()
-        default:
-            throw new Error(
-                'Network not supported for Hedera Operations. Check NETWORK env variable'
-            )
-    }
-}
-
-export async function deployContractSDK(
-    factory: any,
-    privateKey: string,
-    clientOperator: Client,
-    constructorParameters?: any,
-    adminKey?: PrivateKey,
-    contractMemo?: string
-): Promise<IContract> {
-    const transaction = new ContractCreateFlow()
-        .setBytecode(factory.bytecode)
-        .setGas(15000000)
-    //.setAdminKey(Key)
-    if (contractMemo) {
-        transaction.setContractMemo(contractMemo)
-    }
-    if (constructorParameters) {
-        transaction.setConstructorParameters(constructorParameters)
-    }
-
-    const contractCreateSign = await transaction.sign(
-        PrivateKey.fromStringED25519(privateKey)
-    )
-
-    const txResponse = await contractCreateSign.execute(clientOperator)
-    await sleep(2000)
-    const receipt = await txResponse.getReceipt(clientOperator)
-    await sleep(2000)
-    const contractId = receipt.contractId
-    if (!contractId) {
-        throw Error('Error deploying contractSDK')
-    }
-    const contractInfo = await getContractInfo(contractId.toString())
-    console.log(
-        `${factory.name} - ${contractInfo.contract_id} - ${contractInfo.evm_address}`
-    )
-    return contractInfo
-}
-
-export async function toEvmAddress(
-    accountId: string,
-    isE25519: boolean
-): Promise<string> {
-    try {
-        if (isE25519)
-            return '0x' + AccountId.fromString(accountId).toSolidityAddress()
-
-        const URI_BASE = `${getHederaNetworkMirrorNodeURL(
-            getEnvVar({ name: 'NETWORK' })
-        )}/api/v1/`
-        const url = URI_BASE + 'accounts/' + accountId
-        const res = await axios.get<IAccount>(url)
-        return res.data.evm_address
-    } catch (error) {
-        throw new Error('Error retrieving the Evm Address : ' + error)
-    }
-}
-
-export function contractIdToString(contractId: ContractId): string {
-    return `${contractId.shard.toString()}.${contractId.realm.toString()}.${contractId.num.toString()}`
-}
-
-/**
- * Converts a private key string to a Hashgraph PrivateKey object.
- *
- * @param params - An object containing the private key string and a boolean indicating the key type.
- * @param params.privateKey - The private key string.
- * @param params.isED25519 - A boolean indicating whether the key is ED25519 (true) or ECDSA (false).
- * @returns A Hashgraph PrivateKey object.
- */
-export function toHashgraphKey({
-    privateKey,
-    isED25519,
-}: {
-    privateKey: string
-    isED25519: boolean
-}): PrivateKey {
-    return isED25519
-        ? PrivateKey.fromStringED25519(privateKey)
-        : PrivateKey.fromStringECDSA(privateKey)
-}
-
-export async function getContractInfo(contractId: string): Promise<IContract> {
-    try {
-        if (
-            !REGEX.contractId.test(contractId) &&
-            !REGEX.address.test(contractId)
-        ) {
-            throw new Error(
-                'Invalid contractId format. It must be like "0.0.XXXX" or "0xhexadecimal".'
-            )
-        }
-        const URI_BASE = `${getHederaNetworkMirrorNodeURL(
-            getEnvVar({ name: 'NETWORK' })
-        )}/api/v1/`
-        const url = URI_BASE + 'contracts/' + contractId
-
-        console.log(url)
-        const retry = 10
-        let i = 0
-        let res = null
-        do {
-            res = await axios.get<IContract>(url)
-            i++
-            await sleep(1000)
-        } while (res.status !== 200 && i < retry)
-
-        return {
-            ...res.data,
-            contractId: ContractId.fromString(res.data.contract_id),
-        }
-    } catch (error) {
-        throw new Error('Error retrieving the Evm Address : ' + error)
-    }
-}
-
-export async function evmToHederaFormat(evmAddress: string): Promise<string> {
-    if (evmAddress === ADDRESS_0) return '0.0.0'
-    const URI_BASE = `${getHederaNetworkMirrorNodeURL(
-        getEnvVar({ name: 'NETWORK' })
-    )}/api/v1/`
-    const url = URI_BASE + 'accounts/' + evmAddress
-    const res = await axios.get<IAccount>(url)
-    return res.data.account
-}
-
-function getHederaNetworkMirrorNodeURL(network?: string): string {
-    if (!network) {
-        const hre = require('hardhat')
-        network = hre.network.name
-    }
-    switch (network) {
-        case 'local':
-            return getEnvVar({
-                name: 'MIRROR_NODE_URL_LOCAL',
-                defaultValue: 'http://localhost:5551',
-            })
-        case 'previewnet':
-            return getEnvVar({
-                name: 'MIRROR_NODE_URL_PREVIEWNET',
-                defaultValue: 'https://previewnet.mirrornode.hedera.com',
-            })
-        case 'testnet':
-            return getEnvVar({
-                name: 'MIRROR_NODE_URL_TESTNET',
-                defaultValue: 'https://testnet.mirrornode.hedera.com',
-            })
-        case 'mainnet':
-            return getEnvVar({
-                name: 'MIRROR_NODE_URL_MAINNET',
-                defaultValue: 'https://mainnet.mirrornode.hedera.com',
-            })
-        default:
-            return 'https://testnet.mirrornode.hedera.com'
+    constructor({
+        name,
+        address,
+        contract,
+        proxyAddress,
+        proxyAdminAddress,
+        receipt,
+    }: {
+        name: ContractName
+        address: string
+        contract: Contract
+        proxyAddress?: string
+        proxyAdminAddress?: string
+        receipt?: ContractReceipt
+    }) {
+        super({
+            address,
+            contract,
+            proxyAddress,
+            proxyAdminAddress,
+            receipt,
+        })
+        this.name = name
     }
 }

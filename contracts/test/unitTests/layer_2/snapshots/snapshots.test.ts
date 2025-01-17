@@ -205,28 +205,33 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Snapshots_2,
     type Equity,
     type ERC1410ScheduledTasks,
     type AccessControl,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+    BusinessLogicResolver,
+    IFactory,
+    AccessControl__factory,
+    Equity__factory,
+    ERC1410ScheduledTasks__factory,
+    Snapshots_2__factory,
+} from '@typechain'
 import {
-    _SNAPSHOT_ROLE,
-    _PAUSER_ROLE,
-    _ISSUER_ROLE,
-    _CORPORATE_ACTION_ROLE,
-} from '../../../../scripts/constants'
-import {
+    SNAPSHOT_ROLE,
+    PAUSER_ROLE,
+    ISSUER_ROLE,
+    CORPORATE_ACTION_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '@scripts'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -249,79 +254,91 @@ describe('Snapshots Layer 2 Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
     let snapshotFacet: Snapshots_2
     let accessControlFacet: AccessControl
     let equityFacet: Equity
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
 
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            true,
-            'TEST_AccessControl',
-            'TAC',
-            DECIMALS,
-            isinGenerator(),
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            MAX_SUPPLY,
-            100,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_B,
-            true,
-            'ES,FR,CH',
-            'nothing',
-            init_rbacs
-        )
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: true,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: DECIMALS,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_SUPPLY,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory,
+        })
 
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
+        equityFacet = Equity__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        snapshotFacet = await ethers.getContractAt(
-            'Snapshots_2',
-            diamond.address
-        )
-
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
+        snapshotFacet = Snapshots_2__factory.connect(diamond.address, signer_A)
     })
 
     it('GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_A)
+        await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_A)
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
 
         snapshotFacet = snapshotFacet.connect(signer_A)
         erc1410Facet = erc1410Facet.connect(signer_A)
