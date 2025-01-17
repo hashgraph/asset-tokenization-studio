@@ -212,9 +212,6 @@ import {
     checkNounceAndDeadline,
     verify
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {
-    IProtectedPartitionsStorageWrapper
-} from '../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol';
 import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
 import {
     LockStorageWrapper_2
@@ -222,16 +219,11 @@ import {
 import {
     LockStorageWrapper_2_Read
 } from '../../layer_2/lock/LockStorageWrapper_2_Read.sol';
-import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
 import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
-import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     getMessageHashTransferAndLockByPartition,
     getMessageHashTransferAndLock
 } from './signatureVerification.sol';
-import {
-    TransferAndLockStorageWrapper
-} from './TransferAndLockStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract TransferAndLockStorageWrapper is

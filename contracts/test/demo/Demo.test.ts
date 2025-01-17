@@ -237,6 +237,7 @@ import {
     RegulationType,
     deployEquityFromFactory,
 } from '../../scripts/factory'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const _MINUTE_1 = 6000
 const _BUSINESS_LOGIC_COUNT = 21
@@ -556,7 +557,7 @@ Deployed contracts:
         const TokenName = 'TEST_DEMO'
         const TokenSymbol = 'TD'
         const TokenDecimals = 6
-        const TokenISIN = 'ABCDEF123456'
+        const TokenISIN = isinGenerator()
         const TokenType = 1 // equity
         const isWhiteList = false
         const isControllable = true
@@ -571,7 +572,7 @@ Deployed contracts:
         const putRight = true
         const dividendRight = DividendType.PREFERRED
         const currency = '0x455552'
-        const numberOfShares = 200000
+        const numberOfShares = 200000n
         const nominalValue = 100
 
         diamond = await deployEquityFromFactory(

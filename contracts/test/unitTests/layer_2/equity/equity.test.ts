@@ -229,6 +229,7 @@ import {
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const TIME = 10000
 const DECIMALS = 7
@@ -261,7 +262,7 @@ let balanceAdjustmentData = {
     factor: balanceAdjustmentFactor,
     decimals: balanceAdjustmentDecimals,
 }
-const number_Of_Shares = 100000
+const number_Of_Shares = 100000n
 
 describe('Equity Tests', () => {
     let diamond: ResolverProxy
@@ -305,7 +306,7 @@ describe('Equity Tests', () => {
             'TEST_AccessControl',
             'TAC',
             DECIMALS,
-            'ABCDEF123456',
+            isinGenerator(),
             false,
             false,
             false,
@@ -338,7 +339,7 @@ describe('Equity Tests', () => {
 
         erc1410Facet = await ethers.getContractAt(
             'ERC1410ScheduledTasks',
-            await diamond.address
+            diamond.address
         )
 
         currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
@@ -499,7 +500,7 @@ describe('Equity Tests', () => {
 
             // issue and lock
             const TotalAmount = number_Of_Shares
-            const LockedAmount = TotalAmount - 5
+            const LockedAmount = TotalAmount - 5n
 
             await erc1410Facet.issueByPartition(
                 _DEFAULT_PARTITION,
@@ -618,7 +619,7 @@ describe('Equity Tests', () => {
 
             // issue and lock
             const TotalAmount = number_Of_Shares
-            const LockedAmount = TotalAmount - 5
+            const LockedAmount = TotalAmount - 5n
 
             await erc1410Facet.issueByPartition(
                 _DEFAULT_PARTITION,

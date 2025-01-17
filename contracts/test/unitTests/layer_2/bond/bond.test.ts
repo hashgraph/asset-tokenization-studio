@@ -231,6 +231,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const TIME = 30000
 const numberOfUnits = 1000
@@ -312,7 +313,7 @@ describe('Bond Tests', () => {
             'TEST_AccessControl',
             'TAC',
             6,
-            'ABCDEF123456',
+            isinGenerator(),
             '0x455552',
             numberOfUnits,
             100,

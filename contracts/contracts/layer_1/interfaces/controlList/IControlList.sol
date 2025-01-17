@@ -233,12 +233,9 @@ interface IControlList {
      * @dev Initial configuration
      *
      * @param _isWhiteList true (WHITELIST) false (BLACKLIST)
-     * @return success_
      */
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ControlList(
-        bool _isWhiteList
-    ) external returns (bool success_);
+    function initialize_ControlList(bool _isWhiteList) external;
 
     /**
      * @dev Adds an account to the control list

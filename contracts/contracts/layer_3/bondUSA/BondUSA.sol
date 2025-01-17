@@ -225,15 +225,9 @@ contract BondUSA is IBondUSA, Bond, Security {
         CouponDetailsData calldata _couponDetailsData,
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    )
-        external
-        override
-        onlyUninitialized(_bondStorage().initialized)
-        returns (bool)
-    {
-        return
-            _initialize_bond(_bondDetailsData, _couponDetailsData) &&
-            _initializeSecurity(_regulationData, _additionalSecurityData);
+    ) external override onlyUninitialized(_bondStorage().initialized) {
+        _initialize_bond(_bondDetailsData, _couponDetailsData);
+        _initializeSecurity(_regulationData, _additionalSecurityData);
     }
 
     function getStaticResolverKey()
