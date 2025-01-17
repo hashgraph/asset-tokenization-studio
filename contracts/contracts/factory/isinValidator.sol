@@ -206,53 +206,82 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface IERC1594 {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1594() external;
+import {
+    _ISIN_LENGTH,
+    _CHECKSUM_POSITION_IN_ISIN,
+    _TEN,
+    _UINT_WITH_ONE_DIGIT,
+    _ASCII_9,
+    _ASCII_7,
+    _ASCII_0
+} from '../layer_1/constants/values.sol';
 
-    // Transfers
-    function transferWithData(
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+error WrongISIN(string isin);
+error WrongISINChecksum(string isin);
 
-    function transferFromWithData(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+function validateISIN(string calldata _isin) pure {
+    checkLength(_isin);
+    checkChecksum(_isin);
+}
 
-    // Token Issuance
-    function isIssuable() external view returns (bool);
+function checkLength(string calldata _isin) pure {
+    if (bytes(_isin).length != _ISIN_LENGTH) {
+        revert WrongISIN(_isin);
+    }
+}
 
-    function issue(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+// solhint-disable-next-line
+// https://fastercapital.com/questions/how-to-check-if-an-isin-code-is-valid-and-compliant-with-the-iso-6166-standard.html
+function checkChecksum(string calldata _isin) pure {
+    bytes memory isin = bytes(_isin);
+    (uint8[] memory conv, uint8 convLength) = convertISINToNumber(isin);
+    if (
+        byteToCode(isin[_CHECKSUM_POSITION_IN_ISIN]) !=
+        calculateChecksum(conv, convLength)
+    ) {
+        revert WrongISINChecksum(_isin);
+    }
+}
 
-    // Token Redemption
-    function redeem(uint256 _value, bytes calldata _data) external;
+function convertISINToNumber(
+    bytes memory _isin
+) pure returns (uint8[] memory conv_, uint8 convLength_) {
+    unchecked {
+        conv_ = new uint8[](_CHECKSUM_POSITION_IN_ISIN * 2);
+        for (uint256 index; index < _CHECKSUM_POSITION_IN_ISIN; ++index) {
+            uint8 code = byteToCode(_isin[index]);
+            if (code > _UINT_WITH_ONE_DIGIT) {
+                conv_[convLength_] = code / _TEN;
+                conv_[++convLength_] = code % _TEN; // Try with bitwise or &
+            } else {
+                conv_[convLength_] = code;
+            }
+            ++convLength_;
+        }
+    }
+}
 
-    function redeemFrom(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data
-    ) external;
+function calculateChecksum(
+    uint8[] memory _conv,
+    uint8 _convLength
+) pure returns (uint8 checksum_) {
+    unchecked {
+        uint256 pairing = (_convLength + 1) % 2;
+        uint256 checksum;
+        for (uint256 index; index < _convLength; ++index) {
+            uint8 code = _conv[index] * ((index % 2) == pairing ? 2 : 1);
+            if (code > _UINT_WITH_ONE_DIGIT) {
+                checksum += code / _TEN;
+                checksum += code % _TEN;
+            } else {
+                checksum += code;
+            }
+        }
+        checksum_ = uint8((_TEN - (checksum % _TEN)) % _TEN);
+    }
+}
 
-    // Transfer Validity
-    function canTransfer(
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    ) external view returns (bool, bytes1, bytes32);
-
-    function canTransferFrom(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data
-    ) external view returns (bool, bytes1, bytes32);
+function byteToCode(bytes1 _character) pure returns (uint8 code_) {
+    code_ = uint8(_character);
+    code_ = code_ > _ASCII_9 ? code_ - _ASCII_7 : code_ - _ASCII_0;
 }

@@ -206,6 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     AccessControl,
     AccessControl__factory,
@@ -232,6 +233,7 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
 } from '../../../../scripts'
+import { MAX_UINT256 } from '../../../common'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -241,6 +243,7 @@ const _PARTITION_ID_1 =
 const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const TIME = 6000
+
 describe('CAP Layer 2 Tests', () => {
     let factory: IFactory,
         businessLogicResolver: BusinessLogicResolver,
@@ -275,7 +278,7 @@ describe('CAP Layer 2 Tests', () => {
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: 6,
-            isin: 'ABCDEF123456',
+            isin: isinGenerator(),
             votingRight: false,
             informationRight: false,
             liquidationRight: false,
@@ -285,7 +288,7 @@ describe('CAP Layer 2 Tests', () => {
             putRight: false,
             dividendRight: 1,
             currency: '0x345678',
-            numberOfShares: 0,
+            numberOfShares: MAX_UINT256,
             nominalValue: 100,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_B,

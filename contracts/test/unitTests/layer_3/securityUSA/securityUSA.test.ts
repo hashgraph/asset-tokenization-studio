@@ -206,6 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type EquityUSA,
@@ -222,6 +223,7 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
 } from '../../../../scripts'
+import { MAX_UINT256 } from '../../../common'
 
 const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
@@ -290,7 +292,7 @@ describe('Security USA Tests', () => {
                 name: 'TEST_AccessControl',
                 symbol: 'TAC',
                 decimals: 6,
-                isin: 'ABCDEF123456',
+                isin: isinGenerator(),
                 votingRight: false,
                 informationRight: false,
                 liquidationRight: false,
@@ -300,7 +302,7 @@ describe('Security USA Tests', () => {
                 putRight: false,
                 dividendRight: 1,
                 currency: '0x345678',
-                numberOfShares: 0,
+                numberOfShares: MAX_UINT256,
                 nominalValue: 100,
                 regulationType: RegulationType.REG_S,
                 regulationSubType: RegulationSubType.NONE,
@@ -364,7 +366,7 @@ describe('Security USA Tests', () => {
                 name: 'TEST_AccessControl',
                 symbol: 'TAC',
                 decimals: 6,
-                isin: 'ABCDEF123456',
+                isin: isinGenerator(),
                 votingRight: false,
                 informationRight: false,
                 liquidationRight: false,
@@ -374,7 +376,7 @@ describe('Security USA Tests', () => {
                 putRight: false,
                 dividendRight: 1,
                 currency: '0x345678',
-                numberOfShares: 0,
+                numberOfShares: MAX_UINT256,
                 nominalValue: 100,
                 regulationType: RegulationType.REG_D,
                 regulationSubType: RegulationSubType.REG_D_506_B,
@@ -438,7 +440,7 @@ describe('Security USA Tests', () => {
                 name: 'TEST_AccessControl',
                 symbol: 'TAC',
                 decimals: 6,
-                isin: 'ABCDEF123456',
+                isin: isinGenerator(),
                 votingRight: false,
                 informationRight: false,
                 liquidationRight: false,
@@ -448,7 +450,7 @@ describe('Security USA Tests', () => {
                 putRight: false,
                 dividendRight: 1,
                 currency: '0x345678',
-                numberOfShares: 0,
+                numberOfShares: MAX_UINT256,
                 nominalValue: 100,
                 regulationType: RegulationType.REG_D,
                 regulationSubType: RegulationSubType.REG_D_506_C,
@@ -514,7 +516,7 @@ describe('Security USA Tests', () => {
                 name: 'TEST_AccessControl',
                 symbol: 'TAC',
                 decimals: 6,
-                isin: 'ABCDEF123456',
+                isin: isinGenerator(),
                 currency: '0x455552',
                 numberOfUnits,
                 nominalValue: 100,
@@ -585,7 +587,7 @@ describe('Security USA Tests', () => {
                 name: 'TEST_AccessControl',
                 symbol: 'TAC',
                 decimals: 6,
-                isin: 'ABCDEF123456',
+                isin: isinGenerator(),
                 currency: '0x455552',
                 numberOfUnits,
                 nominalValue: 100,
@@ -656,7 +658,7 @@ describe('Security USA Tests', () => {
                 name: 'TEST_AccessControl',
                 symbol: 'TAC',
                 decimals: 6,
-                isin: 'ABCDEF123456',
+                isin: isinGenerator(),
                 currency: '0x455552',
                 numberOfUnits,
                 nominalValue: 100,

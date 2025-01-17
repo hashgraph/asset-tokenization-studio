@@ -206,6 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Snapshots_2,
@@ -228,7 +229,7 @@ import {
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
 } from '../../../../scripts'
-import { grantRoleAndPauseToken } from '../../../common'
+import { grantRoleAndPauseToken, MAX_UINT256 } from '../../../common'
 
 const amount = 1000
 const balanceOf_C_Original = 2 * amount
@@ -300,7 +301,7 @@ describe('Snapshots Tests', () => {
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: 6,
-            isin: 'ABCDEF123456',
+            isin: isinGenerator(),
             votingRight: false,
             informationRight: false,
             liquidationRight: false,
@@ -310,7 +311,7 @@ describe('Snapshots Tests', () => {
             putRight: false,
             dividendRight: 1,
             currency: '0x345678',
-            numberOfShares: 0,
+            numberOfShares: MAX_UINT256,
             nominalValue: 100,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_B,

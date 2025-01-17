@@ -206,6 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Equity,
@@ -267,7 +268,7 @@ let balanceAdjustmentData = {
     factor: balanceAdjustmentFactor,
     decimals: balanceAdjustmentDecimals,
 }
-const number_Of_Shares = 100000
+const number_Of_Shares = 100000n
 
 describe('Equity Tests', () => {
     let diamond: ResolverProxy
@@ -325,7 +326,7 @@ describe('Equity Tests', () => {
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: DECIMALS,
-            isin: 'ABCDEF123456',
+            isin: isinGenerator(),
             votingRight: false,
             informationRight: false,
             liquidationRight: false,
@@ -508,7 +509,7 @@ describe('Equity Tests', () => {
 
             // issue and lock
             const TotalAmount = number_Of_Shares
-            const LockedAmount = TotalAmount - 5
+            const LockedAmount = TotalAmount - 5n
 
             await erc1410Facet.issueByPartition(
                 DEFAULT_PARTITION,
@@ -621,7 +622,7 @@ describe('Equity Tests', () => {
 
             // issue and lock
             const TotalAmount = number_Of_Shares
-            const LockedAmount = TotalAmount - 5
+            const LockedAmount = TotalAmount - 5n
 
             await erc1410Facet.issueByPartition(
                 DEFAULT_PARTITION,

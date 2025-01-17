@@ -206,6 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type ControlList,
@@ -224,7 +225,7 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
 } from '../../../../scripts'
-import { grantRoleAndPauseToken } from '../../../common'
+import { grantRoleAndPauseToken, MAX_UINT256 } from '../../../common'
 
 describe('Control List Tests', () => {
     let diamond: ResolverProxy
@@ -287,7 +288,7 @@ describe('Control List Tests', () => {
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: 6,
-            isin: 'ABCDEF123456',
+            isin: isinGenerator(),
             votingRight: false,
             informationRight: false,
             liquidationRight: false,
@@ -297,7 +298,7 @@ describe('Control List Tests', () => {
             putRight: false,
             dividendRight: 1,
             currency: '0x345678',
-            numberOfShares: 0,
+            numberOfShares: MAX_UINT256,
             nominalValue: 100,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_C,

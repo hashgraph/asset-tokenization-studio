@@ -206,6 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type ERC20,
@@ -230,7 +231,7 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
 } from '../../../../../scripts'
-import { assertObject } from '../../../../common'
+import { assertObject, MAX_UINT256 } from '../../../../common'
 
 const amount = 1000
 
@@ -257,7 +258,7 @@ describe('ERC20 Tests', () => {
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
     const decimals = 6
-    const isin = 'ABCDEF123456'
+    const isin = isinGenerator()
 
     describe('Multi partition', () => {
         before(async () => {
@@ -315,7 +316,7 @@ describe('ERC20 Tests', () => {
                 putRight: false,
                 dividendRight: 1,
                 currency: '0x345678',
-                numberOfShares: 0,
+                numberOfShares: MAX_UINT256,
                 nominalValue: 100,
                 regulationType: RegulationType.REG_S,
                 regulationSubType: RegulationSubType.NONE,
@@ -532,7 +533,7 @@ describe('ERC20 Tests', () => {
                 putRight: false,
                 dividendRight: 1,
                 currency: '0x345678',
-                numberOfShares: 0,
+                numberOfShares: MAX_UINT256,
                 nominalValue: 100,
                 regulationType: RegulationType.REG_S,
                 regulationSubType: RegulationSubType.NONE,

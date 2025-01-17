@@ -204,9 +204,9 @@
 */
 
 import { expect } from 'chai'
-import { ethers, network } from 'hardhat'
+import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
-import { Network } from '../../../Configuration'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     BusinessLogicResolver,
     type AccessControl,
@@ -230,7 +230,6 @@ import {
     GAS_LIMIT,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-    DeployAtsFullInfrastructureResult,
     Rbac,
     setEquityData,
     setBondData,
@@ -253,7 +252,7 @@ describe('Factory Tests', () => {
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
     const decimals = 6
-    const isin = 'ABCDEF123456'
+    const isin = isinGenerator()
     const isWhitelist = false
     const isControllable = true
     const isMultiPartition = false
@@ -267,10 +266,10 @@ describe('Factory Tests', () => {
     const redemptionRight = false
     const putRight = true
     const dividendRight = DividendType.PREFERRED
-    const numberOfShares = 2000
+    const numberOfShares = BigInt(2000)
 
     const currency = '0x455552'
-    const numberOfUnits = 1000
+    const numberOfUnits = BigInt(1000)
     const nominalValue = 100
     let startingDate = 999
     let maturityDate = 999
@@ -433,6 +432,10 @@ describe('Factory Tests', () => {
                     gasLimit: GAS_LIMIT.default,
                 })
             ).to.be.rejectedWith('WrongISIN')
+            equityData.security.erc20MetadataInfo.isin = 'SJ5633813321'
+            await expect(
+                factory.deployEquity(equityData, factoryRegulationData)
+            ).to.be.rejectedWith('WrongISINChecksum')
         })
 
         it('GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails', async () => {
@@ -738,6 +741,10 @@ describe('Factory Tests', () => {
             await expect(
                 factory.deployBond(bondData, factoryRegulationData)
             ).to.be.rejectedWith('WrongISIN')
+            bondData.security.erc20MetadataInfo.isin = 'SJ5633813321'
+            await expect(
+                factory.deployBond(bondData, factoryRegulationData)
+            ).to.be.rejectedWith('WrongISINChecksum')
         })
 
         it('GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails', async () => {

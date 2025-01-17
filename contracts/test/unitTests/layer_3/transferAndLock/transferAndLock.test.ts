@@ -206,6 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Lock,
@@ -230,6 +231,7 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
 } from '../../../../scripts'
+import { MAX_UINT256 } from '../../../common'
 
 const _NON_DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000011'
@@ -313,7 +315,7 @@ describe('Transfer and lock Tests', () => {
                 name: 'TEST_Lock',
                 symbol: 'TAC',
                 decimals: 6,
-                isin: 'ABCDEF123456',
+                isin: isinGenerator(),
                 votingRight: false,
                 informationRight: false,
                 liquidationRight: false,
@@ -323,7 +325,7 @@ describe('Transfer and lock Tests', () => {
                 putRight: false,
                 dividendRight: 1,
                 currency: '0x345678',
-                numberOfShares: 0,
+                numberOfShares: MAX_UINT256,
                 nominalValue: 100,
                 regulationType: RegulationType.REG_D,
                 regulationSubType: RegulationSubType.REG_D_506_B,
@@ -582,7 +584,7 @@ describe('Transfer and lock Tests', () => {
                 name: 'TEST_Lock',
                 symbol: 'TAC',
                 decimals: 6,
-                isin: 'ABCDEF123456',
+                isin: isinGenerator(),
                 votingRight: false,
                 informationRight: false,
                 liquidationRight: false,
@@ -592,7 +594,7 @@ describe('Transfer and lock Tests', () => {
                 putRight: false,
                 dividendRight: 1,
                 currency: '0x345678',
-                numberOfShares: 0,
+                numberOfShares: MAX_UINT256,
                 nominalValue: 100,
                 regulationType: RegulationType.REG_D,
                 regulationSubType: RegulationSubType.REG_D_506_B,

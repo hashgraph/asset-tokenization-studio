@@ -207,6 +207,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { BigNumber } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     ResolverProxy,
     Bond,
@@ -332,7 +333,7 @@ describe('Bond Tests', () => {
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: 6,
-            isin: 'ABCDEF123456',
+            isin: isinGenerator(),
             currency: '0x455552',
             numberOfUnits,
             nominalValue: 100,

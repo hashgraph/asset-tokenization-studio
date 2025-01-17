@@ -207,6 +207,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type AdjustBalances,
@@ -240,6 +241,7 @@ import {
     deployAtsFullInfrastructure,
 } from '../../../../scripts'
 import { providers } from 'ethers'
+import { MAX_UINT256 } from '../../../common'
 
 const amount = 1
 const balanceOf_A_Original = [10 * amount, 100 * amount]
@@ -287,7 +289,7 @@ describe('Locks Layer 2 Tests', () => {
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: decimals_Original,
-            isin: 'ABCDEF123456',
+            isin: isinGenerator(),
             votingRight: false,
             informationRight: false,
             liquidationRight: false,
@@ -297,7 +299,7 @@ describe('Locks Layer 2 Tests', () => {
             putRight: false,
             dividendRight: 1,
             currency: '0x345678',
-            numberOfShares: 0,
+            numberOfShares: MAX_UINT256,
             nominalValue: 100,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_B,

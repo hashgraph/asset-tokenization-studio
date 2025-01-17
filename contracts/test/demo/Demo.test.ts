@@ -205,6 +205,7 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type DiamondLoupeFacet,
@@ -558,7 +559,7 @@ Deployed contracts:
         const TokenName = 'TEST_DEMO'
         const TokenSymbol = 'TD'
         const TokenDecimals = 6
-        const TokenISIN = 'ABCDEF123456'
+        const TokenISIN = isinGenerator()
         const TokenType = 1 // equity
         const isWhiteList = false
         const isControllable = true
@@ -573,7 +574,7 @@ Deployed contracts:
         const putRight = true
         const dividendRight = DividendType.PREFERRED
         const currency = '0x455552'
-        const numberOfShares = 200000
+        const numberOfShares = 200000n
         const nominalValue = 100
 
         diamond = await deployEquityFromFactory({

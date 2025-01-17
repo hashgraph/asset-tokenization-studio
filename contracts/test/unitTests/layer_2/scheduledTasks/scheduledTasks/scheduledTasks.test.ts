@@ -206,6 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Equity,
@@ -234,6 +235,7 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
 } from '../../../../../scripts'
+import { MAX_UINT256 } from '../../../../common'
 
 const TIME = 15000
 const _PARTITION_ID_1 =
@@ -301,7 +303,7 @@ describe('Scheduled Tasks Tests', () => {
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: DECIMALS_INIT,
-            isin: 'ABCDEF123456',
+            isin: isinGenerator(),
             votingRight: false,
             informationRight: false,
             liquidationRight: false,
@@ -311,7 +313,7 @@ describe('Scheduled Tasks Tests', () => {
             putRight: false,
             dividendRight: 1,
             currency: '0x345678',
-            numberOfShares: 0,
+            numberOfShares: MAX_UINT256,
             nominalValue: 100,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_B,

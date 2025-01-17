@@ -206,6 +206,7 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Snapshots_2,
@@ -241,6 +242,7 @@ const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const TIME = 6000
 const DECIMALS = 6
+const MAX_SUPPLY = BigInt(100000000)
 
 describe('Snapshots Layer 2 Tests', () => {
     let diamond: ResolverProxy
@@ -297,7 +299,7 @@ describe('Snapshots Layer 2 Tests', () => {
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: DECIMALS,
-            isin: 'ABCDEF123456',
+            isin: isinGenerator(),
             votingRight: false,
             informationRight: false,
             liquidationRight: false,
@@ -307,7 +309,7 @@ describe('Snapshots Layer 2 Tests', () => {
             putRight: false,
             dividendRight: 1,
             currency: '0x345678',
-            numberOfShares: 0,
+            numberOfShares: MAX_SUPPLY,
             nominalValue: 100,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_B,

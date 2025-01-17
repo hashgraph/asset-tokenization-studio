@@ -238,6 +238,7 @@ const _PARTITION_ID_2 =
 const adjustFactor = 253
 const adjustDecimals = 2
 const decimals_Original = 6
+const maxSupply_Original = 1000000 * amount
 const TIME = 6000
 
 describe('Adjust Balances Tests', () => {
@@ -279,7 +280,7 @@ describe('Adjust Balances Tests', () => {
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: decimals_Original,
-            isin: 'ABCDEF123456',
+            isin: 'RO3682287482',
             votingRight: false,
             informationRight: false,
             liquidationRight: false,
@@ -289,7 +290,7 @@ describe('Adjust Balances Tests', () => {
             putRight: false,
             dividendRight: 1,
             currency: '0x345678',
-            numberOfShares: 0,
+            numberOfShares: BigInt(maxSupply_Original),
             nominalValue: 100,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_B,
