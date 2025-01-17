@@ -297,7 +297,7 @@ export interface SecurityData {
     rbacs: Rbac[]
     isControllable: boolean
     isWhiteList: boolean
-    maxSupply: number
+    maxSupply: bigint
     erc20MetadataInfo: ERC20MetadataInfo
 }
 
@@ -377,7 +377,7 @@ export async function setEquityData(
     putRight: boolean,
     dividendRight: DividendType,
     currency: string,
-    numberOfShares: number,
+    numberOfShares: bigint,
     nominalValue: number,
     init_rbacs?: Rbac[],
     addAdmin = true,
@@ -455,7 +455,7 @@ export async function setBondData(
     decimals: number,
     isin: string,
     currency: string,
-    numberOfUnits: number,
+    numberOfUnits: bigint,
     nominalValue: number,
     startingDate: number,
     maturityDate: number,
@@ -547,7 +547,7 @@ export async function deployEquityFromFactory(
     putRight: boolean,
     dividendRight: DividendType,
     currency: string,
-    numberOfShares: number,
+    numberOfShares: bigint,
     nominalValue: number,
     regulationType: number,
     regulationSubType: number,
@@ -643,7 +643,7 @@ export async function deployBondFromFactory(
         decimals,
         isin,
         currency,
-        numberOfUnits,
+        BigInt(numberOfUnits),
         nominalValue,
         startingDate,
         maturityDate,

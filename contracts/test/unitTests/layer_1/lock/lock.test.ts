@@ -226,6 +226,8 @@ import {
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { takeSnapshot, time } from '@nomicfoundation/hardhat-network-helpers'
 import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
+import { MAX_UINT256 } from '../../../../scripts/testCommon'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const _NON_DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000011'
@@ -302,7 +304,7 @@ describe('Lock Tests', () => {
                 'TEST_Lock',
                 'TAC',
                 6,
-                'ABCDEF123456',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -312,7 +314,7 @@ describe('Lock Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                MAX_UINT256,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_B,
@@ -707,7 +709,7 @@ describe('Lock Tests', () => {
                 'TEST_Lock',
                 'TAC',
                 6,
-                'ABCDEF123456',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -717,7 +719,7 @@ describe('Lock Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                MAX_UINT256,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_B,
