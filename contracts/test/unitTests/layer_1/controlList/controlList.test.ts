@@ -214,18 +214,19 @@ import {
     AccessControl,
     IFactory,
     BusinessLogicResolver,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     CONTROL_LIST_ROLE,
     PAUSER_ROLE,
+    MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../scripts'
-import { grantRoleAndPauseToken, MAX_UINT256 } from '../../../common'
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 describe('Control List Tests', () => {
     let diamond: ResolverProxy

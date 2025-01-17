@@ -208,7 +208,7 @@ import {
     GetProxyAdminConfigArgs,
     GetSignerResult,
     UpdateFactoryVersionArgs,
-} from './index'
+} from '@tasks'
 
 task('updateFactoryVersion', 'Updates the factory version')
     .addPositionalParam('proxyAdminAddress', 'The proxy admin contract address')
@@ -243,7 +243,7 @@ task('updateFactoryVersion', 'Updates the factory version')
         const {
             upgradeProxyImplementation,
             UpgradeProxyImplementationCommand,
-        } = await import('../scripts')
+        } = await import('@scripts')
         console.log(`Executing updateFactoryVersion on ${hre.network.name} ...`)
         const {
             privateKey,
@@ -285,7 +285,7 @@ task('getProxyAdminConfig', 'Get Proxy Admin owner and implementation')
     )
     .setAction(async (args: GetProxyAdminConfigArgs, hre) => {
         console.log(`Executing getProxyAdminConfig on ${hre.network.name} ...`)
-        const { ProxyAdmin__factory } = await import('../typechain-types')
+        const { ProxyAdmin__factory } = await import('@typechain')
 
         const proxyAdmin = ProxyAdmin__factory.connect(
             args.proxyAdmin,

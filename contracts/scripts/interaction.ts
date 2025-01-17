@@ -1,5 +1,5 @@
 import { Result } from 'ethers/lib/utils'
-import { CallContractCommand } from '.'
+import { CallContractCommand } from '@scripts'
 import {
     TransactionReceipt,
     TransactionResponse,

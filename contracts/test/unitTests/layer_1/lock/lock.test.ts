@@ -216,19 +216,19 @@ import {
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     PAUSER_ROLE,
     LOCKER_ROLE,
     ISSUER_ROLE,
+    MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
-} from '../../../../scripts'
-import { MAX_UINT256 } from '../../../common'
+} from '@scripts'
 
 const _NON_DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000011'

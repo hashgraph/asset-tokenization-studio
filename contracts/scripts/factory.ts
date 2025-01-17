@@ -204,7 +204,7 @@
 */
 
 import { ethers } from 'hardhat'
-import { IFactory } from '../typechain-types'
+import { IFactory } from '@typechain'
 import {
     DEFAULT_ADMIN_ROLE,
     EQUITY_CONFIG_ID,
@@ -727,7 +727,7 @@ export async function deployBondFromFactory({
         decimals,
         isin,
         currency,
-        BigInt(numberOfUnits),
+        numberOfUnits: BigInt(numberOfUnits),
         nominalValue,
         startingDate,
         maturityDate,

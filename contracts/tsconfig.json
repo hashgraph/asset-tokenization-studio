@@ -13,15 +13,10 @@
         "outDir": "./build",
         "resolveJsonModule": true,
         "paths": {
-            // ! Do not work on hardhat
-            // "@configuration": ["./Configuration"],
-            // "@scripts": ["./scripts/index.ts"],
-            // "@typechain/*": [
-            //     "./typechain/*",
-            //     "./typechain/index.ts",
-            //     "../../typechain-types"
-            // ],
-            // "@openzeppelin": ["./typechain/@openzeppelin/*"]
+            "@configuration": ["./Configuration"],
+            "@typechain": ["./typechain-types/*", "./typechain-types/index.ts"],
+            "@scripts": ["./scripts/index"],
+            "@tasks": ["./tasks/index.ts"]
         }
     }
 

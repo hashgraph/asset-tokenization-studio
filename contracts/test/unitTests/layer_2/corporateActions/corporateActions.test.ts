@@ -217,7 +217,7 @@ import {
     AccessControl__factory,
     CorporateActionsSecurity__factory,
     Pause__factory,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
     PAUSER_ROLE,
@@ -227,8 +227,9 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../scripts'
-import { grantRoleAndPauseToken, MAX_UINT256 } from '../../../common'
+    MAX_UINT256,
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 const actionType =
     '0x000000000000000000000000000000000000000000000000000000000000aa23'

@@ -205,11 +205,7 @@
 
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { expect } from 'chai'
-import { type Pause, type AccessControl } from '../typechain-types'
-
-export const MAX_UINT256 = BigInt(
-    '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
-)
+import { type Pause, type AccessControl } from '@typechain'
 
 export async function grantRoleAndPauseToken(
     accessControlFacet: AccessControl,

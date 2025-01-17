@@ -217,7 +217,7 @@ import {
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
-} from '../../../../../typechain-types'
+} from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
     ISSUER_ROLE,
@@ -230,8 +230,9 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../../scripts'
-import { grantRoleAndPauseToken, MAX_UINT256 } from '../../../../common'
+    MAX_UINT256,
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../../common'
 
 const amount = 1
 const data = '0x1234'

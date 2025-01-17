@@ -217,12 +217,13 @@ import {
     ERC20_2,
     BusinessLogicResolver,
     IFactory,
-} from '../../../../../typechain-types'
+} from '@typechain'
 import {
     CONTROL_LIST_ROLE,
     PAUSER_ROLE,
     ISSUER_ROLE,
     DEFAULT_PARTITION,
+    MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
@@ -230,8 +231,8 @@ import {
     SecurityType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../../scripts'
-import { assertObject, MAX_UINT256 } from '../../../../common'
+} from '@scripts'
+import { assertObject } from '../../../../common'
 
 const amount = 1000
 

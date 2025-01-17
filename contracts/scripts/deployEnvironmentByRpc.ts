@@ -212,13 +212,13 @@ import {
     IStaticFunctionSelectors,
     ProxyAdmin,
     ProxyAdmin__factory,
-} from '../typechain-types'
+} from '@typechain'
 import {
     DeployedBusinessLogics,
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
-} from './index'
-import { Network } from '../Configuration'
+} from '@scripts'
+import { Network } from '@configuration'
 import { network } from 'hardhat'
 
 export interface Environment {

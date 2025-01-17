@@ -214,7 +214,7 @@ import {
     type ERC1644,
     type ERC20,
     type Factory,
-} from '../../../typechain-types'
+} from '@typechain'
 import {
     ADDRESS_ZERO,
     DEFAULT_ADMIN_ROLE,
@@ -238,7 +238,7 @@ import {
     setFactoryRegulationData,
     RegulationType,
     RegulationSubType,
-} from '../../../scripts'
+} from '@scripts'
 
 describe('Factory Tests', () => {
     let signer_A: SignerWithAddress

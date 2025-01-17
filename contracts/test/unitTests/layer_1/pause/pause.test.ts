@@ -215,7 +215,7 @@ import {
     BusinessLogicResolver,
     AccessControl__factory,
     Pause__factory,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     PAUSER_ROLE,
     deployEquityFromFactory,
@@ -223,8 +223,9 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../scripts'
-import { grantRoleAndPauseToken, MAX_UINT256 } from '../../../common'
+    MAX_UINT256,
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 describe('Pause Tests', () => {
     let diamond: ResolverProxy

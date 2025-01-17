@@ -4,7 +4,7 @@ import {
     GetResolverBusinessLogicsArgs,
     GetSignerResult,
     UpdateBusinessLogicKeysArgs,
-} from './index'
+} from '@tasks'
 
 task('getConfigurationInfo', 'Get all info for a given configuration')
     .addPositionalParam(
@@ -25,7 +25,7 @@ task('getConfigurationInfo', 'Get all info for a given configuration')
         const {
             getFacetsByConfigurationIdAndVersion,
             GetFacetsByConfigurationIdAndVersionQuery,
-        } = await import('../scripts/index')
+        } = await import('@scripts')
 
         const query = new GetFacetsByConfigurationIdAndVersionQuery({
             businessLogicResolverAddress: args.resolver,
@@ -89,9 +89,7 @@ task('getResolverBusinessLogics', 'Get business logics from resolver')
         console.log(
             `Executing getResolverBusinessLogics on ${hre.network.name} ...`
         )
-        const { IBusinessLogicResolver__factory } = await import(
-            '../typechain-types'
-        )
+        const { IBusinessLogicResolver__factory } = await import('@typechain')
 
         // Fetch business logic keys
         const businessLogicKeys = await IBusinessLogicResolver__factory.connect(
@@ -140,7 +138,7 @@ task('updateBusinessLogicKeys', 'Update the address of a business logic key')
     .setAction(async (args: UpdateBusinessLogicKeysArgs, hre) => {
         // Inlined import due to circular dependency
         const { registerBusinessLogics, RegisterBusinessLogicsCommand } =
-            await import('../scripts')
+            await import('@scripts')
         console.log(
             `Executing updateBusinessLogicKeys on ${hre.network.name} ...`
         )

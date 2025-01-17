@@ -214,7 +214,7 @@ import {
     AccessControl,
     IFactory,
     BusinessLogicResolver,
-} from '../../../../../typechain-types'
+} from '@typechain'
 import {
     PAUSER_ROLE,
     DOCUMENTER_ROLE,
@@ -224,8 +224,9 @@ import {
     RegulationType,
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
-} from '../../../../../scripts'
-import { grantRoleAndPauseToken, MAX_UINT256 } from '../../../../common'
+    MAX_UINT256,
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../../common'
 
 const documentName_1 =
     '0x000000000000000000000000000000000000000000000000000000000000aa23'

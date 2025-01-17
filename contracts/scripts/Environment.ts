@@ -1,5 +1,5 @@
-import { DeployContractWithFactoryResult } from '.'
-import { BusinessLogicResolver, Factory } from '../typechain-types'
+import { DeployContractWithFactoryResult } from '@scripts'
+import { BusinessLogicResolver, Factory } from '@typechain'
 import DeployAtsContractsResult from './results/DeployAtsContractsResult'
 import DeployAtsFullInfrastructureResult from './results/DeployAtsFullInfrastructureResult'
 

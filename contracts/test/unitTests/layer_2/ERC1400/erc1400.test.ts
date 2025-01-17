@@ -228,7 +228,7 @@ import {
     Equity__factory,
     ERC1410ScheduledTasks__factory,
     Pause__factory,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
     CAP_ROLE,
@@ -254,8 +254,9 @@ import {
     RegulationType,
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
-} from '../../../../scripts'
-import { grantRoleAndPauseToken, MAX_UINT256 } from '../../../common'
+    MAX_UINT256,
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount

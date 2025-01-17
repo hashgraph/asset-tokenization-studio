@@ -22,7 +22,7 @@ import {
     TransferAndLock,
     Lock,
     ProtectedPartitions,
-} from '../../typechain-types'
+} from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
 export interface DeployAtsContractsResultParams {

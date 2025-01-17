@@ -203,11 +203,10 @@
    
    */
 
-import { equity } from '../typechain-types/contracts/layer_2'
-import { businessLogicResolver } from './businessLogicResolver'
-import { getStaticResolverKey } from './contractsMethods'
-
 // * General
+export const MAX_UINT256 = BigInt(
+    '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+)
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'

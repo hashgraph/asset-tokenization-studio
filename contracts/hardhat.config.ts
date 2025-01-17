@@ -1,10 +1,11 @@
 import { HardhatUserConfig } from 'hardhat/config'
+import 'tsconfig-paths/register'
 import '@nomicfoundation/hardhat-toolbox'
 import 'hardhat-contract-sizer'
 import 'solidity-coverage'
 import '@hashgraph/sdk'
-import Configuration from './Configuration'
-import './tasks/index'
+import Configuration from '@configuration'
+import '@tasks'
 
 const config: HardhatUserConfig = {
     solidity: {

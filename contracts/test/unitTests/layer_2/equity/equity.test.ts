@@ -221,7 +221,7 @@ import {
     Pause__factory,
     Lock_2__factory,
     ERC1410ScheduledTasks__factory,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
     DEFAULT_PARTITION,
@@ -234,7 +234,7 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../scripts'
+} from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
 const TIME = 10000

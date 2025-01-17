@@ -213,7 +213,7 @@ import {
     type BondUSA,
     BusinessLogicResolver,
     IFactory,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     Rbac,
     deployBondFromFactory,
@@ -222,8 +222,8 @@ import {
     RegulationSubType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../scripts'
-import { MAX_UINT256 } from '../../../common'
+    MAX_UINT256,
+} from '@scripts'
 
 const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'

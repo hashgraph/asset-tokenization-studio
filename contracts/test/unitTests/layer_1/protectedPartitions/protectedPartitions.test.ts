@@ -219,7 +219,7 @@ import {
     ControlList,
     IFactory,
     BusinessLogicResolver,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     DEFAULT_PARTITION,
     PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
@@ -235,8 +235,8 @@ import {
     ISSUER_ROLE,
     CONTROL_LIST_ROLE,
     PAUSER_ROLE,
-} from '../../../../scripts'
-import { MAX_UINT256 } from '../../../common'
+    MAX_UINT256,
+} from '@scripts'
 
 const amount = 1
 

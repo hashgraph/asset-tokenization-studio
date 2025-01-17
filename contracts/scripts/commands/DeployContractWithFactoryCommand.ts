@@ -1,5 +1,5 @@
 import { type ContractFactory, Overrides, Signer } from 'ethers'
-import { DeployedContract } from '../../Configuration'
+import { DeployedContract } from '@configuration'
 
 export default class DeployContractWithFactoryCommand<
     F extends ContractFactory

@@ -216,7 +216,7 @@ import {
     ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
     PAUSER_ROLE,
@@ -228,7 +228,7 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../scripts'
+} from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
 const amount = 1

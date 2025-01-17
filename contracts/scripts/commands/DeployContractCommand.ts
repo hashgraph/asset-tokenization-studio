@@ -1,5 +1,5 @@
 import { Signer } from 'ethers'
-import { ContractName } from '../../Configuration'
+import { ContractName } from '@configuration'
 
 interface DeployContractCommandParams {
     name: ContractName

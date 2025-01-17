@@ -1,5 +1,5 @@
 import { Signer } from 'ethers'
-import { Network } from '../../Configuration'
+import { Network } from '@configuration'
 
 interface DeployAtsContractsCommandNewParams {
     signer: Signer

@@ -213,7 +213,7 @@ import {
     type Pause,
     IFactory,
     BusinessLogicResolver,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     DEFAULT_ADMIN_ROLE,
     PAUSER_ROLE,
@@ -222,14 +222,14 @@ import {
     CORPORATE_ACTION_ROLE,
     DOCUMENTER_ROLE,
     LOCKER_ROLE,
+    MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../scripts'
-import { MAX_UINT256 } from '../../../common'
+} from '@scripts'
 
 describe('Access Control Tests', () => {
     let diamond: ResolverProxy

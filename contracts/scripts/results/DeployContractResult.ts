@@ -1,5 +1,5 @@
 import { Contract, ContractReceipt } from 'ethers'
-import { ContractName } from '../../Configuration'
+import { ContractName } from '@configuration'
 import DeployContractWithFactoryResult from './DeployContractWithFactoryResult'
 
 export default class DeployContractResult extends DeployContractWithFactoryResult<Contract> {

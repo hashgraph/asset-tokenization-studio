@@ -214,11 +214,13 @@ import {
     DiamondFacet__factory,
     AccessControl__factory,
     Pause__factory,
-} from '../../../typechain-types'
+} from '@typechain'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { DEFAULT_ADMIN_ROLE } from '../../../scripts/constants'
-import { FacetConfiguration } from '../../../scripts/resolverDiamondCut.js'
-import { BusinessLogicRegistryData } from '../../../scripts/businessLogicResolver.js'
+import {
+    DEFAULT_ADMIN_ROLE,
+    BusinessLogicRegistryData,
+    FacetConfiguration,
+} from '@scripts'
 import { assertObject } from '../../common'
 
 describe('ResolverProxy Tests', () => {

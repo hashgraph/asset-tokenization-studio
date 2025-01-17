@@ -231,8 +231,8 @@ import {
     Snapshots_2__factory,
     TransferAndLock__factory,
     TransparentUpgradeableProxy__factory,
-} from '../typechain-types'
-import Configuration from '../Configuration'
+} from '@typechain'
+import Configuration from '@configuration'
 import {
     MESSAGES,
     DeployContractCommand,
@@ -253,7 +253,7 @@ import {
     RegisterDeployedContractBusinessLogicsCommand,
     registerDeployedContractBusinessLogics,
     CreateConfigurationsForDeployedContractsResult,
-} from './index'
+} from '@scripts'
 import Environment from './Environment'
 
 export let environment = Environment.empty()

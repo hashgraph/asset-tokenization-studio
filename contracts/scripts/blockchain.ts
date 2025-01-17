@@ -2,7 +2,7 @@ import {
     TransactionReceiptError,
     ValidateTxResponseCommand,
     ValidateTxResponseResult,
-} from './index'
+} from '@scripts'
 
 export async function validateTxResponse({
     txResponse,

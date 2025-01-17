@@ -206,7 +206,7 @@
 import { subtask, task, types } from 'hardhat/config'
 import { Signer, Wallet } from 'ethers'
 import { keccak256 } from 'ethers/lib/utils'
-import { GetSignerResult, GetSignerArgs, Keccak256Args } from './index'
+import { GetSignerResult, GetSignerArgs, Keccak256Args } from '@tasks'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
 
 subtask(

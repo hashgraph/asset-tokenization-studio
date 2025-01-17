@@ -222,7 +222,7 @@ import {
     Pause__factory,
     AccessControl__factory,
     Bond__factory,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
     PAUSER_ROLE,
@@ -236,7 +236,7 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../scripts'
+} from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
 const TIME = 30000

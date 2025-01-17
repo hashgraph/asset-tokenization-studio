@@ -218,7 +218,7 @@ import {
     type Snapshots,
     type ScheduledSnapshots,
     type Cap_2,
-} from '../../typechain-types'
+} from '@typechain'
 import {
     DEFAULT_ADMIN_ROLE,
     CONTROL_LIST_ROLE,
@@ -227,17 +227,13 @@ import {
     CONTROLLER_ROLE,
     PAUSER_ROLE,
     ADDRESS_ZERO,
-} from '../../scripts/constants'
-import {
     DividendType,
     RegulationSubType,
     RegulationType,
     deployEquityFromFactory,
-} from '../../scripts/factory'
-import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../scripts'
+} from '@scripts'
 
 const _MINUTE_1 = 6000
 const _BUSINESS_LOGIC_COUNT = 21

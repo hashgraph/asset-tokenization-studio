@@ -204,7 +204,7 @@
 */
 
 import { task, types } from 'hardhat/config'
-import { CONTRACT_NAMES, ContractName, Network } from '../Configuration'
+import { CONTRACT_NAMES, ContractName, Network } from '@configuration'
 import { DeployAllArgs, DeployArgs, GetSignerResult } from './Arguments'
 
 task(
@@ -247,7 +247,7 @@ task(
             deployAtsFullInfrastructure,
             DeployAtsFullInfrastructureCommand,
             addresstoHederaId,
-        } = await import('../scripts')
+        } = await import('@scripts')
         const network = hre.network.name as Network
         console.log(`Executing deployAll on ${hre.network.name} ...`)
         const { signer }: GetSignerResult = await hre.run('getSigner', {
@@ -365,7 +365,7 @@ task('deploy', 'Deploy new contract')
             deployContract,
             DeployContractCommand,
             addressListToHederaIdList,
-        } = await import('../scripts')
+        } = await import('@scripts')
         const network = hre.network.name as Network
         console.log(`Executing deploy on ${network} ...`)
         if (!CONTRACT_NAMES.includes(args.contractName as ContractName)) {

@@ -1,4 +1,4 @@
-import { IDiamondLoupe } from '../../typechain-types'
+import { IDiamondLoupe } from '@typechain'
 
 interface NewType {
     facetListRecord: Record<number, IDiamondLoupe.FacetStructOutput[]>

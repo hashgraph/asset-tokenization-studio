@@ -219,7 +219,7 @@ import {
     AccessControl__factory,
     ERC1410ScheduledTasks__factory,
     Pause__factory,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     CAP_ROLE,
     deployAtsFullInfrastructure,
@@ -230,7 +230,7 @@ import {
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts'
+} from '@scripts'
 
 const maxSupply = 1
 const maxSupplyByPartition = 1

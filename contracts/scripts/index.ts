@@ -68,5 +68,8 @@ export * from './transparentUpgradeableProxy'
 // * BusinessLogicResolver
 export * from './businessLogicResolver'
 
+// * ResolverDiamondCut
+export * from './resolverDiamondCut'
+
 // * Factory
 export * from './factory'

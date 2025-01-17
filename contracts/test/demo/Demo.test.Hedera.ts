@@ -245,10 +245,10 @@ import {
     Lock__factory,
     Lock,
     TransferAndLock,
-} from '../../typechain-types'
+} from '@typechain'
 import { Wallet } from 'ethers'
-import { getClient, toEvmAddress } from '../../scripts/utils'
-import { toHashgraphKey } from '../../scripts/deploy'
+import { getClient, toEvmAddress } from '@scripts/utils'
+import { toHashgraphKey } from '@scripts/deploy'
 import {
     _DEFAULT_ADMIN_ROLE,
     _CONTROL_LIST_ROLE,
@@ -256,7 +256,7 @@ import {
     _ISSUER_ROLE,
     _CONTROLLER_ROLE,
     _PAUSER_ROLE,
-} from '../../scripts/constants'
+} from '@scripts/constants'
 import {
     SecurityData,
     Rbac,
@@ -268,7 +268,7 @@ import {
     FactoryRegulationData,
     RegulationType,
     RegulationSubType,
-} from '../../scripts/factory'
+} from '@scripts/factory'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const _MINUTE_1 = 6000

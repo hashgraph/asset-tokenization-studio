@@ -219,7 +219,7 @@ import {
     TransferAndLock__factory,
     Pause__factory,
     ERC1410ScheduledTasks__factory,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     PAUSER_ROLE,
     LOCKER_ROLE,
@@ -230,8 +230,8 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../scripts'
-import { MAX_UINT256 } from '../../../common'
+    MAX_UINT256,
+} from '@scripts'
 
 const _NON_DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000011'

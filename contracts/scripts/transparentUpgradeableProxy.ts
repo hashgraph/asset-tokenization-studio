@@ -207,7 +207,7 @@ import { ContractReceipt } from 'ethers'
 import {
     ProxyAdmin__factory,
     TransparentUpgradeableProxy__factory,
-} from '../typechain-types'
+} from '@typechain'
 import {
     deployContractWithFactory,
     DeployContractWithFactoryCommand,
@@ -217,7 +217,7 @@ import {
     UpgradeProxyImplementationCommand,
     validateTxResponse,
     ValidateTxResponseCommand,
-} from './index'
+} from '@scripts'
 
 export async function deployProxyAdmin({
     signer,

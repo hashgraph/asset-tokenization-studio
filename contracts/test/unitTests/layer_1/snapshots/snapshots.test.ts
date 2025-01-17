@@ -216,7 +216,7 @@ import {
     type Lock_2,
     IFactory,
     BusinessLogicResolver,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     SNAPSHOT_ROLE,
     PAUSER_ROLE,
@@ -228,8 +228,9 @@ import {
     RegulationType,
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
-} from '../../../../scripts'
-import { grantRoleAndPauseToken, MAX_UINT256 } from '../../../common'
+    MAX_UINT256,
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 const amount = 1000
 const balanceOf_C_Original = 2 * amount

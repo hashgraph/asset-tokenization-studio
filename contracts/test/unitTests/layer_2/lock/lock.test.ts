@@ -205,6 +205,7 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { providers } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { time } from '@nomicfoundation/hardhat-network-helpers'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
@@ -224,7 +225,7 @@ import {
     Cap_2__factory,
     Lock_2__factory,
     Equity__factory,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
     PAUSER_ROLE,
@@ -239,9 +240,8 @@ import {
     RegulationType,
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
-} from '../../../../scripts'
-import { providers } from 'ethers'
-import { MAX_UINT256 } from '../../../common'
+    MAX_UINT256,
+} from '@scripts'
 
 const amount = 1
 const balanceOf_A_Original = [10 * amount, 100 * amount]

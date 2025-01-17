@@ -219,7 +219,7 @@ import {
     Equity__factory,
     ERC1410ScheduledTasks__factory,
     Snapshots_2__factory,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     SNAPSHOT_ROLE,
     PAUSER_ROLE,
@@ -231,7 +231,7 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../scripts'
+} from '@scripts'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount

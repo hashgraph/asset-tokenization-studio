@@ -217,7 +217,7 @@ import {
     AccessControl__factory,
     Pause__factory,
     DiamondCutManager__factory,
-} from '../../../typechain-types'
+} from '@typechain'
 import {
     BOND_CONFIG_ID,
     deployAtsFullInfrastructure,
@@ -225,7 +225,7 @@ import {
     DeployContractWithFactoryResult,
     EQUITY_CONFIG_ID,
     PAUSER_ROLE,
-} from '../../../scripts'
+} from '@scripts'
 import { BaseContract } from 'ethers'
 
 describe('DiamondCutManager', () => {

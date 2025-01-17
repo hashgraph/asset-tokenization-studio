@@ -219,7 +219,7 @@ import {
     Equity__factory,
     ScheduledTasks__factory,
     ScheduledSnapshots__factory,
-} from '../../../../../typechain-types'
+} from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
     PAUSER_ROLE,
@@ -229,8 +229,8 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../../scripts'
-import { MAX_UINT256 } from '../../../../common'
+    MAX_UINT256,
+} from '@scripts'
 
 const TIME = 6000
 

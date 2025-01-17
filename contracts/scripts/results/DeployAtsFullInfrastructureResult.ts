@@ -1,4 +1,4 @@
-import { Factory } from '../../typechain-types'
+import { Factory } from '@typechain'
 import {
     CreateConfigurationsForDeployedContractsResult,
     DeployAtsContractsResult,

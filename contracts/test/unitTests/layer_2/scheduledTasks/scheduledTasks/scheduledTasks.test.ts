@@ -221,7 +221,7 @@ import {
     Pause__factory,
     ERC1410ScheduledTasks__factory,
     ScheduledTasks__factory,
-} from '../../../../../typechain-types'
+} from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
     PAUSER_ROLE,
@@ -234,8 +234,8 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../../scripts'
-import { MAX_UINT256 } from '../../../../common'
+    MAX_UINT256,
+} from '@scripts'
 
 const TIME = 15000
 const _PARTITION_ID_1 =

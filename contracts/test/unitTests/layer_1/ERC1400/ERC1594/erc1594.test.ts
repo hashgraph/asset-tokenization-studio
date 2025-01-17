@@ -217,7 +217,7 @@ import {
     ERC20,
     IFactory,
     BusinessLogicResolver,
-} from '../../../../../typechain-types'
+} from '@typechain'
 import {
     CONTROL_LIST_ROLE,
     DEFAULT_PARTITION,
@@ -238,8 +238,8 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../../scripts'
-import { MAX_UINT256 } from '../../../../common'
+    MAX_UINT256,
+} from '@scripts'
 
 const amount = 1000
 const balanceOf_C_Original = 2 * amount

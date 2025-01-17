@@ -220,7 +220,7 @@ import {
     IFactory,
     Snapshots_2,
     Snapshots_2__factory,
-} from '../../../../typechain-types'
+} from '@typechain'
 import {
     CAP_ROLE,
     CORPORATE_ACTION_ROLE,
@@ -232,8 +232,8 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-} from '../../../../scripts'
-import { MAX_UINT256 } from '../../../common'
+    MAX_UINT256,
+} from '@scripts'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2

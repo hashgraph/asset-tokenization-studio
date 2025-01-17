@@ -210,8 +210,8 @@ import {
     IBusinessLogicResolver__factory,
     IDiamondCutManager__factory,
     IStaticFunctionSelectors__factory,
-} from '../typechain-types'
-import { IStaticFunctionSelectors } from '../typechain-types'
+} from '@typechain'
+import { IStaticFunctionSelectors } from '@typechain'
 import {
     CreateConfigurationsForDeployedContractsCommand,
     CreateConfigurationsForDeployedContractsResult,
@@ -226,7 +226,7 @@ import {
     RegisterDeployedContractBusinessLogicsCommand,
     validateTxResponse,
     ValidateTxResponseCommand,
-} from './index'
+} from '@scripts'
 import { BOND_CONFIG_ID, EQUITY_CONFIG_ID, EVENTS } from './constants'
 import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
 import { FacetConfiguration } from './resolverDiamondCut'
