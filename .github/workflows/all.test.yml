@@ -20,7 +20,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
       - name: Setup NodeJS Environment
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
