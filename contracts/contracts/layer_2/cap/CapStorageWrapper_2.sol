@@ -272,9 +272,12 @@ abstract contract CapStorageWrapper_2 is
     function _checkNewMaxSupply(
         uint256 _newMaxSupply
     ) internal virtual override {
+        if (_newMaxSupply == 0) {
+            revert NewMaxSupplyCannotBeZero();
+        }
         uint256 totalSupply = ERC1410ScheduledTasks_CD_Lib
             .totalSupplyAdjusted();
-        if (_newMaxSupply != 0 && totalSupply > _newMaxSupply) {
+        if (totalSupply > _newMaxSupply) {
             revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
         }
     }
@@ -283,13 +286,22 @@ abstract contract CapStorageWrapper_2 is
         bytes32 _partition,
         uint256 _newMaxSupply
     ) internal view virtual override returns (bool) {
-        uint256 totalSupply = ERC1410ScheduledTasks_CD_Lib
+        if (_newMaxSupply == 0) return true;
+        uint256 totalSupplyForPartition = ERC1410ScheduledTasks_CD_Lib
             .totalSupplyByPartitionAdjusted(_partition);
-        if (_newMaxSupply != 0 && totalSupply > _newMaxSupply) {
+        if (totalSupplyForPartition > _newMaxSupply) {
             revert NewMaxSupplyForPartitionTooLow(
                 _partition,
                 _newMaxSupply,
-                totalSupply
+                totalSupplyForPartition
+            );
+        }
+        uint256 maxSupplyOverall = _getMaxSupplyAdjusted();
+        if (_newMaxSupply > maxSupplyOverall) {
+            revert NewMaxSupplyByPartitionTooHigh(
+                _partition,
+                _newMaxSupply,
+                maxSupplyOverall
             );
         }
         return true;

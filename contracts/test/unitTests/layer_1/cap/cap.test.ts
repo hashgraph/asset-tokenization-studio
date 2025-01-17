@@ -225,6 +225,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const maxSupply = 1
 const maxSupplyByPartition = 1
@@ -270,7 +271,7 @@ describe('CAP Tests', () => {
             'TEST_AccessControl',
             'TAC',
             6,
-            'ABCDEF123456',
+            isinGenerator(),
             false,
             false,
             false,
@@ -280,7 +281,7 @@ describe('CAP Tests', () => {
             false,
             1,
             '0x345678',
-            0,
+            BigInt(maxSupply * 2),
             100,
             RegulationType.REG_D,
             RegulationSubType.REG_D_506_B,
@@ -300,6 +301,44 @@ describe('CAP Tests', () => {
             'ERC1410ScheduledTasks',
             diamond.address
         )
+    })
+
+    it('GIVEN setting 0 to max supply WHEN trying to initialize THEN transaction fails', async () => {
+        const rbacPause: Rbac = {
+            role: _PAUSER_ROLE,
+            members: [account_B],
+        }
+        const init_rbacs: Rbac[] = [rbacPause]
+        await expect(
+            deployEquityFromFactory(
+                account_A,
+                false,
+                true,
+                false,
+                false,
+                'TEST_AccessControl',
+                'TAC',
+                6,
+                isinGenerator(),
+                false,
+                false,
+                false,
+                true,
+                true,
+                true,
+                false,
+                1,
+                '0x345678',
+                0n,
+                100,
+                RegulationType.REG_D,
+                RegulationSubType.REG_D_506_B,
+                true,
+                'ES,FR,CH',
+                'nothing',
+                init_rbacs
+            )
+        ).to.be.rejectedWith('NewMaxSupplyCannotBeZero')
     })
 
     it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {
@@ -361,7 +400,22 @@ describe('CAP Tests', () => {
         })
     })
 
-    describe('New Max Supply Too low', () => {
+    describe('New Max Supply Too low or 0', () => {
+        it('GIVEN a token WHEN setMaxSupply to 0 THEN transaction fails with NewMaxSupplyCannotBeZero', async () => {
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+
+            // Using account C (non role)
+            capFacet = capFacet.connect(signer_C)
+
+            // add to list fails
+            await expect(
+                capFacet.setMaxSupply(0)
+            ).to.be.revertedWithCustomError(
+                capFacet,
+                'NewMaxSupplyCannotBeZero'
+            )
+        })
         it('GIVEN a token WHEN setMaxSupply a value that is less than the current total supply THEN transaction fails with NewMaxSupplyTooLow', async () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
@@ -371,7 +425,7 @@ describe('CAP Tests', () => {
             await erc1410Facet.issueByPartition(
                 _PARTITION_ID_1,
                 account_A,
-                2 * maxSupply,
+                maxSupply * 2,
                 '0x'
             )
 
@@ -393,7 +447,7 @@ describe('CAP Tests', () => {
             await erc1410Facet.issueByPartition(
                 _PARTITION_ID_1,
                 account_A,
-                2 * maxSupply,
+                maxSupply * 2,
                 '0x'
             )
 
@@ -410,6 +464,25 @@ describe('CAP Tests', () => {
         })
     })
 
+    describe('New Max Supply By Partition Too High', () => {
+        it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyByPartitionTooHigh', async () => {
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+
+            // Using account C (non role)
+            capFacet = capFacet.connect(signer_C)
+
+            // add to list fails
+            await expect(
+                capFacet.setMaxSupplyByPartition(
+                    _PARTITION_ID_1,
+                    maxSupply * 100
+                )
+            ).to.eventually.be.rejectedWith('NewMaxSupplyByPartitionTooHigh')
+        })
+    })
+
     describe('New Max Supply OK', () => {
         it('GIVEN a token WHEN setMaxSupply THEN transaction succeeds', async () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
@@ -417,13 +490,13 @@ describe('CAP Tests', () => {
 
             capFacet = capFacet.connect(signer_C)
 
-            await expect(capFacet.setMaxSupply(maxSupply))
+            await expect(capFacet.setMaxSupply(maxSupply * 4))
                 .to.emit(capFacet, 'MaxSupplySet')
-                .withArgs(account_C, maxSupply, 0)
+                .withArgs(account_C, maxSupply * 4, maxSupply * 2)
 
             const currentMaxSupply = await capFacet.getMaxSupply()
 
-            expect(currentMaxSupply).to.equal(maxSupply)
+            expect(currentMaxSupply).to.equal(maxSupply * 4)
         })
 
         it('GIVEN a token WHEN setMaxSupplyByPartition THEN transaction succeeds', async () => {
@@ -433,16 +506,16 @@ describe('CAP Tests', () => {
             capFacet = capFacet.connect(signer_C)
 
             await expect(
-                capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply)
+                capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 2)
             )
                 .to.emit(capFacet, 'MaxSupplyByPartitionSet')
-                .withArgs(account_C, _PARTITION_ID_1, maxSupply, 0)
+                .withArgs(account_C, _PARTITION_ID_1, maxSupply * 2, 0)
 
             const currentMaxSupply = await capFacet.getMaxSupplyByPartition(
                 _PARTITION_ID_1
             )
 
-            expect(currentMaxSupply).to.equal(maxSupply)
+            expect(currentMaxSupply).to.equal(maxSupply * 2)
         })
     })
 })

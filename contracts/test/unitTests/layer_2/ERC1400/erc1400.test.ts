@@ -247,8 +247,12 @@ import {
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { ADDRESS_0 } from '../../../../scripts/constants'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+import {
+    grantRoleAndPauseToken,
+    MAX_UINT256,
+} from '../../../../scripts/testCommon'
 import { BigNumber } from 'ethers'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -595,7 +599,7 @@ describe('ERC1400 Tests', () => {
             'TEST_AccessControl',
             'TAC',
             decimals_Original,
-            'ABCDEF123456',
+            isinGenerator(),
             false,
             false,
             false,
@@ -605,7 +609,7 @@ describe('ERC1400 Tests', () => {
             false,
             1,
             '0x345678',
-            0,
+            MAX_UINT256,
             100,
             RegulationType.REG_D,
             RegulationSubType.REG_D_506_B,
@@ -687,7 +691,7 @@ describe('ERC1400 Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'ABCDEF123456',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -697,7 +701,7 @@ describe('ERC1400 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                MAX_UINT256,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_B,
@@ -1106,7 +1110,7 @@ describe('ERC1400 Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'ABCDEF123456',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -1116,7 +1120,7 @@ describe('ERC1400 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                MAX_UINT256,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_B,
@@ -2000,7 +2004,7 @@ describe('ERC1400 Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'ABCDEF123456',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -2010,7 +2014,7 @@ describe('ERC1400 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                MAX_UINT256,
                 100,
                 RegulationType.REG_D,
                 RegulationSubType.REG_D_506_C,
@@ -2361,7 +2365,7 @@ describe('ERC1400 Tests', () => {
                 'TEST_AccessControl',
                 'TAC',
                 6,
-                'ABCDEF123456',
+                isinGenerator(),
                 false,
                 false,
                 false,
@@ -2371,7 +2375,7 @@ describe('ERC1400 Tests', () => {
                 false,
                 1,
                 '0x345678',
-                0,
+                MAX_UINT256,
                 100,
                 RegulationType.REG_S,
                 RegulationSubType.NONE,

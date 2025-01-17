@@ -226,6 +226,7 @@ import {
     RegulationType,
 } from '../../../../scripts/factory'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -236,6 +237,7 @@ const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const TIME = 6000
 const DECIMALS = 6
+const MAX_SUPPLY = BigInt(100000000)
 
 describe('Snapshots Layer 2 Tests', () => {
     let diamond: ResolverProxy
@@ -276,7 +278,7 @@ describe('Snapshots Layer 2 Tests', () => {
             'TEST_AccessControl',
             'TAC',
             DECIMALS,
-            'ABCDEF123456',
+            isinGenerator(),
             false,
             false,
             false,
@@ -286,7 +288,7 @@ describe('Snapshots Layer 2 Tests', () => {
             false,
             1,
             '0x345678',
-            0,
+            MAX_SUPPLY,
             100,
             RegulationType.REG_D,
             RegulationSubType.REG_D_506_B,

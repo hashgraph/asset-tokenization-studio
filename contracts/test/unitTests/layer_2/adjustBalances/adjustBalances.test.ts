@@ -237,6 +237,7 @@ const _PARTITION_ID_2 =
 const adjustFactor = 253
 const adjustDecimals = 2
 const decimals_Original = 6
+const maxSupply_Original = 1000000 * amount
 const TIME = 6000
 
 describe('Adjust Balances Tests', () => {
@@ -268,7 +269,7 @@ describe('Adjust Balances Tests', () => {
             'TEST_AccessControl',
             'TAC',
             decimals_Original,
-            'ABCDEF123456',
+            'RO3682287482',
             false,
             false,
             false,
@@ -278,7 +279,7 @@ describe('Adjust Balances Tests', () => {
             false,
             1,
             '0x345678',
-            0,
+            BigInt(maxSupply_Original),
             100,
             RegulationType.REG_D,
             RegulationSubType.REG_D_506_B,

@@ -223,11 +223,9 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, ERC1644StorageWrapper {
         virtual
         override
         onlyUninitialized(_getErc1644Storage().initialized)
-        returns (bool success_)
     {
         _getErc1644Storage().isControllable = _controllable;
         _getErc1644Storage().initialized = true;
-        success_ = true;
     }
 
     // solhint-disable no-unused-vars
