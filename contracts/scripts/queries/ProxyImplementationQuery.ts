@@ -203,131 +203,25 @@
 
 */
 
-import { task, types } from 'hardhat/config'
-import { ContractId } from '@hashgraph/sdk'
-import {
-    GetClientResult,
-    UpdateBusinessLogicKeysArgs,
-    UpdateFactoryVersionArgs,
-} from './Arguments'
-import { BusinessLogicRegistryData } from '../scripts/businessLogicResolverLogic'
-import { getProxyImpl, updateProxy } from '../scripts/deploy'
-import {
-    getStaticResolverKey,
-    registerBusinessLogics,
-} from '../scripts/contractsMethods'
+import { BaseBlockchainQuery, BaseBlockchainQueryParams } from '../index'
 
-task('updateFactoryVersion', 'Updates the factory version')
-    .addPositionalParam(
-        'proxyadmin',
-        'The proxy admin contract ID. 0.0.XXXX format'
-    )
-    .addPositionalParam(
-        'transparentproxy',
-        'The transparent proxy contract ID. 0.0.XXXX format'
-    )
-    .addPositionalParam(
-        'implementation',
-        'The new implementation contract ID. 0.0.XXXX format'
-    )
-    .addOptionalParam(
-        'account',
-        'The Hedera account to use for deployment. 0.0.XXXX format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account, Raw hexadecimal string',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'isEd25519',
-        'Client is ED25519 key type',
-        false,
-        types.boolean
-    )
-    .setAction(async (args: UpdateFactoryVersionArgs, hre) => {
-        console.log(`Executing updateFactoryVersion on ${hre.network.name} ...`)
-        const { client }: GetClientResult = await hre.run('getClient', {
-            account: args.account,
-            privateKey: args.privateKey,
-            isEd25519: args.isEd25519,
-        })
+interface ProxyImplementationQueryParams extends BaseBlockchainQueryParams {
+    proxyAdminAddress: string
+    transparentProxyAddress: string
+}
 
-        await updateProxy(
-            client,
-            args.proxyAdmin,
-            args.proxy,
-            args.newImplementation
-        )
+export default class ProxyImplementationQuery extends BaseBlockchainQuery {
+    public readonly proxyAdminAddress: string
+    public readonly transparentProxyAddress: string
 
-        await getProxyImpl(client, args.proxyAdmin, args.proxy)
-
-        console.log('Factory version updated')
-    })
-
-task('updateBusinessLogicKeys', 'Update the address of a business logic key')
-    .addPositionalParam('resolver', 'The resolver Contract ID. 0.0.XXXX format')
-    .addPositionalParam(
-        'implementations',
-        'The implementations to update. List of comma separated contract IDs. 0.0.XXXX format'
-    )
-    .addOptionalParam(
-        'account',
-        'The Hedera account to use for deployment. 0.0.XXXX format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account, Raw hexadecimal string',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'isEd25519',
-        'Client is ED25519 key type',
-        false,
-        types.boolean
-    )
-    .setAction(async (args: UpdateBusinessLogicKeysArgs, hre) => {
-        console.log(
-            `Executing updateBusinessLogicKeys on ${hre.network.name} ...`
-        )
-        const { client }: GetClientResult = await hre.run('getClient', {
-            account: args.account,
-            privateKey: args.privateKey,
-            isEd25519: args.isEd25519,
-        })
-
-        const businessLogicRegistries: BusinessLogicRegistryData[] = []
-
-        const implementationList = args.implementations.split(',')
-
-        for (let i = 0; i < implementationList.length; i++) {
-            const facet = ContractId.fromString(implementationList[i])
-
-            console.log(implementationList[i])
-
-            const businessLogicKey = await getStaticResolverKey(facet, client)
-
-            console.log(businessLogicKey)
-
-            businessLogicRegistries.push({
-                businessLogicKey: businessLogicKey,
-                businessLogicAddress: ContractId.fromString(
-                    implementationList[i]
-                ).toSolidityAddress(),
-            })
-        }
-
-        const resolverContract = ContractId.fromString(args.resolver)
-
-        await registerBusinessLogics(
-            businessLogicRegistries,
-            resolverContract,
-            client
-        )
-    })
+    constructor({
+        proxyAdminAddress,
+        transparentProxyAddress,
+        provider,
+        overrides,
+    }: ProxyImplementationQueryParams) {
+        super({ provider, overrides })
+        this.proxyAdminAddress = proxyAdminAddress
+        this.transparentProxyAddress = transparentProxyAddress
+    }
+}

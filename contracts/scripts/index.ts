@@ -203,125 +203,78 @@
 
 */
 
-//import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ethers } from 'hardhat'
-import { IBusinessLogicResolver } from '../typechain-types'
-import { IStaticFunctionSelectors } from '../typechain-types'
-import {
-    transparentUpgradableProxy,
-    deployProxyAdmin,
-    deployTransparentUpgradeableProxy,
-} from './transparentUpgradableProxy'
-import { expect } from 'chai'
+// * Constants
+export * from './constants'
 
-export interface BusinessLogicRegistryData {
-    businessLogicKey: string
-    businessLogicAddress: string
-}
+// * Commands
+export {
+    default as BaseBlockchainCommand,
+    BaseBlockchainCommandParams,
+} from './commands/base/BaseBlockchainCommand'
+export {
+    default as BaseAtsContractListCommand,
+    BaseAtsContractListCommandParams,
+} from './commands/base/BaseAtsContractListCommand'
+export { default as ErrorMessageCommand } from './commands/ErrorMessageCommand'
+export { default as DeployContractCommand } from './commands/DeployContractCommand'
+export { default as DeployAtsContractsCommand } from './commands/DeployAtsContractsCommand'
+export { default as DeployAtsFullInfrastructureCommand } from './commands/DeployAtsFullInfrastructureCommand'
+export { default as DeployContractWithFactoryCommand } from './commands/DeployContractWithFactoryCommand'
+export { default as DeployProxyAdminCommand } from './commands/DeployProxyAdminCommand'
+export { default as DeployUpgradeableProxyCommand } from './commands/DeployTransparentProxyCommand'
+export { default as DeployProxyForBusinessLogicResolverCommand } from './commands/DeployProxyForBusinessLogicResolverCommand'
+export { default as UpgradeProxyImplementationCommand } from './commands/UpgradeProxyImplementationCommand'
+export { default as CallContractCommand } from './commands/CallContractCommand'
+export { default as ValidateTxResponseCommand } from './commands/ValidateTxResponseCommand'
+export { default as RegisterBusinessLogicsCommand } from './commands/RegisterBusinessLogicsCommand'
+export { default as RegisterDeployedContractBusinessLogicsCommand } from './commands/RegisterDeployedContractBusinessLogicsCommand'
+export { default as CreateConfigurationsForDeployedContractsCommand } from './commands/CreateConfigurationsForDeployedContractsCommand'
 
-export interface DeployedBusinessLogics {
-    businessLogicResolver: IStaticFunctionSelectors
-    factory: IStaticFunctionSelectors
-    diamondFacet: IStaticFunctionSelectors
-    accessControl: IStaticFunctionSelectors
-    controlList: IStaticFunctionSelectors
-    corporateActionsSecurity: IStaticFunctionSelectors
-    pause: IStaticFunctionSelectors
-    eRC20_2: IStaticFunctionSelectors
-    eRC1644_2: IStaticFunctionSelectors
-    eRC1410ScheduledTasks: IStaticFunctionSelectors
-    eRC1594_2: IStaticFunctionSelectors
-    eRC1643: IStaticFunctionSelectors
-    equityUSA: IStaticFunctionSelectors
-    bondUSA: IStaticFunctionSelectors
-    snapshots_2: IStaticFunctionSelectors
-    scheduledSnapshots: IStaticFunctionSelectors
-    scheduledBalanceAdjustments: IStaticFunctionSelectors
-    scheduledTasks: IStaticFunctionSelectors
-    cap_2: IStaticFunctionSelectors
-    lock_2: IStaticFunctionSelectors
-    transferAndLock: IStaticFunctionSelectors
-    adjustBalances: IStaticFunctionSelectors
-    protectedPartitions: IStaticFunctionSelectors
-}
+// * Queries
+export {
+    default as BaseBlockchainQuery,
+    BaseBlockchainQueryParams,
+} from './queries/base/BaseBlockchainQuery'
+export { default as ProxyImplementationQuery } from './queries/ProxyImplementationQuery'
+export { default as GetFacetsByConfigurationIdAndVersionQuery } from './queries/GetFacetsByConfigurationIdAndVersionQuery'
 
-export let businessLogicResolver: IBusinessLogicResolver
+// * Results
+export { default as DeployContractResult } from './results/DeployContractResult'
+export { default as DeployContractWithFactoryResult } from './results/DeployContractWithFactoryResult'
+export {
+    default as DeployAtsContractsResult,
+    DeployAtsContractsResultParams,
+} from './results/DeployAtsContractsResult'
+export { default as DeployAtsFullInfrastructureResult } from './results/DeployAtsFullInfrastructureResult'
+export { default as ValidateTxResponseResult } from './results/ValidateTxResponseResult'
+export { default as GetFacetsByConfigurationIdAndVersionResult } from './results/GetFacetsByConfigurationIdAndVersionResult'
+export { default as CreateConfigurationsForDeployedContractsResult } from './results/CreateConfigurationsForDeployedContractsResult'
 
-export async function deployProxyToBusinessLogicResolver(
-    businessLogicResolverLogicAddress: string
-) {
-    //await loadFixture(deployProxyAdmin)
-    await deployProxyAdmin()
-    await deployTransparentUpgradeableProxy(businessLogicResolverLogicAddress)
-    businessLogicResolver = (await ethers.getContractAt(
-        'BusinessLogicResolver',
-        transparentUpgradableProxy.address
-    )) as IBusinessLogicResolver
-    await businessLogicResolver.initialize_BusinessLogicResolver()
-}
+// * Errors
+export { default as BusinessLogicResolverNotFound } from './errors/BusinessLogicResolverNotFound'
+export { default as BusinessLogicResolverProxyNotFound } from './errors/BusinessLogicResolverProxyNotFound'
+export { default as TransactionReceiptError } from './errors/TransactionReceiptError'
 
-async function toStaticFunctionSelectors(
-    address: string
-): Promise<IStaticFunctionSelectors> {
-    return (await ethers.getContractAt(
-        'IStaticFunctionSelectors',
-        address
-    )) as IStaticFunctionSelectors
-}
+// * Time functions
+export * from './time'
 
-function capitalizeFirst(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-}
+// * Blockain functions
+export * from './blockchain'
 
-function uncapitalizeFirst(str: string) {
-    return str.charAt(0).toLowerCase() + str.slice(1)
-}
+// * Hedera functions
+export * from './hedera'
 
-export async function deployBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    async function deployContractAndAssignIt(
-        deployedAndRegisteredBusinessLogics: DeployedBusinessLogics,
-        contractToDeploy: string
-    ) {
-        async function deployContract() {
-            return await (
-                await ethers.getContractFactory(contractToDeploy)
-            ).deploy()
-        }
-        //await loadFixture(deployContract)
-        const deployedContract = await deployContract()
-        const deployedAndRegisteredBusinessLogics_Property =
-            uncapitalizeFirst(contractToDeploy)
-        deployedAndRegisteredBusinessLogics[
-            deployedAndRegisteredBusinessLogics_Property as keyof DeployedBusinessLogics
-        ] = await toStaticFunctionSelectors(deployedContract.address)
-    }
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        await deployContractAndAssignIt(
-            deployedAndRegisteredBusinessLogics,
-            capitalizeFirst(key)
-        )
-    }
-}
+// * Deploy functions
+export * from './deploy'
 
-export async function registerBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    const businessLogicsData: BusinessLogicRegistryData[] = []
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        if (key === 'businessLogicResolver' || key === 'factory') {
-            continue
-        }
-        const businessLogic = deployedAndRegisteredBusinessLogics[key]
-        businessLogicsData.push({
-            businessLogicKey: await businessLogic.getStaticResolverKey(),
-            businessLogicAddress: businessLogic.address,
-        })
-    }
-    await expect(
-        businessLogicResolver.registerBusinessLogics(businessLogicsData)
-    ).to.emit(businessLogicResolver, 'BusinessLogicsRegistered')
-}
+// * Proxy functions
+export * from './transparentUpgradeableProxy'
+
+// * BusinessLogicResolver
+export * from './businessLogicResolver'
+
+// * ResolverDiamondCut
+export * from './resolverDiamondCut'
+
+// * Factory
+export * from './factory'

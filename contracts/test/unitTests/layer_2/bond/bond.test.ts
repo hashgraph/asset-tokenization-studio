@@ -207,6 +207,7 @@ import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { BigNumber } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     ResolverProxy,
     Bond,
@@ -214,24 +215,29 @@ import {
     Pause,
     Lock_2,
     ERC1410ScheduledTasks,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+    IFactory,
+    BusinessLogicResolver,
+    ERC1410ScheduledTasks__factory,
+    Lock_2__factory,
+    Pause__factory,
+    AccessControl__factory,
+    Bond__factory,
+} from '@typechain'
 import {
-    _CORPORATE_ACTION_ROLE,
-    _PAUSER_ROLE,
-    _BOND_MANAGER_ROLE,
-    _LOCKER_ROLE,
-    _ISSUER_ROLE,
-    _DEFAULT_PARTITION,
-} from '../../../../scripts/constants'
-import {
+    CORPORATE_ACTION_ROLE,
+    PAUSER_ROLE,
+    BOND_MANAGER_ROLE,
+    LOCKER_ROLE,
+    ISSUER_ROLE,
+    DEFAULT_PARTITION,
     Rbac,
     deployBondFromFactory,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 const TIME = 30000
 const numberOfUnits = 1000
@@ -267,6 +273,8 @@ describe('Bond Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let bondFacet: Bond
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
@@ -274,17 +282,31 @@ describe('Bond Tests', () => {
     let erc1410Facet: ERC1410ScheduledTasks
 
     before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
     })
 
     beforeEach(async () => {
         currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
             .timestamp
-        startingDate = currentTimeInSeconds + TIME / 1000
+        startingDate = currentTimeInSeconds + TIME / 1000 + 5 // ! Had to add 5 seconds to avoid timestamp issues
         maturityDate = startingDate + numberOfCoupons * frequency
         firstCouponDate = startingDate + 1
         couponRecordDateInSeconds = currentTimeInSeconds + TIME_2 / 1000
@@ -296,54 +318,50 @@ describe('Bond Tests', () => {
             rate: couponRate,
         }
 
-        await deployEnvironment()
-
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
 
-        diamond = await deployBondFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            false,
-            'TEST_AccessControl',
-            'TAC',
-            6,
-            isinGenerator(),
-            '0x455552',
+        diamond = await deployBondFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            currency: '0x455552',
             numberOfUnits,
-            100,
+            nominalValue: 100,
             startingDate,
             maturityDate,
-            frequency,
-            rate,
+            couponFrequency: frequency,
+            couponRate: rate,
             firstCouponDate,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_C,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_C,
             countriesControlListType,
             listOfCountries,
             info,
-            init_rbacs
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
+
+        bondFacet = Bond__factory.connect(diamond.address, signer_A)
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        bondFacet = await ethers.getContractAt('Bond', diamond.address)
-
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
-        )
-
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-
-        lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
-
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            await diamond.address
+        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
         )
     })
 
@@ -363,7 +381,7 @@ describe('Bond Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                _CORPORATE_ACTION_ROLE,
+                CORPORATE_ACTION_ROLE,
                 signer_A,
                 signer_B,
                 account_C
@@ -381,10 +399,7 @@ describe('Bond Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setCoupon with wrong dates THEN transaction fails', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             bondFacet = bondFacet.connect(signer_C)
 
@@ -415,10 +430,7 @@ describe('Bond Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             bondFacet = bondFacet.connect(signer_C)
 
@@ -465,12 +477,9 @@ describe('Bond Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
-            await accessControlFacet.grantRole(_LOCKER_ROLE, account_C)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             // Using account C (with role)
             bondFacet = bondFacet.connect(signer_C)
             lockFacet = lockFacet.connect(signer_C)
@@ -481,7 +490,7 @@ describe('Bond Tests', () => {
             const LockedAmount = TotalAmount - 5
 
             await erc1410Facet.issueByPartition(
-                _DEFAULT_PARTITION,
+                DEFAULT_PARTITION,
                 account_A,
                 TotalAmount,
                 '0x'
@@ -502,7 +511,7 @@ describe('Bond Tests', () => {
 
             // check list members
             await new Promise((f) => setTimeout(f, TIME_2 + 1))
-            await accessControlFacet.revokeRole(_ISSUER_ROLE, account_C)
+            await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
 
             const couponFor = await bondFacet.getCouponFor(
                 numberOfCoupons + 1,
@@ -517,7 +526,7 @@ describe('Bond Tests', () => {
             // * Arrange
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_BOND_MANAGER_ROLE, account_C)
+            await accessControlFacet.grantRole(BOND_MANAGER_ROLE, account_C)
             // Using account C (with role)
             bondFacet = bondFacet.connect(signer_C)
             // Get maturity date
@@ -553,7 +562,7 @@ describe('Bond Tests', () => {
             // * Arrange
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_BOND_MANAGER_ROLE, account_C)
+            await accessControlFacet.grantRole(BOND_MANAGER_ROLE, account_C)
             // Using account C (with role)
             bondFacet = bondFacet.connect(signer_C)
             // Get maturity date
@@ -604,7 +613,7 @@ describe('Bond Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                _BOND_MANAGER_ROLE,
+                BOND_MANAGER_ROLE,
                 signer_A,
                 signer_B,
                 account_C

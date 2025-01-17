@@ -205,26 +205,28 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type ControlList,
     type Pause,
     AccessControl,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
-import { _CONTROL_LIST_ROLE, _PAUSER_ROLE } from '../../../../scripts/constants'
+    IFactory,
+    BusinessLogicResolver,
+} from '@typechain'
 import {
+    CONTROL_LIST_ROLE,
+    PAUSER_ROLE,
+    MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import {
-    grantRoleAndPauseToken,
-    MAX_UINT256,
-} from '../../../../scripts/testCommon'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 describe('Control List Tests', () => {
     let diamond: ResolverProxy
@@ -240,11 +242,15 @@ describe('Control List Tests', () => {
     let account_D: string
     let account_E: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let controlListFacet: ControlList
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
             await ethers.getSigners()
@@ -254,42 +260,56 @@ describe('Control List Tests', () => {
         account_D = signer_D.address
         account_E = signer_E.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
 
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            false,
-            'TEST_AccessControl',
-            'TAC',
-            6,
-            isinGenerator(),
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            MAX_UINT256,
-            100,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_C,
-            true,
-            'ES,FR,CH',
-            'nothing',
-            init_rbacs
-        )
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_C,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory: factory,
+        })
 
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
@@ -335,7 +355,7 @@ describe('Control List Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _CONTROL_LIST_ROLE,
+            CONTROL_LIST_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -355,7 +375,7 @@ describe('Control List Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _CONTROL_LIST_ROLE,
+            CONTROL_LIST_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -374,7 +394,7 @@ describe('Control List Tests', () => {
         // ADD TO LIST ------------------------------------------------------------------
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_CONTROL_LIST_ROLE, account_C)
+        await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_C)
         // Using account C (with role)
         controlListFacet = controlListFacet.connect(signer_C)
 
