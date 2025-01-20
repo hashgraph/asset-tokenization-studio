@@ -209,6 +209,7 @@ import {Cap} from '../layer_1/cap/Cap.sol';
 import {CapStorageWrapper_2} from '../layer_2/cap/CapStorageWrapper_2.sol';
 import {CapStorageWrapper} from '../layer_1/cap/CapStorageWrapper.sol';
 import {TimeTravel} from './TimeTravel.sol';
+import {LocalContext} from '../layer_1/context/LocalContext.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 // TODO: Remove _ in contract name
@@ -325,8 +326,12 @@ contract Cap_2TimeTravel is Cap, CapStorageWrapper_2, TimeTravel {
             .selector;
     }
 
-    function _blockTimestamp() internal view override returns (uint256) {
-        return
-            _getBlockTimestamp() == 0 ? block.timestamp : _getBlockTimestamp();
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravel)
+        returns (uint256)
+    {
+        return TimeTravel._blockTimestamp();
     }
 }

@@ -215,9 +215,11 @@ abstract contract TimeTravel is ITimeTravel {
         if (_newSystemTime == 0) {
             revert InvalidTimestamp(_newSystemTime);
         }
+
+        uint256 _oldSystemTime = _timestamp;
         _timestamp = _newSystemTime;
 
-        emit SystemTimestampChanged(_getBlockTimestamp(), _newSystemTime);
+        emit SystemTimestampChanged(_oldSystemTime, _newSystemTime);
     }
 
     function resetSystemTimestamp() external override {
@@ -225,7 +227,9 @@ abstract contract TimeTravel is ITimeTravel {
         emit SystemTimestampReset();
     }
 
-    function _getBlockTimestamp() internal view virtual returns (uint256) {
-        return _timestamp;
+    function _blockTimestamp() internal view virtual returns (uint256) {
+      if(block.chainid == 31337) revert("Wrong chain id");
+      uint256 timestamp = _timestamp;
+      return timestamp == 0 ? block.timestamp : timestamp;
     }
 }

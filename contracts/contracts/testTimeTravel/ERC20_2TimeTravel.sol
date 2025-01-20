@@ -226,6 +226,7 @@ import {
 import {IERC20_2} from '../layer_2/interfaces/ERC1400/IERC20_2.sol';
 import {CapStorageWrapper} from '../layer_1/cap/CapStorageWrapper.sol';
 import {TimeTravel} from './TimeTravel.sol';
+import {LocalContext} from '../layer_1/context/LocalContext.sol';
 
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors
@@ -478,9 +479,13 @@ contract ERC20_2TimeTravel is
         return _getERC20MetadataAdjusted();
     }
 
-    function _blockTimestamp() internal view override returns (uint256) {
-        return
-            _getBlockTimestamp() == 0 ? block.timestamp : _getBlockTimestamp();
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravel)
+        returns (uint256)
+    {
+        return TimeTravel._blockTimestamp();
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors

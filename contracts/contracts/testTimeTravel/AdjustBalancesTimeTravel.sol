@@ -222,6 +222,7 @@ import {
     ScheduledTasks_CD_Lib
 } from '../layer_2/scheduledTasks/scheduledTasks/ScheduledTasks_CD_Lib.sol';
 import {TimeTravel} from './TimeTravel.sol';
+import {LocalContext} from '../layer_1/context/LocalContext.sol';
 
 contract AdjustBalancesTimeTravel is
     IAdjustBalances,
@@ -395,8 +396,12 @@ contract AdjustBalancesTimeTravel is
             .interfaceId;
     }
 
-    function _blockTimestamp() internal view override returns (uint256) {
-        return
-            _getBlockTimestamp() == 0 ? block.timestamp : _getBlockTimestamp();
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravel)
+        returns (uint256)
+    {
+        return TimeTravel._blockTimestamp();
     }
 }

@@ -231,6 +231,7 @@ import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 import {TimeTravel} from './TimeTravel.sol';
+import {LocalContext} from '../layer_1/context/LocalContext.sol';
 
 contract ERC1410ScheduledTasksTimeTravel is
     IERC1410ScheduledTasks,
@@ -559,8 +560,12 @@ contract ERC1410ScheduledTasksTimeTravel is
         staticInterfaceIds_[selectorsIndex++] = type(IERC1410).interfaceId;
     }
 
-    function _blockTimestamp() internal view override returns (uint256) {
-        return
-            _getBlockTimestamp() == 0 ? block.timestamp : _getBlockTimestamp();
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravel)
+        returns (uint256)
+    {
+        return TimeTravel._blockTimestamp();
     }
 }

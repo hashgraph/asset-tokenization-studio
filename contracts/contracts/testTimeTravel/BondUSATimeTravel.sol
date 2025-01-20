@@ -217,6 +217,7 @@ import {_BOND_RESOLVER_KEY} from '../layer_2/constants/resolverKeys.sol';
 import {IBond} from '../layer_2/interfaces/bond/IBond.sol';
 import {ISecurity} from '../layer_3/interfaces/ISecurity.sol';
 import {TimeTravel} from './TimeTravel.sol';
+import {LocalContext} from '../layer_1/context/LocalContext.sol';
 
 contract BondUSATimeTravel is IBondUSA, Bond, Security, TimeTravel {
     // solhint-disable func-name-mixedcase
@@ -293,8 +294,12 @@ contract BondUSATimeTravel is IBondUSA, Bond, Security, TimeTravel {
         staticInterfaceIds_[selectorsIndex++] = type(IBondUSA).interfaceId;
     }
 
-    function _blockTimestamp() internal view override returns (uint256) {
-        return
-            _getBlockTimestamp() == 0 ? block.timestamp : _getBlockTimestamp();
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravel)
+        returns (uint256)
+    {
+        return TimeTravel._blockTimestamp();
     }
 }

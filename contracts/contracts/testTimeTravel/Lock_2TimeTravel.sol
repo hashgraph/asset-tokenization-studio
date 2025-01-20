@@ -219,6 +219,7 @@ import {
     ERC1410BasicStorageWrapperRead
 } from '../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 import {TimeTravel} from './TimeTravel.sol';
+import {LocalContext} from '../layer_1/context/LocalContext.sol';
 
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
@@ -423,9 +424,13 @@ contract Lock_2TimeTravel is Lock, LockStorageWrapper_2, TimeTravel {
         staticInterfaceIds_[selectorsIndex++] = type(ILock).interfaceId;
     }
 
-    function _blockTimestamp() internal view override returns (uint256) {
-        return
-            _getBlockTimestamp() == 0 ? block.timestamp : _getBlockTimestamp();
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravel)
+        returns (uint256)
+    {
+        return TimeTravel._blockTimestamp();
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

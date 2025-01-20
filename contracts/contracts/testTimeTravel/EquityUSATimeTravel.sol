@@ -217,6 +217,7 @@ import {_EQUITY_RESOLVER_KEY} from '../layer_2/constants/resolverKeys.sol';
 import {IEquity} from '../layer_2/interfaces/equity/IEquity.sol';
 import {ISecurity} from '../layer_3/interfaces/ISecurity.sol';
 import {TimeTravel} from './TimeTravel.sol';
+import {LocalContext} from '../layer_1/context/LocalContext.sol';
 
 contract EquityUSATimeTravel is IEquityUSA, Equity, Security, TimeTravel {
     // solhint-disable func-name-mixedcase
@@ -303,8 +304,12 @@ contract EquityUSATimeTravel is IEquityUSA, Equity, Security, TimeTravel {
         staticInterfaceIds_[selectorsIndex++] = type(IEquityUSA).interfaceId;
     }
 
-    function _blockTimestamp() internal view override returns (uint256) {
-        return
-            _getBlockTimestamp() == 0 ? block.timestamp : _getBlockTimestamp();
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravel)
+        returns (uint256)
+    {
+        return TimeTravel._blockTimestamp();
     }
 }
