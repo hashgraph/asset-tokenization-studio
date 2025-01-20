@@ -206,19 +206,226 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {Context} from '@openzeppelin/contracts/utils/Context.sol';
+import {LockStorageWrapper_2} from '../layer_2/lock/LockStorageWrapper_2.sol';
+import {
+    LockStorageWrapper_2_Read
+} from '../layer_2/lock/LockStorageWrapper_2_Read.sol';
+import {LockStorageWrapper} from '../layer_1/lock/LockStorageWrapper.sol';
+import {Lock} from '../layer_1/lock/Lock.sol';
+import {ILock} from '../layer_1/interfaces/lock/ILock.sol';
+import {_DEFAULT_PARTITION} from '../layer_1/constants/values.sol';
+import {_LOCK_RESOLVER_KEY} from '../layer_1/constants/resolverKeys.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {TimeTravel} from './TimeTravel.sol';
 
-abstract contract LocalContext is Context {
-    function _blockTimestamp()
-        internal
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+contract Lock_2TimeTravel is Lock, LockStorageWrapper_2, TimeTravel {
+    function getLockedAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 amount_) {
+        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function getLockForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    )
+        external
         view
         virtual
-        returns (uint256 blockTimestamp_)
+        override
+        returns (uint256 amount_, uint256 expirationTimestamp_)
     {
-        return block.timestamp;
+        return
+            _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
     }
 
-    function _blockChainid() internal view returns (uint256 chainid_) {
-        chainid_ = block.chainid;
+    function getLockedAmountFor(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 amount_) {
+        return
+            _getLockedAmountForByPartitionAdjusted(
+                _DEFAULT_PARTITION,
+                _tokenHolder
+            );
+    }
+
+    function getLockFor(
+        address _tokenHolder,
+        uint256 _lockId
+    )
+        external
+        view
+        virtual
+        override
+        returns (uint256 amount_, uint256 expirationTimestamp_)
+    {
+        return
+            _getLockForByPartitionAdjusted(
+                _DEFAULT_PARTITION,
+                _tokenHolder,
+                _lockId
+            );
+    }
+
+    function getLockedAmountForAdjusted(
+        address _tokenHolder
+    ) external view virtual returns (uint256 amount_) {
+        return _getLockedAmountForAdjusted(_tokenHolder);
+    }
+
+    function getLockedAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual returns (uint256 amount_) {
+        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function _lockByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _tokenHolder,
+        uint256 _expirationTimestamp
+    )
+        internal
+        virtual
+        override(LockStorageWrapper, LockStorageWrapper_2)
+        returns (bool success_, uint256 lockId_)
+    {
+        return
+            LockStorageWrapper_2._lockByPartition(
+                _partition,
+                _amount,
+                _tokenHolder,
+                _expirationTimestamp
+            );
+    }
+
+    function _releaseByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    )
+        internal
+        virtual
+        override(LockStorageWrapper, LockStorageWrapper_2)
+        returns (bool success_)
+    {
+        return
+            LockStorageWrapper_2._releaseByPartition(
+                _partition,
+                _lockId,
+                _tokenHolder
+            );
+    }
+
+    function _setLockAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex,
+        LockData memory _lock
+    ) internal virtual override(LockStorageWrapper, LockStorageWrapper_2) {
+        LockStorageWrapper_2._setLockAtIndex(
+            _partition,
+            _tokenHolder,
+            _lockIndex,
+            _lock
+        );
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(ERC1410BasicStorageWrapperRead, LockStorageWrapper_2_Read)
+    {
+        LockStorageWrapper_2_Read._addPartitionTo(_value, _account, _partition);
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _LOCK_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](16);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .lockByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .releaseByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockedAmountForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockCountForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLocksIdForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.lock.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.release.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockedAmountFor
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockCountFor
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getLocksIdFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getLockFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockedAmountForAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockedAmountForByPartitionAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .changeSystemTimestamp
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .resetSystemTimestamp
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(ILock).interfaceId;
+    }
+
+    function _blockTimestamp() internal view override returns (uint256) {
+        return
+            _getBlockTimestamp() == 0 ? block.timestamp : _getBlockTimestamp();
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

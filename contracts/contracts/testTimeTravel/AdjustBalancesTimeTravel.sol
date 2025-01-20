@@ -205,20 +205,198 @@
 
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {
+    IAdjustBalances
+} from '../layer_2/interfaces/adjustBalances/IAdjustBalances.sol';
+import {
+    AdjustBalancesStorageWrapper
+} from '../layer_2/adjustBalances/AdjustBalancesStorageWrapper.sol';
+import {
+    _BALANCE_ADJUSTMENTS_RESOLVER_KEY
+} from '../layer_2/constants/resolverKeys.sol';
+import {_ADJUSTMENT_BALANCE_ROLE} from '../layer_2/constants/roles.sol';
+import {
+    IStaticFunctionSelectors
+} from '../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {
+    ScheduledTasks_CD_Lib
+} from '../layer_2/scheduledTasks/scheduledTasks/ScheduledTasks_CD_Lib.sol';
+import {TimeTravel} from './TimeTravel.sol';
 
-import {Context} from '@openzeppelin/contracts/utils/Context.sol';
-
-abstract contract LocalContext is Context {
-    function _blockTimestamp()
-        internal
-        view
+contract AdjustBalancesTimeTravel is
+    IAdjustBalances,
+    IStaticFunctionSelectors,
+    AdjustBalancesStorageWrapper,
+    TimeTravel
+{
+    function adjustBalances(
+        uint256 factor,
+        uint8 decimals
+    )
+        external
         virtual
-        returns (uint256 blockTimestamp_)
+        override
+        onlyUnpaused
+        onlyRole(_ADJUSTMENT_BALANCE_ROLE)
+        checkFactor(factor)
+        returns (bool success_)
     {
-        return block.timestamp;
+        ScheduledTasks_CD_Lib.triggerScheduledTasks(0);
+        _adjustBalances(factor, decimals);
+        success_ = true;
     }
 
-    function _blockChainid() internal view returns (uint256 chainid_) {
-        chainid_ = block.chainid;
+    function getABAF() external view virtual override returns (uint256) {
+        return _getABAF();
+    }
+
+    function getABAFAdjusted()
+        external
+        view
+        virtual
+        override
+        returns (uint256)
+    {
+        return _getABAFAdjusted();
+    }
+
+    function getABAFAdjustedAt(
+        uint256 _timestamp
+    ) external view virtual override returns (uint256) {
+        return _getABAFAdjustedAt(_timestamp);
+    }
+
+    function getLABAFByUser(
+        address _account
+    ) external view virtual override returns (uint256) {
+        return _getLABAFByUser(_account);
+    }
+
+    function getLABAFByPartition(
+        bytes32 _partition
+    ) external view virtual override returns (uint256) {
+        return _getLABAFByPartition(_partition);
+    }
+
+    function getLABAFByUserAndPartition(
+        bytes32 _partition,
+        address _account
+    ) external view virtual override returns (uint256) {
+        return _getLABAFByUserAndPartition(_partition, _account);
+    }
+
+    function getAllowanceLABAF(
+        address _owner,
+        address _spender
+    ) external view virtual override returns (uint256) {
+        return _getAllowanceLABAF(_owner, _spender);
+    }
+
+    function getTotalLockLABAF(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getTotalLockLABAF(_tokenHolder);
+    }
+
+    function getTotalLockLABAFByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getTotalLockLABAFByPartition(_partition, _tokenHolder);
+    }
+
+    function getLockLABAFByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex
+    ) external view virtual override returns (uint256) {
+        return _getLockLABAFByIndex(_partition, _tokenHolder, _lockIndex);
+    }
+
+    function getLockLABAFByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getLockLABAFByPartition(_partition, _lockId, _tokenHolder);
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _BALANCE_ADJUSTMENTS_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](14);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .adjustBalances
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getABAF.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getABAFAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getABAFAdjustedAt
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLABAFByUser
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLABAFByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLABAFByUserAndPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getAllowanceLABAF
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalLockLABAF
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalLockLABAFByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockLABAFByIndex
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockLABAFByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .changeSystemTimestamp
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .resetSystemTimestamp
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IAdjustBalances)
+            .interfaceId;
+    }
+
+    function _blockTimestamp() internal view override returns (uint256) {
+        return
+            _getBlockTimestamp() == 0 ? block.timestamp : _getBlockTimestamp();
     }
 }

@@ -203,22 +203,44 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity ^0.8.18;
 
-import {Context} from '@openzeppelin/contracts/utils/Context.sol';
+/**
+ * @title Time Travel interface
+ * @notice Interface for the TimeTravel contract
+ */
+interface ITimeTravel {
+    /**
+     * @notice Error thrown when attempting to set an invalid new system timestamp
+     * @param newSystemTime The new system timestamp that caused the error
+     */
+    error InvalidTimestamp(uint256 newSystemTime);
+    /**
+     * @notice Emitted when the system timestamp is changed
+     * @param legacySystemTime The legacy system timestamp (0 if not changed)
+     * @param newSystemTime The new system timestamp
+     */
+    event SystemTimestampChanged(
+        uint256 legacySystemTime,
+        uint256 newSystemTime
+    );
 
-abstract contract LocalContext is Context {
-    function _blockTimestamp()
-        internal
-        view
-        virtual
-        returns (uint256 blockTimestamp_)
-    {
-        return block.timestamp;
-    }
+    /**
+     * @notice Emitted when the system timestamp is reset
+     */
+    event SystemTimestampReset();
 
-    function _blockChainid() internal view returns (uint256 chainid_) {
-        chainid_ = block.chainid;
-    }
+    /**
+     * @notice Changes the system timestamp
+     *         emits SystemTimestampChanged event
+     * @param _newSystemTime The new system timestamp
+     */
+    function changeSystemTimestamp(uint256 _newSystemTime) external;
+
+    /**
+     * @notice Resets the system timestamp
+     *         emits SystemTimestampReset event
+     */
+    function resetSystemTimestamp() external;
 }

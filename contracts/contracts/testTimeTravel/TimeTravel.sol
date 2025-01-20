@@ -203,22 +203,29 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {Context} from '@openzeppelin/contracts/utils/Context.sol';
+import {ITimeTravel} from './interfaces/ITimeTravel.sol';
 
-abstract contract LocalContext is Context {
-    function _blockTimestamp()
-        internal
-        view
-        virtual
-        returns (uint256 blockTimestamp_)
-    {
-        return block.timestamp;
+abstract contract TimeTravel is ITimeTravel {
+    uint256 _timestamp;
+
+    function changeSystemTimestamp(uint256 _newSystemTime) external override {
+        if (_newSystemTime == 0) {
+            revert InvalidTimestamp(_newSystemTime);
+        }
+        _timestamp = _newSystemTime;
+
+        emit SystemTimestampChanged(_getBlockTimestamp(), _newSystemTime);
     }
 
-    function _blockChainid() internal view returns (uint256 chainid_) {
-        chainid_ = block.chainid;
+    function resetSystemTimestamp() external override {
+        _timestamp = 0;
+        emit SystemTimestampReset();
+    }
+
+    function _getBlockTimestamp() internal view virtual returns (uint256) {
+        return _timestamp;
     }
 }

@@ -213,7 +213,7 @@ import {
     type ERC1410ScheduledTasks,
     type AccessControl,
     Equity,
-    ScheduledTasks,
+    ScheduledTasksTimeTravel,
     BusinessLogicResolver,
     IFactory,
 } from '@typechain'
@@ -240,6 +240,7 @@ const adjustDecimals = 2
 const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
 const TIME = 6000
+let currentTimeInSeconds = 1893452400 // 2030-01-01
 
 describe('Adjust Balances Tests', () => {
     let diamond: ResolverProxy
@@ -258,7 +259,7 @@ describe('Adjust Balances Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let equityFacet: Equity
-    let scheduledTasksFacet: ScheduledTasks
+    let scheduledTasksFacet: ScheduledTasksTimeTravel
 
     async function deployAsset({
         multiPartition,
@@ -326,7 +327,7 @@ describe('Adjust Balances Tests', () => {
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
 
         scheduledTasksFacet = await ethers.getContractAt(
-            'ScheduledTasks',
+            'ScheduledTasksTimeTravel',
             diamond.address
         )
     }
@@ -354,11 +355,16 @@ describe('Adjust Balances Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravel: true,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    afterEach(async () => {
+        await scheduledTasksFacet.resetSystemTimestamp()
     })
 
     beforeEach(async () => {
@@ -432,9 +438,6 @@ describe('Adjust Balances Tests', () => {
         )
 
         // schedule tasks
-        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
-
         const dividendsRecordDateInSeconds_1 =
             currentTimeInSeconds + TIME / 1000
         const dividendsExecutionDateInSeconds =
@@ -463,7 +466,7 @@ describe('Adjust Balances Tests', () => {
             await scheduledTasksFacet.scheduledTaskCount()
 
         //-------------------------
-        await new Promise((f) => setTimeout(f, TIME + 2))
+        await scheduledTasksFacet.changeSystemTimestamp(currentTimeInSeconds + TIME/1000 + 2)
 
         // balance adjustment
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)

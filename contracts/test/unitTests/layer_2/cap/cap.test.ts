@@ -211,8 +211,8 @@ import {
     AccessControl,
     AccessControl__factory,
     BusinessLogicResolver,
-    type Cap_2,
-    Cap_2__factory,
+    type Cap_2TimeTravel,
+    Cap_2TimeTravel__factory,
     Equity,
     Equity__factory,
     ERC1410ScheduledTasks,
@@ -243,12 +243,13 @@ const _PARTITION_ID_1 =
 const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const TIME = 6000
+let currentTime = 1893452400 // 2030-01-01
 
 describe('CAP Layer 2 Tests', () => {
     let factory: IFactory,
         businessLogicResolver: BusinessLogicResolver,
         diamond: Equity,
-        capFacet: Cap_2,
+        capFacet: Cap_2TimeTravel,
         accessControlFacet: AccessControl,
         equityFacet: Equity,
         snapshotFacet: Snapshots_2,
@@ -300,7 +301,7 @@ describe('CAP Layer 2 Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        capFacet = Cap_2__factory.connect(diamond.address, signer_A)
+        capFacet = Cap_2TimeTravel__factory.connect(diamond.address, signer_A)
         accessControlFacet = AccessControl__factory.connect(
             diamond.address,
             signer_A
@@ -349,6 +350,7 @@ describe('CAP Layer 2 Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravel: true,
                 })
             )
 
@@ -360,6 +362,10 @@ describe('CAP Layer 2 Tests', () => {
         await setupEnvironment()
     })
 
+    afterEach(async () => {
+        await capFacet.resetSystemTimestamp()
+    })
+
     const testBalanceAdjustments = async (
         adjustments: Adjustment[],
         expectedFactors: number[]
@@ -369,6 +375,8 @@ describe('CAP Layer 2 Tests', () => {
         // Execute adjustments and verify
         for (let i = 0; i < adjustments.length; i++) {
             await new Promise((resolve) => setTimeout(resolve, TIME + 1))
+            await capFacet.changeSystemTimestamp(currentTime + TIME/1000 + 1)
+            currentTime = currentTime + TIME/1000 + 1
             await snapshotFacet.takeSnapshot()
         }
 
@@ -402,7 +410,6 @@ describe('CAP Layer 2 Tests', () => {
             maxSupplyByPartition
         )
 
-        const currentTime = (await ethers.provider.getBlock('latest')).timestamp
         const adjustments = createAdjustmentData(
             currentTime,
             [TIME / 1000, (2 * TIME) / 1000, (3 * TIME) / 1000],
@@ -451,7 +458,7 @@ describe('CAP Layer 2 Tests', () => {
         await setupScheduledBalanceAdjustments(adjustments)
 
         // Execute adjustments and verify reversion case
-        await new Promise((resolve) => setTimeout(resolve, TIME + 1))
+        await capFacet.changeSystemTimestamp(currentTime + TIME/1000 + 1)
 
         await expect(
             capFacet.setMaxSupply(maxSupplyByPartition)
@@ -495,7 +502,7 @@ describe('CAP Layer 2 Tests', () => {
         await setupScheduledBalanceAdjustments(adjustments)
         //-------------------------
         // wait for first balance adjustment
-        await new Promise((f) => setTimeout(f, TIME + 1))
+        await capFacet.changeSystemTimestamp(currentTime + TIME/1000 + 1)
 
         // Attempt to change the max supply by partition with the same value as before
         await expect(

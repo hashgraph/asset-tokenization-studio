@@ -211,7 +211,7 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Pause,
-    type ERC1410ScheduledTasks,
+    type ERC1410ScheduledTasksTimeTravel,
     type AccessControl,
     type Equity,
     type ControlList,
@@ -226,7 +226,7 @@ import {
     AccessControl__factory,
     ControlList__factory,
     Equity__factory,
-    ERC1410ScheduledTasks__factory,
+    ERC1410ScheduledTasksTimeTravel__factory,
     Pause__factory,
 } from '@typechain'
 import {
@@ -277,6 +277,7 @@ const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
+let currentTimeInSeconds = 1893452400 // 2030-01-01
 
 interface BalanceAdjustedValues {
     maxSupply: BigNumber
@@ -311,7 +312,7 @@ describe('ERC1400 Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc1410Facet: ERC1410ScheduledTasks
+    let erc1410Facet: ERC1410ScheduledTasksTimeTravel
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let equityFacet: Equity
@@ -645,9 +646,10 @@ describe('ERC1400 Tests', () => {
         )
 
         erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
+            'ERC1410ScheduledTasksTimeTravel',
             diamond.address
         )
+        await erc1410Facet.resetSystemTimestamp()
 
         adjustBalancesFacet = await ethers.getContractAt(
             'AdjustBalances',
@@ -698,6 +700,7 @@ describe('ERC1400 Tests', () => {
                         signer: signer_A,
                         useDeployed: false,
                         useEnvironment: true,
+                        timeTravel: true,
                     })
                 )
 
@@ -748,7 +751,7 @@ describe('ERC1400 Tests', () => {
                 diamond.address,
                 signer_A
             )
-            erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            erc1410Facet = ERC1410ScheduledTasksTimeTravel__factory.connect(
                 diamond.address,
                 signer_A
             )
@@ -773,6 +776,10 @@ describe('ERC1400 Tests', () => {
                 balanceOf_E_Original,
                 '0x'
             )
+        })
+
+        afterEach(async () => {
+            erc1410Facet.resetSystemTimestamp()
         })
 
         it('GIVEN an account WHEN authorizing and revoking operators THEN transaction succeeds', async () => {
@@ -1164,7 +1171,7 @@ describe('ERC1400 Tests', () => {
             )
 
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
+                'ERC1410ScheduledTasksTimeTravel',
                 newDiamond.address
             )
 
@@ -1490,9 +1497,6 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
             equityFacet = equityFacet.connect(signer_C)
             // scheduling 2 snapshots
-            const currentTimeInSeconds = (
-                await ethers.provider.getBlock('latest')
-            ).timestamp
             const dividendsRecordDateInSeconds_1 =
                 currentTimeInSeconds + snapshot_1_delay / 1000
             const dividendsRecordDateInSeconds_2 =
@@ -1607,15 +1611,8 @@ describe('ERC1400 Tests', () => {
             expect(dividend_1_For_E.recordDateReached).to.equal(false)
             expect(dividend_1_For_D.recordDateReached).to.equal(false)
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) => setTimeout(f, snapshot_1_delay))
+            await erc1410Facet.changeSystemTimestamp(currentTimeInSeconds+snapshot_1_delay/1000+1)
 
-            // dumb transactions just to create a new block with a new blocktimestamp without trigerring the snapshot
-            await accessControlFacet.revokeRole(
-                CORPORATE_ACTION_ROLE,
-                account_C
-            )
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            // dumb transactions just to create a new block with a new blocktimestamp without trigerring the snapshot
             dividend_1 = await equityFacet.getDividends(1)
             expect(dividend_1.snapshotId.toNumber()).to.equal(0)
 
@@ -1676,9 +1673,8 @@ describe('ERC1400 Tests', () => {
             expect(dividend_1_For_D.recordDateReached).to.equal(true)
 
             // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) =>
-                setTimeout(f, snapshot_2_delay - snapshot_1_delay)
-            )
+            await erc1410Facet.changeSystemTimestamp(currentTimeInSeconds+snapshot_2_delay/1000+1)
+
 
             // transfer From
             await expect(
@@ -1745,9 +1741,6 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_A)
             equityFacet = equityFacet.connect(signer_C)
             // scheduling 2 snapshots
-            const currentTimeInSeconds = (
-                await ethers.provider.getBlock('latest')
-            ).timestamp
             const dividendsRecordDateInSeconds_1 =
                 currentTimeInSeconds + snapshot_1_delay / 1000
             const dividendsRecordDateInSeconds_2 =
@@ -1821,7 +1814,7 @@ describe('ERC1400 Tests', () => {
             )
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) => setTimeout(f, snapshot_1_delay))
+            await erc1410Facet.changeSystemTimestamp(currentTimeInSeconds+snapshot_1_delay/1000+1)
 
             // transfer
             await expect(
@@ -1851,9 +1844,6 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
             equityFacet = equityFacet.connect(signer_C)
             // scheduling 2 snapshots
-            const currentTimeInSeconds = (
-                await ethers.provider.getBlock('latest')
-            ).timestamp
             const dividendsRecordDateInSeconds_1 =
                 currentTimeInSeconds + snapshot_1_delay / 1000
             const dividendsRecordDateInSeconds_2 =
@@ -1969,7 +1959,7 @@ describe('ERC1400 Tests', () => {
             expect(totalSupplyByPartition).to.be.equal(totalSupply)
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) => setTimeout(f, snapshot_1_delay + 1000))
+            await erc1410Facet.changeSystemTimestamp(currentTimeInSeconds+snapshot_1_delay/1000+1)
 
             // transfer
             await expect(
@@ -1985,9 +1975,7 @@ describe('ERC1400 Tests', () => {
             expect(dividend_2.snapshotId.toNumber()).to.equal(0)
 
             // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) =>
-                setTimeout(f, snapshot_2_delay - snapshot_1_delay + 1000)
-            )
+            await erc1410Facet.changeSystemTimestamp(currentTimeInSeconds+snapshot_2_delay/1000+1)
 
             // transfer From
             await expect(
@@ -2048,7 +2036,7 @@ describe('ERC1400 Tests', () => {
             )
 
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
+                'ERC1410ScheduledTasksTimeTravel',
                 newDiamond.address
             )
 
@@ -2219,9 +2207,6 @@ describe('ERC1400 Tests', () => {
                 '0x'
             )
             // scheduling 2 snapshots
-            const currentTimeInSeconds = (
-                await ethers.provider.getBlock('latest')
-            ).timestamp
             const dividendsRecordDateInSeconds_1 =
                 currentTimeInSeconds + snapshot_1_delay / 1000
             const dividendsRecordDateInSeconds_2 =
@@ -2305,7 +2290,7 @@ describe('ERC1400 Tests', () => {
             expect(dividend_2.snapshotId.toNumber()).to.equal(0)
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) => setTimeout(f, snapshot_1_delay + 1000))
+            await erc1410Facet.changeSystemTimestamp(currentTimeInSeconds+snapshot_1_delay/1000+1)
 
             // controller transfer
             await expect(
@@ -2328,9 +2313,7 @@ describe('ERC1400 Tests', () => {
             expect(dividend_2.snapshotId.toNumber()).to.equal(0)
 
             // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) =>
-                setTimeout(f, snapshot_2_delay - snapshot_1_delay + 1000)
-            )
+            await erc1410Facet.changeSystemTimestamp(currentTimeInSeconds+snapshot_2_delay/1000+1)
 
             // controller redeem
             await expect(
@@ -2372,6 +2355,7 @@ describe('ERC1400 Tests', () => {
                         signer: signer_A,
                         useDeployed: false,
                         useEnvironment: true,
+                        timeTravel: true,
                     })
                 )
 
@@ -2421,7 +2405,7 @@ describe('ERC1400 Tests', () => {
                 diamond.address,
                 signer_A
             )
-            erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            erc1410Facet = ERC1410ScheduledTasksTimeTravel__factory.connect(
                 diamond.address,
                 signer_A
             )
@@ -2593,6 +2577,7 @@ describe('ERC1400 Tests', () => {
                         signer: signer_A,
                         useDeployed: false,
                         useEnvironment: true,
+                        timeTravel: true,
                     })
                 )
 
@@ -2624,10 +2609,6 @@ describe('ERC1400 Tests', () => {
             // scheduled two balance updates
             equityFacet = equityFacet.connect(signer_B)
 
-            const currentTimeInSeconds = (
-                await ethers.provider.getBlock('latest')
-            ).timestamp
-
             const balanceAdjustmentData = {
                 executionDate: (currentTimeInSeconds + 2).toString(),
                 factor: adjustFactor,
@@ -2647,7 +2628,7 @@ describe('ERC1400 Tests', () => {
             )
 
             // wait for first scheduled balance adjustment only (run DUMB transaction)
-            await new Promise((f) => setTimeout(f, 3000))
+            await erc1410Facet.changeSystemTimestamp(currentTimeInSeconds+3)
             await accessControlFacet.grantRole(PAUSER_ROLE, account_C) // DUMB transaction
 
             // After Values Before Transaction

@@ -8,15 +8,14 @@
 
 ### Table of Contents
 
-- **[Description](#description)**<br>
-- **[Installation](#installation)**<br>
-- **[Build](#build)**<br>
-- **[Test](#test)**<br>
+-   **[Description](#description)**<br>
+-   **[Installation](#installation)**<br>
+-   **[Build](#build)**<br>
+-   **[Test](#test)**<br>
 
 # Description
 
 The contracts module contains the code of all the solidity smart contracts deployed on Hedera.
-
 
 # Installation
 
@@ -36,9 +35,9 @@ npm run compile:force
 
 # Test
 
-The contracts tests are located in the *test* folder at the root of the contracts module.
+The contracts tests are located in the _test_ folder at the root of the contracts module.
 
-In order to execute all the tests run this command from the *contracts* folder:
+In order to execute all the tests run this command from the _contracts_ folder:
 
 ```
 npm run test

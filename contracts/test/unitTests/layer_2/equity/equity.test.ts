@@ -209,7 +209,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Equity,
+    type EquityUSATimeTravel,
     type Pause,
     type AccessControl,
     Lock_2,
@@ -217,7 +217,7 @@ import {
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
-    Equity__factory,
+    EquityUSATimeTravel__factory,
     Pause__factory,
     Lock_2__factory,
     ERC1410ScheduledTasks__factory,
@@ -239,7 +239,7 @@ import { grantRoleAndPauseToken } from '../../../common'
 
 const TIME = 10000
 const DECIMALS = 7
-let currentTimeInSeconds = 0
+let currentTimeInSeconds = 1893452400 // 2030-01-01
 let dividendsRecordDateInSeconds = 0
 let dividendsExecutionDateInSeconds = 0
 const dividendsAmountPerEquity = 1
@@ -282,7 +282,7 @@ describe('Equity Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let equityFacet: Equity
+    let equityFacet: EquityUSATimeTravel
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock_2
@@ -303,6 +303,7 @@ describe('Equity Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravel: true,
                 })
             )
 
@@ -352,7 +353,7 @@ describe('Equity Tests', () => {
             diamond.address,
             signer_A
         )
-        equityFacet = Equity__factory.connect(diamond.address, signer_A)
+        equityFacet = EquityUSATimeTravel__factory.connect(diamond.address, signer_A)
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
         lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
@@ -360,8 +361,6 @@ describe('Equity Tests', () => {
             signer_A
         )
 
-        currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
         dividendsRecordDateInSeconds = currentTimeInSeconds + TIME / 1000
         dividendsExecutionDateInSeconds =
             currentTimeInSeconds + (10 * TIME) / 1000
@@ -383,6 +382,10 @@ describe('Equity Tests', () => {
             factor: balanceAdjustmentFactor,
             decimals: balanceAdjustmentDecimals,
         }
+    })
+    
+    afterEach(async()=>{
+        await equityFacet.resetSystemTimestamp()
     })
 
     describe('Dividends', () => {
@@ -417,6 +420,7 @@ describe('Equity Tests', () => {
         })
 
         it('GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails', async () => {
+            await equityFacet.changeSystemTimestamp(currentTimeInSeconds)
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
@@ -436,7 +440,7 @@ describe('Equity Tests', () => {
 
             const wrongDividendData_2 = {
                 recordDate: (
-                    (await ethers.provider.getBlock('latest')).timestamp - 1
+                    currentTimeInSeconds - 1
                 ).toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: dividendsAmountPerEquity,
@@ -532,7 +536,7 @@ describe('Equity Tests', () => {
                 )
 
             // check list members
-            await new Promise((f) => setTimeout(f, TIME + 1))
+            await equityFacet.changeSystemTimestamp(currentTimeInSeconds + TIME/1000+1)
             await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
             const dividendFor = await equityFacet.getDividendsFor(1, account_A)
 
@@ -643,7 +647,7 @@ describe('Equity Tests', () => {
                     voteData
                 )
 
-            await new Promise((f) => setTimeout(f, TIME + 1))
+            await equityFacet.changeSystemTimestamp(currentTimeInSeconds + TIME/1000+1)
             await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
             const votingFor = await equityFacet.getVotingFor(1, account_A)
 

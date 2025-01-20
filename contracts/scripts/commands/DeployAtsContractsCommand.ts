@@ -210,6 +210,7 @@ interface DeployAtsContractsCommandNewParams {
     signer: Signer
     useDeployed?: boolean
     useEnvironment?: boolean
+    timeTravel?: boolean
 }
 
 export interface DeployAtsContractsCommandParams
@@ -222,23 +223,27 @@ export default class DeployAtsContractsCommand {
     public readonly useEnvironment: boolean = false
     public readonly signer: Signer
     public readonly network: Network
+    public readonly timeTravel: boolean = false
 
     constructor({
         signer,
         network,
         useDeployed = true,
         useEnvironment = false,
+        timeTravel = false,
     }: DeployAtsContractsCommandParams) {
         this.useDeployed = useDeployed
         this.useEnvironment = useEnvironment
         this.network = network!
         this.signer = signer
+        this.timeTravel = timeTravel
     }
 
     public static async newInstance({
         signer,
         useDeployed = true,
         useEnvironment = false,
+        timeTravel = false,
     }: DeployAtsContractsCommandNewParams): Promise<DeployAtsContractsCommand> {
         if (!signer.provider) {
             throw new Error('Signer must have a provider')
@@ -248,6 +253,7 @@ export default class DeployAtsContractsCommand {
             network: (await signer.provider.getNetwork()).name as Network,
             useDeployed,
             useEnvironment,
+            timeTravel,
         })
     }
 }

@@ -203,22 +203,364 @@
 
 */
 
+// SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {Context} from '@openzeppelin/contracts/utils/Context.sol';
+import {
+    ERC1410BasicStorageWrapper
+} from '../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {
+    ERC1410ControllerStorageWrapper
+} from '../layer_1/ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
+import {ERC1410Snapshot} from '../layer_1/ERC1400/ERC1410/ERC1410Snapshot.sol';
+import {
+    ERC1410SnapshotStorageWrapper
+} from '../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
+import {CapStorageWrapper} from '../layer_1/cap/CapStorageWrapper.sol';
+import {_ERC1410_RESOLVER_KEY} from '../layer_1/constants/resolverKeys.sol';
+import {IERC1410} from '../layer_1/interfaces/ERC1400/IERC1410.sol';
+import {
+    IERC1410ScheduledTasks
+} from '../layer_2/interfaces/ERC1400/IERC1410ScheduledTasks.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {TimeTravel} from './TimeTravel.sol';
 
-abstract contract LocalContext is Context {
-    function _blockTimestamp()
+contract ERC1410ScheduledTasksTimeTravel is
+    IERC1410ScheduledTasks,
+    ERC1410Snapshot,
+    ERC1410ScheduledTasksStorageWrapper,
+    TimeTravel
+{
+    function triggerAndSyncAll(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) external virtual onlyUnpaused {
+        _triggerAndSyncAll(_partition, _from, _to);
+    }
+
+    function totalSupplyAdjusted() external view virtual returns (uint256) {
+        return _totalSupplyAdjusted();
+    }
+
+    function totalSupplyByPartitionAdjusted(
+        bytes32 _partition
+    ) external view virtual returns (uint256) {
+        return _totalSupplyByPartitionAdjusted(_partition);
+    }
+
+    function balanceOfAdjusted(
+        address _tokenHolder
+    ) external view virtual returns (uint256) {
+        return _balanceOfAdjusted(_tokenHolder);
+    }
+
+    function balanceOfAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) external view virtual returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, _timestamp);
+    }
+
+    function balanceOfByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual returns (uint256) {
+        return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function balanceOf(
+        address _tokenHolder
+    ) external view virtual override returns (uint256) {
+        return _balanceOfAdjusted(_tokenHolder);
+    }
+
+    function balanceOfByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256) {
+        return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function _beforeTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
+    )
+        internal
+        virtual
+        override(
+            ERC1410BasicStorageWrapper,
+            ERC1410ScheduledTasksStorageWrapper,
+            ERC1410SnapshotStorageWrapper
+        )
+    {
+        ERC1410ScheduledTasksStorageWrapper._beforeTokenTransfer(
+            partition,
+            from,
+            to,
+            amount
+        );
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(
+            ERC1410BasicStorageWrapperRead,
+            ERC1410ScheduledTasksStorageWrapper
+        )
+    {
+        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
+    }
+
+    function _canTransferByPartition(
+        address _from,
+        address _to,
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data, // solhint-disable-line no-unused-vars
+        bytes calldata _operatorData // solhint-disable-line no-unused-vars
+    )
         internal
         view
         virtual
-        returns (uint256 blockTimestamp_)
+        override(
+            ERC1410ControllerStorageWrapper,
+            ERC1410ScheduledTasksStorageWrapper
+        )
+        returns (bool, bytes1, bytes32)
     {
-        return block.timestamp;
+        return
+            ERC1410ScheduledTasksStorageWrapper._canTransferByPartition(
+                _from,
+                _to,
+                _partition,
+                _value,
+                _data,
+                _operatorData
+            );
     }
 
-    function _blockChainid() internal view returns (uint256 chainid_) {
-        chainid_ = block.chainid;
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupply(_amount);
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return ERC1410ScheduledTasksStorageWrapper._checkMaxSupply(_amount);
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
+                _partition,
+                _newMaxSupply
+            );
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _ERC1410_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](32);
+        uint256 selectorIndex = 0;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfAdjustedAt
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfByPartitionAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .initialize_ERC1410_Basic
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .transferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .isMultiPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.balanceOf.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.partitionsOf.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.totalSupply.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyByPartitionAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .authorizeOperator
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .revokeOperator
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .authorizeOperatorByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .revokeOperatorByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isOperator.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .isOperatorForPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .redeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .issueByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .canTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .canRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .triggerAndSyncAll
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedTransferFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedRedeemFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .changeSystemTimestamp
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .resetSystemTimestamp
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC1410).interfaceId;
+    }
+
+    function _blockTimestamp() internal view override returns (uint256) {
+        return
+            _getBlockTimestamp() == 0 ? block.timestamp : _getBlockTimestamp();
     }
 }

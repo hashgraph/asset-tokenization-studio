@@ -203,22 +203,284 @@
 
 */
 
+// SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {Context} from '@openzeppelin/contracts/utils/Context.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {ERC20} from '../layer_1/ERC1400/ERC20/ERC20.sol';
+import {
+    ERC20StorageWrapper
+} from '../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
+import {_ERC20_RESOLVER_KEY} from '../layer_1/constants/resolverKeys.sol';
+import {IERC20} from '../layer_1/interfaces/ERC1400/IERC20.sol';
+import {
+    ERC20StorageWrapper_2
+} from '../layer_2/ERC1400/ERC20/ERC20StorageWrapper_2.sol';
+import {
+    ERC20StorageWrapper_2_Read
+} from '../layer_2/ERC1400/ERC20/ERC20StorageWrapper_2_Read.sol';
+import {IERC20_2} from '../layer_2/interfaces/ERC1400/IERC20_2.sol';
+import {CapStorageWrapper} from '../layer_1/cap/CapStorageWrapper.sol';
+import {TimeTravel} from './TimeTravel.sol';
 
-abstract contract LocalContext is Context {
-    function _blockTimestamp()
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors
+contract ERC20_2TimeTravel is
+    IERC20_2,
+    ERC20,
+    ERC20StorageWrapper_2,
+    TimeTravel
+{
+    function allowance(
+        address owner,
+        address spender
+    ) external view virtual override returns (uint256) {
+        return _allowanceAdjusted(owner, spender);
+    }
+
+    function decimalsAdjusted() external view virtual returns (uint8) {
+        return _decimalsAdjusted();
+    }
+
+    function decimalsAdjustedAt(
+        uint256 _timestamp
+    ) external view virtual returns (uint8) {
+        return _decimalsAdjustedAt(_timestamp);
+    }
+
+    function _beforeTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual override(ERC20, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._beforeTokenTransfer(
+            partition,
+            from,
+            to,
+            amount
+        );
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(ERC1410BasicStorageWrapperRead, ERC20StorageWrapper_2_Read)
+    {
+        ERC20StorageWrapper_2_Read._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
+    }
+
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
+        uint256 _amount,
+        bool _isIncrease
+    ) internal virtual override(ERC20StorageWrapper, ERC20StorageWrapper_2) {
+        ERC20StorageWrapper_2._beforeAllowanceUpdate(
+            _owner,
+            _spender,
+            _amount,
+            _isIncrease
+        );
+    }
+
+    function _totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    ) internal view virtual override returns (uint256 totalSupply_) {
+        revert('Should not reach this function');
+    }
+
+    function _lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 balance_) {
+        revert('Should not reach this function');
+    }
+
+    function _lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 balance_) {
+        revert('Should not reach this function');
+    }
+
+    function _balanceOfAt(
+        address account,
+        uint256 snapshotId
+    ) internal view virtual override returns (uint256) {
+        revert('Should not reach this function');
+    }
+
+    /**
+     * @dev Retrieves the balance of `account` for 'partition' at the time `snapshotId` was created.
+     */
+    function _balanceOfAtByPartition(
+        bytes32 _partition,
+        address account,
+        uint256 snapshotId
+    ) internal view virtual override returns (uint256) {
+        revert('Should not reach this function');
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewTotalSupply(_amount);
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
         internal
         view
         virtual
-        returns (uint256 blockTimestamp_)
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
     {
-        return block.timestamp;
+        return ERC20StorageWrapper_2_Read._checkMaxSupply(_amount);
     }
 
-    function _blockChainid() internal view returns (uint256 chainid_) {
-        chainid_ = block.chainid;
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return
+            ERC20StorageWrapper_2_Read._checkNewMaxSupplyForPartition(
+                _partition,
+                _newMaxSupply
+            );
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return
+            ERC20StorageWrapper_2_Read._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _ERC20_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](15);
+        uint256 selectorsIndex;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .initialize_ERC20
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.approve.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.transfer.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.transferFrom.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .increaseAllowance
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .decreaseAllowance
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.allowance.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .getERC20Metadata
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.name.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.symbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.decimals.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .decimalsAdjustedAt
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .decimalsAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .changeSystemTimestamp
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .resetSystemTimestamp
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](2);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC20).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC20_2).interfaceId;
+    }
+
+    function getERC20Metadata()
+        external
+        view
+        override
+        returns (ERC20Metadata memory)
+    {
+        return _getERC20MetadataAdjusted();
+    }
+
+    function _blockTimestamp() internal view override returns (uint256) {
+        return
+            _getBlockTimestamp() == 0 ? block.timestamp : _getBlockTimestamp();
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors

@@ -203,22 +203,98 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {Context} from '@openzeppelin/contracts/utils/Context.sol';
+import {Bond} from '../layer_2/bond/Bond.sol';
+import {Security} from '../layer_3/security/Security.sol';
+import {IBondUSA} from '../layer_3/interfaces/IBondUSA.sol';
+import {
+    RegulationData,
+    AdditionalSecurityData
+} from '../layer_3/constants/regulation.sol';
+import {_BOND_RESOLVER_KEY} from '../layer_2/constants/resolverKeys.sol';
+import {IBond} from '../layer_2/interfaces/bond/IBond.sol';
+import {ISecurity} from '../layer_3/interfaces/ISecurity.sol';
+import {TimeTravel} from './TimeTravel.sol';
 
-abstract contract LocalContext is Context {
-    function _blockTimestamp()
-        internal
-        view
-        virtual
-        returns (uint256 blockTimestamp_)
-    {
-        return block.timestamp;
+contract BondUSATimeTravel is IBondUSA, Bond, Security, TimeTravel {
+    // solhint-disable func-name-mixedcase
+    // solhint-disable-next-line private-vars-leading-underscore
+    function _initialize_bondUSA(
+        BondDetailsData calldata _bondDetailsData,
+        CouponDetailsData calldata _couponDetailsData,
+        RegulationData memory _regulationData,
+        AdditionalSecurityData calldata _additionalSecurityData
+    ) external override onlyUninitialized(_bondStorage().initialized) {
+        _initialize_bond(_bondDetailsData, _couponDetailsData);
+        _initializeSecurity(_regulationData, _additionalSecurityData);
     }
 
-    function _blockChainid() internal view returns (uint256 chainid_) {
-        chainid_ = block.chainid;
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _BOND_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](11);
+        staticFunctionSelectors_[selectorIndex++] = this
+            ._initialize_bondUSA
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .updateMaturityDate
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getBondDetails
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getCouponDetails
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getCouponCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getSecurityRegulationData
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .changeSystemTimestamp
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .resetSystemTimestamp
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](3);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IBond).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IBondUSA).interfaceId;
+    }
+
+    function _blockTimestamp() internal view override returns (uint256) {
+        return
+            _getBlockTimestamp() == 0 ? block.timestamp : _getBlockTimestamp();
     }
 }
