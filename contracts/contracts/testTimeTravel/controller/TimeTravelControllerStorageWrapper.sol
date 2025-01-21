@@ -209,6 +209,8 @@ pragma solidity 0.8.18;
 import {ITimeTravelController} from '../interfaces/ITimeTravelController.sol';
 
 abstract contract TimeTravelControllerStorageWrapper is ITimeTravelController {
+    /* solhint-disable state-visibility */
+
     // keccak256("security.token.standard.timeTravelController.resolverKey")
     bytes32 constant _TIME_TRAVEL_CONTROLLER_RESOLVER_KEY =
         0x9bc48b661c0bcf7aba2ef1bb1f13bda2ca72b29495b8d84e16a6048321df0622;

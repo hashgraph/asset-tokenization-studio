@@ -340,7 +340,10 @@ describe('Locks Layer 2 Tests', () => {
         capFacet = Cap_2__factory.connect(diamond.address, defaultSigner)
         lockFacet = Lock_2__factory.connect(diamond.address, defaultSigner)
         equityFacet = Equity__factory.connect(diamond.address, defaultSigner)
-        timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, defaultSigner)
+        timeTravelControllerFacet = TimeTravelController__factory.connect(
+            diamond.address,
+            defaultSigner
+        )
     }
 
     function set_initRbacs(): Rbac[] {
@@ -432,7 +435,7 @@ describe('Locks Layer 2 Tests', () => {
         await deployAsset(true)
     })
 
-    afterEach(async() => {
+    afterEach(async () => {
         await timeTravelControllerFacet.resetSystemTimestamp()
     })
 
@@ -487,7 +490,9 @@ describe('Locks Layer 2 Tests', () => {
         await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
 
         // wait for first scheduled balance adjustment only (run DUMB transaction)
-        await timeTravelControllerFacet.changeSystemTimestamp(currentTimestamp + 3)
+        await timeTravelControllerFacet.changeSystemTimestamp(
+            currentTimestamp + 3
+        )
 
         const lock_TotalAmount_After = await lockFacet.getLockedAmountFor(
             account_A

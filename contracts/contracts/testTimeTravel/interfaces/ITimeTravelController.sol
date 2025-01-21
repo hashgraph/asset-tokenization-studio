@@ -208,7 +208,7 @@ pragma solidity ^0.8.18;
 
 /**
  * @title Time Travel interface
- * @notice Interface for the TimeTravel contract
+ * @notice Interface for the TimeTravelController contract
  */
 interface ITimeTravelController {
     /**
@@ -243,4 +243,9 @@ interface ITimeTravelController {
      *         emits SystemTimestampReset event
      */
     function resetSystemTimestamp() external;
+
+    /**
+     * @notice Retrieves the current system timestamp
+     */
+    function blockTimestamp() external view returns (uint256);
 }

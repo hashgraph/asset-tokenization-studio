@@ -653,7 +653,10 @@ describe('ERC1400 Tests', () => {
             diamond.address
         )
 
-        timeTravelControllerFacet = await ethers.getContractAt('TimeTravelController', diamond.address)
+        timeTravelControllerFacet = await ethers.getContractAt(
+            'TimeTravelController',
+            diamond.address
+        )
 
         adjustBalancesFacet = await ethers.getContractAt(
             'AdjustBalances',
@@ -765,7 +768,10 @@ describe('ERC1400 Tests', () => {
                 diamond.address,
                 signer_A
             )
-            timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, signer_A)
+            timeTravelControllerFacet = TimeTravelController__factory.connect(
+                diamond.address,
+                signer_A
+            )
 
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
 
@@ -1616,7 +1622,9 @@ describe('ERC1400 Tests', () => {
             expect(dividend_1_For_E.recordDateReached).to.equal(false)
             expect(dividend_1_For_D.recordDateReached).to.equal(false)
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds+snapshot_1_delay/1000+1)
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTimeInSeconds + snapshot_1_delay / 1000 + 1
+            )
 
             dividend_1 = await equityFacet.getDividends(1)
             expect(dividend_1.snapshotId.toNumber()).to.equal(0)
@@ -1678,8 +1686,9 @@ describe('ERC1400 Tests', () => {
             expect(dividend_1_For_D.recordDateReached).to.equal(true)
 
             // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds+snapshot_2_delay/1000+1)
-
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTimeInSeconds + snapshot_2_delay / 1000 + 1
+            )
 
             // transfer From
             await expect(
@@ -1819,7 +1828,9 @@ describe('ERC1400 Tests', () => {
             )
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds+snapshot_1_delay/1000+1)
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTimeInSeconds + snapshot_1_delay / 1000 + 1
+            )
 
             // transfer
             await expect(
@@ -1964,7 +1975,9 @@ describe('ERC1400 Tests', () => {
             expect(totalSupplyByPartition).to.be.equal(totalSupply)
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds+snapshot_1_delay/1000+1)
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTimeInSeconds + snapshot_1_delay / 1000 + 1
+            )
 
             // transfer
             await expect(
@@ -1980,7 +1993,9 @@ describe('ERC1400 Tests', () => {
             expect(dividend_2.snapshotId.toNumber()).to.equal(0)
 
             // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds+snapshot_2_delay/1000+1)
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTimeInSeconds + snapshot_2_delay / 1000 + 1
+            )
 
             // transfer From
             await expect(
@@ -2295,7 +2310,9 @@ describe('ERC1400 Tests', () => {
             expect(dividend_2.snapshotId.toNumber()).to.equal(0)
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds+snapshot_1_delay/1000+1)
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTimeInSeconds + snapshot_1_delay / 1000 + 1
+            )
 
             // controller transfer
             await expect(
@@ -2318,7 +2335,9 @@ describe('ERC1400 Tests', () => {
             expect(dividend_2.snapshotId.toNumber()).to.equal(0)
 
             // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds+snapshot_2_delay/1000+1)
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTimeInSeconds + snapshot_2_delay / 1000 + 1
+            )
 
             // controller redeem
             await expect(
@@ -2598,7 +2617,9 @@ describe('ERC1400 Tests', () => {
             })
         })
 
-        afterEach(async () => { await timeTravelControllerFacet.resetSystemTimestamp() })
+        afterEach(async () => {
+            await timeTravelControllerFacet.resetSystemTimestamp()
+        })
 
         it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN transaction succeeds', async () => {
             await setPreBalanceAdjustment()
@@ -2635,7 +2656,9 @@ describe('ERC1400 Tests', () => {
             )
 
             // wait for first scheduled balance adjustment only (run DUMB transaction)
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds+3)
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTimeInSeconds + 3
+            )
             await accessControlFacet.grantRole(PAUSER_ROLE, account_C) // DUMB transaction
 
             // After Values Before Transaction

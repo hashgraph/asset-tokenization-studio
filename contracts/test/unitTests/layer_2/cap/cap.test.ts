@@ -315,7 +315,10 @@ describe('CAP Layer 2 Tests', () => {
             diamond.address,
             signer_A
         )
-        timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, signer_A)
+        timeTravelControllerFacet = TimeTravelController__factory.connect(
+            diamond.address,
+            signer_A
+        )
     }
 
     const setupScheduledBalanceAdjustments = async (
@@ -378,8 +381,10 @@ describe('CAP Layer 2 Tests', () => {
 
         // Execute adjustments and verify
         for (let i = 0; i < adjustments.length; i++) {
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTime + TIME/1000 + 1)
-            currentTime = currentTime + TIME/1000 + 1
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTime + TIME / 1000 + 1
+            )
+            currentTime = currentTime + TIME / 1000 + 1
             await snapshotFacet.takeSnapshot()
         }
 
@@ -461,7 +466,9 @@ describe('CAP Layer 2 Tests', () => {
         await setupScheduledBalanceAdjustments(adjustments)
 
         // Execute adjustments and verify reversion case
-        await timeTravelControllerFacet.changeSystemTimestamp(currentTime + TIME/1000 + 1)
+        await timeTravelControllerFacet.changeSystemTimestamp(
+            currentTime + TIME / 1000 + 1
+        )
 
         await expect(
             capFacet.setMaxSupply(maxSupplyByPartition)
@@ -505,7 +512,9 @@ describe('CAP Layer 2 Tests', () => {
         await setupScheduledBalanceAdjustments(adjustments)
         //-------------------------
         // wait for first balance adjustment
-        await timeTravelControllerFacet.changeSystemTimestamp(currentTime + TIME/1000 + 1)
+        await timeTravelControllerFacet.changeSystemTimestamp(
+            currentTime + TIME / 1000 + 1
+        )
 
         // Attempt to change the max supply by partition with the same value as before
         await expect(

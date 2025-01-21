@@ -330,7 +330,10 @@ describe('Scheduled BalanceAdjustments Tests', () => {
             diamond.address,
             signer_A
         )
-        timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, signer_A)
+        timeTravelControllerFacet = TimeTravelController__factory.connect(
+            diamond.address,
+            signer_A
+        )
     })
 
     afterEach(async () => {
@@ -418,7 +421,9 @@ describe('Scheduled BalanceAdjustments Tests', () => {
 
         // AFTER FIRST SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
         scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
-        await timeTravelControllerFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1+1)
+        await timeTravelControllerFacet.changeSystemTimestamp(
+            balanceAdjustmentExecutionDateInSeconds_1 + 1
+        )
         await scheduledTasksFacet.triggerPendingScheduledTasks()
 
         scheduledBalanceAdjustmentCount =
@@ -447,7 +452,9 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         )
 
         // AFTER SECOND SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        await timeTravelControllerFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_2+1)
+        await timeTravelControllerFacet.changeSystemTimestamp(
+            balanceAdjustmentExecutionDateInSeconds_2 + 1
+        )
         await scheduledTasksFacet.triggerScheduledTasks(100)
 
         scheduledBalanceAdjustmentCount =
@@ -470,7 +477,9 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         )
 
         // AFTER THIRD SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        await timeTravelControllerFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_3+1)
+        await timeTravelControllerFacet.changeSystemTimestamp(
+            balanceAdjustmentExecutionDateInSeconds_3 + 1
+        )
         await scheduledTasksFacet.triggerScheduledTasks(0)
 
         scheduledBalanceAdjustmentCount =

@@ -344,7 +344,10 @@ describe('Scheduled Tasks Tests', () => {
             diamond.address,
             signer_A
         )
-        timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, signer_A)
+        timeTravelControllerFacet = TimeTravelController__factory.connect(
+            diamond.address,
+            signer_A
+        )
     })
 
     afterEach(async () => {
@@ -456,7 +459,9 @@ describe('Scheduled Tasks Tests', () => {
         // AFTER FIRST SCHEDULED TASKS ------------------------------------------------------------------
         scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
 
-        await timeTravelControllerFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1+1)
+        await timeTravelControllerFacet.changeSystemTimestamp(
+            balanceAdjustmentExecutionDateInSeconds_1 + 1
+        )
 
         // Checking dividends For before triggering from the queue
         const BalanceOf_A_Dividend_1 = await equityFacet.getDividendsFor(
@@ -491,7 +496,9 @@ describe('Scheduled Tasks Tests', () => {
         expect(scheduledTasks[1].data).to.equal(SNAPSHOT_TASK_TYPE)
 
         // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-        await timeTravelControllerFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_2+1)
+        await timeTravelControllerFacet.changeSystemTimestamp(
+            balanceAdjustmentExecutionDateInSeconds_2 + 1
+        )
         // Checking dividends For before triggering from the queue
         BalanceOf_A_Dividend_2 = await equityFacet.getDividendsFor(1, account_A)
 

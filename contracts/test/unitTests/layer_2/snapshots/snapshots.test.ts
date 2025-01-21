@@ -433,7 +433,9 @@ describe('Snapshots Layer 2 Tests', () => {
         await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_3)
 
         //-------------------------
-        await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds+3*TIME/1000+2)
+        await timeTravelControllerFacet.changeSystemTimestamp(
+            currentTimeInSeconds + (3 * TIME) / 1000 + 2
+        )
 
         // snapshot
         await snapshotFacet.takeSnapshot()

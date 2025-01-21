@@ -354,7 +354,10 @@ describe('Bond Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        bondFacet = BondUSATimeTravel__factory.connect(diamond.address, signer_A)
+        bondFacet = BondUSATimeTravel__factory.connect(
+            diamond.address,
+            signer_A
+        )
         accessControlFacet = AccessControl__factory.connect(
             diamond.address,
             signer_A
@@ -365,7 +368,10 @@ describe('Bond Tests', () => {
             diamond.address,
             signer_A
         )
-        timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, signer_A)
+        timeTravelControllerFacet = TimeTravelController__factory.connect(
+            diamond.address,
+            signer_A
+        )
     })
 
     afterEach(async () => {
@@ -517,7 +523,9 @@ describe('Bond Tests', () => {
                 )
 
             // check list members
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds + TIME_2 + 1)
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTimeInSeconds + TIME_2 + 1
+            )
             await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
 
             const couponFor = await bondFacet.getCouponFor(
@@ -575,7 +583,9 @@ describe('Bond Tests', () => {
                 .maturityDate
             // New maturity date (earlier than current)
             // New maturity date (earlier than current)
-            const dayBeforeCurrentMaturity = maturityDateBefore.sub(BigNumber.from(86400))
+            const dayBeforeCurrentMaturity = maturityDateBefore.sub(
+                BigNumber.from(86400)
+            )
 
             // * Act & Assert
             // Set maturity date

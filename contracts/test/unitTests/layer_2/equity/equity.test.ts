@@ -356,14 +356,20 @@ describe('Equity Tests', () => {
             diamond.address,
             signer_A
         )
-        equityFacet = EquityUSATimeTravel__factory.connect(diamond.address, signer_A)
+        equityFacet = EquityUSATimeTravel__factory.connect(
+            diamond.address,
+            signer_A
+        )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
         lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
         )
-        timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, signer_A)
+        timeTravelControllerFacet = TimeTravelController__factory.connect(
+            diamond.address,
+            signer_A
+        )
 
         dividendsRecordDateInSeconds = currentTimeInSeconds + TIME / 1000
         dividendsExecutionDateInSeconds =
@@ -387,8 +393,8 @@ describe('Equity Tests', () => {
             decimals: balanceAdjustmentDecimals,
         }
     })
-    
-    afterEach(async()=>{
+
+    afterEach(async () => {
         await timeTravelControllerFacet.resetSystemTimestamp()
     })
 
@@ -424,7 +430,9 @@ describe('Equity Tests', () => {
         })
 
         it('GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails', async () => {
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds)
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTimeInSeconds
+            )
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
@@ -443,9 +451,7 @@ describe('Equity Tests', () => {
             ).to.be.rejectedWith('WrongDates')
 
             const wrongDividendData_2 = {
-                recordDate: (
-                    currentTimeInSeconds - 1
-                ).toString(),
+                recordDate: (currentTimeInSeconds - 1).toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: dividendsAmountPerEquity,
             }
@@ -540,7 +546,9 @@ describe('Equity Tests', () => {
                 )
 
             // check list members
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds + TIME/1000+1)
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTimeInSeconds + TIME / 1000 + 1
+            )
             await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
             const dividendFor = await equityFacet.getDividendsFor(1, account_A)
 
@@ -651,7 +659,9 @@ describe('Equity Tests', () => {
                     voteData
                 )
 
-            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds + TIME/1000+1)
+            await timeTravelControllerFacet.changeSystemTimestamp(
+                currentTimeInSeconds + TIME / 1000 + 1
+            )
             await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
             const votingFor = await equityFacet.getVotingFor(1, account_A)
 

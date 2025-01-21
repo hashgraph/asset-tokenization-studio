@@ -239,8 +239,8 @@ export async function deployEnvironment({
     signer,
     timeTravel = false,
 }: {
-    signer: SignerWithAddress;
-    timeTravel?: boolean; 
+    signer: SignerWithAddress
+    timeTravel?: boolean
 }) {
     if (!environmentInitialized) {
         const {

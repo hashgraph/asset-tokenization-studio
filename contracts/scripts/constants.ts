@@ -545,9 +545,9 @@ export const MESSAGES = {
             deployed: 'Factory deployed successfully',
         },
     },
-    timeTravel:{
-        error:{
+    timeTravel: {
+        error: {
             notSupported: 'Time travel not supported in production',
-        }
-    }
+        },
+    },
 }

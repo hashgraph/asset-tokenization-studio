@@ -333,7 +333,10 @@ describe('Adjust Balances Tests', () => {
             diamond.address
         )
 
-        timeTravelControllerFacet = await ethers.getContractAt('TimeTravelController', diamond.address)
+        timeTravelControllerFacet = await ethers.getContractAt(
+            'TimeTravelController',
+            diamond.address
+        )
     }
 
     function set_initRbacs(): Rbac[] {
@@ -470,7 +473,9 @@ describe('Adjust Balances Tests', () => {
             await scheduledTasksFacet.scheduledTaskCount()
 
         //-------------------------
-        await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds + TIME/1000 + 2)
+        await timeTravelControllerFacet.changeSystemTimestamp(
+            currentTimeInSeconds + TIME / 1000 + 2
+        )
 
         // balance adjustment
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
