@@ -209,9 +209,10 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type EquityUSATimeTravel,
+    type EquityUSA,
     type Pause,
     type AccessControl,
+    TimeTravelController,
     Lock_2,
     ERC1410ScheduledTasks,
     IFactory,
@@ -221,6 +222,7 @@ import {
     Pause__factory,
     Lock_2__factory,
     ERC1410ScheduledTasks__factory,
+    TimeTravelController__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -282,11 +284,12 @@ describe('Equity Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let equityFacet: EquityUSATimeTravel
+    let equityFacet: EquityUSA
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock_2
     let erc1410Facet: ERC1410ScheduledTasks
+    let timeTravelControllerFacet: TimeTravelController
 
     before(async () => {
         // mute | mock console.log
@@ -360,6 +363,7 @@ describe('Equity Tests', () => {
             diamond.address,
             signer_A
         )
+        timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, signer_A)
 
         dividendsRecordDateInSeconds = currentTimeInSeconds + TIME / 1000
         dividendsExecutionDateInSeconds =
@@ -385,7 +389,7 @@ describe('Equity Tests', () => {
     })
     
     afterEach(async()=>{
-        await equityFacet.resetSystemTimestamp()
+        await timeTravelControllerFacet.resetSystemTimestamp()
     })
 
     describe('Dividends', () => {
@@ -420,7 +424,7 @@ describe('Equity Tests', () => {
         })
 
         it('GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails', async () => {
-            await equityFacet.changeSystemTimestamp(currentTimeInSeconds)
+            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds)
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
@@ -536,7 +540,7 @@ describe('Equity Tests', () => {
                 )
 
             // check list members
-            await equityFacet.changeSystemTimestamp(currentTimeInSeconds + TIME/1000+1)
+            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds + TIME/1000+1)
             await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
             const dividendFor = await equityFacet.getDividendsFor(1, account_A)
 
@@ -647,7 +651,7 @@ describe('Equity Tests', () => {
                     voteData
                 )
 
-            await equityFacet.changeSystemTimestamp(currentTimeInSeconds + TIME/1000+1)
+            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds + TIME/1000+1)
             await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
             const votingFor = await equityFacet.getVotingFor(1, account_A)
 

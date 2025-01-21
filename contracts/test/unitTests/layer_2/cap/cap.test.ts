@@ -211,8 +211,9 @@ import {
     AccessControl,
     AccessControl__factory,
     BusinessLogicResolver,
-    type Cap_2TimeTravel,
-    Cap_2TimeTravel__factory,
+    type Cap_2,
+    TimeTravelController,
+    Cap_2__factory,
     Equity,
     Equity__factory,
     ERC1410ScheduledTasks,
@@ -220,6 +221,7 @@ import {
     IFactory,
     Snapshots_2,
     Snapshots_2__factory,
+    TimeTravelController__factory,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -249,11 +251,12 @@ describe('CAP Layer 2 Tests', () => {
     let factory: IFactory,
         businessLogicResolver: BusinessLogicResolver,
         diamond: Equity,
-        capFacet: Cap_2TimeTravel,
+        capFacet: Cap_2,
         accessControlFacet: AccessControl,
         equityFacet: Equity,
         snapshotFacet: Snapshots_2,
-        erc1410Facet: ERC1410ScheduledTasks
+        erc1410Facet: ERC1410ScheduledTasks,
+        timeTravelControllerFacet: TimeTravelController
     let signer_A: SignerWithAddress,
         signer_B: SignerWithAddress,
         signer_C: SignerWithAddress
@@ -301,7 +304,7 @@ describe('CAP Layer 2 Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        capFacet = Cap_2TimeTravel__factory.connect(diamond.address, signer_A)
+        capFacet = Cap_2__factory.connect(diamond.address, signer_A)
         accessControlFacet = AccessControl__factory.connect(
             diamond.address,
             signer_A
@@ -312,6 +315,7 @@ describe('CAP Layer 2 Tests', () => {
             diamond.address,
             signer_A
         )
+        timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, signer_A)
     }
 
     const setupScheduledBalanceAdjustments = async (
@@ -363,7 +367,7 @@ describe('CAP Layer 2 Tests', () => {
     })
 
     afterEach(async () => {
-        await capFacet.resetSystemTimestamp()
+        await timeTravelControllerFacet.resetSystemTimestamp()
     })
 
     const testBalanceAdjustments = async (
@@ -374,8 +378,7 @@ describe('CAP Layer 2 Tests', () => {
 
         // Execute adjustments and verify
         for (let i = 0; i < adjustments.length; i++) {
-            await new Promise((resolve) => setTimeout(resolve, TIME + 1))
-            await capFacet.changeSystemTimestamp(currentTime + TIME/1000 + 1)
+            await timeTravelControllerFacet.changeSystemTimestamp(currentTime + TIME/1000 + 1)
             currentTime = currentTime + TIME/1000 + 1
             await snapshotFacet.takeSnapshot()
         }
@@ -458,7 +461,7 @@ describe('CAP Layer 2 Tests', () => {
         await setupScheduledBalanceAdjustments(adjustments)
 
         // Execute adjustments and verify reversion case
-        await capFacet.changeSystemTimestamp(currentTime + TIME/1000 + 1)
+        await timeTravelControllerFacet.changeSystemTimestamp(currentTime + TIME/1000 + 1)
 
         await expect(
             capFacet.setMaxSupply(maxSupplyByPartition)
@@ -502,7 +505,7 @@ describe('CAP Layer 2 Tests', () => {
         await setupScheduledBalanceAdjustments(adjustments)
         //-------------------------
         // wait for first balance adjustment
-        await capFacet.changeSystemTimestamp(currentTime + TIME/1000 + 1)
+        await timeTravelControllerFacet.changeSystemTimestamp(currentTime + TIME/1000 + 1)
 
         // Attempt to change the max supply by partition with the same value as before
         await expect(

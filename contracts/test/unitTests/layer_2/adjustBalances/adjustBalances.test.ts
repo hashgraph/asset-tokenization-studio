@@ -213,9 +213,10 @@ import {
     type ERC1410ScheduledTasks,
     type AccessControl,
     Equity,
-    ScheduledTasksTimeTravel,
+    ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
+    TimeTravelController,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -259,7 +260,8 @@ describe('Adjust Balances Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let equityFacet: Equity
-    let scheduledTasksFacet: ScheduledTasksTimeTravel
+    let scheduledTasksFacet: ScheduledTasks
+    let timeTravelControllerFacet: TimeTravelController
 
     async function deployAsset({
         multiPartition,
@@ -330,6 +332,8 @@ describe('Adjust Balances Tests', () => {
             'ScheduledTasksTimeTravel',
             diamond.address
         )
+
+        timeTravelControllerFacet = await ethers.getContractAt('TimeTravelController', diamond.address)
     }
 
     function set_initRbacs(): Rbac[] {
@@ -364,7 +368,7 @@ describe('Adjust Balances Tests', () => {
     })
 
     afterEach(async () => {
-        await scheduledTasksFacet.resetSystemTimestamp()
+        await timeTravelControllerFacet.resetSystemTimestamp()
     })
 
     beforeEach(async () => {
@@ -466,7 +470,7 @@ describe('Adjust Balances Tests', () => {
             await scheduledTasksFacet.scheduledTaskCount()
 
         //-------------------------
-        await scheduledTasksFacet.changeSystemTimestamp(currentTimeInSeconds + TIME/1000 + 2)
+        await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds + TIME/1000 + 2)
 
         // balance adjustment
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)

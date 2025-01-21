@@ -209,18 +209,20 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type EquityUSATimeTravel,
+    type EquityUSA,
     type Pause,
     type AccessControl,
+    TimeTravelController,
     ScheduledTasks,
     ERC1410ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
     AccessControl__factory,
-    EquityUSATimeTravel__factory,
+    EquityUSA__factory,
     Pause__factory,
     ERC1410ScheduledTasks__factory,
     ScheduledTasks__factory,
+    TimeTravelController__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -256,11 +258,12 @@ describe('Scheduled Tasks Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let equityFacet: EquityUSATimeTravel
+    let equityFacet: EquityUSA
     let scheduledTasksFacet: ScheduledTasks
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
+    let timeTravelControllerFacet: TimeTravelController
 
     before(async () => {
         // mute | mock console.log
@@ -331,7 +334,7 @@ describe('Scheduled Tasks Tests', () => {
             diamond.address,
             signer_A
         )
-        equityFacet = EquityUSATimeTravel__factory.connect(diamond.address, signer_A)
+        equityFacet = EquityUSA__factory.connect(diamond.address, signer_A)
         scheduledTasksFacet = ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
@@ -341,10 +344,11 @@ describe('Scheduled Tasks Tests', () => {
             diamond.address,
             signer_A
         )
+        timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, signer_A)
     })
 
     afterEach(async () => {
-        await equityFacet.resetSystemTimestamp()
+        await timeTravelControllerFacet.resetSystemTimestamp()
     })
 
     it('GIVEN a paused Token WHEN triggerTasks THEN transaction fails with TokenIsPaused', async () => {
@@ -452,7 +456,7 @@ describe('Scheduled Tasks Tests', () => {
         // AFTER FIRST SCHEDULED TASKS ------------------------------------------------------------------
         scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
 
-        await equityFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1+1)
+        await timeTravelControllerFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1+1)
 
         // Checking dividends For before triggering from the queue
         const BalanceOf_A_Dividend_1 = await equityFacet.getDividendsFor(
@@ -487,7 +491,7 @@ describe('Scheduled Tasks Tests', () => {
         expect(scheduledTasks[1].data).to.equal(SNAPSHOT_TASK_TYPE)
 
         // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-        await equityFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_2+1)
+        await timeTravelControllerFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_2+1)
         // Checking dividends For before triggering from the queue
         BalanceOf_A_Dividend_2 = await equityFacet.getDividendsFor(1, account_A)
 

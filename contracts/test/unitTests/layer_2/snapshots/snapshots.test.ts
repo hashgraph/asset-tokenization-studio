@@ -210,15 +210,17 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Snapshots_2,
-    type EquityUSATimeTravel,
+    type EquityUSA,
     type ERC1410ScheduledTasks,
     type AccessControl,
+    TimeTravelController,
     BusinessLogicResolver,
     IFactory,
     AccessControl__factory,
-    EquityUSATimeTravel__factory,
+    EquityUSA__factory,
     ERC1410ScheduledTasks__factory,
     Snapshots_2__factory,
+    TimeTravelController__factory,
 } from '@typechain'
 import {
     SNAPSHOT_ROLE,
@@ -260,7 +262,8 @@ describe('Snapshots Layer 2 Tests', () => {
     let erc1410Facet: ERC1410ScheduledTasks
     let snapshotFacet: Snapshots_2
     let accessControlFacet: AccessControl
-    let equityFacet: EquityUSATimeTravel
+    let equityFacet: EquityUSA
+    let timeTravelControllerFacet: TimeTravelController
 
     before(async () => {
         // mute | mock console.log
@@ -327,16 +330,20 @@ describe('Snapshots Layer 2 Tests', () => {
             diamond.address,
             signer_A
         )
-        equityFacet = EquityUSATimeTravel__factory.connect(diamond.address, signer_A)
+        equityFacet = EquityUSA__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
         )
         snapshotFacet = Snapshots_2__factory.connect(diamond.address, signer_A)
+        timeTravelControllerFacet = TimeTravelController__factory.connect(
+            diamond.address,
+            signer_A
+        )
     })
 
     afterEach(async () => {
-        equityFacet.resetSystemTimestamp()
+        timeTravelControllerFacet.resetSystemTimestamp()
     })
 
     it('GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds', async () => {
@@ -426,7 +433,7 @@ describe('Snapshots Layer 2 Tests', () => {
         await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_3)
 
         //-------------------------
-        await equityFacet.changeSystemTimestamp(currentTimeInSeconds+3*TIME/1000+2)
+        await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds+3*TIME/1000+2)
 
         // snapshot
         await snapshotFacet.takeSnapshot()

@@ -279,6 +279,7 @@ describe('ERC20 Tests', () => {
                         signer: signer_A,
                         useDeployed: false,
                         useEnvironment: true,
+                        timeTravel: true,
                     })
                 )
 

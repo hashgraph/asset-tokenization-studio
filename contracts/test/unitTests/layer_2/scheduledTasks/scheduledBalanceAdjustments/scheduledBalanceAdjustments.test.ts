@@ -212,13 +212,15 @@ import {
     type Equity,
     type ScheduledBalanceAdjustments,
     type AccessControl,
-    ScheduledTasksTimeTravel,
+    ScheduledTasks,
+    TimeTravelController,
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
     Equity__factory,
     ScheduledBalanceAdjustments__factory,
-    ScheduledTasksTimeTravel__factory,
+    ScheduledTasks__factory,
+    TimeTravelController__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -249,8 +251,9 @@ describe('Scheduled BalanceAdjustments Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let equityFacet: Equity
     let scheduledBalanceAdjustmentsFacet: ScheduledBalanceAdjustments
-    let scheduledTasksFacet: ScheduledTasksTimeTravel
+    let scheduledTasksFacet: ScheduledTasks
     let accessControlFacet: AccessControl
+    let timeTravelControllerFacet: TimeTravelController
 
     before(async () => {
         // mute | mock console.log
@@ -323,14 +326,15 @@ describe('Scheduled BalanceAdjustments Tests', () => {
                 diamond.address,
                 signer_A
             )
-        scheduledTasksFacet = ScheduledTasksTimeTravel__factory.connect(
+        scheduledTasksFacet = ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
         )
+        timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, signer_A)
     })
 
     afterEach(async () => {
-        scheduledTasksFacet.resetSystemTimestamp()
+        timeTravelControllerFacet.resetSystemTimestamp()
     })
 
     it('GIVEN a token WHEN triggerBalanceAdjustments THEN transaction succeeds', async () => {
@@ -414,7 +418,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
 
         // AFTER FIRST SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
         scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
-        await scheduledTasksFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1+1)
+        await timeTravelControllerFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_1+1)
         await scheduledTasksFacet.triggerPendingScheduledTasks()
 
         scheduledBalanceAdjustmentCount =
@@ -443,7 +447,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         )
 
         // AFTER SECOND SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        await scheduledTasksFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_2+1)
+        await timeTravelControllerFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_2+1)
         await scheduledTasksFacet.triggerScheduledTasks(100)
 
         scheduledBalanceAdjustmentCount =
@@ -466,7 +470,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         )
 
         // AFTER THIRD SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        await scheduledTasksFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_3+1)
+        await timeTravelControllerFacet.changeSystemTimestamp(balanceAdjustmentExecutionDateInSeconds_3+1)
         await scheduledTasksFacet.triggerScheduledTasks(0)
 
         scheduledBalanceAdjustmentCount =

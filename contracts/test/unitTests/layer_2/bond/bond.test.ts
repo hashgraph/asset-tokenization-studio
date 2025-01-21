@@ -210,10 +210,11 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     ResolverProxy,
-    BondUSATimeTravel,
+    BondUSA,
     AccessControl,
     Pause,
     Lock_2,
+    TimeTravelController,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
@@ -222,6 +223,7 @@ import {
     Pause__factory,
     AccessControl__factory,
     BondUSATimeTravel__factory,
+    TimeTravelController__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -275,11 +277,12 @@ describe('Bond Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let bondFacet: BondUSATimeTravel
+    let bondFacet: BondUSA
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock_2
     let erc1410Facet: ERC1410ScheduledTasks
+    let timeTravelControllerFacet: TimeTravelController
 
     before(async () => {
         // mute | mock console.log
@@ -362,10 +365,11 @@ describe('Bond Tests', () => {
             diamond.address,
             signer_A
         )
+        timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, signer_A)
     })
 
     afterEach(async () => {
-        bondFacet.resetSystemTimestamp()
+        timeTravelControllerFacet.resetSystemTimestamp()
     })
 
     describe('Coupons', () => {
@@ -513,7 +517,7 @@ describe('Bond Tests', () => {
                 )
 
             // check list members
-            await bondFacet.changeSystemTimestamp(currentTimeInSeconds + TIME_2 + 1)
+            await timeTravelControllerFacet.changeSystemTimestamp(currentTimeInSeconds + TIME_2 + 1)
             await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
 
             const couponFor = await bondFacet.getCouponFor(
