@@ -247,6 +247,7 @@ export const CONTRACT_NAMES = [
     'Lock',
     'AdjustBalances',
     'ProtectedPartitions',
+    'TimeTravelController',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]
 export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']

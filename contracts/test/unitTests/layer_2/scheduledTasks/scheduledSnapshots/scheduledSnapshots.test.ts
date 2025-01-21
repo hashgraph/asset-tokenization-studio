@@ -212,12 +212,12 @@ import {
     type Equity,
     type ScheduledSnapshots,
     type AccessControl,
-    ScheduledTasks,
+    ScheduledTasksTimeTravel,
     BusinessLogicResolver,
     IFactory,
     AccessControl__factory,
     Equity__factory,
-    ScheduledTasks__factory,
+    ScheduledTasksTimeTravel__factory,
     ScheduledSnapshots__factory,
 } from '@typechain'
 import {
@@ -233,6 +233,7 @@ import {
 } from '@scripts'
 
 const TIME = 6000
+let currentTimeInSeconds = 1893452400 // 2030-01-01
 
 describe('Scheduled Snapshots Tests', () => {
     let diamond: ResolverProxy
@@ -248,7 +249,7 @@ describe('Scheduled Snapshots Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let equityFacet: Equity
     let scheduledSnapshotsFacet: ScheduledSnapshots
-    let scheduledTasksFacet: ScheduledTasks
+    let scheduledTasksFacet: ScheduledTasksTimeTravel
     let accessControlFacet: AccessControl
 
     before(async () => {
@@ -266,6 +267,7 @@ describe('Scheduled Snapshots Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravel: true,
                 })
             )
 
@@ -320,10 +322,14 @@ describe('Scheduled Snapshots Tests', () => {
             diamond.address,
             signer_A
         )
-        scheduledTasksFacet = ScheduledTasks__factory.connect(
+        scheduledTasksFacet = ScheduledTasksTimeTravel__factory.connect(
             diamond.address,
             signer_A
         )
+    })
+
+    afterEach(async () => {
+        scheduledTasksFacet.resetSystemTimestamp()
     })
 
     it('GIVEN a token WHEN triggerSnapshots THEN transaction succeeds', async () => {
@@ -334,8 +340,6 @@ describe('Scheduled Snapshots Tests', () => {
         equityFacet = equityFacet.connect(signer_C)
 
         // set dividend
-        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
         const dividendsRecordDateInSeconds_1 =
             currentTimeInSeconds + TIME / 1000
         const dividendsRecordDateInSeconds_2 =
@@ -397,7 +401,7 @@ describe('Scheduled Snapshots Tests', () => {
         // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
         scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
 
-        await new Promise((f) => setTimeout(f, TIME + 1000))
+        await scheduledTasksFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_1+1)
         await expect(scheduledTasksFacet.triggerPendingScheduledTasks())
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
             .withArgs(account_A, 1)
@@ -419,7 +423,7 @@ describe('Scheduled Snapshots Tests', () => {
         expect(scheduledSnapshots[1].data).to.equal(dividend_2_Id)
 
         // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-        await new Promise((f) => setTimeout(f, TIME + 1000))
+        await scheduledTasksFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_2+1)
         await expect(scheduledTasksFacet.triggerScheduledTasks(100))
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
             .withArgs(account_A, 2)
@@ -437,7 +441,7 @@ describe('Scheduled Snapshots Tests', () => {
         expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id)
 
         // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-        await new Promise((f) => setTimeout(f, TIME + 1000))
+        await scheduledTasksFacet.changeSystemTimestamp(dividendsRecordDateInSeconds_3+1)
         await expect(scheduledTasksFacet.triggerScheduledTasks(0))
             .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
             .withArgs(account_A, 3)

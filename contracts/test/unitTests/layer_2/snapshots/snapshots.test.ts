@@ -210,13 +210,13 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Snapshots_2,
-    type Equity,
+    type EquityUSATimeTravel,
     type ERC1410ScheduledTasks,
     type AccessControl,
     BusinessLogicResolver,
     IFactory,
     AccessControl__factory,
-    Equity__factory,
+    EquityUSATimeTravel__factory,
     ERC1410ScheduledTasks__factory,
     Snapshots_2__factory,
 } from '@typechain'
@@ -243,6 +243,7 @@ const _PARTITION_ID_2 =
 const TIME = 6000
 const DECIMALS = 6
 const MAX_SUPPLY = BigInt(100000000)
+let currentTimeInSeconds = 1893452400 // 2030-01-01
 
 describe('Snapshots Layer 2 Tests', () => {
     let diamond: ResolverProxy
@@ -259,7 +260,7 @@ describe('Snapshots Layer 2 Tests', () => {
     let erc1410Facet: ERC1410ScheduledTasks
     let snapshotFacet: Snapshots_2
     let accessControlFacet: AccessControl
-    let equityFacet: Equity
+    let equityFacet: EquityUSATimeTravel
 
     before(async () => {
         // mute | mock console.log
@@ -276,6 +277,7 @@ describe('Snapshots Layer 2 Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravel: true,
                 })
             )
 
@@ -325,12 +327,16 @@ describe('Snapshots Layer 2 Tests', () => {
             diamond.address,
             signer_A
         )
-        equityFacet = Equity__factory.connect(diamond.address, signer_A)
+        equityFacet = EquityUSATimeTravel__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
         )
         snapshotFacet = Snapshots_2__factory.connect(diamond.address, signer_A)
+    })
+
+    afterEach(async () => {
+        equityFacet.resetSystemTimestamp()
     })
 
     it('GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds', async () => {
@@ -358,9 +364,6 @@ describe('Snapshots Layer 2 Tests', () => {
         )
 
         // schedule tasks
-        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
-
         const dividendsRecordDateInSeconds_1 =
             currentTimeInSeconds + TIME / 1000
         const dividendsRecordDateInSeconds_2 =
@@ -423,7 +426,7 @@ describe('Snapshots Layer 2 Tests', () => {
         await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_3)
 
         //-------------------------
-        await new Promise((f) => setTimeout(f, 3 * TIME + 2))
+        await equityFacet.changeSystemTimestamp(currentTimeInSeconds+3*TIME/1000+2)
 
         // snapshot
         await snapshotFacet.takeSnapshot()

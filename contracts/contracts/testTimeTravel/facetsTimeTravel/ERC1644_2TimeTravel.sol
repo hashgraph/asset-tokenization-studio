@@ -204,32 +204,23 @@
 */
 
 // SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
-import {ITimeTravel} from './interfaces/ITimeTravel.sol';
+import {ERC1644_2} from '../../layer_2/ERC1400/ERC1644/ERC1644_2.sol';
+import {TimeTravel} from '../controller/TimeTravel.sol';
+import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-abstract contract TimeTravel is ITimeTravel {
-    uint256 _timestamp;
-
-    function changeSystemTimestamp(uint256 _newSystemTime) external override {
-        if (_newSystemTime == 0) {
-            revert InvalidTimestamp(_newSystemTime);
-        }
-
-        uint256 _oldSystemTime = _timestamp;
-        _timestamp = _newSystemTime;
-
-        emit SystemTimestampChanged(_oldSystemTime, _newSystemTime);
-    }
-
-    function resetSystemTimestamp() external override {
-        _timestamp = 0;
-        emit SystemTimestampReset();
-    }
-
-    function _blockTimestamp() internal view virtual returns (uint256) {
-      if(block.chainid == 31337) revert("Wrong chain id");
-      uint256 timestamp = _timestamp;
-      return timestamp == 0 ? block.timestamp : timestamp;
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+contract ERC1644_2TimeTravel is ERC1644_2, TimeTravel {
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravel)
+        returns (uint256)
+    {
+        return TimeTravel._blockTimestamp();
     }
 }

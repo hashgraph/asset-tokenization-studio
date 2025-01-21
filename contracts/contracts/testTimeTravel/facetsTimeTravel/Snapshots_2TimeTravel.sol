@@ -203,97 +203,16 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {Bond} from '../layer_2/bond/Bond.sol';
-import {Security} from '../layer_3/security/Security.sol';
-import {IBondUSA} from '../layer_3/interfaces/IBondUSA.sol';
-import {
-    RegulationData,
-    AdditionalSecurityData
-} from '../layer_3/constants/regulation.sol';
-import {_BOND_RESOLVER_KEY} from '../layer_2/constants/resolverKeys.sol';
-import {IBond} from '../layer_2/interfaces/bond/IBond.sol';
-import {ISecurity} from '../layer_3/interfaces/ISecurity.sol';
-import {TimeTravel} from './TimeTravel.sol';
-import {LocalContext} from '../layer_1/context/LocalContext.sol';
+import {Snapshots_2} from '../../layer_2/snapshots/Snapshots_2.sol';
+import {TimeTravel} from '../controller/TimeTravel.sol';
+import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-contract BondUSATimeTravel is IBondUSA, Bond, Security, TimeTravel {
-    // solhint-disable func-name-mixedcase
-    // solhint-disable-next-line private-vars-leading-underscore
-    function _initialize_bondUSA(
-        BondDetailsData calldata _bondDetailsData,
-        CouponDetailsData calldata _couponDetailsData,
-        RegulationData memory _regulationData,
-        AdditionalSecurityData calldata _additionalSecurityData
-    ) external override onlyUninitialized(_bondStorage().initialized) {
-        _initialize_bond(_bondDetailsData, _couponDetailsData);
-        _initializeSecurity(_regulationData, _additionalSecurityData);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _BOND_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](11);
-        staticFunctionSelectors_[selectorIndex++] = this
-            ._initialize_bondUSA
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .updateMaturityDate
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getBondDetails
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponDetails
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getCouponCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getSecurityRegulationData
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .changeSystemTimestamp
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .resetSystemTimestamp
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](3);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IBond).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IBondUSA).interfaceId;
-    }
-
+// TODO: Remove those errors of solhint
+// solhint-disable  contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+contract Snapshots_2TimeTravel is Snapshots_2, TimeTravel {
     function _blockTimestamp()
         internal
         view
@@ -303,3 +222,4 @@ contract BondUSATimeTravel is IBondUSA, Bond, Security, TimeTravel {
         return TimeTravel._blockTimestamp();
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

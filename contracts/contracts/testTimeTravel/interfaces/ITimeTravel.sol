@@ -212,35 +212,12 @@ pragma solidity ^0.8.18;
  */
 interface ITimeTravel {
     /**
-     * @notice Error thrown when attempting to set an invalid new system timestamp
-     * @param newSystemTime The new system timestamp that caused the error
+     * @notice Error thrown when timestamp is not found
      */
-    error InvalidTimestamp(uint256 newSystemTime);
-    /**
-     * @notice Emitted when the system timestamp is changed
-     * @param legacySystemTime The legacy system timestamp (0 if not changed)
-     * @param newSystemTime The new system timestamp
-     */
-    event SystemTimestampChanged(
-        uint256 legacySystemTime,
-        uint256 newSystemTime
-    );
+    error TimestampNotFound();
 
     /**
-     * @notice Emitted when the system timestamp is reset
+     * @notice Emitted when using time travel out of test environment
      */
-    event SystemTimestampReset();
-
-    /**
-     * @notice Changes the system timestamp
-     *         emits SystemTimestampChanged event
-     * @param _newSystemTime The new system timestamp
-     */
-    function changeSystemTimestamp(uint256 _newSystemTime) external;
-
-    /**
-     * @notice Resets the system timestamp
-     *         emits SystemTimestampReset event
-     */
-    function resetSystemTimestamp() external;
+    error WrongChainId();
 }

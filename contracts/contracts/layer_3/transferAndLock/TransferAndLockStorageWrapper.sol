@@ -224,6 +224,7 @@ import {
     getMessageHashTransferAndLockByPartition,
     getMessageHashTransferAndLock
 } from './signatureVerification.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract TransferAndLockStorageWrapper is

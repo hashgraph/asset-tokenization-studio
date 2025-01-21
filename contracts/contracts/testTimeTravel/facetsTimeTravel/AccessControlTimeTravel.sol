@@ -204,128 +204,13 @@
 */
 
 pragma solidity 0.8.18;
-
-import {Cap} from '../layer_1/cap/Cap.sol';
-import {CapStorageWrapper_2} from '../layer_2/cap/CapStorageWrapper_2.sol';
-import {CapStorageWrapper} from '../layer_1/cap/CapStorageWrapper.sol';
-import {TimeTravel} from './TimeTravel.sol';
-import {LocalContext} from '../layer_1/context/LocalContext.sol';
-
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-contract Cap_2TimeTravel is Cap, CapStorageWrapper_2, TimeTravel {
-    function getMaxSupply()
-        external
-        view
-        virtual
-        override
-        returns (uint256 maxSupply_)
-    {
-        return _getMaxSupplyAdjusted();
-    }
 
-    function getMaxSupplyByPartition(
-        bytes32 _partition
-    ) external view virtual override returns (uint256 maxSupply_) {
-        return _getMaxSupplyByPartitionAdjusted(_partition);
-    }
+import {AccessControl} from '../../layer_1/accessControl/AccessControl.sol';
+import {TimeTravel} from '../controller/TimeTravel.sol';
+import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-    function _checkNewMaxSupply(
-        uint256 _newMaxSupply
-    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
-        CapStorageWrapper_2._checkNewMaxSupply(_newMaxSupply);
-    }
-
-    function _checkNewTotalSupply(
-        uint256 _amount
-    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
-        CapStorageWrapper_2._checkNewTotalSupply(_amount);
-    }
-
-    function _checkNewTotalSupplyForPartition(
-        bytes32 _partition,
-        uint256 _amount
-    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
-        CapStorageWrapper_2._checkNewTotalSupplyForPartition(
-            _partition,
-            _amount
-        );
-    }
-
-    function _checkMaxSupply(
-        uint256 _amount
-    )
-        internal
-        view
-        virtual
-        override(CapStorageWrapper, CapStorageWrapper_2)
-        returns (bool)
-    {
-        return CapStorageWrapper_2._checkMaxSupply(_amount);
-    }
-
-    function _checkNewMaxSupplyForPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    )
-        internal
-        view
-        virtual
-        override(CapStorageWrapper, CapStorageWrapper_2)
-        returns (bool)
-    {
-        return
-            CapStorageWrapper_2._checkNewMaxSupplyForPartition(
-                _partition,
-                _newMaxSupply
-            );
-    }
-
-    function _checkMaxSupplyForPartition(
-        bytes32 _partition,
-        uint256 _amount
-    )
-        internal
-        view
-        virtual
-        override(CapStorageWrapper, CapStorageWrapper_2)
-        returns (bool)
-    {
-        return
-            CapStorageWrapper_2._checkMaxSupplyForPartition(
-                _partition,
-                _amount
-            );
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_Cap
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.setMaxSupply.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setMaxSupplyByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getMaxSupply.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getMaxSupplyByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .changeSystemTimestamp
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .resetSystemTimestamp
-            .selector;
-    }
-
+contract AccessControlTimeTravel is AccessControl, TimeTravel {
     function _blockTimestamp()
         internal
         view

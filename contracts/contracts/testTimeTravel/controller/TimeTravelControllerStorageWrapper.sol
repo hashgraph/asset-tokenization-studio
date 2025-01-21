@@ -203,149 +203,34 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IStaticFunctionSelectors
-} from '../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {Common} from '../layer_1/common/Common.sol';
-import {
-    _SCHEDULED_TASKS_RESOLVER_KEY
-} from '../layer_2/constants/resolverKeys.sol';
-import {
-    CorporateActionsStorageWrapperSecurity
-} from '../layer_2/corporateActions/CorporateActionsStorageWrapperSecurity.sol';
-import {
-    IScheduledTasks
-} from '../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
-import {
-    ScheduledTasksLib
-} from '../layer_2/scheduledTasks/ScheduledTasksLib.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {TimeTravel} from './TimeTravel.sol';
-import {LocalContext} from '../layer_1/context/LocalContext.sol';
+import {ITimeTravelController} from '../interfaces/ITimeTravelController.sol';
 
-contract ScheduledTasksTimeTravel is
-    IStaticFunctionSelectors,
-    IScheduledTasks,
-    Common,
-    CorporateActionsStorageWrapperSecurity,
-    TimeTravel
-{
-    using EnumerableSet for EnumerableSet.Bytes32Set;
+abstract contract TimeTravelControllerStorageWrapper is ITimeTravelController {
+    // keccak256("security.token.standard.timeTravelController.resolverKey")
+    bytes32 constant _TIME_TRAVEL_CONTROLLER_RESOLVER_KEY =
+        0x9bc48b661c0bcf7aba2ef1bb1f13bda2ca72b29495b8d84e16a6048321df0622;
+    uint256 _timestamp;
 
-    // solhint-disable no-unused-vars
-    function onScheduledTaskTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external virtual override onlyAutoCalling(_scheduledTaskStorage()) {
-        _onScheduledTaskTriggered(_data);
-    } // solhint-enable no-unused-vars
+    function changeSystemTimestamp(uint256 _newSystemTime) external override {
+        if (_newSystemTime == 0) {
+            revert InvalidTimestamp(_newSystemTime);
+        }
 
-    function triggerPendingScheduledTasks()
-        external
-        virtual
-        override
-        onlyUnpaused
-        returns (uint256)
-    {
-        return _triggerScheduledTasks(0);
+        uint256 _oldSystemTime = _timestamp;
+        _timestamp = _newSystemTime;
+
+        emit SystemTimestampChanged(_oldSystemTime, _newSystemTime);
     }
 
-    function triggerScheduledTasks(
-        uint256 _max
-    ) external virtual override onlyUnpaused returns (uint256) {
-        return _triggerScheduledTasks(_max);
+    function resetSystemTimestamp() external override {
+        _timestamp = 0;
+        emit SystemTimestampReset();
     }
 
-    function scheduledTaskCount()
-        external
-        view
-        virtual
-        override
-        returns (uint256)
-    {
-        return _getScheduledTaskCount();
-    }
-
-    function getScheduledTasks(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    )
-        external
-        view
-        virtual
-        override
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
-    {
-        scheduledTask_ = _getScheduledTasks(_pageIndex, _pageLength);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _SCHEDULED_TASKS_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerPendingScheduledTasks
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .triggerScheduledTasks
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .scheduledTaskCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getScheduledTasks
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .onScheduledTaskTriggered
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .changeSystemTimestamp
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .resetSystemTimestamp
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IScheduledTasks)
-            .interfaceId;
-    }
-
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravel)
-        returns (uint256)
-    {
-        return TimeTravel._blockTimestamp();
+    function blockTimestamp() external view returns (uint256) {
+        return _timestamp == 0 ? block.timestamp : _timestamp;
     }
 }

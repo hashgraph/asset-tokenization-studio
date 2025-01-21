@@ -214,6 +214,7 @@ import {
     type AdjustBalances,
     type ERC1410ScheduledTasks,
     type AccessControl,
+    TimeTravelController,
     Lock_2,
     Equity,
     Cap_2,
@@ -225,6 +226,7 @@ import {
     Cap_2__factory,
     Lock_2__factory,
     Equity__factory,
+    TimeTravelController__factory,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -257,6 +259,7 @@ const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
 const ONE_SECOND = 1
+let currentTimestamp = 1893452400 // 2030-01-01
 
 describe('Locks Layer 2 Tests', () => {
     let diamond: ResolverProxy
@@ -276,6 +279,7 @@ describe('Locks Layer 2 Tests', () => {
     let capFacet: Cap_2
     let equityFacet: Equity
     let lockFacet: Lock_2
+    let timeTravelControllerFacet: TimeTravelController
 
     async function deployAsset(multiPartition: boolean) {
         const init_rbacs: Rbac[] = set_initRbacs()
@@ -336,6 +340,7 @@ describe('Locks Layer 2 Tests', () => {
         capFacet = Cap_2__factory.connect(diamond.address, defaultSigner)
         lockFacet = Lock_2__factory.connect(diamond.address, defaultSigner)
         equityFacet = Equity__factory.connect(diamond.address, defaultSigner)
+        timeTravelControllerFacet = TimeTravelController__factory.connect(diamond.address, defaultSigner)
     }
 
     function set_initRbacs(): Rbac[] {
@@ -415,6 +420,7 @@ describe('Locks Layer 2 Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravel: true,
                 })
             )
 
@@ -426,6 +432,10 @@ describe('Locks Layer 2 Tests', () => {
         await deployAsset(true)
     })
 
+    afterEach(async() => {
+        await timeTravelControllerFacet.resetSystemTimestamp()
+    })
+
     it('GIVEN a lock WHEN adjustBalances THEN lock amount gets updated succeeds', async () => {
         await setPreBalanceAdjustment()
 
@@ -434,10 +444,6 @@ describe('Locks Layer 2 Tests', () => {
             await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
 
         // LOCK
-        const currentTimestamp = (await ethers.provider.getBlock('latest'))
-            .timestamp
-        const ONE_SECOND = 1
-
         lockFacet = lockFacet.connect(signer_A)
         await lockFacet.lockByPartition(
             _PARTITION_ID_1,
@@ -466,17 +472,14 @@ describe('Locks Layer 2 Tests', () => {
         // scheduled two balance updates
         equityFacet = equityFacet.connect(signer_B)
 
-        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
-
         const balanceAdjustmentData = {
-            executionDate: (currentTimeInSeconds + 2).toString(),
+            executionDate: (currentTimestamp + 2).toString(),
             factor: adjustFactor,
             decimals: adjustDecimals,
         }
 
         const balanceAdjustmentData_2 = {
-            executionDate: (currentTimeInSeconds + 1000).toString(),
+            executionDate: (currentTimestamp + 1000).toString(),
             factor: adjustFactor,
             decimals: adjustDecimals,
         }
@@ -484,8 +487,7 @@ describe('Locks Layer 2 Tests', () => {
         await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
 
         // wait for first scheduled balance adjustment only (run DUMB transaction)
-        await new Promise((f) => setTimeout(f, 3000))
-        await accessControlFacet.grantRole(PAUSER_ROLE, account_C) // DUMB transaction
+        await timeTravelControllerFacet.changeSystemTimestamp(currentTimestamp + 3)
 
         const lock_TotalAmount_After = await lockFacet.getLockedAmountFor(
             account_A
