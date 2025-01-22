@@ -207,30 +207,10 @@
 pragma solidity ^0.8.18;
 
 /**
- * @title Time Travel interface
+ * @title Time Travel Controller interface
  * @notice Interface for the TimeTravelController contract
  */
 interface ITimeTravelController {
-    /**
-     * @notice Error thrown when attempting to set an invalid new system timestamp
-     * @param newSystemTime The new system timestamp that caused the error
-     */
-    error InvalidTimestamp(uint256 newSystemTime);
-    /**
-     * @notice Emitted when the system timestamp is changed
-     * @param legacySystemTime The legacy system timestamp (0 if not changed)
-     * @param newSystemTime The new system timestamp
-     */
-    event SystemTimestampChanged(
-        uint256 legacySystemTime,
-        uint256 newSystemTime
-    );
-
-    /**
-     * @notice Emitted when the system timestamp is reset
-     */
-    event SystemTimestampReset();
-
     /**
      * @notice Changes the system timestamp
      *         emits SystemTimestampChanged event

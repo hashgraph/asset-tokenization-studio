@@ -207,16 +207,18 @@
 pragma solidity 0.8.18;
 
 import {ERC1643} from '../../layer_1/ERC1400/ERC1643/ERC1643.sol';
-import {TimeTravel} from '../controller/TimeTravel.sol';
+import {
+    TimeTravelControllerStorageWrapper
+} from '../controller/TimeTravelControllerStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-contract ERC1643TimeTravel is ERC1643, TimeTravel {
+contract ERC1643TimeTravel is ERC1643, TimeTravelControllerStorageWrapper {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravel)
+        override(LocalContext, TimeTravelControllerStorageWrapper)
         returns (uint256)
     {
-        return TimeTravel._blockTimestamp();
+        return TimeTravelControllerStorageWrapper._blockTimestamp();
     }
 }

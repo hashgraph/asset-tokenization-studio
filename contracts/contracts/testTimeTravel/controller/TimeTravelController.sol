@@ -216,8 +216,21 @@ import {ITimeTravelController} from '../interfaces/ITimeTravelController.sol';
 
 contract TimeTravelController is
     IStaticFunctionSelectors,
+    ITimeTravelController,
     TimeTravelControllerStorageWrapper
 {
+    function changeSystemTimestamp(uint256 newTimestamp) external override {
+        _changeSystemTimestamp(newTimestamp);
+    }
+
+    function resetSystemTimestamp() external override {
+        _resetSystemTimestamp();
+    }
+
+    function blockTimestamp() external view override returns (uint256) {
+        return _blockTimestamp();
+    }
+
     function getStaticResolverKey()
         external
         pure

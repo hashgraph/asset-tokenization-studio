@@ -203,27 +203,37 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity ^0.8.18;
 
-import {ITimeTravel} from '../interfaces/ITimeTravel.sol';
+/**
+ * @title Time Travel Controller Storage Wrapper Interface
+ * @notice Interface for the TimeTravelControllerStorageWrapper contract
+ */
+interface ITimeTravelControllerStorageWrapper {
+    /**
+     * @notice Error thrown when attempting to set an invalid new system timestamp
+     * @param newSystemTime The new system timestamp that caused the error
+     */
+    error InvalidTimestamp(uint256 newSystemTime);
 
-abstract contract TimeTravel is ITimeTravel {
-    constructor() {
-        if (block.chainid != 1337) {
-            revert WrongChainId();
-        }
-    }
+    /**
+     * @notice Emitted when using time travel out of test environment
+     */
+    error WrongChainId();
 
-    function _blockTimestamp()
-        internal
-        view
-        virtual
-        returns (uint256 timestamp)
-    {
-        bytes memory data = abi.encodeWithSignature('blockTimestamp()');
-        (bool success, bytes memory result) = address(this).staticcall(data);
-        if (!success) revert TimestampNotFound();
-        timestamp = abi.decode(result, (uint256));
-    }
+    /**
+     * @notice Emitted when the system timestamp is changed
+     * @param legacySystemTime The legacy system timestamp (0 if not changed)
+     * @param newSystemTime The new system timestamp
+     */
+    event SystemTimestampChanged(
+        uint256 legacySystemTime,
+        uint256 newSystemTime
+    );
+
+    /**
+     * @notice Emitted when the system timestamp is reset
+     */
+    event SystemTimestampReset();
 }

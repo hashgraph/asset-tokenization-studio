@@ -206,9 +206,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {ITimeTravelController} from '../interfaces/ITimeTravelController.sol';
+import {
+    ITimeTravelControllerStorageWrapper
+} from '../interfaces/ITimeTravelControllerStorageWrapper.sol';
 
-abstract contract TimeTravelControllerStorageWrapper is ITimeTravelController {
+abstract contract TimeTravelControllerStorageWrapper is
+    ITimeTravelControllerStorageWrapper
+{
     /* solhint-disable state-visibility */
 
     // keccak256("security.token.standard.timeTravelController.resolverKey")
@@ -216,7 +220,11 @@ abstract contract TimeTravelControllerStorageWrapper is ITimeTravelController {
         0x9bc48b661c0bcf7aba2ef1bb1f13bda2ca72b29495b8d84e16a6048321df0622;
     uint256 _timestamp;
 
-    function changeSystemTimestamp(uint256 _newSystemTime) external override {
+    constructor() {
+        if (block.chainid != 1337) revert WrongChainId();
+    }
+
+    function _changeSystemTimestamp(uint256 _newSystemTime) internal {
         if (_newSystemTime == 0) {
             revert InvalidTimestamp(_newSystemTime);
         }
@@ -227,12 +235,12 @@ abstract contract TimeTravelControllerStorageWrapper is ITimeTravelController {
         emit SystemTimestampChanged(_oldSystemTime, _newSystemTime);
     }
 
-    function resetSystemTimestamp() external override {
+    function _resetSystemTimestamp() internal {
         _timestamp = 0;
         emit SystemTimestampReset();
     }
 
-    function blockTimestamp() external view returns (uint256) {
+    function _blockTimestamp() internal view virtual returns (uint256) {
         return _timestamp == 0 ? block.timestamp : _timestamp;
     }
 }

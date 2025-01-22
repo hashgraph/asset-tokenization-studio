@@ -207,16 +207,18 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {Pause} from '../../layer_1/pause/Pause.sol';
-import {TimeTravel} from '../controller/TimeTravel.sol';
+import {
+    TimeTravelControllerStorageWrapper
+} from '../controller/TimeTravelControllerStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-contract PauseTimeTravel is Pause, TimeTravel {
+contract PauseTimeTravel is Pause, TimeTravelControllerStorageWrapper {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravel)
+        override(LocalContext, TimeTravelControllerStorageWrapper)
         returns (uint256)
     {
-        return TimeTravel._blockTimestamp();
+        return TimeTravelControllerStorageWrapper._blockTimestamp();
     }
 }

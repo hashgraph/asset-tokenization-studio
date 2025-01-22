@@ -211,16 +211,21 @@ pragma solidity 0.8.18;
 import {
     ERC1410ScheduledTasks
 } from '../../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasks.sol';
-import {TimeTravel} from '../controller/TimeTravel.sol';
+import {
+    TimeTravelControllerStorageWrapper
+} from '../controller/TimeTravelControllerStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-contract ERC1410ScheduledTasksTimeTravel is ERC1410ScheduledTasks, TimeTravel {
+contract ERC1410ScheduledTasksTimeTravel is
+    ERC1410ScheduledTasks,
+    TimeTravelControllerStorageWrapper
+{
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravel)
+        override(LocalContext, TimeTravelControllerStorageWrapper)
         returns (uint256)
     {
-        return TimeTravel._blockTimestamp();
+        return TimeTravelControllerStorageWrapper._blockTimestamp();
     }
 }

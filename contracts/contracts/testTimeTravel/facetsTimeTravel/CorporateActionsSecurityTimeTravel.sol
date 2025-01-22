@@ -209,19 +209,21 @@ pragma solidity 0.8.18;
 import {
     CorporateActionsSecurity
 } from '../../layer_2/corporateActions/CorporateActionsSecurity.sol';
-import {TimeTravel} from '../controller/TimeTravel.sol';
+import {
+    TimeTravelControllerStorageWrapper
+} from '../controller/TimeTravelControllerStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
 contract CorporateActionsSecurityTimeTravel is
     CorporateActionsSecurity,
-    TimeTravel
+    TimeTravelControllerStorageWrapper
 {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravel)
+        override(LocalContext, TimeTravelControllerStorageWrapper)
         returns (uint256)
     {
-        return TimeTravel._blockTimestamp();
+        return TimeTravelControllerStorageWrapper._blockTimestamp();
     }
 }

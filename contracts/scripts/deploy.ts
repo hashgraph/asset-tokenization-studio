@@ -916,8 +916,8 @@ export async function deployAtsContracts({
         })
 
     if (!timeTravel) {
-        const { timeTravelController, ...AtsContracts } = deployedContracts
-        return AtsContracts
+        const { timeTravelController, ...atsContracts } = deployedContracts
+        return atsContracts
     }
     return deployedContracts
 }

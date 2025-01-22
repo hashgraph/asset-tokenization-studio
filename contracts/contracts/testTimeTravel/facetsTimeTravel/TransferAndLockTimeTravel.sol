@@ -209,16 +209,21 @@ pragma solidity 0.8.18;
 import {
     TransferAndLock
 } from '../../layer_3/transferAndLock/TransferAndLock.sol';
-import {TimeTravel} from '../controller/TimeTravel.sol';
+import {
+    TimeTravelControllerStorageWrapper
+} from '../controller/TimeTravelControllerStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-contract TransferAndLockTimeTravel is TransferAndLock, TimeTravel {
+contract TransferAndLockTimeTravel is
+    TransferAndLock,
+    TimeTravelControllerStorageWrapper
+{
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravel)
+        override(LocalContext, TimeTravelControllerStorageWrapper)
         returns (uint256)
     {
-        return TimeTravel._blockTimestamp();
+        return TimeTravelControllerStorageWrapper._blockTimestamp();
     }
 }

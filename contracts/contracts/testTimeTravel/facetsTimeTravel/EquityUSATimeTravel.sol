@@ -207,16 +207,18 @@
 pragma solidity 0.8.18;
 
 import {EquityUSA} from '../../layer_3/equityUSA/EquityUSA.sol';
-import {TimeTravel} from '../controller/TimeTravel.sol';
+import {
+    TimeTravelControllerStorageWrapper
+} from '../controller/TimeTravelControllerStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-contract EquityUSATimeTravel is EquityUSA, TimeTravel {
+contract EquityUSATimeTravel is EquityUSA, TimeTravelControllerStorageWrapper {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravel)
+        override(LocalContext, TimeTravelControllerStorageWrapper)
         returns (uint256)
     {
-        return TimeTravel._blockTimestamp();
+        return TimeTravelControllerStorageWrapper._blockTimestamp();
     }
 }

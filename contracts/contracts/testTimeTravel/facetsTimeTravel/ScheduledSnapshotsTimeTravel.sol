@@ -209,16 +209,21 @@ pragma solidity 0.8.18;
 import {
     ScheduledSnapshots
 } from '../../layer_2/scheduledTasks/scheduledSnapshots/ScheduledSnapshots.sol';
-import {TimeTravel} from '../controller/TimeTravel.sol';
+import {
+    TimeTravelControllerStorageWrapper
+} from '../controller/TimeTravelControllerStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-contract ScheduledSnapshotsTimeTravel is ScheduledSnapshots, TimeTravel {
+contract ScheduledSnapshotsTimeTravel is
+    ScheduledSnapshots,
+    TimeTravelControllerStorageWrapper
+{
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravel)
+        override(LocalContext, TimeTravelControllerStorageWrapper)
         returns (uint256)
     {
-        return TimeTravel._blockTimestamp();
+        return TimeTravelControllerStorageWrapper._blockTimestamp();
     }
 }
