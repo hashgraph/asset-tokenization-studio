@@ -203,74 +203,131 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
-
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
-    TimeTravelControllerStorageWrapper
-} from './TimeTravelControllerStorageWrapper.sol';
+    BusinessLogicResolver,
+    TimeTravel,
+    Equity,
+    IFactory,
+    TimeTravel__factory,
+} from '@typechain'
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ITimeTravelController} from '../interfaces/ITimeTravelController.sol';
+    deployEquityFromFactory,
+    RegulationSubType,
+    RegulationType,
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+    MAX_UINT256,
+} from '@scripts'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
-contract TimeTravelController is
-    IStaticFunctionSelectors,
-    ITimeTravelController,
-    TimeTravelControllerStorageWrapper
-{
-    function changeSystemTimestamp(uint256 newTimestamp) external override {
-        _changeSystemTimestamp(newTimestamp);
+describe('Time Travel Tests', () => {
+    let factory: IFactory,
+        businessLogicResolver: BusinessLogicResolver,
+        diamond: Equity,
+        timeTravelFacet: TimeTravel
+    let signer_A: SignerWithAddress
+    let account_A: string
+
+    const setupEnvironment = async () => {
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
+
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
     }
 
-    function resetSystemTimestamp() external override {
-        _resetSystemTimestamp();
-    }
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[signer_A] = await ethers.getSigners()
+        account_A = signer_A.address
 
-    function blockTimestamp() external view override returns (uint256) {
-        return _blockTimestamp();
-    }
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: false,
+                    timeTravel: true,
+                })
+            )
 
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _TIME_TRAVEL_CONTROLLER_RESOLVER_KEY;
-    }
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](3);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .changeSystemTimestamp
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .resetSystemTimestamp
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .blockTimestamp
-            .selector;
-    }
+    beforeEach(async () => {
+        await setupEnvironment()
+    })
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ITimeTravelController)
-            .interfaceId;
-    }
-}
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
+    })
+
+    it('GIVEN succesful deployment THEN chainId is hardhat network id', async () => {
+        const chainId = 1337
+        expect(await timeTravelFacet.checkBlockChainid(chainId)).to.not.be
+            .reverted
+    })
+
+    it('GIVEN new system timestamp THEN change succeeds', async () => {
+        const newTimestamp = dateToUnixTimestamp('2030-01-01T00:00:00Z')
+        const oldSystemTime = 0
+        await expect(timeTravelFacet.changeSystemTimestamp(newTimestamp))
+            .to.emit(timeTravelFacet, 'SystemTimestampChanged')
+            .withArgs(oldSystemTime, newTimestamp)
+        expect(await timeTravelFacet.blockTimestamp()).to.be.equal(newTimestamp)
+    })
+
+    it('GIVEN incorrect system timestamp change THEN revert with InvalidTimestamp', async () => {
+        const newTimestamp = 0
+        await expect(
+            timeTravelFacet.changeSystemTimestamp(newTimestamp)
+        ).to.revertedWithCustomError(timeTravelFacet, 'InvalidTimestamp')
+    })
+
+    it('GIVEN system timestamp reset THEN use network timestamp', async () => {
+        const newTimestamp = dateToUnixTimestamp('2030-01-01T00:00:00Z')
+        await timeTravelFacet.changeSystemTimestamp(newTimestamp)
+        await expect(timeTravelFacet.resetSystemTimestamp()).to.emit(
+            timeTravelFacet,
+            'SystemTimestampReset'
+        )
+        const latestBlock = await ethers.provider.getBlock('latest')
+        const latestTimestamp = latestBlock.timestamp
+        expect(await timeTravelFacet.blockTimestamp()).to.be.equal(
+            latestTimestamp
+        )
+    })
+})

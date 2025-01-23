@@ -214,7 +214,7 @@ import {
     type AdjustBalances,
     type ERC1410ScheduledTasks,
     type AccessControl,
-    TimeTravelController,
+    TimeTravel,
     Lock_2,
     Equity,
     Cap_2,
@@ -226,7 +226,7 @@ import {
     Cap_2__factory,
     Lock_2__factory,
     Equity__factory,
-    TimeTravelController__factory,
+    TimeTravel__factory,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -244,6 +244,7 @@ import {
     deployAtsFullInfrastructure,
     MAX_UINT256,
 } from '@scripts'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const amount = 1
 const balanceOf_A_Original = [10 * amount, 100 * amount]
@@ -259,7 +260,6 @@ const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
 const ONE_SECOND = 1
-let currentTimestamp = 1893452400 // 2030-01-01
 
 describe('Locks Layer 2 Tests', () => {
     let diamond: ResolverProxy
@@ -279,7 +279,7 @@ describe('Locks Layer 2 Tests', () => {
     let capFacet: Cap_2
     let equityFacet: Equity
     let lockFacet: Lock_2
-    let timeTravelControllerFacet: TimeTravelController
+    let timeTravelFacet: TimeTravel
 
     async function deployAsset(multiPartition: boolean) {
         const init_rbacs: Rbac[] = set_initRbacs()
@@ -340,7 +340,7 @@ describe('Locks Layer 2 Tests', () => {
         capFacet = Cap_2__factory.connect(diamond.address, defaultSigner)
         lockFacet = Lock_2__factory.connect(diamond.address, defaultSigner)
         equityFacet = Equity__factory.connect(diamond.address, defaultSigner)
-        timeTravelControllerFacet = TimeTravelController__factory.connect(
+        timeTravelFacet = TimeTravel__factory.connect(
             diamond.address,
             defaultSigner
         )
@@ -436,7 +436,7 @@ describe('Locks Layer 2 Tests', () => {
     })
 
     afterEach(async () => {
-        await timeTravelControllerFacet.resetSystemTimestamp()
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     it('GIVEN a lock WHEN adjustBalances THEN lock amount gets updated succeeds', async () => {
@@ -452,7 +452,7 @@ describe('Locks Layer 2 Tests', () => {
             _PARTITION_ID_1,
             amount,
             account_A,
-            currentTimestamp + ONE_SECOND
+            dateToUnixTimestamp('2030-01-01T00:00:01Z')
         )
 
         const lock_TotalAmount_Before = await lockFacet.getLockedAmountFor(
@@ -476,22 +476,26 @@ describe('Locks Layer 2 Tests', () => {
         equityFacet = equityFacet.connect(signer_B)
 
         const balanceAdjustmentData = {
-            executionDate: (currentTimestamp + 2).toString(),
+            executionDate: dateToUnixTimestamp(
+                '2030-01-01T00:00:02Z'
+            ).toString(),
             factor: adjustFactor,
             decimals: adjustDecimals,
         }
 
         const balanceAdjustmentData_2 = {
-            executionDate: (currentTimestamp + 1000).toString(),
+            executionDate: dateToUnixTimestamp(
+                '2030-01-01T00:16:40Z'
+            ).toString(),
             factor: adjustFactor,
             decimals: adjustDecimals,
         }
         await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
         await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
 
-        // wait for first scheduled balance adjustment only (run DUMB transaction)
-        await timeTravelControllerFacet.changeSystemTimestamp(
-            currentTimestamp + 3
+        // wait for first scheduled balance adjustment only
+        await timeTravelFacet.changeSystemTimestamp(
+            dateToUnixTimestamp('2030-01-01T00:00:03Z')
         )
 
         const lock_TotalAmount_After = await lockFacet.getLockedAmountFor(

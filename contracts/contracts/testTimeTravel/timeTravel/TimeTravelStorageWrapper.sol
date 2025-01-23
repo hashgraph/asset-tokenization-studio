@@ -207,21 +207,27 @@
 pragma solidity 0.8.18;
 
 import {
-    ITimeTravelControllerStorageWrapper
-} from '../interfaces/ITimeTravelControllerStorageWrapper.sol';
+    ITimeTravelStorageWrapper
+} from '../interfaces/ITimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-abstract contract TimeTravelControllerStorageWrapper is
-    ITimeTravelControllerStorageWrapper
+abstract contract TimeTravelStorageWrapper is
+    ITimeTravelStorageWrapper,
+    LocalContext
 {
     /* solhint-disable state-visibility */
 
-    // keccak256("security.token.standard.timeTravelController.resolverKey")
+    // keccak256("security.token.standard.TimeTravel.resolverKey")
     bytes32 constant _TIME_TRAVEL_CONTROLLER_RESOLVER_KEY =
         0x9bc48b661c0bcf7aba2ef1bb1f13bda2ca72b29495b8d84e16a6048321df0622;
     uint256 _timestamp;
 
     constructor() {
-        if (block.chainid != 1337) revert WrongChainId();
+        _checkBlockChainid(_blockChainid());
+    }
+
+    function _checkBlockChainid(uint256 chainId) internal pure {
+        if (chainId != 1337) revert WrongChainId();
     }
 
     function _changeSystemTimestamp(uint256 _newSystemTime) internal {
@@ -240,7 +246,13 @@ abstract contract TimeTravelControllerStorageWrapper is
         emit SystemTimestampReset();
     }
 
-    function _blockTimestamp() internal view virtual returns (uint256) {
+    function _blockTimestamp()
+        internal
+        view
+        virtual
+        override
+        returns (uint256)
+    {
         return _timestamp == 0 ? block.timestamp : _timestamp;
     }
 }

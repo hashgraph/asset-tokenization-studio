@@ -216,7 +216,7 @@ import {
     ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
-    TimeTravelController,
+    TimeTravel,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -231,6 +231,7 @@ import {
     DeployAtsFullInfrastructureCommand,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const amount = 1
 const balanceOf_B_Original = [20 * amount, 200 * amount]
@@ -240,8 +241,6 @@ const adjustFactor = 253
 const adjustDecimals = 2
 const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
-const TIME = 6000
-let currentTimeInSeconds = 1893452400 // 2030-01-01
 
 describe('Adjust Balances Tests', () => {
     let diamond: ResolverProxy
@@ -261,7 +260,7 @@ describe('Adjust Balances Tests', () => {
     let pauseFacet: Pause
     let equityFacet: Equity
     let scheduledTasksFacet: ScheduledTasks
-    let timeTravelControllerFacet: TimeTravelController
+    let timeTravelFacet: TimeTravel
 
     async function deployAsset({
         multiPartition,
@@ -333,8 +332,8 @@ describe('Adjust Balances Tests', () => {
             diamond.address
         )
 
-        timeTravelControllerFacet = await ethers.getContractAt(
-            'TimeTravelController',
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
             diamond.address
         )
     }
@@ -371,7 +370,7 @@ describe('Adjust Balances Tests', () => {
     })
 
     afterEach(async () => {
-        await timeTravelControllerFacet.resetSystemTimestamp()
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     beforeEach(async () => {
@@ -446,9 +445,9 @@ describe('Adjust Balances Tests', () => {
 
         // schedule tasks
         const dividendsRecordDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000
+            dateToUnixTimestamp(`2030-01-01T00:00:06Z`)
         const dividendsExecutionDateInSeconds =
-            currentTimeInSeconds + (10 * TIME) / 1000
+            dateToUnixTimestamp(`2030-01-01T00:01:00Z`)
         const dividendsAmountPerEquity = 1
         const dividendData_1 = {
             recordDate: dividendsRecordDateInSeconds_1.toString(),
@@ -459,7 +458,7 @@ describe('Adjust Balances Tests', () => {
         await equityFacet.setDividends(dividendData_1)
 
         const balanceAdjustmentExecutionDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000 + 1
+            dateToUnixTimestamp(`2030-01-01T00:00:07Z`)
 
         const balanceAdjustmentData_1 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
@@ -473,8 +472,8 @@ describe('Adjust Balances Tests', () => {
             await scheduledTasksFacet.scheduledTaskCount()
 
         //-------------------------
-        await timeTravelControllerFacet.changeSystemTimestamp(
-            currentTimeInSeconds + TIME / 1000 + 2
+        await timeTravelFacet.changeSystemTimestamp(
+            balanceAdjustmentExecutionDateInSeconds_1 + 1
         )
 
         // balance adjustment

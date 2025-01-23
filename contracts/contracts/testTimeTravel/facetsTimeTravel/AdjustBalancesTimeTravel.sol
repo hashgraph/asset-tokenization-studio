@@ -207,20 +207,17 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 import {AdjustBalances} from '../../layer_2/adjustBalances/AdjustBalances.sol';
 import {
-    TimeTravelControllerStorageWrapper
-} from '../controller/TimeTravelControllerStorageWrapper.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-contract AdjustBalancesTimeTravel is
-    AdjustBalances,
-    TimeTravelControllerStorageWrapper
-{
+contract AdjustBalancesTimeTravel is AdjustBalances, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravelControllerStorageWrapper)
+        override(LocalContext, TimeTravelStorageWrapper)
         returns (uint256)
     {
-        return TimeTravelControllerStorageWrapper._blockTimestamp();
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

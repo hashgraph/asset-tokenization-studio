@@ -210,20 +210,20 @@ import {
     ScheduledSnapshots
 } from '../../layer_2/scheduledTasks/scheduledSnapshots/ScheduledSnapshots.sol';
 import {
-    TimeTravelControllerStorageWrapper
-} from '../controller/TimeTravelControllerStorageWrapper.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
 contract ScheduledSnapshotsTimeTravel is
     ScheduledSnapshots,
-    TimeTravelControllerStorageWrapper
+    TimeTravelStorageWrapper
 {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravelControllerStorageWrapper)
+        override(LocalContext, TimeTravelStorageWrapper)
         returns (uint256)
     {
-        return TimeTravelControllerStorageWrapper._blockTimestamp();
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

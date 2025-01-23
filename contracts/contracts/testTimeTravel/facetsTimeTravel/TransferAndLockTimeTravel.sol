@@ -210,20 +210,20 @@ import {
     TransferAndLock
 } from '../../layer_3/transferAndLock/TransferAndLock.sol';
 import {
-    TimeTravelControllerStorageWrapper
-} from '../controller/TimeTravelControllerStorageWrapper.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
 contract TransferAndLockTimeTravel is
     TransferAndLock,
-    TimeTravelControllerStorageWrapper
+    TimeTravelStorageWrapper
 {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravelControllerStorageWrapper)
+        override(LocalContext, TimeTravelStorageWrapper)
         returns (uint256)
     {
-        return TimeTravelControllerStorageWrapper._blockTimestamp();
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

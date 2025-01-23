@@ -212,7 +212,7 @@ import {
     type EquityUSA,
     type Pause,
     type AccessControl,
-    TimeTravelController,
+    TimeTravel,
     Lock_2,
     ERC1410ScheduledTasks,
     IFactory,
@@ -222,7 +222,7 @@ import {
     Pause__factory,
     Lock_2__factory,
     ERC1410ScheduledTasks__factory,
-    TimeTravelController__factory,
+    TimeTravel__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -238,10 +238,9 @@ import {
     DeployAtsFullInfrastructureCommand,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
-const TIME = 10000
 const DECIMALS = 7
-let currentTimeInSeconds = 1893452400 // 2030-01-01
 let dividendsRecordDateInSeconds = 0
 let dividendsExecutionDateInSeconds = 0
 const dividendsAmountPerEquity = 1
@@ -289,7 +288,7 @@ describe('Equity Tests', () => {
     let pauseFacet: Pause
     let lockFacet: Lock_2
     let erc1410Facet: ERC1410ScheduledTasks
-    let timeTravelControllerFacet: TimeTravelController
+    let timeTravelFacet: TimeTravel
 
     before(async () => {
         // mute | mock console.log
@@ -366,17 +365,18 @@ describe('Equity Tests', () => {
             diamond.address,
             signer_A
         )
-        timeTravelControllerFacet = TimeTravelController__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
 
-        dividendsRecordDateInSeconds = currentTimeInSeconds + TIME / 1000
-        dividendsExecutionDateInSeconds =
-            currentTimeInSeconds + (10 * TIME) / 1000
-        votingRecordDateInSeconds = currentTimeInSeconds + TIME / 1000
-        balanceAdjustmentExecutionDateInSeconds =
-            currentTimeInSeconds + TIME / 1000
+        dividendsRecordDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:00:10Z'
+        )
+        dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:16:40Z'
+        )
+        votingRecordDateInSeconds = dateToUnixTimestamp('2030-01-01T00:00:10Z')
+        balanceAdjustmentExecutionDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:00:10Z'
+        )
 
         votingData = {
             recordDate: votingRecordDateInSeconds.toString(),
@@ -395,7 +395,7 @@ describe('Equity Tests', () => {
     })
 
     afterEach(async () => {
-        await timeTravelControllerFacet.resetSystemTimestamp()
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     describe('Dividends', () => {
@@ -430,8 +430,8 @@ describe('Equity Tests', () => {
         })
 
         it('GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails', async () => {
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTimeInSeconds
+            await timeTravelFacet.changeSystemTimestamp(
+                dateToUnixTimestamp('2030-01-01T00:00:00Z')
             )
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
@@ -451,7 +451,9 @@ describe('Equity Tests', () => {
             ).to.be.rejectedWith('WrongDates')
 
             const wrongDividendData_2 = {
-                recordDate: (currentTimeInSeconds - 1).toString(),
+                recordDate: dateToUnixTimestamp(
+                    '2029-12-31T23:59:59Z'
+                ).toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: dividendsAmountPerEquity,
             }
@@ -546,10 +548,9 @@ describe('Equity Tests', () => {
                 )
 
             // check list members
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTimeInSeconds + TIME / 1000 + 1
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds + 1
             )
-            await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
             const dividendFor = await equityFacet.getDividendsFor(1, account_A)
 
             expect(dividendFor.tokenBalance).to.equal(TotalAmount)
@@ -659,10 +660,9 @@ describe('Equity Tests', () => {
                     voteData
                 )
 
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTimeInSeconds + TIME / 1000 + 1
+            await timeTravelFacet.changeSystemTimestamp(
+                votingRecordDateInSeconds + 1
             )
-            await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
             const votingFor = await equityFacet.getVotingFor(1, account_A)
 
             expect(votingFor.tokenBalance).to.equal(TotalAmount)

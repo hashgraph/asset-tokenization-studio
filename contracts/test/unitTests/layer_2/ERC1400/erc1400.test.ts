@@ -215,7 +215,7 @@ import {
     type AccessControl,
     type Equity,
     type ControlList,
-    TimeTravelController,
+    TimeTravel,
     ERC20_2,
     ERC1594_2,
     ERC1644_2,
@@ -229,7 +229,7 @@ import {
     Equity__factory,
     ERC1410ScheduledTasks__factory,
     Pause__factory,
-    TimeTravelController__factory,
+    TimeTravel__factory,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -259,12 +259,11 @@ import {
     MAX_UINT256,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
 const balanceOf_E_Original = 2 * amount
-const snapshot_1_delay = 8000
-const snapshot_2_delay = snapshot_1_delay * 3
 const data = '0x1234'
 const operatorData = '0x5678'
 const _PARTITION_ID_1 =
@@ -279,7 +278,6 @@ const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
-let currentTimeInSeconds = 1893452400 // 2030-01-01
 
 interface BalanceAdjustedValues {
     maxSupply: BigNumber
@@ -324,7 +322,7 @@ describe('ERC1400 Tests', () => {
     let erc1594Facet: ERC1594_2
     let erc1644Facet: ERC1644_2
     let adjustBalancesFacet: AdjustBalances
-    let timeTravelControllerFacet: TimeTravelController
+    let timeTravelFacet: TimeTravel
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
         await grantRolesToAccounts()
@@ -653,8 +651,8 @@ describe('ERC1400 Tests', () => {
             diamond.address
         )
 
-        timeTravelControllerFacet = await ethers.getContractAt(
-            'TimeTravelController',
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
             diamond.address
         )
 
@@ -768,7 +766,7 @@ describe('ERC1400 Tests', () => {
                 diamond.address,
                 signer_A
             )
-            timeTravelControllerFacet = TimeTravelController__factory.connect(
+            timeTravelFacet = TimeTravel__factory.connect(
                 diamond.address,
                 signer_A
             )
@@ -790,7 +788,7 @@ describe('ERC1400 Tests', () => {
         })
 
         afterEach(async () => {
-            timeTravelControllerFacet.resetSystemTimestamp()
+            timeTravelFacet.resetSystemTimestamp()
         })
 
         it('GIVEN an account WHEN authorizing and revoking operators THEN transaction succeeds', async () => {
@@ -1508,12 +1506,16 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
             equityFacet = equityFacet.connect(signer_C)
             // scheduling 2 snapshots
-            const dividendsRecordDateInSeconds_1 =
-                currentTimeInSeconds + snapshot_1_delay / 1000
-            const dividendsRecordDateInSeconds_2 =
-                currentTimeInSeconds + snapshot_2_delay / 1000
-            const dividendsExecutionDateInSeconds =
-                currentTimeInSeconds + 10 * (snapshot_2_delay / 1000)
+            const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
+                '2030-01-01T00:00:08Z'
+            )
+
+            const dividendsRecordDateInSeconds_2 = dateToUnixTimestamp(
+                '2030-01-01T00:00:24Z'
+            )
+            const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:04:00Z'
+            )
             const dividendData_1 = {
                 recordDate: dividendsRecordDateInSeconds_1.toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
@@ -1622,8 +1624,8 @@ describe('ERC1400 Tests', () => {
             expect(dividend_1_For_E.recordDateReached).to.equal(false)
             expect(dividend_1_For_D.recordDateReached).to.equal(false)
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTimeInSeconds + snapshot_1_delay / 1000 + 1
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds_1 + 1
             )
 
             dividend_1 = await equityFacet.getDividends(1)
@@ -1686,8 +1688,8 @@ describe('ERC1400 Tests', () => {
             expect(dividend_1_For_D.recordDateReached).to.equal(true)
 
             // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTimeInSeconds + snapshot_2_delay / 1000 + 1
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds_2 + 1
             )
 
             // transfer From
@@ -1755,12 +1757,15 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_A)
             equityFacet = equityFacet.connect(signer_C)
             // scheduling 2 snapshots
-            const dividendsRecordDateInSeconds_1 =
-                currentTimeInSeconds + snapshot_1_delay / 1000
-            const dividendsRecordDateInSeconds_2 =
-                currentTimeInSeconds + snapshot_2_delay / 1000
-            const dividendsExecutionDateInSeconds =
-                currentTimeInSeconds + 10 * (snapshot_2_delay / 1000)
+            const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
+                '2030-01-01T00:00:08Z'
+            )
+            const dividendsRecordDateInSeconds_2 = dateToUnixTimestamp(
+                '2030-01-01T00:00:24Z'
+            )
+            const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:04:00Z'
+            )
             const dividendData_1 = {
                 recordDate: dividendsRecordDateInSeconds_1.toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
@@ -1828,8 +1833,8 @@ describe('ERC1400 Tests', () => {
             )
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTimeInSeconds + snapshot_1_delay / 1000 + 1
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds_1 + 1
             )
 
             // transfer
@@ -1860,12 +1865,15 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
             equityFacet = equityFacet.connect(signer_C)
             // scheduling 2 snapshots
-            const dividendsRecordDateInSeconds_1 =
-                currentTimeInSeconds + snapshot_1_delay / 1000
-            const dividendsRecordDateInSeconds_2 =
-                currentTimeInSeconds + snapshot_2_delay / 1000
-            const dividendsExecutionDateInSeconds =
-                currentTimeInSeconds + 10 * (snapshot_2_delay / 1000)
+            const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
+                '2030-01-01T00:00:08Z'
+            )
+            const dividendsRecordDateInSeconds_2 = dateToUnixTimestamp(
+                '2030-01-01T00:00:24Z'
+            )
+            const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:24:00Z'
+            )
             const dividendData_1 = {
                 recordDate: dividendsRecordDateInSeconds_1.toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
@@ -1975,8 +1983,8 @@ describe('ERC1400 Tests', () => {
             expect(totalSupplyByPartition).to.be.equal(totalSupply)
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTimeInSeconds + snapshot_1_delay / 1000 + 1
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds_1 + 1
             )
 
             // transfer
@@ -1993,8 +2001,8 @@ describe('ERC1400 Tests', () => {
             expect(dividend_2.snapshotId.toNumber()).to.equal(0)
 
             // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTimeInSeconds + snapshot_2_delay / 1000 + 1
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds_2 + 1
             )
 
             // transfer From
@@ -2227,12 +2235,15 @@ describe('ERC1400 Tests', () => {
                 '0x'
             )
             // scheduling 2 snapshots
-            const dividendsRecordDateInSeconds_1 =
-                currentTimeInSeconds + snapshot_1_delay / 1000
-            const dividendsRecordDateInSeconds_2 =
-                currentTimeInSeconds + snapshot_2_delay / 1000
-            const dividendsExecutionDateInSeconds =
-                currentTimeInSeconds + 10 * (snapshot_2_delay / 1000)
+            const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
+                '2030-01-01T00:00:08Z'
+            )
+            const dividendsRecordDateInSeconds_2 = dateToUnixTimestamp(
+                '2030-01-01T00:00:24Z'
+            )
+            const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:04:00Z'
+            )
             const dividendData_1 = {
                 recordDate: dividendsRecordDateInSeconds_1.toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
@@ -2310,8 +2321,8 @@ describe('ERC1400 Tests', () => {
             expect(dividend_2.snapshotId.toNumber()).to.equal(0)
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTimeInSeconds + snapshot_1_delay / 1000 + 1
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds_1 + 1
             )
 
             // controller transfer
@@ -2335,8 +2346,8 @@ describe('ERC1400 Tests', () => {
             expect(dividend_2.snapshotId.toNumber()).to.equal(0)
 
             // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTimeInSeconds + snapshot_2_delay / 1000 + 1
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds_2 + 1
             )
 
             // controller redeem
@@ -2618,7 +2629,7 @@ describe('ERC1400 Tests', () => {
         })
 
         afterEach(async () => {
-            await timeTravelControllerFacet.resetSystemTimestamp()
+            await timeTravelFacet.resetSystemTimestamp()
         })
 
         it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN transaction succeeds', async () => {
@@ -2638,13 +2649,17 @@ describe('ERC1400 Tests', () => {
             equityFacet = equityFacet.connect(signer_B)
 
             const balanceAdjustmentData = {
-                executionDate: (currentTimeInSeconds + 2).toString(),
+                executionDate: dateToUnixTimestamp(
+                    '2030-01-01T00:00:02Z'
+                ).toString(),
                 factor: adjustFactor,
                 decimals: adjustDecimals,
             }
 
             const balanceAdjustmentData_2 = {
-                executionDate: (currentTimeInSeconds + 1000).toString(),
+                executionDate: dateToUnixTimestamp(
+                    '2030-01-01T00:16:40Z'
+                ).toString(),
                 factor: adjustFactor,
                 decimals: adjustDecimals,
             }
@@ -2655,12 +2670,10 @@ describe('ERC1400 Tests', () => {
                 balanceAdjustmentData_2
             )
 
-            // wait for first scheduled balance adjustment only (run DUMB transaction)
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTimeInSeconds + 3
+            // wait for first scheduled balance adjustment only
+            await timeTravelFacet.changeSystemTimestamp(
+                dateToUnixTimestamp('2030-01-01T00:00:03Z')
             )
-            await accessControlFacet.grantRole(PAUSER_ROLE, account_C) // DUMB transaction
-
             // After Values Before Transaction
             const after: BalanceAdjustedValues =
                 await getBalanceAdjustedValues()

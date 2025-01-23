@@ -208,20 +208,20 @@ pragma solidity 0.8.18;
 
 import {Lock_2} from '../../layer_2/lock/Lock_2.sol';
 import {
-    TimeTravelControllerStorageWrapper
-} from '../controller/TimeTravelControllerStorageWrapper.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-contract Lock_2TimeTravel is Lock_2, TimeTravelControllerStorageWrapper {
+contract Lock_2TimeTravel is Lock_2, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravelControllerStorageWrapper)
+        override(LocalContext, TimeTravelStorageWrapper)
         returns (uint256)
     {
-        return TimeTravelControllerStorageWrapper._blockTimestamp();
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

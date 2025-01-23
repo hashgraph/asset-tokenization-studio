@@ -214,7 +214,7 @@ import {
     AccessControl,
     Pause,
     Lock_2,
-    TimeTravelController,
+    TimeTravel,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
@@ -223,7 +223,7 @@ import {
     Pause__factory,
     AccessControl__factory,
     BondUSATimeTravel__factory,
-    TimeTravelController__factory,
+    TimeTravel__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -240,10 +240,9 @@ import {
     DeployAtsFullInfrastructureCommand,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
-const TIME = 30000
 const numberOfUnits = 1000
-let currentTimeInSeconds = 1893452400 // 2030-01-01
 let startingDate = 0
 const numberOfCoupons = 50
 const frequency = 7
@@ -254,7 +253,6 @@ const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
 const info = 'info'
 
-const TIME_2 = 2 * TIME
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
 const couponRate = 5
@@ -282,7 +280,7 @@ describe('Bond Tests', () => {
     let pauseFacet: Pause
     let lockFacet: Lock_2
     let erc1410Facet: ERC1410ScheduledTasks
-    let timeTravelControllerFacet: TimeTravelController
+    let timeTravelFacet: TimeTravel
 
     before(async () => {
         // mute | mock console.log
@@ -308,12 +306,12 @@ describe('Bond Tests', () => {
     })
 
     beforeEach(async () => {
-        startingDate = currentTimeInSeconds + TIME / 1000 + 5
+        startingDate = dateToUnixTimestamp(`2030-01-01T00:00:35Z`)
         maturityDate = startingDate + numberOfCoupons * frequency
         firstCouponDate = startingDate + 1
-        couponRecordDateInSeconds = currentTimeInSeconds + TIME_2 / 1000
+        couponRecordDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:01:00Z`)
         couponExecutionDateInSeconds =
-            currentTimeInSeconds + 10 * (TIME_2 / 1000)
+            dateToUnixTimestamp(`2030-01-01T00:10:00Z`)
         couponData = {
             recordDate: couponRecordDateInSeconds.toString(),
             executionDate: couponExecutionDateInSeconds.toString(),
@@ -368,14 +366,11 @@ describe('Bond Tests', () => {
             diamond.address,
             signer_A
         )
-        timeTravelControllerFacet = TimeTravelController__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
     })
 
     afterEach(async () => {
-        timeTravelControllerFacet.resetSystemTimestamp()
+        timeTravelFacet.resetSystemTimestamp()
     })
 
     describe('Coupons', () => {
@@ -523,8 +518,8 @@ describe('Bond Tests', () => {
                 )
 
             // check list members
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTimeInSeconds + TIME_2 + 1
+            await timeTravelFacet.changeSystemTimestamp(
+                couponRecordDateInSeconds + 1
             )
             await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
 

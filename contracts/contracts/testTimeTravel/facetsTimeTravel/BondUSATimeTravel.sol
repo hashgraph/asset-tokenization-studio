@@ -208,17 +208,17 @@ pragma solidity 0.8.18;
 
 import {BondUSA} from '../../layer_3/bondUSA/BondUSA.sol';
 import {
-    TimeTravelControllerStorageWrapper
-} from '../controller/TimeTravelControllerStorageWrapper.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-contract BondUSATimeTravel is BondUSA, TimeTravelControllerStorageWrapper {
+contract BondUSATimeTravel is BondUSA, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravelControllerStorageWrapper)
+        override(LocalContext, TimeTravelStorageWrapper)
         returns (uint256)
     {
-        return TimeTravelControllerStorageWrapper._blockTimestamp();
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

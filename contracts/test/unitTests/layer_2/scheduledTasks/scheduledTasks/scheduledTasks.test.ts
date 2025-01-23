@@ -212,7 +212,7 @@ import {
     type EquityUSA,
     type Pause,
     type AccessControl,
-    TimeTravelController,
+    TimeTravel,
     ScheduledTasks,
     ERC1410ScheduledTasks,
     BusinessLogicResolver,
@@ -222,7 +222,7 @@ import {
     Pause__factory,
     ERC1410ScheduledTasks__factory,
     ScheduledTasks__factory,
-    TimeTravelController__factory,
+    TimeTravel__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -238,13 +238,12 @@ import {
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
 } from '@scripts'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
-const TIME = 15000
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 const INITIAL_AMOUNT = 1000
 const DECIMALS_INIT = 6
-let currentTimeInSeconds = 1893452400 // 2030-01-01
 
 describe('Scheduled Tasks Tests', () => {
     let diamond: ResolverProxy
@@ -263,7 +262,7 @@ describe('Scheduled Tasks Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
-    let timeTravelControllerFacet: TimeTravelController
+    let timeTravelFacet: TimeTravel
 
     before(async () => {
         // mute | mock console.log
@@ -344,14 +343,11 @@ describe('Scheduled Tasks Tests', () => {
             diamond.address,
             signer_A
         )
-        timeTravelControllerFacet = TimeTravelController__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
     })
 
     afterEach(async () => {
-        await timeTravelControllerFacet.resetSystemTimestamp()
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     it('GIVEN a paused Token WHEN triggerTasks THEN transaction fails with TokenIsPaused', async () => {
@@ -388,12 +384,15 @@ describe('Scheduled Tasks Tests', () => {
         equityFacet = equityFacet.connect(signer_C)
 
         // set dividend
-        const dividendsRecordDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000
-        const dividendsRecordDateInSeconds_2 =
-            currentTimeInSeconds + (2 * TIME) / 1000
-        const dividendsExecutionDateInSeconds =
-            currentTimeInSeconds + (10 * TIME) / 1000
+        const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
+            '2030-01-01T00:00:15Z'
+        )
+        const dividendsRecordDateInSeconds_2 = dateToUnixTimestamp(
+            '2030-01-01T00:00:30Z'
+        )
+        const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:02:30Z'
+        )
         const dividendsAmountPerEquity = 1
         const dividendData_1 = {
             recordDate: dividendsRecordDateInSeconds_1.toString(),
@@ -408,10 +407,12 @@ describe('Scheduled Tasks Tests', () => {
         await equityFacet.setDividends(dividendData_2)
         await equityFacet.setDividends(dividendData_1)
 
-        const balanceAdjustmentExecutionDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000 + 1
-        const balanceAdjustmentExecutionDateInSeconds_2 =
-            currentTimeInSeconds + (2 * TIME) / 1000 + 1
+        const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp(
+            '2030-01-01T00:00:16Z'
+        )
+        const balanceAdjustmentExecutionDateInSeconds_2 = dateToUnixTimestamp(
+            '2030-01-01T00:00:31Z'
+        )
         const balanceAdjustmentsFactor_1 = 1
         const balanceAdjustmentsDecimals_1 = 2
         const balanceAdjustmentsFactor_2 = 1
@@ -459,7 +460,7 @@ describe('Scheduled Tasks Tests', () => {
         // AFTER FIRST SCHEDULED TASKS ------------------------------------------------------------------
         scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
 
-        await timeTravelControllerFacet.changeSystemTimestamp(
+        await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_1 + 1
         )
 
@@ -496,7 +497,7 @@ describe('Scheduled Tasks Tests', () => {
         expect(scheduledTasks[1].data).to.equal(SNAPSHOT_TASK_TYPE)
 
         // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-        await timeTravelControllerFacet.changeSystemTimestamp(
+        await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_2 + 1
         )
         // Checking dividends For before triggering from the queue

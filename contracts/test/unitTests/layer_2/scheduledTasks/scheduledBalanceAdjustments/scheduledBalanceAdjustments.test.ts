@@ -213,14 +213,14 @@ import {
     type ScheduledBalanceAdjustments,
     type AccessControl,
     ScheduledTasks,
-    TimeTravelController,
+    TimeTravel,
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
     Equity__factory,
     ScheduledBalanceAdjustments__factory,
     ScheduledTasks__factory,
-    TimeTravelController__factory,
+    TimeTravel__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -233,9 +233,7 @@ import {
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
 } from '@scripts'
-
-const TIME = 6000
-let currentTimeInSeconds = 1893452400 // 2030-01-01
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 describe('Scheduled BalanceAdjustments Tests', () => {
     let diamond: ResolverProxy
@@ -253,7 +251,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
     let scheduledBalanceAdjustmentsFacet: ScheduledBalanceAdjustments
     let scheduledTasksFacet: ScheduledTasks
     let accessControlFacet: AccessControl
-    let timeTravelControllerFacet: TimeTravelController
+    let timeTravelFacet: TimeTravel
 
     before(async () => {
         // mute | mock console.log
@@ -330,14 +328,11 @@ describe('Scheduled BalanceAdjustments Tests', () => {
             diamond.address,
             signer_A
         )
-        timeTravelControllerFacet = TimeTravelController__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
     })
 
     afterEach(async () => {
-        timeTravelControllerFacet.resetSystemTimestamp()
+        timeTravelFacet.resetSystemTimestamp()
     })
 
     it('GIVEN a token WHEN triggerBalanceAdjustments THEN transaction succeeds', async () => {
@@ -348,13 +343,15 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         equityFacet = equityFacet.connect(signer_C)
 
         // set balanceAdjustment
-        const balanceAdjustmentExecutionDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000
-        const balanceAdjustmentExecutionDateInSeconds_2 =
-            currentTimeInSeconds + (2 * TIME) / 1000
-        const balanceAdjustmentExecutionDateInSeconds_3 =
-            currentTimeInSeconds + (3 * TIME) / 1000
-
+        const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp(
+            '2030-01-01T00:00:06Z'
+        )
+        const balanceAdjustmentExecutionDateInSeconds_2 = dateToUnixTimestamp(
+            '2030-01-01T00:00:12Z'
+        )
+        const balanceAdjustmentExecutionDateInSeconds_3 = dateToUnixTimestamp(
+            '2030-01-01T00:00:18Z'
+        )
         const balanceAdjustmentsFactor = 1
         const balanceAdjustmentsDecimals = 2
 
@@ -421,7 +418,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
 
         // AFTER FIRST SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
         scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
-        await timeTravelControllerFacet.changeSystemTimestamp(
+        await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_1 + 1
         )
         await scheduledTasksFacet.triggerPendingScheduledTasks()
@@ -452,7 +449,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         )
 
         // AFTER SECOND SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        await timeTravelControllerFacet.changeSystemTimestamp(
+        await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_2 + 1
         )
         await scheduledTasksFacet.triggerScheduledTasks(100)
@@ -477,7 +474,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
         )
 
         // AFTER THIRD SCHEDULED BalanceAdjustmentS ------------------------------------------------------------------
-        await timeTravelControllerFacet.changeSystemTimestamp(
+        await timeTravelFacet.changeSystemTimestamp(
             balanceAdjustmentExecutionDateInSeconds_3 + 1
         )
         await scheduledTasksFacet.triggerScheduledTasks(0)

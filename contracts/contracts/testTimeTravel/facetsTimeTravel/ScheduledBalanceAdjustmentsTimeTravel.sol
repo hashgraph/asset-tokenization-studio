@@ -210,20 +210,20 @@ import {
     ScheduledBalanceAdjustments
 } from '../../layer_2/scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustments.sol';
 import {
-    TimeTravelControllerStorageWrapper
-} from '../controller/TimeTravelControllerStorageWrapper.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
 contract ScheduledBalanceAdjustmentsTimeTravel is
     ScheduledBalanceAdjustments,
-    TimeTravelControllerStorageWrapper
+    TimeTravelStorageWrapper
 {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravelControllerStorageWrapper)
+        override(LocalContext, TimeTravelStorageWrapper)
         returns (uint256)
     {
-        return TimeTravelControllerStorageWrapper._blockTimestamp();
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

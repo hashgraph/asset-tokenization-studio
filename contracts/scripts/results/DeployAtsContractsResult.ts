@@ -227,7 +227,7 @@ import {
     TransferAndLock,
     Lock,
     ProtectedPartitions,
-    TimeTravelController,
+    TimeTravel,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
@@ -254,7 +254,7 @@ export interface DeployAtsContractsResultParams {
     lock: DeployContractWithFactoryResult<Lock>
     adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
     protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
-    timeTravelController?: DeployContractWithFactoryResult<TimeTravelController>
+    TimeTravel?: DeployContractWithFactoryResult<TimeTravel>
     deployer?: Signer
 }
 
@@ -281,7 +281,7 @@ export default class DeployAtsContractsResult {
     public readonly lock: DeployContractWithFactoryResult<Lock>
     public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
     public readonly protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
-    public readonly timeTravelController?: DeployContractWithFactoryResult<TimeTravelController>
+    public readonly TimeTravel?: DeployContractWithFactoryResult<TimeTravel>
     public readonly deployer?: Signer
 
     constructor({
@@ -307,7 +307,7 @@ export default class DeployAtsContractsResult {
         lock,
         adjustBalances,
         protectedPartitions,
-        timeTravelController,
+        TimeTravel,
         deployer,
     }: DeployAtsContractsResultParams) {
         this.businessLogicResolver = businessLogicResolver
@@ -332,7 +332,7 @@ export default class DeployAtsContractsResult {
         this.lock = lock
         this.adjustBalances = adjustBalances
         this.protectedPartitions = protectedPartitions
-        this.timeTravelController = timeTravelController
+        this.TimeTravel = TimeTravel
         // Deployer
         this.deployer = deployer
     }

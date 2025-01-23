@@ -207,20 +207,20 @@ pragma solidity 0.8.18;
 
 import {Cap_2} from '../../layer_2/cap/Cap_2.sol';
 import {
-    TimeTravelControllerStorageWrapper
-} from '../controller/TimeTravelControllerStorageWrapper.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 // TODO: Remove _ in contract name
 // solhint-disable-next-line
-contract Cap_2TimeTravel is Cap_2, TimeTravelControllerStorageWrapper {
+contract Cap_2TimeTravel is Cap_2, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravelControllerStorageWrapper)
+        override(LocalContext, TimeTravelStorageWrapper)
         returns (uint256)
     {
-        return TimeTravelControllerStorageWrapper._blockTimestamp();
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

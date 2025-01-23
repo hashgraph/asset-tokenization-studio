@@ -212,7 +212,7 @@ import {
     AccessControl__factory,
     BusinessLogicResolver,
     type Cap_2,
-    TimeTravelController,
+    TimeTravel,
     Cap_2__factory,
     Equity,
     Equity__factory,
@@ -221,7 +221,7 @@ import {
     IFactory,
     Snapshots_2,
     Snapshots_2__factory,
-    TimeTravelController__factory,
+    TimeTravel__factory,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -236,6 +236,7 @@ import {
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
 } from '@scripts'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -245,7 +246,6 @@ const _PARTITION_ID_1 =
 const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const TIME = 6000
-let currentTime = 1893452400 // 2030-01-01
 
 describe('CAP Layer 2 Tests', () => {
     let factory: IFactory,
@@ -256,7 +256,7 @@ describe('CAP Layer 2 Tests', () => {
         equityFacet: Equity,
         snapshotFacet: Snapshots_2,
         erc1410Facet: ERC1410ScheduledTasks,
-        timeTravelControllerFacet: TimeTravelController
+        timeTravelFacet: TimeTravel
     let signer_A: SignerWithAddress,
         signer_B: SignerWithAddress,
         signer_C: SignerWithAddress
@@ -315,10 +315,7 @@ describe('CAP Layer 2 Tests', () => {
             diamond.address,
             signer_A
         )
-        timeTravelControllerFacet = TimeTravelController__factory.connect(
-            diamond.address,
-            signer_A
-        )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
     }
 
     const setupScheduledBalanceAdjustments = async (
@@ -370,7 +367,7 @@ describe('CAP Layer 2 Tests', () => {
     })
 
     afterEach(async () => {
-        await timeTravelControllerFacet.resetSystemTimestamp()
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     const testBalanceAdjustments = async (
@@ -381,10 +378,11 @@ describe('CAP Layer 2 Tests', () => {
 
         // Execute adjustments and verify
         for (let i = 0; i < adjustments.length; i++) {
-            await timeTravelControllerFacet.changeSystemTimestamp(
-                currentTime + TIME / 1000 + 1
+            await timeTravelFacet.changeSystemTimestamp(
+                dateToUnixTimestamp(`2030-01-01T00:00:00Z`) +
+                    ((i + 1) * TIME) / 1000 +
+                    1
             )
-            currentTime = currentTime + TIME / 1000 + 1
             await snapshotFacet.takeSnapshot()
         }
 
@@ -419,7 +417,7 @@ describe('CAP Layer 2 Tests', () => {
         )
 
         const adjustments = createAdjustmentData(
-            currentTime,
+            dateToUnixTimestamp('2030-01-01T00:00:00Z'),
             [TIME / 1000, (2 * TIME) / 1000, (3 * TIME) / 1000],
             [5, 6, 7],
             [2, 0, 1]
@@ -455,7 +453,7 @@ describe('CAP Layer 2 Tests', () => {
             '0x'
         )
 
-        const currentTime = (await ethers.provider.getBlock('latest')).timestamp
+        const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`)
         const adjustments = createAdjustmentData(
             currentTime,
             [TIME / 1000],
@@ -466,8 +464,8 @@ describe('CAP Layer 2 Tests', () => {
         await setupScheduledBalanceAdjustments(adjustments)
 
         // Execute adjustments and verify reversion case
-        await timeTravelControllerFacet.changeSystemTimestamp(
-            currentTime + TIME / 1000 + 1
+        await timeTravelFacet.changeSystemTimestamp(
+            adjustments[0].executionDate + 1
         )
 
         await expect(
@@ -501,7 +499,7 @@ describe('CAP Layer 2 Tests', () => {
         )
 
         // scheduled balance adjustments
-        const currentTime = (await ethers.provider.getBlock('latest')).timestamp
+        const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`)
         const adjustments = createAdjustmentData(
             currentTime,
             [TIME / 1000],
@@ -512,8 +510,8 @@ describe('CAP Layer 2 Tests', () => {
         await setupScheduledBalanceAdjustments(adjustments)
         //-------------------------
         // wait for first balance adjustment
-        await timeTravelControllerFacet.changeSystemTimestamp(
-            currentTime + TIME / 1000 + 1
+        await timeTravelFacet.changeSystemTimestamp(
+            adjustments[0].executionDate + 1
         )
 
         // Attempt to change the max supply by partition with the same value as before

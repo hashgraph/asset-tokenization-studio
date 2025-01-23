@@ -207,33 +207,25 @@
 pragma solidity ^0.8.18;
 
 /**
- * @title Time Travel Controller Storage Wrapper Interface
- * @notice Interface for the TimeTravelControllerStorageWrapper contract
+ * @title Time Travel Controller interface
+ * @notice Interface for the TimeTravel contract
  */
-interface ITimeTravelControllerStorageWrapper {
+interface ITimeTravel {
     /**
-     * @notice Error thrown when attempting to set an invalid new system timestamp
-     * @param newSystemTime The new system timestamp that caused the error
+     * @notice Changes the system timestamp
+     *         emits SystemTimestampChanged event
+     * @param _newSystemTime The new system timestamp
      */
-    error InvalidTimestamp(uint256 newSystemTime);
+    function changeSystemTimestamp(uint256 _newSystemTime) external;
 
     /**
-     * @notice Emitted when using time travel out of test environment
+     * @notice Resets the system timestamp
+     *         emits SystemTimestampReset event
      */
-    error WrongChainId();
+    function resetSystemTimestamp() external;
 
     /**
-     * @notice Emitted when the system timestamp is changed
-     * @param legacySystemTime The legacy system timestamp (0 if not changed)
-     * @param newSystemTime The new system timestamp
+     * @notice Retrieves the current system timestamp
      */
-    event SystemTimestampChanged(
-        uint256 legacySystemTime,
-        uint256 newSystemTime
-    );
-
-    /**
-     * @notice Emitted when the system timestamp is reset
-     */
-    event SystemTimestampReset();
+    function blockTimestamp() external view returns (uint256);
 }

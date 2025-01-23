@@ -212,20 +212,20 @@ import {
     ERC1410ScheduledTasks
 } from '../../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasks.sol';
 import {
-    TimeTravelControllerStorageWrapper
-} from '../controller/TimeTravelControllerStorageWrapper.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
 contract ERC1410ScheduledTasksTimeTravel is
     ERC1410ScheduledTasks,
-    TimeTravelControllerStorageWrapper
+    TimeTravelStorageWrapper
 {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravelControllerStorageWrapper)
+        override(LocalContext, TimeTravelStorageWrapper)
         returns (uint256)
     {
-        return TimeTravelControllerStorageWrapper._blockTimestamp();
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

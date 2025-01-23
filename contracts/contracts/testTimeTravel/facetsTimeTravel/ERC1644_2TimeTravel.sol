@@ -210,19 +210,19 @@ pragma solidity 0.8.18;
 
 import {ERC1644_2} from '../../layer_2/ERC1400/ERC1644/ERC1644_2.sol';
 import {
-    TimeTravelControllerStorageWrapper
-} from '../controller/TimeTravelControllerStorageWrapper.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
 // TODO: Remove _ in contract name
 // solhint-disable-next-line
-contract ERC1644_2TimeTravel is ERC1644_2, TimeTravelControllerStorageWrapper {
+contract ERC1644_2TimeTravel is ERC1644_2, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravelControllerStorageWrapper)
+        override(LocalContext, TimeTravelStorageWrapper)
         returns (uint256)
     {
-        return TimeTravelControllerStorageWrapper._blockTimestamp();
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

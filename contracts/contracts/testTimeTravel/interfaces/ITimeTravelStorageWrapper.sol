@@ -203,27 +203,37 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity ^0.8.18;
 
-pragma solidity 0.8.18;
+/**
+ * @title Time Travel Controller Storage Wrapper Interface
+ * @notice Interface for the TimeTravelStorageWrapper contract
+ */
+interface ITimeTravelStorageWrapper {
+    /**
+     * @notice Error thrown when attempting to set an invalid new system timestamp
+     * @param newSystemTime The new system timestamp that caused the error
+     */
+    error InvalidTimestamp(uint256 newSystemTime);
 
-import {ERC20_2} from '../../layer_2/ERC1400/ERC20/ERC20_2.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+    /**
+     * @notice Emitted when using time travel out of test environment
+     */
+    error WrongChainId();
 
-// TODO: Remove those errors of solhint
-// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors
-contract ERC20_2TimeTravel is ERC20_2, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
-        return TimeTravelStorageWrapper._blockTimestamp();
-    }
+    /**
+     * @notice Emitted when the system timestamp is changed
+     * @param legacySystemTime The legacy system timestamp (0 if not changed)
+     * @param newSystemTime The new system timestamp
+     */
+    event SystemTimestampChanged(
+        uint256 legacySystemTime,
+        uint256 newSystemTime
+    );
+
+    /**
+     * @notice Emitted when the system timestamp is reset
+     */
+    event SystemTimestampReset();
 }
-// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors

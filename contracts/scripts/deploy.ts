@@ -456,7 +456,7 @@ import {
     TransferAndLock__factory,
     TransferAndLockTimeTravel__factory,
     TransparentUpgradeableProxy__factory,
-    TimeTravelController__factory,
+    TimeTravel__factory,
 } from '@typechain'
 import Configuration from '@configuration'
 import {
@@ -850,14 +850,15 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        timeTravelController:
+        TimeTravel:
             timeTravel == true
                 ? new DeployContractWithFactoryCommand({
-                      factory: new TimeTravelController__factory(),
+                      factory: new TimeTravel__factory(),
                       signer,
                       deployedContract: useDeployed
-                          ? Configuration.contracts.TimeTravelController
-                                .addresses?.[network]
+                          ? Configuration.contracts.TimeTravel.addresses?.[
+                                network
+                            ]
                           : undefined,
                       overrides,
                   })
@@ -909,14 +910,14 @@ export async function deployAtsContracts({
             protectedPartitions: await deployContractWithFactory(
                 commands.protectedPartitions
             ),
-            timeTravelController: commands.timeTravelController
-                ? await deployContractWithFactory(commands.timeTravelController)
+            TimeTravel: commands.TimeTravel
+                ? await deployContractWithFactory(commands.TimeTravel)
                 : undefined,
             deployer: signer,
         })
 
     if (!timeTravel) {
-        const { timeTravelController, ...atsContracts } = deployedContracts
+        const { TimeTravel, ...atsContracts } = deployedContracts
         return atsContracts
     }
     return deployedContracts
