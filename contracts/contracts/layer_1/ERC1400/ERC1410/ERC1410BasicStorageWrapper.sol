@@ -212,7 +212,7 @@ import {
 import {Common} from '../../common/Common.sol';
 import {
     ERC1410BasicStorageWrapperRead
-} from './ERC1410BasicStorageWrapperRead.sol';
+} from '../../../layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 
 abstract contract ERC1410BasicStorageWrapper is
     IERC1410StorageWrapper,
@@ -256,4 +256,10 @@ abstract contract ERC1410BasicStorageWrapper is
         address to,
         uint256 amount
     ) internal virtual;
+
+    function _checkValidAddress(address account) internal pure {
+        if (account == address(0)) {
+            revert ZeroAddressNotAllowed();
+        }
+    }
 }

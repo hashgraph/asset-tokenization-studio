@@ -247,8 +247,10 @@ abstract contract ERC20 is
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(spender)
-        onlyWithoutMultiPartition
-        returns (bool)
+        returns (
+            //onlyWithoutMultiPartition
+            bool
+        )
     {
         return _approve(spender, value);
     }
@@ -263,7 +265,7 @@ abstract contract ERC20 is
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(to)
-        onlyWithoutMultiPartition
+        //onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool)
     {
@@ -282,7 +284,7 @@ abstract contract ERC20 is
         checkControlList(_msgSender())
         checkControlList(from)
         checkControlList(to)
-        onlyWithoutMultiPartition
+        //onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool)
     {
@@ -298,8 +300,10 @@ abstract contract ERC20 is
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(spender)
-        onlyWithoutMultiPartition
-        returns (bool)
+        returns (
+            //onlyWithoutMultiPartition
+            bool
+        )
     {
         return _increaseAllowance(spender, addedValue);
     }
@@ -313,8 +317,10 @@ abstract contract ERC20 is
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(spender)
-        onlyWithoutMultiPartition
-        returns (bool)
+        returns (
+            //onlyWithoutMultiPartition
+            bool
+        )
     {
         return _decreaseAllowance(spender, subtractedValue);
     }

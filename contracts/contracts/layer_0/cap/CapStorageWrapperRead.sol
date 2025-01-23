@@ -204,54 +204,53 @@
 */
 
 pragma solidity 0.8.18;
+
+import {
+    AdjustBalancesStorageWrapperRead
+} from '../adjustBalances/AdjustBalancesStorageWrapperRead.sol';
+import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ProtectedPartitionsStorageWrapper
-} from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
-import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
-import {
-    ControlListStorageWrapper
-} from '../controlList/ControlListStorageWrapper.sol';
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
-import {
-    SnapshotsStorageWrapper
-} from '../../layer_0/snapshots/SnapshotsStorageWrapper.sol';
-
-// solhint-disable no-empty-blocks
-abstract contract Common is
-    PauseStorageWrapper,
-    ControlListStorageWrapper,
-    ProtectedPartitionsStorageWrapper,
-    SnapshotsStorageWrapper
-{
-    error AlreadyInitialized();
-    error OnlyDelegateAllowed();
-
-    modifier onlyUninitialized(bool initialized) {
-        if (initialized) {
-            revert AlreadyInitialized();
-        }
-        _;
+// solhint-disable no-unused-vars, custom-errors
+contract CapStorageWrapperRead is AdjustBalancesStorageWrapperRead {
+    struct CapDataStorage {
+        uint256 maxSupply;
+        mapping(bytes32 => uint256) maxSupplyByPartition;
+        bool initialized;
     }
 
-    modifier onlyDelegate() {
-        if (_msgSender() != address(this)) {
-            revert OnlyDelegateAllowed();
-        }
-        _;
-    }
-
-    modifier onlyUnProtectedPartitionsOrWildCardRole() {
+    function _adjustMaxSupply(uint256 factor) internal {
+        CapDataStorage storage capDataStorage = _getCapStorage();
         if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
-            );
+            capDataStorage.maxSupply ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        ) return;
+        capDataStorage.maxSupply *= factor;
+    }
+
+    function _adjustMaxSupplyByPartition(
+        bytes32 partition,
+        uint256 factor
+    ) internal {
+        CapDataStorage storage capDataStorage = _getCapStorage();
+        if (
+            capDataStorage.maxSupplyByPartition[partition] ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        ) return;
+        capDataStorage.maxSupplyByPartition[partition] *= factor;
+    }
+
+    function _getCapStorage()
+        internal
+        pure
+        virtual
+        returns (CapDataStorage storage cap_)
+    {
+        bytes32 position = _CAP_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            cap_.slot := position
         }
-        _;
     }
 }
+// solhint-enable no-unused-vars, custom-errors
