@@ -518,7 +518,7 @@ describe('ProtectedPartitions Tests', () => {
             await setProtected()
 
             controlListFacet = controlListFacet.connect(signer_B)
-            controlListFacet.addToControlList(account_A)
+            await controlListFacet.addToControlList(account_A)
 
             erc1410Facet = erc1410Facet.connect(signer_B)
 
@@ -601,7 +601,7 @@ describe('ProtectedPartitions Tests', () => {
             await setProtected()
 
             controlListFacet = controlListFacet.connect(signer_B)
-            controlListFacet.addToControlList(account_A)
+            await controlListFacet.addToControlList(account_A)
 
             erc1410Facet = erc1410Facet.connect(signer_B)
 
@@ -739,7 +739,7 @@ describe('ProtectedPartitions Tests', () => {
             })
 
             it('GIVEN a protected token WHEN performing an ERC1410 operator transfer By partition THEN transaction fails with PartitionsAreProtectedAndNoRole', async () => {
-                erc1410Facet.authorizeOperatorByPartition(
+                await erc1410Facet.authorizeOperatorByPartition(
                     DEFAULT_PARTITION,
                     account_C
                 )
@@ -906,7 +906,7 @@ describe('ProtectedPartitions Tests', () => {
 
                 erc1410Facet = erc1410Facet.connect(signer_A)
 
-                erc1410Facet.authorizeOperatorByPartition(
+                await erc1410Facet.authorizeOperatorByPartition(
                     DEFAULT_PARTITION,
                     account_C
                 )
@@ -1083,7 +1083,7 @@ describe('ProtectedPartitions Tests', () => {
             })
 
             it('GIVEN a protected token WHEN performing an ERC1410 operator redeem By partition THEN transaction fails with PartitionsAreProtected', async () => {
-                erc1410Facet.authorizeOperatorByPartition(
+                await erc1410Facet.authorizeOperatorByPartition(
                     DEFAULT_PARTITION,
                     account_C
                 )
