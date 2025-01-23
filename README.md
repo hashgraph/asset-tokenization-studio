@@ -72,9 +72,10 @@ To run the project, you'll need to configure environment variables in the `.env`
 
 ### *General Settings*
 
-- **`REACT_APP_BUSINESS_LOGIC_KEYS_COMMON`**: This is a list of common business logic keys required for the functioning of the application. Each key represents a smart contract or similar on-chain entity.
-- **`REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY`**: Business logic key specifically for handling equity-related operations.
-- **`REACT_APP_BUSINESS_LOGIC_KEYS_BOND`**: Business logic key specifically for handling bond-related operations.
+- **`REACT_APP_EQUITY_CONFIG_ID`**: Configuration Id for Equities.
+- **`REACT_APP_EQUITY_CONFIG_VERSION`**: Equity Version.
+- **`REACT_APP_BOND_CONFIG_ID`**: configuration Id for Bonds.
+- **`REACT_APP_BOND_CONFIG_VERSION`**: Bond Version.
 - **`REACT_APP_SHOW_DISCLAIMER`**: Set this value to `"true"` to show a disclaimer in the application.
 
 ### *Network Configuration*
@@ -107,9 +108,10 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 4. Replace the placeholder values with your actual environment settings. For example:
 
     ```bash
-    REACT_APP_BUSINESS_LOGIC_KEYS_COMMON="0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6"
-    REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY="0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810"
-    REACT_APP_BUSINESS_LOGIC_KEYS_BOND="0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef"
+    REACT_APP_EQUITY_CONFIG_ID='0x0000000000000000000000000000000000000000000000000000000000000001'
+    REACT_APP_EQUITY_CONFIG_VERSION="0"
+    REACT_APP_BOND_CONFIG_ID="0x0000000000000000000000000000000000000000000000000000000000000002"
+    REACT_APP_BOND_CONFIG_VERSION="0"
     REACT_APP_SHOW_DISCLAIMER="true"
 
     REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
