@@ -207,7 +207,7 @@ pragma solidity 0.8.18;
 
 import {
     SnapshotsStorageWrapper
-} from '../snapshots/SnapshotsStorageWrapper.sol';
+} from '../../layer_0/snapshots/SnapshotsStorageWrapper.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';

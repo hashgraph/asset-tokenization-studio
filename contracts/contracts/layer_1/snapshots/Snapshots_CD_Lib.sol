@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
+import {CD_Lib} from '../../layer_0/common/CD_Lib.sol';
 // TODO: Remove _ in contract name
 // solhint-disable-next-line
 library Snapshots_CD_Lib {

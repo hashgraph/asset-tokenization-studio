@@ -254,7 +254,7 @@ contract ERC1594 is
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(_to)
-        onlyWithoutMultiPartition
+        //onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
         // Add a function to validate the `_data` parameter
@@ -287,7 +287,7 @@ contract ERC1594 is
         checkControlList(_msgSender())
         checkControlList(_to)
         checkControlList(_from)
-        onlyWithoutMultiPartition
+        //onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
         // Add a function to validate the `_data` parameter
@@ -315,7 +315,7 @@ contract ERC1594 is
         onlyUnpaused
         onlyRole(_ISSUER_ROLE)
         checkControlList(_tokenHolder)
-        onlyWithoutMultiPartition
+        //onlyWithoutMultiPartition
         onlyIssuable
     {
         _issue(_tokenHolder, _value, _data);
@@ -337,7 +337,7 @@ contract ERC1594 is
         override
         onlyUnpaused
         checkControlList(_msgSender())
-        onlyWithoutMultiPartition
+        //onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
         _redeem(_value, _data);
@@ -363,7 +363,7 @@ contract ERC1594 is
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(_tokenHolder)
-        onlyWithoutMultiPartition
+        //onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
         _redeemFrom(_tokenHolder, _value, _data);
@@ -400,8 +400,12 @@ contract ERC1594 is
         view
         virtual
         override
-        onlyWithoutMultiPartition
-        returns (bool, bytes1, bytes32)
+        returns (
+            //onlyWithoutMultiPartition
+            bool,
+            bytes1,
+            bytes32
+        )
     {
         return _canTransfer(_to, _value, _data);
     }
@@ -428,8 +432,12 @@ contract ERC1594 is
         view
         virtual
         override
-        onlyWithoutMultiPartition
-        returns (bool, bytes1, bytes32)
+        returns (
+            //onlyWithoutMultiPartition
+            bool,
+            bytes1,
+            bytes32
+        )
     {
         return _canTransferFrom(_from, _to, _value, _data);
     }

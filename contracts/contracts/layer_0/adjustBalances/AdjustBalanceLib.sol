@@ -204,54 +204,141 @@
 */
 
 pragma solidity 0.8.18;
+
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    _PARTITION_SIZE,
+    _PARTITION_AMOUNT_OFFSET
+} from '../../layer_1/constants/storagePositions.sol';
+import {
+    CorporateActionDataStorage
+} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
+import {
+    AdjustBalancesStorageWrapperRead
+} from './AdjustBalancesStorageWrapperRead.sol';
+import {ArrayLib} from '../common/ArrayLib.sol';
+import {MappingLib} from '../common/MappingLib.sol';
+import {ScheduledTasksLib} from '../scheduledTasks/ScheduledTasksLib.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ProtectedPartitionsStorageWrapper
-} from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
-import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
-import {
-    ControlListStorageWrapper
-} from '../controlList/ControlListStorageWrapper.sol';
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
-import {
-    SnapshotsStorageWrapper
-} from '../../layer_0/snapshots/SnapshotsStorageWrapper.sol';
-
-// solhint-disable no-empty-blocks
-abstract contract Common is
-    PauseStorageWrapper,
-    ControlListStorageWrapper,
-    ProtectedPartitionsStorageWrapper,
-    SnapshotsStorageWrapper
-{
-    error AlreadyInitialized();
-    error OnlyDelegateAllowed();
-
-    modifier onlyUninitialized(bool initialized) {
-        if (initialized) {
-            revert AlreadyInitialized();
-        }
-        _;
+/**
+    * total = account total balance
+    * t1 = account's partition 1 balance
+    * t2 = account's partition 2 balance
+    * x = factor for total balance
+    * y = factor for partition 2 balance
+    *
+    * OPTION : First adjusting partition : (y * t2)
+    *    // adding partition increment diff to total :  total = total + (t2 * (y - 1))
+    *    // Finally adjusting total : (x * total)
+    *
+    * total = t1 + t2;
+    * total = t1 + t2 + (t2 * (y - 1)) = t1 + t2 + y * t2 - t2
+      total = t1 + y * t2;
+      total = x * total = x * (t1 + y * t2)
+    */
+library AdjustBalanceLib {
+    function adjustTotalAndMaxSupplyForPartition(
+        bytes32 _partition //    , //        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage //        storage _basicStorage, //        CapStorageWrapper.CapDataStorage storage _capStorage, //        AdjustBalancesStorageWrapperRead.AdjustBalancesStorage //        storage _adjustBalanceStorage
+    ) internal {
+        //        ERC1410BasicStorageWrapperRead._adjustTotalAndMaxSupplyByPartition(
+        //            _partition
+        //        );
     }
 
-    modifier onlyDelegate() {
-        if (_msgSender() != address(this)) {
-            revert OnlyDelegateAllowed();
-        }
-        _;
+    function adjustTotalBalanceAndPartitionBalanceFor(
+        bytes32 _partition,
+        address _account //    , //        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage //            storage _basicStorage, //        AdjustBalancesStorageWrapper.AdjustBalancesStorage //            storage _adjustBalanceStorage
+    ) internal {
+        //        ERC1410BasicStorageWrapperRead._adjustTotalBalanceAndPartitionBalanceFor(
+        //            _partition,
+        //            _account
+        //        );
     }
 
-    modifier onlyUnProtectedPartitionsOrWildCardRole() {
-        if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
-            );
+    function updateBalance(
+        uint256 _abaf,
+        uint256 _labaf,
+        uint256 _balanceSlotPos
+    ) internal {
+        uint256 factor = calculateFactor(_abaf, _labaf);
+        uint256 amount;
+
+        // solhint-disable-next-line
+        assembly {
+            amount := sload(_balanceSlotPos)
         }
-        _;
+
+        if (amount == 0) return;
+
+        amount *= factor;
+
+        // solhint-disable-next-line
+        assembly {
+            sstore(_balanceSlotPos, amount)
+        }
     }
+
+    function updateLABAF(uint256 _abaf, uint256 _labafSlotPos) internal {
+        // solhint-disable-next-line
+        assembly {
+            sstore(_labafSlotPos, _abaf)
+        }
+    }
+
+    function calculateFactor(
+        uint256 _abaf,
+        uint256 _labaf
+    ) internal pure returns (uint256 factor_) {
+        if (_abaf == 0) return 1;
+        if (_labaf == 0) return _abaf;
+        factor_ = _abaf / _labaf;
+    }
+
+    //    function getPendingScheduledBalanceAdjustmentsAt(
+    //        ScheduledTasksLib.ScheduledTasksDataStorage
+    //            storage _scheduledBalanceAdjustments,
+    //        CorporateActionDataStorage storage _corporateActions,
+    //        uint256 _timestamp
+    //    ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
+    //        // * Initialization
+    //        pendingABAF_ = 1;
+    //        pendingDecimals_ = 0;
+    //
+    //        uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(
+    //            _scheduledBalanceAdjustments
+    //        );
+    //
+    //        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
+    //            uint256 pos = scheduledTaskCount - i;
+    //
+    //            ScheduledTasksLib.ScheduledTask
+    //                memory scheduledTask = ScheduledTasksLib
+    //                    .getScheduledTasksByIndex(
+    //                        _scheduledBalanceAdjustments,
+    //                        pos
+    //                    );
+    //
+    //            if (scheduledTask.scheduledTimestamp < _timestamp) {
+    //                bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
+    //
+    //                bytes memory balanceAdjustmentData = _corporateActions
+    //                    .actionsData[actionId]
+    //                    .data;
+    //
+    //                IEquity.ScheduledBalanceAdjustment
+    //                    memory balanceAdjustment = abi.decode(
+    //                        balanceAdjustmentData,
+    //                        (IEquity.ScheduledBalanceAdjustment)
+    //                    );
+    //                pendingABAF_ *= balanceAdjustment.factor;
+    //                pendingDecimals_ += balanceAdjustment.decimals;
+    //            } else {
+    //                break;
+    //            }
+    //        }
+    //    }
 }
