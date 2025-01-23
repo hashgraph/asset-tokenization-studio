@@ -297,6 +297,16 @@ import { GetScheduledBalanceAdjustmentCountQueryHandler } from '../app/usecase/q
 import { GetLastAggregatedBalanceAdjustmentFactorForQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorFor/GetLastAggregatedBalanceAdjustmentFactorForQueryHandler.js';
 import { GetAggregatedBalanceAdjustmentFactorQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getAggregatedBalanceAdjustmentFactor/GetAggregatedBalanceAdjustmentFactorQueryHandler';
 import { GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler } from '../app/usecase/query/equity/balanceAdjustments/getLastAggregatedBalanceAdjustmentFactorForByPartition/GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler.js';
+import { DFNSTransactionAdapter } from '../port/out/hs/hts/custodial/DFNSTransactionAdapter.js';
+import { FireblocksTransactionAdapter } from '../port/out/hs/hts/custodial/FireblocksTransactionAdapter.js';
+import { AWSKMSTransactionAdapter } from '../port/out/hs/hts/custodial/AWSKMSTransactionAdapter.js';
+import { ProtectPartitionsCommandHandler } from '../app/usecase/command/security/operations/protectPartitions/ProtectPartitionsCommandHandler.js';
+import { UnprotectPartitionsCommandHandler } from '../app/usecase/command/security/operations/unprotectPartitions/UnprotectPartitionsCommandHandler.js';
+import { ProtectedRedeemFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/redeem/ProtectedRedeemFromByPartitionCommandHandler.js';
+import { ProtectedTransferFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/transfer/ProtectedTransferFromByPartitionCommandHandler.js';
+import { ProtectedTransferAndLockByPartitionCommandHandler } from '../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommandHandler.js';
+import { PartitionsProtectedQueryHandler } from '../app/usecase/query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQueryHandler';
+import { GetNounceQueryHandler } from '../app/usecase/query/security/protectedPartitions/getNounce/GetNounceQueryHandler';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -380,6 +390,26 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: RemoveFromControlListCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectPartitionsCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: UnprotectPartitionsCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedRedeemFromByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedTransferFromByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedTransferAndLockByPartitionCommandHandler,
+  },
   // Bond Operations
   {
     token: TOKENS.COMMAND_HANDLER,
@@ -446,6 +476,14 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetAccountInfoQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: PartitionsProtectedQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetNounceQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
@@ -615,6 +653,18 @@ const TRANSACTION_HANDLER = [
     token: TOKENS.TRANSACTION_HANDLER,
     useClass: HederaWalletConnectTransactionAdapter,
   },
+  {
+    token: TOKENS.TRANSACTION_HANDLER,
+    useClass: DFNSTransactionAdapter,
+  },
+  {
+    token: TOKENS.TRANSACTION_HANDLER,
+    useClass: FireblocksTransactionAdapter,
+  },
+  {
+    token: TOKENS.TRANSACTION_HANDLER,
+    useClass: AWSKMSTransactionAdapter,
+  },
 ];
 
 const defaultNetworkProps: NetworkProps = {
@@ -700,6 +750,9 @@ export default class Injectable {
     adapters.push(
       Injectable.resolve(RPCTransactionAdapter),
       Injectable.resolve(HederaWalletConnectTransactionAdapter),
+      Injectable.resolve(DFNSTransactionAdapter),
+      Injectable.resolve(FireblocksTransactionAdapter),
+      Injectable.resolve(AWSKMSTransactionAdapter),
     );
     return adapters;
   }

@@ -214,7 +214,12 @@ export class ConnectCommandHandler implements ICommandHandler<ConnectCommand> {
     const handler = TransactionService.getHandlerClass(command.wallet);
     const debug = command.debug ? command.debug : false;
 
-    const input = command.HWCSettings ? command.HWCSettings : command.account;
+    const input =
+      command.custodialSettings === undefined
+        ? command.HWCSettings === undefined
+          ? command.account
+          : command.HWCSettings
+        : command.custodialSettings;
 
     const registration = await handler.register(input, debug);
 

@@ -223,6 +223,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   }
   isWhiteList: boolean;
   isControllable: boolean;
+  arePartitionsProtected: boolean;
   isMultiPartition: boolean;
 
   @OptionalField()
@@ -254,6 +255,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     decimals,
     isWhiteList,
     isControllable,
+    arePartitionsProtected,
     isMultiPartition,
     diamondOwnerAccount,
     votingRight,
@@ -281,6 +283,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     decimals: number | string;
     isWhiteList: boolean;
     isControllable: boolean;
+    arePartitionsProtected: boolean;
     isMultiPartition: boolean;
     diamondOwnerAccount?: string;
     votingRight: boolean;
@@ -337,6 +340,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
       typeof decimals === 'number' ? decimals : parseInt(decimals);
     this.isWhiteList = isWhiteList;
     this.isControllable = isControllable;
+    this.arePartitionsProtected = arePartitionsProtected;
     this.isMultiPartition = isMultiPartition;
     this.diamondOwnerAccount = diamondOwnerAccount;
     this.votingRight = votingRight;

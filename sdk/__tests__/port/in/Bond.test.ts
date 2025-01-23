@@ -335,6 +335,7 @@ describe('🧪 Bond test', () => {
       decimals: decimals,
       isWhiteList: false,
       isControllable: true,
+      arePartitionsProtected: false,
       isMultiPartition: false,
       diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
       currency: currency,

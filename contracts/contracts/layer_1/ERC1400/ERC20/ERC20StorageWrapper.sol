@@ -395,7 +395,7 @@ abstract contract ERC20StorageWrapper is
         erc20Storage.allowed[from][spender] -= value;
     }
 
-    // solhint-disable no-empty-blocks
+    // solhint-disable no-unused-vars, custom-errors
     function _beforeAllowanceUpdate(
         address _owner,
         address _spender,
@@ -404,7 +404,7 @@ abstract contract ERC20StorageWrapper is
     ) internal virtual {
         revert('Should not reach this function');
     }
-    // solhint-enable no-empty-blocks
+    // solhint-enable no-unused-vars, custom-errors
 
     function _emitTransferEvent(
         address from,

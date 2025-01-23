@@ -232,6 +232,7 @@ contract ScheduledBalanceAdjustments is
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
+    // solhint-disable no-unused-vars
     function onScheduledBalanceAdjustmentTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,
@@ -243,7 +244,7 @@ contract ScheduledBalanceAdjustments is
         onlyAutoCalling(_scheduledBalanceAdjustmentStorage())
     {
         _onScheduledBalanceAdjustmentTriggered(_data);
-    }
+    } // solhint-enable no-unused-vars
 
     function scheduledBalanceAdjustmentCount()
         external

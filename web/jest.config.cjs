@@ -8,8 +8,7 @@ module.exports = {
   transform: {
     "^.+\\.(ts|tsx)?$": "ts-jest",
     "^.+\\.(js|jsx)$": "babel-jest",
-    "^.+\\.svg$": "<rootDir>/svgTransform.js"
-
+    "^.+\\.svg$": "<rootDir>/svgTransform.js",
   },
   moduleFileExtensions: ["tsx", "ts", "js", "jsx"],
   setupFilesAfterEnv: [
@@ -21,11 +20,14 @@ module.exports = {
       "<rootDir>/node_modules/@hashgraph/io-axios-services/lib/$1.js",
     "\\.(css|less|scss|sass|ttf|png)$": "ts-jest",
   },
-    collectCoverageFrom: [
+  collectCoverageFrom: [
     "**/views/**/*.{ts,tsx}",
     "**/components/**/*.{ts,tsx}",
     "**/layouts/**/*.{ts,tsx}",
     "!**/node_modules/**",
     "!**/vendor/**",
+  ],
+  transformIgnorePatterns: [
+    "/node_modules/(?!@hashgraph/asset-tokenization-sdk|multiformats|fireblocks-sdk|did-jwt|uuid|uint8arrays).*/",
   ],
 };

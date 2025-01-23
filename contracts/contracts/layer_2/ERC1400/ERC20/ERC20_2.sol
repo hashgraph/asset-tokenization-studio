@@ -221,7 +221,8 @@ import {ERC20StorageWrapper_2} from './ERC20StorageWrapper_2.sol';
 import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
 import {IERC20_2} from '../../interfaces/ERC1400/IERC20_2.sol';
 import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
-
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors
 contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
     function allowance(
         address owner,
@@ -460,3 +461,4 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
         return _getERC20MetadataAdjusted();
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors

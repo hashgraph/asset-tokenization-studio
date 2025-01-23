@@ -207,7 +207,8 @@
 pragma solidity 0.8.18;
 
 import {CD_Lib} from '../../../layer_1/common/CD_Lib.sol';
-
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
 library ScheduledTasks_CD_Lib {
     function triggerPendingScheduledTasks() internal returns (uint256) {
         bytes memory data = CD_Lib.delegateCall(

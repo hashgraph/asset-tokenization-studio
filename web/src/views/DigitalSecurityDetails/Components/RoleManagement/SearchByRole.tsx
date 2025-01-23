@@ -244,7 +244,7 @@ export const SearchByRole = () => {
   const { id = "" } = useParams();
   const { details: securityDetails } = useSecurityStore();
 
-  const [roleToSearch, setRoleToSearch] = useState<SecurityRole>();
+  const [roleToSearch, setRoleToSearch] = useState<string>();
   const [isRoleMemberCountLoading, setIsRoleMemberCountLoading] =
     useState<boolean>(false);
   const [isRoleMembersLoading, setIsRoleMembersLoading] =
@@ -262,7 +262,7 @@ export const SearchByRole = () => {
 
   const roleMemberCountRequest = new GetRoleMemberCountRequest({
     securityId: id,
-    role: roleToSearch,
+    role: roleToSearch ?? '',
   });
 
   const { data: roleMemberCount, refetch: refetchRoleMemberCount } =
@@ -275,7 +275,7 @@ export const SearchByRole = () => {
 
   const roleMembersRequest = new GetRoleMembersRequest({
     securityId: id,
-    role: roleToSearch,
+    role: roleToSearch ?? '',
     start: 0,
     end: roleMemberCount ?? 0,
   });

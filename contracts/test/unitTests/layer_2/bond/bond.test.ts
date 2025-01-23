@@ -245,7 +245,7 @@ const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
 const info = 'info'
 
-const TIME_2 = 3 * TIME
+const TIME_2 = 2 * TIME
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
 const couponRate = 5
@@ -307,6 +307,7 @@ describe('Bond Tests', () => {
             account_A,
             false,
             true,
+            false,
             false,
             'TEST_AccessControl',
             'TAC',

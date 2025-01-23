@@ -221,7 +221,7 @@ import {
 import {
     CountersUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
-
+// solhint-disable no-unused-vars, custom-errors
 abstract contract SnapshotsStorageWrapper is
     ISnapshotsStorageWrapper,
     ERC1410BasicStorageWrapperRead,
@@ -509,3 +509,4 @@ abstract contract SnapshotsStorageWrapper is
         }
     }
 }
+// solhint-enable no-unused-vars, custom-errors

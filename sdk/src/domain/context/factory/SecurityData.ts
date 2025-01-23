@@ -208,6 +208,7 @@ import { Rbac } from './Rbac.js';
 import { ResolverProxyConfiguration } from './ResolverProxyConfiguration.js';
 
 export class SecurityData {
+  public arePartitionsProtected: boolean;
   public isMultiPartition: boolean;
   public resolver: string;
   public resolverProxyConfiguration: ResolverProxyConfiguration;

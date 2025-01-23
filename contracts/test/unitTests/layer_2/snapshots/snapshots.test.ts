@@ -271,6 +271,7 @@ describe('Snapshots Layer 2 Tests', () => {
             account_A,
             false,
             true,
+            false,
             true,
             'TEST_AccessControl',
             'TAC',

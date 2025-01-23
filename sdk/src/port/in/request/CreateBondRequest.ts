@@ -223,6 +223,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   }
   isWhiteList: boolean;
   isControllable: boolean;
+  arePartitionsProtected: boolean;
   isMultiPartition: boolean;
 
   @OptionalField()
@@ -251,6 +252,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     decimals,
     isWhiteList,
     isControllable,
+    arePartitionsProtected,
     isMultiPartition,
     diamondOwnerAccount,
     currency,
@@ -275,6 +277,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     decimals: number | string;
     isWhiteList: boolean;
     isControllable: boolean;
+    arePartitionsProtected: boolean;
     isMultiPartition: boolean;
     diamondOwnerAccount?: string;
     currency: string;
@@ -350,6 +353,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
       typeof decimals === 'number' ? decimals : parseInt(decimals);
     this.isWhiteList = isWhiteList;
     this.isControllable = isControllable;
+    this.arePartitionsProtected = arePartitionsProtected;
     this.isMultiPartition = isMultiPartition;
     this.diamondOwnerAccount = diamondOwnerAccount;
     this.currency = currency;

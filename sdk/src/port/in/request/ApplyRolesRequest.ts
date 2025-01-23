@@ -206,13 +206,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ValidatedRequest from './validation/ValidatedRequest.js';
 import Validation from './validation/Validation.js';
-import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
 import { InvalidValue } from './error/InvalidValue.js';
 
 export default class ApplyRolesRequest extends ValidatedRequest<ApplyRolesRequest> {
   securityId: string;
   targetId: string;
-  roles: SecurityRole[];
+  roles: string[];
   actives: boolean[];
 
   constructor({
@@ -223,7 +222,7 @@ export default class ApplyRolesRequest extends ValidatedRequest<ApplyRolesReques
   }: {
     targetId: string;
     securityId: string;
-    roles: SecurityRole[];
+    roles: string[];
     actives: boolean[];
   }) {
     super({

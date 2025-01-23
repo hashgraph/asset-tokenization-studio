@@ -212,20 +212,20 @@ import {
 
 contract AdjustBalancesStorageWrapperRead {
     struct AdjustBalancesStorage {
-        // Mapping from investor to their partitions LABAF
-        mapping(address => uint256[]) LABAF_user_partition;
+        // Mapping from investor to their partitions labaf
+        mapping(address => uint256[]) labafUserPartition;
         // Aggregated Balance Adjustment
-        uint256 ABAF;
+        uint256 abaf;
         // Last Aggregated Balance Adjustment per account
-        mapping(address => uint256) LABAF;
+        mapping(address => uint256) labaf;
         // Last Aggregated Balance Adjustment per partition
-        mapping(bytes32 => uint256) LABAF_partition;
+        mapping(bytes32 => uint256) labafByPartition;
         // Last Aggregated Balance Adjustment per allowance
-        mapping(address => mapping(address => uint256)) LABAFs_allowances;
+        mapping(address => mapping(address => uint256)) labafsAllowances;
         // Locks
-        mapping(address => uint256) LABAFs_TotalLocked;
-        mapping(address => mapping(bytes32 => uint256)) LABAFs_TotalLockedByPartition;
-        mapping(address => mapping(bytes32 => uint256[])) LABAF_locks;
+        mapping(address => uint256) labafsTotalLocked;
+        mapping(address => mapping(bytes32 => uint256)) labafsTotalLockedByPartition;
+        mapping(address => mapping(bytes32 => uint256[])) labafLocks;
     }
 
     function _getAdjustBalancesStorage()
