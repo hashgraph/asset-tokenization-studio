@@ -206,7 +206,75 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+
+struct HoldData {
+    uint256 id;
+    uint256 amount;
+    uint256 expirationTimestamp;
+    address escrow;
+    address to;
+    bytes data;
+}
+
+struct EscrowHoldData {
+    uint256 escrow_id;
+    address tokenHolder;
+    uint256 id; // link to HoldData(id)
+}
+
+struct HoldDataStorage {
+    mapping(address => uint256) totalHeldAmount;
+    mapping(address => mapping(bytes32 => uint256)) heldAmountByPartition;
+    mapping(address => mapping(bytes32 => HoldData[])) holds;
+    mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIds;
+    mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) holdsIndex;
+    mapping(address => mapping(bytes32 => uint256)) holdNextId;
+    mapping(address => mapping(bytes32 => EscrowHoldData[])) escrow_holds;
+    mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) escrow_holdIds;
+    mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) escrow_holdsIndex;
+}
+
 interface IHold {
+    event HeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        address indexed escrow,
+        bytes32 partition,
+        uint256 holdId,
+        uint256 amount,
+        uint256 expirationTimestamp,
+        address to,
+        bytes data
+    );
+
+    event HoldByPartitionExecuted(
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount,
+        address to
+    );
+
+    event HoldByPartitionReleased(
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount
+    );
+
+    event HoldByPartitionReclaimed(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount
+    );
+
+    error HoldExpirationNotReached();
+    error WrongHoldId();
+    error WrongExpirationTimestamp();
+
     function createHoldByPartition(
         bytes32 _partition,
         uint256 _amount,

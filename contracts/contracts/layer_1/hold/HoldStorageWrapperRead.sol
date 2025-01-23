@@ -208,39 +208,9 @@ pragma solidity 0.8.18;
 import {LibCommon} from '../common/LibCommon.sol';
 import {_LOCK_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {LocalContext} from '../context/LocalContext.sol';
-import {IHoldStorageWrapper} from '../interfaces/hold/IHoldStorageWrapper.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract HoldStorageWrapperRead is IHoldStorageWrapper, LocalContext {
-    using LibCommon for EnumerableSet.UintSet;
+abstract contract HoldStorageWrapperRead is LocalContext {
 
-    struct HoldData {
-        uint256 id;
-        uint256 amount;
-        uint256 expirationTimestamp;
-        address escrow;
-        address to;
-        bytes data;
-    }
-
-    struct EscrowHoldData {
-        uint256 escrow_id;
-        address tokenHolder;
-        uint256 id; // link to HoldData(id)
-    }
-
-    struct HoldDataStorage {
-        mapping(address => uint256) totalHeldAmount;
-        mapping(address => mapping(bytes32 => uint256)) heldAmountByPartition;
-        mapping(address => mapping(bytes32 => HoldData[])) holds;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIds;
-        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) holdsIndex;
-        mapping(address => mapping(bytes32 => uint256)) holdNextId;
-        mapping(address => mapping(bytes32 => EscrowHoldData[])) escrow_holds;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) escrow_holdIds;
-        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) escrow_holdsIndex;
-    }
 }
