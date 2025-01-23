@@ -245,7 +245,6 @@ export const SearchByRole = () => {
   const { details: securityDetails } = useSecurityStore();
 
   const [roleToSearch, setRoleToSearch] = useState<string>();
-  const [roleToSearch, setRoleToSearch] = useState<string>();
   const [isRoleMemberCountLoading, setIsRoleMemberCountLoading] =
     useState<boolean>(false);
   const [isRoleMembersLoading, setIsRoleMembersLoading] =
