@@ -205,7 +205,7 @@
 
 pragma solidity 0.8.18;
 
-import {LibCommon} from '../../layer_1/common/LibCommon.sol';
+import {LibCommon} from '../../layer_0/common/LibCommon.sol';
 import {
     IDiamondCutManager
 } from '../../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol';

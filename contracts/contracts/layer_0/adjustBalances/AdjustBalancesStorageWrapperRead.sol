@@ -206,52 +206,121 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {MappingLib} from '../common/MappingLib.sol';
 import {
-    ProtectedPartitionsStorageWrapper
-} from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
-import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
-import {
-    ControlListStorageWrapper
-} from '../controlList/ControlListStorageWrapper.sol';
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
-import {
-    SnapshotsStorageWrapper
-} from '../../layer_0/snapshots/SnapshotsStorageWrapper.sol';
+    _ADJUST_BALANCES_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
 
-// solhint-disable no-empty-blocks
-abstract contract Common is
-    PauseStorageWrapper,
-    ControlListStorageWrapper,
-    ProtectedPartitionsStorageWrapper,
-    SnapshotsStorageWrapper
-{
-    error AlreadyInitialized();
-    error OnlyDelegateAllowed();
-
-    modifier onlyUninitialized(bool initialized) {
-        if (initialized) {
-            revert AlreadyInitialized();
-        }
-        _;
+contract AdjustBalancesStorageWrapperRead {
+    struct AdjustBalancesStorage {
+        // Mapping from investor to their partitions labaf
+        mapping(address => uint256[]) labafUserPartition;
+        // Aggregated Balance Adjustment
+        uint256 abaf;
+        // Last Aggregated Balance Adjustment per account
+        mapping(address => uint256) labaf;
+        // Last Aggregated Balance Adjustment per partition
+        mapping(bytes32 => uint256) labafByPartition;
+        // Last Aggregated Balance Adjustment per allowance
+        mapping(address => mapping(address => uint256)) labafsAllowances;
+        // Locks
+        mapping(address => uint256) labafsTotalLocked;
+        mapping(address => mapping(bytes32 => uint256)) labafsTotalLockedByPartition;
+        mapping(address => mapping(bytes32 => uint256[])) labafLocks;
     }
 
-    modifier onlyDelegate() {
-        if (_msgSender() != address(this)) {
-            revert OnlyDelegateAllowed();
-        }
-        _;
+    function _updateLabafByPartition(bytes32 partition) internal {
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+        adjustBalancesStorage.labafByPartition[
+            partition
+        ] = adjustBalancesStorage.abaf;
     }
 
-    modifier onlyUnProtectedPartitionsOrWildCardRole() {
-        if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
-            );
+    function _updateLabafByTokenHolder(
+        uint256 labaf,
+        address tokenHolder
+    ) internal {
+        _getAdjustBalancesStorage().labaf[tokenHolder] = labaf;
+    }
+
+    function _updateLabafByTokenHolderAndPartitionIndex(
+        uint256 labaf,
+        address tokenHolder,
+        uint256 partitionIndex
+    ) internal {
+        _getAdjustBalancesStorage().labafUserPartition[tokenHolder][
+            partitionIndex - 1
+        ] = labaf;
+    }
+
+    function _calculateFactorByTokenHolder(
+        uint256 abaf,
+        address tokenHolder
+    ) internal view returns (uint256 factor) {
+        factor = calculateFactor(
+            abaf,
+            _getAdjustBalancesStorage().labaf[tokenHolder]
+        );
+    }
+
+    function _calculateFactorByAbafAndTokenHolder(
+        uint256 abaf,
+        address tokenHolder
+    ) internal view returns (uint256 factor) {
+        factor = calculateFactor(
+            abaf,
+            _getAdjustBalancesStorage().labaf[tokenHolder]
+        );
+    }
+
+    function _calculateFactorByPartition(
+        bytes32 partition
+    ) internal view returns (uint256 factor) {
+        AdjustBalancesStorage
+            storage adjustBalanceStorage = _getAdjustBalancesStorage();
+        factor = calculateFactor(
+            adjustBalanceStorage.abaf,
+            adjustBalanceStorage.labafByPartition[partition]
+        );
+    }
+
+    function _calculateFactorByTokenHolderAndPartitionIndex(
+        uint256 abaf,
+        address tokenHolder,
+        uint256 partitionIndex
+    ) internal view returns (uint256 factor) {
+        factor = calculateFactor(
+            abaf,
+            _getAdjustBalancesStorage().labafUserPartition[tokenHolder][
+                partitionIndex - 1
+            ]
+        );
+    }
+
+    function _getAbaf() internal view returns (uint256) {
+        return _getAdjustBalancesStorage().abaf;
+    }
+
+    function calculateFactor(
+        uint256 _abaf,
+        uint256 _labaf
+    ) private pure returns (uint256 factor_) {
+        if (_abaf == 0) return 1;
+        if (_labaf == 0) return _abaf;
+        factor_ = _abaf / _labaf;
+    }
+
+    function _getAdjustBalancesStorage()
+        internal
+        pure
+        virtual
+        returns (AdjustBalancesStorage storage adjustBalancesStorage_)
+    {
+        bytes32 position = _ADJUST_BALANCES_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            adjustBalancesStorage_.slot := position
         }
-        _;
     }
 }

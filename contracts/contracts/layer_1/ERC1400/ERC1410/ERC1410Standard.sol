@@ -232,10 +232,10 @@ abstract contract ERC1410Standard is
         override
         checkMaxSupply(_value)
         checkMaxSupplyForPartition(_partition, _value)
-        onlyValidAddress(_tokenHolder)
+        //        onlyValidAddress(_tokenHolder)
         checkControlList(_tokenHolder)
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
+        //onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_ISSUER_ROLE)
     {
         _issueByPartition(_partition, _tokenHolder, _value, _data);
@@ -254,7 +254,7 @@ abstract contract ERC1410Standard is
         virtual
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
+        //onlyDefaultPartitionWithSinglePartition(_partition)
         checkControlList(_msgSender())
         onlyUnProtectedPartitionsOrWildCardRole
     {
@@ -287,7 +287,7 @@ abstract contract ERC1410Standard is
         virtual
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
+        //onlyDefaultPartitionWithSinglePartition(_partition)
         checkControlList(_tokenHolder)
         checkControlList(_msgSender())
         onlyOperator(_partition, _tokenHolder)

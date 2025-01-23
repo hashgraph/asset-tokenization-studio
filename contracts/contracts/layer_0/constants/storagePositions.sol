@@ -206,52 +206,24 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ProtectedPartitionsStorageWrapper
-} from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
-import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
-import {
-    ControlListStorageWrapper
-} from '../controlList/ControlListStorageWrapper.sol';
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
-import {
-    SnapshotsStorageWrapper
-} from '../../layer_0/snapshots/SnapshotsStorageWrapper.sol';
+// solhint-disable max-line-length
 
-// solhint-disable no-empty-blocks
-abstract contract Common is
-    PauseStorageWrapper,
-    ControlListStorageWrapper,
-    ProtectedPartitionsStorageWrapper,
-    SnapshotsStorageWrapper
-{
-    error AlreadyInitialized();
-    error OnlyDelegateAllowed();
+// keccak256('security.token.standard.cap.storage');
+bytes32 constant _CAP_STORAGE_POSITION = 0x591561cf73f8f1ca1532449c7ce18338a75e9e17f2894af1e41b36e3b013f951;
 
-    modifier onlyUninitialized(bool initialized) {
-        if (initialized) {
-            revert AlreadyInitialized();
-        }
-        _;
-    }
+// keccak256('security.token.standard.lock.storage');
+bytes32 constant _LOCK_STORAGE_POSITION = 0xd15962e60f276260fba4c9b4de7fd05f475afe18b48c917ec6f6fcc71c00bf71;
 
-    modifier onlyDelegate() {
-        if (_msgSender() != address(this)) {
-            revert OnlyDelegateAllowed();
-        }
-        _;
-    }
+// keccak256('security.token.standard.erc1410.basic.storage');
+bytes32 constant _ERC1410_BASIC_STORAGE_POSITION = 0x67661db80d37d3b9810c430f78991b4b5377bdebd3b71b39fbd3427092c1822a;
 
-    modifier onlyUnProtectedPartitionsOrWildCardRole() {
-        if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
-            );
-        }
-        _;
-    }
-}
+// keccak256('security.token.standard.corporateactions.storage');
+bytes32 constant _CORPORATE_ACTION_STORAGE_POSITION = 0x9db84024bbea48a7580380e27785cf3e0d08fada233c84760c8a5aff47f86e12;
+
+// keccak256('security.token.standard.snapshot.storage');
+bytes32 constant _SNAPSHOT_STORAGE_POSITION = 0x450898ebb84982a28d8787f0138cfce477c6d811ae3b1db5fdb7ed17e8bda898;
+
+// keccak256('security.token.standard.adjust.balances.storage');
+bytes32 constant _ADJUST_BALANCES_STORAGE_POSITION = 0x20765daced38554542b3c858f10e7fb957696c4dbd38d7faabc51dd4de7ad541;
+
+// solhint-enable max-line-length

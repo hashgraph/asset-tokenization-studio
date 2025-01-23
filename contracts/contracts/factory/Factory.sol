@@ -221,22 +221,22 @@ import {IERC1594} from '../layer_1/interfaces/ERC1400/IERC1594.sol';
 import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {LocalContext} from '../layer_1/context/LocalContext.sol';
-import {
-    FactoryRegulationData,
-    buildRegulationData,
-    RegulationData,
-    RegulationType,
-    RegulationSubType,
-    checkRegulationTypeAndSubType
-} from '../layer_3/constants/regulation.sol';
-import {IEquityUSA} from '../layer_3/interfaces/IEquityUSA.sol';
-import {IBondUSA} from '../layer_3/interfaces/IBondUSA.sol';
+import {LocalContext} from '../layer_0/context/LocalContext.sol';
+//import {
+//    FactoryRegulationData,
+//    buildRegulationData,
+//    RegulationData,
+//    RegulationType,
+//    RegulationSubType,
+//    checkRegulationTypeAndSubType
+//} from '../layer_3/constants/regulation.sol';
+//import {IEquityUSA} from '../layer_3/interfaces/IEquityUSA.sol';
+//import {IBondUSA} from '../layer_3/interfaces/IBondUSA.sol';
 import {
     IProtectedPartitions
 } from '../layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol';
 import {validateISIN} from './isinValidator.sol';
-
+/*
 contract Factory is IFactory, LocalContext {
     modifier checkResolver(IBusinessLogicResolver resolver) {
         if (address(resolver) == address(0)) {
@@ -423,3 +423,4 @@ contract Factory is IFactory, LocalContext {
         );
     }
 }
+*/

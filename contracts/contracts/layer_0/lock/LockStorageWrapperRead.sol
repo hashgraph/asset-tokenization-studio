@@ -204,54 +204,146 @@
 */
 
 pragma solidity 0.8.18;
+
+import {LibCommon} from '..//common/LibCommon.sol';
+import {_LOCK_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {LocalContext} from '../context/LocalContext.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ProtectedPartitionsStorageWrapper
-} from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
-import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
-import {
-    ControlListStorageWrapper
-} from '../controlList/ControlListStorageWrapper.sol';
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
-import {
-    SnapshotsStorageWrapper
-} from '../../layer_0/snapshots/SnapshotsStorageWrapper.sol';
+abstract contract LockStorageWrapperRead is LocalContext {
+    using LibCommon for EnumerableSet.UintSet;
 
-// solhint-disable no-empty-blocks
-abstract contract Common is
-    PauseStorageWrapper,
-    ControlListStorageWrapper,
-    ProtectedPartitionsStorageWrapper,
-    SnapshotsStorageWrapper
-{
-    error AlreadyInitialized();
-    error OnlyDelegateAllowed();
-
-    modifier onlyUninitialized(bool initialized) {
-        if (initialized) {
-            revert AlreadyInitialized();
-        }
-        _;
+    struct LockData {
+        uint256 id;
+        uint256 amount;
+        uint256 expirationTimestamp;
     }
 
-    modifier onlyDelegate() {
-        if (_msgSender() != address(this)) {
-            revert OnlyDelegateAllowed();
-        }
-        _;
+    struct LockDataStorage {
+        mapping(address => uint256) totalLockedAmount;
+        mapping(address => mapping(bytes32 => uint256)) lockedAmountByPartition;
+        mapping(address => mapping(bytes32 => LockData[])) locks;
+        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) lockIds;
+        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) locksIndex;
+        mapping(address => mapping(bytes32 => uint256)) lockNextId;
     }
 
-    modifier onlyUnProtectedPartitionsOrWildCardRole() {
-        if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
+    function _getLockedAmountFor(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _lockStorage().totalLockedAmount[_tokenHolder];
+    }
+
+    function _getLockedAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _lockStorage().lockedAmountByPartition[_tokenHolder][_partition];
+    }
+
+    function _getLockCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 lockCount_) {
+        return _lockStorage().locks[_tokenHolder][_partition].length;
+    }
+
+    function _getLocksIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (uint256[] memory locksId_) {
+        return
+            _lockStorage().lockIds[_tokenHolder][_partition].getFromSet(
+                _pageIndex,
+                _pageLength
             );
+    }
+
+    function _getLockForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    )
+        internal
+        view
+        virtual
+        returns (uint256 amount_, uint256 expirationTimestamp_)
+    {
+        LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
+        amount_ = lock.amount;
+        expirationTimestamp_ = lock.expirationTimestamp;
+    }
+
+    function _isLockIdValid(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (bool) {
+        if (_getLockIndex(_partition, _tokenHolder, _lockId) == 0) return false;
+        return true;
+    }
+
+    function _getLockIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (uint256) {
+        return _lockStorage().locksIndex[_tokenHolder][_partition][_lockId];
+    }
+
+    function _getLock(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (LockData memory) {
+        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
+
+        return _getLockByIndex(_partition, _tokenHolder, lockIndex);
+    }
+
+    function _getLockByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex
+    ) internal view returns (LockData memory) {
+        LockDataStorage storage lockStorage = _lockStorage();
+
+        if (_lockIndex == 0) return LockData(0, 0, 0);
+
+        _lockIndex--;
+
+        assert(_lockIndex < lockStorage.locks[_tokenHolder][_partition].length);
+
+        return lockStorage.locks[_tokenHolder][_partition][_lockIndex];
+    }
+
+    function _isLockedExpirationTimestamp(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (bool) {
+        LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
+
+        if (lock.expirationTimestamp > _blockTimestamp()) return false;
+
+        return true;
+    }
+
+    function _lockStorage()
+        internal
+        pure
+        virtual
+        returns (LockDataStorage storage lock_)
+    {
+        bytes32 position = _LOCK_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            lock_.slot := position
         }
-        _;
     }
 }

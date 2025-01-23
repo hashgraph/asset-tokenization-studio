@@ -230,7 +230,7 @@ abstract contract ERC1410Controller is
         virtual
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
+        //onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_CONTROLLER_ROLE)
         onlyControllable
     {
@@ -256,7 +256,7 @@ abstract contract ERC1410Controller is
         virtual
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
+        //onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_CONTROLLER_ROLE)
         onlyControllable
     {

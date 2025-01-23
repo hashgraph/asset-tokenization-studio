@@ -207,9 +207,8 @@ pragma solidity 0.8.18;
 
 import {
     ERC1410BasicStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
+} from '../../layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {LocalContext} from '../../layer_0/context/LocalContext.sol';
 import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -219,12 +218,6 @@ contract CapStorageWrapper is
     ERC1410BasicStorageWrapperRead,
     LocalContext
 {
-    struct CapDataStorage {
-        uint256 maxSupply;
-        mapping(bytes32 => uint256) maxSupplyByPartition;
-        bool initialized;
-    }
-
     // modifiers
     modifier checkMaxSupply(uint256 _amount) {
         _checkNewTotalSupply(_amount);
@@ -251,8 +244,8 @@ contract CapStorageWrapper is
 
     // Internal
     function _setMaxSupply(uint256 _maxSupply) internal virtual {
-        uint256 previousMaxSupply = _capStorage().maxSupply;
-        _capStorage().maxSupply = _maxSupply;
+        uint256 previousMaxSupply = _getCapStorage().maxSupply;
+        _getCapStorage().maxSupply = _maxSupply;
         emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
     }
 
@@ -260,10 +253,10 @@ contract CapStorageWrapper is
         bytes32 _partition,
         uint256 _maxSupply
     ) internal virtual {
-        uint256 previousMaxSupply = _capStorage().maxSupplyByPartition[
+        uint256 previousMaxSupply = _getCapStorage().maxSupplyByPartition[
             _partition
         ];
-        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
+        _getCapStorage().maxSupplyByPartition[_partition] = _maxSupply;
         emit MaxSupplyByPartitionSet(
             _msgSender(),
             _partition,
@@ -278,13 +271,13 @@ contract CapStorageWrapper is
         virtual
         returns (uint256 maxSupply_)
     {
-        return _capStorage().maxSupply;
+        return _getCapStorage().maxSupply;
     }
 
     function _getMaxSupplyByPartition(
         bytes32 _partition
     ) internal view virtual returns (uint256 maxSupply_) {
-        return _capStorage().maxSupplyByPartition[_partition];
+        return _getCapStorage().maxSupplyByPartition[_partition];
     }
 
     function _checkMaxSupply(
@@ -329,19 +322,6 @@ contract CapStorageWrapper is
         uint256 _amount
     ) internal virtual {
         revert('Should not reach this function');
-    }
-
-    function _capStorage()
-        internal
-        pure
-        virtual
-        returns (CapDataStorage storage cap_)
-    {
-        bytes32 position = _CAP_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            cap_.slot := position
-        }
     }
 }
 // solhint-enable no-unused-vars, custom-errors

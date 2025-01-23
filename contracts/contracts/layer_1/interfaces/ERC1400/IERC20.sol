@@ -209,7 +209,6 @@
 pragma solidity 0.8.18;
 
 import {IERC20StorageWrapper} from './IERC20StorageWrapper.sol';
-import {IFactory} from '../../../interfaces/factory/IFactory.sol';
 
 interface IERC20 is IERC20StorageWrapper {
     struct ERC20MetadataInfo {
@@ -221,7 +220,7 @@ interface IERC20 is IERC20StorageWrapper {
 
     struct ERC20Metadata {
         ERC20MetadataInfo info;
-        IFactory.SecurityType securityType;
+        SecurityType securityType;
     }
 
     // solhint-disable-next-line func-name-mixedcase

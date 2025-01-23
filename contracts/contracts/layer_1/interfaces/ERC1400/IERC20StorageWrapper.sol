@@ -209,6 +209,11 @@
 pragma solidity 0.8.18;
 
 interface IERC20StorageWrapper {
+    enum SecurityType {
+        Bond,
+        Equity
+    }
+
     error InsufficientAllowance(address spender, address from);
     error SpenderWithZeroAddress();
 

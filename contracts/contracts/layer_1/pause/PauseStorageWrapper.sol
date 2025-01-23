@@ -206,7 +206,7 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LocalContext} from '../context/LocalContext.sol';
+import {LocalContext} from '../../layer_0/context/LocalContext.sol';
 import {
     IPauseStorageWrapper
 } from '../interfaces/pause/IPauseStorageWrapper.sol';

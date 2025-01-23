@@ -239,10 +239,10 @@ abstract contract ERC1410Basic is IERC1410Basic, ERC1410BasicStorageWrapper {
         virtual
         override
         onlyUnpaused
-        onlyValidAddress(_to)
+        //onlyValidAddress(_to)
         checkControlList(_msgSender())
         checkControlList(_to)
-        onlyDefaultPartitionWithSinglePartition(_partition)
+        //onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bytes32)
     {

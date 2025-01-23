@@ -254,7 +254,7 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, ERC1644StorageWrapper {
         override
         onlyRole(_CONTROLLER_ROLE)
         onlyUnpaused
-        onlyWithoutMultiPartition
+        //onlyWithoutMultiPartition
         onlyControllable
     {
         _controllerTransfer(_from, _to, _value, _data, _operatorData);
@@ -283,7 +283,7 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, ERC1644StorageWrapper {
         override
         onlyRole(_CONTROLLER_ROLE)
         onlyUnpaused
-        onlyWithoutMultiPartition
+        //onlyWithoutMultiPartition
         onlyControllable
     {
         _controllerRedeem(_tokenHolder, _value, _data, _operatorData);
