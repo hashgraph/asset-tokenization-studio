@@ -244,7 +244,7 @@ contract TimeTravel is
         override
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _TIME_TRAVEL_CONTROLLER_RESOLVER_KEY;
+        staticResolverKey_ = _TIME_TRAVEL_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
