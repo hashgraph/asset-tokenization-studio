@@ -305,7 +305,7 @@ describe('Equity Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
-                    timeTravel: true,
+                    timeTravelEnabled: true,
                 })
             )
 

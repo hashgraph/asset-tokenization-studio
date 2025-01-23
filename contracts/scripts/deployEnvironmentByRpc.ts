@@ -237,10 +237,10 @@ let environmentInitialized = false
 
 export async function deployEnvironment({
     signer,
-    timeTravel = false,
+    timeTravelEnabled = false,
 }: {
     signer: SignerWithAddress
-    timeTravel?: boolean
+    timeTravelEnabled?: boolean
 }) {
     if (!environmentInitialized) {
         const {
@@ -253,7 +253,7 @@ export async function deployEnvironment({
                 signer: signer,
                 network: network.name as Network,
                 useDeployed: false,
-                timeTravel: timeTravel,
+                timeTravelEnabled: timeTravelEnabled,
             })
         )
 

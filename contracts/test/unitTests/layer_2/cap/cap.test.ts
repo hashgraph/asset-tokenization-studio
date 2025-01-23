@@ -354,7 +354,7 @@ describe('CAP Layer 2 Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
-                    timeTravel: true,
+                    timeTravelEnabled: true,
                 })
             )
 

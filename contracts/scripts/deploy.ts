@@ -489,9 +489,9 @@ export async function deployAtsFullInfrastructure({
     network,
     useDeployed,
     useEnvironment,
-    timeTravel,
+    timeTravelEnabled,
 }: DeployAtsFullInfrastructureCommand): Promise<DeployAtsFullInfrastructureResult> {
-    if (timeTravel && (await signer.getChainId()) !== 1337) {
+    if (timeTravelEnabled && (await signer.getChainId()) !== 1337) {
         throw new Error(MESSAGES.timeTravel.error.notSupported)
     }
     if (useEnvironment && environment.initialized) {
@@ -505,7 +505,7 @@ export async function deployAtsFullInfrastructure({
     const deployCommand = await DeployAtsContractsCommand.newInstance({
         signer,
         useDeployed,
-        timeTravel,
+        timeTravelEnabled,
     })
     const { deployer, ...deployedContractList } = await deployAtsContracts(
         deployCommand
@@ -591,14 +591,14 @@ export async function deployAtsContracts({
     signer,
     network,
     useDeployed,
-    timeTravel = false,
+    timeTravelEnabled = false,
 }: DeployAtsContractsCommand) {
     const overrides = {} // If you want to override the default parameters
     const getFactory = <T extends ContractFactory>(
         standardFactory: T,
         timeTravelFactory?: T
     ): T => {
-        if (!timeTravel || !timeTravelFactory) return standardFactory
+        if (!timeTravelEnabled || !timeTravelFactory) return standardFactory
         return timeTravelFactory as T
     }
     const commands = {
@@ -850,8 +850,8 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
-        TimeTravel:
-            timeTravel == true
+        timeTravel:
+            timeTravelEnabled == true
                 ? new DeployContractWithFactoryCommand({
                       factory: new TimeTravel__factory(),
                       signer,
@@ -910,14 +910,14 @@ export async function deployAtsContracts({
             protectedPartitions: await deployContractWithFactory(
                 commands.protectedPartitions
             ),
-            TimeTravel: commands.TimeTravel
-                ? await deployContractWithFactory(commands.TimeTravel)
+            timeTravel: commands.timeTravel
+                ? await deployContractWithFactory(commands.timeTravel)
                 : undefined,
             deployer: signer,
         })
 
-    if (!timeTravel) {
-        const { TimeTravel, ...atsContracts } = deployedContracts
+    if (!timeTravelEnabled) {
+        const { timeTravel, ...atsContracts } = deployedContracts
         return atsContracts
     }
     return deployedContracts

@@ -367,7 +367,7 @@ describe('ProtectedPartitions Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: false,
-                    timeTravel: true,
+                    timeTravelEnabled: true,
                 })
             )
 

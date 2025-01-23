@@ -705,7 +705,7 @@ describe('ERC1400 Tests', () => {
                         signer: signer_A,
                         useDeployed: false,
                         useEnvironment: true,
-                        timeTravel: true,
+                        timeTravelEnabled: true,
                     })
                 )
 
@@ -2390,7 +2390,7 @@ describe('ERC1400 Tests', () => {
                         signer: signer_A,
                         useDeployed: false,
                         useEnvironment: true,
-                        timeTravel: false,
+                        timeTravelEnabled: false,
                     })
                 )
 
@@ -2612,7 +2612,7 @@ describe('ERC1400 Tests', () => {
                         signer: signer_A,
                         useDeployed: false,
                         useEnvironment: true,
-                        timeTravel: true,
+                        timeTravelEnabled: true,
                     })
                 )
 
