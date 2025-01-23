@@ -215,11 +215,13 @@ import {
     AdjustBalances_CD_Lib
 } from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
 import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
-
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 contract ERC20StorageWrapper_2 is
     AdjustBalancesStorageWrapperRead,
     ERC20StorageWrapper_2_Read
 {
+    // solhint-disable no-unused-vars
     function _beforeAllowanceUpdate(
         address _owner,
         address _spender,
@@ -230,6 +232,7 @@ contract ERC20StorageWrapper_2 is
 
         _updateAllowanceAndLABAF(_owner, _spender);
     }
+    // solhint-disable no-unused-vars
 
     function _updateAllowanceAndLABAF(
         address _owner,
@@ -238,18 +241,18 @@ contract ERC20StorageWrapper_2 is
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
-        uint256 ABAF = AdjustBalances_CD_Lib.getABAF();
-        uint256 LABAF = AdjustBalances_CD_Lib.getAllowanceLABAF(
+        uint256 abaf = AdjustBalances_CD_Lib.getABAF();
+        uint256 labaf = AdjustBalances_CD_Lib.getAllowanceLABAF(
             _owner,
             _spender
         );
 
-        if (ABAF == LABAF) return;
+        if (abaf == labaf) return;
 
-        uint256 factor = AdjustBalanceLib._calculateFactor(ABAF, LABAF);
+        uint256 factor = AdjustBalanceLib.calculateFactor(abaf, labaf);
 
         _getErc20Storage().allowed[_owner][_spender] *= factor;
-        adjustBalancesStorage.LABAFs_allowances[_owner][_spender] = ABAF;
+        adjustBalancesStorage.labafsAllowances[_owner][_spender] = abaf;
     }
 
     function _decimalsAdjusted()
@@ -260,7 +263,7 @@ contract ERC20StorageWrapper_2 is
         returns (uint8)
     {
         (, uint8 pendingDecimals) = AdjustBalanceLib
-            ._getPendingScheduledBalanceAdjustmentsAt(
+            .getPendingScheduledBalanceAdjustmentsAt(
                 _scheduledBalanceAdjustmentStorage(),
                 _corporateActionsStorage(),
                 _blockTimestamp()
@@ -273,10 +276,11 @@ contract ERC20StorageWrapper_2 is
         address _owner,
         address _spender
     ) internal view virtual override returns (uint256) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
+        uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjusted(),
             AdjustBalances_CD_Lib.getAllowanceLABAF(_owner, _spender)
         );
         return _allowance(_owner, _spender) * factor;
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

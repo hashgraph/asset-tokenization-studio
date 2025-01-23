@@ -242,6 +242,7 @@ export interface DeployedBusinessLogics {
     lock_2: IStaticFunctionSelectors
     transferAndLock: IStaticFunctionSelectors
     adjustBalances: IStaticFunctionSelectors
+    protectedPartitions: IStaticFunctionSelectors
 }
 
 export let businessLogicResolver: IBusinessLogicResolver

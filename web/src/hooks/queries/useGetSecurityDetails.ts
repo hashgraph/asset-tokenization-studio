@@ -227,7 +227,6 @@ import {
   RegulationViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useSecurityStore } from "../../store/securityStore";
-import { SecurityRole } from "../../utils/SecurityRole";
 
 export const GET_SECURITY_DETAILS = (equityId: string) =>
   `GET_SECURITY_DETAILS${equityId}`;
@@ -242,7 +241,7 @@ export const GET_ROLE_MEMBER_COUNT = (securityId: string, role: string) =>
 
 export const GET_ROLE_MEMBERS = (
   securityId: string,
-  role: SecurityRole,
+  role: string,
   start: number,
   end: number,
 ) => `GET_ROLE_MEMBERS_${securityId}_${role}_${start}_${end}`;

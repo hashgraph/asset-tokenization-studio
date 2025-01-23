@@ -222,6 +222,7 @@ import { DigitalSecurityTransfer } from "../views/DigitalSecurityTransfer/Digita
 import { DigitalSecurityRedeem } from "../views/DigitalSecurityRedeem/DigitalSecurityRedeem";
 import { DigitalSecurityForceTransfer } from "../views/DigitalSecurityForceTransfer/DigitalSecurityForceTransfer";
 import { DigitalSecurityForceRedeem } from "../views/DigitalSecurityForceRedeem/DigitalSecurityForceRedeem";
+import { DigitalSecurityLocker } from "../views/DigitalSecurityLocker/DigitalSecurityLocker";
 
 const t = (key: RouteName) => i18n.t(`routes:${key}`);
 
@@ -339,6 +340,15 @@ export const routes = [
         element: (
           <PrivateRoute>
             <DigitalSecurityForceRedeem />
+          </PrivateRoute>
+        ),
+      },
+      {
+        path: RoutePath.DIGITAL_SECURITY_LOCK,
+        breadcrumb: t(RouteName.DigitalSecurityLock),
+        element: (
+          <PrivateRoute>
+            <DigitalSecurityLocker />
           </PrivateRoute>
         ),
       },

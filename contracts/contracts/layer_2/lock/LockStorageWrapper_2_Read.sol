@@ -217,9 +217,8 @@ import {
     AdjustBalances_CD_Lib
 } from '../adjustBalances/AdjustBalances_CD_Lib.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-//import {AdjustBalancesStorageWrapper} from '../adjustBalances/AdjustBalancesStorageWrapper.sol';
-
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
 abstract contract LockStorageWrapper_2_Read is
     LockStorageWrapper,
     ERC1410ScheduledTasksStorageWrapper
@@ -227,7 +226,7 @@ abstract contract LockStorageWrapper_2_Read is
     function _getLockedAmountForAdjusted(
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
+        uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjusted(),
             AdjustBalances_CD_Lib.getTotalLockLABAF(_tokenHolder)
         );
@@ -239,7 +238,7 @@ abstract contract LockStorageWrapper_2_Read is
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_) {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
+        uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjusted(),
             AdjustBalances_CD_Lib.getTotalLockLABAFByPartition(
                 _partition,
@@ -260,7 +259,7 @@ abstract contract LockStorageWrapper_2_Read is
         virtual
         returns (uint256 amount_, uint256 expirationTimestamp_)
     {
-        uint256 factor = AdjustBalanceLib._calculateFactor(
+        uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjusted(),
             AdjustBalances_CD_Lib.getLockLABAFByPartition(
                 _partition,

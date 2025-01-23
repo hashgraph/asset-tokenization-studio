@@ -207,7 +207,7 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 library ArrayLib {
-    function _getSlotForDynamicArrayItem(
+    function getSlotForDynamicArrayItem(
         uint256 _dynamicArraySlot,
         uint256 _itemIndex,
         uint256 _itemsSize

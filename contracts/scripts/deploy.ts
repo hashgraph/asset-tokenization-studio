@@ -230,6 +230,7 @@ import {
     ScheduledTasks__factory,
     Cap_2__factory,
     AdjustBalances__factory,
+    ProtectedPartitions__factory,
 } from '../typechain-types'
 import {
     getEnvVar,
@@ -336,6 +337,9 @@ const ExistingContractIds = {
     ),
     adjustBalances: ContractId.fromString(
         getEnvVar({ name: 'ADJUST_BALANCES', defaultValue: '0.0.0' })
+    ),
+    protectedPartitions: ContractId.fromString(
+        getEnvVar({ name: 'PROTECTED_PARTITIONS', defaultValue: '0.0.0' })
     ),
 }
 
@@ -513,6 +517,10 @@ export async function deployAtsFullInfrastructure({
                 name: 'adjustbalances',
                 ids: { contract: ExistingContractIds.adjustBalances },
             },
+            {
+                name: 'protectedpartitions',
+                ids: { contract: ExistingContractIds.protectedPartitions },
+            },
         ]
 
         const deployedContracts: { [key: string]: DeployedContract } = {}
@@ -559,6 +567,7 @@ export async function deployAtsFullInfrastructure({
         corporateactionssecurity: corporateActionsSecurity,
         transferandlock: transferAndLock,
         adjustbalances: adjustBalances,
+        protectedpartitions: protectedPartitions,
     } = deployedContracts
 
     const businessLogicRegistries: BusinessLogicRegistryData[] = []
@@ -583,6 +592,7 @@ export async function deployAtsFullInfrastructure({
         lock,
         transferAndLock,
         adjustBalances,
+        protectedPartitions,
     ]) {
         const businessLogicKey = await getStaticResolverKey(
             contract.contractId,
@@ -626,6 +636,7 @@ export async function deployAtsFullInfrastructure({
                 lock,
                 transferAndLock,
                 adjustBalances,
+                protectedPartitions,
             ].map(({ contract }) =>
                 getStaticResolverKey(contract.contractId, clientOperator)
             )
@@ -704,6 +715,7 @@ export async function deployAtsFullInfrastructure({
         lock,
         transferAndLock,
         adjustBalances,
+        protectedPartitions,
         factory,
     }
 }
@@ -758,6 +770,7 @@ export async function deployContract({
         transferandlock: { factory: TransferAndLock__factory },
         lock: { factory: Lock_2__factory },
         adjustbalances: { factory: AdjustBalances__factory },
+        protectedpartitions: { factory: ProtectedPartitions__factory },
     }
 
     const contractKey = Object.keys(contractMap).find((contractType) =>

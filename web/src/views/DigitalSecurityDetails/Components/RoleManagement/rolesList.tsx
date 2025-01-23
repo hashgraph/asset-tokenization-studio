@@ -263,6 +263,15 @@ export const rolesList: TRole[] = [
     label: "adjustmentBalance",
     value: SecurityRole._ADJUSTMENT_BALANCE_ROLE,
     allowedSecurities: ["BOND", "EQUITY"],
-
+  },
+  {
+    label: "locker",
+    value: SecurityRole._LOCKER_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
+  },
+  {
+    label: "cap",
+    value: SecurityRole._CAP_ROLE,
+    allowedSecurities: ["BOND", "EQUITY"],
   },
 ];

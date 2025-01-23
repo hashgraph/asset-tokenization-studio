@@ -217,6 +217,8 @@ import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
 contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
     function _beforeTokenTransfer(
         bytes32 partition,

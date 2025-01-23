@@ -218,10 +218,9 @@ import {
 import {
     _DIAMOND_CUT_RESOLVER_KEY
 } from '../../../layer_1/constants/resolverKeys.sol';
-import {Common} from '../../../layer_1/common/Common.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../../../layer_1/constants/roles.sol';
 
-contract DiamondCutFacet is IDiamondCut, Common, ResolverProxyUnstructured {
+contract DiamondCutFacet is IDiamondCut, ResolverProxyUnstructured {
     function updateConfigVersion(
         uint256 _newVersion
     ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {

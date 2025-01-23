@@ -206,12 +206,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ValidatedRequest from './validation/ValidatedRequest.js';
 import Validation from './validation/Validation.js';
-import { SecurityRole } from '../../../domain/context/security/SecurityRole.js';
 
 export default class RoleRequest extends ValidatedRequest<RoleRequest> {
   securityId: string;
   targetId: string;
-  role: SecurityRole | undefined;
+  role: string;
 
   constructor({
     targetId,
@@ -220,12 +219,12 @@ export default class RoleRequest extends ValidatedRequest<RoleRequest> {
   }: {
     targetId: string;
     securityId: string;
-    role: SecurityRole | undefined;
+    role: string;
   }) {
     super({
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
       targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      role: Validation.checkRole(),
+      role: Validation.checkBytes32Format(),
     });
     this.securityId = securityId;
     this.targetId = targetId;

@@ -214,6 +214,7 @@ export const RoutePath: Record<RouteName, string> = {
   [RouteName.DigitalSecurityForceTransfer]: "/security/:id/forceTransfer",
   [RouteName.DigitalSecurityRedeem]: "/security/:id/redeem",
   [RouteName.DigitalSecurityForceRedeem]: "/security/:id/forceRedeem",
+  [RouteName.DigitalSecurityLock]: "/security/:id/lock",
   [RouteName.DigitalSecuritiesList]: "/list/:type",
   [RouteName.AddSecurity]: "/security/add",
   [RouteName.CreateSecurity]: "/security/create",

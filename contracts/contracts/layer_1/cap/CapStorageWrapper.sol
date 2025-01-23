@@ -213,6 +213,7 @@ import {LocalContext} from '../context/LocalContext.sol';
 import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+// solhint-disable no-unused-vars, custom-errors
 contract CapStorageWrapper is
     ICapStorageWrapper,
     ERC1410BasicStorageWrapperRead,
@@ -343,3 +344,4 @@ contract CapStorageWrapper is
         }
     }
 }
+// solhint-enable no-unused-vars, custom-errors

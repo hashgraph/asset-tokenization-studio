@@ -245,6 +245,9 @@ export class SetMaxSupplyCommandHandler
     );
 
     const security = await this.securityService.get(securityId);
+
+    // TODO: Check if queryAdapter has _CAP_ROLE
+
     if (CheckNums.hasMoreDecimals(maxSupply, security.decimals)) {
       throw new DecimalsOverRange(security.decimals);
     }
