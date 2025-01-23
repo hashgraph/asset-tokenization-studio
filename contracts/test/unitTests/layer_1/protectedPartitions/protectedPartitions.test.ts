@@ -366,6 +366,8 @@ describe('ProtectedPartitions Tests', () => {
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
                     useDeployed: false,
+                    useEnvironment: false,
+                    timeTravelEnabled: true,
                 })
             )
 

@@ -216,6 +216,7 @@ import {
     ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
+    TimeTravel,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -230,6 +231,7 @@ import {
     DeployAtsFullInfrastructureCommand,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const amount = 1
 const balanceOf_B_Original = [20 * amount, 200 * amount]
@@ -239,7 +241,6 @@ const adjustFactor = 253
 const adjustDecimals = 2
 const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
-const TIME = 6000
 
 describe('Adjust Balances Tests', () => {
     let diamond: ResolverProxy
@@ -259,6 +260,7 @@ describe('Adjust Balances Tests', () => {
     let pauseFacet: Pause
     let equityFacet: Equity
     let scheduledTasksFacet: ScheduledTasks
+    let timeTravelFacet: TimeTravel
 
     async function deployAsset({
         multiPartition,
@@ -326,7 +328,12 @@ describe('Adjust Balances Tests', () => {
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
 
         scheduledTasksFacet = await ethers.getContractAt(
-            'ScheduledTasks',
+            'ScheduledTasksTimeTravel',
+            diamond.address
+        )
+
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
             diamond.address
         )
     }
@@ -354,11 +361,16 @@ describe('Adjust Balances Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravelEnabled: true,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     beforeEach(async () => {
@@ -432,13 +444,10 @@ describe('Adjust Balances Tests', () => {
         )
 
         // schedule tasks
-        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
-
         const dividendsRecordDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000
+            dateToUnixTimestamp(`2030-01-01T00:00:06Z`)
         const dividendsExecutionDateInSeconds =
-            currentTimeInSeconds + (10 * TIME) / 1000
+            dateToUnixTimestamp(`2030-01-01T00:01:00Z`)
         const dividendsAmountPerEquity = 1
         const dividendData_1 = {
             recordDate: dividendsRecordDateInSeconds_1.toString(),
@@ -449,7 +458,7 @@ describe('Adjust Balances Tests', () => {
         await equityFacet.setDividends(dividendData_1)
 
         const balanceAdjustmentExecutionDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000 + 1
+            dateToUnixTimestamp(`2030-01-01T00:00:07Z`)
 
         const balanceAdjustmentData_1 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
@@ -463,7 +472,9 @@ describe('Adjust Balances Tests', () => {
             await scheduledTasksFacet.scheduledTaskCount()
 
         //-------------------------
-        await new Promise((f) => setTimeout(f, TIME + 2))
+        await timeTravelFacet.changeSystemTimestamp(
+            balanceAdjustmentExecutionDateInSeconds_1 + 1
+        )
 
         // balance adjustment
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)

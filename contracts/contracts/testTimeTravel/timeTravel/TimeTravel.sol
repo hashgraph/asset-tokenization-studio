@@ -203,267 +203,82 @@
 
 */
 
-import { expect } from 'chai'
-import { ethers } from 'hardhat'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { isinGenerator } from '@thomaschaplin/isin-generator'
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.18;
+
+import {TimeTravelStorageWrapper} from './TimeTravelStorageWrapper.sol';
 import {
-    type ResolverProxy,
-    type Equity,
-    type ScheduledSnapshots,
-    type AccessControl,
-    ScheduledTasks,
-    TimeTravel,
-    BusinessLogicResolver,
-    IFactory,
-    AccessControl__factory,
-    Equity__factory,
-    ScheduledTasks__factory,
-    ScheduledSnapshots__factory,
-    TimeTravel__factory,
-} from '@typechain'
-import {
-    CORPORATE_ACTION_ROLE,
-    PAUSER_ROLE,
-    deployEquityFromFactory,
-    Rbac,
-    RegulationSubType,
-    RegulationType,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-    MAX_UINT256,
-} from '@scripts'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {ITimeTravel} from '../interfaces/ITimeTravel.sol';
 
-describe('Scheduled Snapshots Tests', () => {
-    let diamond: ResolverProxy
-    let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
+contract TimeTravel is
+    IStaticFunctionSelectors,
+    ITimeTravel,
+    TimeTravelStorageWrapper
+{
+    function changeSystemTimestamp(uint256 newTimestamp) external override {
+        _changeSystemTimestamp(newTimestamp);
+    }
 
-    let account_A: string
-    let account_B: string
-    let account_C: string
+    function resetSystemTimestamp() external override {
+        _resetSystemTimestamp();
+    }
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let equityFacet: Equity
-    let scheduledSnapshotsFacet: ScheduledSnapshots
-    let scheduledTasksFacet: ScheduledTasks
-    let accessControlFacet: AccessControl
-    let timeTravelFacet: TimeTravel
+    function blockTimestamp() external view override returns (uint256) {
+        return _blockTimestamp();
+    }
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
+    /*
+     * @dev Check the chainId of the current block (only for testing)
+     * @param chainId The chainId to check
+     */
+    function checkBlockChainid(uint256 chainId) external pure {
+        _checkBlockChainid(chainId);
+    }
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                    timeTravelEnabled: true,
-                })
-            )
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _TIME_TRAVEL_RESOLVER_KEY;
+    }
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](4);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .changeSystemTimestamp
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .resetSystemTimestamp
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .blockTimestamp
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .checkBlockChainid
+            .selector;
+    }
 
-    beforeEach(async () => {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        const init_rbacs: Rbac[] = [rbacPause]
-
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            isMultiPartition: false,
-            name: 'TEST_AccessControl',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_B,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            businessLogicResolver: businessLogicResolver.address,
-            factory,
-        })
-
-        accessControlFacet = AccessControl__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        equityFacet = Equity__factory.connect(diamond.address, signer_A)
-        scheduledSnapshotsFacet = ScheduledSnapshots__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        scheduledTasksFacet = ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
-    })
-
-    afterEach(async () => {
-        timeTravelFacet.resetSystemTimestamp()
-    })
-
-    it('GIVEN a token WHEN triggerSnapshots THEN transaction succeeds', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-        // Using account C (with role)
-        equityFacet = equityFacet.connect(signer_C)
-
-        // set dividend
-        const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
-            '2030-01-01T00:00:06Z'
-        )
-        const dividendsRecordDateInSeconds_2 = dateToUnixTimestamp(
-            '2030-01-01T00:00:12Z'
-        )
-        const dividendsRecordDateInSeconds_3 = dateToUnixTimestamp(
-            '2030-01-01T00:00:18Z'
-        )
-        const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
-            '2030-01-01T00:01:00Z'
-        )
-        const dividendsAmountPerEquity = 1
-        const dividendData_1 = {
-            recordDate: dividendsRecordDateInSeconds_1.toString(),
-            executionDate: dividendsExecutionDateInSeconds.toString(),
-            amount: dividendsAmountPerEquity,
-        }
-        const dividendData_2 = {
-            recordDate: dividendsRecordDateInSeconds_2.toString(),
-            executionDate: dividendsExecutionDateInSeconds.toString(),
-            amount: dividendsAmountPerEquity,
-        }
-        const dividendData_3 = {
-            recordDate: dividendsRecordDateInSeconds_3.toString(),
-            executionDate: dividendsExecutionDateInSeconds.toString(),
-            amount: dividendsAmountPerEquity,
-        }
-        await equityFacet.setDividends(dividendData_2)
-        await equityFacet.setDividends(dividendData_3)
-        await equityFacet.setDividends(dividendData_1)
-
-        const dividend_2_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000001'
-        const dividend_3_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000002'
-        const dividend_1_Id =
-            '0x0000000000000000000000000000000000000000000000000000000000000003'
-
-        // check schedled snapshots
-        scheduledSnapshotsFacet = scheduledSnapshotsFacet.connect(signer_A)
-
-        let scheduledSnapshotCount =
-            await scheduledSnapshotsFacet.scheduledSnapshotCount()
-        let scheduledSnapshots =
-            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100)
-
-        expect(scheduledSnapshotCount).to.equal(3)
-        expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount)
-        expect(scheduledSnapshots[0].scheduledTimestamp.toNumber()).to.equal(
-            dividendsRecordDateInSeconds_3
-        )
-        expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id)
-        expect(scheduledSnapshots[1].scheduledTimestamp.toNumber()).to.equal(
-            dividendsRecordDateInSeconds_2
-        )
-        expect(scheduledSnapshots[1].data).to.equal(dividend_2_Id)
-        expect(scheduledSnapshots[2].scheduledTimestamp.toNumber()).to.equal(
-            dividendsRecordDateInSeconds_1
-        )
-        expect(scheduledSnapshots[2].data).to.equal(dividend_1_Id)
-
-        // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-        scheduledTasksFacet = scheduledTasksFacet.connect(signer_A)
-
-        await timeTravelFacet.changeSystemTimestamp(
-            dividendsRecordDateInSeconds_1 + 1
-        )
-        await expect(scheduledTasksFacet.triggerPendingScheduledTasks())
-            .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
-            .withArgs(account_A, 1)
-
-        scheduledSnapshotCount =
-            await scheduledSnapshotsFacet.scheduledSnapshotCount()
-        scheduledSnapshots =
-            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100)
-
-        expect(scheduledSnapshotCount).to.equal(2)
-        expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount)
-        expect(scheduledSnapshots[0].scheduledTimestamp.toNumber()).to.equal(
-            dividendsRecordDateInSeconds_3
-        )
-        expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id)
-        expect(scheduledSnapshots[1].scheduledTimestamp.toNumber()).to.equal(
-            dividendsRecordDateInSeconds_2
-        )
-        expect(scheduledSnapshots[1].data).to.equal(dividend_2_Id)
-
-        // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-        await timeTravelFacet.changeSystemTimestamp(
-            dividendsRecordDateInSeconds_2 + 1
-        )
-        await expect(scheduledTasksFacet.triggerScheduledTasks(100))
-            .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
-            .withArgs(account_A, 2)
-
-        scheduledSnapshotCount =
-            await scheduledSnapshotsFacet.scheduledSnapshotCount()
-        scheduledSnapshots =
-            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100)
-
-        expect(scheduledSnapshotCount).to.equal(1)
-        expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount)
-        expect(scheduledSnapshots[0].scheduledTimestamp.toNumber()).to.equal(
-            dividendsRecordDateInSeconds_3
-        )
-        expect(scheduledSnapshots[0].data).to.equal(dividend_3_Id)
-
-        // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-        await timeTravelFacet.changeSystemTimestamp(
-            dividendsRecordDateInSeconds_3 + 1
-        )
-        await expect(scheduledTasksFacet.triggerScheduledTasks(0))
-            .to.emit(scheduledSnapshotsFacet, 'SnapshotTriggered')
-            .withArgs(account_A, 3)
-
-        scheduledSnapshotCount =
-            await scheduledSnapshotsFacet.scheduledSnapshotCount()
-        scheduledSnapshots =
-            await scheduledSnapshotsFacet.getScheduledSnapshots(0, 100)
-
-        expect(scheduledSnapshotCount).to.equal(0)
-        expect(scheduledSnapshots.length).to.equal(scheduledSnapshotCount)
-    })
-})
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(ITimeTravel).interfaceId;
+    }
+}

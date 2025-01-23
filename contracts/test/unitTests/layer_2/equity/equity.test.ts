@@ -209,18 +209,20 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Equity,
+    type EquityUSA,
     type Pause,
     type AccessControl,
+    TimeTravel,
     Lock_2,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
-    Equity__factory,
+    EquityUSATimeTravel__factory,
     Pause__factory,
     Lock_2__factory,
     ERC1410ScheduledTasks__factory,
+    TimeTravel__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -236,10 +238,9 @@ import {
     DeployAtsFullInfrastructureCommand,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
-const TIME = 10000
 const DECIMALS = 7
-let currentTimeInSeconds = 0
 let dividendsRecordDateInSeconds = 0
 let dividendsExecutionDateInSeconds = 0
 const dividendsAmountPerEquity = 1
@@ -282,11 +283,12 @@ describe('Equity Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let equityFacet: Equity
+    let equityFacet: EquityUSA
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock_2
     let erc1410Facet: ERC1410ScheduledTasks
+    let timeTravelFacet: TimeTravel
 
     before(async () => {
         // mute | mock console.log
@@ -303,6 +305,7 @@ describe('Equity Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravelEnabled: true,
                 })
             )
 
@@ -352,22 +355,28 @@ describe('Equity Tests', () => {
             diamond.address,
             signer_A
         )
-        equityFacet = Equity__factory.connect(diamond.address, signer_A)
+        equityFacet = EquityUSATimeTravel__factory.connect(
+            diamond.address,
+            signer_A
+        )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
         lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
         )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
 
-        currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
-        dividendsRecordDateInSeconds = currentTimeInSeconds + TIME / 1000
-        dividendsExecutionDateInSeconds =
-            currentTimeInSeconds + (10 * TIME) / 1000
-        votingRecordDateInSeconds = currentTimeInSeconds + TIME / 1000
-        balanceAdjustmentExecutionDateInSeconds =
-            currentTimeInSeconds + TIME / 1000
+        dividendsRecordDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:00:10Z'
+        )
+        dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:16:40Z'
+        )
+        votingRecordDateInSeconds = dateToUnixTimestamp('2030-01-01T00:00:10Z')
+        balanceAdjustmentExecutionDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:00:10Z'
+        )
 
         votingData = {
             recordDate: votingRecordDateInSeconds.toString(),
@@ -383,6 +392,10 @@ describe('Equity Tests', () => {
             factor: balanceAdjustmentFactor,
             decimals: balanceAdjustmentDecimals,
         }
+    })
+
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     describe('Dividends', () => {
@@ -417,6 +430,9 @@ describe('Equity Tests', () => {
         })
 
         it('GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails', async () => {
+            await timeTravelFacet.changeSystemTimestamp(
+                dateToUnixTimestamp('2030-01-01T00:00:00Z')
+            )
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
@@ -435,8 +451,8 @@ describe('Equity Tests', () => {
             ).to.be.rejectedWith('WrongDates')
 
             const wrongDividendData_2 = {
-                recordDate: (
-                    (await ethers.provider.getBlock('latest')).timestamp - 1
+                recordDate: dateToUnixTimestamp(
+                    '2029-12-31T23:59:59Z'
                 ).toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: dividendsAmountPerEquity,
@@ -532,8 +548,9 @@ describe('Equity Tests', () => {
                 )
 
             // check list members
-            await new Promise((f) => setTimeout(f, TIME + 1))
-            await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds + 1
+            )
             const dividendFor = await equityFacet.getDividendsFor(1, account_A)
 
             expect(dividendFor.tokenBalance).to.equal(TotalAmount)
@@ -643,8 +660,9 @@ describe('Equity Tests', () => {
                     voteData
                 )
 
-            await new Promise((f) => setTimeout(f, TIME + 1))
-            await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
+            await timeTravelFacet.changeSystemTimestamp(
+                votingRecordDateInSeconds + 1
+            )
             const votingFor = await equityFacet.getVotingFor(1, account_A)
 
             expect(votingFor.tokenBalance).to.equal(TotalAmount)

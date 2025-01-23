@@ -280,6 +280,7 @@ describe('ERC1644 Tests', () => {
                         signer: signer_A,
                         useDeployed: false,
                         useEnvironment: true,
+                        timeTravelEnabled: true,
                     })
                 )
 
