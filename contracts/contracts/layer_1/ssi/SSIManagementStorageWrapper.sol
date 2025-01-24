@@ -206,58 +206,89 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable max-line-length
+import {LibCommon} from '../common/LibCommon.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {LocalContext} from '../context/LocalContext.sol';
+import {
+    _SSI_MANAGEMENT_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {ISSIManagement} from '../interfaces/ssi/ISSIManagement.sol';
 
-// keccak256('security.token.standard.accesscontrol.storage');
-bytes32 constant _ACCESS_CONTROL_STORAGE_POSITION = 0x4765bbd856d800638d39a79262ebc6fdfb5833d0e59f32c5d482fe4c4a3554c1;
+abstract contract SSIManagementStorageWrapper is ISSIManagement, LocalContext {
+    using LibCommon for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
-// keccak256('security.token.standard.controllist.storage');
-bytes32 constant _CONTROL_LIST_STORAGE_POSITION = 0xd2a97f6f015eb0ef6e78a5d99ed4baddb1001474ec77117d69e09432533577d3;
+    struct SSIManagementStorage {
+        EnumerableSet.AddressSet issuerList;
+        address revocationRegistry;
+    }
 
-// keccak256('security.token.standard.pause.storage');
-bytes32 constant _PAUSE_STORAGE_POSITION = 0x5a5b295532a8b6e97bc9d45d68fc49b85a099545bac8f91f77706d392a1cea71;
+    // modifiers
+    modifier checkIssuerList(address issuer) {
+        if (!_isIssuer(issuer)) {
+            revert AccountIsNotIssuer(issuer);
+        }
+        _;
+    }
 
-// keccak256('security.token.standard.cap.storage');
-bytes32 constant _CAP_STORAGE_POSITION = 0x591561cf73f8f1ca1532449c7ce18338a75e9e17f2894af1e41b36e3b013f951;
+    // Internal
+    function _setRevocationRegistryAddress(
+        address _revocationRegistryAddress
+    ) internal returns (bool success_) {
+        _SSIManagementStorage().revocationRegistry = _revocationRegistryAddress;
+        return true;
+    }
 
-// keccak256('security.token.standard.corporateactions.storage');
-bytes32 constant _CORPORATE_ACTION_STORAGE_POSITION = 0x9db84024bbea48a7580380e27785cf3e0d08fada233c84760c8a5aff47f86e12;
+    function _addIssuer(address _issuer) internal returns (bool success_) {
+        success_ = _SSIManagementStorage().issuerList.add(_issuer);
+    }
 
-// keccak256('security.token.standard.erc1595.storage');
-bytes32 constant _ERC1594_STORAGE_POSITION = 0x919465d7e15b775c94035d2b592c0808b79e37ecb2e0ceb66bd8c481f998ee9f;
+    function _removeIssuer(address _issuer) internal returns (bool success_) {
+        success_ = _SSIManagementStorage().issuerList.remove(_issuer);
+    }
 
-// keccak256('security.token.standard.erc1643.storage');
-bytes32 constant _ERC1643_STORAGE_POSITION = 0xf570af0a020d64f3ea72a78716790700daaeb1b83730feca87e92c517de986ef;
+    function _getRevocationRegistryAddress()
+        internal
+        view
+        returns (address revocationRegistryAddress_)
+    {
+        revocationRegistryAddress_ = _SSIManagementStorage().revocationRegistry;
+    }
 
-// keccak256('security.token.standard.erc1410.operator.storage');
-bytes32 constant _ERC1410_OPERATOR_STORAGE_POSITION = 0x319c8795293307b302697a4daf045524536834965f40eb730e6ca085ae32ae00;
+    function _getIssuerListCount()
+        internal
+        view
+        returns (uint256 issuerListCount_)
+    {
+        issuerListCount_ = _SSIManagementStorage().issuerList.length();
+    }
 
-// keccak256('security.token.standard.erc1410.basic.storage');
-bytes32 constant _ERC1410_BASIC_STORAGE_POSITION = 0x67661db80d37d3b9810c430f78991b4b5377bdebd3b71b39fbd3427092c1822a;
+    function _getIssuerListMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory members_) {
+        return
+            _SSIManagementStorage().issuerList.getFromSet(
+                _pageIndex,
+                _pageLength
+            );
+    }
 
-// keccak256('security.token.standard.erc1644.storage');
-bytes32 constant _ERC1644_STORAGE_POSITION = 0x78da7d6f03fa6ff51457b34dfcf6bc00f21877d08759f4b646f714d8f8c539f7;
+    function _isIssuer(address _issuer) internal view returns (bool) {
+        return _SSIManagementStorage().issuerList.contains(_issuer);
+    }
 
-// keccak256('security.token.standard.erc20.storage');
-bytes32 constant _ERC20_STORAGE_POSITION = 0xd5228ac65cba3eaaef0669de6709c44cfdf33c0f1cce2989d4a133e0214cce57;
-
-// keccak256('security.token.standard.resolverProxy.storage');
-bytes32 constant _RESOLVER_PROXY_STORAGE_POSITION = 0x4833864335c8f29dd85e3f7a36869cb90d5dc7167ae5000f7e1ce4d7c15d14ad;
-
-// keccak256('security.token.standard.snapshot.storage');
-bytes32 constant _SNAPSHOT_STORAGE_POSITION = 0x450898ebb84982a28d8787f0138cfce477c6d811ae3b1db5fdb7ed17e8bda898;
-
-// keccak256('security.token.standard.lock.storage');
-bytes32 constant _LOCK_STORAGE_POSITION = 0xd15962e60f276260fba4c9b4de7fd05f475afe18b48c917ec6f6fcc71c00bf71;
-
-// keccak256('security.token.standard.protectedpartitions.storage');
-bytes32 constant _PROTECTED_PARTITIONS_STORAGE_POSITION = 0x564ecdb30bda57ccdf5f0ccce9a283978b97919c80a3230163042042418b1546;
-
-// keccak256('security.token.standard.ssiManagement.storage');
-bytes32 constant _SSI_MANAGEMENT_STORAGE_POSITION = 0xdbde0b1f7457f92983806323b8056e5eabfce9a23b8924af999a4df0e4154e18;
-
-// ERC1410BasicStorageWrapperRead.Partition.amount.slot
-uint256 constant _PARTITION_AMOUNT_OFFSET = 0;
-
-// ERC1410BasicStorageWrapperRead.Partition
-uint256 constant _PARTITION_SIZE = 2;
+    function _SSIManagementStorage()
+        internal
+        pure
+        returns (SSIManagementStorage storage ssiManagement_)
+    {
+        bytes32 position = _SSI_MANAGEMENT_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            ssiManagement_.slot := position
+        }
+    }
+}
