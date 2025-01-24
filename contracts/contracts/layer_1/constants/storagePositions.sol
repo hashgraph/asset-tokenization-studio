@@ -253,8 +253,8 @@ bytes32 constant _LOCK_STORAGE_POSITION = 0xd15962e60f276260fba4c9b4de7fd05f475a
 // keccak256('security.token.standard.protectedpartitions.storage');
 bytes32 constant _PROTECTED_PARTITIONS_STORAGE_POSITION = 0x564ecdb30bda57ccdf5f0ccce9a283978b97919c80a3230163042042418b1546;
 
-// keccak256('security.token.standard.didManagement.storage');
-bytes32 constant _DID_MANAGEMENT_STORAGE_POSITION = 0x3f4c44718829a3b11ac04acfdf17d39ca5560f3cdc83a21e8bef3913f62af40b;
+// keccak256('security.token.standard.ssiManagement.storage');
+bytes32 constant _SSI_MANAGEMENT_STORAGE_POSITION = 0xdbde0b1f7457f92983806323b8056e5eabfce9a23b8924af999a4df0e4154e18;
 
 // ERC1410BasicStorageWrapperRead.Partition.amount.slot
 uint256 constant _PARTITION_AMOUNT_OFFSET = 0;

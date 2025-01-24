@@ -249,5 +249,5 @@ bytes32 constant _PROTECTED_PARTITIONS_PARTICIPANT_ROLE = 0xdaba153046c65d49da6a
 // keccak256('security.token.standard.role.wildcard');
 bytes32 constant _WILD_CARD_ROLE = 0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46;
 
-// keccak256('security.token.standard.role.did.manager');
-bytes32 constant _DID_MANAGER_ROLE = 0x545974280d05b78f1c65d2a0c9e6e5af1b50974a5e625303595e31bc7b643cd9;
+// keccak256('security.token.standard.role.ssi.manager');
+bytes32 constant _SSI_MANAGER_ROLE = 0x0995a089e16ba792fdf9ec5a4235cba5445a9fb250d6e96224c586678b81ebd0;

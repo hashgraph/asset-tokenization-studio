@@ -207,16 +207,16 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {Common} from '../common/Common.sol';
-import {_DID_MANAGER_ROLE} from '../constants/roles.sol';
+import {_SSI_MANAGER_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_DID_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {DIDManagementStorageWrapper} from './DIDManagementStorageWrapper.sol';
-import {IDIDManagement} from '../interfaces/did/IDIDManagement.sol';
+import {_SSI_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {SSIManagementStorageWrapper} from './SSIManagementStorageWrapper.sol';
+import {ISSIManagement} from '../interfaces/ssi/ISSIManagement.sol';
 
-contract DIDManagement is
-    DIDManagementStorageWrapper,
+contract SSIManagement is
+    SSIManagementStorageWrapper,
     IStaticFunctionSelectors,
     Common
 {
@@ -225,7 +225,7 @@ contract DIDManagement is
     )
         external
         override
-        onlyRole(_DID_MANAGER_ROLE)
+        onlyRole(_SSI_MANAGER_ROLE)
         onlyUnpaused
         returns (bool success_)
     {
@@ -237,7 +237,7 @@ contract DIDManagement is
     )
         external
         override
-        onlyRole(_DID_MANAGER_ROLE)
+        onlyRole(_SSI_MANAGER_ROLE)
         onlyUnpaused
         returns (bool success_)
     {
@@ -253,7 +253,7 @@ contract DIDManagement is
     )
         external
         override
-        onlyRole(_DID_MANAGER_ROLE)
+        onlyRole(_SSI_MANAGER_ROLE)
         onlyUnpaused
         returns (bool success_)
     {
@@ -299,7 +299,7 @@ contract DIDManagement is
         override
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _DID_MANAGEMENT_RESOLVER_KEY;
+        staticResolverKey_ = _SSI_MANAGEMENT_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
@@ -335,7 +335,7 @@ contract DIDManagement is
     {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IDIDManagement)
+        staticInterfaceIds_[selectorsIndex++] = type(ISSIManagement)
             .interfaceId;
     }
 }
