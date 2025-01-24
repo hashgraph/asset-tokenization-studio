@@ -236,27 +236,22 @@ abstract contract DIDManagementStorageWrapper is IDIDManagement, LocalContext {
     // Internal
     function _setRevocationRegistryAddress(
         address _revocationRegistryAddress
-    ) internal virtual returns (bool success_) {
+    ) internal returns (bool success_) {
         _DIDManagementStorage().revocationRegistry = _revocationRegistryAddress;
         return true;
     }
 
-    function _addIssuer(
-        address _issuer
-    ) internal virtual returns (bool success_) {
+    function _addIssuer(address _issuer) internal returns (bool success_) {
         success_ = _DIDManagementStorage().issuerList.add(_issuer);
     }
 
-    function _removeIssuer(
-        address _issuer
-    ) internal virtual returns (bool success_) {
+    function _removeIssuer(address _issuer) internal returns (bool success_) {
         success_ = _DIDManagementStorage().issuerList.remove(_issuer);
     }
 
     function _getRevocationRegistryAddress()
         internal
         view
-        virtual
         returns (address revocationRegistryAddress_)
     {
         revocationRegistryAddress_ = _DIDManagementStorage().revocationRegistry;
@@ -265,7 +260,6 @@ abstract contract DIDManagementStorageWrapper is IDIDManagement, LocalContext {
     function _getIssuerListCount()
         internal
         view
-        virtual
         returns (uint256 issuerListCount_)
     {
         issuerListCount_ = _DIDManagementStorage().issuerList.length();
@@ -274,7 +268,7 @@ abstract contract DIDManagementStorageWrapper is IDIDManagement, LocalContext {
     function _getIssuerListMembers(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view virtual returns (address[] memory members_) {
+    ) internal view returns (address[] memory members_) {
         return
             _DIDManagementStorage().issuerList.getFromSet(
                 _pageIndex,
@@ -282,14 +276,13 @@ abstract contract DIDManagementStorageWrapper is IDIDManagement, LocalContext {
             );
     }
 
-    function _isIssuer(address _issuer) internal view virtual returns (bool) {
+    function _isIssuer(address _issuer) internal view returns (bool) {
         return _DIDManagementStorage().issuerList.contains(_issuer);
     }
 
     function _DIDManagementStorage()
         internal
         pure
-        virtual
         returns (DIDManagementStorage storage didManagement_)
     {
         bytes32 position = _DID_MANAGEMENT_STORAGE_POSITION;

@@ -224,7 +224,6 @@ contract DIDManagement is
         address _revocationRegistryAddress
     )
         external
-        virtual
         override
         onlyRole(_DID_MANAGER_ROLE)
         onlyUnpaused
@@ -237,7 +236,6 @@ contract DIDManagement is
         address _issuer
     )
         external
-        virtual
         override
         onlyRole(_DID_MANAGER_ROLE)
         onlyUnpaused
@@ -254,7 +252,6 @@ contract DIDManagement is
         address _issuer
     )
         external
-        virtual
         override
         onlyRole(_DID_MANAGER_ROLE)
         onlyUnpaused
@@ -270,23 +267,19 @@ contract DIDManagement is
     function getRevocationRegistryAddress()
         external
         view
-        virtual
         override
         returns (address revocationRegistryAddress_)
     {
         return _getRevocationRegistryAddress();
     }
 
-    function isIssuer(
-        address _issuer
-    ) external view virtual override returns (bool) {
+    function isIssuer(address _issuer) external view override returns (bool) {
         return _isIssuer(_issuer);
     }
 
     function getIssuerListCount()
         external
         view
-        virtual
         override
         returns (uint256 issuerListCount_)
     {
@@ -296,14 +289,13 @@ contract DIDManagement is
     function getIssuerListMembers(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view virtual override returns (address[] memory members_) {
+    ) external view override returns (address[] memory members_) {
         return _getIssuerListMembers(_pageIndex, _pageLength);
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -313,7 +305,6 @@ contract DIDManagement is
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -339,7 +330,6 @@ contract DIDManagement is
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {
