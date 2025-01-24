@@ -273,7 +273,6 @@ interface IHold {
 
     error HoldExpirationNotReached();
     error WrongHoldId();
-    error WrongExpirationTimestamp();
 
     function createHoldByPartition(
         bytes32 _partition,

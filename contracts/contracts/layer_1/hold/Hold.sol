@@ -208,7 +208,6 @@ pragma solidity 0.8.18;
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_LOCKER_ROLE} from '../constants/roles.sol';
 import {_DEFAULT_PARTITION} from '../constants/values.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
 import {HoldStorageWrapper} from './HoldStorageWrapper.sol';

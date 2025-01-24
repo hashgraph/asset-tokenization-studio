@@ -206,11 +206,9 @@
 pragma solidity 0.8.18;
 
 import {LibCommon} from '../common/LibCommon.sol';
-import {_LOCK_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {LocalContext} from '../context/LocalContext.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract HoldStorageWrapperRead is LocalContext {
-
-}
+abstract contract HoldStorageWrapperRead is LocalContext {}
