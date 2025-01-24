@@ -203,56 +203,36 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface ISnapshots {
-    function takeSnapshot() external returns (uint256 snapshotID_);
-
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
+import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+library Hold_2_CD_Lib {
+    function getHeldAmountForAdjusted(
         address _tokenHolder
-    ) external view returns (uint256 balance_);
+    ) internal view returns (uint256 amount_) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getHeldAmountForAdjusted(address)',
+                _tokenHolder
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
 
-    function balanceOfAtSnapshotByPartition(
+    function getHeldAmountForByPartitionAdjusted(
         bytes32 _partition,
-        uint256 _snapshotID,
         address _tokenHolder
-    ) external view returns (uint256 balance_);
-
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (bytes32[] memory);
-
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 totalSupply_);
-
-    function totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) external view returns (uint256 totalSupply_);
-
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
-
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
-
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
-
-    function heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view returns (uint256 balance_);
+    ) internal view returns (uint256 amount_) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getHeldAmountForByPartitionAdjusted(bytes32,address)',
+                _partition,
+                _tokenHolder
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
 }

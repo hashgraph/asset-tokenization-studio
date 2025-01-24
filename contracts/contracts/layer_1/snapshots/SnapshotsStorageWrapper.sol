@@ -215,6 +215,7 @@ import {
     ISnapshotsStorageWrapper
 } from '../interfaces/snapshots/ISnapshotsStorageWrapper.sol';
 import {LockStorageWrapperRead} from '../lock/LockStorageWrapperRead.sol';
+import {HoldStorageWrapperRead} from '../hold/HoldStorageWrapperRead.sol';
 import {
     ArraysUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
@@ -226,6 +227,7 @@ abstract contract SnapshotsStorageWrapper is
     ISnapshotsStorageWrapper,
     ERC1410BasicStorageWrapperRead,
     LockStorageWrapperRead,
+    HoldStorageWrapperRead,
     Common
 {
     using ArraysUpgradeable for uint256[];
@@ -256,6 +258,8 @@ abstract contract SnapshotsStorageWrapper is
         mapping(address => Snapshots) accountLockedBalanceSnapshots;
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
         mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
+        mapping(address => Snapshots) accountHeldBalanceSnapshots;
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionHeldBalanceSnapshots;
     }
 
     event SnapshotTriggered(address indexed operator, uint256 snapshotId);
@@ -355,6 +359,26 @@ abstract contract SnapshotsStorageWrapper is
         );
     }
 
+    function _updateAccountHeldBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual {
+        _updateSnapshot(
+            _snapshotStorage().accountHeldBalanceSnapshots[account],
+            // TODO : replace 0 with commentted method when function implement in HoldStorageWrapperRead
+            0
+            // _getHeldAmountFor(account)
+        );
+        _updateSnapshot(
+            _snapshotStorage().accountPartitionHeldBalanceSnapshots[account][
+                partition
+            ],
+            // TODO : replace 0 with commentted method when function implement in HoldStorageWrapperRead
+            0
+            //_getHeldAmountForByPartition(partition, account)
+        );
+    }
+
     function _updateTotalSupplySnapshot(bytes32 partition) internal virtual {
         _updateSnapshot(
             _snapshotStorage().totalSupplySnapshots,
@@ -435,6 +459,21 @@ abstract contract SnapshotsStorageWrapper is
     }
 
     function _lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_) {
+        revert('Should not reach this function');
+    }
+
+    function _heldBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_) {
+        revert('Should not reach this function');
+    }
+
+    function _heldBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID,
         address _tokenHolder
