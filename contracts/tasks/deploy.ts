@@ -326,10 +326,13 @@ task(
             if (!address) {
                 continue
             }
-            const contractId = await addresstoHederaId({
-                address,
-                network,
-            })
+            let contractId = ''
+            if (network !== 'hardhat') {
+                contractId = await addresstoHederaId({
+                    address,
+                    network,
+                })
+            }
             console.log(`   --> ${key}: ${address} (${contractId})`)
         }
     })
