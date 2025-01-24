@@ -206,48 +206,146 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable max-line-length
+import {Common} from '../common/Common.sol';
+import {_DID_MANAGER_ROLE} from '../constants/roles.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_DID_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {DIDManagementStorageWrapper} from './DIDManagementStorageWrapper.sol';
+import {IDIDManagement} from '../interfaces/did/IDIDManagement.sol';
 
-bytes32 constant _DEFAULT_ADMIN_ROLE = 0x00;
+contract DIDManagement is
+    DIDManagementStorageWrapper,
+    IStaticFunctionSelectors,
+    Common
+{
+    function setRevocationRegistryAddress(
+        address _revocationRegistryAddress
+    )
+        external
+        virtual
+        override
+        onlyRole(_DID_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _setRevocationRegistryAddress(_revocationRegistryAddress);
+    }
 
-// keccak256('security.token.standard.role.controlList');
-bytes32 constant _CONTROL_LIST_ROLE = 0xca537e1c88c9f52dc5692c96c482841c3bea25aafc5f3bfe96f645b5f800cac3;
+    function addIssuer(
+        address _issuer
+    )
+        external
+        virtual
+        override
+        onlyRole(_DID_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _addIssuer(_issuer);
+        if (!success_) {
+            revert ListedIssuer(_issuer);
+        }
+        emit AddedToIssuerList(_msgSender(), _issuer);
+    }
 
-// keccak256('security.token.standard.role.corporateAction');
-bytes32 constant _CORPORATE_ACTION_ROLE = 0x8a139eeb747b9809192ae3de1b88acfd2568c15241a5c4f85db0443a536d77d6;
+    function removeIssuer(
+        address _issuer
+    )
+        external
+        virtual
+        override
+        onlyRole(_DID_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _removeIssuer(_issuer);
+        if (!success_) {
+            revert UnlistedIssuer(_issuer);
+        }
+        emit RemovedFromIssuerList(_msgSender(), _issuer);
+    }
 
-// keccak256('security.token.standard.role.issuer');
-bytes32 constant _ISSUER_ROLE = 0x4be32e8849414d19186807008dabd451c1d87dae5f8e22f32f5ce94d486da842;
+    function getRevocationRegistryAddress()
+        external
+        view
+        virtual
+        override
+        returns (address revocationRegistryAddress_)
+    {
+        return _getRevocationRegistryAddress();
+    }
 
-// keccak256('security.token.standard.role.documenter');
-bytes32 constant _DOCUMENTER_ROLE = 0x83ace103a76d3729b4ba1350ad27522bbcda9a1a589d1e5091f443e76abccf41;
+    function isIssuer(
+        address _issuer
+    ) external view virtual override returns (bool) {
+        return _isIssuer(_issuer);
+    }
 
-// keccak256('security.token.standard.role.controller');
-bytes32 constant _CONTROLLER_ROLE = 0xa72964c08512ad29f46841ce735cff038789243c2b506a89163cc99f76d06c0f;
+    function getIssuerListCount()
+        external
+        view
+        virtual
+        override
+        returns (uint256 issuerListCount_)
+    {
+        return _getIssuerListCount();
+    }
 
-// keccak256('security.token.standard.role.pauser');
-bytes32 constant _PAUSER_ROLE = 0x6f65556918c1422809d0d567462eafeb371be30159d74b38ac958dc58864faeb;
+    function getIssuerListMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view virtual override returns (address[] memory members_) {
+        return _getIssuerListMembers(_pageIndex, _pageLength);
+    }
 
-// keccak256('security.token.standard.role.cap');
-bytes32 constant _CAP_ROLE = 0xb60cac52541732a1020ce6841bc7449e99ed73090af03b50911c75d631476571;
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _DID_MANAGEMENT_RESOLVER_KEY;
+    }
 
-// keccak256('security.token.standard.role.snapshot');
-bytes32 constant _SNAPSHOT_ROLE = 0x3fbb44760c0954eea3f6cb9f1f210568f5ae959dcbbef66e72f749dbaa7cc2da;
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .setRevocationRegistryAddress
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.addIssuer.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.removeIssuer.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isIssuer.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getRevocationRegistryAddress
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getIssuerListCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getIssuerListMembers
+            .selector;
+    }
 
-// keccak256('security.token.standard.role.locker');
-bytes32 constant _LOCKER_ROLE = 0xd8aa8c6f92fe8ac3f3c0f88216e25f7c08b3a6c374b4452a04d200c29786ce88;
-
-// keccak256('security.token.standard.role.bondManager');
-bytes32 constant _BOND_MANAGER_ROLE = 0x8e99f55d84328dd46dd7790df91f368b44ea448d246199c88b97896b3f83f65d;
-
-// keccak256('security.token.standard.protected.partitions');
-bytes32 constant _PROTECTED_PARTITIONS_ROLE = 0x8e359333991af626d1f6087d9bc57221ef1207a053860aaa78b7609c2c8f96b6;
-
-// keccak256('security.token.standard.protected.partitions.participant');
-bytes32 constant _PROTECTED_PARTITIONS_PARTICIPANT_ROLE = 0xdaba153046c65d49da6a7597abc24374aa681e3eee7004426ca6185b3927a3f5;
-
-// keccak256('security.token.standard.role.wildcard');
-bytes32 constant _WILD_CARD_ROLE = 0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46;
-
-// keccak256('security.token.standard.role.did.manager');
-bytes32 constant _DID_MANAGER_ROLE = 0x545974280d05b78f1c65d2a0c9e6e5af1b50974a5e625303595e31bc7b643cd9;
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IDIDManagement)
+            .interfaceId;
+    }
+}
