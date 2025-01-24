@@ -375,6 +375,45 @@ contract AdjustBalancesStorageWrapper is
         return _getLockLABAFByIndex(_partition, _tokenHolder, lockIndex);
     }
 
+    function _getTotalHeldLABAF(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 labaf_) {
+        return _getAdjustBalancesStorage().labafsTotalHeld[_tokenHolder];
+    }
+
+    function _getTotalHeldLABAFByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 labaf_) {
+        return
+            _getAdjustBalancesStorage().labafsTotalHeldByPartition[
+                _tokenHolder
+            ][_partition];
+    }
+
+    function _getHoldLABAFByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex
+    ) internal view virtual returns (uint256) {
+        return
+            _getAdjustBalancesStorage().labafHolds[_tokenHolder][_partition][
+                _holdIndex - 1
+            ];
+    }
+
+    function _getHoldLABAFByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        // TODO : remove 0 and uncomment line below
+        uint256 holdIndex = 0;
+        // uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+        if (holdIndex == 0) return 0;
+        return _getHoldLABAFByIndex(_partition, _tokenHolder, holdIndex);
+    }
+
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,
