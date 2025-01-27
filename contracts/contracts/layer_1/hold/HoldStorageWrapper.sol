@@ -202,17 +202,167 @@
    limitations under the License.
 
 */
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 pragma solidity 0.8.18;
 
+import {ERC20StorageWrapper} from '../ERC1400/ERC20/ERC20StorageWrapper.sol';
 import {
     SnapshotsStorageWrapper
 } from '../snapshots/SnapshotsStorageWrapper.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {IHold} from '../interfaces/hold/IHold.sol';
+import {
+    checkNounceAndDeadline,
+    verify
+} from '../../layer_1/protectedPartitions/signatureVerification.sol';
+import {
+    _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH
+} from '../constants/values.sol';
 
-abstract contract HoldStorageWrapper is SnapshotsStorageWrapper {
+abstract contract HoldStorageWrapper is
+    SnapshotsStorageWrapper,
+    ERC20StorageWrapper
+{
     using EnumerableSet for EnumerableSet.UintSet;
+
+    function _createHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        IHold.Hold memory _hold,
+        bytes memory _operatorData
+    ) internal virtual returns (bool success_, uint256 holdId_) {
+        _beforeHold(_partition, _from, _hold.to);
+        _reduceBalanceByPartition(_from, _hold.amount, _partition);
+
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        holdId_ = ++holdStorage.holdNextId[_from][_partition];
+        uint256 escrowId_ = ++holdStorage.escrow_holdNextId[_hold.escrow][
+            _partition
+        ];
+
+        IHold.HoldData memory hold = IHold.HoldData(
+            holdId_,
+            _hold,
+            _operatorData
+        );
+
+        IHold.EscrowHoldData memory escrow = IHold.EscrowHoldData(
+            escrowId_,
+            _hold.escrow,
+            holdId_
+        );
+
+        holdStorage.holds[_from][_partition].push(hold);
+        holdStorage.escrow_holds[_from][_partition].push(escrow);
+        holdStorage.holdIds[_from][_partition].add(holdId_);
+        holdStorage.escrow_holdIds[_from][_partition].add(escrowId_);
+        holdStorage.holdsIndex[_from][_partition][holdId_] = holdStorage
+        .holds[_from][_partition].length;
+        holdStorage.heldAmountByPartition[_from][_partition] += _hold.amount;
+
+        success_ = true;
+    }
+
+    function _createHoldFromByPartition(
+        bytes32 _partition,
+        address _from,
+        IHold.Hold memory _hold,
+        bytes memory _operatorData
+    ) internal virtual returns (bool success_, uint256 holdId_) {
+        _decreaseAllowedBalance(_from, _msgSender(), _hold.amount);
+
+        return _createHoldByPartition(_partition, _from, _hold, _operatorData);
+    }
+
+    function _protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold
+    ) internal virtual returns (bool success_, uint256 holdId_) {
+        checkNounceAndDeadline(
+            _protectedHold.nonce,
+            _from,
+            _getNounceFor(_from),
+            _protectedHold.deadline,
+            _blockTimestamp()
+        );
+
+        _checkCreateHoldSignature(_partition, _from, _protectedHold);
+
+        _setNounce(_protectedHold.nonce, _from);
+
+        return
+            _createHoldByPartition(
+                _partition,
+                _from,
+                _protectedHold.hold,
+                '0x'
+            );
+    }
+
+    function _checkCreateHoldSignature(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold
+    ) internal view virtual {
+        if (!_isCreateHoldSignatureValid(_partition, _from, _protectedHold))
+            revert WrongSignature();
+    }
+
+    function _isCreateHoldSignatureValid(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold
+    ) internal view virtual returns (bool) {
+        bytes32 functionHash = getMessageHashCreateHold(
+            _partition,
+            _from,
+            _protectedHold
+        );
+        return
+            verify(
+                _from,
+                functionHash,
+                _protectedHold.signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
+            );
+    }
+
+    function getMessageHashCreateHold(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold
+    ) internal pure returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
+                    _partition,
+                    _from,
+                    _protectedHold
+                )
+            );
+    }
+
+    function _beforeHold(
+        bytes32 partition,
+        address from,
+        address to
+    ) internal virtual {
+        if (from == address(0)) {
+            _updateAccountHeldBalancesSnapshot(to, partition);
+        } else if (to == address(0)) {
+            _updateAccountHeldBalancesSnapshot(from, partition);
+        } else {
+            _updateAccountHeldBalancesSnapshot(from, partition);
+            _updateAccountHeldBalancesSnapshot(to, partition);
+        }
+    }
 }

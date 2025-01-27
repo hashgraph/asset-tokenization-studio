@@ -208,9 +208,296 @@ pragma solidity 0.8.18;
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_DEFAULT_PARTITION} from '../constants/values.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
 import {HoldStorageWrapper} from './HoldStorageWrapper.sol';
+import {
+    ERC1410ControllerStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
+import {_CONTROLLER_ROLE} from '../constants/roles.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {}
+abstract contract Hold is
+    IHold,
+    IStaticFunctionSelectors,
+    HoldStorageWrapper,
+    ERC1410ControllerStorageWrapper
+{
+    function createHoldByPartition(
+        bytes32 _partition,
+        Hold calldata _hold
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyValidAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 holdId_)
+    {
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _msgSender(),
+            _hold,
+            ''
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _msgSender(),
+            _partition,
+            holdId_,
+            _hold,
+            ''
+        );
+    }
+
+    function createHoldFromByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyValidAddress(_from)
+        onlyValidAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 holdId_)
+    {
+        (success_, holdId_) = _createHoldFromByPartition(
+            _partition,
+            _from,
+            _hold,
+            _operatorData
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _from,
+            _partition,
+            holdId_,
+            _hold,
+            _operatorData
+        );
+    }
+
+    function operatorCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyValidAddress(_from)
+        onlyValidAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyOperator(_partition, _from)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 holdId_)
+    {
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _from,
+            _hold,
+            _operatorData
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _from,
+            _partition,
+            holdId_,
+            _hold,
+            _operatorData
+        );
+    }
+
+    function controllerCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyValidAddress(_from)
+        onlyValidAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyRole(_CONTROLLER_ROLE)
+        onlyControllable
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 holdId_)
+    {
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _from,
+            _hold,
+            _operatorData
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _from,
+            _partition,
+            holdId_,
+            _hold,
+            _operatorData
+        );
+    }
+
+    function protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        ProtectedHold memory _protectedHold
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyValidAddress(_from)
+        onlyValidAddress(_protectedHold.hold.escrow)
+        onlyRole(_protectedPartitionsRole(_partition))
+        onlyProtectedPartitions
+        returns (bool success_, uint256 holdId_)
+    {
+        (success_, holdId_) = _protectedCreateHoldByPartition(
+            _partition,
+            _from,
+            _protectedHold
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _from,
+            _partition,
+            holdId_,
+            _protectedHold.hold,
+            ''
+        );
+    }
+
+    function executeHoldByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder,
+        address _to,
+        uint256 _amount
+    ) external returns (bool success_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function releaseHoldByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder,
+        uint256 _amount
+    ) external returns (bool success_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function reclaimHoldByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder
+    ) external returns (bool success_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 amount_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 holdCount_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHoldCountForEscrowByPartition(
+        bytes32 _partition,
+        address _escrow
+    ) external view returns (uint256 escrowHoldCount_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (uint256[] memory holdsId_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHoldsIdForEscrowByPartition(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (uint256[] memory escrowHoldsId_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        external
+        view
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_
+        )
+    {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHoldForEscrowByPartition(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _escrowHoldId
+    )
+        external
+        view
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address tokenHolder_,
+            uint256 id_,
+            address destination_,
+            bytes memory data_
+        )
+    {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+}

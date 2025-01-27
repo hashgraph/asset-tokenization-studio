@@ -383,7 +383,7 @@ abstract contract ERC20StorageWrapper is
         address from,
         address spender,
         uint256 value
-    ) private {
+    ) internal {
         _beforeAllowanceUpdate(from, spender, value, false);
 
         ERC20Storage storage erc20Storage = _getErc20Storage();

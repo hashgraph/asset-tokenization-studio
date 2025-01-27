@@ -245,9 +245,9 @@ import {
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
     AdjustBalancesStorageWrapperRead,
-    ERC1410SnapshotStorageWrapper,
     CorporateActionsStorageWrapper,
     ScheduledBalanceAdjustmentsStorageWrapper,
+    ERC1410SnapshotStorageWrapper,
     CapStorageWrapper_2
 {
     function _beforeTokenTransfer(

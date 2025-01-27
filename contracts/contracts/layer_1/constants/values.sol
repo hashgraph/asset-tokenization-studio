@@ -245,4 +245,8 @@ bytes32 constant _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH = 0x2d745a289deb1f3
 //    'protectedRedeemFromByPartition(bytes32 _partition,address _from,uint256 _amount,uint256 _deadline,uint256 _nounce)'
 //);
 bytes32 constant _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH = 0x5075effccf2d386f2a3f230b6a45274e523d872e1b1b33a0cf97bef34dfa14e7;
+//keccak256(
+//    'protectedCreateHoldByPartition(bytes32 _partition,address _from,ProtectedHold _protectedHold)'
+//);
+bytes32 constant _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH = 0x4bcd1835e0a3e43f571463e70016b4dd30a9b6b57295d4d430789361aee41a33;
 // solhint-enable max-line-length

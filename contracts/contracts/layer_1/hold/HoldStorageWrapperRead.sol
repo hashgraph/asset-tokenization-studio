@@ -208,7 +208,25 @@ pragma solidity 0.8.18;
 import {LibCommon} from '../common/LibCommon.sol';
 import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {LocalContext} from '../context/LocalContext.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract HoldStorageWrapperRead is LocalContext {}
+abstract contract HoldStorageWrapperRead is LocalContext {
+    using LibCommon for EnumerableSet.UintSet;
+    function _holdStorage()
+        internal
+        pure
+        virtual
+        returns (IHold.HoldDataStorage storage hold_)
+    {
+        bytes32 position = _HOLD_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            hold_.slot := position
+        }
+    }
+}
