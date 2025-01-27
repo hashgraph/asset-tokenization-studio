@@ -57,6 +57,7 @@
     "test:securityUSA": "npx hardhat test test/unitTests/layer_3/securityUSA/securityUSA.test.ts",
     "test:lock": "npx hardhat test test/unitTests/layer_1/lock/lock.test.ts",
     "test:lock_2": "npx hardhat test test/unitTests/layer_2/lock/lock.test.ts",
+    "test:hold": "npx hardhat test test/unitTests/layer_1/hold/hold.test.ts",
     "test:diamondCutManager": "npx hardhat test test/unitTests/resolver/diamondCutManager.test.ts",
     "test:protectedPartitions": "NETWORK=hardhat npx hardhat test test/unitTests/layer_1/protectedPartitions/protectedPartitions.test.ts",
     "test:timeTravel": "NETWORK=hardhat npx hardhat test test/unitTests/timeTravel/timeTravel.test.ts",
