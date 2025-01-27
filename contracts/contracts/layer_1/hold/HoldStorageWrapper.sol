@@ -220,8 +220,8 @@ import {
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
 
 abstract contract HoldStorageWrapper is
-    ERC20StorageWrapper,
-    SnapshotsStorageWrapper
+    SnapshotsStorageWrapper,
+    ERC20StorageWrapper
 {
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -282,9 +282,8 @@ abstract contract HoldStorageWrapper is
         bytes calldata _data,
         bytes calldata _operatorData
     ) internal virtual returns (bool success_, uint256 holdId_) {
-        if (_from != _msgSender() && !_isOperator(_msgSender(), _from)) {
-            _decreaseAllowance(_from, _amount);
-        }
+        _decreaseAllowedBalance(_from, _msgSender(), _amount);
+
         return
             _createHoldByPartition(
                 _partition,
