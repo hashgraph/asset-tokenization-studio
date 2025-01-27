@@ -883,11 +883,13 @@ describe('Hold Tests', () => {
             expect(hold.amount_).to.equal(_AMOUNT)
             expect(hold.escrow_).to.equal(account_B)
             expect(hold.data_).to.equal('0x123')
+            expect(hold.operatorData_).to.equal('0x')
             expect(hold.destination_).to.equal(ADDRESS_ZERO)
             expect(hold.expirationTimestamp_).to.equal(expirationTimestamp)
             expect(escrow_hold.amount_).to.equal(_AMOUNT)
             expect(escrow_hold.tokenHolder_).to.equal(account_A)
             expect(escrow_hold.data_).to.equal('0x123')
+            expect(escrow_hold.operatorData_).to.equal('0x')
             expect(escrow_hold.destination_).to.equal(ADDRESS_ZERO)
             expect(escrow_hold.expirationTimestamp_).to.equal(
                 expirationTimestamp
@@ -920,7 +922,8 @@ describe('Hold Tests', () => {
                     _AMOUNT,
                     expirationTimestamp,
                     ADDRESS_ZERO,
-                    '0x123'
+                    '0x123',
+                    '0x'
                 )
 
             await checkCreatedHold()
@@ -953,7 +956,8 @@ describe('Hold Tests', () => {
                     _AMOUNT,
                     expirationTimestamp,
                     ADDRESS_ZERO,
-                    '0x123'
+                    '0x123',
+                    '0x'
                 )
 
             await erc20Facet
@@ -990,7 +994,8 @@ describe('Hold Tests', () => {
                     _AMOUNT,
                     expirationTimestamp,
                     ADDRESS_ZERO,
-                    '0x123'
+                    '0x123',
+                    '0x'
                 )
 
             await erc1410Facet.connect(signer_A).revokeOperator(account_B)
@@ -1023,7 +1028,8 @@ describe('Hold Tests', () => {
                     _AMOUNT,
                     expirationTimestamp,
                     ADDRESS_ZERO,
-                    '0x123'
+                    '0x123',
+                    '0x'
                 )
 
             await checkCreatedHold()
