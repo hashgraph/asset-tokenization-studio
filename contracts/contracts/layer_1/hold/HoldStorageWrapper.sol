@@ -202,6 +202,7 @@
    limitations under the License.
 
 */
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 pragma solidity 0.8.18;
 
@@ -212,10 +213,13 @@ import {
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {IHold} from '../interfaces/hold/IHold.sol';
+import {
+    checkNounceAndDeadline,
+    verify
+} from '../../layer_1/protectedPartitions/signatureVerification.sol';
 
 abstract contract HoldStorageWrapper is
-    IHold,
     ERC20StorageWrapper,
     SnapshotsStorageWrapper
 {
@@ -229,17 +233,19 @@ abstract contract HoldStorageWrapper is
         address _to,
         uint256 _expirationTimestamp,
         bytes calldata _data,
-        bytes calldata _operatorData
+        bytes memory _operatorData
     ) internal virtual returns (bool success_, uint256 holdId_) {
         _beforeHold(_partition, _from, _to);
         _reduceBalanceByPartition(_from, _amount, _partition);
 
-        HoldDataStorage storage holdStorage = _holdStorage();
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         holdId_ = ++holdStorage.holdNextId[_from][_partition];
-        escrowId_ = ++holdStorage.escrow_holdNextId[_escrow][_partition];
+        uint256 escrowId_ = ++holdStorage.escrow_holdNextId[_escrow][
+            _partition
+        ];
 
-        HoldData memory hold = HoldData(
+        IHold.HoldData memory hold = IHold.HoldData(
             holdId_,
             _amount,
             _expirationTimestamp,
@@ -249,7 +255,7 @@ abstract contract HoldStorageWrapper is
             _operatorData
         );
 
-        EscrowHoldData memory escrow = EscrowHoldData(
+        IHold.EscrowHoldData memory escrow = IHold.EscrowHoldData(
             escrowId_,
             _escrow,
             holdId_
@@ -264,19 +270,6 @@ abstract contract HoldStorageWrapper is
         holdStorage.heldAmountByPartition[_from][_partition] += _amount;
 
         success_ = true;
-
-        emit HeldByPartition(
-            _msgSender(),
-            _from,
-            _escrow,
-            _partition,
-            holdId_,
-            _amount,
-            _expirationTimestamp,
-            _to,
-            _data,
-            _operatorData
-        );
     }
 
     function _createHoldFromByPartition(
@@ -346,7 +339,7 @@ abstract contract HoldStorageWrapper is
                 _to,
                 _expirationTimestamp,
                 _data,
-                ''
+                '0x'
             );
     }
 
@@ -354,7 +347,7 @@ abstract contract HoldStorageWrapper is
         bytes32 partition,
         address from,
         address to
-    ) internal virtual override {
+    ) internal virtual {
         if (from == address(0)) {
             _updateAccountHeldBalancesSnapshot(to, partition);
         } else if (to == address(0)) {

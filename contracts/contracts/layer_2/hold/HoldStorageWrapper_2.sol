@@ -212,9 +212,9 @@ import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
 import {
     AdjustBalances_CD_Lib
 } from '../adjustBalances/AdjustBalances_CD_Lib.sol';
-import {HoldStorageWrapper_2_Read} from './HoldStorageWrapper_2_Read.sol';
+//import {HoldStorageWrapper_2_Read} from './HoldStorageWrapper_2_Read.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {}
+// abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {}
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

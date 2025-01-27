@@ -206,8 +206,8 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {HoldStorageWrapper_2} from './HoldStorageWrapper_2.sol';
-import {HoldStorageWrapper_2_Read} from './HoldStorageWrapper_2_Read.sol';
+//import {HoldStorageWrapper_2} from './HoldStorageWrapper_2.sol';
+//import {HoldStorageWrapper_2_Read} from './HoldStorageWrapper_2_Read.sol';
 import {HoldStorageWrapper} from '../../layer_1/hold/HoldStorageWrapper.sol';
 import {Hold} from '../../layer_1/hold/Hold.sol';
 import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
@@ -218,8 +218,8 @@ import {
 } from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-abstract contract Hold_2 is Hold, HoldStorageWrapper_2 {
-    function _addPartitionTo(
+abstract contract Hold_2 is Hold {
+    /*function _addPartitionTo(
         uint256 _value,
         address _account,
         bytes32 _partition
@@ -229,7 +229,7 @@ abstract contract Hold_2 is Hold, HoldStorageWrapper_2 {
         override(ERC1410BasicStorageWrapperRead, HoldStorageWrapper_2_Read)
     {
         HoldStorageWrapper_2_Read._addPartitionTo(_value, _account, _partition);
-    }
+    }*/
 
     function getStaticResolverKey()
         external

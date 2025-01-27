@@ -208,7 +208,7 @@ pragma solidity 0.8.18;
 import {LibCommon} from '../common/LibCommon.sol';
 import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {LocalContext} from '../context/LocalContext.sol';
-import {HoldDataStorage} from '../interfaces/hold/IHold.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
@@ -221,7 +221,7 @@ abstract contract HoldStorageWrapperRead is LocalContext {
         internal
         pure
         virtual
-        returns (HoldDataStorage storage hold_)
+        returns (IHold.HoldDataStorage storage hold_)
     {
         bytes32 position = _HOLD_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly

@@ -219,7 +219,7 @@ import {
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 // TODO: Remove _ in contract name
 // solhint-disable-next-line
-abstract contract HoldStorageWrapper_2_Read is
+/*abstract contract HoldStorageWrapper_2_Read is
     HoldStorageWrapper,
     ERC1410ScheduledTasksStorageWrapper
 {
@@ -241,4 +241,4 @@ abstract contract HoldStorageWrapper_2_Read is
             _partition
         );
     }
-}
+}*/

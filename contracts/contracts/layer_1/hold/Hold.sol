@@ -213,6 +213,8 @@ import {HoldStorageWrapper} from './HoldStorageWrapper.sol';
 import {
     ERC1410ControllerStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
+import {_CONTROLLER_ROLE} from '../constants/roles.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract Hold is
@@ -239,17 +241,29 @@ abstract contract Hold is
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
-        return
-            _createHoldByPartition(
-                _partition,
-                _amount,
-                _escrow,
-                msgSender(),
-                _to,
-                _expirationTimestamp,
-                _data,
-                ''
-            );
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _amount,
+            _escrow,
+            _msgSender(),
+            _to,
+            _expirationTimestamp,
+            _data,
+            ''
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _msgSender(),
+            _escrow,
+            _partition,
+            holdId_,
+            _amount,
+            _expirationTimestamp,
+            _to,
+            _data,
+            ''
+        );
     }
 
     function createHoldFromByPartition(
@@ -273,17 +287,29 @@ abstract contract Hold is
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
-        return
-            _createHoldFromByPartition(
-                _partition,
-                _amount,
-                _escrow,
-                _from,
-                _to,
-                _expirationTimestamp,
-                _data,
-                _operatorData
-            );
+        (success_, holdId_) = _createHoldFromByPartition(
+            _partition,
+            _amount,
+            _escrow,
+            _from,
+            _to,
+            _expirationTimestamp,
+            _data,
+            _operatorData
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _from,
+            _escrow,
+            _partition,
+            holdId_,
+            _amount,
+            _expirationTimestamp,
+            _to,
+            _data,
+            _operatorData
+        );
     }
 
     function operatorCreateHoldByPartition(
@@ -307,17 +333,29 @@ abstract contract Hold is
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
-        return
-            _createHoldByPartition(
-                _partition,
-                _amount,
-                _escrow,
-                _from,
-                _to,
-                _expirationTimestamp,
-                _data,
-                _operatorData
-            );
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _amount,
+            _escrow,
+            _from,
+            _to,
+            _expirationTimestamp,
+            _data,
+            _operatorData
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _from,
+            _escrow,
+            _partition,
+            holdId_,
+            _amount,
+            _expirationTimestamp,
+            _to,
+            _data,
+            _operatorData
+        );
     }
 
     function controllerCreateHoldByPartition(
@@ -342,17 +380,29 @@ abstract contract Hold is
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
-        return
-            _createHoldByPartition(
-                _partition,
-                _amount,
-                _escrow,
-                _from,
-                _to,
-                _expirationTimestamp,
-                _data,
-                _operatorData
-            );
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _amount,
+            _escrow,
+            _from,
+            _to,
+            _expirationTimestamp,
+            _data,
+            _operatorData
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _from,
+            _escrow,
+            _partition,
+            holdId_,
+            _amount,
+            _expirationTimestamp,
+            _to,
+            _data,
+            _operatorData
+        );
     }
 
     function protectedCreateHoldByPartition(
@@ -379,18 +429,30 @@ abstract contract Hold is
         onlyProtectedPartitions
         returns (bool success_, uint256 holdId_)
     {
-        return
-            _protectedCreateHoldByPartition(
-                _partition,
-                _amount,
-                _escrow,
-                _from,
-                _to,
-                _expirationTimestamp,
-                _data,
-                _deadline,
-                _nounce,
-                _signature
-            );
+        (success_, holdId_) = _protectedCreateHoldByPartition(
+            _partition,
+            _amount,
+            _escrow,
+            _from,
+            _to,
+            _expirationTimestamp,
+            _data,
+            _deadline,
+            _nounce,
+            _signature
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _from,
+            _escrow,
+            _partition,
+            holdId_,
+            _amount,
+            _expirationTimestamp,
+            _to,
+            _data,
+            ''
+        );
     }
 }
