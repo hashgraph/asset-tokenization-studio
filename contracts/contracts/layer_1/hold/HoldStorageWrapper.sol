@@ -227,37 +227,29 @@ abstract contract HoldStorageWrapper is
 
     function _createHoldByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
         address _from,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data,
+        IHold.Hold memory _hold,
         bytes memory _operatorData
     ) internal virtual returns (bool success_, uint256 holdId_) {
-        _beforeHold(_partition, _from, _to);
-        _reduceBalanceByPartition(_from, _amount, _partition);
+        _beforeHold(_partition, _from, _hold.to);
+        _reduceBalanceByPartition(_from, _hold.amount, _partition);
 
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         holdId_ = ++holdStorage.holdNextId[_from][_partition];
-        uint256 escrowId_ = ++holdStorage.escrow_holdNextId[_escrow][
+        uint256 escrowId_ = ++holdStorage.escrow_holdNextId[_hold.escrow][
             _partition
         ];
 
         IHold.HoldData memory hold = IHold.HoldData(
             holdId_,
-            _amount,
-            _expirationTimestamp,
-            _escrow,
-            _from,
-            _data,
+            _hold,
             _operatorData
         );
 
         IHold.EscrowHoldData memory escrow = IHold.EscrowHoldData(
             escrowId_,
-            _escrow,
+            _hold.escrow,
             holdId_
         );
 
@@ -267,77 +259,52 @@ abstract contract HoldStorageWrapper is
         holdStorage.escrow_holdIds[_from][_partition].add(escrowId_);
         holdStorage.holdsIndex[_from][_partition][holdId_] = holdStorage
         .holds[_from][_partition].length;
-        holdStorage.heldAmountByPartition[_from][_partition] += _amount;
+        holdStorage.heldAmountByPartition[_from][_partition] += _hold.amount;
 
         success_ = true;
     }
 
     function _createHoldFromByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
         address _from,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data,
-        bytes calldata _operatorData
+        IHold.Hold memory _hold,
+        bytes memory _operatorData
     ) internal virtual returns (bool success_, uint256 holdId_) {
-        _decreaseAllowedBalance(_from, _msgSender(), _amount);
+        _decreaseAllowedBalance(_from, _msgSender(), _hold.amount);
 
-        return
-            _createHoldByPartition(
-                _partition,
-                _amount,
-                _escrow,
-                _from,
-                _to,
-                _expirationTimestamp,
-                _data,
-                _operatorData
-            );
+        return _createHoldByPartition(_partition, _from, _hold, _operatorData);
     }
 
     function _protectedCreateHoldByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
         address _from,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        IHold.ProtectedHold memory _protectedHold
     ) internal virtual returns (bool success_, uint256 holdId_) {
         checkNounceAndDeadline(
-            _nounce,
+            _protectedHold.nonce,
             _from,
             _getNounceFor(_from),
-            _deadline,
+            _protectedHold.deadline,
             _blockTimestamp()
         );
 
-        _checkTransferSignature(
+        /*_checkTransferSignature(
             _partition,
             _from,
-            _to,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
+            _protectedHold.hold.to,
+            _protectedHold.hold.amount,
+            _protectedHold.deadline,
+            _protectedHold.nonce,
+            _protectedHold.signature
+        );*/
 
-        _setNounce(_nounce, _from);
+        _setNounce(_protectedHold.nonce, _from);
 
         return
             _createHoldByPartition(
                 _partition,
-                _amount,
-                _escrow,
                 _from,
-                _to,
-                _expirationTimestamp,
-                _data,
+                _protectedHold.hold,
                 '0x'
             );
     }

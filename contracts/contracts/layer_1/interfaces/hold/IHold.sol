@@ -212,13 +212,9 @@ interface IHold {
     event HeldByPartition(
         address indexed operator,
         address indexed tokenHolder,
-        address indexed escrow,
         bytes32 partition,
         uint256 holdId,
-        uint256 amount,
-        uint256 expirationTimestamp,
-        address to,
-        bytes data,
+        Hold hold,
         bytes operatorData
     );
 
@@ -248,13 +244,24 @@ interface IHold {
     error HoldExpirationNotReached();
     error WrongHoldId();
 
-    struct HoldData {
-        uint256 id;
+    struct Hold {
         uint256 amount;
         uint256 expirationTimestamp;
         address escrow;
         address to;
         bytes data;
+    }
+
+    struct ProtectedHold {
+        Hold hold;
+        uint256 deadline;
+        uint256 nonce;
+        bytes signature;
+    }
+
+    struct HoldData {
+        uint256 id;
+        Hold hold;
         bytes operatorData;
     }
 
@@ -279,57 +286,34 @@ interface IHold {
 
     function createHoldByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data
+        Hold calldata _hold
     ) external returns (bool success_, uint256 holdId_);
 
     function createHoldFromByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
+        Hold calldata _hold,
         address _from,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data,
         bytes calldata _operatorData
     ) external returns (bool success_, uint256 holdId_);
 
     function operatorCreateHoldByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
+        Hold calldata _hold,
         address _from,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data,
         bytes calldata _operatorData
     ) external returns (bool success_, uint256 holdId_);
 
     function controllerCreateHoldByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
+        Hold calldata _hold,
         address _from,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data,
         bytes calldata _operatorData
     ) external returns (bool success_, uint256 holdId_);
 
     function protectedCreateHoldByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
-        address _from,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data,
-        uint256 _deadline,
-        uint256 nonce,
-        bytes calldata _signature
+        ProtectedHold memory _protectedHold,
+        address _from
     ) external returns (bool success_, uint256 holdId_);
 
     function executeHoldByPartition(

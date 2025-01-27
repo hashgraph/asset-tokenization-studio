@@ -225,55 +225,39 @@ abstract contract Hold is
 {
     function createHoldByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data
+        Hold calldata _hold
     )
         external
         virtual
         override
         onlyUnpaused
-        onlyValidAddress(_escrow)
+        onlyValidAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldByPartition(
             _partition,
-            _amount,
-            _escrow,
             _msgSender(),
-            _to,
-            _expirationTimestamp,
-            _data,
+            _hold,
             ''
         );
 
         emit HeldByPartition(
             _msgSender(),
             _msgSender(),
-            _escrow,
             _partition,
             holdId_,
-            _amount,
-            _expirationTimestamp,
-            _to,
-            _data,
+            _hold,
             ''
         );
     }
 
     function createHoldFromByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
+        Hold calldata _hold,
         address _from,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data,
         bytes calldata _operatorData
     )
         external
@@ -281,45 +265,33 @@ abstract contract Hold is
         override
         onlyUnpaused
         onlyValidAddress(_from)
-        onlyValidAddress(_escrow)
+        onlyValidAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldFromByPartition(
             _partition,
-            _amount,
-            _escrow,
             _from,
-            _to,
-            _expirationTimestamp,
-            _data,
+            _hold,
             _operatorData
         );
 
         emit HeldByPartition(
             _msgSender(),
             _from,
-            _escrow,
             _partition,
             holdId_,
-            _amount,
-            _expirationTimestamp,
-            _to,
-            _data,
+            _hold,
             _operatorData
         );
     }
 
     function operatorCreateHoldByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
+        Hold calldata _hold,
         address _from,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data,
         bytes calldata _operatorData
     )
         external
@@ -327,7 +299,7 @@ abstract contract Hold is
         override
         onlyUnpaused
         onlyValidAddress(_from)
-        onlyValidAddress(_escrow)
+        onlyValidAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyOperator(_partition, _from)
         onlyUnProtectedPartitionsOrWildCardRole
@@ -335,37 +307,25 @@ abstract contract Hold is
     {
         (success_, holdId_) = _createHoldByPartition(
             _partition,
-            _amount,
-            _escrow,
             _from,
-            _to,
-            _expirationTimestamp,
-            _data,
+            _hold,
             _operatorData
         );
 
         emit HeldByPartition(
             _msgSender(),
             _from,
-            _escrow,
             _partition,
             holdId_,
-            _amount,
-            _expirationTimestamp,
-            _to,
-            _data,
+            _hold,
             _operatorData
         );
     }
 
     function controllerCreateHoldByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
+        Hold calldata _hold,
         address _from,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data,
         bytes calldata _operatorData
     )
         external
@@ -373,7 +333,7 @@ abstract contract Hold is
         override
         onlyUnpaused
         onlyValidAddress(_from)
-        onlyValidAddress(_escrow)
+        onlyValidAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_CONTROLLER_ROLE)
         onlyControllable
@@ -382,76 +342,48 @@ abstract contract Hold is
     {
         (success_, holdId_) = _createHoldByPartition(
             _partition,
-            _amount,
-            _escrow,
             _from,
-            _to,
-            _expirationTimestamp,
-            _data,
+            _hold,
             _operatorData
         );
 
         emit HeldByPartition(
             _msgSender(),
             _from,
-            _escrow,
             _partition,
             holdId_,
-            _amount,
-            _expirationTimestamp,
-            _to,
-            _data,
+            _hold,
             _operatorData
         );
     }
 
     function protectedCreateHoldByPartition(
         bytes32 _partition,
-        uint256 _amount,
-        address _escrow,
-        address _from,
-        address _to,
-        uint256 _expirationTimestamp,
-        bytes calldata _data,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
+        ProtectedHold memory _protectedHold,
+        address _from
     )
         external
         virtual
         override
         onlyUnpaused
         onlyValidAddress(_from)
-        onlyValidAddress(_escrow)
+        onlyValidAddress(_protectedHold.hold.escrow)
         onlyRole(_protectedPartitionsRole(_partition))
-        checkControlList(_from)
-        checkControlList(_to)
         onlyProtectedPartitions
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _protectedCreateHoldByPartition(
             _partition,
-            _amount,
-            _escrow,
             _from,
-            _to,
-            _expirationTimestamp,
-            _data,
-            _deadline,
-            _nounce,
-            _signature
+            _protectedHold
         );
 
         emit HeldByPartition(
             _msgSender(),
             _from,
-            _escrow,
             _partition,
             holdId_,
-            _amount,
-            _expirationTimestamp,
-            _to,
-            _data,
+            _protectedHold.hold,
             ''
         );
     }
