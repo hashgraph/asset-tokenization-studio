@@ -210,9 +210,17 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
 import {HoldStorageWrapper} from './HoldStorageWrapper.sol';
+import {
+    ERC1410ControllerStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
+abstract contract Hold is
+    IHold,
+    IStaticFunctionSelectors,
+    HoldStorageWrapper,
+    ERC1410ControllerStorageWrapper
+{
     function createHoldByPartition(
         bytes32 _partition,
         uint256 _amount,
@@ -225,16 +233,18 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
         virtual
         override
         onlyUnpaused
+        onlyValidAddress(_escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
         return
-            _holdByPartition(
+            _createHoldByPartition(
                 _partition,
                 _amount,
                 _escrow,
-                address(0),
+                msgSender(),
                 _to,
                 _expirationTimestamp,
                 _data,
@@ -256,12 +266,15 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
         virtual
         override
         onlyUnpaused
+        onlyValidAddress(_from)
+        onlyValidAddress(_escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
         return
-            _holdByPartition(
+            _createHoldFromByPartition(
                 _partition,
                 _amount,
                 _escrow,
@@ -287,19 +300,15 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
         virtual
         override
         onlyUnpaused
+        onlyValidAddress(_from)
+        onlyValidAddress(_escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
-        checkControlList(_msgSender())
-        checkControlList(_from)
-        checkControlList(_to)
         onlyOperator(_partition, _from)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
-        {
-            _checkValidAddress(_to);
-        }
         return
-            _holdByPartition(
+            _createHoldByPartition(
                 _partition,
                 _amount,
                 _escrow,
@@ -325,13 +334,16 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
         virtual
         override
         onlyUnpaused
+        onlyValidAddress(_from)
+        onlyValidAddress(_escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_CONTROLLER_ROLE)
         onlyControllable
+        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
         return
-            _holdByPartition(
+            _createHoldByPartition(
                 _partition,
                 _amount,
                 _escrow,
@@ -359,6 +371,8 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
         virtual
         override
         onlyUnpaused
+        onlyValidAddress(_from)
+        onlyValidAddress(_escrow)
         onlyRole(_protectedPartitionsRole(_partition))
         checkControlList(_from)
         checkControlList(_to)

@@ -209,6 +209,9 @@ import {LibCommon} from '../common/LibCommon.sol';
 import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {LocalContext} from '../context/LocalContext.sol';
 import {HoldDataStorage} from '../interfaces/hold/IHold.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -223,7 +226,7 @@ abstract contract HoldStorageWrapperRead is LocalContext {
         bytes32 position = _HOLD_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            lock_.slot := position
+            hold_.slot := position
         }
     }
 }

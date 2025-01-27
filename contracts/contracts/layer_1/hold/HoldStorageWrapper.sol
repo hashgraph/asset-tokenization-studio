@@ -205,6 +205,7 @@
 
 pragma solidity 0.8.18;
 
+import {ERC20StorageWrapper} from '../ERC1400/ERC20/ERC20StorageWrapper.sol';
 import {
     SnapshotsStorageWrapper
 } from '../snapshots/SnapshotsStorageWrapper.sol';
@@ -213,10 +214,14 @@ import {
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract HoldStorageWrapper is IHold, SnapshotsStorageWrapper {
+abstract contract HoldStorageWrapper is
+    IHold,
+    ERC20StorageWrapper,
+    SnapshotsStorageWrapper
+{
     using EnumerableSet for EnumerableSet.UintSet;
 
-    function _holdByPartition(
+    function _createHoldByPartition(
         bytes32 _partition,
         uint256 _amount,
         address _escrow,
@@ -227,13 +232,11 @@ abstract contract HoldStorageWrapper is IHold, SnapshotsStorageWrapper {
         bytes calldata _operatorData
     ) internal virtual returns (bool success_, uint256 holdId_) {
         _beforeHold(_partition, _from, _to);
-
-        address tokenHolder = _from != address(0) ? _from : _to;
-        _reduceBalanceByPartition(tokenHolder, _amount, _partition);
+        _reduceBalanceByPartition(_from, _amount, _partition);
 
         HoldDataStorage storage holdStorage = _holdStorage();
 
-        holdId_ = ++holdStorage.holdNextId[tokenHolder][_partition];
+        holdId_ = ++holdStorage.holdNextId[_from][_partition];
         escrowId_ = ++holdStorage.escrow_holdNextId[_escrow][_partition];
 
         HoldData memory hold = HoldData(
@@ -241,7 +244,7 @@ abstract contract HoldStorageWrapper is IHold, SnapshotsStorageWrapper {
             _amount,
             _expirationTimestamp,
             _escrow,
-            tokenHolder,
+            _from,
             _data,
             _operatorData
         );
@@ -252,19 +255,19 @@ abstract contract HoldStorageWrapper is IHold, SnapshotsStorageWrapper {
             holdId_
         );
 
-        holdStorage.holds[tokenHolder][_partition].push(hold);
-        holdStorage.escrow_holds[tokenHolder][_partition].push(escrow);
-        holdStorage.holdIds[tokenHolder][_partition].add(holdId_);
-        holdStorage.escrow_holdIds[tokenHolder][_partition].add(escrowId_);
-        holdStorage.holdsIndex[tokenHolder][_partition][holdId_] = holdStorage
-        .holds[tokenHolder][_partition].length;
-        holdStorage.heldAmountByPartition[tokenHolder][_partition] += _amount;
+        holdStorage.holds[_from][_partition].push(hold);
+        holdStorage.escrow_holds[_from][_partition].push(escrow);
+        holdStorage.holdIds[_from][_partition].add(holdId_);
+        holdStorage.escrow_holdIds[_from][_partition].add(escrowId_);
+        holdStorage.holdsIndex[_from][_partition][holdId_] = holdStorage
+        .holds[_from][_partition].length;
+        holdStorage.heldAmountByPartition[_from][_partition] += _amount;
 
         success_ = true;
 
         emit HeldByPartition(
             _msgSender(),
-            tokenHolder,
+            _from,
             _escrow,
             _partition,
             holdId_,
@@ -274,6 +277,32 @@ abstract contract HoldStorageWrapper is IHold, SnapshotsStorageWrapper {
             _data,
             _operatorData
         );
+    }
+
+    function _createHoldFromByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _escrow,
+        address _from,
+        address _to,
+        uint256 _expirationTimestamp,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) internal virtual returns (bool success_, uint256 holdId_) {
+        if (_from != _msgSender() && !_isOperator(_msgSender(), _from)) {
+            _decreaseAllowance(_from, _amount);
+        }
+        return
+            _createHoldByPartition(
+                _partition,
+                _amount,
+                _escrow,
+                _from,
+                _to,
+                _expirationTimestamp,
+                _data,
+                _operatorData
+            );
     }
 
     function _protectedCreateHoldByPartition(
@@ -309,7 +338,7 @@ abstract contract HoldStorageWrapper is IHold, SnapshotsStorageWrapper {
         _setNounce(_nounce, _from);
 
         return
-            _holdByPartition(
+            _createHoldByPartition(
                 _partition,
                 _amount,
                 _escrow,
