@@ -207,7 +207,7 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {HoldStorageWrapper_2} from './HoldStorageWrapper_2.sol';
-import {HoldStorageWrapper_2_Read} from './HoldStorageWrapper_2_Read.sol';
+//import {HoldStorageWrapper_2_Read} from './HoldStorageWrapper_2_Read.sol';
 import {HoldStorageWrapper} from '../../layer_1/hold/HoldStorageWrapper.sol';
 import {Hold} from '../../layer_1/hold/Hold.sol';
 import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
@@ -218,8 +218,8 @@ import {
 } from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-abstract contract Hold_2 is Hold, HoldStorageWrapper_2 {
-    function _addPartitionTo(
+contract Hold_2 is Hold, HoldStorageWrapper_2 {
+    /*function _addPartitionTo(
         uint256 _value,
         address _account,
         bytes32 _partition
@@ -229,7 +229,7 @@ abstract contract Hold_2 is Hold, HoldStorageWrapper_2 {
         override(ERC1410BasicStorageWrapperRead, HoldStorageWrapper_2_Read)
     {
         HoldStorageWrapper_2_Read._addPartitionTo(_value, _account, _partition);
-    }
+    }*/
 
     function getStaticResolverKey()
         external
@@ -247,7 +247,55 @@ abstract contract Hold_2 is Hold, HoldStorageWrapper_2 {
         virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
-    {}
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](15);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .createHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .createHoldFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .executeHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .releaseHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .reclaimHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHeldAmountForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldCountForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldCountForEscrowByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldsIdForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldsIdForEscrowByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldForEscrowByPartition
+            .selector;
+    }
 
     function getStaticInterfaceIds()
         external
@@ -259,6 +307,16 @@ abstract contract Hold_2 is Hold, HoldStorageWrapper_2 {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IHold).interfaceId;
+    }
+
+    function _beforeTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual override {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
