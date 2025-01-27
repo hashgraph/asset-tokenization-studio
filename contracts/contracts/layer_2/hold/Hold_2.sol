@@ -216,6 +216,7 @@ import {_HOLD_RESOLVER_KEY} from '../../layer_1/constants/resolverKeys.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 abstract contract Hold_2 is Hold, HoldStorageWrapper_2 {
@@ -229,6 +230,26 @@ abstract contract Hold_2 is Hold, HoldStorageWrapper_2 {
         override(ERC1410BasicStorageWrapperRead, HoldStorageWrapper_2_Read)
     {
         HoldStorageWrapper_2_Read._addPartitionTo(_value, _account, _partition);
+    }
+
+    function _executeHoldByPartition(
+        bytes32 _partition,
+        uint256 _escrowId,
+        address _tokenHolder,
+        address _to
+    )
+        internal
+        virtual
+        override(HoldStorageWrapper, HoldStorageWrapper_2)
+        returns (bool success_)
+    {
+        return
+            HoldStorageWrapper_2._releaseByPartition(
+                _partition,
+                _escrowId,
+                _tokenHolder,
+                _to
+            );
     }
 
     function getStaticResolverKey()

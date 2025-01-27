@@ -214,6 +214,7 @@ import {HoldDataStorage} from '../interfaces/hold/IHold.sol';
 
 abstract contract HoldStorageWrapperRead is LocalContext {
     using LibCommon for EnumerableSet.UintSet;
+
     function _holdStorage()
         internal
         pure
@@ -225,5 +226,88 @@ abstract contract HoldStorageWrapperRead is LocalContext {
         assembly {
             lock_.slot := position
         }
+    }
+
+    function _getEscrowHoldIndex(
+        bytes32 _partition,
+        address _escrowAddress,
+        uint256 _escrowId
+    ) internal {
+        return
+            _holdStorage().escrow_holdsIndex[_escrowAddress][_partition][
+                _escrowId
+            ];
+    }
+
+    function _getHoldIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal {
+        return _holdStorage().holdsIndex[_tokenHolder][_partition][_holdId];
+    }
+
+    function _getHoldByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex
+    ) internal view returns (HoldData memory) {
+        HoldDataStorage storage holdStorage = _holdStorage();
+
+        if (_holdIndex == 0)
+            return
+                HoldData({
+                    id: 0,
+                    amount: 0,
+                    expirationTimestamp: 0,
+                    escrow: address(0),
+                    to: address(0),
+                    data: '',
+                    operatorData: ''
+                });
+
+        _holdIndex--;
+
+        assert(_holdIndex < holdStorage.holds[_tokenHolder][_partition].length);
+
+        return holdStorage.holds[_tokenHolder][_partition][_holdIndex];
+    }
+
+    function _getEscrowHoldByIndex(
+        bytes32 _partition,
+        address _escrowAddress,
+        uint256 _escrowHoldIndex
+    ) internal view returns (EscrowHoldData memory) {
+        HoldDataStorage storage holdStorage = _holdStorage();
+
+        if (_escrowHoldIndex == 0)
+            return
+                EscrowHoldData({escrow_id: 0, _tokenHolder: address(0), id: 0});
+
+        _escrowHoldIndex--;
+
+        assert(
+            _escrowHoldIndex <
+                holdStorage.escrow_holds[_escrowAddress][_partition].length
+        );
+
+        return
+            holdStorage.escrow_holds[_escrowAddress][_partition][
+                _escrowHoldIndex
+            ];
+    }
+
+    function _getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 lockCount_) {
+        return _holdStorage().holds[_tokenHolder][_partition].length;
+    }
+
+    function _getEscrowHoldCountForByPartition(
+        bytes32 _partition,
+        address _escrowAddress
+    ) internal view virtual returns (uint256 lockCount_) {
+        return _holdStorage().escrow_holds[_escrowAddress][_partition].length;
     }
 }

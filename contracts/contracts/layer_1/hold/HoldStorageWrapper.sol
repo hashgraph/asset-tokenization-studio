@@ -322,29 +322,30 @@ abstract contract HoldStorageWrapper is IHold, SnapshotsStorageWrapper {
             );
     }
 
-    function _beforeHold(
-        bytes32 partition,
-        address from,
-        address to
-    ) internal virtual override {
-        if (from == address(0)) {
-            _updateAccountHeldBalancesSnapshot(to, partition);
-        } else if (to == address(0)) {
-            _updateAccountHeldBalancesSnapshot(from, partition);
-        } else {
-            _updateAccountHeldBalancesSnapshot(from, partition);
-            _updateAccountHeldBalancesSnapshot(to, partition);
-        }
-    }
-
     function _executeHoldByPartition(
         bytes32 _partition,
-        uint256 _holdId,
+        uint256 _escrowId,
         address _tokenHolder,
         address _to
     ) internal virtual returns (bool success_) {
-        _beforeExecuteHold(_partition, _holdId, _tokenHolder);
-        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+        address escrowAddress = _msgSender();
+        _beforeHold(_partition, _tokenHolder, _to);
+        uint256 escrowHoldIndex = _getEscrowHoldIndex(
+            _partition,
+            escrowAddress,
+            _escrowId
+        );
+        EscrowHoldData memory escrowHold = _getEscrowHoldByIndex(
+            _partition,
+            escrowAddress,
+            escrowHoldIndex
+        );
+
+        uint256 holdIndex = _getHoldIndex(
+            _partition,
+            escrowAddress,
+            escrowHold.id
+        );
 
         HoldData memory hold = _getHoldByIndex(
             _partition,
@@ -361,30 +362,121 @@ abstract contract HoldStorageWrapper is IHold, SnapshotsStorageWrapper {
         if (holdStorage.heldAmountByPartition[_tokenHolder][_partition] == 0) {
             holdStorage.holdsIndex[_tokenHolder][_partition][hold.id] = 0;
             holdStorage.holdIds[_tokenHolder][_partition].remove(hold.id);
-        }
-
-        uint256 lastIndex = _getHoldCountForByPartition(
-            _partition,
-            _tokenHolder
-        );
-
-        if (holdIndex < lastIndex) {
-            HoldData memory lastHold = _getHoldByIndex(
-                _partition,
-                _tokenHolder,
-                lastIndex
+            holdStorage.escrow_holdsIndex[escrowAddress][_partition][
+                escrowHold.id
+            ] = 0;
+            holdStorage.escrow_holdIds[escrowAddress][_partition].remove(
+                escrowHold.id
             );
-            _setLockAtIndex(_partition, _tokenHolder, lockIndex, lastHold);
+            uint256 holdLastIndex = _getHoldCountForByPartition(
+                _partition,
+                _tokenHolder
+            );
+
+            uint256 escrowLastIndex = _getEscrowHoldCountForByPartition(
+                _partition,
+                escrowAddress
+            );
+
+            if (holdIndex < holdLastIndex) {
+                HoldData memory lastHold = _getHoldByIndex(
+                    _partition,
+                    _tokenHolder,
+                    holdLastIndex
+                );
+                _setHoldAtIndex(_partition, _tokenHolder, holdIndex, lastHold);
+            }
+
+            if (escrowHoldIndex < escrowLastIndex) {
+                EscrowHoldData memory lastEscrowHold = _getEscrowHoldByIndex(
+                    _partition,
+                    escrowAddress,
+                    escrowLastIndex
+                );
+                _setEscrowHoldAtIndex(
+                    _partition,
+                    escrowAddress,
+                    escrowHoldIndex,
+                    lastEscrowHold
+                );
+            }
+
+            holdStorage.holds[_tokenHolder][_partition].pop();
+            holdStorage.escrow_holds[escrowAddress][_partition].pop();
         }
 
-        holdStorage.holds[_tokenHolder][_partition].pop();
-
-        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
-            _addPartitionTo(hold.amount, _tokenHolder, _partition);
+        if (!_validPartitionForReceiver(_partition, _to)) {
+            _addPartitionTo(hold.amount, _to, _partition);
         } else {
-            _increaseBalanceByPartition(_tokenHolder, hold.amount, _partition);
+            _increaseBalanceByPartition(_to, hold.amount, _partition);
         }
 
         success_ = true;
+    }
+
+    function _setHoldAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex,
+        HoldData memory hold
+    ) internal virtual {
+        HoldDataStorage storage holdStorage = _holdStorage();
+
+        holdStorage.holds[_tokenHolder][_partition][_holdIndex - 1].id = hold
+            .id;
+        holdStorage
+        .holds[_tokenHolder][_partition][_lockIndex - 1].amount = hold.amount;
+        holdStorage
+        .holds[_tokenHolder][_partition][_lockIndex - 1]
+            .expirationTimestamp = hold.expirationTimestamp;
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1].escrow = hold.escrow;
+        holdStorage.holds[_tokenHolder][_partition][_lockIndex - 1].to = hold
+            .to;
+        holdStorage.holds[_tokenHolder][_partition][_lockIndex - 1].data = hold
+            .data;
+        holdStorage
+        .holds[_tokenHolder][_partition][_lockIndex - 1].operatorData = hold
+            .operatorData;
+
+        holdStorage.holdsIndex[_tokenHolder][_partition][holds.id] = _holdIndex;
+    }
+
+    function _setEscrowHoldAtIndex(
+        bytes32 _partition,
+        address _escrowAddress,
+        uint256 _escrowHoldIndex,
+        EscrowHoldData memory escrowHold
+    ) internal virtual {
+        HoldDataStorage storage holdStorage = _holdStorage();
+
+        holdStorage
+        .escrow_holds[_escrowAddress][_partition][_holdIndex - 1]
+            .escrow_id = escrowHold.escrow_id;
+        holdStorage
+        .escrow_holds[_escrowAddress][_partition][_holdIndex - 1]
+            .tokenHolder = escrowHold.tokenHolder;
+        holdStorage
+        .escrow_holds[_escrowAddress][_partition][_holdIndex - 1]
+            .id = escrowHold.id;
+
+        holdStorage.escrow_holdsIndex[_escrowAddress][_partition][
+                escrowHold.id
+            ] = _escrowHoldIndex;
+    }
+
+    function _beforeHold(
+        bytes32 partition,
+        address from,
+        address to
+    ) internal virtual override {
+        if (from == address(0)) {
+            _updateAccountHeldBalancesSnapshot(to, partition);
+        } else if (to == address(0)) {
+            _updateAccountHeldBalancesSnapshot(from, partition);
+        } else {
+            _updateAccountHeldBalancesSnapshot(from, partition);
+            _updateAccountHeldBalancesSnapshot(to, partition);
+        }
     }
 }

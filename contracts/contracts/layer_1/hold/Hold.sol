@@ -380,12 +380,10 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
                 _signature
             );
     }
-}
 
-abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
     function executeHoldByPartition(
         bytes32 _partition,
-        uint256 _holdId,
+        uint256 _escrowId,
         address _tokenHolder,
         address _to,
         uint256 _amount
@@ -393,16 +391,15 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
         external
         virtual
         override
-        onlyEscrowAccount(_msgSender())
         onlyValidTo(_to)
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
+        onlyWithValidHoldId(_partition, _tokenHolder, _escrowId)
         returns (bool success_)
     {
         success_ = _executeHoldByPartition(
             _partition,
-            _holdId,
+            _escrowId,
             _tokenHolder,
             _to
         );
@@ -410,7 +407,7 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
             _msgSender(),
             _tokenHolder,
             _partition,
-            _holdId
+            _escrowId
         );
     }
 }

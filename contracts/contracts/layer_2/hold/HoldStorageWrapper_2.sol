@@ -213,8 +213,90 @@ import {
     AdjustBalances_CD_Lib
 } from '../adjustBalances/AdjustBalances_CD_Lib.sol';
 import {HoldStorageWrapper_2_Read} from './HoldStorageWrapper_2_Read.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {}
+abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
+    function _executeHoldByPartition(
+        bytes32 _partition,
+        uint256 _escrowId,
+        address _tokenHolder,
+        address _to
+    ) internal virtual override returns (bool success_) {
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+
+        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
+            _partition,
+            _tokenHolder,
+            _to
+        );
+
+        uint256 abaf = _updateTotalHold(
+            _partition,
+            _tokenHolder,
+            _to,
+            adjustBalancesStorage
+        );
+
+        _updateLockByIndex(_partition, _lockId, _tokenHolder, abaf);
+
+        success_ = super._releaseByPartition(_partition, _lockId, _tokenHolder);
+
+        adjustBalancesStorage.labafLocks[_tokenHolder][_partition].pop();
+    }
+
+    function _updateTotalHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        address _to,
+        AdjustBalancesStorage storage adjustBalancesStorage
+    ) internal returns (uint256 ABAF_) {
+        ABAF_ = AdjustBalances_CD_Lib.getABAF();
+
+        uint256 labaf = AdjustBalances_CD_Lib.getTotalHoldLABAF(_tokenHolder);
+        uint256 LABAFByPartition = AdjustBalances_CD_Lib
+            .getTotalHoldLABAFByPartition(_partition, _tokenHolder);
+
+        if (ABAF_ != labaf) {
+            uint256 factor = AdjustBalanceLib.calculateFactor(ABAF_, labaf);
+
+            _updateTotalHeldAmountAndLABAF(
+                _tokenHolder,
+                factor,
+                adjustBalancesStorage,
+                ABAF_
+            );
+        }
+
+        if (ABAF_ != LABAFByPartition) {
+            uint256 factorByPartition = AdjustBalanceLib.calculateFactor(
+                ABAF_,
+                LABAFByPartition
+            );
+
+            _updateTotalLockedAmountAndLABAFByPartition(
+                _partition,
+                _tokenHolder,
+                factorByPartition,
+                adjustBalancesStorage,
+                ABAF_
+            );
+        }
+    }
+
+    function _updateTotalHeldAmountAndLABAF(
+        address _tokenHolder,
+        uint256 _factor,
+        AdjustBalancesStorage storage adjustBalancesStorage,
+        uint256 _abaf
+    ) internal virtual {
+        if (_factor == 1) return;
+        HoldataStorage storage holdStorage = _holdStorage();
+
+        holdStorage.totalHeldAmount[_tokenHolder] *= _factor;
+        adjustBalancesStorage.labafsTotalHeld[_tokenHolder] = _abaf;
+    }
+}
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
