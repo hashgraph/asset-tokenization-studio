@@ -218,6 +218,9 @@ import {
     checkNounceAndDeadline,
     verify
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
+import {
+    _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH
+} from '../constants/values.sol';
 
 abstract contract HoldStorageWrapper is
     SnapshotsStorageWrapper,
@@ -288,15 +291,7 @@ abstract contract HoldStorageWrapper is
             _blockTimestamp()
         );
 
-        /*_checkTransferSignature(
-            _partition,
-            _from,
-            _protectedHold.hold.to,
-            _protectedHold.hold.amount,
-            _protectedHold.deadline,
-            _protectedHold.nonce,
-            _protectedHold.signature
-        );*/
+        _checkCreateHoldSignature(_partition, _from, _protectedHold);
 
         _setNounce(_protectedHold.nonce, _from);
 
@@ -306,6 +301,53 @@ abstract contract HoldStorageWrapper is
                 _from,
                 _protectedHold.hold,
                 '0x'
+            );
+    }
+
+    function _checkCreateHoldSignature(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold
+    ) internal view virtual {
+        if (!_isCreateHoldSignatureValid(_partition, _from, _protectedHold))
+            revert WrongSignature();
+    }
+
+    function _isCreateHoldSignatureValid(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold
+    ) internal view virtual returns (bool) {
+        bytes32 functionHash = getMessageHashCreateHold(
+            _partition,
+            _from,
+            _protectedHold
+        );
+        return
+            verify(
+                _from,
+                functionHash,
+                _protectedHold.signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
+            );
+    }
+
+    function getMessageHashCreateHold(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold
+    ) internal pure returns (bytes32) {
+        return
+            keccak256(
+                abi.encode(
+                    _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
+                    _partition,
+                    _from,
+                    _protectedHold
+                )
             );
     }
 

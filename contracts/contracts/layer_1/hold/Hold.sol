@@ -256,8 +256,8 @@ abstract contract Hold is
 
     function createHoldFromByPartition(
         bytes32 _partition,
-        Hold calldata _hold,
         address _from,
+        Hold calldata _hold,
         bytes calldata _operatorData
     )
         external
@@ -290,8 +290,8 @@ abstract contract Hold is
 
     function operatorCreateHoldByPartition(
         bytes32 _partition,
-        Hold calldata _hold,
         address _from,
+        Hold calldata _hold,
         bytes calldata _operatorData
     )
         external
@@ -324,8 +324,8 @@ abstract contract Hold is
 
     function controllerCreateHoldByPartition(
         bytes32 _partition,
-        Hold calldata _hold,
         address _from,
+        Hold calldata _hold,
         bytes calldata _operatorData
     )
         external
@@ -359,8 +359,8 @@ abstract contract Hold is
 
     function protectedCreateHoldByPartition(
         bytes32 _partition,
-        ProtectedHold memory _protectedHold,
-        address _from
+        address _from,
+        ProtectedHold memory _protectedHold
     )
         external
         virtual

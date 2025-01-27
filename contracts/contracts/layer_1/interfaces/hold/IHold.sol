@@ -291,29 +291,29 @@ interface IHold {
 
     function createHoldFromByPartition(
         bytes32 _partition,
-        Hold calldata _hold,
         address _from,
+        Hold calldata _hold,
         bytes calldata _operatorData
     ) external returns (bool success_, uint256 holdId_);
 
     function operatorCreateHoldByPartition(
         bytes32 _partition,
-        Hold calldata _hold,
         address _from,
+        Hold calldata _hold,
         bytes calldata _operatorData
     ) external returns (bool success_, uint256 holdId_);
 
     function controllerCreateHoldByPartition(
         bytes32 _partition,
-        Hold calldata _hold,
         address _from,
+        Hold calldata _hold,
         bytes calldata _operatorData
     ) external returns (bool success_, uint256 holdId_);
 
     function protectedCreateHoldByPartition(
         bytes32 _partition,
-        ProtectedHold memory _protectedHold,
-        address _from
+        address _from,
+        ProtectedHold memory _protectedHold
     ) external returns (bool success_, uint256 holdId_);
 
     function executeHoldByPartition(
