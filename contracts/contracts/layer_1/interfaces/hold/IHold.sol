@@ -215,6 +215,7 @@ struct HoldData {
     address escrow;
     address to;
     bytes data;
+    bytes operatorData;
 }
 
 struct EscrowHoldData {
@@ -233,6 +234,7 @@ struct HoldDataStorage {
     mapping(address => mapping(bytes32 => EscrowHoldData[])) escrow_holds;
     mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) escrow_holdIds;
     mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) escrow_holdsIndex;
+    mapping(address => mapping(bytes32 => uint256)) escrow_holdNextId;
 }
 
 interface IHold {
@@ -245,7 +247,8 @@ interface IHold {
         uint256 amount,
         uint256 expirationTimestamp,
         address to,
-        bytes data
+        bytes data,
+        bytes operatorData
     );
 
     event HoldByPartitionExecuted(

@@ -213,6 +213,126 @@ import {
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract HoldStorageWrapper is SnapshotsStorageWrapper {
+abstract contract HoldStorageWrapper is IHold, SnapshotsStorageWrapper {
     using EnumerableSet for EnumerableSet.UintSet;
+
+    function _holdByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _escrow,
+        address _from,
+        address _to,
+        uint256 _expirationTimestamp,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) internal virtual returns (bool success_, uint256 holdId_) {
+        _beforeHold(_partition, _from, _to);
+
+        address tokenHolder = _from != address(0) ? _from : _to;
+        _reduceBalanceByPartition(tokenHolder, _amount, _partition);
+
+        HoldDataStorage storage holdStorage = _holdStorage();
+
+        holdId_ = ++holdStorage.holdNextId[tokenHolder][_partition];
+        escrowId_ = ++holdStorage.escrow_holdNextId[_escrow][_partition];
+
+        HoldData memory hold = HoldData(
+            holdId_,
+            _amount,
+            _expirationTimestamp,
+            _escrow,
+            tokenHolder,
+            _data,
+            _operatorData
+        );
+
+        EscrowHoldData memory escrow = EscrowHoldData(
+            escrowId_,
+            _escrow,
+            holdId_
+        );
+
+        holdStorage.holds[tokenHolder][_partition].push(hold);
+        holdStorage.escrow_holds[tokenHolder][_partition].push(escrow);
+        holdStorage.holdIds[tokenHolder][_partition].add(holdId_);
+        holdStorage.escrow_holdIds[tokenHolder][_partition].add(escrowId_);
+        holdStorage.holdsIndex[tokenHolder][_partition][holdId_] = holdStorage
+        .holds[tokenHolder][_partition].length;
+        holdStorage.heldAmountByPartition[tokenHolder][_partition] += _amount;
+
+        success_ = true;
+
+        emit HeldByPartition(
+            _msgSender(),
+            tokenHolder,
+            _escrow,
+            _partition,
+            holdId_,
+            _amount,
+            _expirationTimestamp,
+            _to,
+            _data,
+            _operatorData
+        );
+    }
+
+    function _protectedCreateHoldByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _escrow,
+        address _from,
+        address _to,
+        uint256 _expirationTimestamp,
+        bytes calldata _data,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 holdId_) {
+        checkNounceAndDeadline(
+            _nounce,
+            _from,
+            _getNounceFor(_from),
+            _deadline,
+            _blockTimestamp()
+        );
+
+        _checkTransferSignature(
+            _partition,
+            _from,
+            _to,
+            _amount,
+            _deadline,
+            _nounce,
+            _signature
+        );
+
+        _setNounce(_nounce, _from);
+
+        return
+            _holdByPartition(
+                _partition,
+                _amount,
+                _escrow,
+                _from,
+                _to,
+                _expirationTimestamp,
+                _data,
+                ''
+            );
+    }
+
+    function _beforeHold(
+        bytes32 partition,
+        address from,
+        address to
+    ) internal virtual override {
+        if (from == address(0)) {
+            _updateAccountHeldBalancesSnapshot(to, partition);
+        } else if (to == address(0)) {
+            _updateAccountHeldBalancesSnapshot(from, partition);
+        } else {
+            _updateAccountHeldBalancesSnapshot(from, partition);
+            _updateAccountHeldBalancesSnapshot(to, partition);
+        }
+    }
 }

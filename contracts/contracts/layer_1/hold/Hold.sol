@@ -208,9 +208,175 @@ pragma solidity 0.8.18;
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_DEFAULT_PARTITION} from '../constants/values.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
 import {HoldStorageWrapper} from './HoldStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {}
+abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
+    function createHoldByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _escrow,
+        address _to,
+        uint256 _expirationTimestamp,
+        bytes calldata _data
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        returns (bool success_, uint256 holdId_)
+    {
+        return
+            _holdByPartition(
+                _partition,
+                _amount,
+                _escrow,
+                address(0),
+                _to,
+                _expirationTimestamp,
+                _data,
+                ''
+            );
+    }
+
+    function createHoldFromByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _escrow,
+        address _from,
+        address _to,
+        uint256 _expirationTimestamp,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        returns (bool success_, uint256 holdId_)
+    {
+        return
+            _holdByPartition(
+                _partition,
+                _amount,
+                _escrow,
+                _from,
+                _to,
+                _expirationTimestamp,
+                _data,
+                _operatorData
+            );
+    }
+
+    function operatorCreateHoldByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _escrow,
+        address _from,
+        address _to,
+        uint256 _expirationTimestamp,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        checkControlList(_msgSender())
+        checkControlList(_from)
+        checkControlList(_to)
+        onlyOperator(_partition, _from)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 holdId_)
+    {
+        {
+            _checkValidAddress(_to);
+        }
+        return
+            _holdByPartition(
+                _partition,
+                _amount,
+                _escrow,
+                _from,
+                _to,
+                _expirationTimestamp,
+                _data,
+                _operatorData
+            );
+    }
+
+    function controllerCreateHoldByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _escrow,
+        address _from,
+        address _to,
+        uint256 _expirationTimestamp,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyRole(_CONTROLLER_ROLE)
+        onlyControllable
+        returns (bool success_, uint256 holdId_)
+    {
+        return
+            _holdByPartition(
+                _partition,
+                _amount,
+                _escrow,
+                _from,
+                _to,
+                _expirationTimestamp,
+                _data,
+                _operatorData
+            );
+    }
+
+    function protectedCreateHoldByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _escrow,
+        address _from,
+        address _to,
+        uint256 _expirationTimestamp,
+        bytes calldata _data,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_protectedPartitionsRole(_partition))
+        checkControlList(_from)
+        checkControlList(_to)
+        onlyProtectedPartitions
+        returns (bool success_, uint256 holdId_)
+    {
+        return
+            _protectedCreateHoldByPartition(
+                _partition,
+                _amount,
+                _escrow,
+                _from,
+                _to,
+                _expirationTimestamp,
+                _data,
+                _deadline,
+                _nounce,
+                _signature
+            );
+    }
+}
