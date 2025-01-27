@@ -222,11 +222,8 @@ import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
 
 // TODO: Remove _ in contract name
 // solhint-disable-next-line
-abstract contract HoldStorageWrapper_2_Read is
-    ERC1410ScheduledTasksStorageWrapper,
-    HoldStorageWrapper
-{
-    function _addPartitionTo(
+abstract contract HoldStorageWrapper_2_Read is HoldStorageWrapper {
+    /* function _addPartitionTo(
         uint256 _value,
         address _account,
         bytes32 _partition
@@ -323,5 +320,5 @@ abstract contract HoldStorageWrapper_2_Read is
                 _partition,
                 _amount
             );
-    }
+    }*/
 }

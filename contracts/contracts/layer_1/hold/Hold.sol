@@ -455,4 +455,117 @@ abstract contract Hold is
             ''
         );
     }
+
+    function executeHoldByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder,
+        address _to,
+        uint256 _amount
+    ) external returns (bool success_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function releaseHoldByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder,
+        uint256 _amount
+    ) external returns (bool success_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function reclaimHoldByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder
+    ) external returns (bool success_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 amount_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 holdCount_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHoldCountForEscrowByPartition(
+        bytes32 _partition,
+        address _escrow
+    ) external view returns (uint256 escrowHoldCount_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (uint256[] memory holdsId_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHoldsIdForEscrowByPartition(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (uint256[] memory escrowHoldsId_) {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        external
+        view
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_
+        )
+    {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
+
+    function getHoldForEscrowByPartition(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _escrowHoldId
+    )
+        external
+        view
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address tokenHolder_,
+            uint256 id_,
+            address destination_,
+            bytes memory data_
+        )
+    {
+        // solhint-disable-next-line
+        revert('Should never reach this part');
+    }
 }
