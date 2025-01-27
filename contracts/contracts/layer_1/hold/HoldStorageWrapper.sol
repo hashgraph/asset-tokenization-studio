@@ -211,6 +211,7 @@ import {
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract HoldStorageWrapper is IHold, SnapshotsStorageWrapper {
@@ -334,5 +335,56 @@ abstract contract HoldStorageWrapper is IHold, SnapshotsStorageWrapper {
             _updateAccountHeldBalancesSnapshot(from, partition);
             _updateAccountHeldBalancesSnapshot(to, partition);
         }
+    }
+
+    function _executeHoldByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder,
+        address _to
+    ) internal virtual returns (bool success_) {
+        _beforeExecuteHold(_partition, _holdId, _tokenHolder);
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+
+        HoldData memory hold = _getHoldByIndex(
+            _partition,
+            _tokenHolder,
+            holdIndex
+        );
+
+        HoldDataStorage storage holdStorage = _holdStorage();
+
+        holdStorage.heldAmountByPartition[_tokenHolder][_partition] -= hold
+            .amount;
+        holdStorage.totalHeldAmount[_tokenHolder] -= hold.amount;
+
+        if (holdStorage.heldAmountByPartition[_tokenHolder][_partition] == 0) {
+            holdStorage.holdsIndex[_tokenHolder][_partition][hold.id] = 0;
+            holdStorage.holdIds[_tokenHolder][_partition].remove(hold.id);
+        }
+
+        uint256 lastIndex = _getHoldCountForByPartition(
+            _partition,
+            _tokenHolder
+        );
+
+        if (holdIndex < lastIndex) {
+            HoldData memory lastHold = _getHoldByIndex(
+                _partition,
+                _tokenHolder,
+                lastIndex
+            );
+            _setLockAtIndex(_partition, _tokenHolder, lockIndex, lastHold);
+        }
+
+        holdStorage.holds[_tokenHolder][_partition].pop();
+
+        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
+            _addPartitionTo(hold.amount, _tokenHolder, _partition);
+        } else {
+            _increaseBalanceByPartition(_tokenHolder, hold.amount, _partition);
+        }
+
+        success_ = true;
     }
 }

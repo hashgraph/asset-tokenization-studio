@@ -210,6 +210,7 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
 import {HoldStorageWrapper} from './HoldStorageWrapper.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
@@ -378,5 +379,38 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
                 _nounce,
                 _signature
             );
+    }
+}
+
+abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
+    function executeHoldByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder,
+        address _to,
+        uint256 _amount
+    )
+        external
+        virtual
+        override
+        onlyEscrowAccount(_msgSender())
+        onlyValidTo(_to)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
+        returns (bool success_)
+    {
+        success_ = _executeHoldByPartition(
+            _partition,
+            _holdId,
+            _tokenHolder,
+            _to
+        );
+        emit HoldByPartitionExecuted(
+            _msgSender(),
+            _tokenHolder,
+            _partition,
+            _holdId
+        );
     }
 }
