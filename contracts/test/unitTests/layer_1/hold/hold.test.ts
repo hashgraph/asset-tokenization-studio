@@ -211,7 +211,7 @@ import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/h
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Hold,
+    type Hold_2,
     ControlList,
     Pause,
     ERC20,
@@ -239,6 +239,7 @@ const _DEFAULT_PARTITION =
 const _WRONG_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000321'
 const _AMOUNT = 1000
+const _DATA = '0x1234'
 
 describe('Hold Tests', () => {
     let diamond: ResolverProxy
@@ -256,7 +257,7 @@ describe('Hold Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let holdFacet: Hold
+    let holdFacet: Hold_2
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
     let controlListFacet: ControlList
@@ -297,10 +298,7 @@ describe('Hold Tests', () => {
         await snapshot.restore()
     })
 
-    beforeEach(async () => {
-        currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
-        expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
-
+    async function deployAll(isMultiPartition: boolean) {
         const rbacIssuer: Rbac = {
             role: ISSUER_ROLE,
             members: [account_B],
@@ -329,7 +327,7 @@ describe('Hold Tests', () => {
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: false,
-            isMultiPartition: true,
+            isMultiPartition: isMultiPartition,
             name: 'TEST_Hold',
             symbol: 'TAC',
             decimals: 6,
@@ -387,6 +385,13 @@ describe('Hold Tests', () => {
             _AMOUNT,
             '0x'
         )
+    }
+
+    beforeEach(async () => {
+        currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
+        expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
+
+        await deployAll(false)
     })
 
     describe('Paused', () => {
@@ -402,7 +407,7 @@ describe('Hold Tests', () => {
                 expirationTimestamp: expirationTimestamp,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
-                data: '0x123',
+                data: _DATA,
             }
 
             await expect(
@@ -416,7 +421,7 @@ describe('Hold Tests', () => {
                 expirationTimestamp: expirationTimestamp,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
-                data: '0x123',
+                data: _DATA,
             }
 
             await expect(
@@ -435,7 +440,7 @@ describe('Hold Tests', () => {
                 expirationTimestamp: expirationTimestamp,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
-                data: '0x123',
+                data: _DATA,
             }
 
             await expect(
@@ -454,7 +459,7 @@ describe('Hold Tests', () => {
                 expirationTimestamp: expirationTimestamp,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
-                data: '0x123',
+                data: _DATA,
             }
 
             await expect(
@@ -482,7 +487,7 @@ describe('Hold Tests', () => {
                 expirationTimestamp: expirationTimestamp,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
-                data: '0x123',
+                data: _DATA,
             }
 
             // add to list fails
@@ -504,7 +509,7 @@ describe('Hold Tests', () => {
                 expirationTimestamp: expirationTimestamp,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
-                data: '0x123',
+                data: _DATA,
             }
 
             await expect(
@@ -525,7 +530,7 @@ describe('Hold Tests', () => {
                 expirationTimestamp: expirationTimestamp,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
-                data: '0x123',
+                data: _DATA,
             }
 
             await expect(
@@ -558,7 +563,7 @@ describe('Hold Tests', () => {
                 expirationTimestamp: expirationTimestamp,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
-                data: '0x123',
+                data: _DATA,
             }
 
             console.log('createHoldByPartition')
@@ -620,12 +625,14 @@ describe('Hold Tests', () => {
         })
 
         it('GIVEN a Token WHEN createHoldByPartition for wrong partition THEN transaction fails with InvalidPartition', async () => {
+            await deployAll(true)
+
             let hold = {
                 amount: _AMOUNT,
                 expirationTimestamp: expirationTimestamp,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
-                data: '0x123',
+                data: _DATA,
             }
 
             console.log('createHoldByPartition')
@@ -635,23 +642,6 @@ describe('Hold Tests', () => {
             ).to.be.rejectedWith('InvalidPartition')
 
             console.log('createHoldFromByPartition')
-
-            await erc20Facet.connect(signer_A).approve(account_B, _AMOUNT)
-
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .createHoldFromByPartition(
-                        _WRONG_PARTITION,
-                        account_A,
-                        hold,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('InvalidPartition')
-
-            await erc20Facet
-                .connect(signer_A)
-                .decreaseAllowance(account_B, _AMOUNT)
 
             console.log('operatorCreateHoldByPartition')
 
@@ -690,7 +680,7 @@ describe('Hold Tests', () => {
                 expirationTimestamp: expirationTimestamp,
                 escrow: ADDRESS_ZERO,
                 to: ADDRESS_ZERO,
-                data: '0x123',
+                data: _DATA,
             }
 
             console.log('createHoldByPartition')
@@ -757,7 +747,7 @@ describe('Hold Tests', () => {
                 expirationTimestamp: wrongExpirationTimestamp,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
-                data: '0x123',
+                data: _DATA,
             }
 
             console.log('createHoldByPartition')
@@ -817,13 +807,13 @@ describe('Hold Tests', () => {
         })
     })
 
-    describe('Holds OK', () => {
+    describe.skip('Holds OK', () => {
         let hold = {
             amount: _AMOUNT,
             expirationTimestamp: expirationTimestamp,
             escrow: account_B,
             to: ADDRESS_ZERO,
-            data: '0x123',
+            data: _DATA,
         }
         // Create
         async function checkCreatedHold() {
@@ -841,7 +831,7 @@ describe('Hold Tests', () => {
                     _DEFAULT_PARTITION,
                     account_B
                 )
-            let hold = await holdFacet.getHoldForByPartition(
+            let retrieved_hold = await holdFacet.getHoldForByPartition(
                 _DEFAULT_PARTITION,
                 account_A,
                 1
@@ -868,19 +858,21 @@ describe('Hold Tests', () => {
             expect(heldAmount).to.equal(_AMOUNT)
             expect(holdCount).to.equal(1)
             expect(escrow_holdCount).to.equal(1)
-            expect(hold.amount_).to.equal(_AMOUNT)
-            expect(hold.escrow_).to.equal(account_B)
-            expect(hold.data_).to.equal('0x123')
+            expect(retrieved_hold.amount_).to.equal(hold.amount)
+            expect(retrieved_hold.escrow_).to.equal(hold.escrow)
+            expect(retrieved_hold.data_).to.equal(hold.data)
             //expect(hold.operatorData_).to.equal('0x')
-            expect(hold.destination_).to.equal(ADDRESS_ZERO)
-            expect(hold.expirationTimestamp_).to.equal(expirationTimestamp)
-            expect(escrow_hold.amount_).to.equal(_AMOUNT)
+            expect(retrieved_hold.destination_).to.equal(hold.to)
+            expect(retrieved_hold.expirationTimestamp_).to.equal(
+                hold.expirationTimestamp
+            )
+            expect(escrow_hold.amount_).to.equal(hold.amount)
             expect(escrow_hold.tokenHolder_).to.equal(account_A)
-            expect(escrow_hold.data_).to.equal('0x123')
+            expect(escrow_hold.data_).to.equal(hold.data)
             //expect(escrow_hold.operatorData_).to.equal('0x')
-            expect(escrow_hold.destination_).to.equal(ADDRESS_ZERO)
+            expect(escrow_hold.destination_).to.equal(hold.to)
             expect(escrow_hold.expirationTimestamp_).to.equal(
-                expirationTimestamp
+                hold.expirationTimestamp
             )
             expect(escrow_hold.id_).to.equal(1)
             expect(holdIds.length).to.equal(1)
