@@ -208,11 +208,14 @@ pragma solidity 0.8.18;
 import {LibCommon} from '../common/LibCommon.sol';
 import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {LocalContext} from '../context/LocalContext.sol';
-import {HoldDataStorage} from '../interfaces/hold/IHold.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract HoldStorageWrapperRead is LocalContext {
+abstract contract HoldStorageWrapperRead is LocalContext, IHold {
     using LibCommon for EnumerableSet.UintSet;
 
     function _holdStorage()
@@ -224,7 +227,7 @@ abstract contract HoldStorageWrapperRead is LocalContext {
         bytes32 position = _HOLD_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            lock_.slot := position
+            hold_.slot := position
         }
     }
 
@@ -232,7 +235,7 @@ abstract contract HoldStorageWrapperRead is LocalContext {
         bytes32 _partition,
         address _escrowAddress,
         uint256 _escrowId
-    ) internal {
+    ) internal view returns (uint256) {
         return
             _holdStorage().escrow_holdsIndex[_escrowAddress][_partition][
                 _escrowId
@@ -243,7 +246,7 @@ abstract contract HoldStorageWrapperRead is LocalContext {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _holdId
-    ) internal {
+    ) internal view returns (uint256) {
         return _holdStorage().holdsIndex[_tokenHolder][_partition][_holdId];
     }
 
@@ -258,11 +261,13 @@ abstract contract HoldStorageWrapperRead is LocalContext {
             return
                 HoldData({
                     id: 0,
-                    amount: 0,
-                    expirationTimestamp: 0,
-                    escrow: address(0),
-                    to: address(0),
-                    data: '',
+                    hold: Hold({
+                        amount: 0,
+                        expirationTimestamp: 0,
+                        escrow: address(0),
+                        to: address(0),
+                        data: ''
+                    }),
                     operatorData: ''
                 });
 
@@ -282,7 +287,7 @@ abstract contract HoldStorageWrapperRead is LocalContext {
 
         if (_escrowHoldIndex == 0)
             return
-                EscrowHoldData({escrow_id: 0, _tokenHolder: address(0), id: 0});
+                EscrowHoldData({escrow_id: 0, tokenHolder: address(0), id: 0});
 
         _escrowHoldIndex--;
 
@@ -300,14 +305,14 @@ abstract contract HoldStorageWrapperRead is LocalContext {
     function _getHoldCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view virtual returns (uint256 lockCount_) {
+    ) internal view virtual returns (uint256) {
         return _holdStorage().holds[_tokenHolder][_partition].length;
     }
 
     function _getEscrowHoldCountForByPartition(
         bytes32 _partition,
         address _escrowAddress
-    ) internal view virtual returns (uint256 lockCount_) {
+    ) internal view virtual returns (uint256) {
         return _holdStorage().escrow_holds[_escrowAddress][_partition].length;
     }
 }

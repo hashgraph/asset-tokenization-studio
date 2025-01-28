@@ -203,6 +203,8 @@
 
 */
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
 pragma solidity 0.8.18;
 
 import {
@@ -213,8 +215,8 @@ import {
     AdjustBalances_CD_Lib
 } from '../adjustBalances/AdjustBalances_CD_Lib.sol';
 import {HoldStorageWrapper_2_Read} from './HoldStorageWrapper_2_Read.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
@@ -222,8 +224,38 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
         bytes32 _partition,
         uint256 _escrowId,
         address _tokenHolder,
-        address _to
+        address _to,
+        uint256 _amount
     ) internal virtual override returns (bool success_) {
+        address escrowAddress = _msgSender();
+        uint256 escrowHoldIndex = _getEscrowHoldIndex(
+            _partition,
+            escrowAddress,
+            _escrowId
+        );
+        IHold.EscrowHoldData memory escrowHold = _getEscrowHoldByIndex(
+            _partition,
+            escrowAddress,
+            escrowHoldIndex
+        );
+
+        uint256 holdIndex = _getHoldIndex(
+            _partition,
+            escrowAddress,
+            escrowHold.id
+        );
+
+        IHold.HoldData memory holdData = _getHoldByIndex(
+            _partition,
+            _tokenHolder,
+            holdIndex
+        );
+
+        Hold memory hold = holdData.hold;
+
+        if (hold.to != address(0) && _to != hold.to) {
+            revert InvalidDestinationAddress(hold.to, _to);
+        }
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
@@ -236,28 +268,35 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
         uint256 abaf = _updateTotalHold(
             _partition,
             _tokenHolder,
-            _to,
             adjustBalancesStorage
         );
 
-        _updateLockByIndex(_partition, _lockId, _tokenHolder, abaf);
+        _updateHoldByIndex(_partition, holdData.id, _tokenHolder, abaf);
 
-        success_ = super._releaseByPartition(_partition, _lockId, _tokenHolder);
+        success_ = super._executeHoldByPartition(
+            _partition,
+            _escrowId,
+            _tokenHolder,
+            _to,
+            _amount
+        );
 
-        adjustBalancesStorage.labafLocks[_tokenHolder][_partition].pop();
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        if (holdStorage.heldAmountByPartition[_tokenHolder][_partition] == 0)
+            adjustBalancesStorage.labafHolds[_tokenHolder][_partition].pop();
     }
 
     function _updateTotalHold(
         bytes32 _partition,
         address _tokenHolder,
-        address _to,
         AdjustBalancesStorage storage adjustBalancesStorage
     ) internal returns (uint256 ABAF_) {
         ABAF_ = AdjustBalances_CD_Lib.getABAF();
 
-        uint256 labaf = AdjustBalances_CD_Lib.getTotalHoldLABAF(_tokenHolder);
+        uint256 labaf = AdjustBalances_CD_Lib.getTotalHeldLABAF(_tokenHolder);
         uint256 LABAFByPartition = AdjustBalances_CD_Lib
-            .getTotalHoldLABAFByPartition(_partition, _tokenHolder);
+            .getTotalHeldLABAFByPartition(_partition, _tokenHolder);
 
         if (ABAF_ != labaf) {
             uint256 factor = AdjustBalanceLib.calculateFactor(ABAF_, labaf);
@@ -276,7 +315,7 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
                 LABAFByPartition
             );
 
-            _updateTotalLockedAmountAndLABAFByPartition(
+            _updateTotalHeldAmountAndLABAFByPartition(
                 _partition,
                 _tokenHolder,
                 factorByPartition,
@@ -293,10 +332,72 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
         uint256 _abaf
     ) internal virtual {
         if (_factor == 1) return;
-        HoldataStorage storage holdStorage = _holdStorage();
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         holdStorage.totalHeldAmount[_tokenHolder] *= _factor;
         adjustBalancesStorage.labafsTotalHeld[_tokenHolder] = _abaf;
+    }
+
+    function _updateTotalHeldAmountAndLABAFByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _factor,
+        AdjustBalancesStorage storage adjustBalancesStorage,
+        uint256 _abaf
+    ) internal virtual {
+        if (_factor == 1) return;
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        holdStorage.heldAmountByPartition[_tokenHolder][_partition] *= _factor;
+        adjustBalancesStorage.labafsTotalHeldByPartition[_tokenHolder][
+            _partition
+        ] = _abaf;
+    }
+
+    function _updateHoldByIndex(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder,
+        uint256 _abaf
+    ) internal virtual {
+        uint256 hold_LABAF = AdjustBalances_CD_Lib.getLockLABAFByPartition(
+            _partition,
+            _holdId,
+            _tokenHolder
+        );
+
+        if (_abaf != hold_LABAF) {
+            uint256 factor_hold = AdjustBalanceLib.calculateFactor(
+                _abaf,
+                hold_LABAF
+            );
+
+            uint256 holdIndex = _getHoldIndex(
+                _partition,
+                _tokenHolder,
+                _holdId
+            );
+
+            _updateHoldAmountByIndex(
+                _partition,
+                holdIndex,
+                _tokenHolder,
+                factor_hold
+            );
+        }
+    }
+
+    function _updateHoldAmountByIndex(
+        bytes32 _partition,
+        uint256 _holdIndex,
+        address _tokenHolder,
+        uint256 _factor
+    ) internal virtual {
+        if (_factor == 1) return;
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1].hold.amount *= _factor;
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
