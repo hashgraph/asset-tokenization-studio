@@ -399,7 +399,6 @@ abstract contract Hold is
         virtual
         override
         onlyUnpaused
-        onlyUnProtectedPartitionsOrWildCardRole
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidHoldId(_partition, _tokenHolder, _escrowId, _tokenHolder)
         returns (bool success_)
