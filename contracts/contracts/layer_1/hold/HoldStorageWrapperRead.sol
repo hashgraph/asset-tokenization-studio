@@ -217,19 +217,24 @@ import {
 
 abstract contract HoldStorageWrapperRead is LocalContext {
     using LibCommon for EnumerableSet.UintSet;
-    modifier onlyWithValidHoldId(
+    modifier onlyWithValidEscrowHoldId(
         bytes32 _partition,
         address _escrowAddress,
         uint256 _escrowId,
         address _tokenHolder
     ) {
         if (
-            !_isHoldIdValid(_partition, _escrowAddress, _escrowId, _tokenHolder)
-        ) revert IHold.WrongHoldId();
+            !_isEscrowHoldIdValid(
+                _partition,
+                _escrowAddress,
+                _escrowId,
+                _tokenHolder
+            )
+        ) revert IHold.WrongEscrowHoldId();
         _;
     }
 
-    function _isHoldIdValid(
+    function _isEscrowHoldIdValid(
         bytes32 _partition,
         address _escrowAddress,
         uint256 _escrowId,

@@ -400,7 +400,14 @@ abstract contract Hold is
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidHoldId(_partition, _tokenHolder, _escrowId, _tokenHolder)
+        onlyWithValidEscrowHoldId(
+            _partition,
+            _tokenHolder,
+            _escrowId,
+            _tokenHolder
+        )
+        checkControlList(_tokenHolder)
+        checkControlList(_to)
         returns (bool success_)
     {
         success_ = _executeHoldByPartition(
