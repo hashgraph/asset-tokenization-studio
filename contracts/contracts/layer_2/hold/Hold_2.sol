@@ -292,19 +292,19 @@ contract Hold_2 is Hold, HoldStorageWrapper_2 {
         address _to,
         uint256 _amount
     )
-        internal
-        virtual
-        override(HoldStorageWrapper, HoldStorageWrapper_2)
-        returns (bool success_)
+    internal
+    virtual
+    override(HoldStorageWrapper, HoldStorageWrapper_2)
+    returns (bool success_)
     {
         return
             HoldStorageWrapper_2._executeHoldByPartition(
-                _partition,
-                _escrowId,
-                _tokenHolder,
-                _to,
-                _amount
-            );
+            _partition,
+            _escrowId,
+            _tokenHolder,
+            _to,
+            _amount
+        );
     }
 
     function getStaticResolverKey()
