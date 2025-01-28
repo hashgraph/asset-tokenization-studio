@@ -249,6 +249,26 @@ contract Hold_2 is Hold, HoldStorageWrapper_2 {
             );
     }
 
+    function _releaseHoldByPartition(
+        bytes32 _partition,
+        uint256 _escrowId,
+        address _tokenHolder,
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(HoldStorageWrapper, HoldStorageWrapper_2)
+        returns (bool success_)
+    {
+        return
+            HoldStorageWrapper_2._releaseHoldByPartition(
+                _partition,
+                _escrowId,
+                _tokenHolder,
+                _amount
+            );
+    }
+
     function getStaticResolverKey()
         external
         pure

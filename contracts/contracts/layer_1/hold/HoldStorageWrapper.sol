@@ -323,7 +323,11 @@ abstract contract HoldStorageWrapper is
 
         IHold.Hold memory hold = holdData.hold;
 
-        _beforeExecuteHold(_partition, _tokenHolder, hold, _to, _amount);
+        if (hold.to != address(0) && _to != hold.to) {
+            revert IHold.InvalidDestinationAddress(hold.to, _to);
+        }
+
+        _beforeExecuteHold(_partition, _tokenHolder, _to);
 
         _decreaseHeldAmount(_partition, _tokenHolder, _amount, holdData.id);
 
@@ -341,6 +345,44 @@ abstract contract HoldStorageWrapper is
             _addPartitionTo(_amount, _to, _partition);
         } else {
             _increaseBalanceByPartition(_to, _amount, _partition);
+        }
+
+        success_ = true;
+    }
+
+    function _releaseHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _escrowId,
+        uint256 _amount
+    ) internal virtual returns (bool success_) {
+        IHold.HoldData memory holdData = _getHoldFromEscrowId(
+            _partition,
+            _msgSender(),
+            _escrowId,
+            _tokenHolder
+        );
+
+        IHold.Hold memory hold = holdData.hold;
+
+        _beforeReleaseHold(_partition, _tokenHolder, _tokenHolder);
+
+        _decreaseHeldAmount(_partition, _tokenHolder, _amount, holdData.id);
+
+        if (hold.amount == _amount) {
+            _removeHold(
+                _partition,
+                _tokenHolder,
+                holdData.id,
+                _msgSender(),
+                _escrowId
+            );
+        }
+
+        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
+            _addPartitionTo(_amount, _tokenHolder, _partition);
+        } else {
+            _increaseBalanceByPartition(_tokenHolder, _amount, _partition);
         }
 
         success_ = true;
@@ -461,8 +503,8 @@ abstract contract HoldStorageWrapper is
             .id = escrowHold.id;
 
         holdStorage.escrow_holdsIndex[_escrowAddress][_partition][
-            escrowHold.id
-        ] = _escrowHoldIndex;
+                escrowHold.id
+            ] = _escrowHoldIndex;
     }
 
     function _checkCreateHoldSignature(
@@ -524,9 +566,7 @@ abstract contract HoldStorageWrapper is
     function _beforeExecuteHold(
         bytes32 _partition,
         address _tokenHolder,
-        IHold.Hold memory _hold,
-        address _to,
-        uint256 _amount
+        address _to
     ) internal virtual {
         _updateAccountSnapshot(_to, _partition);
         _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
@@ -535,15 +575,16 @@ abstract contract HoldStorageWrapper is
     function _beforeReleaseHold(
         bytes32 _partition,
         address _tokenHolder,
-        IHold.Hold memory _hold,
-        uint256 _amount
+        address _to
     ) internal virtual {
-        _beforeExecuteHold(
-            _partition,
-            _tokenHolder,
-            _hold,
-            _tokenHolder,
-            _amount
-        );
+        _beforeExecuteHold(_partition, _tokenHolder, _to);
+    }
+
+    function _beforeReclaimHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        address _to
+    ) internal virtual {
+        _beforeExecuteHold(_partition, _tokenHolder, _to);
     }
 }
