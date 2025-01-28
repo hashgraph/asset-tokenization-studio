@@ -269,6 +269,8 @@ describe('Hold Tests', () => {
 
     let snapshot: SnapshotRestorer
 
+    let hold: any
+
     before(async () => {
         snapshot = await takeSnapshot()
         // mute | mock console.log
@@ -354,7 +356,7 @@ describe('Hold Tests', () => {
         })
 
         holdFacet = await ethers.getContractAt(
-            'Hold',
+            'Hold_2',
             diamond.address,
             signer_A
         )
@@ -390,6 +392,14 @@ describe('Hold Tests', () => {
     beforeEach(async () => {
         currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
         expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
+
+        hold = {
+            amount: _AMOUNT,
+            expirationTimestamp: expirationTimestamp,
+            escrow: account_B,
+            to: ADDRESS_ZERO,
+            data: _DATA,
+        }
 
         await deployAll(false)
     })
@@ -807,14 +817,7 @@ describe('Hold Tests', () => {
         })
     })
 
-    describe.skip('Holds OK', () => {
-        let hold = {
-            amount: _AMOUNT,
-            expirationTimestamp: expirationTimestamp,
-            escrow: account_B,
-            to: ADDRESS_ZERO,
-            data: _DATA,
-        }
+    describe('Holds OK', () => {
         // Create
         async function checkCreatedHold() {
             let balance = await erc1410Facet.balanceOf(account_A)
@@ -861,7 +864,7 @@ describe('Hold Tests', () => {
             expect(retrieved_hold.amount_).to.equal(hold.amount)
             expect(retrieved_hold.escrow_).to.equal(hold.escrow)
             expect(retrieved_hold.data_).to.equal(hold.data)
-            //expect(hold.operatorData_).to.equal('0x')
+            //expect(retrieved_hold.operatorData_).to.equal('0x')
             expect(retrieved_hold.destination_).to.equal(hold.to)
             expect(retrieved_hold.expirationTimestamp_).to.equal(
                 hold.expirationTimestamp
@@ -891,7 +894,7 @@ describe('Hold Tests', () => {
                     account_A,
                     _DEFAULT_PARTITION,
                     1,
-                    hold,
+                    Object.values(hold),
                     '0x'
                 )
 
