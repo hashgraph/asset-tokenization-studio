@@ -252,7 +252,7 @@ abstract contract HoldStorageWrapper is
 
         IHold.EscrowHoldData memory escrow = IHold.EscrowHoldData(
             escrowId_,
-            _hold.escrow,
+            _from,
             holdId_
         );
 
