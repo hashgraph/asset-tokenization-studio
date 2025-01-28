@@ -920,7 +920,7 @@ describe('Hold Tests', () => {
                     account_A,
                     _DEFAULT_PARTITION,
                     1,
-                    hold,
+                    Object.values(hold),
                     '0x'
                 )
 
@@ -950,7 +950,7 @@ describe('Hold Tests', () => {
                     account_A,
                     _DEFAULT_PARTITION,
                     1,
-                    hold,
+                    Object.values(hold),
                     '0x'
                 )
 
@@ -976,7 +976,7 @@ describe('Hold Tests', () => {
                     account_A,
                     _DEFAULT_PARTITION,
                     1,
-                    hold,
+                    Object.values(hold),
                     '0x'
                 )
 
