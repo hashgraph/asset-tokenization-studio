@@ -247,8 +247,8 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
     AdjustBalancesStorageWrapperRead,
     CorporateActionsStorageWrapper,
     ScheduledBalanceAdjustmentsStorageWrapper,
-    ERC1410SnapshotStorageWrapper,
-    CapStorageWrapper_2
+    CapStorageWrapper_2,
+    ERC1410SnapshotStorageWrapper
 {
     function _beforeTokenTransfer(
         bytes32 partition,
