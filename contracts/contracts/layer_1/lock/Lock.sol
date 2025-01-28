@@ -212,6 +212,7 @@ import {_LOCKER_ROLE} from '../constants/roles.sol';
 import {_DEFAULT_PARTITION} from '../constants/values.sol';
 import {ILock} from '../interfaces/lock/ILock.sol';
 import {LockStorageWrapper} from './LockStorageWrapper.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {

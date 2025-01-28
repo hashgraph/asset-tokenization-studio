@@ -218,6 +218,18 @@ import {
 abstract contract HoldStorageWrapperRead is LocalContext {
     using LibCommon for EnumerableSet.UintSet;
 
+    modifier onlyWithValidHoldId(
+        bytes32 _partition,
+        address _escrowAddress,
+        uint256 _escrowId,
+        address _tokenHolder
+    ) {
+        if (
+            !_isHoldIdValid(_partition, _escrowAddress, _escrowId, _tokenHolder)
+        ) revert IHold.WrongHoldId();
+        _;
+    }
+
     function _holdStorage()
         internal
         pure
@@ -229,6 +241,49 @@ abstract contract HoldStorageWrapperRead is LocalContext {
         assembly {
             hold_.slot := position
         }
+    }
+
+    function _isHoldIdValid(
+        bytes32 _partition,
+        address _escrowAddress,
+        uint256 _escrowId,
+        address _tokenHolder
+    ) internal view returns (bool) {
+        if (
+            _getHoldFromEscrowId(
+                _partition,
+                _escrowAddress,
+                _escrowId,
+                _tokenHolder
+            ).id == 0
+        ) return false;
+        return true;
+    }
+
+    function _getHoldFromEscrowId(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _escrowId,
+        address _tokenHolder
+    ) internal view returns (IHold.HoldData memory holdData_) {
+        uint256 escrowHoldIndex = _getEscrowHoldIndex(
+            _partition,
+            _escrow,
+            _escrowId
+        );
+        IHold.EscrowHoldData memory escrowHold = _getEscrowHoldByIndex(
+            _partition,
+            _escrow,
+            escrowHoldIndex
+        );
+
+        uint256 holdIndex = _getHoldIndex(
+            _partition,
+            _tokenHolder,
+            escrowHold.id
+        );
+
+        holdData_ = _getHoldByIndex(_partition, _tokenHolder, holdIndex);
     }
 
     function _getEscrowHoldIndex(

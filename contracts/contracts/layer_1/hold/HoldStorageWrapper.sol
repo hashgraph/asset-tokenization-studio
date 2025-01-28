@@ -419,32 +419,6 @@ abstract contract HoldStorageWrapper is
         holdStorage.escrow_holds[_msgSender()][_partition].pop();
     }
 
-    function _getHoldFromEscrowId(
-        bytes32 _partition,
-        address _escrow,
-        uint256 _escrowId,
-        address _tokenHolder
-    ) internal view returns (IHold.HoldData memory holdData_) {
-        uint256 escrowHoldIndex = _getEscrowHoldIndex(
-            _partition,
-            _escrow,
-            _escrowId
-        );
-        IHold.EscrowHoldData memory escrowHold = _getEscrowHoldByIndex(
-            _partition,
-            _escrow,
-            escrowHoldIndex
-        );
-
-        uint256 holdIndex = _getHoldIndex(
-            _partition,
-            _tokenHolder,
-            escrowHold.id
-        );
-
-        holdData_ = _getHoldByIndex(_partition, _tokenHolder, holdIndex);
-    }
-
     function _setHoldAtIndex(
         bytes32 _partition,
         address _tokenHolder,
