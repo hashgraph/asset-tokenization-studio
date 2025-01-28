@@ -449,18 +449,20 @@ abstract contract HoldStorageWrapper is
         bytes32 _partition,
         address _tokenHolder,
         uint256 _holdIndex,
-        IHold.HoldData memory hold
+        IHold.HoldData memory _holdData
     ) internal virtual {
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
-        holdStorage.holds[_tokenHolder][_partition][_holdIndex - 1].id = hold
-            .id;
-        holdStorage.holds[_tokenHolder][_partition][_holdIndex - 1].hold = hold
-            .hold;
         holdStorage
-        .holds[_tokenHolder][_partition][_holdIndex - 1].operatorData = hold
-            .operatorData;
-        holdStorage.holdsIndex[_tokenHolder][_partition][hold.id] = _holdIndex;
+        .holds[_tokenHolder][_partition][_holdIndex - 1].id = _holdData.id;
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1].hold = _holdData.hold;
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1]
+            .operatorData = _holdData.operatorData;
+        holdStorage.holdsIndex[_tokenHolder][_partition][
+            _holdData.id
+        ] = _holdIndex;
     }
 
     function _setEscrowHoldAtIndex(
@@ -482,8 +484,8 @@ abstract contract HoldStorageWrapper is
             .id = escrowHold.id;
 
         holdStorage.escrow_holdsIndex[_escrowAddress][_partition][
-            escrowHold.id
-        ] = _escrowHoldIndex;
+                escrowHold.id
+            ] = _escrowHoldIndex;
     }
 
     function _checkCreateHoldSignature(

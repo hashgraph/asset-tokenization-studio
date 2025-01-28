@@ -438,5 +438,19 @@ contract Hold_2 is Hold, HoldStorageWrapper_2 {
                 _operatorData
             );
     }
+
+    function _setHoldAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex,
+        HoldData memory _holdData
+    ) internal virtual override(HoldStorageWrapper, HoldStorageWrapper_2) {
+        HoldStorageWrapper_2._setHoldAtIndex(
+            _partition,
+            _tokenHolder,
+            _holdIndex,
+            _holdData
+        );
+    }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
