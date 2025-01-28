@@ -207,7 +207,7 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {HoldStorageWrapper_2} from './HoldStorageWrapper_2.sol';
-//import {HoldStorageWrapper_2_Read} from './HoldStorageWrapper_2_Read.sol';
+import {HoldStorageWrapper_2_Read} from './HoldStorageWrapper_2_Read.sol';
 import {HoldStorageWrapper} from '../../layer_1/hold/HoldStorageWrapper.sol';
 import {Hold} from '../../layer_1/hold/Hold.sol';
 import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
@@ -216,20 +216,38 @@ import {_HOLD_RESOLVER_KEY} from '../../layer_1/constants/resolverKeys.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    ERC1410ControllerStorageWrapper
+} from '../../layer_1/ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
+
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 contract Hold_2 is Hold, HoldStorageWrapper_2 {
-    /*function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
+    function _executeHoldByPartition(
+        bytes32 _partition,
+        uint256 _escrowId,
+        address _tokenHolder,
+        address _to,
+        uint256 _amount
     )
         internal
         virtual
-        override(ERC1410BasicStorageWrapperRead, HoldStorageWrapper_2_Read)
+        override(HoldStorageWrapper, HoldStorageWrapper_2)
+        returns (bool success_)
     {
-        HoldStorageWrapper_2_Read._addPartitionTo(_value, _account, _partition);
-    }*/
+        return
+            HoldStorageWrapper_2._executeHoldByPartition(
+                _partition,
+                _escrowId,
+                _tokenHolder,
+                _to,
+                _amount
+            );
+    }
 
     function getStaticResolverKey()
         external
@@ -309,14 +327,130 @@ contract Hold_2 is Hold, HoldStorageWrapper_2 {
         staticInterfaceIds_[selectorsIndex++] = type(IHold).interfaceId;
     }
 
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override {
-        // solhint-disable-next-line
-        revert('Should never reach this part');
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(ERC1410BasicStorageWrapperRead, HoldStorageWrapper_2_Read)
+    {
+        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override(CapStorageWrapper, HoldStorageWrapper_2_Read) {
+        HoldStorageWrapper_2_Read._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, HoldStorageWrapper_2_Read) {
+        HoldStorageWrapper_2_Read._checkNewTotalSupply(_amount);
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, HoldStorageWrapper_2_Read) {
+        HoldStorageWrapper_2_Read._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, HoldStorageWrapper_2_Read)
+        returns (bool)
+    {
+        return HoldStorageWrapper_2_Read._checkMaxSupply(_amount);
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, HoldStorageWrapper_2_Read)
+        returns (bool)
+    {
+        return
+            HoldStorageWrapper_2_Read._checkNewMaxSupplyForPartition(
+                _partition,
+                _newMaxSupply
+            );
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, HoldStorageWrapper_2_Read)
+        returns (bool)
+    {
+        return
+            HoldStorageWrapper_2_Read._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
+    }
+
+    function _canTransferByPartition(
+        address _from,
+        address _to,
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data, // solhint-disable-line no-unused-vars
+        bytes calldata _operatorData // solhint-disable-line no-unused-vars
+    )
+        internal
+        view
+        virtual
+        override(
+            ERC1410ControllerStorageWrapper,
+            ERC1410ScheduledTasksStorageWrapper
+        )
+        returns (bool, bytes1, bytes32)
+    {
+        return
+            ERC1410ScheduledTasksStorageWrapper._canTransferByPartition(
+                _from,
+                _to,
+                _partition,
+                _value,
+                _data,
+                _operatorData
+            );
+    }
+
+    function _setHoldAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex,
+        HoldData memory _holdData
+    ) internal virtual override(HoldStorageWrapper, HoldStorageWrapper_2) {
+        HoldStorageWrapper_2._setHoldAtIndex(
+            _partition,
+            _tokenHolder,
+            _holdIndex,
+            _holdData
+        );
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

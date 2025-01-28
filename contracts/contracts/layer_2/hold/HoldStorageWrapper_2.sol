@@ -215,8 +215,196 @@ import {
     AdjustBalances_CD_Lib
 } from '../adjustBalances/AdjustBalances_CD_Lib.sol';
 import {HoldStorageWrapper_2_Read} from './HoldStorageWrapper_2_Read.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {}
+abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
+    function _executeHoldByPartition(
+        bytes32 _partition,
+        uint256 _escrowId,
+        address _tokenHolder,
+        address _to,
+        uint256 _amount
+    ) internal virtual override returns (bool success_) {
+        IHold.HoldData memory holdData = _getHoldFromEscrowId(
+            _partition,
+            _msgSender(),
+            _escrowId,
+            _tokenHolder
+        );
+
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+
+        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
+            _partition,
+            address(0),
+            _tokenHolder
+        );
+
+        uint256 abaf = _updateTotalHold(
+            _partition,
+            _tokenHolder,
+            adjustBalancesStorage
+        );
+
+        _updateHoldByIndex(_partition, holdData.id, _tokenHolder, abaf);
+
+        success_ = super._executeHoldByPartition(
+            _partition,
+            _escrowId,
+            _tokenHolder,
+            _to,
+            _amount
+        );
+
+        if (_amount == holdData.hold.amount) {
+            adjustBalancesStorage.labafHolds[_tokenHolder][_partition].pop();
+        }
+    }
+
+    function _setHoldAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex,
+        IHold.HoldData memory _holdData
+    ) internal virtual override {
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+        uint256 holdIndex = _getHoldIndex(
+            _partition,
+            _tokenHolder,
+            _holdData.id
+        );
+        uint256 labaf = adjustBalancesStorage.labafHolds[_tokenHolder][
+            _partition
+        ][holdIndex - 1];
+
+        adjustBalancesStorage.labafHolds[_tokenHolder][_partition][
+            _holdIndex - 1
+        ] = labaf;
+
+        return
+            super._setHoldAtIndex(
+                _partition,
+                _tokenHolder,
+                holdIndex,
+                _holdData
+            );
+    }
+
+    function _updateTotalHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        AdjustBalancesStorage storage adjustBalancesStorage
+    ) internal returns (uint256 ABAF_) {
+        ABAF_ = AdjustBalances_CD_Lib.getABAF();
+
+        uint256 labaf = AdjustBalances_CD_Lib.getTotalHeldLABAF(_tokenHolder);
+        uint256 LABAFByPartition = AdjustBalances_CD_Lib
+            .getTotalHeldLABAFByPartition(_partition, _tokenHolder);
+
+        if (ABAF_ != labaf) {
+            uint256 factor = AdjustBalanceLib.calculateFactor(ABAF_, labaf);
+
+            _updateTotalHeldAmountAndLABAF(
+                _tokenHolder,
+                factor,
+                adjustBalancesStorage,
+                ABAF_
+            );
+        }
+
+        if (ABAF_ != LABAFByPartition) {
+            uint256 factorByPartition = AdjustBalanceLib.calculateFactor(
+                ABAF_,
+                LABAFByPartition
+            );
+
+            _updateTotalHeldAmountAndLABAFByPartition(
+                _partition,
+                _tokenHolder,
+                factorByPartition,
+                adjustBalancesStorage,
+                ABAF_
+            );
+        }
+    }
+
+    function _updateTotalHeldAmountAndLABAF(
+        address _tokenHolder,
+        uint256 _factor,
+        AdjustBalancesStorage storage adjustBalancesStorage,
+        uint256 _abaf
+    ) internal virtual {
+        if (_factor == 1) return;
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        holdStorage.totalHeldAmount[_tokenHolder] *= _factor;
+        adjustBalancesStorage.labafsTotalHeld[_tokenHolder] = _abaf;
+    }
+
+    function _updateTotalHeldAmountAndLABAFByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _factor,
+        AdjustBalancesStorage storage adjustBalancesStorage,
+        uint256 _abaf
+    ) internal virtual {
+        if (_factor == 1) return;
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        holdStorage.heldAmountByPartition[_tokenHolder][_partition] *= _factor;
+        adjustBalancesStorage.labafsTotalHeldByPartition[_tokenHolder][
+            _partition
+        ] = _abaf;
+    }
+
+    function _updateHoldByIndex(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder,
+        uint256 _abaf
+    ) internal virtual {
+        uint256 hold_LABAF = AdjustBalances_CD_Lib.getLockLABAFByPartition(
+            _partition,
+            _holdId,
+            _tokenHolder
+        );
+
+        if (_abaf != hold_LABAF) {
+            uint256 factor_hold = AdjustBalanceLib.calculateFactor(
+                _abaf,
+                hold_LABAF
+            );
+
+            uint256 holdIndex = _getHoldIndex(
+                _partition,
+                _tokenHolder,
+                _holdId
+            );
+
+            _updateHoldAmountByIndex(
+                _partition,
+                holdIndex,
+                _tokenHolder,
+                factor_hold
+            );
+        }
+    }
+
+    function _updateHoldAmountByIndex(
+        bytes32 _partition,
+        uint256 _holdIndex,
+        address _tokenHolder,
+        uint256 _factor
+    ) internal virtual {
+        if (_factor == 1) return;
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1].hold.amount *= _factor;
+    }
+}
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

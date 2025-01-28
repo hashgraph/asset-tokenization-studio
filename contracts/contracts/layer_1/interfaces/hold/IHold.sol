@@ -242,7 +242,8 @@ interface IHold {
     );
 
     error HoldExpirationNotReached();
-    error WrongHoldId();
+    error WrongEscrowHoldId();
+    error InvalidDestinationAddress(address holdDestination, address to);
 
     struct Hold {
         uint256 amount;

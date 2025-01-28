@@ -395,13 +395,40 @@ abstract contract Hold is
 
     function executeHoldByPartition(
         bytes32 _partition,
-        uint256 _holdId,
+        uint256 _escrowId,
         address _tokenHolder,
         address _to,
         uint256 _amount
-    ) external returns (bool success_) {
-        // solhint-disable-next-line
-        revert('Should never reach this part');
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidEscrowHoldId(
+            _partition,
+            _tokenHolder,
+            _escrowId,
+            _tokenHolder
+        )
+        checkControlList(_tokenHolder)
+        checkControlList(_to)
+        returns (bool success_)
+    {
+        success_ = _executeHoldByPartition(
+            _partition,
+            _escrowId,
+            _tokenHolder,
+            _to,
+            _amount
+        );
+        emit HoldByPartitionExecuted(
+            _tokenHolder,
+            _partition,
+            _escrowId,
+            _amount,
+            _to
+        );
     }
 
     function releaseHoldByPartition(
