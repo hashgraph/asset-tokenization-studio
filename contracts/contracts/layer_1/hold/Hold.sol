@@ -399,11 +399,12 @@ abstract contract Hold is
         virtual
         override
         onlyUnpaused
-        onlyValidAddress(_to)
-        onlyProtectedPartitions
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidHoldId(_partition, _tokenHolder, _escrowId, _tokenHolder)
         returns (bool success_)
     {
-        _executeHoldByPartition(
+        success_ = _executeHoldByPartition(
             _partition,
             _escrowId,
             _tokenHolder,
@@ -442,24 +443,21 @@ abstract contract Hold is
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 amount_) {
-        // solhint-disable-next-line
-        revert('Should never reach this part');
+        return _getHeldAmountForByPartition(_partition, _tokenHolder);
     }
 
     function getHoldCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 holdCount_) {
-        // solhint-disable-next-line
-        revert('Should never reach this part');
+        return _getHoldCountForByPartition(_partition, _tokenHolder);
     }
 
     function getHoldCountForEscrowByPartition(
         bytes32 _partition,
         address _escrow
     ) external view returns (uint256 escrowHoldCount_) {
-        // solhint-disable-next-line
-        revert('Should never reach this part');
+        return _getHoldCountForEscrowByPartition(_partition, _escrow);
     }
 
     function getHoldsIdForByPartition(
@@ -468,8 +466,13 @@ abstract contract Hold is
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (uint256[] memory holdsId_) {
-        // solhint-disable-next-line
-        revert('Should never reach this part');
+        return
+            _getHoldsIdForByPartition(
+                _partition,
+                _tokenHolder,
+                _pageIndex,
+                _pageLength
+            );
     }
 
     function getHoldsIdForEscrowByPartition(
@@ -478,8 +481,13 @@ abstract contract Hold is
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (uint256[] memory escrowHoldsId_) {
-        // solhint-disable-next-line
-        revert('Should never reach this part');
+        return
+            _getHoldsIdForEscrowByPartition(
+                _partition,
+                _escrow,
+                _pageIndex,
+                _pageLength
+            );
     }
 
     function getHoldForByPartition(
@@ -497,8 +505,7 @@ abstract contract Hold is
             bytes memory data_
         )
     {
-        // solhint-disable-next-line
-        revert('Should never reach this part');
+        return _getHoldForByPartition(_partition, _tokenHolder, _holdId);
     }
 
     function getHoldForEscrowByPartition(
@@ -517,7 +524,6 @@ abstract contract Hold is
             bytes memory data_
         )
     {
-        // solhint-disable-next-line
-        revert('Should never reach this part');
+        return _getHoldForEscrowByPartition(_partition, _escrow, _escrowHoldId);
     }
 }

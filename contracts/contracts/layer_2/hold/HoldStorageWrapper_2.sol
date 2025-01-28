@@ -358,6 +358,36 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
         }
     }
 
+    function _setHoldAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex,
+        IHold.HoldData memory _holdData
+    ) internal virtual override {
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+        uint256 holdIndex = _getHoldIndex(
+            _partition,
+            _tokenHolder,
+            _holdData.id
+        );
+        uint256 labaf = adjustBalancesStorage.labafHolds[_tokenHolder][
+            _partition
+        ][holdIndex - 1];
+
+        adjustBalancesStorage.labafHolds[_tokenHolder][_partition][
+            _holdIndex - 1
+        ] = labaf;
+
+        return
+            super._setHoldAtIndex(
+                _partition,
+                _tokenHolder,
+                holdIndex,
+                _holdData
+            );
+    }
+
     function _updateTotalHold(
         bytes32 _partition,
         address _tokenHolder,

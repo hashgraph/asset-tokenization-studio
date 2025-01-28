@@ -257,12 +257,15 @@ abstract contract HoldStorageWrapper is
         );
 
         holdStorage.holds[_from][_partition].push(hold);
-        holdStorage.escrow_holds[_from][_partition].push(escrow);
+        holdStorage.escrow_holds[_hold.escrow][_partition].push(escrow);
         holdStorage.holdIds[_from][_partition].add(holdId_);
-        holdStorage.escrow_holdIds[_from][_partition].add(escrowId_);
+        holdStorage.escrow_holdIds[_hold.escrow][_partition].add(escrowId_);
         holdStorage.holdsIndex[_from][_partition][holdId_] = holdStorage
         .holds[_from][_partition].length;
         holdStorage.heldAmountByPartition[_from][_partition] += _hold.amount;
+        holdStorage.escrow_holdsIndex[_hold.escrow][_partition][
+            escrowId_
+        ] = holdStorage.escrow_holds[_hold.escrow][_partition].length;
 
         success_ = true;
     }
@@ -419,48 +422,24 @@ abstract contract HoldStorageWrapper is
         holdStorage.escrow_holds[_msgSender()][_partition].pop();
     }
 
-    function _getHoldFromEscrowId(
-        bytes32 _partition,
-        address _escrow,
-        uint256 _escrowId,
-        address _tokenHolder
-    ) internal view returns (IHold.HoldData memory holdData_) {
-        uint256 escrowHoldIndex = _getEscrowHoldIndex(
-            _partition,
-            _escrow,
-            _escrowId
-        );
-        IHold.EscrowHoldData memory escrowHold = _getEscrowHoldByIndex(
-            _partition,
-            _escrow,
-            escrowHoldIndex
-        );
-
-        uint256 holdIndex = _getHoldIndex(
-            _partition,
-            _tokenHolder,
-            escrowHold.id
-        );
-
-        holdData_ = _getHoldByIndex(_partition, _tokenHolder, holdIndex);
-    }
-
     function _setHoldAtIndex(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _holdIndex,
-        IHold.HoldData memory hold
+        IHold.HoldData memory _holdData
     ) internal virtual {
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
-        holdStorage.holds[_tokenHolder][_partition][_holdIndex - 1].id = hold
-            .id;
-        holdStorage.holds[_tokenHolder][_partition][_holdIndex - 1].hold = hold
-            .hold;
         holdStorage
-        .holds[_tokenHolder][_partition][_holdIndex - 1].operatorData = hold
-            .operatorData;
-        holdStorage.holdsIndex[_tokenHolder][_partition][hold.id] = _holdIndex;
+        .holds[_tokenHolder][_partition][_holdIndex - 1].id = _holdData.id;
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1].hold = _holdData.hold;
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1]
+            .operatorData = _holdData.operatorData;
+        holdStorage.holdsIndex[_tokenHolder][_partition][
+            _holdData.id
+        ] = _holdIndex;
     }
 
     function _setEscrowHoldAtIndex(
@@ -482,8 +461,8 @@ abstract contract HoldStorageWrapper is
             .id = escrowHold.id;
 
         holdStorage.escrow_holdsIndex[_escrowAddress][_partition][
-            escrowHold.id
-        ] = _escrowHoldIndex;
+                escrowHold.id
+            ] = _escrowHoldIndex;
     }
 
     function _checkCreateHoldSignature(
