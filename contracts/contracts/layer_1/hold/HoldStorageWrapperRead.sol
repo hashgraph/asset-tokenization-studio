@@ -217,7 +217,6 @@ import {
 
 abstract contract HoldStorageWrapperRead is LocalContext {
     using LibCommon for EnumerableSet.UintSet;
-
     modifier onlyWithValidHoldId(
         bytes32 _partition,
         address _escrowAddress,
@@ -228,19 +227,6 @@ abstract contract HoldStorageWrapperRead is LocalContext {
             !_isHoldIdValid(_partition, _escrowAddress, _escrowId, _tokenHolder)
         ) revert IHold.WrongHoldId();
         _;
-    }
-
-    function _holdStorage()
-        internal
-        pure
-        virtual
-        returns (IHold.HoldDataStorage storage hold_)
-    {
-        bytes32 position = _HOLD_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            hold_.slot := position
-        }
     }
 
     function _isHoldIdValid(
@@ -266,7 +252,7 @@ abstract contract HoldStorageWrapperRead is LocalContext {
         uint256 _escrowId,
         address _tokenHolder
     ) internal view returns (IHold.HoldData memory holdData_) {
-        uint256 escrowHoldIndex = _getEscrowHoldIndex(
+        uint256 escrowHoldIndex = _getHoldEscrowIndex(
             _partition,
             _escrow,
             _escrowId
@@ -286,15 +272,39 @@ abstract contract HoldStorageWrapperRead is LocalContext {
         holdData_ = _getHoldByIndex(_partition, _tokenHolder, holdIndex);
     }
 
-    function _getEscrowHoldIndex(
+    function _getHold(
         bytes32 _partition,
-        address _escrowAddress,
-        uint256 _escrowId
-    ) internal view returns (uint256) {
-        return
-            _holdStorage().escrow_holdsIndex[_escrowAddress][_partition][
-                _escrowId
-            ];
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (IHold.HoldData memory) {
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+
+        return _getHoldByIndex(_partition, _tokenHolder, holdIndex);
+    }
+
+    function _getHoldForEscrow(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _escrowHoldId
+    )
+        internal
+        view
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address tokenHolder_,
+            uint256 id_,
+            address destination_,
+            bytes memory data_
+        )
+    {
+        uint256 escrowIndex = _getHoldEscrowIndex(
+            _partition,
+            _escrow,
+            _escrowHoldId
+        );
+
+        return _getHoldByEscrowIndex(_partition, _escrow, escrowIndex);
     }
 
     function _getHoldIndex(
@@ -303,6 +313,17 @@ abstract contract HoldStorageWrapperRead is LocalContext {
         uint256 _holdId
     ) internal view returns (uint256) {
         return _holdStorage().holdsIndex[_tokenHolder][_partition][_holdId];
+    }
+
+    function _getHoldEscrowIndex(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _escrowHoldId
+    ) internal view returns (uint256) {
+        return
+            _holdStorage().escrow_holdsIndex[_escrow][_partition][
+                _escrowHoldId
+            ];
     }
 
     function _getHoldByIndex(
@@ -314,23 +335,160 @@ abstract contract HoldStorageWrapperRead is LocalContext {
 
         if (_holdIndex == 0)
             return
-                IHold.HoldData({
-                    id: 0,
-                    hold: IHold.Hold({
-                        amount: 0,
-                        expirationTimestamp: 0,
-                        escrow: address(0),
-                        to: address(0),
-                        data: ''
-                    }),
-                    operatorData: ''
-                });
+                IHold.HoldData(
+                    0,
+                    IHold.Hold(0, 0, address(0), address(0), ''),
+                    ''
+                );
 
         _holdIndex--;
 
         assert(_holdIndex < holdStorage.holds[_tokenHolder][_partition].length);
 
         return holdStorage.holds[_tokenHolder][_partition][_holdIndex];
+    }
+
+    function _getHoldByEscrowIndex(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _escrowIndex
+    )
+        internal
+        view
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address tokenHolder_,
+            uint256 id_,
+            address destination_,
+            bytes memory data_
+        )
+    {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        if (_escrowIndex == 0) return (0, 0, address(0), 0, address(0), '');
+
+        _escrowIndex--;
+
+        assert(
+            _escrowIndex < holdStorage.escrow_holds[_escrow][_partition].length
+        );
+
+        IHold.EscrowHoldData memory escrowHoldData = holdStorage.escrow_holds[
+            _escrow
+        ][_partition][_escrowIndex];
+
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            escrowHoldData.tokenHolder,
+            escrowHoldData.id
+        );
+
+        return (
+            holdData.hold.amount,
+            holdData.hold.expirationTimestamp,
+            escrowHoldData.tokenHolder,
+            holdData.id,
+            holdData.hold.to,
+            holdData.hold.data
+        );
+    }
+
+    function _getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _holdStorage().heldAmountByPartition[_tokenHolder][_partition];
+    }
+
+    function _getHoldCountForEscrowByPartition(
+        bytes32 _partition,
+        address _escrow
+    ) internal view virtual returns (uint256 escrowHoldCount_) {
+        return _holdStorage().escrow_holds[_escrow][_partition].length;
+    }
+
+    function _getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (uint256[] memory holdsId_) {
+        return
+            _holdStorage().holdIds[_tokenHolder][_partition].getFromSet(
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _getHoldsIdForEscrowByPartition(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (uint256[] memory escrowHoldsId_) {
+        return
+            _holdStorage().escrow_holdIds[_escrow][_partition].getFromSet(
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _getHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        internal
+        view
+        virtual
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_
+        )
+    {
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+        return (
+            holdData.hold.amount,
+            holdData.hold.expirationTimestamp,
+            holdData.hold.escrow,
+            holdData.hold.to,
+            holdData.hold.data
+        );
+    }
+
+    function _getHoldForEscrowByPartition(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _escrowHoldId
+    )
+        internal
+        view
+        virtual
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address tokenHolder_,
+            uint256 id_,
+            address destination_,
+            bytes memory data_
+        )
+    {
+        (
+            amount_,
+            expirationTimestamp_,
+            tokenHolder_,
+            id_,
+            destination_,
+            data_
+        ) = _getHoldForEscrow(_partition, _escrow, _escrowHoldId);
     }
 
     function _getEscrowHoldByIndex(
@@ -359,6 +517,19 @@ abstract contract HoldStorageWrapperRead is LocalContext {
             holdStorage.escrow_holds[_escrowAddress][_partition][
                 _escrowHoldIndex
             ];
+    }
+
+    function _holdStorage()
+        internal
+        pure
+        virtual
+        returns (IHold.HoldDataStorage storage hold_)
+    {
+        bytes32 position = _HOLD_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            hold_.slot := position
+        }
     }
 
     function _getHoldCountForByPartition(
