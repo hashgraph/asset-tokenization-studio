@@ -257,12 +257,15 @@ abstract contract HoldStorageWrapper is
         );
 
         holdStorage.holds[_from][_partition].push(hold);
-        holdStorage.escrow_holds[_from][_partition].push(escrow);
+        holdStorage.escrow_holds[_hold.escrow][_partition].push(escrow);
         holdStorage.holdIds[_from][_partition].add(holdId_);
-        holdStorage.escrow_holdIds[_from][_partition].add(escrowId_);
+        holdStorage.escrow_holdIds[_hold.escrow][_partition].add(escrowId_);
         holdStorage.holdsIndex[_from][_partition][holdId_] = holdStorage
         .holds[_from][_partition].length;
         holdStorage.heldAmountByPartition[_from][_partition] += _hold.amount;
+        holdStorage.escrow_holdsIndex[_hold.escrow][_partition][
+            escrowId_
+        ] = holdStorage.escrow_holds[_hold.escrow][_partition].length;
 
         success_ = true;
     }
