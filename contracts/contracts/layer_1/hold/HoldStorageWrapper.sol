@@ -317,7 +317,7 @@ abstract contract HoldStorageWrapper is
             escrowAddress,
             _escrowId
         );
-        EscrowHoldData memory escrowHold = _getEscrowHoldByIndex(
+        IHold.EscrowHoldData memory escrowHold = _getEscrowHoldByIndex(
             _partition,
             escrowAddress,
             escrowHoldIndex
@@ -329,17 +329,17 @@ abstract contract HoldStorageWrapper is
             escrowHold.id
         );
 
-        HoldData memory holdData = _getHoldByIndex(
+        IHold.HoldData memory holdData = _getHoldByIndex(
             _partition,
             _tokenHolder,
             holdIndex
         );
 
-        Hold memory hold = holdData.hold;
+        IHold.Hold memory hold = holdData.hold;
 
         _beforeHold(_partition, _tokenHolder, _to);
 
-        HoldDataStorage storage holdStorage = _holdStorage();
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         holdStorage.heldAmountByPartition[_tokenHolder][_partition] -= _amount;
         holdStorage.totalHeldAmount[_tokenHolder] -= _amount;
@@ -365,7 +365,7 @@ abstract contract HoldStorageWrapper is
             );
 
             if (holdIndex < holdLastIndex) {
-                HoldData memory lastHold = _getHoldByIndex(
+                IHold.HoldData memory lastHold = _getHoldByIndex(
                     _partition,
                     _tokenHolder,
                     holdLastIndex
@@ -374,11 +374,12 @@ abstract contract HoldStorageWrapper is
             }
 
             if (escrowHoldIndex < escrowLastIndex) {
-                EscrowHoldData memory lastEscrowHold = _getEscrowHoldByIndex(
-                    _partition,
-                    escrowAddress,
-                    escrowLastIndex
-                );
+                IHold.EscrowHoldData
+                    memory lastEscrowHold = _getEscrowHoldByIndex(
+                        _partition,
+                        escrowAddress,
+                        escrowLastIndex
+                    );
                 _setEscrowHoldAtIndex(
                     _partition,
                     escrowAddress,
@@ -404,9 +405,9 @@ abstract contract HoldStorageWrapper is
         bytes32 _partition,
         address _tokenHolder,
         uint256 _holdIndex,
-        HoldData memory hold
+        IHold.HoldData memory hold
     ) internal virtual {
-        HoldDataStorage storage holdStorage = _holdStorage();
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         holdStorage.holds[_tokenHolder][_partition][_holdIndex - 1].id = hold
             .id;
@@ -422,9 +423,9 @@ abstract contract HoldStorageWrapper is
         bytes32 _partition,
         address _escrowAddress,
         uint256 _escrowHoldIndex,
-        EscrowHoldData memory escrowHold
+        IHold.EscrowHoldData memory escrowHold
     ) internal virtual {
-        HoldDataStorage storage holdStorage = _holdStorage();
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         holdStorage
         .escrow_holds[_escrowAddress][_partition][_escrowHoldIndex - 1]
@@ -437,8 +438,8 @@ abstract contract HoldStorageWrapper is
             .id = escrowHold.id;
 
         holdStorage.escrow_holdsIndex[_escrowAddress][_partition][
-                escrowHold.id
-            ] = _escrowHoldIndex;
+            escrowHold.id
+        ] = _escrowHoldIndex;
     }
 
     function _checkCreateHoldSignature(

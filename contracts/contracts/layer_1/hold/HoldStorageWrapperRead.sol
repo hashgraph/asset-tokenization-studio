@@ -215,14 +215,14 @@ import {
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract HoldStorageWrapperRead is LocalContext, IHold {
+abstract contract HoldStorageWrapperRead is LocalContext {
     using LibCommon for EnumerableSet.UintSet;
 
     function _holdStorage()
         internal
         pure
         virtual
-        returns (HoldDataStorage storage hold_)
+        returns (IHold.HoldDataStorage storage hold_)
     {
         bytes32 position = _HOLD_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
@@ -254,14 +254,14 @@ abstract contract HoldStorageWrapperRead is LocalContext, IHold {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _holdIndex
-    ) internal view returns (HoldData memory) {
-        HoldDataStorage storage holdStorage = _holdStorage();
+    ) internal view returns (IHold.HoldData memory) {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         if (_holdIndex == 0)
             return
-                HoldData({
+                IHold.HoldData({
                     id: 0,
-                    hold: Hold({
+                    hold: IHold.Hold({
                         amount: 0,
                         expirationTimestamp: 0,
                         escrow: address(0),
@@ -282,12 +282,16 @@ abstract contract HoldStorageWrapperRead is LocalContext, IHold {
         bytes32 _partition,
         address _escrowAddress,
         uint256 _escrowHoldIndex
-    ) internal view returns (EscrowHoldData memory) {
-        HoldDataStorage storage holdStorage = _holdStorage();
+    ) internal view returns (IHold.EscrowHoldData memory) {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         if (_escrowHoldIndex == 0)
             return
-                EscrowHoldData({escrow_id: 0, tokenHolder: address(0), id: 0});
+                IHold.EscrowHoldData({
+                    escrow_id: 0,
+                    tokenHolder: address(0),
+                    id: 0
+                });
 
         _escrowHoldIndex--;
 

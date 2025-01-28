@@ -413,8 +413,8 @@ abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
             _partition
         ] *= _factor;
         adjustBalancesStorage.labafsTotalLockedByPartition[_tokenHolder][
-                _partition
-            ] = _abaf;
+            _partition
+        ] = _abaf;
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

@@ -251,10 +251,10 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
             holdIndex
         );
 
-        Hold memory hold = holdData.hold;
+        IHold.Hold memory hold = holdData.hold;
 
         if (hold.to != address(0) && _to != hold.to) {
-            revert InvalidDestinationAddress(hold.to, _to);
+            revert IHold.InvalidDestinationAddress(hold.to, _to);
         }
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();

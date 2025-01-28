@@ -226,7 +226,7 @@ abstract contract HoldStorageWrapper_2_Read is
     HoldStorageWrapper,
     ERC1410ScheduledTasksStorageWrapper
 {
-    /* function _addPartitionTo(
+    function _addPartitionTo(
         uint256 _value,
         address _account,
         bytes32 _partition
@@ -323,5 +323,5 @@ abstract contract HoldStorageWrapper_2_Read is
                 _partition,
                 _amount
             );
-    }*/
+    }
 }
