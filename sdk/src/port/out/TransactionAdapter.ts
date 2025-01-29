@@ -545,11 +545,24 @@ interface IManagementTransactionAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface IHoldTransactionAdapter {
+  createHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    target: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
     RoleTransactionAdapter,
-    IManagementTransactionAdapter
+    IManagementTransactionAdapter,
+    IHoldTransactionAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -967,6 +980,17 @@ export default abstract class TransactionAdapter
     executionDate: BigDecimal,
     factor: BigDecimal,
     decimals: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  createHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    target: EvmAddress,
+    expirationDate: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');

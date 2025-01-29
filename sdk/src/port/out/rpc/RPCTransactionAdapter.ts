@@ -296,6 +296,7 @@ import {
   PROTECTED_REDEEM_GAS,
   UNPROTECT_PARTITION_GAS,
   PROTECTED_TRANSFER_AND_LOCK_GAS,
+  CREATE_HOLD_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -325,6 +326,7 @@ import {
   ScheduledTasks__factory,
   Snapshots__factory,
   TransferAndLock__factory,
+  Hold__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -346,6 +348,7 @@ import {
 } from '../../../domain/context/factory/RegulationType.js';
 import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
 import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
+import { Hold } from '../../../domain/context/security/Hold.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -1796,6 +1799,37 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           gasLimit: PROTECTED_TRANSFER_GAS,
         },
       ),
+      this.networkService.environment,
+    );
+  }
+
+  async createHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    target: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Holding ${amount} tokens from account ${target.toString()} until ${expirationDate} with escrow ${escrow}`,
+    );
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: target.toString(),
+      data: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).createHoldByPartition(partitionId, hold, {
+        gasLimit: CREATE_HOLD_GAS,
+      }),
       this.networkService.environment,
     );
   }
