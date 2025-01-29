@@ -252,68 +252,6 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
             );
     }
 
-    function _createHoldFromByPartition(
-        bytes32 _partition,
-        address _from,
-        IHold.Hold memory _hold,
-        bytes memory _operatorData
-    ) internal virtual override returns (bool success_, uint256 holdId_) {
-        AdjustBalancesStorage
-            storage adjustBalancesStorage = _getAdjustBalancesStorage();
-
-        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
-            _partition,
-            _from,
-            address(0)
-        );
-
-        uint256 abaf = _updateTotalHold(
-            _partition,
-            _from,
-            adjustBalancesStorage
-        );
-
-        adjustBalancesStorage.labafHolds[_from][_partition].push(abaf);
-
-        return
-            super._createHoldFromByPartition(
-                _partition,
-                _from,
-                _hold,
-                _operatorData
-            );
-    }
-
-    function _protectedCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        IHold.ProtectedHold memory _protectedHold
-    ) internal virtual override returns (bool success_, uint256 holdId_) {
-        AdjustBalancesStorage
-            storage adjustBalancesStorage = _getAdjustBalancesStorage();
-
-        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
-            _partition,
-            _from,
-            address(0)
-        );
-
-        uint256 abaf = _updateTotalHold(
-            _partition,
-            _from,
-            adjustBalancesStorage
-        );
-
-        adjustBalancesStorage.labafHolds[_from][_partition].push(abaf);
-
-        return
-            super._protectedCreateHoldByPartition(
-                _partition,
-                _from,
-                _protectedHold
-            );
-    }
-
     function _executeHoldByPartition(
         bytes32 _partition,
         uint256 _escrowId,
