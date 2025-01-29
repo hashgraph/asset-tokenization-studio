@@ -221,7 +221,7 @@ interface IHold {
     event HoldByPartitionExecuted(
         address indexed tokenHolder,
         bytes32 indexed partition,
-        uint256 escrowId,
+        uint256 holdId,
         uint256 amount,
         address to
     );
@@ -229,7 +229,7 @@ interface IHold {
     event HoldByPartitionReleased(
         address indexed tokenHolder,
         bytes32 indexed partition,
-        uint256 escrowId,
+        uint256 holdId,
         uint256 amount
     );
 
@@ -237,7 +237,7 @@ interface IHold {
         address indexed operator,
         address indexed tokenHolder,
         bytes32 indexed partition,
-        uint256 escrowId,
+        uint256 holdId,
         uint256 amount
     );
 

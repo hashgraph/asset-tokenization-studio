@@ -237,16 +237,15 @@ contract Hold_2 is Hold, HoldStorageWrapper_2 {
         internal
         virtual
         override(HoldStorageWrapper, HoldStorageWrapper_2)
-        returns (bool success_)
+        returns (bool success_, uint256 holdId_)
     {
-        return
-            HoldStorageWrapper_2._executeHoldByPartition(
-                _partition,
-                _escrowId,
-                _tokenHolder,
-                _to,
-                _amount
-            );
+        (success_, holdId_) = HoldStorageWrapper_2._executeHoldByPartition(
+            _partition,
+            _escrowId,
+            _tokenHolder,
+            _to,
+            _amount
+        );
     }
 
     function _releaseHoldByPartition(
@@ -258,15 +257,14 @@ contract Hold_2 is Hold, HoldStorageWrapper_2 {
         internal
         virtual
         override(HoldStorageWrapper, HoldStorageWrapper_2)
-        returns (bool success_)
+        returns (bool success_, uint256 holdId_)
     {
-        return
-            HoldStorageWrapper_2._releaseHoldByPartition(
-                _partition,
-                _tokenHolder,
-                _escrowId,
-                _amount
-            );
+        (success_, holdId_) = HoldStorageWrapper_2._releaseHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _escrowId,
+            _amount
+        );
     }
 
     function _reclaimHoldByPartition(
@@ -278,14 +276,15 @@ contract Hold_2 is Hold, HoldStorageWrapper_2 {
         internal
         virtual
         override(HoldStorageWrapper, HoldStorageWrapper_2)
-        returns (bool success_, uint256 amount_)
+        returns (bool success_, uint256 amount_, uint256 holdId_)
     {
-        (success_, amount_) = HoldStorageWrapper_2._reclaimHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _escrowId,
-            _escrowAddress
-        );
+        (success_, amount_, holdId_) = HoldStorageWrapper_2
+            ._reclaimHoldByPartition(
+                _partition,
+                _tokenHolder,
+                _escrowId,
+                _escrowAddress
+            );
     }
 
     function getStaticResolverKey()

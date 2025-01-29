@@ -313,7 +313,7 @@ abstract contract HoldStorageWrapper is
         address _tokenHolder,
         address _to,
         uint256 _amount
-    ) internal virtual returns (bool success_) {
+    ) internal virtual returns (bool success_, uint256 holdId_) {
         IHold.HoldData memory holdData = _getHoldFromEscrowId(
             _partition,
             _msgSender(),
@@ -348,6 +348,7 @@ abstract contract HoldStorageWrapper is
         }
 
         success_ = true;
+        holdId_ = holdData.id;
     }
 
     function _releaseHoldByPartition(
@@ -355,7 +356,7 @@ abstract contract HoldStorageWrapper is
         address _tokenHolder,
         uint256 _escrowId,
         uint256 _amount
-    ) internal virtual returns (bool success_) {
+    ) internal virtual returns (bool success_, uint256 holdId_) {
         IHold.HoldData memory holdData = _getHoldFromEscrowId(
             _partition,
             _msgSender(),
@@ -386,6 +387,7 @@ abstract contract HoldStorageWrapper is
         }
 
         success_ = true;
+        holdId_ = holdData.id;
     }
 
     function _reclaimHoldByPartition(
@@ -393,7 +395,11 @@ abstract contract HoldStorageWrapper is
         address _tokenHolder,
         uint256 _escrowId,
         address _escrowAddress
-    ) internal virtual returns (bool success_, uint256 amount_) {
+    )
+        internal
+        virtual
+        returns (bool success_, uint256 amount_, uint256 holdId_)
+    {
         IHold.HoldData memory holdData = _getHoldFromEscrowId(
             _partition,
             _escrowAddress,
@@ -427,6 +433,7 @@ abstract contract HoldStorageWrapper is
 
         success_ = true;
         amount_ = hold.amount;
+        holdId_ = holdData.id;
     }
 
     function _decreaseHeldAmount(

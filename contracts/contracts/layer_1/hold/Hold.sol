@@ -410,7 +410,8 @@ abstract contract Hold is
         checkControlList(_to)
         returns (bool success_)
     {
-        success_ = _executeHoldByPartition(
+        uint256 holdId_;
+        (success_, holdId_) = _executeHoldByPartition(
             _partition,
             _escrowId,
             _tokenHolder,
@@ -420,7 +421,7 @@ abstract contract Hold is
         emit HoldByPartitionReleased(
             _tokenHolder,
             _partition,
-            _escrowId,
+            holdId_,
             _amount
         );
     }
@@ -445,7 +446,8 @@ abstract contract Hold is
         checkControlList(_tokenHolder)
         returns (bool success_)
     {
-        success_ = _releaseHoldByPartition(
+        uint256 holdId_;
+        (success_, holdId_) = _releaseHoldByPartition(
             _partition,
             _tokenHolder,
             _escrowId,
@@ -454,7 +456,7 @@ abstract contract Hold is
         emit HoldByPartitionReleased(
             _tokenHolder,
             _partition,
-            _escrowId,
+            holdId_,
             _amount
         );
     }
@@ -479,8 +481,9 @@ abstract contract Hold is
         checkControlList(_tokenHolder)
         returns (bool success_)
     {
-        uint256 amount;
-        (success_, amount) = _reclaimHoldByPartition(
+        uint256 amount_;
+        uint256 holdId_;
+        (success_, amount_, holdId_) = _reclaimHoldByPartition(
             _partition,
             _tokenHolder,
             _escrowId,
@@ -490,8 +493,8 @@ abstract contract Hold is
             _msgSender(),
             _tokenHolder,
             _partition,
-            _escrowId,
-            amount
+            holdId_,
+            amount_
         );
     }
 

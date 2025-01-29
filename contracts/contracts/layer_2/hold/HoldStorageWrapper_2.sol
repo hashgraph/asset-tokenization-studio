@@ -226,7 +226,7 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
         address _tokenHolder,
         address _to,
         uint256 _amount
-    ) internal virtual override returns (bool success_) {
+    ) internal virtual override returns (bool success_, uint256 holdId_) {
         IHold.HoldData memory holdData = _getHoldFromEscrowId(
             _partition,
             _msgSender(),
@@ -251,7 +251,7 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
 
         _updateHoldByIndex(_partition, holdData.id, _tokenHolder, abaf);
 
-        success_ = super._executeHoldByPartition(
+        (success_, holdId_) = super._executeHoldByPartition(
             _partition,
             _escrowId,
             _tokenHolder,
@@ -269,7 +269,7 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
         address _tokenHolder,
         uint256 _escrowId,
         uint256 _amount
-    ) internal virtual override returns (bool success_) {
+    ) internal virtual override returns (bool success_, uint256 holdId_) {
         IHold.HoldData memory holdData = _getHoldFromEscrowId(
             _partition,
             _msgSender(),
@@ -293,7 +293,7 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
 
         _updateHoldByIndex(_partition, holdData.id, _tokenHolder, abaf);
 
-        success_ = super._releaseHoldByPartition(
+        (success_, holdId_) = super._releaseHoldByPartition(
             _partition,
             _tokenHolder,
             _escrowId,
@@ -310,7 +310,12 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
         address _tokenHolder,
         uint256 _escrowId,
         address _escrowAddress
-    ) internal virtual override returns (bool success_, uint256 amount_) {
+    )
+        internal
+        virtual
+        override
+        returns (bool success_, uint256 amount_, uint256 holdId_)
+    {
         IHold.HoldData memory holdData = _getHoldFromEscrowId(
             _partition,
             _escrowAddress,
@@ -334,7 +339,7 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
 
         _updateHoldByIndex(_partition, holdData.id, _tokenHolder, abaf);
 
-        (success_, amount_) = super._reclaimHoldByPartition(
+        (success_, amount_, holdId_) = super._reclaimHoldByPartition(
             _partition,
             _tokenHolder,
             _escrowId,
