@@ -221,6 +221,7 @@ import {
   CreateHoldByPartitionCommand,
   CreateHoldByPartitionCommandResponse,
 } from './CreateHoldByPartitionCommand.js';
+import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
 
 @CommandHandler(CreateHoldByPartitionCommand)
 export class CreateHoldByPartitionCommandHandler
@@ -251,6 +252,7 @@ export class CreateHoldByPartitionCommandHandler
       expirationDate,
     } = command;
     const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
@@ -276,6 +278,15 @@ export class CreateHoldByPartitionCommandHandler
       : new EvmAddress(targetId);
 
     const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    if (
+      account.evmAddress &&
+      (
+        await this.queryAdapter.balanceOf(securityEvmAddress, targetEvmAddress)
+      ).lt(amountBd.toBigNumber())
+    ) {
+      throw new InsufficientBalance();
+    }
 
     const res = await handler.createHoldByPartition(
       securityEvmAddress,

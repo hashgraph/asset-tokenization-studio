@@ -271,6 +271,7 @@ import GetNounceRequest from './GetNounceRequest.js';
 import PartitionsProtectedRequest from './PartitionsProtectedRequest.js';
 import ProtectedTransferAndLockByPartitionRequest from './ProtectedTransferAndLockByPartitionRequest.js';
 import CreateHoldByPartitionRequest from './CreateHoldByPartition.js';
+import CreateHoldFromByPartitionRequest from './CreateHoldFromByPartition.js';
 
 export * from './BaseRequest.js';
 export {
@@ -341,4 +342,5 @@ export {
   PartitionsProtectedRequest,
   ProtectedTransferAndLockByPartitionRequest,
   CreateHoldByPartitionRequest,
+  CreateHoldFromByPartitionRequest
 };

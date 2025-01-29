@@ -203,19 +203,57 @@
 
 */
 
-import { BigNumber } from 'ethers';
+import { SecurityDate } from '../../../domain/context/shared/SecurityDate.js';
+import ValidatedRequest from './validation/ValidatedRequest.js';
+import Validation from './validation/Validation.js';
 
-export class Hold {
-  public amount: BigNumber;
-  public expirationTimestamp: BigNumber;
-  public escrow: string;
-  public to: string;
-  public data: string;
-}
+export default class CreateHoldFromByPartitionRequest extends ValidatedRequest<CreateHoldFromByPartitionRequest> {
+  securityId: string;
+  partitionId: string;
+  amount: string;
+  escrow: string;
+  sourceId: string;
+  targetId: string;
+  expirationDate: string;
 
-export class ProtectedHold {
-   public hold: Hold;
-   public deadline: BigNumber;
-   public nonce: BigNumber;
-   public signature: string;
+  constructor({
+    securityId,
+    partitionId,
+    amount,
+    escrow,
+    sourceId,
+    targetId,
+    expirationDate,
+  }: {
+    securityId: string;
+    partitionId: string;
+    amount: string;
+    escrow: string;
+    sourceId: string;
+    targetId: string;
+    expirationDate: string;
+  }) {
+    super({
+      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: Validation.checkBytes32Format(),
+      amount: Validation.checkAmount(),
+      escrow: Validation.checkHederaIdFormatOrEvmAddress(),
+      sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
+      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
+      expirationDate: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          Math.ceil(new Date().getTime() / 1000),
+        );
+      },
+    });
+
+    this.securityId = securityId;
+    this.partitionId = partitionId;
+    this.amount = amount;
+    this.escrow = escrow;
+    this.sourceId = sourceId;
+    this.targetId = targetId;
+    this.expirationDate = expirationDate;
+  }
 }

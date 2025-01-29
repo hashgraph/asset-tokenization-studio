@@ -203,19 +203,26 @@
 
 */
 
-import { BigNumber } from 'ethers';
+import { Command } from '../../../../../../../core/command/Command.js';
+import { CommandResponse } from '../../../../../../../core/command/CommandResponse.js';
 
-export class Hold {
-  public amount: BigNumber;
-  public expirationTimestamp: BigNumber;
-  public escrow: string;
-  public to: string;
-  public data: string;
+export class ControllerCreateHoldByPartitionCommandResponse implements CommandResponse {
+  constructor(
+    public readonly payload: number,
+    public readonly transactionId: string,
+  ) {}
 }
 
-export class ProtectedHold {
-   public hold: Hold;
-   public deadline: BigNumber;
-   public nonce: BigNumber;
-   public signature: string;
+export class ControllerCreateHoldByPartitionCommand extends Command<ControllerCreateHoldByPartitionCommandResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly partitionId: string,
+    public readonly escrow: string,
+    public readonly amount: string,
+    public readonly sourceId: string,
+    public readonly targetId: string,
+    public readonly expirationDate: string,
+  ) {
+    super();
+  }
 }
