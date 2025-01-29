@@ -329,7 +329,7 @@ import {
   ScheduledTasks__factory,
   Snapshots__factory,
   TransferAndLock__factory,
-  Hold__factory,
+  Hold_2__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -1827,7 +1827,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold__factory.connect(
+      await Hold_2__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).createHoldByPartition(partitionId, hold, {
@@ -1859,7 +1859,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold__factory.connect(
+      await Hold_2__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).createHoldFromByPartition(
@@ -1897,7 +1897,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold__factory.connect(
+      await Hold_2__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).controllerCreateHoldByPartition(
@@ -1945,7 +1945,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold__factory.connect(
+      await Hold_2__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).protectedCreateHoldByPartition(
