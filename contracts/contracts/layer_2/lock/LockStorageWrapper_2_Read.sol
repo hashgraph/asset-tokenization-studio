@@ -205,96 +205,93 @@
 
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-// solhint-disable no-unused-vars, custom-errors
-abstract contract CapStorageWrapper is ICapStorageWrapper, Common {
-    // modifiers
-    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) {
-        _checkNewMaxSupply(_newMaxSupply);
-        _;
-    }
-
-    modifier onlyValidNewMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) {
-        _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
-        _;
-    }
-
-    // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
-        uint256 previousMaxSupply = _getMaxSupply();
-        _capStorage().maxSupply = _maxSupply;
-        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
-    }
-
-    function _setMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _maxSupply
-    ) internal {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
-            _partition
-        );
-        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
-            _msgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
-    }
-
-    function _checkNewMaxSupply(uint256 newMaxSupply) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupply = _totalSupply() + newMaxSupply;
-        uint256 maxSupply = _getMaxSupply();
-
-        if (!_checkMaxSupplyCommon(newTotalSupply, maxSupply)) {
-            revert MaxSupplyReached(maxSupply);
-        }
-    }
-
-    function _checkNewMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 newMaxSupply
-    ) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            partition
-        ) + newMaxSupply;
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(partition);
-
-        if (
-            !_checkMaxSupplyCommon(
-                newTotalSupplyForPartition,
-                maxSupplyForPartition
-            )
-        ) {
-            revert MaxSupplyReachedForPartition(
-                partition,
-                maxSupplyForPartition
-            );
-        }
-    }
-
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
-        return
-            _maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ||
-            _amount <= _maxSupply;
-    }
-}
-// solhint-enable no-unused-vars, custom-errors
+//import {
+//    ERC1410BasicStorageWrapperRead
+//} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+//import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
+//import {
+//    ERC1410ScheduledTasksStorageWrapper
+//} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+//import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
+//import {
+//    AdjustBalances_CD_Lib
+//} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
+//// SPDX-License-Identifier: BSD-3-Clause-Attribution
+//// TODO: Remove _ in contract name
+//// solhint-disable-next-line
+//abstract contract LockStorageWrapper_2_Read is
+//    LockStorageWrapper,
+//    ERC1410ScheduledTasksStorageWrapper
+//{
+//    function _getLockedAmountForAdjusted(
+//        address _tokenHolder
+//    ) internal view virtual returns (uint256 amount_) {
+//        uint256 factor = AdjustBalanceLib.calculateFactor(
+//            AdjustBalances_CD_Lib.getABAFAdjusted(),
+//            AdjustBalances_CD_Lib.getTotalLockLABAF(_tokenHolder)
+//        );
+//
+//        return _getLockedAmountFor(_tokenHolder) * factor;
+//    }
+//
+//    function _getLockedAmountForByPartitionAdjusted(
+//        bytes32 _partition,
+//        address _tokenHolder
+//    ) internal view virtual returns (uint256 amount_) {
+//        uint256 factor = AdjustBalanceLib.calculateFactor(
+//            AdjustBalances_CD_Lib.getABAFAdjusted(),
+//            AdjustBalances_CD_Lib.getTotalLockLABAFByPartition(
+//                _partition,
+//                _tokenHolder
+//            )
+//        );
+//        return
+//            _getLockedAmountForByPartition(_partition, _tokenHolder) * factor;
+//    }
+//
+//    function _getLockForByPartitionAdjusted(
+//        bytes32 _partition,
+//        address _tokenHolder,
+//        uint256 _lockId
+//    )
+//        internal
+//        view
+//        virtual
+//        returns (uint256 amount_, uint256 expirationTimestamp_)
+//    {
+//        uint256 factor = AdjustBalanceLib.calculateFactor(
+//            AdjustBalances_CD_Lib.getABAFAdjusted(),
+//            AdjustBalances_CD_Lib.getLockLABAFByPartition(
+//                _partition,
+//                _lockId,
+//                _tokenHolder
+//            )
+//        );
+//
+//        (amount_, expirationTimestamp_) = _getLockForByPartition(
+//            _partition,
+//            _tokenHolder,
+//            _lockId
+//        );
+//        amount_ *= factor;
+//    }
+//
+//    function _addPartitionTo(
+//        uint256 _value,
+//        address _account,
+//        bytes32 _partition
+//    )
+//        internal
+//        virtual
+//        override(
+//            ERC1410BasicStorageWrapperRead,
+//            ERC1410ScheduledTasksStorageWrapper
+//        )
+//    {
+//        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+//            _value,
+//            _account,
+//            _partition
+//        );
+//    }
+//}

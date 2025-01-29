@@ -311,7 +311,7 @@ contract ERC1594 is
         external
         virtual
         override
-        checkMaxSupply(_value)
+        //        onlyValidMaxSupply(_value)
         onlyUnpaused
         onlyRole(_ISSUER_ROLE)
         checkControlList(_tokenHolder)

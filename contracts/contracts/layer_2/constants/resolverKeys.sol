@@ -204,97 +204,24 @@
 */
 
 pragma solidity 0.8.18;
-
-import {Common} from '../common/Common.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable no-unused-vars, custom-errors
-abstract contract CapStorageWrapper is ICapStorageWrapper, Common {
-    // modifiers
-    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) {
-        _checkNewMaxSupply(_newMaxSupply);
-        _;
-    }
+// solhint-disable max-line-length
 
-    modifier onlyValidNewMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) {
-        _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
-        _;
-    }
+// keccak256('security.token.standard.equity.resolverKey');
+bytes32 constant _EQUITY_RESOLVER_KEY = 0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810;
 
-    // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
-        uint256 previousMaxSupply = _getMaxSupply();
-        _capStorage().maxSupply = _maxSupply;
-        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
-    }
+// keccak256('security.token.standard.bond.resolverKey');
+bytes32 constant _BOND_RESOLVER_KEY = 0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef;
 
-    function _setMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _maxSupply
-    ) internal {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
-            _partition
-        );
-        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
-            _msgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
-    }
+// keccak256('security.token.standard.scheduled.snapshots.resolverKey');
+bytes32 constant _SCHEDULED_SNAPSHOTS_RESOLVER_KEY = 0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793;
 
-    function _checkNewMaxSupply(uint256 newMaxSupply) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupply = _totalSupply() + newMaxSupply;
-        uint256 maxSupply = _getMaxSupply();
+// keccak256('security.token.standard.scheduled.balanceAdjustments.resolverKey');
+bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0xc418e67a48260d700e5f85863ad6fa6593206a4385728f8baba1572d631535e0;
 
-        if (!_checkMaxSupplyCommon(newTotalSupply, maxSupply)) {
-            revert MaxSupplyReached(maxSupply);
-        }
-    }
+// keccak256('security.token.standard.scheduled.tasks.resolverKey');
+bytes32 constant _SCHEDULED_TASKS_RESOLVER_KEY = 0xa4934195ab83f1497ce5fc99b68d0f41694716bcfba5f232aa6c8e0d4d504f08;
 
-    function _checkNewMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 newMaxSupply
-    ) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            partition
-        ) + newMaxSupply;
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(partition);
-
-        if (
-            !_checkMaxSupplyCommon(
-                newTotalSupplyForPartition,
-                maxSupplyForPartition
-            )
-        ) {
-            revert MaxSupplyReachedForPartition(
-                partition,
-                maxSupplyForPartition
-            );
-        }
-    }
-
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
-        return
-            _maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ||
-            _amount <= _maxSupply;
-    }
-}
-// solhint-enable no-unused-vars, custom-errors
+// keccak256('security.token.standard.balanceAdjustments.resolverKey');
+bytes32 constant _BALANCE_ADJUSTMENTS_RESOLVER_KEY = 0x2bbe9fb018f1e7dd12b4442154e7fdfd75aec7b0a65d07debf49de4ece5fe8b8;

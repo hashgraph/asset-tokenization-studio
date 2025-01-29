@@ -203,98 +203,222 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {
+    SnapshotsStorageWrapper
+} from '../snapshots/SnapshotsStorageWrapper.sol';
+import {
+    _SCHEDULED_TASKS_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {LibCommon} from '../common/LibCommon.sol';
+import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
+import {
+    ScheduledTask
+} from '../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 
-// solhint-disable no-unused-vars, custom-errors
-abstract contract CapStorageWrapper is ICapStorageWrapper, Common {
-    // modifiers
-    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) {
-        _checkNewMaxSupply(_newMaxSupply);
+struct ScheduledTasksDataStorage {
+    mapping(uint256 => ScheduledTask) scheduledTasks;
+    uint256 scheduledTaskCount;
+    bool autoCalling;
+}
+
+abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper {
+    error WrongTimestamp(uint256 timeStamp);
+    error NotAutocalling();
+
+    modifier checkTimestamp(uint256 timestamp) {
+        if (timestamp <= _blockTimestamp()) {
+            revert WrongTimestamp(timestamp);
+        }
         _;
     }
 
-    modifier onlyValidNewMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) {
-        _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
+    modifier onlyAutoCalling() {
+        if (!_scheduledTaskStorage().autoCalling) revert NotAutocalling();
         _;
     }
 
-    // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
-        uint256 previousMaxSupply = _getMaxSupply();
-        _capStorage().maxSupply = _maxSupply;
-        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
-    }
-
-    function _setMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _maxSupply
+    function _addScheduledTask(
+        uint256 _newScheduledTimestamp,
+        bytes memory _newData
     ) internal {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
-            _partition
+        ScheduledTask memory newScheduledTask = ScheduledTask(
+            _newScheduledTimestamp,
+            _newData
         );
-        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
-            _msgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
-    }
 
-    function _checkNewMaxSupply(uint256 newMaxSupply) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupply = _totalSupply() + newMaxSupply;
-        uint256 maxSupply = _getMaxSupply();
+        uint256 scheduledTasksLength = _getScheduledTaskCount();
 
-        if (!_checkMaxSupplyCommon(newTotalSupply, maxSupply)) {
-            revert MaxSupplyReached(maxSupply);
+        uint256 newScheduledTaskId = scheduledTasksLength;
+
+        bool added = false;
+
+        if (scheduledTasksLength > 0) {
+            for (uint256 index = 1; index <= scheduledTasksLength; index++) {
+                uint256 scheduledTaskPosition = scheduledTasksLength - index;
+
+                if (
+                    _scheduledTaskStorage()
+                        .scheduledTasks[scheduledTaskPosition]
+                        .scheduledTimestamp < _newScheduledTimestamp
+                ) {
+                    slideScheduledTasks(scheduledTaskPosition);
+                } else {
+                    newScheduledTaskId = scheduledTaskPosition + 1;
+                    insertScheduledTask(newScheduledTaskId, newScheduledTask);
+                    added = true;
+                    break;
+                }
+            }
+        }
+        if (!added) {
+            insertScheduledTask(0, newScheduledTask);
         }
     }
 
-    function _checkNewMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 newMaxSupply
-    ) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            partition
-        ) + newMaxSupply;
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(partition);
+    function _triggerScheduledTasks(
+        bytes4 onScheduledTaskTriggeredSelector,
+        uint256 _max,
+        uint256 _timestamp
+    ) internal returns (uint256) {
+        uint256 scheduledTasksLength = _getScheduledTaskCount();
 
-        if (
-            !_checkMaxSupplyCommon(
-                newTotalSupplyForPartition,
-                maxSupplyForPartition
-            )
-        ) {
-            revert MaxSupplyReachedForPartition(
-                partition,
-                maxSupplyForPartition
-            );
+        if (scheduledTasksLength == 0) {
+            return 0;
+        }
+
+        uint256 max = _max;
+
+        uint256 newTaskID;
+
+        if (max > scheduledTasksLength || max == 0) {
+            max = scheduledTasksLength;
+        }
+        ScheduledTasksDataStorage
+            storage scheduledTasks = _scheduledTaskStorage();
+
+        for (uint256 j = 1; j <= max; j++) {
+            uint256 pos = scheduledTasksLength - j;
+
+            ScheduledTask
+                memory currentScheduledTask = _getScheduledTasksByIndex(pos);
+
+            if (currentScheduledTask.scheduledTimestamp < _timestamp) {
+                popScheduledTask();
+
+                scheduledTasks.autoCalling = true;
+
+                // solhint-disable-next-line
+                // TODO: Change it
+                (bool success, bytes memory data) = address(this).delegatecall(
+                    abi.encodeWithSelector(
+                        onScheduledTaskTriggeredSelector,
+                        pos,
+                        scheduledTasksLength,
+                        currentScheduledTask.data
+                    )
+                );
+                if (!success) {
+                    if (data.length > 0) {
+                        // solhint-disable-next-line
+                        assembly {
+                            let returndata_size := mload(data)
+                            revert(add(32, data), returndata_size)
+                        }
+                    } else {
+                        // solhint-disable-next-line
+                        revert(
+                            'onScheduledTaskTriggered method failed without reason'
+                        );
+                    }
+                }
+
+                scheduledTasks.autoCalling = false;
+            } else {
+                break;
+            }
+        }
+
+        return newTaskID;
+    }
+
+    function _getScheduledTaskCount() internal view returns (uint256) {
+        return _scheduledTaskStorage().scheduledTaskCount;
+    }
+
+    function _getScheduledTasksByIndex(
+        uint256 _index
+    ) internal view returns (ScheduledTask memory) {
+        return _scheduledTaskStorage().scheduledTasks[_index];
+    }
+
+    function slideScheduledTasks(uint256 _pos) private {
+        ScheduledTasksDataStorage
+            storage scheduledTasks = _scheduledTaskStorage();
+        scheduledTasks
+            .scheduledTasks[_pos + 1]
+            .scheduledTimestamp = scheduledTasks
+            .scheduledTasks[_pos]
+            .scheduledTimestamp;
+        scheduledTasks.scheduledTasks[_pos + 1].data = scheduledTasks
+            .scheduledTasks[_pos]
+            .data;
+    }
+
+    function insertScheduledTask(
+        uint256 _pos,
+        ScheduledTask memory scheduledTaskToInsert
+    ) private {
+        ScheduledTasksDataStorage
+            storage scheduledTasks = _scheduledTaskStorage();
+        scheduledTasks
+            .scheduledTasks[_pos]
+            .scheduledTimestamp = scheduledTaskToInsert.scheduledTimestamp;
+        scheduledTasks.scheduledTasks[_pos].data = scheduledTaskToInsert.data;
+        scheduledTasks.scheduledTaskCount++;
+    }
+
+    function popScheduledTask() private {
+        uint256 scheduledTasksLength = _getScheduledTaskCount();
+        if (scheduledTasksLength == 0) {
+            return;
+        }
+        ScheduledTasksDataStorage
+            storage scheduledTasks = _scheduledTaskStorage();
+        delete (scheduledTasks.scheduledTasks[scheduledTasksLength - 1]);
+        scheduledTasks.scheduledTaskCount--;
+    }
+
+    function _getScheduledTasks(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (ScheduledTask[] memory scheduledTask_) {
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
+            _pageIndex,
+            _pageLength
+        );
+
+        scheduledTask_ = new ScheduledTask[](
+            LibCommon.getSize(start, end, _getScheduledTaskCount())
+        );
+
+        for (uint256 i = 0; i < scheduledTask_.length; i++) {
+            scheduledTask_[i] = _getScheduledTasksByIndex(start + i);
         }
     }
 
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
-        return
-            _maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ||
-            _amount <= _maxSupply;
+    function _scheduledTaskStorage()
+        internal
+        pure
+        virtual
+        returns (ScheduledTasksDataStorage storage scheduledTasks_)
+    {
+        bytes32 position = _SCHEDULED_TASKS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            scheduledTasks_.slot := position
+        }
     }
 }
-// solhint-enable no-unused-vars, custom-errors

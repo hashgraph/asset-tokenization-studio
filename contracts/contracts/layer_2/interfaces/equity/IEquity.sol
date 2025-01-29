@@ -203,98 +203,121 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-// solhint-disable no-unused-vars, custom-errors
-abstract contract CapStorageWrapper is ICapStorageWrapper, Common {
-    // modifiers
-    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) {
-        _checkNewMaxSupply(_newMaxSupply);
-        _;
+interface IEquity {
+    enum DividendType {
+        NONE,
+        PREFERRED,
+        COMMON
     }
 
-    modifier onlyValidNewMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) {
-        _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
-        _;
+    struct EquityDetailsData {
+        bool votingRight;
+        bool informationRight;
+        bool liquidationRight;
+        bool subscriptionRight;
+        bool conversionRight;
+        bool redemptionRight;
+        bool putRight;
+        DividendType dividendRight;
+        bytes3 currency;
+        uint256 nominalValue;
     }
 
-    // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
-        uint256 previousMaxSupply = _getMaxSupply();
-        _capStorage().maxSupply = _maxSupply;
-        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
+    struct Voting {
+        uint256 recordDate;
+        bytes data;
     }
 
-    function _setMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _maxSupply
-    ) internal {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
-            _partition
-        );
-        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
-            _msgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
+    struct RegisteredVoting {
+        Voting voting;
+        uint256 snapshotId;
     }
 
-    function _checkNewMaxSupply(uint256 newMaxSupply) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupply = _totalSupply() + newMaxSupply;
-        uint256 maxSupply = _getMaxSupply();
-
-        if (!_checkMaxSupplyCommon(newTotalSupply, maxSupply)) {
-            revert MaxSupplyReached(maxSupply);
-        }
+    struct Dividend {
+        uint256 recordDate;
+        uint256 executionDate;
+        uint256 amount;
     }
 
-    function _checkNewMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 newMaxSupply
-    ) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            partition
-        ) + newMaxSupply;
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(partition);
-
-        if (
-            !_checkMaxSupplyCommon(
-                newTotalSupplyForPartition,
-                maxSupplyForPartition
-            )
-        ) {
-            revert MaxSupplyReachedForPartition(
-                partition,
-                maxSupplyForPartition
-            );
-        }
+    struct RegisteredDividend {
+        Dividend dividend;
+        uint256 snapshotId;
     }
 
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
-        return
-            _maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ||
-            _amount <= _maxSupply;
+    struct DividendFor {
+        uint256 tokenBalance;
+        uint256 amount;
+        uint256 recordDate;
+        uint256 executionDate;
+        uint8 decimals;
+        bool recordDateReached;
     }
+
+    struct VotingFor {
+        uint256 tokenBalance;
+        uint256 recordDate;
+        bytes data;
+        uint8 decimals;
+        bool recordDateReached;
+    }
+
+    struct ScheduledBalanceAdjustment {
+        uint256 executionDate;
+        uint256 factor;
+        uint8 decimals;
+    }
+
+    function getEquityDetails()
+        external
+        view
+        returns (EquityDetailsData memory equityDetailsData_);
+
+    function setDividends(
+        Dividend calldata _newDividend
+    ) external returns (bool success_, uint256 dividendID_);
+
+    function getDividends(
+        uint256 _dividendID
+    ) external view returns (RegisteredDividend memory registeredDividend_);
+
+    function getDividendsFor(
+        uint256 _dividendID,
+        address _account
+    ) external view returns (DividendFor memory dividendFor_);
+
+    function getDividendsCount() external view returns (uint256 dividendCount_);
+
+    function setVoting(
+        Voting calldata _newVoting
+    ) external returns (bool success_, uint256 voteID_);
+
+    function getVoting(
+        uint256 _voteID
+    ) external view returns (RegisteredVoting memory registeredVoting_);
+
+    function getVotingFor(
+        uint256 _voteID,
+        address _account
+    ) external view returns (VotingFor memory votingFor_);
+
+    function getVotingCount() external view returns (uint256 votingCount_);
+
+    function setScheduledBalanceAdjustment(
+        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    ) external returns (bool success_, uint256 balanceAdjustmentID_);
+
+    function getScheduledBalanceAdjustment(
+        uint256 _balanceAdjustmentID
+    )
+        external
+        view
+        returns (ScheduledBalanceAdjustment memory balanceAdjustment_);
+
+    function getScheduledBalanceAdjustmentCount()
+        external
+        view
+        returns (uint256 balanceAdjustmentCount_);
 }
-// solhint-enable no-unused-vars, custom-errors

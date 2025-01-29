@@ -205,96 +205,211 @@
 
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-// solhint-disable no-unused-vars, custom-errors
-abstract contract CapStorageWrapper is ICapStorageWrapper, Common {
-    // modifiers
-    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) {
-        _checkNewMaxSupply(_newMaxSupply);
-        _;
-    }
-
-    modifier onlyValidNewMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) {
-        _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
-        _;
-    }
-
-    // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
-        uint256 previousMaxSupply = _getMaxSupply();
-        _capStorage().maxSupply = _maxSupply;
-        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
-    }
-
-    function _setMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _maxSupply
-    ) internal {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
-            _partition
-        );
-        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
-            _msgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
-    }
-
-    function _checkNewMaxSupply(uint256 newMaxSupply) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupply = _totalSupply() + newMaxSupply;
-        uint256 maxSupply = _getMaxSupply();
-
-        if (!_checkMaxSupplyCommon(newTotalSupply, maxSupply)) {
-            revert MaxSupplyReached(maxSupply);
-        }
-    }
-
-    function _checkNewMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 newMaxSupply
-    ) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            partition
-        ) + newMaxSupply;
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(partition);
-
-        if (
-            !_checkMaxSupplyCommon(
-                newTotalSupplyForPartition,
-                maxSupplyForPartition
-            )
-        ) {
-            revert MaxSupplyReachedForPartition(
-                partition,
-                maxSupplyForPartition
-            );
-        }
-    }
-
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
-        return
-            _maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ||
-            _amount <= _maxSupply;
-    }
-}
-// solhint-enable no-unused-vars, custom-errors
+//import {
+//    IStaticFunctionSelectors
+//} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+//import {_LOCKER_ROLE} from '../constants/roles.sol';
+//import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+//import {ILock} from '../interfaces/lock/ILock.sol';
+//import {LockStorageWrapper} from './LockStorageWrapper.sol';
+//// SPDX-License-Identifier: BSD-3-Clause-Attribution
+//
+//abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
+//    function lockByPartition(
+//        bytes32 _partition,
+//        uint256 _amount,
+//        address _tokenHolder,
+//        uint256 _expirationTimestamp
+//    )
+//        external
+//        virtual
+//        override
+//        onlyUnpaused
+//        onlyRole(_LOCKER_ROLE)
+//        onlyDefaultPartitionWithSinglePartition(_partition)
+//        onlyWithValidExpirationTimestamp(_expirationTimestamp)
+//        returns (bool success_, uint256 lockId_)
+//    {
+//        (success_, lockId_) = _lockByPartition(
+//            _partition,
+//            _amount,
+//            _tokenHolder,
+//            _expirationTimestamp
+//        );
+//        emit LockedByPartition(
+//            _msgSender(),
+//            _tokenHolder,
+//            _partition,
+//            lockId_,
+//            _amount,
+//            _expirationTimestamp
+//        );
+//    }
+//
+//    function releaseByPartition(
+//        bytes32 _partition,
+//        uint256 _lockId,
+//        address _tokenHolder
+//    )
+//        external
+//        virtual
+//        override
+//        onlyUnpaused
+//        onlyDefaultPartitionWithSinglePartition(_partition)
+//        onlyWithValidLockId(_partition, _tokenHolder, _lockId)
+//        onlyWithLockedExpirationTimestamp(_partition, _tokenHolder, _lockId)
+//        returns (bool success_)
+//    {
+//        success_ = _releaseByPartition(_partition, _lockId, _tokenHolder);
+//        emit LockByPartitionReleased(
+//            _msgSender(),
+//            _tokenHolder,
+//            _partition,
+//            _lockId
+//        );
+//    }
+//
+//    function getLockedAmountForByPartition(
+//        bytes32 _partition,
+//        address _tokenHolder
+//    ) external view virtual override returns (uint256 amount_) {
+//        return _getLockedAmountForByPartition(_partition, _tokenHolder);
+//    }
+//
+//    function getLockCountForByPartition(
+//        bytes32 _partition,
+//        address _tokenHolder
+//    ) external view virtual override returns (uint256 lockCount_) {
+//        return _getLockCountForByPartition(_partition, _tokenHolder);
+//    }
+//
+//    function getLocksIdForByPartition(
+//        bytes32 _partition,
+//        address _tokenHolder,
+//        uint256 _pageIndex,
+//        uint256 _pageLength
+//    ) external view virtual override returns (uint256[] memory locksId_) {
+//        return
+//            _getLocksIdForByPartition(
+//                _partition,
+//                _tokenHolder,
+//                _pageIndex,
+//                _pageLength
+//            );
+//    }
+//
+//    function getLockForByPartition(
+//        bytes32 _partition,
+//        address _tokenHolder,
+//        uint256 _lockId
+//    )
+//        external
+//        view
+//        virtual
+//        override
+//        returns (uint256 amount_, uint256 expirationTimestamp_)
+//    {
+//        return _getLockForByPartition(_partition, _tokenHolder, _lockId);
+//    }
+//
+//    // Uses default parititon in case Multipartition is not activated
+//    function lock(
+//        uint256 _amount,
+//        address _tokenHolder,
+//        uint256 _expirationTimestamp
+//    )
+//        external
+//        virtual
+//        override
+//        onlyUnpaused
+//        onlyRole(_LOCKER_ROLE)
+//        onlyWithoutMultiPartition
+//        onlyWithValidExpirationTimestamp(_expirationTimestamp)
+//        returns (bool success_, uint256 lockId_)
+//    {
+//        (success_, lockId_) = _lockByPartition(
+//            _DEFAULT_PARTITION,
+//            _amount,
+//            _tokenHolder,
+//            _expirationTimestamp
+//        );
+//        emit LockedByPartition(
+//            _msgSender(),
+//            _tokenHolder,
+//            _DEFAULT_PARTITION,
+//            lockId_,
+//            _amount,
+//            _expirationTimestamp
+//        );
+//    }
+//
+//    function release(
+//        uint256 _lockId,
+//        address _tokenHolder
+//    )
+//        external
+//        virtual
+//        override
+//        onlyUnpaused
+//        onlyWithoutMultiPartition
+//        onlyWithValidLockId(_DEFAULT_PARTITION, _tokenHolder, _lockId)
+//        onlyWithLockedExpirationTimestamp(
+//            _DEFAULT_PARTITION,
+//            _tokenHolder,
+//            _lockId
+//        )
+//        returns (bool success_)
+//    {
+//        success_ = _releaseByPartition(
+//            _DEFAULT_PARTITION,
+//            _lockId,
+//            _tokenHolder
+//        );
+//        emit LockByPartitionReleased(
+//            _msgSender(),
+//            _tokenHolder,
+//            _DEFAULT_PARTITION,
+//            _lockId
+//        );
+//    }
+//
+//    function getLockedAmountFor(
+//        address _tokenHolder
+//    ) external view virtual override returns (uint256 amount_) {
+//        return _getLockedAmountFor(_tokenHolder);
+//    }
+//
+//    function getLockCountFor(
+//        address _tokenHolder
+//    ) external view virtual override returns (uint256 lockCount_) {
+//        return _getLockCountForByPartition(_DEFAULT_PARTITION, _tokenHolder);
+//    }
+//
+//    function getLocksIdFor(
+//        address _tokenHolder,
+//        uint256 _pageIndex,
+//        uint256 _pageLength
+//    ) external view virtual override returns (uint256[] memory locksId_) {
+//        return
+//            _getLocksIdForByPartition(
+//                _DEFAULT_PARTITION,
+//                _tokenHolder,
+//                _pageIndex,
+//                _pageLength
+//            );
+//    }
+//
+//    function getLockFor(
+//        address _tokenHolder,
+//        uint256 _lockId
+//    )
+//        external
+//        view
+//        virtual
+//        override
+//        returns (uint256 amount_, uint256 expirationTimestamp_)
+//    {
+//        return
+//            _getLockForByPartition(_DEFAULT_PARTITION, _tokenHolder, _lockId);
+//    }
+//}

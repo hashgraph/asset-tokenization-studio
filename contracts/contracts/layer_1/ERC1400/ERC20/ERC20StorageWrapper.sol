@@ -207,7 +207,7 @@
 pragma solidity 0.8.18;
 
 import {_ERC20_STORAGE_POSITION} from '../../constants/storagePositions.sol';
-import {_DEFAULT_PARTITION} from '../../constants/values.sol';
+import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
 import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
 import {
     IERC20StorageWrapper

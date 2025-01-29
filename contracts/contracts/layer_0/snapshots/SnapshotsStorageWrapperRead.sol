@@ -203,98 +203,160 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {LocalContext} from '../context/LocalContext.sol';
+import {
+    ArraysUpgradeable
+} from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
+import {
+    CountersUpgradeable
+} from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
+import {
+    ISnapshotsStorageWrapper
+} from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
+import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 
 // solhint-disable no-unused-vars, custom-errors
-abstract contract CapStorageWrapper is ICapStorageWrapper, Common {
-    // modifiers
-    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) {
-        _checkNewMaxSupply(_newMaxSupply);
-        _;
+abstract contract SnapshotsStorageWrapperRead is
+    ISnapshotsStorageWrapper,
+    LocalContext
+{
+    using ArraysUpgradeable for uint256[];
+    using CountersUpgradeable for CountersUpgradeable.Counter;
+
+    // Snapshotted values have arrays of ids and the value corresponding to that id. These could be an array of a
+    // Snapshot struct, but that would impede usage of functions that work on an array.
+    struct Snapshots {
+        uint256[] ids;
+        uint256[] values;
     }
 
-    modifier onlyValidNewMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) {
-        _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
-        _;
+    struct ListOfPartitions {
+        bytes32[] partitions;
+    }
+    struct PartitionSnapshots {
+        uint256[] ids;
+        ListOfPartitions[] values;
     }
 
-    // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
-        uint256 previousMaxSupply = _getMaxSupply();
-        _capStorage().maxSupply = _maxSupply;
-        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
+    struct SnapshotStorage {
+        mapping(address => Snapshots) accountBalanceSnapshots;
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionBalanceSnapshots;
+        mapping(address => PartitionSnapshots) accountPartitionSnapshots;
+        Snapshots totalSupplySnapshots;
+        // Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
+        CountersUpgradeable.Counter currentSnapshotId;
+        mapping(address => Snapshots) accountLockedBalanceSnapshots;
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
+        mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
     }
 
-    function _setMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _maxSupply
+    event SnapshotTriggered(address indexed operator, uint256 snapshotId);
+
+    function _takeSnapshot() internal returns (uint256 snapshotID_) {
+        snapshotID_ = _snapshot();
+        emit SnapshotTaken(_msgSender(), snapshotID_);
+    }
+
+    function _snapshot() internal returns (uint256) {
+        _snapshotStorage().currentSnapshotId.increment();
+
+        uint256 currentId = _getCurrentSnapshotId();
+
+        emit SnapshotTriggered(_msgSender(), currentId);
+
+        return currentId;
+    }
+
+    function _getCurrentSnapshotId() internal view returns (uint256) {
+        return _snapshotStorage().currentSnapshotId.current();
+    }
+
+    function _updateSnapshot(
+        Snapshots storage snapshots,
+        uint256 currentValue
     ) internal {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
-            _partition
-        );
-        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
-            _msgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
-    }
-
-    function _checkNewMaxSupply(uint256 newMaxSupply) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupply = _totalSupply() + newMaxSupply;
-        uint256 maxSupply = _getMaxSupply();
-
-        if (!_checkMaxSupplyCommon(newTotalSupply, maxSupply)) {
-            revert MaxSupplyReached(maxSupply);
+        uint256 currentId = _getCurrentSnapshotId();
+        if (_lastSnapshotId(snapshots.ids) < currentId) {
+            snapshots.ids.push(currentId);
+            snapshots.values.push(currentValue);
         }
     }
 
-    function _checkNewMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 newMaxSupply
-    ) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            partition
-        ) + newMaxSupply;
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(partition);
-
-        if (
-            !_checkMaxSupplyCommon(
-                newTotalSupplyForPartition,
-                maxSupplyForPartition
-            )
-        ) {
-            revert MaxSupplyReachedForPartition(
-                partition,
-                maxSupplyForPartition
+    function _updateSnapshotPartitions(
+        Snapshots storage snapshots,
+        PartitionSnapshots storage partitionSnapshots,
+        uint256 currentValueForPartition,
+        // There is a limitation in the number of partitions an account can have, if it has to many the snapshot
+        // transaction will run out of gas
+        bytes32[] memory partitionIds
+    ) internal {
+        uint256 currentId = _getCurrentSnapshotId();
+        if (_lastSnapshotId(snapshots.ids) < currentId) {
+            snapshots.ids.push(currentId);
+            snapshots.values.push(currentValueForPartition);
+        }
+        if (_lastSnapshotId(partitionSnapshots.ids) < currentId) {
+            partitionSnapshots.ids.push(currentId);
+            ListOfPartitions memory listOfPartitions = ListOfPartitions(
+                partitionIds
             );
+            partitionSnapshots.values.push(listOfPartitions);
         }
     }
 
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
-        return
-            _maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ||
-            _amount <= _maxSupply;
+    function _valueAt(
+        uint256 snapshotId,
+        Snapshots storage snapshots
+    ) internal view returns (bool, uint256) {
+        (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
+
+        return (found, found ? snapshots.values[index] : 0);
+    }
+
+    function _indexFor(
+        uint256 snapshotId,
+        uint256[] storage ids
+    ) internal view returns (bool, uint256) {
+        if (snapshotId == 0) {
+            revert SnapshotIdNull();
+        }
+        if (snapshotId > _getCurrentSnapshotId()) {
+            revert SnapshotIdDoesNotExists(snapshotId);
+        }
+
+        uint256 index = ids.findUpperBound(snapshotId);
+
+        if (index == ids.length) {
+            return (false, 0);
+        } else {
+            return (true, index);
+        }
+    }
+
+    function _lastSnapshotId(
+        uint256[] storage ids
+    ) internal view returns (uint256) {
+        if (ids.length == 0) {
+            return 0;
+        } else {
+            return ids[ids.length - 1];
+        }
+    }
+
+    function _snapshotStorage()
+        internal
+        pure
+        virtual
+        returns (SnapshotStorage storage snapshotStorage_)
+    {
+        bytes32 position = _SNAPSHOT_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            snapshotStorage_.slot := position
+        }
     }
 }
 // solhint-enable no-unused-vars, custom-errors

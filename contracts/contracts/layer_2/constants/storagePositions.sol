@@ -204,97 +204,27 @@
 */
 
 pragma solidity 0.8.18;
-
-import {Common} from '../common/Common.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable no-unused-vars, custom-errors
-abstract contract CapStorageWrapper is ICapStorageWrapper, Common {
-    // modifiers
-    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) {
-        _checkNewMaxSupply(_newMaxSupply);
-        _;
-    }
+// solhint-disable max-line-length
 
-    modifier onlyValidNewMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) {
-        _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
-        _;
-    }
+// keccak256('security.token.standard.bond.storage');
+bytes32 constant _BOND_STORAGE_POSITION = 0x251123c390edd911567d4210605f2dfb26d83878c58bd871f56946d08ffd1f2b;
 
-    // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
-        uint256 previousMaxSupply = _getMaxSupply();
-        _capStorage().maxSupply = _maxSupply;
-        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
-    }
+// keccak256('security.token.standard.equity.storage');
+bytes32 constant _EQUITY_STORAGE_POSITION = 0xa5469e676cbd7933388e0b85a29d4408325f3dd05785ee648c5375e79d0aa651;
 
-    function _setMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _maxSupply
-    ) internal {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
-            _partition
-        );
-        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
-            _msgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
-    }
+// keccak256('security.token.standard.erc1410.basic.2.storage');
+bytes32 constant _ERC1410_BASIC_STORAGE_2_POSITION = 0x0b7c7c3086877579769ac0bef31a4e31f19775fa999bf5053bae0d03195b0d62;
 
-    function _checkNewMaxSupply(uint256 newMaxSupply) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupply = _totalSupply() + newMaxSupply;
-        uint256 maxSupply = _getMaxSupply();
+// keccak256('security.token.standard.adjust.balances.storage');
+bytes32 constant _ADJUST_BALANCES_STORAGE_POSITION = 0x20765daced38554542b3c858f10e7fb957696c4dbd38d7faabc51dd4de7ad541;
 
-        if (!_checkMaxSupplyCommon(newTotalSupply, maxSupply)) {
-            revert MaxSupplyReached(maxSupply);
-        }
-    }
+// keccak256('security.token.standard.lock.2.storage');
+bytes32 constant _LOCK_2_STORAGE_POSITION = 0x80a0b31b5fd604012f7499bdf0f4b16f83f6969068a25c5183f6c442d3d70b78;
 
-    function _checkNewMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 newMaxSupply
-    ) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            partition
-        ) + newMaxSupply;
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(partition);
+// keccak256('security.token.standard.erc20.2.storage');
+bytes32 constant _ERC20_2_STORAGE_POSITION = 0xd9e01023f6efb8d6fd07b486ce7d576973b42ff2c201a7ad9b018c2103b5d0c6;
 
-        if (
-            !_checkMaxSupplyCommon(
-                newTotalSupplyForPartition,
-                maxSupplyForPartition
-            )
-        ) {
-            revert MaxSupplyReachedForPartition(
-                partition,
-                maxSupplyForPartition
-            );
-        }
-    }
-
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
-        return
-            _maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ||
-            _amount <= _maxSupply;
-    }
-}
-// solhint-enable no-unused-vars, custom-errors
+// keccak256('security.token.standard.snapshot.2.storage');
+bytes32 constant _SNAPSHOT_2_STORAGE_POSITION = 0x7fa31c0dfd7893e990d22efcc9d48c475631ab02fa1ab34086c54e7f6d9d9b10;

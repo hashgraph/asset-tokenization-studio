@@ -206,13 +206,23 @@
 pragma solidity 0.8.18;
 
 import {
+    CorporateActionsStorageWrapperRead
+} from '../corporateActions/CorporateActionsStorageWrapperRead.sol';
+import {
     AdjustBalancesStorageWrapperRead
 } from '../adjustBalances/AdjustBalancesStorageWrapperRead.sol';
 import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {
+    SnapshotsStorageWrapperRead
+} from '../snapshots/SnapshotsStorageWrapperRead.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 // solhint-disable no-unused-vars, custom-errors
-contract CapStorageWrapperRead is AdjustBalancesStorageWrapperRead {
+contract CapStorageWrapperRead is
+    AdjustBalancesStorageWrapperRead,
+    CorporateActionsStorageWrapperRead,
+    SnapshotsStorageWrapperRead
+{
     struct CapDataStorage {
         uint256 maxSupply;
         mapping(bytes32 => uint256) maxSupplyByPartition;
@@ -220,32 +230,53 @@ contract CapStorageWrapperRead is AdjustBalancesStorageWrapperRead {
     }
 
     function _adjustMaxSupply(uint256 factor) internal {
-        CapDataStorage storage capDataStorage = _getCapStorage();
+        CapDataStorage storage capStorage = _capStorage();
         if (
-            capDataStorage.maxSupply ==
+            capStorage.maxSupply ==
             0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         ) return;
-        capDataStorage.maxSupply *= factor;
+        capStorage.maxSupply *= factor;
     }
 
     function _adjustMaxSupplyByPartition(
         bytes32 partition,
         uint256 factor
     ) internal {
-        CapDataStorage storage capDataStorage = _getCapStorage();
+        CapDataStorage storage capStorage = _capStorage();
         if (
-            capDataStorage.maxSupplyByPartition[partition] ==
+            capStorage.maxSupplyByPartition[partition] ==
             0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
         ) return;
-        capDataStorage.maxSupplyByPartition[partition] *= factor;
+        capStorage.maxSupplyByPartition[partition] *= factor;
     }
 
-    function _getCapStorage()
-        internal
-        pure
-        virtual
-        returns (CapDataStorage storage cap_)
-    {
+    function _getMaxSupply() internal view returns (uint256) {
+        CapDataStorage storage capStorage = _capStorage();
+        if (
+            capStorage.maxSupply ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        )
+            return
+                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+        return capStorage.maxSupply;
+    }
+
+    function _getMaxSupplyByPartition(
+        bytes32 partition
+    ) internal view returns (uint256) {
+        CapDataStorage storage capStorage = _capStorage();
+        if (
+            capStorage.maxSupplyByPartition[partition] ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        )
+            return
+                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+        return
+            capStorage.maxSupplyByPartition[partition] *
+            _calculateFactorByPartition(partition);
+    }
+
+    function _capStorage() internal pure returns (CapDataStorage storage cap_) {
         bytes32 position = _CAP_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

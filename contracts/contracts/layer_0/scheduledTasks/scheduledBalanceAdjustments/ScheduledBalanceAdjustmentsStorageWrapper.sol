@@ -203,142 +203,93 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
 import {
-    ERC1410BasicStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
+    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
 import {
-    _PARTITION_SIZE,
-    _PARTITION_AMOUNT_OFFSET
-} from '../../layer_1/constants/storagePositions.sol';
+    ScheduledTasksCommon,
+    ScheduledTasksDataStorage
+} from '../../../layer_0/scheduledTasks/ScheduledTasksCommon.sol';
 import {
     CorporateActionDataStorage
-} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
+} from '../../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
 import {
-    AdjustBalancesStorageWrapperRead
-} from './AdjustBalancesStorageWrapperRead.sol';
-import {ArrayLib} from '../common/ArrayLib.sol';
-import {MappingLib} from '../common/MappingLib.sol';
-import {ScheduledTasksLib} from '../scheduledTasks/ScheduledTasksLib.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+    CorporateActionsStorageWrapperRead
+} from '../../corporateActions/CorporateActionsStorageWrapperRead.sol';
+import {IEquity} from '../../../layer_2/interfaces/equity/IEquity.sol';
+import {
+    ScheduledTask
+} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 
-/**
-    * total = account total balance
-    * t1 = account's partition 1 balance
-    * t2 = account's partition 2 balance
-    * x = factor for total balance
-    * y = factor for partition 2 balance
-    *
-    * OPTION : First adjusting partition : (y * t2)
-    *    // adding partition increment diff to total :  total = total + (t2 * (y - 1))
-    *    // Finally adjusting total : (x * total)
-    *
-    * total = t1 + t2;
-    * total = t1 + t2 + (t2 * (y - 1)) = t1 + t2 + y * t2 - t2
-      total = t1 + y * t2;
-      total = x * total = x * (t1 + y * t2)
-    */
-library AdjustBalanceLib {
-    function adjustTotalAndMaxSupplyForPartition(
-        bytes32 _partition //    , //        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage //        storage _basicStorage, //        CapStorageWrapper.CapDataStorage storage _capStorage, //        AdjustBalancesStorageWrapperRead.AdjustBalancesStorage //        storage _adjustBalanceStorage
-    ) internal {
-        //        ERC1410BasicStorageWrapperRead._adjustTotalAndMaxSupplyByPartition(
-        //            _partition
-        //        );
+abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
+    ScheduledTasksCommon
+{
+    function _getScheduledBalanceAdjustmentCount()
+        internal
+        view
+        virtual
+        returns (uint256)
+    {
+        return _getScheduledTaskCount();
     }
 
-    function adjustTotalBalanceAndPartitionBalanceFor(
-        bytes32 _partition,
-        address _account //    , //        ERC1410BasicStorageWrapperRead.ERC1410BasicStorage //            storage _basicStorage, //        AdjustBalancesStorageWrapper.AdjustBalancesStorage //            storage _adjustBalanceStorage
-    ) internal {
-        //        ERC1410BasicStorageWrapperRead._adjustTotalBalanceAndPartitionBalanceFor(
-        //            _partition,
-        //            _account
-        //        );
+    function _getScheduledBalanceAdjustments(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        internal
+        view
+        virtual
+        returns (ScheduledTask[] memory scheduledBalanceAdjustment_)
+    {
+        return _getScheduledTasks(_pageIndex, _pageLength);
     }
 
-    function updateBalance(
-        uint256 _abaf,
-        uint256 _labaf,
-        uint256 _balanceSlotPos
-    ) internal {
-        uint256 factor = calculateFactor(_abaf, _labaf);
-        uint256 amount;
+    function _getPendingScheduledBalanceAdjustmentsAt(
+        uint256 _timestamp
+    ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
+        // * Initialization
+        pendingABAF_ = 1;
+        pendingDecimals_ = 0;
 
-        // solhint-disable-next-line
-        assembly {
-            amount := sload(_balanceSlotPos)
-        }
+        uint256 scheduledTaskCount = _getScheduledTaskCount();
 
-        if (amount == 0) return;
+        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
+            uint256 pos = scheduledTaskCount - i;
 
-        amount *= factor;
+            ScheduledTask memory scheduledTask = _getScheduledTasksByIndex(pos);
 
-        // solhint-disable-next-line
-        assembly {
-            sstore(_balanceSlotPos, amount)
+            if (scheduledTask.scheduledTimestamp < _timestamp) {
+                bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
+                (, bytes memory balanceAdjustmentData) = _getCorporateAction(
+                    actionId
+                );
+                IEquity.ScheduledBalanceAdjustment
+                    memory balanceAdjustment = abi.decode(
+                        balanceAdjustmentData,
+                        (IEquity.ScheduledBalanceAdjustment)
+                    );
+                pendingABAF_ *= balanceAdjustment.factor;
+                pendingDecimals_ += balanceAdjustment.decimals;
+            } else {
+                break;
+            }
         }
     }
 
-    function updateLABAF(uint256 _abaf, uint256 _labafSlotPos) internal {
-        // solhint-disable-next-line
+    function _scheduledBalanceAdjustmentStorage()
+        internal
+        pure
+        virtual
+        returns (ScheduledTasksDataStorage storage scheduledBalanceAdjustments_)
+    {
+        bytes32 position = _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
-            sstore(_labafSlotPos, _abaf)
+            scheduledBalanceAdjustments_.slot := position
         }
     }
-
-    function calculateFactor(
-        uint256 _abaf,
-        uint256 _labaf
-    ) internal pure returns (uint256 factor_) {
-        if (_abaf == 0) return 1;
-        if (_labaf == 0) return _abaf;
-        factor_ = _abaf / _labaf;
-    }
-
-    //    function getPendingScheduledBalanceAdjustmentsAt(
-    //        ScheduledTasksLib.ScheduledTasksDataStorage
-    //            storage _scheduledBalanceAdjustments,
-    //        CorporateActionDataStorage storage _corporateActions,
-    //        uint256 _timestamp
-    //    ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
-    //        // * Initialization
-    //        pendingABAF_ = 1;
-    //        pendingDecimals_ = 0;
-    //
-    //        uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(
-    //            _scheduledBalanceAdjustments
-    //        );
-    //
-    //        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
-    //            uint256 pos = scheduledTaskCount - i;
-    //
-    //            ScheduledTasksLib.ScheduledTask
-    //                memory scheduledTask = ScheduledTasksLib
-    //                    .getScheduledTasksByIndex(
-    //                        _scheduledBalanceAdjustments,
-    //                        pos
-    //                    );
-    //
-    //            if (scheduledTask.scheduledTimestamp < _timestamp) {
-    //                bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
-    //
-    //                bytes memory balanceAdjustmentData = _corporateActions
-    //                    .actionsData[actionId]
-    //                    .data;
-    //
-    //                IEquity.ScheduledBalanceAdjustment
-    //                    memory balanceAdjustment = abi.decode(
-    //                        balanceAdjustmentData,
-    //                        (IEquity.ScheduledBalanceAdjustment)
-    //                    );
-    //                pendingABAF_ *= balanceAdjustment.factor;
-    //                pendingDecimals_ += balanceAdjustment.decimals;
-    //            } else {
-    //                break;
-    //            }
-    //        }
-    //    }
 }

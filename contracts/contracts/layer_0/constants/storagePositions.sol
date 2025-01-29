@@ -226,4 +226,12 @@ bytes32 constant _SNAPSHOT_STORAGE_POSITION = 0x450898ebb84982a28d8787f0138cfce4
 // keccak256('security.token.standard.adjust.balances.storage');
 bytes32 constant _ADJUST_BALANCES_STORAGE_POSITION = 0x20765daced38554542b3c858f10e7fb957696c4dbd38d7faabc51dd4de7ad541;
 
+// keccak256('security.token.standard.scheduledSnapshots.storage');
+bytes32 constant _SCHEDULED_SNAPSHOTS_STORAGE_POSITION = 0xe5334ddaa6268d55c7efe63975567949a7fb208c02c0bd15007703db04a9ba4f;
+
+// keccak256('security.token.standard.scheduledBalanceAdjustments.storage');
+bytes32 constant _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION = 0xaf4aaa3de473ec9b58645d40f5a2fe4e176157e247b2d875db61f1a70935ac68;
+
+// keccak256('security.token.standard.scheduledTasks.storage');
+bytes32 constant _SCHEDULED_TASKS_STORAGE_POSITION = 0x2352c39c61abb4e922588a7d46fb5c925b9a205577be135537479031648c86fe;
 // solhint-enable max-line-length

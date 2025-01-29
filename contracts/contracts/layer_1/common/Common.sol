@@ -208,22 +208,22 @@ pragma solidity 0.8.18;
 
 import {
     ProtectedPartitionsStorageWrapper
-} from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
+} from '../../layer_1/protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
 import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
 import {
     ControlListStorageWrapper
 } from '../controlList/ControlListStorageWrapper.sol';
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
 import {
-    SnapshotsStorageWrapper
-} from '../../layer_0/snapshots/SnapshotsStorageWrapper.sol';
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../../layer_0/scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
 
 // solhint-disable no-empty-blocks
 abstract contract Common is
     PauseStorageWrapper,
     ControlListStorageWrapper,
     ProtectedPartitionsStorageWrapper,
-    SnapshotsStorageWrapper
+    ScheduledBalanceAdjustmentsStorageWrapper
 {
     error AlreadyInitialized();
     error OnlyDelegateAllowed();

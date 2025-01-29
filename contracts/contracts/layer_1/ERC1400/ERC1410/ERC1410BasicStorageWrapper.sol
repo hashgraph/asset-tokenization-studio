@@ -256,10 +256,4 @@ abstract contract ERC1410BasicStorageWrapper is
         address to,
         uint256 amount
     ) internal virtual;
-
-    function _checkValidAddress(address account) internal pure {
-        if (account == address(0)) {
-            revert ZeroAddressNotAllowed();
-        }
-    }
 }
