@@ -560,6 +560,41 @@ describe('Hold Tests', () => {
 
     describe('Control List', () => {
         // Execute
+        it('GIVEN a blacklisted destination account WHEN executeHoldByPartition THEN transaction fails with AccountIsBlocked', async () => {
+            await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+            await controlListFacet.addToControlList(account_C)
+
+            await expect(
+                holdFacet
+                    .connect(signer_B)
+                    .executeHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        1,
+                        account_A,
+                        account_C,
+                        1
+                    )
+            ).to.be.rejectedWith('AccountIsBlocked')
+        })
+
+        it('GIVEN a blacklisted origin account WHEN executeHoldByPartition THEN transaction fails with AccountIsBlocked', async () => {
+            await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+            await controlListFacet.addToControlList(account_A)
+
+            await expect(
+                holdFacet
+                    .connect(signer_B)
+                    .executeHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        1,
+                        account_A,
+                        account_B,
+                        1
+                    )
+            ).to.be.rejectedWith('AccountIsBlocked')
+        })
     })
 
     describe('Create with wrong input arguments', () => {

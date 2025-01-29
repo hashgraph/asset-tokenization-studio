@@ -447,7 +447,6 @@ abstract contract Hold is
             _escrowId,
             _tokenHolder
         )
-        checkControlList(_tokenHolder)
         returns (bool success_)
     {
         // solhint-disable-next-line
