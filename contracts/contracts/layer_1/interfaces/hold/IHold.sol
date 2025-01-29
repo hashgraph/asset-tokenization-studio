@@ -338,6 +338,10 @@ interface IHold {
         address _tokenHolder
     ) external returns (bool success_);
 
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view returns (uint256 amount_);
+
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
@@ -379,7 +383,8 @@ interface IHold {
             uint256 expirationTimestamp_,
             address escrow_,
             address destination_,
-            bytes memory data_
+            bytes memory data_,
+            bytes memory operatorData_
         );
 
     function getHoldForEscrowByPartition(
@@ -395,6 +400,7 @@ interface IHold {
             address tokenHolder_,
             uint256 id_,
             address destination_,
-            bytes memory data_
+            bytes memory data_,
+            bytes memory operatorData_
         );
 }

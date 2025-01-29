@@ -226,6 +226,106 @@ abstract contract HoldStorageWrapper_2_Read is
     HoldStorageWrapper,
     ERC1410ScheduledTasksStorageWrapper
 {
+    function _getHeldAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getTotalHeldLABAF(_tokenHolder)
+        );
+
+        return _getHeldAmountFor(_tokenHolder) * factor;
+    }
+    function _getHeldAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getTotalHeldLABAFByPartition(
+                _partition,
+                _tokenHolder
+            )
+        );
+        return _getHeldAmountForByPartition(_partition, _tokenHolder) * factor;
+    }
+
+    function _getHoldForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        internal
+        view
+        virtual
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        )
+    {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getHoldLABAFByPartition(
+                _partition,
+                _holdId,
+                _tokenHolder
+            )
+        );
+
+        (
+            amount_,
+            expirationTimestamp_,
+            escrow_,
+            destination_,
+            data_,
+            operatorData_
+        ) = _getHoldForByPartition(_partition, _tokenHolder, _holdId);
+        amount_ *= factor;
+    }
+
+    function _getHoldForEscrowByPartitionAdjusted(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _escrowHoldId
+    )
+        internal
+        view
+        virtual
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address tokenHolder_,
+            uint256 id_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        )
+    {
+        (
+            amount_,
+            expirationTimestamp_,
+            tokenHolder_,
+            id_,
+            destination_,
+            data_,
+            operatorData_
+        ) = _getHoldForEscrowByPartition(_partition, _escrow, _escrowHoldId);
+
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getHoldLABAFByPartition(
+                _partition,
+                id_,
+                tokenHolder_
+            )
+        );
+
+        amount_ *= factor;
+    }
     function _addPartitionTo(
         uint256 _value,
         address _account,
