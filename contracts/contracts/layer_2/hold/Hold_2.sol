@@ -227,6 +227,26 @@ import {
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 contract Hold_2 is Hold, HoldStorageWrapper_2 {
+    function _createHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold memory _hold,
+        bytes memory _operatorData
+    )
+        internal
+        virtual
+        override(HoldStorageWrapper, HoldStorageWrapper_2)
+        returns (bool success_, uint256 holdId_)
+    {
+        return
+            HoldStorageWrapper_2._createHoldByPartition(
+                _partition,
+                _from,
+                _hold,
+                _operatorData
+            );
+    }
+
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
