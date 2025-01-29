@@ -230,7 +230,7 @@ abstract contract Cap is
         virtual
         override
         onlyUninitialized(_capStorage().initialized)
-        returns (bool success_)
+        checkNewMaxSupply(maxSupply)
     {
         CapDataStorage storage capStorage = _capStorage();
 
@@ -243,7 +243,6 @@ abstract contract Cap is
         }
 
         capStorage.initialized = true;
-        success_ = true;
     }
 
     function setMaxSupply(

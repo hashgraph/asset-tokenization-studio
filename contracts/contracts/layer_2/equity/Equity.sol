@@ -232,10 +232,10 @@ abstract contract Equity is
     // solhint-disable-next-line private-vars-leading-underscore
     function _initializeEquity(
         EquityDetailsData calldata _equityDetailsData
-    ) internal returns (bool success_) {
+    ) internal {
         EquityDataStorage storage equityStorage = _equityStorage();
         equityStorage.initialized = true;
-        success_ = _storeEquityDetails(_equityDetailsData);
+        _storeEquityDetails(_equityDetailsData);
     }
 
     function getEquityDetails()

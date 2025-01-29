@@ -205,27 +205,36 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Snapshots_2,
-    type Equity,
+    type EquityUSA,
     type ERC1410ScheduledTasks,
     type AccessControl,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+    TimeTravel,
+    BusinessLogicResolver,
+    IFactory,
+    AccessControl__factory,
+    EquityUSA__factory,
+    ERC1410ScheduledTasks__factory,
+    Snapshots_2__factory,
+    TimeTravel__factory,
+} from '@typechain'
 import {
-    _SNAPSHOT_ROLE,
-    _PAUSER_ROLE,
-    _ISSUER_ROLE,
-    _CORPORATE_ACTION_ROLE,
-} from '../../../../scripts/constants'
-import {
+    SNAPSHOT_ROLE,
+    PAUSER_ROLE,
+    ISSUER_ROLE,
+    CORPORATE_ACTION_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '@scripts'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -234,8 +243,8 @@ const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
-const TIME = 6000
 const DECIMALS = 6
+const MAX_SUPPLY = BigInt(100000000)
 
 describe('Snapshots Layer 2 Tests', () => {
     let diamond: ResolverProxy
@@ -247,79 +256,98 @@ describe('Snapshots Layer 2 Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
     let snapshotFacet: Snapshots_2
     let accessControlFacet: AccessControl
-    let equityFacet: Equity
+    let equityFacet: EquityUSA
+    let timeTravelFacet: TimeTravel
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                    timeTravelEnabled: true,
+                })
+            )
 
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
 
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            true,
-            'TEST_AccessControl',
-            'TAC',
-            DECIMALS,
-            'ABCDEF123456',
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            0,
-            100,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_B,
-            true,
-            'ES,FR,CH',
-            'nothing',
-            init_rbacs
-        )
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: true,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: DECIMALS,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_SUPPLY,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory,
+        })
 
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
+        equityFacet = EquityUSA__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
         )
+        snapshotFacet = Snapshots_2__factory.connect(diamond.address, signer_A)
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+    })
 
-        snapshotFacet = await ethers.getContractAt(
-            'Snapshots_2',
-            diamond.address
-        )
-
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
+    afterEach(async () => {
+        timeTravelFacet.resetSystemTimestamp()
     })
 
     it('GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_A)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_A)
+        await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_A)
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
 
         snapshotFacet = snapshotFacet.connect(signer_A)
         erc1410Facet = erc1410Facet.connect(signer_A)
@@ -339,17 +367,18 @@ describe('Snapshots Layer 2 Tests', () => {
         )
 
         // schedule tasks
-        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
-
-        const dividendsRecordDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000
-        const dividendsRecordDateInSeconds_2 =
-            currentTimeInSeconds + (2 * TIME) / 1000
-        const dividendsRecordDateInSeconds_3 =
-            currentTimeInSeconds + (3 * TIME) / 1000
-        const dividendsExecutionDateInSeconds =
-            currentTimeInSeconds + (10 * TIME) / 1000
+        const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
+            '2030-01-01T00:00:06Z'
+        )
+        const dividendsRecordDateInSeconds_2 = dateToUnixTimestamp(
+            '2030-01-01T00:00:12Z'
+        )
+        const dividendsRecordDateInSeconds_3 = dateToUnixTimestamp(
+            '2030-01-01T00:00:18Z'
+        )
+        const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:01:00Z'
+        )
         const dividendsAmountPerEquity = 1
         const dividendData_1 = {
             recordDate: dividendsRecordDateInSeconds_1.toString(),
@@ -370,12 +399,15 @@ describe('Snapshots Layer 2 Tests', () => {
         await equityFacet.setDividends(dividendData_2)
         await equityFacet.setDividends(dividendData_3)
 
-        const balanceAdjustmentExecutionDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000 + 1
-        const balanceAdjustmentExecutionDateInSeconds_2 =
-            currentTimeInSeconds + (2 * TIME) / 1000 + 1
-        const balanceAdjustmentExecutionDateInSeconds_3 =
-            currentTimeInSeconds + (3 * TIME) / 1000 + 1
+        const balanceAdjustmentExecutionDateInSeconds_1 = dateToUnixTimestamp(
+            '2030-01-01T00:00:07Z'
+        )
+        const balanceAdjustmentExecutionDateInSeconds_2 = dateToUnixTimestamp(
+            '2030-01-01T00:00:13Z'
+        )
+        const balanceAdjustmentExecutionDateInSeconds_3 = dateToUnixTimestamp(
+            '2030-01-01T00:00:19Z'
+        )
 
         const balanceAdjustmentsFactor_1 = 5
         const balanceAdjustmentsDecimals_1 = 2
@@ -404,7 +436,9 @@ describe('Snapshots Layer 2 Tests', () => {
         await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_3)
 
         //-------------------------
-        await new Promise((f) => setTimeout(f, 3 * TIME + 2))
+        await timeTravelFacet.changeSystemTimestamp(
+            balanceAdjustmentExecutionDateInSeconds_3 + 1
+        )
 
         // snapshot
         await snapshotFacet.takeSnapshot()

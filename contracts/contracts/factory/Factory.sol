@@ -222,7 +222,6 @@ import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
 import {LocalContext} from '../layer_1/context/LocalContext.sol';
-import {_ISIN_LENGTH} from '../layer_1/constants/values.sol';
 import {
     FactoryRegulationData,
     buildRegulationData,
@@ -236,6 +235,7 @@ import {IBondUSA} from '../layer_3/interfaces/IBondUSA.sol';
 import {
     IProtectedPartitions
 } from '../layer_1/interfaces/protectedPartitions/IProtectedPartitions.sol';
+import {validateISIN} from './isinValidator.sol';
 
 contract Factory is IFactory, LocalContext {
     modifier checkResolver(IBusinessLogicResolver resolver) {
@@ -246,9 +246,7 @@ contract Factory is IFactory, LocalContext {
     }
 
     modifier checkISIN(string calldata isin) {
-        if (bytes(isin).length != _ISIN_LENGTH) {
-            revert WrongISIN(isin);
-        }
+        validateISIN(isin);
         _;
     }
 

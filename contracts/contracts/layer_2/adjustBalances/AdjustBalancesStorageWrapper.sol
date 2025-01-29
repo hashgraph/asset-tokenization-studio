@@ -228,6 +228,7 @@ import {
 import {
     AdjustBalancesStorageWrapperRead
 } from './AdjustBalancesStorageWrapperRead.sol';
+import {_MAX_UINT256} from '../constants/values.sol';
 
 contract AdjustBalancesStorageWrapper is
     IAdjustBalancesStorageWrapper,
@@ -257,11 +258,16 @@ contract AdjustBalancesStorageWrapper is
 
         erc1410Storage.totalSupply *= _factor;
 
-        if (_getABAF() == 0) adjustBalancesStorage.abaf = _factor;
-        else adjustBalancesStorage.abaf *= _factor;
+        if (_getABAF() == 0) {
+            adjustBalancesStorage.abaf = _factor;
+        } else {
+            adjustBalancesStorage.abaf *= _factor;
+        }
 
         erc20Storage.decimals += _decimals;
-        capStorage.maxSupply *= _factor;
+        if (capStorage.maxSupply != _MAX_UINT256) {
+            capStorage.maxSupply *= _factor;
+        }
 
         emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
     }

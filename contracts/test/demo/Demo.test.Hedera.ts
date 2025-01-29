@@ -245,10 +245,10 @@ import {
     Lock__factory,
     Lock,
     TransferAndLock,
-} from '../../typechain-types'
+} from '@typechain'
 import { Wallet } from 'ethers'
-import { getClient, toEvmAddress } from '../../scripts/utils'
-import { toHashgraphKey } from '../../scripts/deploy'
+import { getClient, toEvmAddress } from '@scripts/utils'
+import { toHashgraphKey } from '@scripts/deploy'
 import {
     _DEFAULT_ADMIN_ROLE,
     _CONTROL_LIST_ROLE,
@@ -256,7 +256,7 @@ import {
     _ISSUER_ROLE,
     _CONTROLLER_ROLE,
     _PAUSER_ROLE,
-} from '../../scripts/constants'
+} from '@scripts/constants'
 import {
     SecurityData,
     Rbac,
@@ -268,7 +268,8 @@ import {
     FactoryRegulationData,
     RegulationType,
     RegulationSubType,
-} from '../../scripts/factory'
+} from '@scripts/factory'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 
 const _MINUTE_1 = 6000
 const _BUSINESS_LOGIC_COUNT = 17
@@ -631,97 +632,97 @@ describe('Demo RedSwam', () => {
         Deployed contracts:
             BusinessLogicResolver: ${businessLogicResolver.address},
             Factory: ${factory.address},
-            DiamondFacet: 
+            DiamondFacet:
                 address: ${diamondFacet.address},
                 key: ${await diamondFacet.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await diamondFacet.getStaticFunctionSelectors()
                 )},
-            DiamondLoupeFacet: 
+            DiamondLoupeFacet:
                 address: ${diamondLoupeFacet.address},
                 key: ${await diamondLoupeFacet.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await diamondLoupeFacet.getStaticFunctionSelectors()
                 )},
-            AccessControl: 
+            AccessControl:
                 address: ${accessControl.address},
                 key: ${await accessControl.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await accessControl.getStaticFunctionSelectors()
                 )},
-            Cap: 
+            Cap:
                 address: ${cap.address},
                 key: ${await cap.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await cap.getStaticFunctionSelectors()
                 )},
-            Pause: 
+            Pause:
                 address: ${pause.address},
                 key: ${await pause.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await pause.getStaticFunctionSelectors()
                 )},
-            ControlList: 
+            ControlList:
                 address: ${controlList.address},
                 key: ${await controlList.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await controlList.getStaticFunctionSelectors()
                 )},
-            ERC20: 
+            ERC20:
                 address: ${erc20.address},
                 key: ${await erc20.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await erc20.getStaticFunctionSelectors()
                 )},
-            ERC1644: 
+            ERC1644:
                 address: ${erc1644.address},
                 key: ${await erc1644.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await erc1644.getStaticFunctionSelectors()
                 )},
-            ERC1410: 
+            ERC1410:
                 address: ${erc1410.address},
                 key: ${await erc1410.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await erc1410.getStaticFunctionSelectors()
                 )},
-            ERC1594: 
+            ERC1594:
                 address: ${erc1594.address},
                 key: ${await erc1594.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await erc1594.getStaticFunctionSelectors()
                 )},
-            ERC1643: 
+            ERC1643:
                 address: ${erc1643.address},
                 key: ${await erc1643.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await erc1643.getStaticFunctionSelectors()
                 )},
-            Equity: 
+            Equity:
                 address: ${await equity.address},
                 key: ${await equity.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await equity.getStaticFunctionSelectors()
                 )},
-            Bond: 
+            Bond:
                 address: ${await bond.address},
                 key: ${await bond.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await bond.getStaticFunctionSelectors()
                 )},
-            Snapshots: 
+            Snapshots:
                 address: ${await snapshots.address},
                 key: ${await snapshots.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await snapshots.getStaticFunctionSelectors()
                 )},
-            ScheduledSnapshots: 
+            ScheduledSnapshots:
                 address: ${await scheduledSnapshots.address},
                 key: ${await scheduledSnapshots.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
                     await scheduledSnapshots.getStaticFunctionSelectors()
                 )},
-            CorporateActions: 
+            CorporateActions:
                 address: ${await corporateActions.address},
                 key: ${await corporateActions.getStaticResolverKey()},
                 selectors: ${JSON.stringify(
@@ -963,7 +964,7 @@ describe('Demo RedSwam', () => {
         const TokenName = 'TEST_DEMO'
         const TokenSymbol = 'TD'
         const TokenDecimals = 6
-        const TokenISIN = 'ABCDEF123456'
+        const TokenISIN = isinGenerator()
         const TokenType = 1 // equity
         const isWhiteList = false
         const isControllable = true
@@ -1110,7 +1111,7 @@ describe('Demo RedSwam', () => {
             DiamondLoupe.supportsInterface(0xb8fb063e): ${JSON.stringify(
                 await loupeFacet.supportsInterface('0xb8fb063e')
             )}
-            
+
             `)
 
         let accessControlFacet = accessControl.attach(diamond.address)
@@ -1140,12 +1141,12 @@ describe('Demo RedSwam', () => {
         // --------------------------------------------
 
         console.log(`
-        
-        
+
+
                 --------------------------------
-                    DEMO STEPS 
+                    DEMO STEPS
                 --------------------------------
-        
+
                 `)
 
         console.log('Check token metadata')
@@ -1658,12 +1659,12 @@ describe('Demo RedSwam', () => {
         expect(accountCBalanceByPartition).to.be.equal(accountCBalance)
 
         console.log(`
-        
-        
+
+
                 --------------------------------
-                    DEMO OVER 
+                    DEMO OVER
                 --------------------------------
-                
+
                 `)
     })
 })*/

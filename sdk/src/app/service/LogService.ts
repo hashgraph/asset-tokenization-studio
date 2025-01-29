@@ -241,7 +241,7 @@ export default class LogService {
           })
           .join('\t');
       };
-      return `${timestamp} - [${level}]\t${message}\t${formatOther(other)}`;
+      return `${timestamp} - [${level}]\t${message}\t${formatOther(other as any[])}`;
     },
   );
 
