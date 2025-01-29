@@ -306,6 +306,47 @@ abstract contract HoldStorageWrapper_2 is
         }
     }
 
+    function _releaseHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _escrowId,
+        uint256 _amount
+    ) internal virtual override returns (bool success_) {
+        IHold.HoldData memory holdData = _getHoldFromEscrowId(
+            _partition,
+            _msgSender(),
+            _escrowId,
+            _tokenHolder
+        );
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+
+        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
+            _partition,
+            address(0),
+            _tokenHolder
+        );
+
+        uint256 abaf = _updateTotalHold(
+            _partition,
+            _tokenHolder,
+            adjustBalancesStorage
+        );
+
+        _updateHoldByIndex(_partition, holdData.id, _tokenHolder, abaf);
+
+        success_ = super._releaseHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _escrowId,
+            _amount
+        );
+
+        if (_amount == holdData.hold.amount) {
+            adjustBalancesStorage.labafHolds[_tokenHolder][_partition].pop();
+        }
+    }
+
     function _setHoldAtIndex(
         bytes32 _partition,
         address _tokenHolder,
