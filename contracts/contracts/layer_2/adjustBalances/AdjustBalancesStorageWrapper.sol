@@ -407,9 +407,7 @@ contract AdjustBalancesStorageWrapper is
         uint256 _holdId,
         address _tokenHolder
     ) internal view virtual returns (uint256) {
-        // TODO : remove 0 and uncomment line below
-        uint256 holdIndex = 0;
-        // uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
         if (holdIndex == 0) return 0;
         return _getHoldLABAFByIndex(_partition, _tokenHolder, holdIndex);
     }
