@@ -236,6 +236,7 @@ abstract contract HoldStorageWrapper_2_Read is
 
         return _getHeldAmountFor(_tokenHolder) * factor;
     }
+
     function _getHeldAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
