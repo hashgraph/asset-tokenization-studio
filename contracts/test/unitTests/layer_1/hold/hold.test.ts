@@ -492,15 +492,6 @@ describe('Hold Tests', () => {
     describe('AccessControl', () => {
         // Create
         it('GIVEN an account without authorization WHEN createHoldFromByPartition THEN transaction fails with InsufficientAllowance', async () => {
-            let hold = {
-                amount: _AMOUNT,
-                expirationTimestamp: expirationTimestamp,
-                escrow: account_B,
-                to: ADDRESS_ZERO,
-                data: _DATA,
-            }
-
-            // add to list fails
             await expect(
                 holdFacet
                     .connect(signer_D)
@@ -514,14 +505,6 @@ describe('Hold Tests', () => {
         })
 
         it('GIVEN an account without operator authorization WHEN operatorCreateHoldByPartition THEN transaction fails with Unauthorized', async () => {
-            let hold = {
-                amount: _AMOUNT,
-                expirationTimestamp: expirationTimestamp,
-                escrow: account_B,
-                to: ADDRESS_ZERO,
-                data: _DATA,
-            }
-
             await expect(
                 holdFacet
                     .connect(signer_B)
@@ -535,14 +518,6 @@ describe('Hold Tests', () => {
         })
 
         it('GIVEN an account without CONTROLLER role WHEN controllerCreateHoldByPartition THEN transaction fails with AccountHasNoRole', async () => {
-            let hold = {
-                amount: _AMOUNT,
-                expirationTimestamp: expirationTimestamp,
-                escrow: account_B,
-                to: ADDRESS_ZERO,
-                data: _DATA,
-            }
-
             await expect(
                 holdFacet
                     .connect(signer_B)
