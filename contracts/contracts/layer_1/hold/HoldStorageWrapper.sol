@@ -252,7 +252,7 @@ abstract contract HoldStorageWrapper is
 
         IHold.EscrowHoldData memory escrow = IHold.EscrowHoldData(
             escrowId_,
-            _hold.escrow,
+            _from,
             holdId_
         );
 
@@ -434,6 +434,44 @@ abstract contract HoldStorageWrapper is
         success_ = true;
         amount_ = hold.amount;
         holdId_ = holdData.id;
+    }
+
+    function _releaseHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _escrowId,
+        uint256 _amount
+    ) internal virtual returns (bool success_) {
+        IHold.HoldData memory holdData = _getHoldFromEscrowId(
+            _partition,
+            _msgSender(),
+            _escrowId,
+            _tokenHolder
+        );
+
+        IHold.Hold memory hold = holdData.hold;
+
+        _beforeReleaseHold(_partition, _tokenHolder, _tokenHolder);
+
+        _decreaseHeldAmount(_partition, _tokenHolder, _amount, holdData.id);
+
+        if (hold.amount == _amount) {
+            _removeHold(
+                _partition,
+                _tokenHolder,
+                holdData.id,
+                _msgSender(),
+                _escrowId
+            );
+        }
+
+        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
+            _addPartitionTo(_amount, _tokenHolder, _partition);
+        } else {
+            _increaseBalanceByPartition(_tokenHolder, _amount, _partition);
+        }
+
+        success_ = true;
     }
 
     function _decreaseHeldAmount(
