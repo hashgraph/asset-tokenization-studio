@@ -373,9 +373,7 @@ abstract contract SnapshotsStorageWrapper is
             _snapshotStorage().accountPartitionHeldBalanceSnapshots[account][
                 partition
             ],
-            // TODO : replace 0 with commentted method when function implement in HoldStorageWrapperRead
-            0
-            //_getHeldAmountForByPartition(partition, account)
+            _getHeldAmountForByPartition(partition, account)
         );
     }
 

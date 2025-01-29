@@ -203,226 +203,25 @@
 
 */
 
+pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-pragma solidity 0.8.18;
-
+import {Hold_2} from '../../layer_2/hold/Hold_2.sol';
 import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {HoldStorageWrapper} from '../../layer_1/hold/HoldStorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
-import {
-    AdjustBalances_CD_Lib
-} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
-import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-abstract contract HoldStorageWrapper_2_Read is
-    HoldStorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
-{
-    function _getHeldAmountForAdjusted(
-        address _tokenHolder
-    ) internal view virtual returns (uint256 amount_) {
-        uint256 factor = AdjustBalanceLib.calculateFactor(
-            AdjustBalances_CD_Lib.getABAFAdjusted(),
-            AdjustBalances_CD_Lib.getTotalHeldLABAF(_tokenHolder)
-        );
-
-        return _getHeldAmountFor(_tokenHolder) * factor;
-    }
-
-    function _getHeldAmountForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 amount_) {
-        uint256 factor = AdjustBalanceLib.calculateFactor(
-            AdjustBalances_CD_Lib.getABAFAdjusted(),
-            AdjustBalances_CD_Lib.getTotalHeldLABAFByPartition(
-                _partition,
-                _tokenHolder
-            )
-        );
-        return _getHeldAmountForByPartition(_partition, _tokenHolder) * factor;
-    }
-
-    function _getHoldForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    )
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+contract Hold_2TimeTravel is Hold_2, TimeTravelStorageWrapper {
+    function _blockTimestamp()
         internal
         view
-        virtual
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
-        )
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
     {
-        uint256 factor = AdjustBalanceLib.calculateFactor(
-            AdjustBalances_CD_Lib.getABAFAdjusted(),
-            AdjustBalances_CD_Lib.getHoldLABAFByPartition(
-                _partition,
-                _holdId,
-                _tokenHolder
-            )
-        );
-
-        (
-            amount_,
-            expirationTimestamp_,
-            escrow_,
-            destination_,
-            data_,
-            operatorData_
-        ) = _getHoldForByPartition(_partition, _tokenHolder, _holdId);
-        amount_ *= factor;
-    }
-
-    function _getHoldForEscrowByPartitionAdjusted(
-        bytes32 _partition,
-        address _escrow,
-        uint256 _escrowHoldId
-    )
-        internal
-        view
-        virtual
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address tokenHolder_,
-            uint256 id_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
-        )
-    {
-        (
-            amount_,
-            expirationTimestamp_,
-            tokenHolder_,
-            id_,
-            destination_,
-            data_,
-            operatorData_
-        ) = _getHoldForEscrowByPartition(_partition, _escrow, _escrowHoldId);
-
-        uint256 factor = AdjustBalanceLib.calculateFactor(
-            AdjustBalances_CD_Lib.getABAFAdjusted(),
-            AdjustBalances_CD_Lib.getHoldLABAFByPartition(
-                _partition,
-                id_,
-                tokenHolder_
-            )
-        );
-
-        amount_ *= factor;
-    }
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(
-            ERC1410BasicStorageWrapperRead,
-            ERC1410ScheduledTasksStorageWrapper
-        )
-    {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
-        );
-    }
-
-    function _checkNewMaxSupply(
-        uint256 _newMaxSupply
-    )
-        internal
-        virtual
-        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
-    {
-        ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupply(_newMaxSupply);
-    }
-
-    function _checkNewTotalSupply(
-        uint256 _amount
-    )
-        internal
-        virtual
-        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
-    {
-        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupply(_amount);
-    }
-
-    function _checkNewTotalSupplyForPartition(
-        bytes32 _partition,
-        uint256 _amount
-    )
-        internal
-        virtual
-        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
-    {
-        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupplyForPartition(
-            _partition,
-            _amount
-        );
-    }
-
-    function _checkMaxSupply(
-        uint256 _amount
-    )
-        internal
-        view
-        virtual
-        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
-        returns (bool)
-    {
-        return ERC1410ScheduledTasksStorageWrapper._checkMaxSupply(_amount);
-    }
-
-    function _checkNewMaxSupplyForPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    )
-        internal
-        view
-        virtual
-        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
-        returns (bool)
-    {
-        return
-            ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
-                _partition,
-                _newMaxSupply
-            );
-    }
-
-    function _checkMaxSupplyForPartition(
-        bytes32 _partition,
-        uint256 _amount
-    )
-        internal
-        view
-        virtual
-        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
-        returns (bool)
-    {
-        return
-            ERC1410ScheduledTasksStorageWrapper._checkMaxSupplyForPartition(
-                _partition,
-                _amount
-            );
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
