@@ -509,7 +509,7 @@ abstract contract HoldStorageWrapper is
             );
         }
 
-        holdStorage.escrow_holds[_msgSender()][_partition].pop();
+        holdStorage.escrow_holds[_escrow][_partition].pop();
     }
 
     function _setHoldAtIndex(
