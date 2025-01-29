@@ -899,10 +899,6 @@ describe('Hold Tests', () => {
                     '0x'
                 )
 
-            await erc20Facet
-                .connect(signer_A)
-                .decreaseAllowance(account_B, _AMOUNT)
-
             await checkCreatedHold()
         })
 
