@@ -203,98 +203,69 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-// solhint-disable no-unused-vars, custom-errors
-abstract contract CapStorageWrapper is ICapStorageWrapper, Common {
-    // modifiers
-    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) {
-        _checkNewMaxSupply(_newMaxSupply);
-        _;
-    }
-
-    modifier onlyValidNewMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) {
-        _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
-        _;
-    }
-
-    // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
-        uint256 previousMaxSupply = _getMaxSupply();
-        _capStorage().maxSupply = _maxSupply;
-        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
-    }
-
-    function _setMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _maxSupply
-    ) internal {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
-            _partition
-        );
-        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
-            _msgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
-    }
-
-    function _checkNewMaxSupply(uint256 newMaxSupply) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupply = _totalSupply() + newMaxSupply;
-        uint256 maxSupply = _getMaxSupply();
-
-        if (!_checkMaxSupplyCommon(newTotalSupply, maxSupply)) {
-            revert MaxSupplyReached(maxSupply);
-        }
-    }
-
-    function _checkNewMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 newMaxSupply
-    ) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            partition
-        ) + newMaxSupply;
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(partition);
-
-        if (
-            !_checkMaxSupplyCommon(
-                newTotalSupplyForPartition,
-                maxSupplyForPartition
-            )
-        ) {
-            revert MaxSupplyReachedForPartition(
-                partition,
-                maxSupplyForPartition
-            );
-        }
-    }
-
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
-        return
-            _maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ||
-            _amount <= _maxSupply;
-    }
-}
-// solhint-enable no-unused-vars, custom-errors
+//import {
+//    _SCHEDULED_TASKS_STORAGE_POSITION
+//} from '../../constants/storagePositions.sol';
+//import {
+//    ScheduledTasksCommon
+//} from '../../../layer_0/scheduledTasks/ScheduledTasksCommon.sol';
+//import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+//
+//abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
+//    // TODO: Remove the method
+//    // solhint-disable no-unused-vars, custom-errors
+//    function onScheduledTaskTriggered(
+//        uint256 _pos,
+//        uint256 _scheduledTasksLength,
+//        bytes memory _data
+//    ) external virtual {
+//        revert('This method should never be executed, it should be overriden');
+//    } // solhint-enable no-unused-vars, custom-errors
+//
+//    function _addScheduledTask(
+//        uint256 _newScheduledTimestamp,
+//        bytes memory _newData
+//    ) internal virtual {
+//        ScheduledTasksLib.addScheduledTask(
+//            _scheduledTaskStorage(),
+//            _newScheduledTimestamp,
+//            _newData
+//        );
+//    }
+//
+//    function _triggerScheduledTasks(
+//        uint256 _max
+//    ) internal virtual returns (uint256) {
+//        return
+//            ScheduledTasksLib.triggerScheduledTasks(
+//                _scheduledTaskStorage(),
+//                this.onScheduledTaskTriggered.selector,
+//                _max,
+//                _blockTimestamp()
+//            );
+//    }
+//
+//    function _getScheduledTaskCount() internal view virtual returns (uint256) {
+//        return ScheduledTasksLib.getScheduledTaskCount(_scheduledTaskStorage());
+//    }
+//
+//    function _getScheduledTasks(
+//        uint256 _pageIndex,
+//        uint256 _pageLength
+//    )
+//        internal
+//        view
+//        virtual
+//        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
+//    {
+//        return
+//            ScheduledTasksLib.getScheduledTasks(
+//                _scheduledTaskStorage(),
+//                _pageIndex,
+//                _pageLength
+//            );
+//    }
+//}

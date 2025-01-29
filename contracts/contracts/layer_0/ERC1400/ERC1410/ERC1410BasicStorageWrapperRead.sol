@@ -213,9 +213,15 @@ import {
 import {
     _ERC1410_BASIC_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
-import {CapStorageWrapperRead} from '../../cap/CapStorageWrapperRead.sol';
+import {
+_DEFAULT_PARTITION
+} from '../../constants/values.sol';
+import {LockStorageWrapperRead} from "../../lock/LockStorageWrapperRead.sol";
 
-contract ERC1410BasicStorageWrapperRead is CapStorageWrapperRead {
+contract ERC1410BasicStorageWrapperRead is
+    LockStorageWrapperRead,
+    IERC1410StorageWrapper
+{
     // Represents a fungible set of tokens.
     struct Partition {
         uint256 amount;
@@ -234,6 +240,31 @@ contract ERC1410BasicStorageWrapperRead is CapStorageWrapperRead {
         mapping(address => mapping(bytes32 => uint256)) partitionToIndex;
         bool multiPartition;
         bool initialized;
+    }
+
+    modifier onlyWithoutMultiPartition() {
+        if (_isMultiPartition()) {
+            revert NotAllowedInMultiPartitionMode();
+        }
+        _;
+    }
+
+    modifier onlyDefaultPartitionWithSinglePartition(bytes32 partition) {
+        if (!_isMultiPartition() && partition != _DEFAULT_PARTITION) {
+            revert PartitionNotAllowedInSinglePartitionMode(partition);
+        }
+        _;
+    }
+
+    modifier onlyValidAddress(address account) {
+        _checkValidAddress(account);
+        _;
+    }
+
+    function _checkValidAddress(address account) internal pure {
+        if (account == address(0)) {
+            revert ZeroAddressNotAllowed();
+        }
     }
 
     function _reduceBalanceByPartition(

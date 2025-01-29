@@ -211,9 +211,10 @@ import {LocalContext} from '../context/LocalContext.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {CapStorageWrapperRead} from "../cap/CapStorageWrapperRead.sol";
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract LockStorageWrapperRead is LocalContext {
+abstract contract LockStorageWrapperRead is CapStorageWrapperRead {
     using LibCommon for EnumerableSet.UintSet;
 
     struct LockData {
@@ -234,14 +235,16 @@ abstract contract LockStorageWrapperRead is LocalContext {
     function _getLockedAmountFor(
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_) {
-        return _lockStorage().totalLockedAmount[_tokenHolder];
+        uint256 factor = _calculateFactorForLockedAmountByTokenHolder(_tokenHolder);
+        return _lockStorage().totalLockedAmount[_tokenHolder] * factor;
     }
 
     function _getLockedAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_) {
-        return _lockStorage().lockedAmountByPartition[_tokenHolder][_partition];
+        uint256 factor = _calculateFactorForLockedAmountByTokenHolderAndPartition(_tokenHolder, _partition);
+        return _lockStorage().lockedAmountByPartition[_tokenHolder][_partition] * factor;
     }
 
     function _getLockCountForByPartition(

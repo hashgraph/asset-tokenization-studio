@@ -204,97 +204,29 @@
 */
 
 pragma solidity 0.8.18;
-
-import {Common} from '../common/Common.sol';
-import {ICapStorageWrapper} from '../interfaces/cap/ICapStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable no-unused-vars, custom-errors
-abstract contract CapStorageWrapper is ICapStorageWrapper, Common {
-    // modifiers
-    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) {
-        _checkNewMaxSupply(_newMaxSupply);
-        _;
-    }
+// solhint-disable max-line-length
+// keccak256('security.token.standard.dividend.corporateAction');
+bytes32 constant DIVIDEND_CORPORATE_ACTION_TYPE = 0x1c29d09f87f2b0c8192a7719a2acdfdfa320dc2835b5a0398e5bd8dc34c14b0e;
 
-    modifier onlyValidNewMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) {
-        _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
-        _;
-    }
+// keccak256('security.token.standard.votingRights.corporateAction');
+bytes32 constant VOTING_RIGHTS_CORPORATE_ACTION_TYPE = 0x250dbe25ab2f06b39b936572a67e1dbfce91fb156f522809fe817f89bf684047;
 
-    // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
-        uint256 previousMaxSupply = _getMaxSupply();
-        _capStorage().maxSupply = _maxSupply;
-        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
-    }
+// keccak256('security.token.standard.coupon.corporateAction');
+bytes32 constant COUPON_CORPORATE_ACTION_TYPE = 0x4657b10f3cac57d39d628d52e74738d0fdcadc1b2f82958cb835081f1bb26620;
 
-    function _setMaxSupplyByPartition(
-        bytes32 _partition,
-        uint256 _maxSupply
-    ) internal {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
-            _partition
-        );
-        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
-            _msgSender(),
-            _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
-        );
-    }
+// keccak256('security.token.standard.balanceAdjustment.corporateAction');
+bytes32 constant BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE = 0x1256aa1b36483ca651f5d8cbafb7033dcb54872ae7d24442b8ee4baa3f49aa2f;
 
-    function _checkNewMaxSupply(uint256 newMaxSupply) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupply = _totalSupply() + newMaxSupply;
-        uint256 maxSupply = _getMaxSupply();
+uint256 constant SNAPSHOT_RESULT_ID = 0;
 
-        if (!_checkMaxSupplyCommon(newTotalSupply, maxSupply)) {
-            revert MaxSupplyReached(maxSupply);
-        }
-    }
+uint256 constant _MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
-    function _checkNewMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 newMaxSupply
-    ) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            partition
-        ) + newMaxSupply;
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(partition);
+// keccak256('security.token.standard.balanceAdjustment.scheduledTasks');
+bytes32 constant BALANCE_ADJUSTMENT_TASK_TYPE = 0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d;
 
-        if (
-            !_checkMaxSupplyCommon(
-                newTotalSupplyForPartition,
-                maxSupplyForPartition
-            )
-        ) {
-            revert MaxSupplyReachedForPartition(
-                partition,
-                maxSupplyForPartition
-            );
-        }
-    }
+// keccak256('security.token.standard.snapshot.scheduledTasks');
+bytes32 constant SNAPSHOT_TASK_TYPE = 0x322c4b500b27950e00c27e3a40ca8f9ffacbc81a3b4e3c9516717391fd54234c;
 
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
-        return
-            _maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ||
-            _amount <= _maxSupply;
-    }
-}
-// solhint-enable no-unused-vars, custom-errors
+bytes32 constant _DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;

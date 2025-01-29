@@ -230,8 +230,8 @@ abstract contract ERC1410Standard is
         external
         virtual
         override
-        checkMaxSupply(_value)
-        checkMaxSupplyForPartition(_partition, _value)
+        //        onlyValidMaxSupply(_value)
+        //        onlyValidMaxSupplyByPartition(_partition, _value)
         //        onlyValidAddress(_tokenHolder)
         checkControlList(_tokenHolder)
         onlyUnpaused

@@ -223,37 +223,6 @@ contract CorporateActionsStorageWrapperRead is LocalContext {
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    // Internal
-    function _addCorporateAction(
-        bytes32 _actionType,
-        bytes memory _data
-    )
-        internal
-        virtual
-        returns (
-            bool success_,
-            bytes32 corporateActionId_,
-            uint256 corporateActionIndexByType_
-        )
-    {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
-        // TODO: Review when it can return false.
-        success_ =
-            corporateActions_.actions.add(corporateActionId_) &&
-            corporateActions_.actionsByType[_actionType].add(
-                corporateActionId_
-            );
-        corporateActions_
-            .actionsData[corporateActionId_]
-            .actionType = _actionType;
-        corporateActions_.actionsData[corporateActionId_].data = _data;
-        corporateActionIndexByType_ = _getCorporateActionCountByType(
-            _actionType
-        );
-    }
-
     function _getCorporateAction(
         bytes32 _corporateActionId
     ) internal view virtual returns (bytes32 actionType_, bytes memory data_) {
@@ -298,31 +267,6 @@ contract CorporateActionsStorageWrapperRead is LocalContext {
         corporateActionIds_ = _corporateActionsStorage()
             .actionsByType[_actionType]
             .getFromSet(_pageIndex, _pageLength);
-    }
-
-    function _updateCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId,
-        bytes memory newResult
-    ) internal virtual {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        bytes[] memory results = corporateActions_
-            .actionsData[actionId]
-            .results;
-
-        if (results.length > resultId) {
-            corporateActions_.actionsData[actionId].results[
-                resultId
-            ] = newResult;
-            return;
-        }
-
-        for (uint256 i = results.length; i < resultId; i++) {
-            corporateActions_.actionsData[actionId].results.push('');
-        }
-
-        corporateActions_.actionsData[actionId].results.push(newResult);
     }
 
     function _getResult(

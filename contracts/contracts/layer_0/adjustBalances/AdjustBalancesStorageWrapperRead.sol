@@ -298,6 +298,25 @@ contract AdjustBalancesStorageWrapperRead {
         );
     }
 
+    function _calculateFactorForLockedAmountByTokenHolder(
+        address tokenHolder
+    ) internal view returns (uint256 factor) {
+        factor = calculateFactor(
+            _getAbaf(),
+            _getAdjustBalancesStorage().labafsTotalLocked[tokenHolder]
+        );
+    }
+
+    function _calculateFactorForLockedAmountByTokenHolderAndPartition(
+        address tokenHolder,
+        bytes32 partition
+    ) internal view returns (uint256 factor) {
+        factor = calculateFactor(
+            _getAbaf(),
+            _getAdjustBalancesStorage().labafsTotalLockedByPartition[tokenHolder][partition]
+        );
+    }
+
     function _getAbaf() internal view returns (uint256) {
         return _getAdjustBalancesStorage().abaf;
     }
@@ -314,7 +333,6 @@ contract AdjustBalancesStorageWrapperRead {
     function _getAdjustBalancesStorage()
         internal
         pure
-        virtual
         returns (AdjustBalancesStorage storage adjustBalancesStorage_)
     {
         bytes32 position = _ADJUST_BALANCES_STORAGE_POSITION;
