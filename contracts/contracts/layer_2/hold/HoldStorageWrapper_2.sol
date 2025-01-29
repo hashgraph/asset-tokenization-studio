@@ -220,6 +220,38 @@ import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
+    function _createHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        IHold.Hold memory _hold,
+        bytes memory _operatorData
+    ) internal virtual override returns (bool success_, uint256 holdId_) {
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+
+        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
+            _partition,
+            _from,
+            address(0)
+        );
+
+        uint256 abaf = _updateTotalHold(
+            _partition,
+            _from,
+            adjustBalancesStorage
+        );
+
+        adjustBalancesStorage.labafHolds[_from][_partition].push(abaf);
+
+        return
+            super._createHoldByPartition(
+                _partition,
+                _from,
+                _hold,
+                _operatorData
+            );
+    }
+
     function _executeHoldByPartition(
         bytes32 _partition,
         uint256 _escrowId,
