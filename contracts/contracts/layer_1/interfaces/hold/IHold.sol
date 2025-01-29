@@ -335,7 +335,8 @@ interface IHold {
     function reclaimHoldByPartition(
         bytes32 _partition,
         uint256 _escrowId,
-        address _tokenHolder
+        address _tokenHolder,
+        address _escrowAddress
     ) external returns (bool success_);
 
     function getHeldAmountForByPartition(
