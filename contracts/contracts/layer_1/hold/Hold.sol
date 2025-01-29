@@ -418,11 +418,12 @@ abstract contract Hold is
             _to,
             _amount
         );
-        emit HoldByPartitionReleased(
+        emit HoldByPartitionExecuted(
             _tokenHolder,
             _partition,
             holdId_,
-            _amount
+            _amount,
+            _to
         );
     }
 
