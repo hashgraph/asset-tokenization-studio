@@ -206,7 +206,9 @@
 import { Command } from '../../../../../../../core/command/Command.js';
 import { CommandResponse } from '../../../../../../../core/command/CommandResponse.js';
 
-export class CreateHoldFromByPartitionCommandResponse implements CommandResponse {
+export class CreateHoldFromByPartitionCommandResponse
+  implements CommandResponse
+{
   constructor(
     public readonly payload: number,
     public readonly transactionId: string,

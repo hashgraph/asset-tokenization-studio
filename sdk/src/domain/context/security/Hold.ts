@@ -214,8 +214,8 @@ export class Hold {
 }
 
 export class ProtectedHold {
-   public hold: Hold;
-   public deadline: BigNumber;
-   public nonce: BigNumber;
-   public signature: string;
+  public hold: Hold;
+  public deadline: BigNumber;
+  public nonce: BigNumber;
+  public signature: string;
 }

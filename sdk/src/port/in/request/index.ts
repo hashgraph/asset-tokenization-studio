@@ -342,5 +342,5 @@ export {
   PartitionsProtectedRequest,
   ProtectedTransferAndLockByPartitionRequest,
   CreateHoldByPartitionRequest,
-  CreateHoldFromByPartitionRequest
+  CreateHoldFromByPartitionRequest,
 };
