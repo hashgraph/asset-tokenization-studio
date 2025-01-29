@@ -530,7 +530,32 @@ describe('Hold Tests', () => {
 
         // Execute
 
+        it('GIVEN a wrong escrow WHEN executeHoldByPartition THEN transaction fails with WrongEscrowHoldId', async () => {
+            await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+            await expect(
+                holdFacet
+                    .connect(signer_C)
+                    .executeHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        1,
+                        account_A,
+                        account_C,
+                        1
+                    )
+            ).to.be.rejectedWith('WrongEscrowHoldId')
+        })
+
         // Release
+        it('GIVEN a wrong escrow WHEN releaseHoldByPartition THEN transaction fails with WrongEscrowHoldId', async () => {
+            await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+            await expect(
+                holdFacet
+                    .connect(signer_C)
+                    .releaseHoldByPartition(_DEFAULT_PARTITION, 1, account_A, 1)
+            ).to.be.rejectedWith('WrongEscrowHoldId')
+        })
     })
 
     describe('Control List', () => {
