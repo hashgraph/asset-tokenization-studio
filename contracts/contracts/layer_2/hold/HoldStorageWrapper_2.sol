@@ -214,12 +214,22 @@ import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
 import {
     AdjustBalances_CD_Lib
 } from '../adjustBalances/AdjustBalances_CD_Lib.sol';
-import {HoldStorageWrapper_2_Read} from './HoldStorageWrapper_2_Read.sol';
+import {HoldStorageWrapper} from '../../layer_1/hold/HoldStorageWrapper.sol';
 import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
 
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
+abstract contract HoldStorageWrapper_2 is
+    HoldStorageWrapper,
+    ERC1410ScheduledTasksStorageWrapper
+{
     function _createHoldByPartition(
         bytes32 _partition,
         address _from,
@@ -478,6 +488,105 @@ abstract contract HoldStorageWrapper_2 is HoldStorageWrapper_2_Read {
 
         holdStorage
         .holds[_tokenHolder][_partition][_holdIndex - 1].hold.amount *= _factor;
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(
+            ERC1410BasicStorageWrapperRead,
+            ERC1410ScheduledTasksStorageWrapper
+        )
+    {
+        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupply(_amount);
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return ERC1410ScheduledTasksStorageWrapper._checkMaxSupply(_amount);
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
+                _partition,
+                _newMaxSupply
+            );
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+        returns (bool)
+    {
+        return
+            ERC1410ScheduledTasksStorageWrapper._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
