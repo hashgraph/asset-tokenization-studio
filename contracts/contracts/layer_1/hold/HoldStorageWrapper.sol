@@ -206,10 +206,6 @@
 
 pragma solidity 0.8.18;
 
-import {ERC20StorageWrapper} from '../ERC1400/ERC20/ERC20StorageWrapper.sol';
-import {
-    SnapshotsStorageWrapper
-} from '../snapshots/SnapshotsStorageWrapper.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
@@ -218,14 +214,10 @@ import {
     checkNounceAndDeadline,
     verify
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {
-    _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH
-} from '../constants/values.sol';
+import {HoldStorageWrapperRead} from './HoldStorageWrapperRead.sol';
+import {Common} from '../common/Common.sol';
 
-abstract contract HoldStorageWrapper is
-    SnapshotsStorageWrapper,
-    ERC20StorageWrapper
-{
+abstract contract HoldStorageWrapper is HoldStorageWrapperRead, Common {
     using EnumerableSet for EnumerableSet.UintSet;
 
     function _createHoldByPartition(
@@ -465,53 +457,6 @@ abstract contract HoldStorageWrapper is
         ] = _escrowHoldIndex;
     }
 
-    function _checkCreateHoldSignature(
-        bytes32 _partition,
-        address _from,
-        IHold.ProtectedHold memory _protectedHold
-    ) internal view virtual {
-        if (!_isCreateHoldSignatureValid(_partition, _from, _protectedHold))
-            revert WrongSignature();
-    }
-
-    function _isCreateHoldSignatureValid(
-        bytes32 _partition,
-        address _from,
-        IHold.ProtectedHold memory _protectedHold
-    ) internal view virtual returns (bool) {
-        bytes32 functionHash = getMessageHashCreateHold(
-            _partition,
-            _from,
-            _protectedHold
-        );
-        return
-            verify(
-                _from,
-                functionHash,
-                _protectedHold.signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
-                _blockChainid(),
-                address(this)
-            );
-    }
-
-    function getMessageHashCreateHold(
-        bytes32 _partition,
-        address _from,
-        IHold.ProtectedHold memory _protectedHold
-    ) internal pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
-                    _partition,
-                    _from,
-                    _protectedHold
-                )
-            );
-    }
-
     function _beforeHold(
         bytes32 _partition,
         address _tokenHolder,
@@ -546,4 +491,43 @@ abstract contract HoldStorageWrapper is
             _amount
         );
     }
+
+    function _reduceBalanceByPartition(
+        address _from,
+        uint256 _value,
+        bytes32 _partition
+    ) internal virtual;
+
+    function _decreaseAllowedBalance(
+        address from,
+        address spender,
+        uint256 value
+    ) internal virtual;
+
+    function _validPartitionForReceiver(
+        bytes32 _partition,
+        address _to
+    ) internal view virtual returns (bool);
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    ) internal virtual;
+
+    function _increaseBalanceByPartition(
+        address _from,
+        uint256 _value,
+        bytes32 _partition
+    ) internal virtual;
+
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual;
+
+    function _updateAccountHeldBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual;
 }

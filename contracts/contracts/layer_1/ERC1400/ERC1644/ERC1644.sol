@@ -214,7 +214,13 @@ import {
 import {_ERC1644_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {ERC1644StorageWrapper} from './ERC1644StorageWrapper.sol';
 
-contract ERC1644 is IERC1644, IStaticFunctionSelectors, ERC1644StorageWrapper {
+abstract contract ERC1644 is
+    IERC1644,
+    IStaticFunctionSelectors,
+    ERC1644StorageWrapper
+{
+    modifier onlyWithoutMultiPartition() virtual;
+
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1644(
         bool _controllable
@@ -288,14 +294,6 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, ERC1644StorageWrapper {
     {
         _controllerRedeem(_tokenHolder, _value, _data, _operatorData);
     }
-
-    // solhint-disable no-empty-blocks
-    function _beforeTokenTransfer(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value
-    ) internal virtual override {}
 
     // solhint-enable no-empty-blocks
     // solhint-enable no-unused-vars

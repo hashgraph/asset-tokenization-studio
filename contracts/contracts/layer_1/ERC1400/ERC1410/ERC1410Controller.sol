@@ -218,6 +218,8 @@ abstract contract ERC1410Controller is
     IERC1410Controller,
     ERC1410ControllerStorageWrapper
 {
+    modifier onlyControllable() virtual;
+
     function controllerTransferByPartition(
         bytes32 _partition,
         address _from,

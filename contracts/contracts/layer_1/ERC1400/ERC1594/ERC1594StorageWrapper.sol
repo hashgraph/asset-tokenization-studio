@@ -221,12 +221,9 @@ import {
     _ALLOWANCE_REACHED_ERROR_ID,
     _SUCCESS
 } from '../../constants/values.sol';
-import {ERC20StorageWrapper} from '../ERC20/ERC20StorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
 
-abstract contract ERC1594StorageWrapper is
-    ERC20StorageWrapper,
-    IERC1594StorageWrapper
-{
+abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
     struct ERC1594Storage {
         bool issuance;
         bool initialized;
@@ -401,4 +398,17 @@ abstract contract ERC1594StorageWrapper is
             erc1594Storage_.slot := position
         }
     }
+
+    function _mint(address to, uint256 value) internal virtual;
+    function _burn(address from, uint256 value) internal virtual;
+
+    function _burnFrom(address account, uint256 value) internal virtual;
+    function _balanceOf(
+        address _tokenHolder
+    ) internal view virtual returns (uint256);
+
+    function _allowance(
+        address owner,
+        address spender
+    ) internal view virtual returns (uint256);
 }

@@ -223,7 +223,6 @@ import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
 import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
 
 abstract contract ERC1410StandardStorageWrapper is
-    CapStorageWrapper,
     ERC1410OperatorStorageWrapper
 {
     function _issueByPartition(

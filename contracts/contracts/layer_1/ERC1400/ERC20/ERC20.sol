@@ -218,6 +218,8 @@ abstract contract ERC20 is
     IStaticFunctionSelectors,
     ERC20StorageWrapper
 {
+    modifier onlyWithoutMultiPartition() virtual;
+
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(
         ERC20Metadata calldata erc20Metadata
@@ -337,14 +339,6 @@ abstract contract ERC20 is
     function decimals() external view virtual returns (uint8) {
         return _decimals();
     }
-
-    // solhint-disable no-empty-blocks
-    function _beforeTokenTransfer(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value
-    ) internal virtual override {}
 
     // solhint-enable no-empty-blocks
     // solhint-enable no-unused-vars

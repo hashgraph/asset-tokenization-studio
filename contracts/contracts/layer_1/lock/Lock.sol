@@ -216,6 +216,9 @@ import {LockStorageWrapper} from './LockStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
+    modifier onlyWithoutMultiPartition() virtual;
+    modifier onlyDefaultPartitionWithSinglePartition(bytes32 partition) virtual;
+
     function lockByPartition(
         bytes32 _partition,
         uint256 _amount,

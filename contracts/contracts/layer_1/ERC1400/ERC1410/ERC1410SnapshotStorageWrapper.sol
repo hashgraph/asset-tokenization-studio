@@ -207,14 +207,10 @@
 pragma solidity 0.8.18;
 
 import {
-    SnapshotsStorageWrapper
-} from '../../snapshots/SnapshotsStorageWrapper.sol';
-import {
     ERC1410ControllerStorageWrapper
 } from './ERC1410ControllerStorageWrapper.sol';
 
 abstract contract ERC1410SnapshotStorageWrapper is
-    SnapshotsStorageWrapper,
     ERC1410ControllerStorageWrapper
 {
     function _beforeTokenTransfer(
@@ -237,4 +233,11 @@ abstract contract ERC1410SnapshotStorageWrapper is
             _updateAccountSnapshot(to, partition);
         }
     }
+
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual;
+
+    function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
 }

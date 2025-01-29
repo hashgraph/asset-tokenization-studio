@@ -216,6 +216,9 @@ abstract contract ERC1410Standard is
     IERC1410Standard,
     ERC1410StandardStorageWrapper
 {
+    modifier checkMaxSupply(uint256 _amount) virtual;
+    modifier checkMaxSupplyForPartition(bytes32 _partition, uint256 _amount)
+        virtual;
     /// @notice Increases totalSupply and the corresponding amount of the specified owners partition
     /// @param _partition The partition to allocate the increase in balance
     /// @param _tokenHolder The token holder whose balance should be increased

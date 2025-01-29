@@ -210,12 +210,9 @@ import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {
     IERC1644StorageWrapper
 } from '../../interfaces/ERC1400/IERC1644StorageWrapper.sol';
-import {ERC20StorageWrapper} from '../ERC20/ERC20StorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
 
-abstract contract ERC1644StorageWrapper is
-    IERC1644StorageWrapper,
-    ERC20StorageWrapper
-{
+abstract contract ERC1644StorageWrapper is IERC1644StorageWrapper, Common {
     struct ERC1644Storage {
         bool isControllable;
         bool initialized;
@@ -293,4 +290,12 @@ abstract contract ERC1644StorageWrapper is
             erc1644Storage_.slot := position
         }
     }
+
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual;
+
+    function _burn(address from, uint256 value) internal virtual;
 }

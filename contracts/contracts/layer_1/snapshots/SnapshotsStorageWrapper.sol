@@ -223,13 +223,7 @@ import {
     CountersUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
 // solhint-disable no-unused-vars, custom-errors
-abstract contract SnapshotsStorageWrapper is
-    ISnapshotsStorageWrapper,
-    ERC1410BasicStorageWrapperRead,
-    LockStorageWrapperRead,
-    HoldStorageWrapperRead,
-    Common
-{
+abstract contract SnapshotsStorageWrapper is ISnapshotsStorageWrapper, Common {
     using ArraysUpgradeable for uint256[];
     using CountersUpgradeable for CountersUpgradeable.Counter;
 
@@ -302,6 +296,33 @@ abstract contract SnapshotsStorageWrapper is
 
         return partitionSnapshots.values[index].partitions;
     }
+
+    function _totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    ) internal view virtual returns (uint256 totalSupply_);
+
+    function _lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_);
+
+    function _lockedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_);
+
+    function _heldBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_);
+
+    function _heldBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_);
 
     function _totalSupplyAtSnapshot(
         uint256 _snapshotID
@@ -423,67 +444,6 @@ abstract contract SnapshotsStorageWrapper is
         }
     }
 
-    /**
-     * @dev Retrieves the balance of `account` at the time `snapshotId` was created.
-     */
-    function _balanceOfAt(
-        address account,
-        uint256 snapshotId
-    ) internal view virtual returns (uint256) {
-        revert('Should not reach this function');
-    }
-
-    /**
-     * @dev Retrieves the balance of `account` for 'partition' at the time `snapshotId` was created.
-     */
-    function _balanceOfAtByPartition(
-        bytes32 _partition,
-        address account,
-        uint256 snapshotId
-    ) internal view virtual returns (uint256) {
-        revert('Should not reach this function');
-    }
-
-    function _totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) internal view virtual returns (uint256 totalSupply_) {
-        revert('Should not reach this function');
-    }
-
-    function _lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 balance_) {
-        revert('Should not reach this function');
-    }
-
-    function _lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 balance_) {
-        revert('Should not reach this function');
-    }
-
-    function _heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 balance_) {
-        revert('Should not reach this function');
-    }
-
-    function _heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 balance_) {
-        revert('Should not reach this function');
-    }
-
-    /**
-     * @dev Retrieves the total supply at the time `snapshotId` was created.
-     */
     function _totalSupplyAt(
         uint256 snapshotId
     ) internal view virtual returns (uint256) {
@@ -546,5 +506,44 @@ abstract contract SnapshotsStorageWrapper is
             snapshotStorage_.slot := position
         }
     }
+
+    function _partitionsOf(
+        address _tokenHolder
+    ) internal view virtual returns (bytes32[] memory);
+
+    function _balanceOf(
+        address _tokenHolder
+    ) internal view virtual returns (uint256);
+
+    function _balanceOfAt(
+        address account,
+        uint256 snapshotId
+    ) internal view virtual returns (uint256);
+
+    function _balanceOfByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256);
+
+    function _totalSupply() internal view virtual returns (uint256);
+
+    function _totalSupplyByPartition(
+        bytes32 _partition
+    ) internal view virtual returns (uint256);
+
+    function _getLockedAmountFor(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_);
+
+    function _getLockedAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_);
+
+    function _balanceOfAtByPartition(
+        bytes32 _partition,
+        address account,
+        uint256 snapshotId
+    ) internal view virtual returns (uint256);
 }
 // solhint-enable no-unused-vars, custom-errors

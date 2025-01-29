@@ -213,14 +213,15 @@ import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {ERC1594StorageWrapper} from './ERC1594StorageWrapper.sol';
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
-import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
 
-contract ERC1594 is
+abstract contract ERC1594 is
     IERC1594,
     IStaticFunctionSelectors,
-    CapStorageWrapper,
     ERC1594StorageWrapper
 {
+    modifier onlyWithoutMultiPartition() virtual;
+    modifier checkMaxSupply(uint256 _amount) virtual;
+
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594()
         external
@@ -435,12 +436,6 @@ contract ERC1594 is
     }
 
     // solhint-disable no-empty-blocks
-    function _beforeTokenTransfer(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value
-    ) internal virtual override {}
 
     // solhint-enable no-empty-blocks
     // solhint-enable no-unused-vars
@@ -494,4 +489,17 @@ contract ERC1594 is
         uint256 selectorsIndex;
         staticInterfaceIds_[selectorsIndex++] = type(IERC1594).interfaceId;
     }
+
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual;
+
+    function _transferFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual;
 }

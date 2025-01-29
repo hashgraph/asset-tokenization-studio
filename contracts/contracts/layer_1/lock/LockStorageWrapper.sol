@@ -205,16 +205,15 @@
 
 pragma solidity 0.8.18;
 
-import {
-    SnapshotsStorageWrapper
-} from '../snapshots/SnapshotsStorageWrapper.sol';
+import {LockStorageWrapperRead} from './LockStorageWrapperRead.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {Common} from '../common/Common.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract LockStorageWrapper is SnapshotsStorageWrapper {
+abstract contract LockStorageWrapper is LockStorageWrapperRead, Common {
     using EnumerableSet for EnumerableSet.UintSet;
 
     function _lockByPartition(
@@ -331,4 +330,37 @@ abstract contract LockStorageWrapper is SnapshotsStorageWrapper {
 
         lockStorage.locksIndex[_tokenHolder][_partition][lock.id] = _lockIndex;
     }
+
+    function _reduceBalanceByPartition(
+        address _from,
+        uint256 _value,
+        bytes32 _partition
+    ) internal virtual;
+
+    function _validPartitionForReceiver(
+        bytes32 _partition,
+        address _to
+    ) internal view virtual returns (bool);
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    ) internal virtual;
+
+    function _increaseBalanceByPartition(
+        address _from,
+        uint256 _value,
+        bytes32 _partition
+    ) internal virtual;
+
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual;
+
+    function _updateAccountLockedBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual;
 }

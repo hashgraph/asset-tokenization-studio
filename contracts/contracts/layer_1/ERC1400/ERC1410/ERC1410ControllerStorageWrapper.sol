@@ -210,7 +210,6 @@ import {
     ERC1410StandardStorageWrapper
 } from './ERC1410StandardStorageWrapper.sol';
 import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
-import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
 import {
     _IS_PAUSED_ERROR_ID,
     _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
@@ -225,8 +224,7 @@ import {
 } from '../../constants/values.sol';
 
 abstract contract ERC1410ControllerStorageWrapper is
-    ERC1410StandardStorageWrapper,
-    ERC1644StorageWrapper
+    ERC1410StandardStorageWrapper
 {
     function _canTransferByPartition(
         address _from,

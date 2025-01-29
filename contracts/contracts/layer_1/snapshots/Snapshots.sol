@@ -213,11 +213,12 @@ import {
     ERC1410SnapshotStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
 import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
+import {SnapshotsStorageWrapper} from './SnapshotsStorageWrapper.sol';
 
 abstract contract Snapshots is
     IStaticFunctionSelectors,
     ISnapshots,
-    ERC1410SnapshotStorageWrapper
+    SnapshotsStorageWrapper
 {
     function balanceOfAtSnapshot(
         uint256 _snapshotID,

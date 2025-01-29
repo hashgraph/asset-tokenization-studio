@@ -217,12 +217,14 @@ import {_CONTROLLER_ROLE} from '../constants/roles.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract Hold is
-    IHold,
-    IStaticFunctionSelectors,
-    HoldStorageWrapper,
-    ERC1410ControllerStorageWrapper
-{
+abstract contract Hold is IHold, IStaticFunctionSelectors, HoldStorageWrapper {
+    modifier onlyValidAddress(address account) virtual;
+    modifier onlyDefaultPartitionWithSinglePartition(bytes32 partition) virtual;
+    modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp)
+        virtual;
+    modifier onlyOperator(bytes32 _partition, address _from) virtual;
+    modifier onlyControllable() virtual;
+
     function createHoldByPartition(
         bytes32 _partition,
         Hold calldata _hold

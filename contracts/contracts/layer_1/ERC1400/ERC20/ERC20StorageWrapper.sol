@@ -212,15 +212,10 @@ import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
 import {
     IERC20StorageWrapper
 } from '../../interfaces/ERC1400/IERC20StorageWrapper.sol';
-import {
-    ERC1410StandardStorageWrapper
-} from '../ERC1410/ERC1410StandardStorageWrapper.sol';
 import {IFactory} from '../../../interfaces/factory/IFactory.sol';
+import {Common} from '../../common/Common.sol';
 
-abstract contract ERC20StorageWrapper is
-    IERC20StorageWrapper,
-    ERC1410StandardStorageWrapper
-{
+abstract contract ERC20StorageWrapper is IERC20StorageWrapper, Common {
     struct ERC20Storage {
         string name;
         string symbol;
@@ -401,10 +396,34 @@ abstract contract ERC20StorageWrapper is
         address _spender,
         uint256 _amount,
         bool _isIncrease
-    ) internal virtual {
-        revert('Should not reach this function');
-    }
+    ) internal virtual;
     // solhint-enable no-unused-vars, custom-errors
+
+    function _transferByPartition(
+        address _from,
+        address _to,
+        uint256 _value,
+        bytes32 _partition,
+        bytes memory _data,
+        address _operator,
+        bytes memory _operatorData
+    ) internal virtual;
+
+    function _issueByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _value,
+        bytes memory _data
+    ) internal virtual;
+
+    function _redeemByPartition(
+        bytes32 _partition,
+        address _from,
+        address _operator,
+        uint256 _value,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) internal virtual;
 
     function _emitTransferEvent(
         address from,
