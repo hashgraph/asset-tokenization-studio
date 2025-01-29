@@ -221,6 +221,8 @@ bytes32 constant BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE = 0x1256aa1b36483ca651
 
 uint256 constant SNAPSHOT_RESULT_ID = 0;
 
+uint256 constant _MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+
 // keccak256('security.token.standard.balanceAdjustment.scheduledTasks');
 bytes32 constant BALANCE_ADJUSTMENT_TASK_TYPE = 0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d;
 

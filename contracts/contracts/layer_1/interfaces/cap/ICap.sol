@@ -216,7 +216,7 @@ interface ICap {
     function initialize_Cap(
         uint256 maxSupply,
         PartitionCap[] calldata partitionCap
-    ) external returns (bool success_);
+    ) external;
 
     /**
      * @dev Set a max supply for the token
@@ -228,6 +228,8 @@ interface ICap {
     /**
      * @dev Set a max supply for a partition of the token
      *
+     * @param _partition to be set the max supply
+     * @param _maxSupply to set as maximum value
      * @return success_ true or false
      */
     function setMaxSupplyByPartition(

@@ -208,9 +208,7 @@ pragma solidity 0.8.18;
 
 interface IERC1410Basic {
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410_Basic(
-        bool _multiPartition
-    ) external returns (bool success_);
+    function initialize_ERC1410_Basic(bool _multiPartition) external;
 
     function transferByPartition(
         bytes32 _partition,

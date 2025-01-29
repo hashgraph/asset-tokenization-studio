@@ -205,34 +205,42 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Equity,
+    type EquityUSA,
     type Pause,
     type AccessControl,
+    TimeTravel,
     Lock_2,
     ERC1410ScheduledTasks,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+    IFactory,
+    BusinessLogicResolver,
+    AccessControl__factory,
+    EquityUSATimeTravel__factory,
+    Pause__factory,
+    Lock_2__factory,
+    ERC1410ScheduledTasks__factory,
+    TimeTravel__factory,
+} from '@typechain'
 import {
-    _CORPORATE_ACTION_ROLE,
-    _DEFAULT_PARTITION,
-    _ISSUER_ROLE,
-    _LOCKER_ROLE,
-    _PAUSER_ROLE,
-} from '../../../../scripts/constants'
-import {
+    CORPORATE_ACTION_ROLE,
+    DEFAULT_PARTITION,
+    ISSUER_ROLE,
+    LOCKER_ROLE,
+    PAUSER_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
-const TIME = 10000
 const DECIMALS = 7
-let currentTimeInSeconds = 0
 let dividendsRecordDateInSeconds = 0
 let dividendsExecutionDateInSeconds = 0
 const dividendsAmountPerEquity = 1
@@ -261,7 +269,7 @@ let balanceAdjustmentData = {
     factor: balanceAdjustmentFactor,
     decimals: balanceAdjustmentDecimals,
 }
-const number_Of_Shares = 100000
+const number_Of_Shares = 100000n
 
 describe('Equity Tests', () => {
     let diamond: ResolverProxy
@@ -273,82 +281,102 @@ describe('Equity Tests', () => {
     let account_B: string
     let account_C: string
 
-    let equityFacet: Equity
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
+    let equityFacet: EquityUSA
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock_2
     let erc1410Facet: ERC1410ScheduledTasks
+    let timeTravelFacet: TimeTravel
 
     before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                    timeTravelEnabled: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
     })
 
     beforeEach(async () => {
-        await deployEnvironment()
-
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
 
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            false,
-            'TEST_AccessControl',
-            'TAC',
-            DECIMALS,
-            'ABCDEF123456',
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            number_Of_Shares,
-            100,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_B,
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: DECIMALS,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: number_Of_Shares,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
             countriesControlListType,
             listOfCountries,
             info,
-            init_rbacs
+            init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory,
+        })
+
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        equityFacet = EquityUSATimeTravel__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
-
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-
-        lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
-
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            await diamond.address
+        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
         )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
 
-        currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
-        dividendsRecordDateInSeconds = currentTimeInSeconds + TIME / 1000
-        dividendsExecutionDateInSeconds =
-            currentTimeInSeconds + (10 * TIME) / 1000
-        votingRecordDateInSeconds = currentTimeInSeconds + TIME / 1000
-        balanceAdjustmentExecutionDateInSeconds =
-            currentTimeInSeconds + TIME / 1000
+        dividendsRecordDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:00:10Z'
+        )
+        dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:16:40Z'
+        )
+        votingRecordDateInSeconds = dateToUnixTimestamp('2030-01-01T00:00:10Z')
+        balanceAdjustmentExecutionDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:00:10Z'
+        )
 
         votingData = {
             recordDate: votingRecordDateInSeconds.toString(),
@@ -364,6 +392,10 @@ describe('Equity Tests', () => {
             factor: balanceAdjustmentFactor,
             decimals: balanceAdjustmentDecimals,
         }
+    })
+
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     describe('Dividends', () => {
@@ -382,7 +414,7 @@ describe('Equity Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                _CORPORATE_ACTION_ROLE,
+                CORPORATE_ACTION_ROLE,
                 signer_A,
                 signer_B,
                 account_C
@@ -398,12 +430,12 @@ describe('Equity Tests', () => {
         })
 
         it('GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails', async () => {
+            await timeTravelFacet.changeSystemTimestamp(
+                dateToUnixTimestamp('2030-01-01T00:00:00Z')
+            )
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             equityFacet = equityFacet.connect(signer_C)
 
@@ -419,8 +451,8 @@ describe('Equity Tests', () => {
             ).to.be.rejectedWith('WrongDates')
 
             const wrongDividendData_2 = {
-                recordDate: (
-                    (await ethers.provider.getBlock('latest')).timestamp - 1
+                recordDate: dateToUnixTimestamp(
+                    '2029-12-31T23:59:59Z'
                 ).toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: dividendsAmountPerEquity,
@@ -434,10 +466,7 @@ describe('Equity Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setDividends THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             equityFacet = equityFacet.connect(signer_C)
 
@@ -486,12 +515,9 @@ describe('Equity Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setDividends and lock THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
-            await accessControlFacet.grantRole(_LOCKER_ROLE, account_C)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             // Using account C (with role)
             equityFacet = equityFacet.connect(signer_C)
             lockFacet = lockFacet.connect(signer_C)
@@ -499,10 +525,10 @@ describe('Equity Tests', () => {
 
             // issue and lock
             const TotalAmount = number_Of_Shares
-            const LockedAmount = TotalAmount - 5
+            const LockedAmount = TotalAmount - 5n
 
             await erc1410Facet.issueByPartition(
-                _DEFAULT_PARTITION,
+                DEFAULT_PARTITION,
                 account_A,
                 TotalAmount,
                 '0x'
@@ -522,8 +548,9 @@ describe('Equity Tests', () => {
                 )
 
             // check list members
-            await new Promise((f) => setTimeout(f, TIME + 1))
-            await accessControlFacet.revokeRole(_ISSUER_ROLE, account_C)
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds + 1
+            )
             const dividendFor = await equityFacet.getDividendsFor(1, account_A)
 
             expect(dividendFor.tokenBalance).to.equal(TotalAmount)
@@ -547,7 +574,7 @@ describe('Equity Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                _CORPORATE_ACTION_ROLE,
+                CORPORATE_ACTION_ROLE,
                 signer_A,
                 signer_B,
                 account_C
@@ -565,10 +592,7 @@ describe('Equity Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setVoting THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             equityFacet = equityFacet.connect(signer_C)
 
@@ -605,12 +629,9 @@ describe('Equity Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setVoting and lock THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
-            await accessControlFacet.grantRole(_LOCKER_ROLE, account_C)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             // Using account C (with role)
             equityFacet = equityFacet.connect(signer_C)
             lockFacet = lockFacet.connect(signer_C)
@@ -618,10 +639,10 @@ describe('Equity Tests', () => {
 
             // issue and lock
             const TotalAmount = number_Of_Shares
-            const LockedAmount = TotalAmount - 5
+            const LockedAmount = TotalAmount - 5n
 
             await erc1410Facet.issueByPartition(
-                _DEFAULT_PARTITION,
+                DEFAULT_PARTITION,
                 account_A,
                 TotalAmount,
                 '0x'
@@ -639,8 +660,9 @@ describe('Equity Tests', () => {
                     voteData
                 )
 
-            await new Promise((f) => setTimeout(f, TIME + 1))
-            await accessControlFacet.revokeRole(_ISSUER_ROLE, account_C)
+            await timeTravelFacet.changeSystemTimestamp(
+                votingRecordDateInSeconds + 1
+            )
             const votingFor = await equityFacet.getVotingFor(1, account_A)
 
             expect(votingFor.tokenBalance).to.equal(TotalAmount)
@@ -664,7 +686,7 @@ describe('Equity Tests', () => {
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                _CORPORATE_ACTION_ROLE,
+                CORPORATE_ACTION_ROLE,
                 signer_A,
                 signer_B,
                 account_C
@@ -682,10 +704,7 @@ describe('Equity Tests', () => {
         it('GIVEN an account with corporateActions role WHEN setBalanceAdjustment THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(
-                _CORPORATE_ACTION_ROLE,
-                account_C
-            )
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
             equityFacet = equityFacet.connect(signer_C)
 

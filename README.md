@@ -22,7 +22,6 @@
 - **[Code of conduct](#code-of-conduct)**<br>
 - **[License](#license)**<br>
 
-
 # Development manifesto
 
 The development of the project follows enterprise-grade practices for software development. Using DDD, hexagonal architecture, and the CQS pattern, all within an agile methodology.
@@ -32,6 +31,7 @@ The development of the project follows enterprise-grade practices for software d
 By using DDD (Domain-Driven Design), we aim to create a shared language among all members of the project team, which allows us to focus our development efforts on thoroughly understanding the processes and rules of the domain. This helps to bring benefits such as increased efficiency and improved communication.
 
 # Prerequisites
+
 Ensure the following tools are installed with these versions:
 
 - **Node:**`v20.17.0`
@@ -49,7 +49,6 @@ npm run install:all
 This will install the dependencies in all projects and sets up the links between them.
 
 You can now start developing in any of the modules.
-
 
 # Build
 
@@ -70,14 +69,15 @@ To run the project, you'll need to configure environment variables in the `.env`
 
 ## Required Environment Variables
 
-### *General Settings*
+### _General Settings_
 
-- **`REACT_APP_BUSINESS_LOGIC_KEYS_COMMON`**: This is a list of common business logic keys required for the functioning of the application. Each key represents a smart contract or similar on-chain entity.
-- **`REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY`**: Business logic key specifically for handling equity-related operations.
-- **`REACT_APP_BUSINESS_LOGIC_KEYS_BOND`**: Business logic key specifically for handling bond-related operations.
+- **`REACT_APP_EQUITY_CONFIG_ID`**: Configuration Id for Equities.
+- **`REACT_APP_EQUITY_CONFIG_VERSION`**: Equity Version.
+- **`REACT_APP_BOND_CONFIG_ID`**: configuration Id for Bonds.
+- **`REACT_APP_BOND_CONFIG_VERSION`**: Bond Version.
 - **`REACT_APP_SHOW_DISCLAIMER`**: Set this value to `"true"` to show a disclaimer in the application.
 
-### *Network Configuration*
+### _Network Configuration_
 
 - **`REACT_APP_MIRROR_NODE`**: The URL of the Hedera Mirror Node API used to query historical data from the Hedera testnet. Example: `https://testnet.mirrornode.hedera.com/api/v1/`
 - **`REACT_APP_RPC_NODE`**: The RPC node URL used to communicate with the Hedera testnet. Example: `https://testnet.hashio.io/api`
@@ -99,30 +99,31 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 1. Navigate to the `web` module folder.
 2. Copy the `.env.sample` file to create a new `.env` file:
 
-    ```bash
-    cp .env.sample .env
-    ```
+   ```bash
+   cp .env.sample .env
+   ```
 
 3. Open the `.env` file in your preferred text editor.
 4. Replace the placeholder values with your actual environment settings. For example:
 
-    ```bash
-    REACT_APP_BUSINESS_LOGIC_KEYS_COMMON="0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6"
-    REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY="0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810"
-    REACT_APP_BUSINESS_LOGIC_KEYS_BOND="0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef"
-    REACT_APP_SHOW_DISCLAIMER="true"
+   ```bash
+   REACT_APP_EQUITY_CONFIG_ID='0x0000000000000000000000000000000000000000000000000000000000000001'
+   REACT_APP_EQUITY_CONFIG_VERSION="0"
+   REACT_APP_BOND_CONFIG_ID="0x0000000000000000000000000000000000000000000000000000000000000002"
+   REACT_APP_BOND_CONFIG_VERSION="0"
+   REACT_APP_SHOW_DISCLAIMER="true"
 
-    REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
-    REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
-    REACT_APP_RPC_RESOLVER='0.0.5383403'
-    REACT_APP_RPC_FACTORY='0.0.5383498'
+   REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
+   REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
+   REACT_APP_RPC_RESOLVER='0.0.5423638'
+   REACT_APP_RPC_FACTORY='0.0.5423681'
 
-    REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
-    REACT_APP_DAPP_NAME="Asset Tokenization Studio"
-    REACT_APP_DAPP_DESCRIPTION="Asset Tokenization Studio. Built on Hedera Hashgraph."
-    REACT_APP_DAPP_URL="https://wc.ats.com/"
-    REACT_APP_DAPP_ICONS='["https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg"]'
-    ```
+   REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
+   REACT_APP_DAPP_NAME="Asset Tokenization Studio"
+   REACT_APP_DAPP_DESCRIPTION="Asset Tokenization Studio. Built on Hedera Hashgraph."
+   REACT_APP_DAPP_URL="https://wc.ats.com/"
+   REACT_APP_DAPP_ICONS='["https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg"]'
+   ```
 
 5. Save the file and proceed with running the application.
 
@@ -131,12 +132,11 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 In order to run the application locally:
 
 - Clone the repository
-- Install the application as described in the *Installation* section
-- Create a ".env" file in the *web* module (using the ".env.sample" file as a template)
-- Open a terminal and go to the *web* folder
-- Run the command : __yarn dev__
-- Open a browser and type in the URL displayed in the terminal (by default it will be : *http://localhost:5173*)
-
+- Install the application as described in the _Installation_ section
+- Create a ".env" file in the _web_ module (using the ".env.sample" file as a template)
+- Open a terminal and go to the _web_ folder
+- Run the command : **yarn dev**
+- Open a browser and type in the URL displayed in the terminal (by default it will be : _http://localhost:5173_)
 
 # Support
 

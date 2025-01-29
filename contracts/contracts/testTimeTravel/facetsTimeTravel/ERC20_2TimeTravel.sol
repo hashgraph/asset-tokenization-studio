@@ -203,42 +203,27 @@
 
 */
 
-import { initializeClient, deployContract } from './deploy'
+// SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
 
-import { getClient, toHashgraphKey } from './utils'
+pragma solidity 0.8.18;
 
-export const deployFactory = async () => {
-    const [
-        ,
-        operatorAccount,
-        operatorPriKey,
-        //client1publickey,
-        operatorIsE25519,
-    ] = initializeClient()
+import {ERC20_2} from '../../layer_2/ERC1400/ERC20/ERC20_2.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-    // Deploy Token using Client
-    const clientSdk = getClient()
-    clientSdk.setOperator(
-        operatorAccount,
-        toHashgraphKey({
-            privateKey: operatorPriKey,
-            isED25519: operatorIsE25519,
-        })
-    )
-
-    const { proxy, proxyAdmin, contract } = await deployContract({
-        clientOperator: clientSdk,
-        privateKey: operatorPriKey,
-        contractName: 'factory',
-        isED25519: operatorIsE25519,
-    })
-
-    console.log(
-        '\nProxy Address: \t',
-        proxy?.evm_address,
-        '\nProxy Admin Address: \t',
-        proxyAdmin?.evm_address,
-        '\nFactory Address: \t',
-        contract?.evm_address
-    )
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors
+contract ERC20_2TimeTravel is ERC20_2, TimeTravelStorageWrapper {
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
+    }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors

@@ -211,10 +211,12 @@ import { useTranslation } from "react-i18next";
 import { isHederaValidAddress, required } from "../../../utils/rules";
 import {
   GetAccountBalanceRequest,
+  GetLocksIdRequest,
   SecurityViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useGetBalanceOf } from "../../../hooks/queries/useGetSecurityDetails";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useGetLockers } from "../../../hooks/queries/useGetLockers";
 
 interface BalanceProps {
   id?: string;
@@ -243,8 +245,9 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
   const { t: tError } = useTranslation("security", {
     keyPrefix: "details.balance.error",
   });
-  const [targetId, setTagetId] = useState<string>();
+  const [targetId, setTargetId] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoadingLockers, setIsLoadingLockers] = useState<boolean>(false);
   const toast = useToast();
 
   const { data: balance, refetch } = useGetBalanceOf(
@@ -269,17 +272,69 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
     },
   );
 
+  const { data: lockers, refetch: refetchLockers } = useGetLockers(
+    new GetLocksIdRequest({
+      securityId: id!,
+      targetId: targetId ?? "",
+      start: 0,
+      end: 100,
+    }),
+    {
+      enabled: !!targetId,
+      refetchOnWindowFocus: false,
+      onSuccess: () => {
+        setIsLoadingLockers(false);
+      },
+      onError: () => {
+        setIsLoadingLockers(false);
+        toast.show({
+          duration: 3000,
+          title: tError("targetId"),
+          status: "error",
+        });
+      },
+    },
+  );
+
   useEffect(() => {
-    if (targetId) {
+    if (targetId && !balance) {
       setIsLoading(true);
+      setIsLoadingLockers(true);
       refetch();
+      refetchLockers();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetId]);
 
+  const isLoadingTotal = useMemo(() => {
+    return isLoading || isLoadingLockers;
+  }, [isLoading, isLoadingLockers]);
+
   const onSubmit = ({ search }: BalanceSearchFieldValue) => {
-    setTagetId(search);
+    setTargetId(search);
   };
+
+  const lockBalance = useMemo(() => {
+    if (!lockers) {
+      return "-";
+    }
+
+    return lockers.reduce((acc, current) => {
+      return acc + Number(current.amount);
+    }, 0);
+  }, [lockers]);
+
+  const totalBalance = useMemo(() => {
+    if (!balance?.value) {
+      return "-";
+    }
+
+    if (lockBalance === "-") {
+      return Number(balance?.value);
+    }
+
+    return Number(lockBalance) + Number(balance?.value);
+  }, [lockBalance, balance]);
 
   return (
     <VStack gap={6}>
@@ -310,7 +365,7 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
               size="sm"
               isDisabled={!isValid}
               type="submit"
-              isLoading={isLoading}
+              isLoading={isLoadingTotal}
             >
               <Text textStyle="ElementsMediumSM" px={4}>
                 {tSearch("button")}
@@ -334,19 +389,46 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
             layerStyle="container"
           />
         </Stack>
-        <Stack layerStyle="container" gap={2} p={6} pb={9}>
-          <Text textStyle="ElementsSemiboldMD">
-            {tProperties("accountBalance")}
-          </Text>
-          <VStack gap={0}>
-            <Text textStyle="ElementsSemibold2XL">
-              {balance?.value ?? "-"}
-              <Text ml={1} as="span" textStyle="ElementsRegularMD">
-                {tProperties(detailsResponse.symbol ?? "")}
-              </Text>
+        <VStack w={"full"}>
+          <Stack layerStyle="container" gap={2} p={6} pb={9}>
+            <Text textStyle="ElementsSemiboldMD">
+              {tProperties("totalBalance")}
             </Text>
-          </VStack>
-        </Stack>
+            <VStack gap={0} pb={4}>
+              <Text textStyle="ElementsSemibold2XL">
+                {totalBalance ?? "-"}
+                <Text ml={1} as="span" textStyle="ElementsRegularMD">
+                  {tProperties(detailsResponse.symbol ?? "")}
+                </Text>
+              </Text>
+            </VStack>
+            <HStack
+              gap={8}
+              w="full"
+              h="auto"
+              alignItems={"center"}
+              justifyContent={"center"}
+            >
+              <VStack alignItems={"flex-start"}>
+                <Text textStyle="ElementsRegularXS">Available balance</Text>
+                <Text textStyle="ElementsSemiboldSM">
+                  {balance?.value ?? "-"}{" "}
+                  {tProperties(detailsResponse.symbol ?? "")}
+                </Text>
+              </VStack>
+
+              <VStack w={"1px"} h={"40px"} bgColor={"gray.500"} />
+
+              <VStack alignItems={"flex-start"}>
+                <Text textStyle="ElementsRegularXS">Locked balance</Text>
+                <Text textStyle="ElementsSemiboldSM">
+                  {lockBalance ?? "-"}{" "}
+                  {tProperties(detailsResponse.symbol ?? "")}
+                </Text>
+              </VStack>
+            </HStack>
+          </Stack>
+        </VStack>
       </HStack>
     </VStack>
   );

@@ -203,125 +203,88 @@
 
 */
 
-//import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ethers } from 'hardhat'
-import { IBusinessLogicResolver } from '../typechain-types'
-import { IStaticFunctionSelectors } from '../typechain-types'
-import {
-    transparentUpgradableProxy,
-    deployProxyAdmin,
-    deployTransparentUpgradeableProxy,
-} from './transparentUpgradableProxy'
-import { expect } from 'chai'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import axios from 'axios'
+import Configuration, { Network } from '@configuration'
+import { ADDRESS_ZERO } from './constants'
+import { delay } from '@scripts'
 
-export interface BusinessLogicRegistryData {
-    businessLogicKey: string
-    businessLogicAddress: string
+interface IAccount {
+    evm_address: string
+    key: IKey
+    account: string
 }
 
-export interface DeployedBusinessLogics {
-    businessLogicResolver: IStaticFunctionSelectors
-    factory: IStaticFunctionSelectors
-    diamondFacet: IStaticFunctionSelectors
-    accessControl: IStaticFunctionSelectors
-    controlList: IStaticFunctionSelectors
-    corporateActionsSecurity: IStaticFunctionSelectors
-    pause: IStaticFunctionSelectors
-    eRC20_2: IStaticFunctionSelectors
-    eRC1644_2: IStaticFunctionSelectors
-    eRC1410ScheduledTasks: IStaticFunctionSelectors
-    eRC1594_2: IStaticFunctionSelectors
-    eRC1643: IStaticFunctionSelectors
-    equityUSA: IStaticFunctionSelectors
-    bondUSA: IStaticFunctionSelectors
-    snapshots_2: IStaticFunctionSelectors
-    scheduledSnapshots: IStaticFunctionSelectors
-    scheduledBalanceAdjustments: IStaticFunctionSelectors
-    scheduledTasks: IStaticFunctionSelectors
-    cap_2: IStaticFunctionSelectors
-    lock_2: IStaticFunctionSelectors
-    transferAndLock: IStaticFunctionSelectors
-    adjustBalances: IStaticFunctionSelectors
-    protectedPartitions: IStaticFunctionSelectors
+interface IKey {
+    _type: string
+    key: string
 }
 
-export let businessLogicResolver: IBusinessLogicResolver
-
-export async function deployProxyToBusinessLogicResolver(
-    businessLogicResolverLogicAddress: string
-) {
-    //await loadFixture(deployProxyAdmin)
-    await deployProxyAdmin()
-    await deployTransparentUpgradeableProxy(businessLogicResolverLogicAddress)
-    businessLogicResolver = (await ethers.getContractAt(
-        'BusinessLogicResolver',
-        transparentUpgradableProxy.address
-    )) as IBusinessLogicResolver
-    await businessLogicResolver.initialize_BusinessLogicResolver()
+export async function addressListToHederaIdList({
+    addressList,
+    network,
+}: {
+    addressList: string[]
+    network: Network
+}): Promise<string[]> {
+    return Promise.all(
+        addressList.map((address) => addresstoHederaId({ address, network }))
+    )
 }
 
-async function toStaticFunctionSelectors(
+export async function addresstoHederaId({
+    address: address,
+    network,
+}: {
     address: string
-): Promise<IStaticFunctionSelectors> {
-    return (await ethers.getContractAt(
-        'IStaticFunctionSelectors',
-        address
-    )) as IStaticFunctionSelectors
+    network: Network
+}): Promise<string> {
+    if (address === ADDRESS_ZERO) {
+        return '0.0.0'
+    }
+
+    const url = `accounts/${address}`
+    const res = await getFromMirrorNode<IAccount>({
+        url,
+        network,
+    })
+    if (!res) {
+        throw new Error(`Error retrieving account information for ${address}`)
+    }
+    return res.account
 }
 
-function capitalizeFirst(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-}
-
-function uncapitalizeFirst(str: string) {
-    return str.charAt(0).toLowerCase() + str.slice(1)
-}
-
-export async function deployBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    async function deployContractAndAssignIt(
-        deployedAndRegisteredBusinessLogics: DeployedBusinessLogics,
-        contractToDeploy: string
-    ) {
-        async function deployContract() {
-            return await (
-                await ethers.getContractFactory(contractToDeploy)
-            ).deploy()
+async function getFromMirrorNode<T>({
+    url,
+    network,
+    timeBetweenRetries = 1,
+    timeout = 10,
+}: {
+    url: string
+    network: Network
+    timeBetweenRetries?: number
+    timeout?: number
+}): Promise<T | undefined> {
+    const mirrorUrl = `${Configuration.endpoints[network].mirror}/api/v1/${
+        url.startsWith('/') ? url.slice(1) : url
+    }`
+    let timePassed = 0
+    while (timePassed <= timeout) {
+        try {
+            const res = await axios.get<T>(mirrorUrl)
+            if (res.status === 200) {
+                return res.data
+            }
+        } catch (error) {
+            console.error(
+                `Error retrieving data from Mirror Node: ${
+                    (error as Error).message
+                }`
+            )
         }
-        //await loadFixture(deployContract)
-        const deployedContract = await deployContract()
-        const deployedAndRegisteredBusinessLogics_Property =
-            uncapitalizeFirst(contractToDeploy)
-        deployedAndRegisteredBusinessLogics[
-            deployedAndRegisteredBusinessLogics_Property as keyof DeployedBusinessLogics
-        ] = await toStaticFunctionSelectors(deployedContract.address)
+        await delay({ time: timeBetweenRetries, unit: 'seconds' })
+        timePassed += timeBetweenRetries
     }
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        await deployContractAndAssignIt(
-            deployedAndRegisteredBusinessLogics,
-            capitalizeFirst(key)
-        )
-    }
-}
-
-export async function registerBusinessLogics(
-    deployedAndRegisteredBusinessLogics: DeployedBusinessLogics
-) {
-    const businessLogicsData: BusinessLogicRegistryData[] = []
-    let key: keyof typeof deployedAndRegisteredBusinessLogics
-    for (key in deployedAndRegisteredBusinessLogics) {
-        if (key === 'businessLogicResolver' || key === 'factory') {
-            continue
-        }
-        const businessLogic = deployedAndRegisteredBusinessLogics[key]
-        businessLogicsData.push({
-            businessLogicKey: await businessLogic.getStaticResolverKey(),
-            businessLogicAddress: businessLogic.address,
-        })
-    }
-    await expect(
-        businessLogicResolver.registerBusinessLogics(businessLogicsData)
-    ).to.emit(businessLogicResolver, 'BusinessLogicsRegistered')
+    return undefined
 }

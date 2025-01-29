@@ -224,15 +224,9 @@ contract EquityUSA is IEquityUSA, Equity, Security {
         EquityDetailsData calldata _equityDetailsData,
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    )
-        external
-        override
-        onlyUninitialized(_equityStorage().initialized)
-        returns (bool)
-    {
-        return
-            _initializeEquity(_equityDetailsData) &&
-            _initializeSecurity(_regulationData, _additionalSecurityData);
+    ) external override onlyUninitialized(_equityStorage().initialized) {
+        _initializeEquity(_equityDetailsData);
+        _initializeSecurity(_regulationData, _additionalSecurityData);
     }
 
     function getStaticResolverKey()

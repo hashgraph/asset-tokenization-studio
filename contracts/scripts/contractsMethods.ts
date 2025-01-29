@@ -209,7 +209,7 @@ import {
     BusinessLogicResolver__factory,
     IStaticFunctionSelectors__factory,
     DiamondCutManager__factory,
-} from '../typechain-types'
+} from '@typechain'
 import { contractCall } from './contractsLifeCycle/utils'
 import { FacetConfiguration } from './resolverDiamondCut'
 

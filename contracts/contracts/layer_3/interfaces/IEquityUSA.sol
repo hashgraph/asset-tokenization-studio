@@ -220,5 +220,5 @@ interface IEquityUSA is IEquity, ISecurity {
         EquityDetailsData calldata _equityDetailsData,
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    ) external returns (bool);
+    ) external;
 }
