@@ -301,6 +301,7 @@ abstract contract Hold is
         onlyValidAddress(_from)
         onlyValidAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyOperator(_partition, _from)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
@@ -335,6 +336,7 @@ abstract contract Hold is
         onlyValidAddress(_from)
         onlyValidAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyRole(_CONTROLLER_ROLE)
         onlyControllable
         onlyUnProtectedPartitionsOrWildCardRole
@@ -369,6 +371,9 @@ abstract contract Hold is
         onlyValidAddress(_from)
         onlyValidAddress(_protectedHold.hold.escrow)
         onlyRole(_protectedPartitionsRole(_partition))
+        onlyWithValidExpirationTimestamp(
+            _protectedHold.hold.expirationTimestamp
+        )
         onlyProtectedPartitions
         returns (bool success_, uint256 holdId_)
     {
@@ -417,23 +422,47 @@ abstract contract Hold is
             _to,
             _amount
         );
-        emit HoldByPartitionExecuted(
+        emit HoldByPartitionReleased(
             _tokenHolder,
             _partition,
             _escrowId,
-            _amount,
-            _to
+            _amount
         );
     }
 
     function releaseHoldByPartition(
         bytes32 _partition,
-        uint256 _holdId,
+        uint256 _escrowId,
         address _tokenHolder,
         uint256 _amount
-    ) external returns (bool success_) {
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidEscrowHoldId(
+            _partition,
+            _tokenHolder,
+            _escrowId,
+            _tokenHolder
+        )
+        checkControlList(_tokenHolder)
+        returns (bool success_)
+    {
         // solhint-disable-next-line
-        revert('Should never reach this part');
+        success_ = _releaseHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _escrowId,
+            _amount
+        );
+        emit HoldByPartitionReleased(
+            _tokenHolder,
+            _partition,
+            _escrowId,
+            _amount
+        );
     }
 
     function reclaimHoldByPartition(

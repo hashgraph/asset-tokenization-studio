@@ -440,6 +440,8 @@ import {
     Factory__factory,
     Lock_2__factory,
     Lock_2TimeTravel__factory,
+    Hold_2__factory,
+    Hold_2TimeTravel__factory,
     Pause__factory,
     PauseTimeTravel__factory,
     ProtectedPartitions__factory,
@@ -668,6 +670,17 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        hold: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new Hold_2__factory(),
+                new Hold_2TimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.Hold.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
         erc20: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ERC20_2__factory(),
@@ -876,6 +889,7 @@ export async function deployAtsContracts({
             controlList: await deployContractWithFactory(commands.controlList),
             pause: await deployContractWithFactory(commands.pause),
             lock: await deployContractWithFactory(commands.lock),
+            hold: await deployContractWithFactory(commands.hold),
             erc20: await deployContractWithFactory(commands.erc20),
             erc1410ScheduledTasks: await deployContractWithFactory(
                 commands.erc1410ScheduledTasks
