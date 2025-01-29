@@ -503,8 +503,8 @@ abstract contract HoldStorageWrapper is
             .id = escrowHold.id;
 
         holdStorage.escrow_holdsIndex[_escrowAddress][_partition][
-                escrowHold.id
-            ] = _escrowHoldIndex;
+            escrowHold.id
+        ] = _escrowHoldIndex;
     }
 
     function _checkCreateHoldSignature(

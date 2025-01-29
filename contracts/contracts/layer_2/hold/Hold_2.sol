@@ -251,8 +251,8 @@ contract Hold_2 is Hold, HoldStorageWrapper_2 {
 
     function _releaseHoldByPartition(
         bytes32 _partition,
-        uint256 _escrowId,
         address _tokenHolder,
+        uint256 _escrowId,
         uint256 _amount
     )
         internal
@@ -263,8 +263,8 @@ contract Hold_2 is Hold, HoldStorageWrapper_2 {
         return
             HoldStorageWrapper_2._releaseHoldByPartition(
                 _partition,
-                _escrowId,
                 _tokenHolder,
+                _escrowId,
                 _amount
             );
     }
