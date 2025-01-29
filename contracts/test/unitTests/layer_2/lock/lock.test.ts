@@ -205,33 +205,46 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { providers } from 'ethers'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { time } from '@nomicfoundation/hardhat-network-helpers'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type AdjustBalances,
     type ERC1410ScheduledTasks,
     type AccessControl,
+    TimeTravel,
     Lock_2,
     Equity,
     Cap_2,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+    IFactory,
+    BusinessLogicResolver,
+    AccessControl__factory,
+    ERC1410ScheduledTasks__factory,
+    AdjustBalances__factory,
+    Cap_2__factory,
+    Lock_2__factory,
+    Equity__factory,
+    TimeTravel__factory,
+} from '@typechain'
 import {
-    _ADJUSTMENT_BALANCE_ROLE,
-    _PAUSER_ROLE,
-    _ISSUER_ROLE,
-    _CAP_ROLE,
-    _CONTROLLER_ROLE,
-    _LOCKER_ROLE,
-    _CORPORATE_ACTION_ROLE,
-} from '../../../../scripts/constants'
-import {
+    ADJUSTMENT_BALANCE_ROLE,
+    PAUSER_ROLE,
+    ISSUER_ROLE,
+    CAP_ROLE,
+    CONTROLLER_ROLE,
+    LOCKER_ROLE,
+    CORPORATE_ACTION_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { time } from '@nomicfoundation/hardhat-network-helpers'
+    DeployAtsFullInfrastructureCommand,
+    deployAtsFullInfrastructure,
+    MAX_UINT256,
+} from '@scripts'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const amount = 1
 const balanceOf_A_Original = [10 * amount, 100 * amount]
@@ -258,78 +271,88 @@ describe('Locks Layer 2 Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
     let adjustBalancesFacet: AdjustBalances
     let accessControlFacet: AccessControl
     let capFacet: Cap_2
     let equityFacet: Equity
     let lockFacet: Lock_2
+    let timeTravelFacet: TimeTravel
 
     async function deployAsset(multiPartition: boolean) {
         const init_rbacs: Rbac[] = set_initRbacs()
 
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            multiPartition,
-            'TEST_AccessControl',
-            'TAC',
-            decimals_Original,
-            'ABCDEF123456',
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            0,
-            100,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_B,
-            true,
-            'ES,FR,CH',
-            'nothing',
-            init_rbacs
-        )
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: multiPartition,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: decimals_Original,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
 
-        await setFacets(diamond)
+        await setFacets({ diamond, defaultSigner: signer_A })
     }
 
-    async function setFacets(diamond: ResolverProxy) {
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+    async function setFacets({
+        diamond,
+        defaultSigner = ethers.provider,
+    }: {
+        diamond: ResolverProxy
+        defaultSigner?: SignerWithAddress | providers.Provider
+    }) {
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            defaultSigner
         )
-
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            defaultSigner
         )
-
-        adjustBalancesFacet = await ethers.getContractAt(
-            'AdjustBalances',
-            diamond.address
+        adjustBalancesFacet = AdjustBalances__factory.connect(
+            diamond.address,
+            defaultSigner
         )
-
-        capFacet = await ethers.getContractAt('Cap_2', diamond.address)
-
-        lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
-
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
+        capFacet = Cap_2__factory.connect(diamond.address, defaultSigner)
+        lockFacet = Lock_2__factory.connect(diamond.address, defaultSigner)
+        equityFacet = Equity__factory.connect(diamond.address, defaultSigner)
+        timeTravelFacet = TimeTravel__factory.connect(
+            diamond.address,
+            defaultSigner
+        )
     }
 
     function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const corporateActionPause: Rbac = {
-            role: _CORPORATE_ACTION_ROLE,
+            role: CORPORATE_ACTION_ROLE,
             members: [account_B],
         }
         return [rbacPause, corporateActionPause]
@@ -338,11 +361,11 @@ describe('Locks Layer 2 Tests', () => {
     async function setPreBalanceAdjustment() {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_ADJUSTMENT_BALANCE_ROLE, account_C)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(_CAP_ROLE, account_A)
-        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_A)
-        await accessControlFacet.grantRole(_LOCKER_ROLE, account_A)
+        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(CAP_ROLE, account_A)
+        await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
+        await accessControlFacet.grantRole(LOCKER_ROLE, account_A)
 
         // Using account C (with role)
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -385,16 +408,35 @@ describe('Locks Layer 2 Tests', () => {
         )
     }
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                    timeTravelEnabled: true,
+                })
+            )
 
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
         await deployAsset(true)
+    })
+
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     it('GIVEN a lock WHEN adjustBalances THEN lock amount gets updated succeeds', async () => {
@@ -405,16 +447,12 @@ describe('Locks Layer 2 Tests', () => {
             await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
 
         // LOCK
-        const currentTimestamp = (await ethers.provider.getBlock('latest'))
-            .timestamp
-        const ONE_SECOND = 1
-
         lockFacet = lockFacet.connect(signer_A)
         await lockFacet.lockByPartition(
             _PARTITION_ID_1,
             amount,
             account_A,
-            currentTimestamp + ONE_SECOND
+            dateToUnixTimestamp('2030-01-01T00:00:01Z')
         )
 
         const lock_TotalAmount_Before = await lockFacet.getLockedAmountFor(
@@ -437,26 +475,28 @@ describe('Locks Layer 2 Tests', () => {
         // scheduled two balance updates
         equityFacet = equityFacet.connect(signer_B)
 
-        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
-
         const balanceAdjustmentData = {
-            executionDate: (currentTimeInSeconds + 2).toString(),
+            executionDate: dateToUnixTimestamp(
+                '2030-01-01T00:00:02Z'
+            ).toString(),
             factor: adjustFactor,
             decimals: adjustDecimals,
         }
 
         const balanceAdjustmentData_2 = {
-            executionDate: (currentTimeInSeconds + 1000).toString(),
+            executionDate: dateToUnixTimestamp(
+                '2030-01-01T00:16:40Z'
+            ).toString(),
             factor: adjustFactor,
             decimals: adjustDecimals,
         }
         await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
         await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_2)
 
-        // wait for first scheduled balance adjustment only (run DUMB transaction)
-        await new Promise((f) => setTimeout(f, 3000))
-        await accessControlFacet.grantRole(_PAUSER_ROLE, account_C) // DUMB transaction
+        // wait for first scheduled balance adjustment only
+        await timeTravelFacet.changeSystemTimestamp(
+            dateToUnixTimestamp('2030-01-01T00:00:03Z')
+        )
 
         const lock_TotalAmount_After = await lockFacet.getLockedAmountFor(
             account_A

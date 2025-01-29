@@ -205,6 +205,8 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Pause,
@@ -213,30 +215,31 @@ import {
     type ControlList,
     type ERC1410Snapshot,
     ERC20,
-} from '../../../../../typechain-types'
-import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
+    IFactory,
+    BusinessLogicResolver,
+} from '@typechain'
 import {
-    _CONTROL_LIST_ROLE,
-    _DEFAULT_PARTITION,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _IS_PAUSED_ERROR_ID,
-    _ISSUER_ROLE,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _PAUSER_ROLE,
-    _SUCCESS,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
-    _ALLOWANCE_REACHED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-} from '../../../../../scripts/constants'
-import {
+    CONTROL_LIST_ROLE,
+    DEFAULT_PARTITION,
+    FROM_ACCOUNT_BLOCKED_ERROR_ID,
+    FROM_ACCOUNT_NULL_ERROR_ID,
+    IS_PAUSED_ERROR_ID,
+    ISSUER_ROLE,
+    NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+    PAUSER_ROLE,
+    SUCCESS,
+    TO_ACCOUNT_BLOCKED_ERROR_ID,
+    TO_ACCOUNT_NULL_ERROR_ID,
+    ALLOWANCE_REACHED_ERROR_ID,
+    OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+    MAX_UINT256,
+} from '@scripts'
 
 const amount = 1000
 const balanceOf_C_Original = 2 * amount
@@ -257,13 +260,17 @@ describe('ERC1594 Tests', () => {
     let account_D: string
     let account_E: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1594Facet: ERC1594
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let controlList: ControlList
 
     describe('Multi partition mode', () => {
-        beforeEach(async () => {
+        before(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
@@ -273,42 +280,58 @@ describe('ERC1594 Tests', () => {
             account_D = signer_D.address
             account_E = signer_E.address
 
-            await deployEnvironment()
+            const { deployer, ...deployedContracts } =
+                await deployAtsFullInfrastructure(
+                    await DeployAtsFullInfrastructureCommand.newInstance({
+                        signer: signer_A,
+                        useDeployed: false,
+                        useEnvironment: true,
+                        timeTravelEnabled: true,
+                    })
+                )
 
+            factory = deployedContracts.factory.contract
+            businessLogicResolver =
+                deployedContracts.businessLogicResolver.contract
+        })
+
+        beforeEach(async () => {
             const rbacPause: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_B],
             }
             const init_rbacs: Rbac[] = [rbacPause]
 
-            diamond = await deployEquityFromFactory(
-                account_A,
-                false,
-                true,
-                false,
-                true,
-                'TEST_AccessControl',
-                'TAC',
-                6,
-                'ABCDEF123456',
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                false,
-                1,
-                '0x345678',
-                maxSupply,
-                100,
-                RegulationType.REG_D,
-                RegulationSubType.REG_D_506_B,
-                true,
-                'ES,FR,CH',
-                'nothing',
-                init_rbacs
-            )
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: true,
+                name: 'TEST_AccessControl',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: BigInt(maxSupply),
+                nominalValue: 100,
+                regulationType: RegulationType.REG_D,
+                regulationSubType: RegulationSubType.REG_D_506_B,
+                countriesControlListType: true,
+                listOfCountries: 'ES,FR,CH',
+                info: 'nothing',
+                init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             accessControlFacet = await ethers.getContractAt(
                 'AccessControl',
@@ -328,7 +351,7 @@ describe('ERC1594 Tests', () => {
             )
 
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         })
 
         it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {
@@ -406,10 +429,7 @@ describe('ERC1594 Tests', () => {
             it('GIVEN blocked accounts (sender, to, from) WHEN transfer THEN transaction fails with AccountIsBlocked', async () => {
                 // Blacklisting accounts
                 accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(
-                    _CONTROL_LIST_ROLE,
-                    account_A
-                )
+                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
                 controlList = controlList.connect(signer_A)
                 await controlList.addToControlList(account_C)
 
@@ -468,34 +488,36 @@ describe('ERC1594 Tests', () => {
             it('GIVEN blocked accounts (to) USING WHITELIST WHEN issue THEN transaction fails with AccountIsBlocked', async () => {
                 // First deploy a new token using white list
                 const isWhiteList = true
-                const newDiamond = await deployEquityFromFactory(
-                    account_A,
+                const newDiamond = await deployEquityFromFactory({
+                    adminAccount: account_A,
                     isWhiteList,
-                    true,
-                    false,
-                    false,
-                    'TEST_AccessControl',
-                    'TAC',
-                    6,
-                    'ABCDEF123456',
-                    false,
-                    false,
-                    false,
-                    true,
-                    true,
-                    true,
-                    false,
-                    1,
-                    '0x345678',
-                    0,
-                    100,
-                    RegulationType.REG_D,
-                    RegulationSubType.REG_D_506_B,
-                    true,
-                    'ES,FR,CH',
-                    'nothing',
-                    []
-                )
+                    isControllable: true,
+                    arePartitionsProtected: false,
+                    isMultiPartition: false,
+                    name: 'TEST_AccessControl',
+                    symbol: 'TAC',
+                    decimals: 6,
+                    isin: isinGenerator(),
+                    votingRight: false,
+                    informationRight: false,
+                    liquidationRight: false,
+                    subscriptionRight: true,
+                    conversionRight: true,
+                    redemptionRight: true,
+                    putRight: false,
+                    dividendRight: 1,
+                    currency: '0x345678',
+                    numberOfShares: MAX_UINT256,
+                    nominalValue: 100,
+                    regulationType: RegulationType.REG_D,
+                    regulationSubType: RegulationSubType.REG_D_506_B,
+                    countriesControlListType: true,
+                    listOfCountries: 'ES,FR,CH',
+                    info: 'nothing',
+                    init_rbacs: [],
+                    factory,
+                    businessLogicResolver: businessLogicResolver.address,
+                })
                 accessControlFacet = await ethers.getContractAt(
                     'AccessControl',
                     newDiamond.address
@@ -507,7 +529,7 @@ describe('ERC1594 Tests', () => {
                 )
                 // accounts are blacklisted by default (white list)
                 accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
+                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
 
                 // Using account A (with role)
                 erc1594Facet = erc1594Facet.connect(signer_A)
@@ -524,10 +546,7 @@ describe('ERC1594 Tests', () => {
             it('GIVEN blocked accounts (sender, from) WHEN redeem THEN transaction fails with AccountIsBlocked', async () => {
                 // Blacklisting accounts
                 accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(
-                    _CONTROL_LIST_ROLE,
-                    account_A
-                )
+                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
                 controlList = controlList.connect(signer_A)
                 await controlList.addToControlList(account_C)
 
@@ -694,7 +713,9 @@ describe('ERC1594 Tests', () => {
         let erc1594Approved: ERC1594
         let erc1410SnapshotFacet: ERC1410Snapshot
         let erc20Facet: ERC20
-        beforeEach(async () => {
+        before(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
@@ -704,46 +725,60 @@ describe('ERC1594 Tests', () => {
             account_D = signer_D.address
             account_E = signer_E.address
 
-            await deployEnvironment()
+            const { deployer, ...deployedContracts } =
+                await deployAtsFullInfrastructure(
+                    await DeployAtsFullInfrastructureCommand.newInstance({
+                        signer: signer_A,
+                        useDeployed: false,
+                        useEnvironment: true,
+                    })
+                )
 
+            factory = deployedContracts.factory.contract
+            businessLogicResolver =
+                deployedContracts.businessLogicResolver.contract
+        })
+        beforeEach(async () => {
             const rbacPause: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_B],
             }
             const rbacIssuer: Rbac = {
-                role: _ISSUER_ROLE,
+                role: ISSUER_ROLE,
                 members: [account_C],
             }
             const init_rbacs: Rbac[] = [rbacPause, rbacIssuer]
 
-            diamond = await deployEquityFromFactory(
-                account_A,
-                false,
-                true,
-                false,
-                false,
-                'TEST_AccessControl',
-                'TAC',
-                6,
-                'ABCDEF123456',
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                false,
-                1,
-                '0x345678',
-                0,
-                100,
-                RegulationType.REG_S,
-                RegulationSubType.NONE,
-                true,
-                'ES,FR,CH',
-                'nothing',
-                init_rbacs
-            )
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: false,
+                name: 'TEST_AccessControl',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_S,
+                regulationSubType: RegulationSubType.NONE,
+                countriesControlListType: true,
+                listOfCountries: 'ES,FR,CH',
+                info: 'nothing',
+                init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             accessControlFacet = await ethers.getContractAt(
                 'AccessControl',
@@ -775,7 +810,7 @@ describe('ERC1594 Tests', () => {
             )
 
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         })
 
         describe('Paused', () => {
@@ -793,7 +828,7 @@ describe('ERC1594 Tests', () => {
                     await erc1594Facet.canTransfer(account_D, amount, data)
                 ).to.be.deep.equal([
                     false,
-                    _IS_PAUSED_ERROR_ID,
+                    IS_PAUSED_ERROR_ID,
                     ethers.constants.HashZero,
                 ])
 
@@ -806,7 +841,7 @@ describe('ERC1594 Tests', () => {
                     )
                 ).to.be.deep.equal([
                     false,
-                    _IS_PAUSED_ERROR_ID,
+                    IS_PAUSED_ERROR_ID,
                     ethers.constants.HashZero,
                 ])
             })
@@ -820,10 +855,7 @@ describe('ERC1594 Tests', () => {
             async () => {
                 // Blacklisting accounts
                 accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(
-                    _CONTROL_LIST_ROLE,
-                    account_A
-                )
+                await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
                 controlList = controlList.connect(signer_A)
                 await controlList.addToControlList(account_C)
 
@@ -834,7 +866,7 @@ describe('ERC1594 Tests', () => {
                     await erc1594Facet.canTransfer(account_D, amount, data)
                 ).to.be.deep.equal([
                     false,
-                    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
+                    FROM_ACCOUNT_BLOCKED_ERROR_ID,
                     ethers.constants.HashZero,
                 ])
                 expect(
@@ -843,7 +875,7 @@ describe('ERC1594 Tests', () => {
                         .canTransfer(account_C, amount, data)
                 ).to.be.deep.equal([
                     false,
-                    _TO_ACCOUNT_BLOCKED_ERROR_ID,
+                    TO_ACCOUNT_BLOCKED_ERROR_ID,
                     ethers.constants.HashZero,
                 ])
 
@@ -856,7 +888,7 @@ describe('ERC1594 Tests', () => {
                     )
                 ).to.be.deep.equal([
                     false,
-                    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
+                    OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
                     ethers.constants.HashZero,
                 ])
                 erc1594Facet = erc1594Facet.connect(signer_A)
@@ -869,7 +901,7 @@ describe('ERC1594 Tests', () => {
                     )
                 ).to.be.deep.equal([
                     false,
-                    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
+                    FROM_ACCOUNT_BLOCKED_ERROR_ID,
                     ethers.constants.HashZero,
                 ])
                 expect(
@@ -881,7 +913,7 @@ describe('ERC1594 Tests', () => {
                     )
                 ).to.be.deep.equal([
                     false,
-                    _TO_ACCOUNT_BLOCKED_ERROR_ID,
+                    TO_ACCOUNT_BLOCKED_ERROR_ID,
                     ethers.constants.HashZero,
                 ])
             }
@@ -896,7 +928,7 @@ describe('ERC1594 Tests', () => {
                 )
             ).to.be.deep.equal([
                 false,
-                _TO_ACCOUNT_NULL_ERROR_ID,
+                TO_ACCOUNT_NULL_ERROR_ID,
                 ethers.constants.HashZero,
             ])
             expect(
@@ -908,7 +940,7 @@ describe('ERC1594 Tests', () => {
                 )
             ).to.be.deep.equal([
                 false,
-                _TO_ACCOUNT_NULL_ERROR_ID,
+                TO_ACCOUNT_NULL_ERROR_ID,
                 ethers.constants.HashZero,
             ])
         })
@@ -923,7 +955,7 @@ describe('ERC1594 Tests', () => {
                 )
             ).to.be.deep.equal([
                 false,
-                _FROM_ACCOUNT_NULL_ERROR_ID,
+                FROM_ACCOUNT_NULL_ERROR_ID,
                 ethers.constants.HashZero,
             ])
         })
@@ -938,7 +970,7 @@ describe('ERC1594 Tests', () => {
                 )
             ).to.be.deep.equal([
                 false,
-                _ALLOWANCE_REACHED_ERROR_ID,
+                ALLOWANCE_REACHED_ERROR_ID,
                 ethers.constants.HashZero,
             ])
         })
@@ -948,7 +980,7 @@ describe('ERC1594 Tests', () => {
                 await erc1594Facet.canTransfer(account_D, amount, data)
             ).to.be.deep.equal([
                 false,
-                _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
                 ethers.constants.HashZero,
             ])
 
@@ -962,7 +994,7 @@ describe('ERC1594 Tests', () => {
                 )
             ).to.be.deep.equal([
                 false,
-                _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
                 ethers.constants.HashZero,
             ])
         })
@@ -980,13 +1012,13 @@ describe('ERC1594 Tests', () => {
             )
             expect(
                 await erc1410SnapshotFacet.balanceOfByPartition(
-                    _DEFAULT_PARTITION,
+                    DEFAULT_PARTITION,
                     account_E
                 )
             ).to.be.equal(amount / 2)
             expect(
                 await erc1410SnapshotFacet.totalSupplyByPartition(
-                    _DEFAULT_PARTITION
+                    DEFAULT_PARTITION
                 )
             ).to.be.equal(amount / 2)
         })
@@ -996,7 +1028,7 @@ describe('ERC1594 Tests', () => {
 
             expect(
                 await erc1594Transferor.canTransfer(account_D, amount / 2, data)
-            ).to.be.deep.equal([true, _SUCCESS, ethers.constants.HashZero])
+            ).to.be.deep.equal([true, SUCCESS, ethers.constants.HashZero])
             expect(
                 await erc1594Transferor.transferWithData(
                     account_D,
@@ -1016,19 +1048,19 @@ describe('ERC1594 Tests', () => {
             )
             expect(
                 await erc1410SnapshotFacet.balanceOfByPartition(
-                    _DEFAULT_PARTITION,
+                    DEFAULT_PARTITION,
                     account_E
                 )
             ).to.be.equal(amount / 2)
             expect(
                 await erc1410SnapshotFacet.balanceOfByPartition(
-                    _DEFAULT_PARTITION,
+                    DEFAULT_PARTITION,
                     account_D
                 )
             ).to.be.equal(amount / 2)
             expect(
                 await erc1410SnapshotFacet.totalSupplyByPartition(
-                    _DEFAULT_PARTITION
+                    DEFAULT_PARTITION
                 )
             ).to.be.equal(amount)
         })
@@ -1048,7 +1080,7 @@ describe('ERC1594 Tests', () => {
                         amount / 2,
                         data
                     )
-                ).to.be.deep.equal([true, _SUCCESS, ethers.constants.HashZero])
+                ).to.be.deep.equal([true, SUCCESS, ethers.constants.HashZero])
                 expect(
                     await erc1594Approved.transferFromWithData(
                         account_E,
@@ -1074,19 +1106,19 @@ describe('ERC1594 Tests', () => {
                 ).to.be.equal(amount / 2)
                 expect(
                     await erc1410SnapshotFacet.balanceOfByPartition(
-                        _DEFAULT_PARTITION,
+                        DEFAULT_PARTITION,
                         account_E
                     )
                 ).to.be.equal(amount / 2)
                 expect(
                     await erc1410SnapshotFacet.balanceOfByPartition(
-                        _DEFAULT_PARTITION,
+                        DEFAULT_PARTITION,
                         account_D
                     )
                 ).to.be.equal(amount / 2)
                 expect(
                     await erc1410SnapshotFacet.totalSupplyByPartition(
-                        _DEFAULT_PARTITION
+                        DEFAULT_PARTITION
                     )
                 ).to.be.equal(amount)
             }
@@ -1107,13 +1139,13 @@ describe('ERC1594 Tests', () => {
             )
             expect(
                 await erc1410SnapshotFacet.balanceOfByPartition(
-                    _DEFAULT_PARTITION,
+                    DEFAULT_PARTITION,
                     account_E
                 )
             ).to.be.equal(amount / 2)
             expect(
                 await erc1410SnapshotFacet.totalSupplyByPartition(
-                    _DEFAULT_PARTITION
+                    DEFAULT_PARTITION
                 )
             ).to.be.equal(amount / 2)
         })
@@ -1153,13 +1185,13 @@ describe('ERC1594 Tests', () => {
                 ).to.be.equal(amount / 2)
                 expect(
                     await erc1410SnapshotFacet.balanceOfByPartition(
-                        _DEFAULT_PARTITION,
+                        DEFAULT_PARTITION,
                         account_E
                     )
                 ).to.be.equal(amount / 2)
                 expect(
                     await erc1410SnapshotFacet.totalSupplyByPartition(
-                        _DEFAULT_PARTITION
+                        DEFAULT_PARTITION
                     )
                 ).to.be.equal(amount / 2)
             }

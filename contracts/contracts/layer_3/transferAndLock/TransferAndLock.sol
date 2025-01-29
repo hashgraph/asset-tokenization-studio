@@ -214,9 +214,6 @@ import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
 import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
 import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
-    LockStorageWrapper_2
-} from '../../layer_2/lock/LockStorageWrapper_2.sol';
-import {
     TransferAndLockStorageWrapper
 } from './TransferAndLockStorageWrapper.sol';
 

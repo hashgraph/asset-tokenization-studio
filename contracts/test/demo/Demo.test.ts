@@ -205,6 +205,7 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type DiamondLoupeFacet,
@@ -217,26 +218,22 @@ import {
     type Snapshots,
     type ScheduledSnapshots,
     type Cap_2,
-} from '../../typechain-types'
+} from '@typechain'
 import {
-    deployEnvironment,
-    environment,
-} from '../../scripts/deployEnvironmentByRpc'
-import {
-    _DEFAULT_ADMIN_ROLE,
-    _CONTROL_LIST_ROLE,
-    _CORPORATE_ACTION_ROLE,
-    _ISSUER_ROLE,
-    _CONTROLLER_ROLE,
-    _PAUSER_ROLE,
-    ADDRESS_0,
-} from '../../scripts/constants'
-import {
+    DEFAULT_ADMIN_ROLE,
+    CONTROL_LIST_ROLE,
+    CORPORATE_ACTION_ROLE,
+    ISSUER_ROLE,
+    CONTROLLER_ROLE,
+    PAUSER_ROLE,
+    ADDRESS_ZERO,
     DividendType,
     RegulationSubType,
     RegulationType,
     deployEquityFromFactory,
-} from '../../scripts/factory'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '@scripts'
 
 const _MINUTE_1 = 6000
 const _BUSINESS_LOGIC_COUNT = 21
@@ -269,283 +266,285 @@ describe('Demo RedSwam', () => {
         console.log('Account I : ' + account_I)
         console.log('Account P : ' + account_P)
 
-        await deployEnvironment()
+        const {
+            deployer,
+            businessLogicResolver,
+            factory,
+            diamondFacet,
+            accessControl,
+            pause,
+            controlList,
+            corporateActionsSecurity,
+            cap,
+            erc20,
+            erc1644,
+            erc1410ScheduledTasks,
+            erc1594,
+            erc1643,
+            equityUsa,
+            bondUsa,
+            snapshots,
+            lock,
+            transferAndLock,
+            scheduledSnapshots,
+            scheduledBalanceAdjustments,
+            scheduledTasks,
+            adjustBalances,
+        } = await deployAtsFullInfrastructure(
+            await DeployAtsFullInfrastructureCommand.newInstance({
+                signer: signer_A,
+                useDeployed: false,
+                useEnvironment: false,
+            })
+        )
 
         console.log(`
 Deployed contracts:
-    BusinessLogicResolver: ${environment.resolver.address},
-    Factory: ${environment.factory.address},
+    BusinessLogicResolver: ${businessLogicResolver.address},
+    Factory: ${factory.address},
     DiamondFacet: 
-        address: ${environment.deployedBusinessLogics.diamondFacet.address},
-        key: ${await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey()},
+        address: ${diamondFacet.address},
+        key: ${await diamondFacet.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.diamondFacet.getStaticFunctionSelectors()
+            await diamondFacet.contract.getStaticFunctionSelectors()
         )},
     AccessControl: 
-        address: ${environment.deployedBusinessLogics.accessControl.address},
-        key: ${await environment.deployedBusinessLogics.accessControl.getStaticResolverKey()},
+        address: ${accessControl.address},
+        key: ${await accessControl.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.accessControl.getStaticFunctionSelectors()
+            await accessControl.contract.getStaticFunctionSelectors()
         )},
     Pause: 
-        address: ${environment.deployedBusinessLogics.pause.address},
-        key: ${await environment.deployedBusinessLogics.pause.getStaticResolverKey()},
+        address: ${pause.address},
+        key: ${await pause.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.pause.getStaticFunctionSelectors()
+            await pause.contract.getStaticFunctionSelectors()
         )},
     ControlList: 
-        address: ${environment.deployedBusinessLogics.controlList.address},
-        key: ${await environment.deployedBusinessLogics.controlList.getStaticResolverKey()},
+        address: ${controlList.address},
+        key: ${await controlList.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.controlList.getStaticFunctionSelectors()
+            await controlList.contract.getStaticFunctionSelectors()
         )},
     CorporateActions: 
-        address: ${
-            environment.deployedBusinessLogics.corporateActionsSecurity.address
-        },
-        key: ${await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey()},
+        address: ${corporateActionsSecurity.address},
+        key: ${await corporateActionsSecurity.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticFunctionSelectors()
+            await corporateActionsSecurity.contract.getStaticFunctionSelectors()
         )},
     CAP: 
-        address: ${environment.deployedBusinessLogics.cap_2.address},
-        key: ${await environment.deployedBusinessLogics.cap_2.getStaticResolverKey()},
+        address: ${cap.address},
+        key: ${await cap.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.cap_2.getStaticFunctionSelectors()
+            await cap.contract.getStaticFunctionSelectors()
         )},
     ERC20: 
-        address: ${environment.deployedBusinessLogics.eRC20_2.address},
-        key: ${await environment.deployedBusinessLogics.eRC20_2.getStaticResolverKey()},
+        address: ${erc20.address},
+        key: ${await erc20.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.eRC20_2.getStaticFunctionSelectors()
+            await erc20.contract.getStaticFunctionSelectors()
         )},
     ERC1644: 
-        address: ${environment.deployedBusinessLogics.eRC1644_2.address},
-        key: ${await environment.deployedBusinessLogics.eRC1644_2.getStaticResolverKey()},
+        address: ${erc1644.address},
+        key: ${await erc1644.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.eRC1644_2.getStaticFunctionSelectors()
+            await erc1644.contract.getStaticFunctionSelectors()
         )},
     ERC1410: 
-        address: ${
-            environment.deployedBusinessLogics.eRC1410ScheduledTasks.address
-        },
-        key: ${await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticResolverKey()},
+        address: ${erc1410ScheduledTasks.address},
+        key: ${await erc1410ScheduledTasks.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticFunctionSelectors()
+            await erc1410ScheduledTasks.contract.getStaticFunctionSelectors()
         )},
     ERC1594: 
-        address: ${environment.deployedBusinessLogics.eRC1594_2.address},
-        key: ${await environment.deployedBusinessLogics.eRC1594_2.getStaticResolverKey()},
+        address: ${erc1594.address},
+        key: ${await erc1594.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.eRC1594_2.getStaticFunctionSelectors()
+            await erc1594.contract.getStaticFunctionSelectors()
         )},
     ERC1643: 
-        address: ${environment.deployedBusinessLogics.eRC1643.address},
-        key: ${await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey()},
+        address: ${erc1643.address},
+        key: ${await erc1643.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.eRC1643.getStaticFunctionSelectors()
+            await erc1643.contract.getStaticFunctionSelectors()
         )},
     Equity: 
-        address: ${environment.deployedBusinessLogics.equityUSA.address},
-        key: ${await environment.deployedBusinessLogics.equityUSA.getStaticResolverKey()},
+        address: ${equityUsa.address},
+        key: ${await equityUsa.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.equityUSA.getStaticFunctionSelectors()
+            await equityUsa.contract.getStaticFunctionSelectors()
         )},
     Snapshots: 
-        address: ${environment.deployedBusinessLogics.snapshots_2.address},
-        key: ${await environment.deployedBusinessLogics.snapshots_2.getStaticResolverKey()},
+        address: ${snapshots.address},
+        key: ${await snapshots.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.snapshots_2.getStaticFunctionSelectors()
+            await snapshots.contract.getStaticFunctionSelectors()
         )},
     Lock: 
-        address: ${environment.deployedBusinessLogics.lock_2.address},
-        key: ${await environment.deployedBusinessLogics.lock_2.getStaticResolverKey()},
+        address: ${lock.address},
+        key: ${await lock.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.lock_2.getStaticFunctionSelectors()
+            await lock.contract.getStaticFunctionSelectors()
         )},
     TransferAndLock: 
-        address: ${environment.deployedBusinessLogics.transferAndLock.address},
-        key: ${await environment.deployedBusinessLogics.transferAndLock.getStaticResolverKey()},
+        address: ${transferAndLock.address},
+        key: ${await transferAndLock.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.transferAndLock.getStaticFunctionSelectors()
+            await transferAndLock.contract.getStaticFunctionSelectors()
         )},
     ScheduledSnapshots: 
-        address: ${
-            environment.deployedBusinessLogics.scheduledSnapshots.address
-        },
-        key: ${await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey()},
+        address: ${scheduledSnapshots.address},
+        key: ${await scheduledSnapshots.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.scheduledSnapshots.getStaticFunctionSelectors()
+            await scheduledSnapshots.contract.getStaticFunctionSelectors()
         )},
     ScheduledBalanceAdjustments: 
-        address: ${
-            environment.deployedBusinessLogics.scheduledBalanceAdjustments
-                .address
-        },
+        address: ${scheduledBalanceAdjustments.address},
     ScheduledTasks: 
-        address: ${environment.deployedBusinessLogics.scheduledTasks.address},
-        key: ${await environment.deployedBusinessLogics.scheduledTasks.getStaticResolverKey()},
+        address: ${scheduledTasks.address},
+        key: ${await scheduledTasks.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.scheduledTasks.getStaticFunctionSelectors()
+            await scheduledTasks.contract.getStaticFunctionSelectors()
         )},
     AdjustBalances: 
-        address: ${environment.deployedBusinessLogics.adjustBalances.address},
-        key: ${await environment.deployedBusinessLogics.adjustBalances.getStaticResolverKey()},
+        address: ${adjustBalances.address},
+        key: ${await adjustBalances.contract.getStaticResolverKey()},
         selectors: ${JSON.stringify(
-            await environment.deployedBusinessLogics.adjustBalances.getStaticFunctionSelectors()
+            await adjustBalances.contract.getStaticFunctionSelectors()
         )},
         `)
 
-        expect(await environment.resolver.getVersionStatus(1)).to.be.equal(
-            VersionStatus.ACTIVATED
-        )
-
-        expect(await environment.resolver.getLatestVersion()).to.be.equal(1)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey()
-            )
-        ).to.be.equal(environment.deployedBusinessLogics.diamondFacet.address)
+            await businessLogicResolver.contract.getVersionStatus(1)
+        ).to.be.equal(VersionStatus.ACTIVATED)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.accessControl.getStaticResolverKey()
-            )
-        ).to.be.equal(environment.deployedBusinessLogics.accessControl.address)
+            await businessLogicResolver.contract.getLatestVersion()
+        ).to.be.equal(1)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.pause.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await diamondFacet.contract.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.pause.address)
+        ).to.be.equal(diamondFacet.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.controlList.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await accessControl.contract.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.controlList.address)
+        ).to.be.equal(accessControl.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await pause.contract.getStaticResolverKey()
             )
-        ).to.be.equal(
-            environment.deployedBusinessLogics.corporateActionsSecurity.address
-        )
+        ).to.be.equal(pause.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.cap_2.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await controlList.contract.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.cap_2.address)
+        ).to.be.equal(controlList.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.eRC20_2.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await corporateActionsSecurity.contract.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.eRC20_2.address)
+        ).to.be.equal(corporateActionsSecurity.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.eRC1644_2.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await cap.contract.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.eRC1644_2.address)
+        ).to.be.equal(cap.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await erc20.contract.getStaticResolverKey()
             )
-        ).to.be.equal(
-            environment.deployedBusinessLogics.eRC1410ScheduledTasks.address
-        )
+        ).to.be.equal(erc20.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.eRC1594_2.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await erc1644.contract.getStaticResolverKey()
             )
-        ).to.be.equal(environment.deployedBusinessLogics.eRC1594_2.address)
+        ).to.be.equal(erc1644.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await erc1410ScheduledTasks.contract.getStaticResolverKey()
             )
-        ).to.be.equal(await environment.deployedBusinessLogics.eRC1643.address)
+        ).to.be.equal(erc1410ScheduledTasks.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.equityUSA.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await erc1594.contract.getStaticResolverKey()
             )
-        ).to.be.equal(
-            await environment.deployedBusinessLogics.equityUSA.address
-        )
+        ).to.be.equal(erc1594.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.snapshots_2.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await erc1643.contract.getStaticResolverKey()
             )
-        ).to.be.equal(
-            await environment.deployedBusinessLogics.snapshots_2.address
-        )
+        ).to.be.equal(erc1643.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.lock_2.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await equityUsa.contract.getStaticResolverKey()
             )
-        ).to.be.equal(await environment.deployedBusinessLogics.lock_2.address)
+        ).to.be.equal(equityUsa.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.transferAndLock.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await snapshots.contract.getStaticResolverKey()
             )
-        ).to.be.equal(
-            await environment.deployedBusinessLogics.transferAndLock.address
-        )
+        ).to.be.equal(snapshots.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await lock.contract.getStaticResolverKey()
             )
-        ).to.be.equal(
-            await environment.deployedBusinessLogics.scheduledSnapshots.address
-        )
+        ).to.be.equal(lock.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await transferAndLock.contract.getStaticResolverKey()
             )
-        ).to.be.equal(
-            await environment.deployedBusinessLogics.scheduledBalanceAdjustments
-                .address
-        )
+        ).to.be.equal(transferAndLock.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.scheduledTasks.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await scheduledSnapshots.contract.getStaticResolverKey()
             )
-        ).to.be.equal(
-            await environment.deployedBusinessLogics.scheduledTasks.address
-        )
+        ).to.be.equal(scheduledSnapshots.address)
         expect(
-            await environment.resolver.resolveLatestBusinessLogic(
-                await environment.deployedBusinessLogics.adjustBalances.getStaticResolverKey()
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await scheduledBalanceAdjustments.contract.getStaticResolverKey()
             )
-        ).to.be.equal(
-            await environment.deployedBusinessLogics.adjustBalances.address
-        )
-        expect(await environment.resolver.getBusinessLogicCount()).to.be.equal(
-            _BUSINESS_LOGIC_COUNT
-        )
+        ).to.be.equal(scheduledBalanceAdjustments.address)
+        expect(
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await scheduledTasks.contract.getStaticResolverKey()
+            )
+        ).to.be.equal(scheduledTasks.address)
+        expect(
+            await businessLogicResolver.contract.resolveLatestBusinessLogic(
+                await adjustBalances.contract.getStaticResolverKey()
+            )
+        ).to.be.equal(adjustBalances.address)
+        expect(
+            await businessLogicResolver.contract.getBusinessLogicCount()
+        ).to.be.equal(_BUSINESS_LOGIC_COUNT)
         const businessLogicKeys = JSON.parse(
             JSON.stringify(
-                await environment.resolver.getBusinessLogicKeys(0, 30)
+                await businessLogicResolver.contract.getBusinessLogicKeys(0, 30)
             )
         ).sort()
         expect(businessLogicKeys).to.be.deep.equal(
             [
-                await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.accessControl.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.pause.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.controlList.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.protectedPartitions.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.eRC20_2.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.eRC1644_2.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.eRC1594_2.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.equityUSA.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.bondUSA.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.snapshots_2.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.cap_2.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.lock_2.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.transferAndLock.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.adjustBalances.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticResolverKey(),
-                await environment.deployedBusinessLogics.scheduledTasks.getStaticResolverKey(),
+                await diamondFacet.contract.getStaticResolverKey(),
+                await accessControl.contract.getStaticResolverKey(),
+                await pause.contract.getStaticResolverKey(),
+                await controlList.contract.getStaticResolverKey(),
+                await corporateActionsSecurity.contract.getStaticResolverKey(),
+                await erc20.contract.getStaticResolverKey(),
+                await erc1644.contract.getStaticResolverKey(),
+                await erc1410ScheduledTasks.contract.getStaticResolverKey(),
+                await erc1594.contract.getStaticResolverKey(),
+                await erc1643.contract.getStaticResolverKey(),
+                await equityUsa.contract.getStaticResolverKey(),
+                await bondUsa.contract.getStaticResolverKey(),
+                await snapshots.contract.getStaticResolverKey(),
+                await scheduledSnapshots.contract.getStaticResolverKey(),
+                await cap.contract.getStaticResolverKey(),
+                await lock.contract.getStaticResolverKey(),
+                await transferAndLock.contract.getStaticResolverKey(),
+                await adjustBalances.contract.getStaticResolverKey(),
+                await scheduledBalanceAdjustments.contract.getStaticResolverKey(),
+                await scheduledTasks.contract.getStaticResolverKey(),
             ].sort()
         )
         console.log(
@@ -556,7 +555,7 @@ Deployed contracts:
         const TokenName = 'TEST_DEMO'
         const TokenSymbol = 'TD'
         const TokenDecimals = 6
-        const TokenISIN = 'ABCDEF123456'
+        const TokenISIN = isinGenerator()
         const TokenType = 1 // equity
         const isWhiteList = false
         const isControllable = true
@@ -571,19 +570,19 @@ Deployed contracts:
         const putRight = true
         const dividendRight = DividendType.PREFERRED
         const currency = '0x455552'
-        const numberOfShares = 200000
+        const numberOfShares = 200000n
         const nominalValue = 100
 
-        diamond = await deployEquityFromFactory(
-            account_Z,
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
             isWhiteList,
             isControllable,
             arePartitionsProtected,
             isMultiPartition,
-            TokenName,
-            TokenSymbol,
-            TokenDecimals,
-            TokenISIN,
+            name: TokenName,
+            symbol: TokenSymbol,
+            decimals: TokenDecimals,
+            isin: TokenISIN,
             votingRight,
             informationRight,
             liquidationRight,
@@ -595,12 +594,14 @@ Deployed contracts:
             currency,
             numberOfShares,
             nominalValue,
-            RegulationType.REG_S,
-            RegulationSubType.NONE,
-            true,
-            'ES,FR,CH',
-            'nothing'
-        )
+            regulationType: RegulationType.REG_S,
+            regulationSubType: RegulationSubType.NONE,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            factory: factory.contract,
+            businessLogicResolver: businessLogicResolver.address,
+        })
         console.log(`    Diamond: ${diamond.address}`)
 
         const loupeFacet: DiamondLoupeFacet = await ethers.getContractAt(
@@ -613,97 +614,97 @@ DiamondResume:
     DiamondLoupe.facets: ${JSON.stringify(await loupeFacet.getFacets())}
     DiamondLoupe.facetFunctionSelectors[diamondFacet]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey()
+            await diamondFacet.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[accessControl]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.accessControl.getStaticResolverKey()
+            await accessControl.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[pause]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.pause.getStaticResolverKey()
+            await pause.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[controlList]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.controlList.getStaticResolverKey()
+            await controlList.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[corporateActions]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.corporateActionsSecurity.getStaticResolverKey()
+            await corporateActionsSecurity.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc20]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.eRC20_2.getStaticResolverKey()
+            await erc20.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc1644]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.eRC1644_2.getStaticResolverKey()
+            await erc1644.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc1410]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.eRC1410ScheduledTasks.getStaticResolverKey()
+            await erc1410ScheduledTasks.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc1594]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.eRC1594_2.getStaticResolverKey()
+            await erc1594.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[erc1643]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.eRC1643.getStaticResolverKey()
+            await erc1643.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[equity]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.equityUSA.getStaticResolverKey()
+            await equityUsa.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[bond]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.bondUSA.getStaticResolverKey()
+            await bondUsa.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[snapshots]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.snapshots_2.getStaticResolverKey()
+            await snapshots.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[lock]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.lock_2.getStaticResolverKey()
+            await lock.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[transferAndLock]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.transferAndLock.getStaticResolverKey()
+            await transferAndLock.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[scheduledSnapshots]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.scheduledSnapshots.getStaticResolverKey()
+            await scheduledSnapshots.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[scheduledBalanceAdjustments]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.scheduledBalanceAdjustments.getStaticResolverKey()
+            await scheduledBalanceAdjustments.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[scheduledTasks]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.scheduledTasks.getStaticResolverKey()
+            await scheduledTasks.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetFunctionSelectors[cap]: ${JSON.stringify(
         await loupeFacet.getFacetSelectors(
-            await environment.deployedBusinessLogics.cap_2.getStaticResolverKey()
+            await cap.contract.getStaticResolverKey()
         )
     )}
     DiamondLoupe.facetKeys: ${JSON.stringify(await loupeFacet.getFacetIds())}
@@ -714,7 +715,7 @@ DiamondResume:
         '0xb8fb063e'
     )}
     DiamondLoupe.facet(0xb8fb063e): ${await loupeFacet.getFacet(
-        await environment.deployedBusinessLogics.diamondFacet.getStaticResolverKey()
+        await diamondFacet.contract.getStaticResolverKey()
     )}
     DiamondLoupe.facetAddress(0xb8fb063e): ${await loupeFacet.getFacetAddress(
         '0xb8fb063e'
@@ -730,7 +731,7 @@ DiamondResume:
 
         const capFacet: Cap_2 = await ethers.getContractAt(
             'Cap_2',
-            await diamond.address
+            diamond.address
         )
 
         let pauseFacet: Pause = await ethers.getContractAt(
@@ -745,17 +746,17 @@ DiamondResume:
 
         const erc20Facet: ERC20_2 = await ethers.getContractAt(
             'ERC20_2',
-            await diamond.address
+            diamond.address
         )
 
         let erc1410Facet: ERC1410ScheduledTasks = await ethers.getContractAt(
             'ERC1410ScheduledTasks',
-            await diamond.address
+            diamond.address
         )
 
         let equityFacet: Equity = await ethers.getContractAt(
             'Equity',
-            await diamond.address
+            diamond.address
         )
 
         const snapshotsFacet: Snapshots = await ethers.getContractAt(
@@ -830,34 +831,34 @@ DiamondResume:
             'Grant issuer, control list, corporate action and controller roles to account "I" using account "Z" => succeeds'
         )
         accessControlFacet = accessControlFacet.connect(signer_Z)
-        await expect(accessControlFacet.grantRole(_ISSUER_ROLE, account_I))
+        await expect(accessControlFacet.grantRole(ISSUER_ROLE, account_I))
             .to.emit(accessControlFacet, 'RoleGranted')
-            .withArgs(account_Z, account_I, _ISSUER_ROLE)
-        await accessControlFacet.grantRole(_CONTROL_LIST_ROLE, account_I)
-        await accessControlFacet.grantRole(_CORPORATE_ACTION_ROLE, account_I)
-        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_I)
+            .withArgs(account_Z, account_I, ISSUER_ROLE)
+        await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_I)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_I)
+        await accessControlFacet.grantRole(CONTROLLER_ROLE, account_I)
 
         console.log(
             'Grant pauser role to account "P" using account "Z" => succeeds'
         )
         accessControlFacet = accessControlFacet.connect(signer_Z)
-        await accessControlFacet.grantRole(_PAUSER_ROLE, account_P)
+        await accessControlFacet.grantRole(PAUSER_ROLE, account_P)
 
         console.log('Check current roles')
         const adminMemberCount = await accessControlFacet.getRoleMemberCount(
-            _DEFAULT_ADMIN_ROLE
+            DEFAULT_ADMIN_ROLE
         )
         const issuerMemberCount = await accessControlFacet.getRoleMemberCount(
-            _ISSUER_ROLE
+            ISSUER_ROLE
         )
         const controlListMemberCount =
-            await accessControlFacet.getRoleMemberCount(_CONTROL_LIST_ROLE)
+            await accessControlFacet.getRoleMemberCount(CONTROL_LIST_ROLE)
         const corporateActionsMemberCount =
-            await accessControlFacet.getRoleMemberCount(_CORPORATE_ACTION_ROLE)
+            await accessControlFacet.getRoleMemberCount(CORPORATE_ACTION_ROLE)
         const controllerMemberCount =
-            await accessControlFacet.getRoleMemberCount(_CONTROLLER_ROLE)
+            await accessControlFacet.getRoleMemberCount(CONTROLLER_ROLE)
         const pauserMemberCount = await accessControlFacet.getRoleMemberCount(
-            _PAUSER_ROLE
+            PAUSER_ROLE
         )
         expect(adminMemberCount).to.be.equal(1)
         expect(issuerMemberCount).to.be.equal(1)
@@ -866,32 +867,32 @@ DiamondResume:
         expect(controllerMemberCount).to.be.equal(1)
         expect(pauserMemberCount).to.be.equal(1)
         const adminMembers = await accessControlFacet.getRoleMembers(
-            _DEFAULT_ADMIN_ROLE,
+            DEFAULT_ADMIN_ROLE,
             0,
             adminMemberCount
         )
         const issuerMembers = await accessControlFacet.getRoleMembers(
-            _ISSUER_ROLE,
+            ISSUER_ROLE,
             0,
             issuerMemberCount
         )
         const controlListMembers = await accessControlFacet.getRoleMembers(
-            _CONTROL_LIST_ROLE,
+            CONTROL_LIST_ROLE,
             0,
             controlListMemberCount
         )
         const corporateActionsMembers = await accessControlFacet.getRoleMembers(
-            _CORPORATE_ACTION_ROLE,
+            CORPORATE_ACTION_ROLE,
             0,
             corporateActionsMemberCount
         )
         const controllerMembers = await accessControlFacet.getRoleMembers(
-            _CONTROLLER_ROLE,
+            CONTROLLER_ROLE,
             0,
             controllerMemberCount
         )
         const pauserMembers = await accessControlFacet.getRoleMembers(
-            _PAUSER_ROLE,
+            PAUSER_ROLE,
             0,
             pauserMemberCount
         )
@@ -981,7 +982,7 @@ DiamondResume:
             .to.emit(erc1410Facet, 'TransferByPartition')
             .withArgs(
                 _PARTITION_ID_1,
-                ADDRESS_0,
+                ADDRESS_ZERO,
                 account_A,
                 account_C,
                 500,
@@ -1021,14 +1022,14 @@ DiamondResume:
         expect(dividendDetails.snapshotId.toNumber()).to.be.equal(0)
         const scheduledSnapshotsCount =
             await scheduledSnapshotsFacet.scheduledSnapshotCount()
-        const scheduledSnapshots =
+        const fetchedScheduledSnapshots =
             await scheduledSnapshotsFacet.getScheduledSnapshots(0, 1000)
         expect(scheduledSnapshotsCount.toNumber()).to.be.equal(1)
-        expect(scheduledSnapshots.length).to.be.equal(1)
-        expect(scheduledSnapshots[0].scheduledTimestamp.toNumber()).to.be.equal(
-            dividendsRecordDateInSeconds
-        )
-        expect(scheduledSnapshots[0].data).to.be.equal(
+        expect(fetchedScheduledSnapshots.length).to.be.equal(1)
+        expect(
+            fetchedScheduledSnapshots[0].scheduledTimestamp.toNumber()
+        ).to.be.equal(dividendsRecordDateInSeconds)
+        expect(fetchedScheduledSnapshots[0].data).to.be.equal(
             '0x0000000000000000000000000000000000000000000000000000000000000001'
         )
 
@@ -1173,7 +1174,7 @@ DiamondResume:
             'Revoke controller role from account "I" using account "Z" => succeeds'
         )
         accessControlFacet = accessControlFacet.connect(signer_Z)
-        await accessControlFacet.revokeRole(_CONTROLLER_ROLE, account_I)
+        await accessControlFacet.revokeRole(CONTROLLER_ROLE, account_I)
 
         console.log(
             'Force transfer 500 securities from account "A" to "C" using account "I" => fails (no permission)'
@@ -1213,7 +1214,7 @@ DiamondResume:
         )
         accessControlFacet = accessControlFacet.connect(signer_Z)
         await expect(
-            accessControlFacet.grantRole(_CONTROLLER_ROLE, account_I)
+            accessControlFacet.grantRole(CONTROLLER_ROLE, account_I)
         ).to.be.rejectedWith('TokenIsPaused')
 
         console.log(
@@ -1245,7 +1246,7 @@ DiamondResume:
             'Grant controller role to account “I” using account “Z” => succeeds'
         )
         accessControlFacet = accessControlFacet.connect(signer_Z)
-        await accessControlFacet.grantRole(_CONTROLLER_ROLE, account_I)
+        await accessControlFacet.grantRole(CONTROLLER_ROLE, account_I)
 
         console.log(
             'Transfer 500 securities from account “A” to “C” => succeeds'

@@ -12,7 +12,7 @@ jobs:
       NODE_OPTIONS: "--max-old-space-size=32768"
     permissions:
       contents: read
-    
+
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@f086349bfa2bd1361f7909c78558e816508cdc10 # v2.8.0
@@ -33,6 +33,10 @@ jobs:
           npm ci
           npm run compile:force
 
+      - name: Test Contracts
+        working-directory: contracts
+        run: npm run test
+
       - name: Install dependencies SDK
         working-directory: sdk
         run: |
@@ -46,7 +50,7 @@ jobs:
 #      - name: Install dependencies UI Components
 #        working-directory: uiComponents
 #        run: yarn install
-      
+
       - name: Install dependencies web
         working-directory: web
         run: yarn install
@@ -94,10 +98,6 @@ jobs:
       - name: Test web
         working-directory: web
         run: npm run test
-
-      - name: Test Contracts
-        working-directory: contracts
-        run: npm run test-coverage
 
       - name: Test sdk
         working-directory: sdk

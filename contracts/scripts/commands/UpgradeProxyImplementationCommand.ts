@@ -203,26 +203,30 @@
 
 */
 
-import { ethers } from 'hardhat'
-import { ProxyAdmin } from '../typechain-types'
-import { TransparentUpgradeableProxy } from '../typechain-types'
+import { BaseBlockchainCommand, BaseBlockchainCommandParams } from '../index'
 
-export let transparentUpgradableProxy: TransparentUpgradeableProxy
-export let proxyAdmin: ProxyAdmin
-
-export async function deployProxyAdmin() {
-    proxyAdmin = (await (
-        await ethers.getContractFactory('ProxyAdmin')
-    ).deploy()) as ProxyAdmin
+interface UpgradeProxyImplementationCommandParams
+    extends BaseBlockchainCommandParams {
+    proxyAdminAddress: string
+    transparentProxyAddress: string
+    newImplementationAddress: string
 }
-export async function deployTransparentUpgradeableProxy(
-    businessLogicAddress: string
-) {
-    transparentUpgradableProxy = (await (
-        await ethers.getContractFactory('TransparentUpgradeableProxy')
-    ).deploy(
-        businessLogicAddress,
-        proxyAdmin.address,
-        '0x'
-    )) as TransparentUpgradeableProxy
+
+export default class UpgradeProxyImplementationCommand extends BaseBlockchainCommand {
+    public readonly proxyAdminAddress: string
+    public readonly transparentProxyAddress: string
+    public readonly newImplementationAddress: string
+
+    constructor({
+        proxyAdminAddress,
+        transparentProxyAddress,
+        newImplementationAddress,
+        signer,
+        overrides,
+    }: UpgradeProxyImplementationCommandParams) {
+        super({ signer, overrides })
+        this.proxyAdminAddress = proxyAdminAddress
+        this.transparentProxyAddress = transparentProxyAddress
+        this.newImplementationAddress = newImplementationAddress
+    }
 }

@@ -206,12 +206,8 @@
 //import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { ethers } from 'hardhat'
 import { expect } from 'chai'
-import {
-    AccessControl,
-    Pause,
-    BusinessLogicResolver,
-} from '../../../typechain-types'
-import { _PAUSER_ROLE } from '../../../scripts/constants'
+import { AccessControl, Pause, BusinessLogicResolver } from '@typechain'
+import { PAUSER_ROLE } from '@scripts'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 
 describe('BusinessLogicResolver', () => {
@@ -267,7 +263,7 @@ describe('BusinessLogicResolver', () => {
             businessLogicResolver.address
         )
         accessControl = accessControl.connect(signer_A)
-        await accessControl.grantRole(_PAUSER_ROLE, account_B)
+        await accessControl.grantRole(PAUSER_ROLE, account_B)
 
         pause = await ethers.getContractAt(
             'Pause',

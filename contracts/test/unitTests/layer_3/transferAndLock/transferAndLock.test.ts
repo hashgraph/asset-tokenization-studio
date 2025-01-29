@@ -205,26 +205,33 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Lock,
     Pause,
     ERC1410ScheduledTasks,
     TransferAndLock,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+    BusinessLogicResolver,
+    IFactory,
+    Lock__factory,
+    TransferAndLock__factory,
+    Pause__factory,
+    ERC1410ScheduledTasks__factory,
+} from '@typechain'
 import {
-    _PAUSER_ROLE,
-    _LOCKER_ROLE,
-    _ISSUER_ROLE,
-} from '../../../../scripts/constants'
-import {
+    PAUSER_ROLE,
+    LOCKER_ROLE,
+    ISSUER_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+    MAX_UINT256,
+} from '@scripts'
 
 const _NON_DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000011'
@@ -244,6 +251,8 @@ describe('Transfer and lock Tests', () => {
     let account_C: string
     let account_D: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let lockFacet: Lock
     let transferAndLockFacet: TransferAndLock
     let pauseFacet: Pause
@@ -253,7 +262,9 @@ describe('Transfer and lock Tests', () => {
     let currentTimestamp = 0
     let expirationTimestamp = 0
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
@@ -261,8 +272,20 @@ describe('Transfer and lock Tests', () => {
         account_C = signer_C.address
         account_D = signer_D.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
         currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
         expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
     })
@@ -270,65 +293,57 @@ describe('Transfer and lock Tests', () => {
     describe('Multi-partition enabled', () => {
         beforeEach(async () => {
             const rbacIssuer: Rbac = {
-                role: _ISSUER_ROLE,
+                role: ISSUER_ROLE,
                 members: [account_B],
             }
             const rbacLocker: Rbac = {
-                role: _LOCKER_ROLE,
+                role: LOCKER_ROLE,
                 members: [account_C],
             }
             const rbacPausable: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_D],
             }
             const init_rbacs: Rbac[] = [rbacIssuer, rbacLocker, rbacPausable]
 
-            diamond = await deployEquityFromFactory(
-                account_A,
-                false,
-                true,
-                false,
-                true,
-                'TEST_Lock',
-                'TAC',
-                6,
-                'ABCDEF123456',
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                false,
-                1,
-                '0x345678',
-                0,
-                100,
-                RegulationType.REG_D,
-                RegulationSubType.REG_D_506_B,
-                true,
-                'ES,FR,CH',
-                'nothing',
-                init_rbacs
-            )
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: true,
+                name: 'TEST_Lock',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_D,
+                regulationSubType: RegulationSubType.REG_D_506_B,
+                countriesControlListType: true,
+                listOfCountries: 'ES,FR,CH',
+                info: 'nothing',
+                init_rbacs,
+                businessLogicResolver: businessLogicResolver.address,
+                factory,
+            })
 
-            lockFacet = await ethers.getContractAt(
-                'Lock',
+            lockFacet = Lock__factory.connect(diamond.address, signer_C)
+            transferAndLockFacet = TransferAndLock__factory.connect(
                 diamond.address,
                 signer_C
             )
-            transferAndLockFacet = await ethers.getContractAt(
-                'TransferAndLock',
-                diamond.address,
-                signer_C
-            )
-            pauseFacet = await ethers.getContractAt(
-                'Pause',
-                diamond.address,
-                signer_D
-            )
-            erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
+            pauseFacet = Pause__factory.connect(diamond.address, signer_D)
+            erc1410Facet = ERC1410ScheduledTasks__factory.connect(
                 diamond.address,
                 signer_B
             )
@@ -547,47 +562,49 @@ describe('Transfer and lock Tests', () => {
     describe('Multi-partition disabled', () => {
         beforeEach(async () => {
             const rbacIssuer: Rbac = {
-                role: _ISSUER_ROLE,
+                role: ISSUER_ROLE,
                 members: [account_B],
             }
             const rbacLocker: Rbac = {
-                role: _LOCKER_ROLE,
+                role: LOCKER_ROLE,
                 members: [account_C],
             }
             const rbacPausable: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_D],
             }
             const init_rbacs: Rbac[] = [rbacIssuer, rbacLocker, rbacPausable]
 
-            diamond = await deployEquityFromFactory(
-                account_A,
-                false,
-                true,
-                false,
-                false,
-                'TEST_Lock',
-                'TAC',
-                6,
-                'ABCDEF123456',
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                false,
-                1,
-                '0x345678',
-                0,
-                100,
-                RegulationType.REG_D,
-                RegulationSubType.REG_D_506_B,
-                true,
-                'ES,FR,CH',
-                'nothing',
-                init_rbacs
-            )
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: false,
+                name: 'TEST_Lock',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_D,
+                regulationSubType: RegulationSubType.REG_D_506_B,
+                countriesControlListType: true,
+                listOfCountries: 'ES,FR,CH',
+                info: 'nothing',
+                init_rbacs,
+                businessLogicResolver: businessLogicResolver.address,
+                factory,
+            })
 
             lockFacet = await ethers.getContractAt(
                 'Lock',

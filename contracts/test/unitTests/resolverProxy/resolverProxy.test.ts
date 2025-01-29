@@ -211,12 +211,17 @@ import {
     type Pause,
     DiamondFacet,
     DiamondLoupeFacet,
-} from '../../../typechain-types'
+    DiamondFacet__factory,
+    AccessControl__factory,
+    Pause__factory,
+} from '@typechain'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { assertObject } from '../../assert'
-import { _DEFAULT_ADMIN_ROLE } from '../../../scripts/constants'
-import { FacetConfiguration } from '../../../scripts/resolverDiamondCut.js'
-import { BusinessLogicRegistryData } from '../../../scripts/businessLogicResolverLogic.js'
+import {
+    DEFAULT_ADMIN_ROLE,
+    BusinessLogicRegistryData,
+    FacetConfiguration,
+} from '@scripts'
+import { assertObject } from '../../common'
 
 describe('ResolverProxy Tests', () => {
     const CONFIG_ID =
@@ -236,15 +241,9 @@ describe('ResolverProxy Tests', () => {
     async function deployContracts() {
         resolver = await deployResolver()
 
-        diamondFacet = await (
-            await ethers.getContractFactory('DiamondFacet')
-        ).deploy()
-
-        accessControlImpl = await (
-            await ethers.getContractFactory('AccessControl')
-        ).deploy()
-
-        pauseImpl = await (await ethers.getContractFactory('Pause')).deploy()
+        diamondFacet = await new DiamondFacet__factory(signer_A).deploy()
+        accessControlImpl = await new AccessControl__factory(signer_A).deploy()
+        pauseImpl = await new Pause__factory(signer_A).deploy()
     }
 
     async function setUpResolver(
@@ -404,7 +403,7 @@ describe('ResolverProxy Tests', () => {
         )
 
         const GRANT_ROLE_SIGNATURE = '0x2f2ff15d'
-        await expect(accessControl.grantRole(_DEFAULT_ADMIN_ROLE, account_A))
+        await expect(accessControl.grantRole(DEFAULT_ADMIN_ROLE, account_A))
             .to.be.revertedWithCustomError(resolverProxy, 'FunctionNotFound')
             .withArgs(GRANT_ROLE_SIGNATURE)
         expect(await diamondLoupe.supportsInterface(GRANT_ROLE_SIGNATURE)).to.be
@@ -515,7 +514,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -553,7 +552,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -634,7 +633,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -673,7 +672,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -758,7 +757,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]
@@ -803,7 +802,7 @@ describe('ResolverProxy Tests', () => {
 
         const rbac = [
             {
-                role: _DEFAULT_ADMIN_ROLE,
+                role: DEFAULT_ADMIN_ROLE,
                 members: [account_A],
             },
         ]

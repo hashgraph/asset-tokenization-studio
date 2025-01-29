@@ -210,6 +210,7 @@ import {
     ContractExecuteTransaction,
     ContractId,
     Hbar,
+    Long,
 } from '@hashgraph/sdk'
 import Web3 from 'web3'
 

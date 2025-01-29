@@ -205,7 +205,6 @@
 
 // SPDX-License-Identifier: MIT
 // Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
 
 import {ERC20StorageWrapper} from './ERC20StorageWrapper.sol';
@@ -227,7 +226,6 @@ abstract contract ERC20 is
         virtual
         override
         onlyUninitialized(_getErc20Storage().initialized)
-        returns (bool success_)
     {
         ERC20Storage storage erc20Storage = _getErc20Storage();
         erc20Storage.name = erc20Metadata.info.name;
@@ -236,7 +234,6 @@ abstract contract ERC20 is
         erc20Storage.decimals = erc20Metadata.info.decimals;
         erc20Storage.securityType = erc20Metadata.securityType;
         erc20Storage.initialized = true;
-        success_ = true;
     }
 
     // solhint-disable no-unused-vars

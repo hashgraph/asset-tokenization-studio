@@ -205,15 +205,31 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
+    BusinessLogicResolver,
     type AccessControl,
     type ControlList,
     type ERC1644,
     type ERC20,
     type Factory,
-} from '../../../typechain-types'
-import { deployEnvironment } from '../../../scripts/deployEnvironmentByRpc'
+} from '@typechain'
 import {
+    ADDRESS_ZERO,
+    DEFAULT_ADMIN_ROLE,
+    CONTROL_LIST_ROLE,
+    CORPORATE_ACTION_ROLE,
+    ISSUER_ROLE,
+    DOCUMENTER_ROLE,
+    CONTROLLER_ROLE,
+    PAUSER_ROLE,
+    SNAPSHOT_ROLE,
+    LOCKER_ROLE,
+    EVENTS,
+    GAS_LIMIT,
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
     Rbac,
     setEquityData,
     setBondData,
@@ -222,61 +238,21 @@ import {
     setFactoryRegulationData,
     RegulationType,
     RegulationSubType,
-} from '../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import {
-    ADDRESS_0,
-    _DEFAULT_ADMIN_ROLE,
-    _CONTROL_LIST_ROLE,
-    _CORPORATE_ACTION_ROLE,
-    _ISSUER_ROLE,
-    _DOCUMENTER_ROLE,
-    _CONTROLLER_ROLE,
-    _PAUSER_ROLE,
-    _SNAPSHOT_ROLE,
-    _LOCKER_ROLE,
-    EquityDeployedEvent,
-    BondDeployedEvent,
-    _PROTECTED_PARTITIONS_ROLE,
-    _PROTECTED_PARTITIONS_PARTICIPANT_ROLE,
-    _WILD_CARD_ROLE,
-    _DEFAULT_PARTITION,
-} from '../../../scripts/constants'
-import { transparentUpgradableProxy } from '../../../scripts/transparentUpgradableProxy'
+} from '@scripts'
 
 describe('Factory Tests', () => {
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
-    let signer_D: SignerWithAddress
-    let signer_E: SignerWithAddress
-    let signer_F: SignerWithAddress
-    let signer_G: SignerWithAddress
-    let signer_H: SignerWithAddress
-    let signer_I: SignerWithAddress
-    let signer_J: SignerWithAddress
-    let signer_K: SignerWithAddress
-    let signer_L: SignerWithAddress
 
     let account_A: string
     let account_B: string
-    let account_C: string
-    let account_D: string
-    let account_E: string
-    let account_F: string
-    let account_G: string
-    let account_H: string
-    let account_I: string
-    let account_J: string
-    let account_K: string
-    let account_L: string
 
     const init_rbacs: Rbac[] = []
 
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
     const decimals = 6
-    const isin = 'ABCDEF123456'
+    const isin = isinGenerator()
     const isWhitelist = false
     const isControllable = true
     const isMultiPartition = false
@@ -290,10 +266,10 @@ describe('Factory Tests', () => {
     const redemptionRight = false
     const putRight = true
     const dividendRight = DividendType.PREFERRED
-    const numberOfShares = 2000
+    const numberOfShares = BigInt(2000)
 
     const currency = '0x455552'
-    const numberOfUnits = 1000
+    const numberOfUnits = BigInt(1000)
     const nominalValue = 100
     let startingDate = 999
     let maturityDate = 999
@@ -309,23 +285,22 @@ describe('Factory Tests', () => {
     const info = 'info'
 
     let factory: Factory
+    let businessLogicResolver: BusinessLogicResolver
     let accessControlFacet: AccessControl
     let controlListFacet: ControlList
     let erc1644Facet: ERC1644
     let erc20Facet: ERC20
 
     const listOfRoles = [
-        _DEFAULT_ADMIN_ROLE,
-        _CONTROL_LIST_ROLE,
-        _CORPORATE_ACTION_ROLE,
-        _ISSUER_ROLE,
-        _DOCUMENTER_ROLE,
-        _CONTROLLER_ROLE,
-        _PAUSER_ROLE,
-        _SNAPSHOT_ROLE,
-        _LOCKER_ROLE,
-        _PROTECTED_PARTITIONS_ROLE,
-        _WILD_CARD_ROLE,
+        DEFAULT_ADMIN_ROLE,
+        CONTROL_LIST_ROLE,
+        CORPORATE_ACTION_ROLE,
+        ISSUER_ROLE,
+        DOCUMENTER_ROLE,
+        CONTROLLER_ROLE,
+        PAUSER_ROLE,
+        SNAPSHOT_ROLE,
+        LOCKER_ROLE,
     ]
     let listOfMembers: string[]
 
@@ -345,50 +320,28 @@ describe('Factory Tests', () => {
         erc20Facet = await ethers.getContractAt('ERC20', equityAddress)
     }
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[
-            signer_A,
-            signer_B,
-            signer_C,
-            signer_D,
-            signer_E,
-            signer_F,
-            signer_G,
-            signer_H,
-            signer_I,
-            signer_J,
-            signer_K,
-            signer_L,
-        ] = await ethers.getSigners()
+        ;[signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
-        account_C = signer_C.address
-        account_D = signer_D.address
-        account_E = signer_E.address
-        account_F = signer_F.address
-        account_G = signer_G.address
-        account_H = signer_H.address
-        account_I = signer_I.address
-        account_J = signer_J.address
-        account_K = signer_K.address
-        account_L = signer_L.address
 
-        listOfMembers = [
-            account_A,
-            account_B,
-            account_C,
-            account_D,
-            account_E,
-            account_F,
-            account_G,
-            account_H,
-            account_I,
-            account_J,
-            account_K,
-        ]
+        listOfMembers = [account_A, account_B]
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                    timeTravelEnabled: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         for (let i = 1; i < listOfMembers.length; i++) {
             const rbac: Rbac = {
@@ -397,31 +350,13 @@ describe('Factory Tests', () => {
             }
             init_rbacs.push(rbac)
         }
-        const packedData = ethers.utils.defaultAbiCoder.encode(
-            ['bytes32', 'bytes32'],
-            [_PROTECTED_PARTITIONS_PARTICIPANT_ROLE, _DEFAULT_PARTITION]
-        )
-        const packedDataWithoutPrefix = packedData.slice(2)
-
-        const ProtectedPartitionRole_1 = ethers.utils.keccak256(
-            '0x' + packedDataWithoutPrefix
-        )
-        init_rbacs.push({
-            role: ProtectedPartitionRole_1,
-            members: [account_L],
-        })
-
-        factory = await ethers.getContractAt(
-            'Factory',
-            transparentUpgradableProxy.address
-        )
     })
 
     describe('Equity tests', () => {
         it('GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails', async () => {
-            const equityData = await setEquityData(
-                account_A,
-                isWhitelist,
+            const equityData = await setEquityData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -441,9 +376,9 @@ describe('Factory Tests', () => {
                 numberOfShares,
                 nominalValue,
                 init_rbacs,
-                true,
-                ADDRESS_0
-            )
+                addAdmin: true,
+                businessLogicResolver: ADDRESS_ZERO,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 regulationType,
@@ -459,16 +394,16 @@ describe('Factory Tests', () => {
         })
 
         it('GIVEN a wrong ISIN WHEN deploying a new resolverProxy THEN transaction fails', async () => {
-            const equityData = await setEquityData(
-                account_A,
-                isWhitelist,
+            const equityData = await setEquityData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
                 decimals,
-                '',
+                isin: '',
                 votingRight,
                 informationRight,
                 liquidationRight,
@@ -481,9 +416,9 @@ describe('Factory Tests', () => {
                 numberOfShares,
                 nominalValue,
                 init_rbacs,
-                true,
-                undefined
-            )
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 regulationType,
@@ -494,14 +429,20 @@ describe('Factory Tests', () => {
             )
 
             await expect(
-                factory.deployEquity(equityData, factoryRegulationData)
+                factory.deployEquity(equityData, factoryRegulationData, {
+                    gasLimit: GAS_LIMIT.default,
+                })
             ).to.be.rejectedWith('WrongISIN')
+            equityData.security.erc20MetadataInfo.isin = 'SJ5633813321'
+            await expect(
+                factory.deployEquity(equityData, factoryRegulationData)
+            ).to.be.rejectedWith('WrongISINChecksum')
         })
 
         it('GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails', async () => {
-            const equityData = await setEquityData(
-                account_A,
-                isWhitelist,
+            const equityData = await setEquityData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -521,9 +462,9 @@ describe('Factory Tests', () => {
                 numberOfShares,
                 nominalValue,
                 init_rbacs,
-                false,
-                undefined
-            )
+                addAdmin: false,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 regulationType,
@@ -539,9 +480,9 @@ describe('Factory Tests', () => {
         })
 
         it('GIVEN wrong regulation type WHEN deploying a new resolverProxy THEN transaction fails', async () => {
-            const equityData = await setEquityData(
-                account_A,
-                isWhitelist,
+            const equityData = await setEquityData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -561,9 +502,9 @@ describe('Factory Tests', () => {
                 numberOfShares,
                 nominalValue,
                 init_rbacs,
-                true,
-                undefined
-            )
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 RegulationType.NONE,
@@ -584,9 +525,9 @@ describe('Factory Tests', () => {
         })
 
         it('GIVEN wrong regulation type & subtype WHEN deploying a new resolverProxy THEN transaction fails', async () => {
-            const equityData = await setEquityData(
-                account_A,
-                isWhitelist,
+            const equityData = await setEquityData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -606,9 +547,9 @@ describe('Factory Tests', () => {
                 numberOfShares,
                 nominalValue,
                 init_rbacs,
-                true,
-                undefined
-            )
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 RegulationType.REG_D,
@@ -629,9 +570,9 @@ describe('Factory Tests', () => {
         })
 
         it('GIVEN the proper information WHEN deploying a new resolverProxy THEN transaction succeeds', async () => {
-            const equityData = await setEquityData(
-                account_A,
-                isWhitelist,
+            const equityData = await setEquityData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -651,9 +592,9 @@ describe('Factory Tests', () => {
                 numberOfShares,
                 nominalValue,
                 init_rbacs,
-                true,
-                undefined
-            )
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 regulationType,
@@ -673,7 +614,7 @@ describe('Factory Tests', () => {
             )
             const events = (await result.wait()).events!
             const deployedEquityEvent = events.find(
-                (e) => e.event == EquityDeployedEvent
+                (e) => e.event == EVENTS.equity.deployed
             )
             const equityAddress = deployedEquityEvent!.args!.equityAddress
 
@@ -730,9 +671,9 @@ describe('Factory Tests', () => {
 
     describe('Bond tests', () => {
         it('GIVEN an empty Resolver WHEN deploying a new resolverProxy THEN transaction fails', async () => {
-            const bondData = await setBondData(
-                account_A,
-                isWhitelist,
+            const bondData = await setBondData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -749,9 +690,9 @@ describe('Factory Tests', () => {
                 couponRate,
                 firstCouponDate,
                 init_rbacs,
-                true,
-                ADDRESS_0
-            )
+                addAdmin: true,
+                businessLogicResolver: ADDRESS_ZERO,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 regulationType,
@@ -767,16 +708,16 @@ describe('Factory Tests', () => {
         })
 
         it('GIVEN a wrong ISIN WHEN deploying a new resolverProxy THEN transaction fails', async () => {
-            const bondData = await setBondData(
-                account_A,
-                isWhitelist,
+            const bondData = await setBondData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
                 name,
                 symbol,
                 decimals,
-                '',
+                isin: '',
                 currency,
                 numberOfUnits,
                 nominalValue,
@@ -786,9 +727,9 @@ describe('Factory Tests', () => {
                 couponRate,
                 firstCouponDate,
                 init_rbacs,
-                true,
-                undefined
-            )
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 regulationType,
@@ -801,12 +742,16 @@ describe('Factory Tests', () => {
             await expect(
                 factory.deployBond(bondData, factoryRegulationData)
             ).to.be.rejectedWith('WrongISIN')
+            bondData.security.erc20MetadataInfo.isin = 'SJ5633813321'
+            await expect(
+                factory.deployBond(bondData, factoryRegulationData)
+            ).to.be.rejectedWith('WrongISINChecksum')
         })
 
         it('GIVEN no admin WHEN deploying a new resolverProxy THEN transaction fails', async () => {
-            const bondData = await setBondData(
-                account_A,
-                isWhitelist,
+            const bondData = await setBondData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -823,9 +768,9 @@ describe('Factory Tests', () => {
                 couponRate,
                 firstCouponDate,
                 init_rbacs,
-                false,
-                undefined
-            )
+                addAdmin: false,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 regulationType,
@@ -843,9 +788,9 @@ describe('Factory Tests', () => {
         it('GIVEN incorrect maturity or starting date WHEN deploying a new bond THEN transaction fails', async () => {
             maturityDate = startingDate - 365
 
-            const bondData = await setBondData(
-                account_A,
-                isWhitelist,
+            const bondData = await setBondData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -862,9 +807,9 @@ describe('Factory Tests', () => {
                 couponRate,
                 firstCouponDate,
                 init_rbacs,
-                true,
-                undefined
-            )
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 regulationType,
@@ -898,9 +843,9 @@ describe('Factory Tests', () => {
             maturityDate = startingDate + 10
             firstCouponDate = maturityDate + 1
 
-            const bondData = await setBondData(
-                account_A,
-                isWhitelist,
+            const bondData = await setBondData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -917,9 +862,9 @@ describe('Factory Tests', () => {
                 couponRate,
                 firstCouponDate,
                 init_rbacs,
-                true,
-                undefined
-            )
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 regulationType,
@@ -949,9 +894,9 @@ describe('Factory Tests', () => {
             firstCouponDate = startingDate + 1
             const couponFrequency_2 = 0
 
-            const bondData = await setBondData(
-                account_A,
-                isWhitelist,
+            const bondData = await setBondData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -964,13 +909,13 @@ describe('Factory Tests', () => {
                 nominalValue,
                 startingDate,
                 maturityDate,
-                couponFrequency_2,
+                couponFrequency: couponFrequency_2,
                 couponRate,
                 firstCouponDate,
                 init_rbacs,
-                true,
-                undefined
-            )
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 regulationType,
@@ -992,9 +937,9 @@ describe('Factory Tests', () => {
             maturityDate = startingDate + numberOfCoupon * couponFrequency
             firstCouponDate = startingDate + 1
 
-            const bondData = await setBondData(
-                account_A,
-                isWhitelist,
+            const bondData = await setBondData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -1011,9 +956,9 @@ describe('Factory Tests', () => {
                 couponRate,
                 firstCouponDate,
                 init_rbacs,
-                true,
-                undefined
-            )
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 regulationType,
@@ -1033,7 +978,7 @@ describe('Factory Tests', () => {
             )
             const events = (await result.wait()).events!
             const deployedBondEvent = events.find(
-                (e) => e.event == BondDeployedEvent
+                (e) => e.event == EVENTS.bond.deployed
             )
             const bondAddress = deployedBondEvent!.args!.bondAddress
 
@@ -1098,9 +1043,9 @@ describe('Factory Tests', () => {
         })
 
         it('GIVEN wrong regulation type WHEN deploying a new resolverProxy THEN transaction fails', async () => {
-            const bondData = await setBondData(
-                account_A,
-                isWhitelist,
+            const bondData = await setBondData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -1117,9 +1062,9 @@ describe('Factory Tests', () => {
                 couponRate,
                 firstCouponDate,
                 init_rbacs,
-                true,
-                undefined
-            )
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 RegulationType.NONE,
@@ -1138,9 +1083,9 @@ describe('Factory Tests', () => {
         })
 
         it('GIVEN wrong regulation type & subtype WHEN deploying a new resolverProxy THEN transaction fails', async () => {
-            const bondData = await setBondData(
-                account_A,
-                isWhitelist,
+            const bondData = await setBondData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -1157,9 +1102,9 @@ describe('Factory Tests', () => {
                 couponRate,
                 firstCouponDate,
                 init_rbacs,
-                true,
-                undefined
-            )
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 RegulationType.REG_S,
@@ -1184,9 +1129,9 @@ describe('Factory Tests', () => {
             maturityDate = startingDate + 30
             firstCouponDate = 0
 
-            const bondData = await setBondData(
-                account_A,
-                isWhitelist,
+            const bondData = await setBondData({
+                adminAccount: account_A,
+                isWhiteList: isWhitelist,
                 isControllable,
                 arePartitionsProtected,
                 isMultiPartition,
@@ -1203,9 +1148,9 @@ describe('Factory Tests', () => {
                 couponRate,
                 firstCouponDate,
                 init_rbacs,
-                true,
-                undefined
-            )
+                addAdmin: true,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             const factoryRegulationData = await setFactoryRegulationData(
                 RegulationType.REG_S,
@@ -1225,7 +1170,7 @@ describe('Factory Tests', () => {
             )
             const events = (await result.wait()).events!
             const deployedBondEvent = events.find(
-                (e) => e.event == BondDeployedEvent
+                (e) => e.event == EVENTS.bond.deployed
             )
             const bondAddress = deployedBondEvent!.args!.bondAddress
 

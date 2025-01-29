@@ -205,6 +205,8 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type ERC20,
@@ -213,23 +215,24 @@ import {
     type ControlList,
     type ERC1594,
     ERC20_2,
-} from '../../../../../typechain-types'
-import { deployEnvironment } from '../../../../../scripts/deployEnvironmentByRpc'
+    BusinessLogicResolver,
+    IFactory,
+} from '@typechain'
 import {
-    _CONTROL_LIST_ROLE,
-    _PAUSER_ROLE,
-    _ISSUER_ROLE,
-    _DEFAULT_PARTITION,
-} from '../../../../../scripts/constants'
-import {
+    CONTROL_LIST_ROLE,
+    PAUSER_ROLE,
+    ISSUER_ROLE,
+    DEFAULT_PARTITION,
+    MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
     SecurityType,
-} from '../../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { assertObject } from '../../../../assert'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+} from '@scripts'
+import { assertObject } from '../../../../common'
 
 const amount = 1000
 
@@ -245,6 +248,8 @@ describe('ERC20 Tests', () => {
     let account_C: string
     let account_E: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc20Facet: ERC20_2
     let erc20FacetBlackList: ERC20
     let pauseFacet: Pause
@@ -254,10 +259,12 @@ describe('ERC20 Tests', () => {
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
     const decimals = 6
-    const isin = 'ABCDEF123456'
+    const isin = isinGenerator()
 
     describe('Multi partition', () => {
-        beforeEach(async () => {
+        before(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_E] =
                 await ethers.getSigners()
@@ -266,46 +273,62 @@ describe('ERC20 Tests', () => {
             account_C = signer_C.address
             account_E = signer_E.address
 
-            await deployEnvironment()
+            const { deployer, ...deployedContracts } =
+                await deployAtsFullInfrastructure(
+                    await DeployAtsFullInfrastructureCommand.newInstance({
+                        signer: signer_A,
+                        useDeployed: false,
+                        useEnvironment: true,
+                        timeTravelEnabled: true,
+                    })
+                )
 
+            factory = deployedContracts.factory.contract
+            businessLogicResolver =
+                deployedContracts.businessLogicResolver.contract
+        })
+
+        beforeEach(async () => {
             const rbacPause: Rbac = {
-                role: _PAUSER_ROLE,
+                role: PAUSER_ROLE,
                 members: [account_B],
             }
             const rbacControlList: Rbac = {
-                role: _CONTROL_LIST_ROLE,
+                role: CONTROL_LIST_ROLE,
                 members: [account_A],
             }
             const init_rbacs: Rbac[] = [rbacPause, rbacControlList]
 
-            diamond = await deployEquityFromFactory(
-                account_A,
-                false,
-                true,
-                false,
-                true,
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: true,
                 name,
                 symbol,
                 decimals,
                 isin,
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                false,
-                1,
-                '0x345678',
-                0,
-                100,
-                RegulationType.REG_S,
-                RegulationSubType.NONE,
-                true,
-                'ES,FR,CH',
-                'nothing',
-                init_rbacs
-            )
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_S,
+                regulationSubType: RegulationSubType.NONE,
+                countriesControlListType: true,
+                listOfCountries: 'ES,FR,CH',
+                info: 'nothing',
+                init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
             erc20FacetBlackList = await ethers.getContractAt(
@@ -461,7 +484,9 @@ describe('ERC20 Tests', () => {
         let erc20SignerE: ERC20
         let erc1410Facet: ERC1410Snapshot
 
-        beforeEach(async () => {
+        before(async () => {
+            // mute | mock console.log
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_E] =
                 await ethers.getSigners()
@@ -470,42 +495,57 @@ describe('ERC20 Tests', () => {
             account_C = signer_C.address
             account_E = signer_E.address
 
-            await deployEnvironment()
+            const { deployer, ...deployedContracts } =
+                await deployAtsFullInfrastructure(
+                    await DeployAtsFullInfrastructureCommand.newInstance({
+                        signer: signer_A,
+                        useDeployed: false,
+                        useEnvironment: true,
+                    })
+                )
 
+            factory = deployedContracts.factory.contract
+            businessLogicResolver =
+                deployedContracts.businessLogicResolver.contract
+        })
+
+        beforeEach(async () => {
             const rbacIssuer: Rbac = {
-                role: _ISSUER_ROLE,
+                role: ISSUER_ROLE,
                 members: [account_B],
             }
             const init_rbacs: Rbac[] = [rbacIssuer]
 
-            diamond = await deployEquityFromFactory(
-                account_A,
-                false,
-                true,
-                false,
-                false,
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: false,
                 name,
                 symbol,
                 decimals,
                 isin,
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                false,
-                1,
-                '0x345678',
-                0,
-                100,
-                RegulationType.REG_S,
-                RegulationSubType.NONE,
-                true,
-                'ES,FR,CH',
-                'nothing',
-                init_rbacs
-            )
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_S,
+                regulationSubType: RegulationSubType.NONE,
+                countriesControlListType: true,
+                listOfCountries: 'ES,FR,CH',
+                info: 'nothing',
+                init_rbacs,
+                factory,
+                businessLogicResolver: businessLogicResolver.address,
+            })
 
             erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
             erc20SignerC = await ethers.getContractAt(
@@ -670,19 +710,19 @@ describe('ERC20 Tests', () => {
                     expect(await erc1410Facet.totalSupply()).to.be.equal(amount)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_C
                         )
                     ).to.be.equal(amount / 2)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_E
                         )
                     ).to.be.equal(amount / 2)
                     expect(
                         await erc1410Facet.totalSupplyByPartition(
-                            _DEFAULT_PARTITION
+                            DEFAULT_PARTITION
                         )
                     ).to.be.equal(amount)
                 }
@@ -717,19 +757,19 @@ describe('ERC20 Tests', () => {
                     expect(await erc1410Facet.totalSupply()).to.be.equal(amount)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_C
                         )
                     ).to.be.equal(amount / 2)
                     expect(
                         await erc1410Facet.balanceOfByPartition(
-                            _DEFAULT_PARTITION,
+                            DEFAULT_PARTITION,
                             account_E
                         )
                     ).to.be.equal(amount / 2)
                     expect(
                         await erc1410Facet.totalSupplyByPartition(
-                            _DEFAULT_PARTITION
+                            DEFAULT_PARTITION
                         )
                     ).to.be.equal(amount)
                 }

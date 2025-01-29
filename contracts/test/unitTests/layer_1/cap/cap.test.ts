@@ -205,26 +205,32 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Cap_2,
     AccessControl,
     Pause,
     ERC1410ScheduledTasks,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+    IFactory,
+    BusinessLogicResolver,
+    Cap_2__factory,
+    AccessControl__factory,
+    ERC1410ScheduledTasks__factory,
+    Pause__factory,
+} from '@typechain'
 import {
-    _CAP_ROLE,
-    _ISSUER_ROLE,
-    _PAUSER_ROLE,
-} from '../../../../scripts/constants'
-import {
+    CAP_ROLE,
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+    ISSUER_ROLE,
+    PAUSER_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+} from '@scripts'
 
 const maxSupply = 1
 const maxSupplyByPartition = 1
@@ -241,65 +247,123 @@ describe('CAP Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let capFacet: Cap_2
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause]
 
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            false,
-            'TEST_AccessControl',
-            'TAC',
-            6,
-            'ABCDEF123456',
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            0,
-            100,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_B,
-            true,
-            'ES,FR,CH',
-            'nothing',
-            init_rbacs
-        )
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: BigInt(maxSupply * 2),
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory: factory,
+        })
 
-        capFacet = await ethers.getContractAt('Cap_2', diamond.address)
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        capFacet = Cap_2__factory.connect(diamond.address, signer_A)
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
         )
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
+        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
         )
+    })
+
+    it('GIVEN setting 0 to max supply WHEN trying to initialize THEN transaction fails', async () => {
+        const rbacPause: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_B],
+        }
+        const init_rbacs: Rbac[] = [rbacPause]
+        await expect(
+            deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: false,
+                name: 'TEST_AccessControl',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: 0n,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_D,
+                regulationSubType: RegulationSubType.REG_D_506_B,
+                countriesControlListType: true,
+                listOfCountries: 'ES,FR,CH',
+                info: 'nothing',
+                init_rbacs,
+                businessLogicResolver: businessLogicResolver.address,
+                factory: factory,
+            })
+        ).to.be.rejectedWith('NewMaxSupplyCannotBeZero')
     })
 
     it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {
@@ -361,17 +425,32 @@ describe('CAP Tests', () => {
         })
     })
 
-    describe('New Max Supply Too low', () => {
+    describe('New Max Supply Too low or 0', () => {
+        it('GIVEN a token WHEN setMaxSupply to 0 THEN transaction fails with NewMaxSupplyCannotBeZero', async () => {
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
+
+            // Using account C (non role)
+            capFacet = capFacet.connect(signer_C)
+
+            // add to list fails
+            await expect(
+                capFacet.setMaxSupply(0)
+            ).to.be.revertedWithCustomError(
+                capFacet,
+                'NewMaxSupplyCannotBeZero'
+            )
+        })
         it('GIVEN a token WHEN setMaxSupply a value that is less than the current total supply THEN transaction fails with NewMaxSupplyTooLow', async () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
-            await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             erc1410Facet = erc1410Facet.connect(signer_C)
             await erc1410Facet.issueByPartition(
                 _PARTITION_ID_1,
                 account_A,
-                2 * maxSupply,
+                maxSupply * 2,
                 '0x'
             )
 
@@ -386,14 +465,14 @@ describe('CAP Tests', () => {
 
         it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyForPartitionTooLow', async () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_ISSUER_ROLE, account_C)
-            await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             erc1410Facet = erc1410Facet.connect(signer_C)
             await erc1410Facet.issueByPartition(
                 _PARTITION_ID_1,
                 account_A,
-                2 * maxSupply,
+                maxSupply * 2,
                 '0x'
             )
 
@@ -410,39 +489,58 @@ describe('CAP Tests', () => {
         })
     })
 
+    describe('New Max Supply By Partition Too High', () => {
+        it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyByPartitionTooHigh', async () => {
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
+
+            // Using account C (non role)
+            capFacet = capFacet.connect(signer_C)
+
+            // add to list fails
+            await expect(
+                capFacet.setMaxSupplyByPartition(
+                    _PARTITION_ID_1,
+                    maxSupply * 100
+                )
+            ).to.eventually.be.rejectedWith('NewMaxSupplyByPartitionTooHigh')
+        })
+    })
+
     describe('New Max Supply OK', () => {
         it('GIVEN a token WHEN setMaxSupply THEN transaction succeeds', async () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             capFacet = capFacet.connect(signer_C)
 
-            await expect(capFacet.setMaxSupply(maxSupply))
+            await expect(capFacet.setMaxSupply(maxSupply * 4))
                 .to.emit(capFacet, 'MaxSupplySet')
-                .withArgs(account_C, maxSupply, 0)
+                .withArgs(account_C, maxSupply * 4, maxSupply * 2)
 
             const currentMaxSupply = await capFacet.getMaxSupply()
 
-            expect(currentMaxSupply).to.equal(maxSupply)
+            expect(currentMaxSupply).to.equal(maxSupply * 4)
         })
 
         it('GIVEN a token WHEN setMaxSupplyByPartition THEN transaction succeeds', async () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(_CAP_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             capFacet = capFacet.connect(signer_C)
 
             await expect(
-                capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply)
+                capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 2)
             )
                 .to.emit(capFacet, 'MaxSupplyByPartitionSet')
-                .withArgs(account_C, _PARTITION_ID_1, maxSupply, 0)
+                .withArgs(account_C, _PARTITION_ID_1, maxSupply * 2, 0)
 
             const currentMaxSupply = await capFacet.getMaxSupplyByPartition(
                 _PARTITION_ID_1
             )
 
-            expect(currentMaxSupply).to.equal(maxSupply)
+            expect(currentMaxSupply).to.equal(maxSupply * 2)
         })
     })
 })
