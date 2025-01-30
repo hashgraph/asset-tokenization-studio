@@ -428,8 +428,7 @@ abstract contract HoldStorageWrapper is
             holdId_,
             _escrowId,
             _to,
-            _amount,
-            holdData.hold.amount
+            _amount
         );
 
         success_ = true;
@@ -441,12 +440,11 @@ abstract contract HoldStorageWrapper is
         uint256 _holdId,
         uint256 _escrowId,
         address _to,
-        uint256 _amount,
-        uint256 _holdAmount
+        uint256 _amount
     ) internal {
-        _decreaseHeldAmount(_partition, _tokenHolder, _amount, _holdId);
-
-        if (_holdAmount == _amount) {
+        if (
+            _decreaseHeldAmount(_partition, _tokenHolder, _amount, _holdId) == 0
+        ) {
             _removeHold(
                 _partition,
                 _tokenHolder,
@@ -468,15 +466,18 @@ abstract contract HoldStorageWrapper is
         address _tokenHolder,
         uint256 _amount,
         uint256 _holdId
-    ) internal {
+    ) internal returns (uint256 newHoldBalance_) {
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
 
-        holdStorage.heldAmountByPartition[_tokenHolder][_partition] -= _amount;
         holdStorage.totalHeldAmount[_tokenHolder] -= _amount;
+        holdStorage.heldAmountByPartition[_tokenHolder][_partition] -= _amount;
         holdStorage
-        .holds[_tokenHolder][_partition][holdIndex].hold.amount -= _amount;
+        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount -= _amount;
+
+        newHoldBalance_ = holdStorage
+        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount;
     }
 
     function _removeHold(
