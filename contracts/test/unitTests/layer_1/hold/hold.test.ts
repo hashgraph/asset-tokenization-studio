@@ -218,6 +218,7 @@ import {
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
+    TimeTravel,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -233,6 +234,7 @@ import {
     deployAtsFullInfrastructure,
     ADDRESS_ZERO,
 } from '@scripts'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const _DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -262,6 +264,7 @@ describe('Hold Tests', () => {
     let erc1410Facet: ERC1410ScheduledTasks
     let controlListFacet: ControlList
     let erc20Facet: ERC20
+    let timeTravelFacet: TimeTravel
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -289,6 +292,7 @@ describe('Hold Tests', () => {
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
                     useDeployed: false,
+                    timeTravelEnabled: true,
                 })
             )
 
@@ -298,6 +302,10 @@ describe('Hold Tests', () => {
 
     after(async () => {
         await snapshot.restore()
+    })
+
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     async function deployAll(isMultiPartition: boolean) {
@@ -377,6 +385,11 @@ describe('Hold Tests', () => {
         )
         erc20Facet = await ethers.getContractAt(
             'ERC20',
+            diamond.address,
+            signer_A
+        )
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
             diamond.address,
             signer_A
         )
@@ -1163,7 +1176,7 @@ describe('Hold Tests', () => {
                 )
             })
 
-            it('GIVEN a hold WHEN executeHoldByPartition for an amount larger than the total held amount THEN transaction fails with PartitionNotAllowedInSinglePartitionMode', async () => {
+            it('GIVEN a hold WHEN executeHoldByPartition for an amount larger than the total held amount THEN transaction fails with InsufficientHoldBalance', async () => {
                 await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
 
                 await expect(
@@ -1179,6 +1192,34 @@ describe('Hold Tests', () => {
                 ).to.be.revertedWithCustomError(
                     holdFacet,
                     'InsufficientHoldBalance'
+                )
+            })
+
+            it('GIVEN hold WHEN executeHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached', async () => {
+                let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+
+                hold.expirationTimestamp = finalDate - 1
+
+                await timeTravelFacet.changeSystemTimestamp(initDate)
+
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await timeTravelFacet.changeSystemTimestamp(finalDate)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .executeHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            account_C,
+                            1
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'HoldExpirationReached'
                 )
             })
         })
@@ -1215,7 +1256,7 @@ describe('Hold Tests', () => {
                 )
             })
 
-            it('GIVEN a hold WHEN releaseHoldByPartition for an amount larger than the total held amount THEN transaction fails with PartitionNotAllowedInSinglePartitionMode', async () => {
+            it('GIVEN a hold WHEN releaseHoldByPartition for an amount larger than the total held amount THEN transaction fails with InsufficientHoldBalance', async () => {
                 await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
 
                 await expect(
@@ -1230,6 +1271,75 @@ describe('Hold Tests', () => {
                 ).to.be.revertedWithCustomError(
                     holdFacet,
                     'InsufficientHoldBalance'
+                )
+            })
+
+            it('GIVEN hold WHEN releaseHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached', async () => {
+                let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+
+                hold.expirationTimestamp = finalDate - 1
+
+                await timeTravelFacet.changeSystemTimestamp(initDate)
+
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await timeTravelFacet.changeSystemTimestamp(finalDate)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .releaseHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            1
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'HoldExpirationReached'
+                )
+            })
+        })
+
+        describe('Reclaim with wrong input arguments', () => {
+            it('GIVEN a wrong id WHEN reclaimHoldByPartition THEN transaction fails with WrongHoldId', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet.reclaimHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        2,
+                        account_A
+                    )
+                ).to.be.revertedWithCustomError(holdFacet, 'WrongHoldId')
+            })
+
+            it('GIVEN a wrong partition WHEN reclaimHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode', async () => {
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .reclaimHoldByPartition(_WRONG_PARTITION, 1, account_A)
+                ).to.be.revertedWithCustomError(
+                    erc1410Facet,
+                    'PartitionNotAllowedInSinglePartitionMode'
+                )
+            })
+
+            it('GIVEN hold WHEN reclaimHoldByPartition after expiration date THEN transaction fails with HoldExpirationNotReached', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .reclaimHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'HoldExpirationNotReached'
                 )
             })
         })
