@@ -254,18 +254,6 @@ contract ERC1594_2 is ERC1594, ERC1594StorageWrapper_2 {
         );
     }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(ERC1410BasicStorageWrapperRead, ERC1594StorageWrapper_2)
-    {
-        ERC1594StorageWrapper_2._addPartitionTo(_value, _account, _partition);
-    }
-
     function _canTransfer(
         address _to,
         uint256 _value,

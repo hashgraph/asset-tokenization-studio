@@ -298,22 +298,6 @@ abstract contract ERC1594StorageWrapper_2 is
         return (true, _SUCCESS, bytes32(0));
     }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(ERC1410BasicStorageWrapperRead, ERC20StorageWrapper_2_Read)
-    {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
-        );
-    }
-
     function _beforeAllowanceUpdate(
         address _owner,
         address _spender,

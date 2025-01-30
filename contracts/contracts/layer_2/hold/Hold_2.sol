@@ -245,9 +245,7 @@ import {
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 contract Hold_2 is
     Hold,
-    HoldStorageWrapper_2,
-    SnapshotsStorageWrapper_2,
-    ERC20StorageWrapper_2
+    HoldStorageWrapper_2
 {
     function _createHoldByPartition(
         bytes32 _partition,
@@ -369,21 +367,6 @@ contract Hold_2 is
         staticInterfaceIds_[selectorsIndex++] = type(IHold).interfaceId;
     }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(
-            ERC1410BasicStorageWrapperRead,
-            ERC20StorageWrapper_2_Read,
-            HoldStorageWrapper_2
-        )
-    {
-        HoldStorageWrapper_2._addPartitionTo(_value, _account, _partition);
-    }
 
     function _checkNewMaxSupply(
         uint256 _newMaxSupply

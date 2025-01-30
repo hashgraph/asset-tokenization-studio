@@ -422,19 +422,4 @@ abstract contract TransferAndLockStorageWrapper is
             );
     }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(ERC1410ScheduledTasksStorageWrapper, LockStorageWrapper_2_Read)
-    {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
-        );
-    }
 }

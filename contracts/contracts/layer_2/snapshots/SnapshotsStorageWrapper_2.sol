@@ -223,7 +223,7 @@ import {Hold_2_CD_Lib} from '../hold/Hold_2_CD_Lib.sol';
 
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
+abstract contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
     struct SnapshotStorage_2 {
         Snapshots ABAFSnapshots;
         Snapshots decimals;

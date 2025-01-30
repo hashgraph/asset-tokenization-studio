@@ -313,25 +313,6 @@ contract ERC1410ScheduledTasks is
         );
     }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(
-            ERC1410BasicStorageWrapperRead,
-            ERC1410ScheduledTasksStorageWrapper
-        )
-    {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
-        );
-    }
-
     function _canTransferByPartition(
         address _from,
         address _to,

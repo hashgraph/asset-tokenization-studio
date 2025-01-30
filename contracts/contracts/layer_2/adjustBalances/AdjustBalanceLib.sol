@@ -216,7 +216,7 @@ import {
 import {
     CorporateActionDataStorage
 } from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {AdjustBalancesStorageWrapper} from './AdjustBalancesStorageWrapper.sol';
+import {AdjustBalancesStorageWrapperRead} from './AdjustBalancesStorageWrapperRead.sol';
 import {ArrayLib} from '../common/ArrayLib.sol';
 import {MappingLib} from '../common/MappingLib.sol';
 import {IEquity} from '../interfaces/equity/IEquity.sol';
@@ -246,7 +246,7 @@ library AdjustBalanceLib {
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        AdjustBalancesStorageWrapper.AdjustBalancesStorage
+        AdjustBalancesStorageWrapperRead.AdjustBalancesStorage
             storage _adjustBalanceStorage
     ) internal {
         uint256 abaf = _adjustBalanceStorage.abaf;
@@ -271,7 +271,7 @@ library AdjustBalanceLib {
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
         CapStorageWrapper.CapDataStorage storage _capStorage,
-        AdjustBalancesStorageWrapper.AdjustBalancesStorage
+        AdjustBalancesStorageWrapperRead.AdjustBalancesStorage
             storage _adjustBalanceStorage
     ) internal {
         uint256 abaf = _adjustBalanceStorage.abaf;
@@ -304,7 +304,7 @@ library AdjustBalanceLib {
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        AdjustBalancesStorageWrapper.AdjustBalancesStorage
+        AdjustBalancesStorageWrapperRead.AdjustBalancesStorage
             storage _adjustBalanceStorage
     ) internal {
         uint256 labaf = _adjustBalanceStorage.labaf[_account];
@@ -329,7 +329,7 @@ library AdjustBalanceLib {
         address _account,
         ERC1410BasicStorageWrapperRead.ERC1410BasicStorage
             storage _basicStorage,
-        AdjustBalancesStorageWrapper.AdjustBalancesStorage
+        AdjustBalancesStorageWrapperRead.AdjustBalancesStorage
             storage _adjustBalanceStorage
     ) internal {
         uint256 partitionsIndex = _basicStorage.partitionToIndex[_account][

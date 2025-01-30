@@ -234,25 +234,6 @@ contract ERC1644_2 is ERC1644, ERC1410ScheduledTasksStorageWrapper {
         );
     }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(
-            ERC1410BasicStorageWrapperRead,
-            ERC1410ScheduledTasksStorageWrapper
-        )
-    {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
-        );
-    }
-
     function _checkNewMaxSupply(
         uint256 _newMaxSupply
     )

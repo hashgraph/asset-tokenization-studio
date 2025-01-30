@@ -449,25 +449,6 @@ abstract contract HoldStorageWrapper_2 is
         .holds[_tokenHolder][_partition][_holdIndex - 1].hold.amount *= _factor;
     }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(
-            ERC1410BasicStorageWrapperRead,
-            ERC1410ScheduledTasksStorageWrapper
-        )
-    {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
-        );
-    }
-
     function _checkNewMaxSupply(
         uint256 _newMaxSupply
     )

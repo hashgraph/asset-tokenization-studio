@@ -232,12 +232,16 @@ import {
 import {
     ScheduledTasksStorageWrapper
 } from '../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
+import {
+    CorporateActionsStorageWrapperSecurity_Read
+} from './CorporateActionsStorageWrapperSecurity_Read.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract CorporateActionsStorageWrapperSecurity is
     ICorporateActionsStorageWrapperSecurity,
     IEquityStorageWrapper,
     IBondStorageWrapper,
+    CorporateActionsStorageWrapperSecurity_Read,
     ScheduledTasksStorageWrapper,
     ScheduledSnapshotsStorageWrapper,
     AdjustBalancesStorageWrapper

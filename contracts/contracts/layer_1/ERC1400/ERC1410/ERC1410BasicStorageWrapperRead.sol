@@ -214,7 +214,7 @@ import {
 } from '../../constants/storagePositions.sol';
 import {_DEFAULT_PARTITION} from '../../constants/values.sol';
 
-contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
+abstract contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
     // Represents a fungible set of tokens.
     struct Partition {
         uint256 amount;
@@ -322,16 +322,7 @@ contract ERC1410BasicStorageWrapperRead is IERC1410StorageWrapper {
         uint256 _value,
         address _account,
         bytes32 _partition
-    ) internal virtual {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-
-        erc1410Storage.partitions[_account].push(Partition(_value, _partition));
-        erc1410Storage.partitionToIndex[_account][
-            _partition
-        ] = _getERC1410BasicStorage().partitions[_account].length;
-
-        if (_value != 0) erc1410Storage.balances[_account] += _value;
-    }
+    ) internal virtual;
 
     function _totalSupply() internal view virtual returns (uint256) {
         return _getERC1410BasicStorage().totalSupply;

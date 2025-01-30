@@ -215,11 +215,15 @@ import {
     AdjustBalances_CD_Lib
 } from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
 import {ERC20StorageWrapper_2_Read} from './ERC20StorageWrapper_2_Read.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import{IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 contract ERC20StorageWrapper_2 is
-    AdjustBalancesStorageWrapperRead,
-    ERC20StorageWrapper_2_Read
+    ERC20StorageWrapper_2_Read,
+    ERC1410ScheduledTasksStorageWrapper
 {
     // solhint-disable no-unused-vars
     function _beforeAllowanceUpdate(
@@ -281,6 +285,43 @@ contract ERC20StorageWrapper_2 is
             AdjustBalances_CD_Lib.getAllowanceLABAF(_owner, _spender)
         );
         return _allowance(_owner, _spender) * factor;
+    }
+
+    function _decimalsAdjusted() internal view virtual returns (uint8) {
+        return _decimalsAdjustedAt(_blockTimestamp());
+    }
+
+    function _decimalsAdjustedAt(
+        uint256 _timestamp
+    ) internal view virtual returns (uint8) {
+        return _getERC20MetadataAdjustedAt(_timestamp).info.decimals;
+    }
+
+    function _getERC20MetadataAdjusted()
+        internal
+        view
+        virtual
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+    {
+        erc20Metadata_ = _getERC20MetadataAdjustedAt(_blockTimestamp());
+    }
+
+    function _getERC20MetadataAdjustedAt(
+        uint256 _timestamp
+    )
+        internal
+        view
+        virtual
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+    {
+        (, uint8 pendingDecimals) = AdjustBalanceLib
+            .getPendingScheduledBalanceAdjustmentsAt(
+                _scheduledBalanceAdjustmentStorage(),
+                _corporateActionsStorage(),
+                _timestamp
+            );
+        erc20Metadata_ = super._getERC20Metadata();
+        erc20Metadata_.info.decimals += pendingDecimals;
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

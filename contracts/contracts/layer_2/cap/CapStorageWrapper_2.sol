@@ -208,15 +208,10 @@ pragma solidity 0.8.18;
 
 import {CapStorageWrapper} from '../../layer_1/cap/CapStorageWrapper.sol';
 import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
-import {
-    CorporateActionsStorageWrapper
-} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+import{CorporateActionsStorageWrapperSecurity_Read} from '../corporateActions/CorporateActionsStorageWrapperSecurity_Read.sol';
 import {
     AdjustBalances_CD_Lib
 } from '../adjustBalances/AdjustBalances_CD_Lib.sol';
-import {
-    CorporateActionsStorageWrapper
-} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
@@ -226,8 +221,8 @@ import {
 // TODO: Remove _ in contract name
 // solhint-disable-next-line
 abstract contract CapStorageWrapper_2 is
-    CorporateActionsStorageWrapper,
     CapStorageWrapper,
+    CorporateActionsStorageWrapperSecurity_Read,
     ScheduledBalanceAdjustmentsStorageWrapper
 {
     function _getMaxSupplyAdjusted()

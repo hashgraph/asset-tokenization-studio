@@ -206,39 +206,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    ERC1410BasicStorageWrapper
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapper.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+
 import {
     ERC20StorageWrapper
 } from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
-import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
 import {
     AdjustBalances_CD_Lib
 } from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+
+
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 abstract contract ERC20StorageWrapper_2_Read is
-    ERC20StorageWrapper,
-    ERC1410ScheduledTasksStorageWrapper
+    ERC20StorageWrapper
 {
-    function _decimalsAdjusted() internal view virtual returns (uint8) {
-        return _decimalsAdjustedAt(_blockTimestamp());
-    }
+    
 
-    function _decimalsAdjustedAt(
-        uint256 _timestamp
-    ) internal view virtual returns (uint8) {
-        return _getERC20MetadataAdjustedAt(_timestamp).info.decimals;
-    }
+    
 
     function _allowanceAdjusted(
         address _owner,
@@ -259,151 +245,9 @@ abstract contract ERC20StorageWrapper_2_Read is
         return _allowance(_owner, _spender) * factor;
     }
 
-    function _getERC20MetadataAdjusted()
-        internal
-        view
-        virtual
-        returns (IERC20.ERC20Metadata memory erc20Metadata_)
-    {
-        erc20Metadata_ = _getERC20MetadataAdjustedAt(_blockTimestamp());
-    }
+    
 
-    function _getERC20MetadataAdjustedAt(
-        uint256 _timestamp
-    )
-        internal
-        view
-        virtual
-        returns (IERC20.ERC20Metadata memory erc20Metadata_)
-    {
-        (, uint8 pendingDecimals) = AdjustBalanceLib
-            .getPendingScheduledBalanceAdjustmentsAt(
-                _scheduledBalanceAdjustmentStorage(),
-                _corporateActionsStorage(),
-                _timestamp
-            );
-        erc20Metadata_ = super._getERC20Metadata();
-        erc20Metadata_.info.decimals += pendingDecimals;
-    }
+    
 
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    )
-        internal
-        virtual
-        override(
-            ERC1410BasicStorageWrapper,
-            ERC1410ScheduledTasksStorageWrapper
-        )
-    {
-        ERC1410ScheduledTasksStorageWrapper._beforeTokenTransfer(
-            partition,
-            from,
-            to,
-            amount
-        );
-    }
-
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(
-            ERC1410BasicStorageWrapperRead,
-            ERC1410ScheduledTasksStorageWrapper
-        )
-    {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
-        );
-    }
-
-    function _checkNewMaxSupply(
-        uint256 _newMaxSupply
-    )
-        internal
-        virtual
-        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
-    {
-        ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupply(_newMaxSupply);
-    }
-
-    function _checkNewTotalSupply(
-        uint256 _amount
-    )
-        internal
-        virtual
-        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
-    {
-        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupply(_amount);
-    }
-
-    function _checkNewTotalSupplyForPartition(
-        bytes32 _partition,
-        uint256 _amount
-    )
-        internal
-        virtual
-        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
-    {
-        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupplyForPartition(
-            _partition,
-            _amount
-        );
-    }
-
-    function _checkMaxSupply(
-        uint256 _amount
-    )
-        internal
-        view
-        virtual
-        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
-        returns (bool)
-    {
-        return ERC1410ScheduledTasksStorageWrapper._checkMaxSupply(_amount);
-    }
-
-    function _checkNewMaxSupplyForPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    )
-        internal
-        view
-        virtual
-        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
-        returns (bool)
-    {
-        return
-            ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupplyForPartition(
-                _partition,
-                _newMaxSupply
-            );
-    }
-
-    function _checkMaxSupplyForPartition(
-        bytes32 _partition,
-        uint256 _amount
-    )
-        internal
-        view
-        virtual
-        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
-        returns (bool)
-    {
-        return
-            ERC1410ScheduledTasksStorageWrapper._checkMaxSupplyForPartition(
-                _partition,
-                _amount
-            );
-    }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

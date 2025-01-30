@@ -209,19 +209,13 @@ pragma solidity 0.8.18;
 import {
     IAdjustBalancesStorageWrapper
 } from '../interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
-import {
-    ERC20StorageWrapper
-} from '../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
 import {AdjustBalanceLib} from './AdjustBalanceLib.sol';
 import {
     SnapshotsStorageWrapper_2
 } from '../snapshots/SnapshotsStorageWrapper_2.sol';
 import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {
-    CorporateActionsStorageWrapper
-} from '../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
+    CorporateActionsStorageWrapperSecurity
+} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
 import {
     ScheduledBalanceAdjustmentsStorageWrapper
 } from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
@@ -229,14 +223,21 @@ import {
     AdjustBalancesStorageWrapperRead
 } from './AdjustBalancesStorageWrapperRead.sol';
 import {_MAX_UINT256} from '../constants/values.sol';
+import {
+    CapStorageWrapper_2
+} from '../cap/CapStorageWrapper_2.sol';
+import {LockStorageWrapper_2_Read} from '../lock/LockStorageWrapper_2_Read.sol';
+import{ERC1410ScheduledTasksStorageWrapper_Read} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper_Read.sol';
+import{ERC20StorageWrapper_2_Read} from '../ERC1400/ERC20/ERC20StorageWrapper_2_Read.sol';
+
 
 contract AdjustBalancesStorageWrapper is
     IAdjustBalancesStorageWrapper,
     AdjustBalancesStorageWrapperRead,
-    ERC1410BasicStorageWrapperRead,
-    CorporateActionsStorageWrapper,
-    ERC20StorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper,
+    ERC1410ScheduledTasksStorageWrapper_Read,
+    ERC20StorageWrapper_2_Read,
+    LockStorageWrapper_2_Read,
+    CapStorageWrapper_2,
     SnapshotsStorageWrapper_2
 {
     modifier checkFactor(uint256 _factor) {
@@ -412,16 +413,6 @@ contract AdjustBalancesStorageWrapper is
         // uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
         if (holdIndex == 0) return 0;
         return _getHoldLABAFByIndex(_partition, _tokenHolder, holdIndex);
-    }
-
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override {
-        // solhint-disable-next-line
-        revert('Should never reach this part');
     }
     // solhint-enable no-unused-vars
 }

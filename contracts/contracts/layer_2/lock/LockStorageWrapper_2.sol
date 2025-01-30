@@ -213,11 +213,14 @@ import {
     AdjustBalances_CD_Lib
 } from '../adjustBalances/AdjustBalances_CD_Lib.sol';
 import {LockStorageWrapper_2_Read} from './LockStorageWrapper_2_Read.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
+abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read, ERC1410ScheduledTasksStorageWrapper {
     function _lockByPartition(
         bytes32 _partition,
         uint256 _amount,
@@ -416,5 +419,59 @@ abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
             _partition
         ] = _abaf;
     }
+
+    function _getLockedAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getTotalLockLABAF(_tokenHolder)
+        );
+
+        return _getLockedAmountFor(_tokenHolder) * factor;
+    }
+
+    function _getLockedAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getTotalLockLABAFByPartition(
+                _partition,
+                _tokenHolder
+            )
+        );
+        return
+            _getLockedAmountForByPartition(_partition, _tokenHolder) * factor;
+    }
+
+    function _getLockForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    )
+        internal
+        view
+        virtual
+        returns (uint256 amount_, uint256 expirationTimestamp_)
+    {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getLockLABAFByPartition(
+                _partition,
+                _lockId,
+                _tokenHolder
+            )
+        );
+
+        (amount_, expirationTimestamp_) = _getLockForByPartition(
+            _partition,
+            _tokenHolder,
+            _lockId
+        );
+        amount_ *= factor;
+    }
+
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

@@ -211,7 +211,6 @@ pragma solidity 0.8.18;
 import {
     ERC1410SnapshotStorageWrapper
 } from '../../../layer_1/ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
-import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
 import {_CONTROLLER_ROLE} from '../../../layer_1/constants/roles.sol';
 import {
     _IS_PAUSED_ERROR_ID,
@@ -225,13 +224,7 @@ import {
     _IS_NOT_OPERATOR_ERROR_ID,
     _SUCCESS
 } from '../../../layer_1/constants/values.sol';
-import {
-    CorporateActionsStorageWrapper
-} from '../../../layer_1/corporateActions/CorporateActionsStorageWrapper.sol';
 import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
-import {
-    AdjustBalancesStorageWrapperRead
-} from '../../adjustBalances/AdjustBalancesStorageWrapperRead.sol';
 import {
     AdjustBalances_CD_Lib
 } from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
@@ -242,13 +235,11 @@ import {
 import {
     ScheduledTasks_CD_Lib
 } from '../../scheduledTasks/scheduledTasks/ScheduledTasks_CD_Lib.sol';
+import{CorporateActionsStorageWrapperSecurity} from '../../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+import{ERC1410ScheduledTasksStorageWrapper_Read} from './ERC1410ScheduledTasksStorageWrapper_Read.sol';
 
 abstract contract ERC1410ScheduledTasksStorageWrapper is
-    AdjustBalancesStorageWrapperRead,
-    CorporateActionsStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper,
-    CapStorageWrapper_2,
-    ERC1410SnapshotStorageWrapper
+    CorporateActionsStorageWrapperSecurity
 {
     function _beforeTokenTransfer(
         bytes32 partition,
@@ -319,7 +310,14 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
             AdjustBalances_CD_Lib.getABAF()
         );
 
-        super._addPartitionTo(_value, _account, _partition);
+        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+
+        erc1410Storage.partitions[_account].push(Partition(_value, _partition));
+        erc1410Storage.partitionToIndex[_account][
+            _partition
+        ] = _getERC1410BasicStorage().partitions[_account].length;
+
+        if (_value != 0) erc1410Storage.balances[_account] += _value;
     }
 
     function _totalSupplyAdjusted() internal view virtual returns (uint256) {
@@ -436,71 +434,4 @@ abstract contract ERC1410ScheduledTasksStorageWrapper is
         return _balanceOfByPartition(_partition, _tokenHolder) * factor;
     }
 
-    function _checkNewMaxSupply(
-        uint256 _newMaxSupply
-    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
-        CapStorageWrapper_2._checkNewMaxSupply(_newMaxSupply);
-    }
-
-    function _checkNewTotalSupply(
-        uint256 _amount
-    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
-        CapStorageWrapper_2._checkNewTotalSupply(_amount);
-    }
-
-    function _checkNewTotalSupplyForPartition(
-        bytes32 _partition,
-        uint256 _amount
-    ) internal virtual override(CapStorageWrapper, CapStorageWrapper_2) {
-        CapStorageWrapper_2._checkNewTotalSupplyForPartition(
-            _partition,
-            _amount
-        );
-    }
-
-    function _checkMaxSupply(
-        uint256 _amount
-    )
-        internal
-        view
-        virtual
-        override(CapStorageWrapper, CapStorageWrapper_2)
-        returns (bool)
-    {
-        return CapStorageWrapper_2._checkMaxSupply(_amount);
-    }
-
-    function _checkNewMaxSupplyForPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    )
-        internal
-        view
-        virtual
-        override(CapStorageWrapper, CapStorageWrapper_2)
-        returns (bool)
-    {
-        return
-            CapStorageWrapper_2._checkNewMaxSupplyForPartition(
-                _partition,
-                _newMaxSupply
-            );
-    }
-
-    function _checkMaxSupplyForPartition(
-        bytes32 _partition,
-        uint256 _amount
-    )
-        internal
-        view
-        virtual
-        override(CapStorageWrapper, CapStorageWrapper_2)
-        returns (bool)
-    {
-        return
-            CapStorageWrapper_2._checkMaxSupplyForPartition(
-                _partition,
-                _amount
-            );
-    }
 }
