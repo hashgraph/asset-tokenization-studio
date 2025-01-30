@@ -470,7 +470,9 @@ describe('Hold Tests', () => {
                 expect(retrieved_hold.amount_).to.equal(holdAmount_expected)
                 expect(retrieved_hold.escrow_).to.equal(holdEscrow_expected)
                 expect(retrieved_hold.data_).to.equal(holdData_expected)
-                //expect(retrieved_hold.operatorData_).to.equal(holdOperatorData_expected)
+                expect(retrieved_hold.operatorData_).to.equal(
+                    holdOperatorData_expected
+                )
                 expect(retrieved_hold.destination_).to.equal(
                     holdDestination_expected
                 )
@@ -482,7 +484,9 @@ describe('Hold Tests', () => {
                     holdTokenHolder_expected
                 )
                 expect(escrow_hold.data_).to.equal(holdData_expected)
-                //expect(escrow_hold.operatorData_).to.equal(holdOperatorData_expected)
+                expect(escrow_hold.operatorData_).to.equal(
+                    holdOperatorData_expected
+                )
                 expect(escrow_hold.destination_).to.equal(
                     holdDestination_expected
                 )
@@ -1064,7 +1068,7 @@ describe('Hold Tests', () => {
 
         describe('Create Holds OK', () => {
             // Create
-            async function checkCreatedHold() {
+            async function checkCreatedHold(operatorData?: string) {
                 await checkCreatedHold_expected(
                     0,
                     _AMOUNT,
@@ -1073,7 +1077,7 @@ describe('Hold Tests', () => {
                     hold.amount,
                     hold.escrow,
                     hold.data,
-                    '0x',
+                    operatorData ?? '0x',
                     hold.to,
                     hold.expirationTimestamp,
                     account_A,
@@ -1105,6 +1109,8 @@ describe('Hold Tests', () => {
             it('GIVEN a Token WHEN createHoldFromByPartition hold THEN transaction succeeds', async () => {
                 await erc20Facet.connect(signer_A).approve(account_B, _AMOUNT)
 
+                let operatorData = '0x'
+
                 await expect(
                     holdFacet
                         .connect(signer_B)
@@ -1112,7 +1118,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            operatorData
                         )
                 )
                     .to.emit(holdFacet, 'HeldByPartition')
@@ -1122,13 +1128,15 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         1,
                         Object.values(hold),
-                        '0x'
+                        operatorData
                     )
 
-                await checkCreatedHold()
+                await checkCreatedHold(operatorData)
             })
 
             it('GIVEN a Token WHEN operatorCreateHoldByPartition hold THEN transaction succeeds', async () => {
+                let operatorData = '0xab56'
+
                 await erc1410Facet
                     .connect(signer_A)
                     .authorizeOperator(account_B)
@@ -1140,7 +1148,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            operatorData
                         )
                 )
                     .to.emit(holdFacet, 'HeldByPartition')
@@ -1150,15 +1158,17 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         1,
                         Object.values(hold),
-                        '0x'
+                        operatorData
                     )
 
                 await erc1410Facet.connect(signer_A).revokeOperator(account_B)
 
-                await checkCreatedHold()
+                await checkCreatedHold(operatorData)
             })
 
             it('GIVEN a Token WHEN controllerCreateHoldByPartition hold THEN transaction succeeds', async () => {
+                let operatorData = '0xab56222233'
+
                 await expect(
                     holdFacet
                         .connect(signer_C)
@@ -1166,7 +1176,7 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             hold,
-                            '0x'
+                            operatorData
                         )
                 )
                     .to.emit(holdFacet, 'HeldByPartition')
@@ -1176,10 +1186,10 @@ describe('Hold Tests', () => {
                         _DEFAULT_PARTITION,
                         1,
                         Object.values(hold),
-                        '0x'
+                        operatorData
                     )
 
-                await checkCreatedHold()
+                await checkCreatedHold(operatorData)
             })
         })
 
