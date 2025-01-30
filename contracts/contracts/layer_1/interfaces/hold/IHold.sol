@@ -221,7 +221,7 @@ interface IHold {
     event HoldByPartitionExecuted(
         address indexed tokenHolder,
         bytes32 indexed partition,
-        uint256 escrowId,
+        uint256 holdId,
         uint256 amount,
         address to
     );
@@ -229,7 +229,7 @@ interface IHold {
     event HoldByPartitionReleased(
         address indexed tokenHolder,
         bytes32 indexed partition,
-        uint256 escrowId,
+        uint256 holdId,
         uint256 amount
     );
 
@@ -237,13 +237,15 @@ interface IHold {
         address indexed operator,
         address indexed tokenHolder,
         bytes32 indexed partition,
-        uint256 escrowId,
+        uint256 holdId,
         uint256 amount
     );
 
     error HoldExpirationNotReached();
     error WrongEscrowHoldId();
     error InvalidDestinationAddress(address holdDestination, address to);
+    error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
+    error HoldExpirationReached();
 
     struct Hold {
         uint256 amount;
@@ -320,8 +322,6 @@ interface IHold {
     function executeHoldByPartition(
         bytes32 _partition,
         uint256 _escrowId,
-        uint256 _escrowId,
-        address _tokenHolder,
         address _to,
         uint256 _amount
     ) external returns (bool success_);
@@ -329,15 +329,12 @@ interface IHold {
     function releaseHoldByPartition(
         bytes32 _partition,
         uint256 _escrowId,
-        uint256 _escrowId,
-        address _tokenHolder,
         uint256 _amount
     ) external returns (bool success_);
 
     function reclaimHoldByPartition(
         bytes32 _partition,
         uint256 _escrowId,
-        address _tokenHolder,
         address _escrowAddress
     ) external returns (bool success_);
 
