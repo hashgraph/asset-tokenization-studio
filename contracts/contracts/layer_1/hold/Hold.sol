@@ -339,7 +339,6 @@ abstract contract Hold is
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyRole(_CONTROLLER_ROLE)
         onlyControllable
-        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldByPartition(
