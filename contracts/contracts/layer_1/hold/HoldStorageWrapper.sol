@@ -263,6 +263,7 @@ abstract contract HoldStorageWrapper is
         holdStorage.holdsIndex[_from][_partition][holdId_] = holdStorage
         .holds[_from][_partition].length;
         holdStorage.heldAmountByPartition[_from][_partition] += _hold.amount;
+        holdStorage.totalHeldAmount[_from] += _hold.amount;
         holdStorage.escrow_holdsIndex[_hold.escrow][_partition][
             escrowId_
         ] = holdStorage.escrow_holds[_hold.escrow][_partition].length;
