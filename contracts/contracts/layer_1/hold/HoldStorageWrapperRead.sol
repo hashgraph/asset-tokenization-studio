@@ -237,7 +237,7 @@ abstract contract HoldStorageWrapperRead is LocalContext {
         return true;
     }
 
-    function getTokenHolderFromEscrowId(
+    function _getTokenHolderFromEscrowId(
         bytes32 _partition,
         address _escrow,
         uint256 _escrowId

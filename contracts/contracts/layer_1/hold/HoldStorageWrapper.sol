@@ -322,13 +322,17 @@ abstract contract HoldStorageWrapper is
             _msgSender(),
             _escrowId
         );
-        tokenHolder_ = getTokenHolderFromEscrowId(
+        tokenHolder_ = _getTokenHolderFromEscrowId(
             _partition,
             _msgSender(),
             _escrowId
         );
 
         IHold.Hold memory hold = holdData.hold;
+
+        if (_amount > hold.amount) {
+            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
+        }
 
         if (hold.to != address(0) && _to != hold.to) {
             revert IHold.InvalidDestinationAddress(hold.to, _to);
@@ -376,13 +380,17 @@ abstract contract HoldStorageWrapper is
             _msgSender(),
             _escrowId
         );
-        tokenHolder_ = getTokenHolderFromEscrowId(
+        tokenHolder_ = _getTokenHolderFromEscrowId(
             _partition,
             _msgSender(),
             _escrowId
         );
 
         IHold.Hold memory hold = holdData.hold;
+
+        if (_amount > hold.amount) {
+            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
+        }
 
         if (_blockTimestamp() > hold.expirationTimestamp) {
             revert IHold.HoldExpirationReached();
@@ -433,7 +441,7 @@ abstract contract HoldStorageWrapper is
         );
         // Updated hold
         IHold.Hold memory hold = holdData.hold;
-        tokenHolder_ = getTokenHolderFromEscrowId(
+        tokenHolder_ = _getTokenHolderFromEscrowId(
             _partition,
             _msgSender(),
             _escrowId

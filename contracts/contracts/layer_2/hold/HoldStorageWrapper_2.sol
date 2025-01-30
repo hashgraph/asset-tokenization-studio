@@ -331,6 +331,7 @@ abstract contract HoldStorageWrapper_2 is
 
         amount_ *= factor;
     }
+
     function _createHoldByPartition(
         bytes32 _partition,
         address _from,
@@ -374,7 +375,7 @@ abstract contract HoldStorageWrapper_2 is
         override
         returns (bool success_, uint256 holdId_, address tokenHolder_)
     {
-        tokenHolder_ = getTokenHolderFromEscrowId(
+        tokenHolder_ = _getTokenHolderFromEscrowId(
             _partition,
             _msgSender(),
             _escrowId
@@ -386,10 +387,6 @@ abstract contract HoldStorageWrapper_2 is
             _msgSender(),
             _escrowId
         );
-
-        if (_amount > holdData.hold.amount) {
-            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
-        }
 
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
@@ -414,7 +411,8 @@ abstract contract HoldStorageWrapper_2 is
             _to,
             _amount
         );
-
+        // Updated hold amount
+        holdData = _getHoldFromEscrowId(_partition, _msgSender(), _escrowId);
         if (_amount == holdData.hold.amount) {
             adjustBalancesStorage.labafHolds[tokenHolder_][_partition].pop();
         }
@@ -430,7 +428,7 @@ abstract contract HoldStorageWrapper_2 is
         override
         returns (bool success_, uint256 holdId_, address tokenHolder_)
     {
-        tokenHolder_ = getTokenHolderFromEscrowId(
+        tokenHolder_ = _getTokenHolderFromEscrowId(
             _partition,
             _msgSender(),
             _escrowId
@@ -443,10 +441,6 @@ abstract contract HoldStorageWrapper_2 is
             _msgSender(),
             _escrowId
         );
-
-        if (_amount > holdData.hold.amount) {
-            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
-        }
 
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
@@ -471,6 +465,8 @@ abstract contract HoldStorageWrapper_2 is
             _amount
         );
 
+        // Updated hold amount
+        holdData = _getHoldFromEscrowId(_partition, _msgSender(), _escrowId);
         if (_amount == holdData.hold.amount) {
             adjustBalancesStorage.labafHolds[tokenHolder_][_partition].pop();
         }
@@ -491,7 +487,7 @@ abstract contract HoldStorageWrapper_2 is
             address tokenHolder_
         )
     {
-        tokenHolder_ = getTokenHolderFromEscrowId(
+        tokenHolder_ = _getTokenHolderFromEscrowId(
             _partition,
             _escrowAddress,
             _escrowId
@@ -630,7 +626,7 @@ abstract contract HoldStorageWrapper_2 is
         address _tokenHolder,
         uint256 _abaf
     ) internal virtual {
-        uint256 hold_LABAF = AdjustBalances_CD_Lib.getLockLABAFByPartition(
+        uint256 hold_LABAF = AdjustBalances_CD_Lib.getHoldLABAFByPartition(
             _partition,
             _holdId,
             _tokenHolder
