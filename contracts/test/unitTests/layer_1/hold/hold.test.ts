@@ -218,6 +218,7 @@ import {
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
+    TimeTravel,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -233,6 +234,7 @@ import {
     deployAtsFullInfrastructure,
     ADDRESS_ZERO,
 } from '@scripts'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const _DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -262,6 +264,7 @@ describe('Hold Tests', () => {
     let erc1410Facet: ERC1410ScheduledTasks
     let controlListFacet: ControlList
     let erc20Facet: ERC20
+    let timeTravelFacet: TimeTravel
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -289,6 +292,7 @@ describe('Hold Tests', () => {
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
                     useDeployed: false,
+                    timeTravelEnabled: true,
                 })
             )
 
@@ -298,6 +302,10 @@ describe('Hold Tests', () => {
 
     after(async () => {
         await snapshot.restore()
+    })
+
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     async function deployAll(isMultiPartition: boolean) {
@@ -380,6 +388,11 @@ describe('Hold Tests', () => {
             diamond.address,
             signer_A
         )
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
+            diamond.address,
+            signer_A
+        )
 
         await erc1410Facet.issueByPartition(
             _DEFAULT_PARTITION,
@@ -389,462 +402,25 @@ describe('Hold Tests', () => {
         )
     }
 
-    beforeEach(async () => {
-        currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
-        expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
-
-        hold = {
-            amount: _AMOUNT,
-            expirationTimestamp: expirationTimestamp,
-            escrow: account_B,
-            to: ADDRESS_ZERO,
-            data: _DATA,
-        }
-
-        await deployAll(false)
-    })
-
-    describe('Paused', () => {
-        beforeEach(async () => {
-            // Pausing the token
-            await pauseFacet.pause()
-        })
-
-        // Create
-        it('GIVEN a paused Token WHEN createHoldByPartition THEN transaction fails with TokenIsPaused', async () => {
-            await expect(
-                holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
-            ).to.be.rejectedWith('TokenIsPaused')
-        })
-
-        it('GIVEN a paused Token WHEN createHoldFromByPartition THEN transaction fails with TokenIsPaused', async () => {
-            await expect(
-                holdFacet.createHoldFromByPartition(
-                    _DEFAULT_PARTITION,
-                    account_A,
-                    hold,
-                    '0x'
-                )
-            ).to.be.rejectedWith('TokenIsPaused')
-        })
-
-        it('GIVEN a paused Token WHEN operatorCreateHoldByPartition THEN transaction fails with TokenIsPaused', async () => {
-            await expect(
-                holdFacet.operatorCreateHoldByPartition(
-                    _DEFAULT_PARTITION,
-                    account_A,
-                    hold,
-                    '0x'
-                )
-            ).to.be.rejectedWith('TokenIsPaused')
-        })
-
-        it('GIVEN a paused Token WHEN controllerCreateHoldByPartition THEN transaction fails with TokenIsPaused', async () => {
-            await expect(
-                holdFacet.controllerCreateHoldByPartition(
-                    _DEFAULT_PARTITION,
-                    account_A,
-                    hold,
-                    '0x'
-                )
-            ).to.be.rejectedWith('TokenIsPaused')
-        })
-
-        // Execute
-        it('GIVEN a paused Token WHEN executeHoldByPartition THEN transaction fails with TokenIsPaused', async () => {
-            await expect(
-                holdFacet.executeHoldByPartition(
-                    _DEFAULT_PARTITION,
-                    1,
-                    account_A,
-                    account_C,
-                    1
-                )
-            ).to.be.rejectedWith('TokenIsPaused')
-        })
-
-        // Release
-        it('GIVEN a paused Token WHEN releaseHoldByPartition THEN transaction fails with TokenIsPaused', async () => {
-            await expect(
-                holdFacet.releaseHoldByPartition(
-                    _DEFAULT_PARTITION,
-                    1,
-                    account_A,
-                    1
-                )
-            ).to.be.rejectedWith('TokenIsPaused')
-        })
-
-        // Reclaim
-        it('GIVEN a paused Token WHEN reclaimHoldByPartition THEN transaction fails with TokenIsPaused', async () => {
-            await expect(
-                holdFacet.reclaimHoldByPartition(
-                    _DEFAULT_PARTITION,
-                    1,
-                    account_A
-                )
-            ).to.be.rejectedWith('TokenIsPaused')
-        })
-    })
-
-    describe('AccessControl', () => {
-        // Create
-        it('GIVEN an account without authorization WHEN createHoldFromByPartition THEN transaction fails with InsufficientAllowance', async () => {
-            await expect(
-                holdFacet
-                    .connect(signer_D)
-                    .createHoldFromByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('InsufficientAllowance')
-        })
-
-        it('GIVEN an account without operator authorization WHEN operatorCreateHoldByPartition THEN transaction fails with Unauthorized', async () => {
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .operatorCreateHoldByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('Unauthorized')
-        })
-
-        it('GIVEN an account without CONTROLLER role WHEN controllerCreateHoldByPartition THEN transaction fails with AccountHasNoRole', async () => {
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .controllerCreateHoldByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('AccountHasNoRole')
-        })
-
-        // Execute
-
-        it('GIVEN a wrong escrow WHEN executeHoldByPartition THEN transaction fails with WrongEscrowHoldId', async () => {
-            await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
-
-            await expect(
-                holdFacet
-                    .connect(signer_C)
-                    .executeHoldByPartition(
-                        _DEFAULT_PARTITION,
-                        1,
-                        account_A,
-                        account_C,
-                        1
-                    )
-            ).to.be.rejectedWith('WrongEscrowHoldId')
-        })
-
-        // Release
-        it('GIVEN a wrong escrow WHEN releaseHoldByPartition THEN transaction fails with WrongEscrowHoldId', async () => {
-            await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
-
-            await expect(
-                holdFacet
-                    .connect(signer_C)
-                    .releaseHoldByPartition(_DEFAULT_PARTITION, 1, account_A, 1)
-            ).to.be.rejectedWith('WrongEscrowHoldId')
-        })
-    })
-
-    describe('Control List', () => {
-        // Execute
-        it('GIVEN a blacklisted destination account WHEN executeHoldByPartition THEN transaction fails with AccountIsBlocked', async () => {
-            await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
-
-            await controlListFacet.addToControlList(account_C)
-
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .executeHoldByPartition(
-                        _DEFAULT_PARTITION,
-                        1,
-                        account_A,
-                        account_C,
-                        1
-                    )
-            ).to.be.rejectedWith('AccountIsBlocked')
-        })
-
-        it('GIVEN a blacklisted origin account WHEN executeHoldByPartition THEN transaction fails with AccountIsBlocked', async () => {
-            await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
-
-            await controlListFacet.addToControlList(account_A)
-
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .executeHoldByPartition(
-                        _DEFAULT_PARTITION,
-                        1,
-                        account_A,
-                        account_B,
-                        1
-                    )
-            ).to.be.rejectedWith('AccountIsBlocked')
-        })
-    })
-
-    describe('Create with wrong input arguments', () => {
-        it('GIVEN a Token WHEN creating hold with amount bigger than balance THEN transaction fails with InsufficientBalance', async () => {
-            let AmountLargerThanBalance = 1000 * _AMOUNT
-
-            let hold_wrong = {
-                amount: AmountLargerThanBalance,
-                expirationTimestamp: expirationTimestamp,
-                escrow: account_B,
-                to: ADDRESS_ZERO,
-                data: _DATA,
-            }
-
-            console.log('createHoldByPartition')
-
-            await expect(
-                holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold_wrong)
-            ).to.be.rejectedWith('InsufficientBalance')
-
-            console.log('createHoldFromByPartition')
-
-            await erc20Facet
-                .connect(signer_A)
-                .approve(account_B, AmountLargerThanBalance)
-
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .createHoldFromByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold_wrong,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('InsufficientBalance')
-
-            await erc20Facet
-                .connect(signer_A)
-                .decreaseAllowance(account_B, AmountLargerThanBalance)
-
-            console.log('operatorCreateHoldByPartition')
-
-            await erc1410Facet.connect(signer_A).authorizeOperator(account_B)
-
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .operatorCreateHoldByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold_wrong,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('InsufficientBalance')
-
-            await erc1410Facet.connect(signer_A).revokeOperator(account_B)
-
-            console.log('controllerCreateHoldByPartition')
-
-            await expect(
-                holdFacet
-                    .connect(signer_C)
-                    .controllerCreateHoldByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold_wrong,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('InsufficientBalance')
-        })
-
-        it('GIVEN a Token WHEN createHoldByPartition for wrong partition THEN transaction fails with InvalidPartition', async () => {
-            await deployAll(true)
-
-            console.log('createHoldByPartition')
-
-            await expect(
-                holdFacet.createHoldByPartition(_WRONG_PARTITION, hold)
-            ).to.be.rejectedWith('InvalidPartition')
-
-            console.log('createHoldFromByPartition')
-
-            console.log('operatorCreateHoldByPartition')
-
-            await erc1410Facet.connect(signer_A).authorizeOperator(account_B)
-
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .operatorCreateHoldByPartition(
-                        _WRONG_PARTITION,
-                        account_A,
-                        hold,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('InvalidPartition')
-
-            await erc1410Facet.connect(signer_A).revokeOperator(account_B)
-
-            console.log('controllerCreateHoldByPartition')
-
-            await expect(
-                holdFacet
-                    .connect(signer_C)
-                    .controllerCreateHoldByPartition(
-                        _WRONG_PARTITION,
-                        account_A,
-                        hold,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('InvalidPartition')
-        })
-
-        it('GIVEN a Token WHEN createHoldByPartition passing empty escrow THEN transaction fails with ZeroAddressNotAllowed', async () => {
-            let hold_wrong = {
-                amount: _AMOUNT,
-                expirationTimestamp: expirationTimestamp,
-                escrow: ADDRESS_ZERO,
-                to: ADDRESS_ZERO,
-                data: _DATA,
-            }
-
-            console.log('createHoldByPartition')
-
-            await expect(
-                holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold_wrong)
-            ).to.be.rejectedWith('ZeroAddressNotAllowed')
-
-            console.log('createHoldFromByPartition')
-
-            await erc20Facet.connect(signer_A).approve(account_B, _AMOUNT)
-
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .createHoldFromByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold_wrong,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('ZeroAddressNotAllowed')
-
-            await erc20Facet
-                .connect(signer_A)
-                .decreaseAllowance(account_B, _AMOUNT)
-
-            console.log('operatorCreateHoldByPartition')
-
-            await erc1410Facet.connect(signer_A).authorizeOperator(account_B)
-
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .operatorCreateHoldByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold_wrong,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('ZeroAddressNotAllowed')
-
-            await erc1410Facet.connect(signer_A).revokeOperator(account_B)
-
-            console.log('controllerCreateHoldByPartition')
-
-            await expect(
-                holdFacet
-                    .connect(signer_C)
-                    .controllerCreateHoldByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold_wrong,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('ZeroAddressNotAllowed')
-        })
-
-        it('GIVEN a Token WHEN createHoldByPartition passing wrong expirationTimestamp THEN transaction fails with WrongExpirationTimestamp', async () => {
-            let wrongExpirationTimestamp = currentTimestamp - 1
-
-            let hold_wrong = {
-                amount: _AMOUNT,
-                expirationTimestamp: wrongExpirationTimestamp,
-                escrow: account_B,
-                to: ADDRESS_ZERO,
-                data: _DATA,
-            }
-
-            console.log('createHoldByPartition')
-
-            await expect(
-                holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold_wrong)
-            ).to.be.rejectedWith('WrongExpirationTimestamp')
-
-            console.log('createHoldFromByPartition')
-
-            await erc20Facet.connect(signer_A).approve(account_B, _AMOUNT)
-
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .createHoldFromByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold_wrong,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('WrongExpirationTimestamp')
-
-            await erc20Facet
-                .connect(signer_A)
-                .decreaseAllowance(account_B, _AMOUNT)
-
-            console.log('operatorCreateHoldByPartition')
-
-            await erc1410Facet.connect(signer_A).authorizeOperator(account_B)
-
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .operatorCreateHoldByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold_wrong,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('WrongExpirationTimestamp')
-
-            await erc1410Facet.connect(signer_A).revokeOperator(account_B)
-
-            console.log('controllerCreateHoldByPartition')
-
-            await expect(
-                holdFacet
-                    .connect(signer_C)
-                    .controllerCreateHoldByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold_wrong,
-                        '0x'
-                    )
-            ).to.be.rejectedWith('WrongExpirationTimestamp')
-        })
-    })
-
-    describe('Holds OK', () => {
-        // Create
-        async function checkCreatedHold() {
+    describe('Multi-partition disabled', () => {
+        async function checkCreatedHold_expected(
+            balance_expected: number,
+            totalHeldAmount_expected: number,
+            holdCount_expected: number,
+            escrow_holdCount_expected: number,
+            holdAmount_expected: number,
+            holdEscrow_expected: string,
+            holdData_expected: string,
+            holdOperatorData_expected: string,
+            holdDestination_expected: string,
+            holdExpirationTimestamp_expected: string,
+            holdTokenHolder_expected: string,
+            escrow_HoldId_expected: number,
+            holdsLength_expected: number,
+            holdId_expected: number,
+            escrowHoldsLength_expected: number,
+            escrowHoldId_expected: number
+        ) {
             let balance = await erc1410Facet.balanceOf(account_A)
             let heldAmount = await holdFacet.getHeldAmountForByPartition(
                 _DEFAULT_PARTITION,
@@ -859,16 +435,6 @@ describe('Hold Tests', () => {
                     _DEFAULT_PARTITION,
                     account_B
                 )
-            let retrieved_hold = await holdFacet.getHoldForByPartition(
-                _DEFAULT_PARTITION,
-                account_A,
-                1
-            )
-            let escrow_hold = await holdFacet.getHoldForEscrowByPartition(
-                _DEFAULT_PARTITION,
-                account_B,
-                1
-            )
             let holdIds = await holdFacet.getHoldsIdForByPartition(
                 _DEFAULT_PARTITION,
                 account_A,
@@ -882,134 +448,1109 @@ describe('Hold Tests', () => {
                 1
             )
 
-            expect(balance).to.equal(0)
-            expect(heldAmount).to.equal(_AMOUNT)
-            expect(holdCount).to.equal(1)
-            expect(escrow_holdCount).to.equal(1)
-            expect(retrieved_hold.amount_).to.equal(hold.amount)
-            expect(retrieved_hold.escrow_).to.equal(hold.escrow)
-            expect(retrieved_hold.data_).to.equal(hold.data)
-            //expect(retrieved_hold.operatorData_).to.equal('0x')
-            expect(retrieved_hold.destination_).to.equal(hold.to)
-            expect(retrieved_hold.expirationTimestamp_).to.equal(
-                hold.expirationTimestamp
-            )
-            expect(escrow_hold.amount_).to.equal(hold.amount)
-            expect(escrow_hold.tokenHolder_).to.equal(account_A)
-            expect(escrow_hold.data_).to.equal(hold.data)
-            //expect(escrow_hold.operatorData_).to.equal('0x')
-            expect(escrow_hold.destination_).to.equal(hold.to)
-            expect(escrow_hold.expirationTimestamp_).to.equal(
-                hold.expirationTimestamp
-            )
-            expect(escrow_hold.id_).to.equal(1)
-            expect(holdIds.length).to.equal(1)
-            expect(holdIds[0]).to.equal(1)
-            expect(escrow_holdIds.length).to.equal(1)
-            expect(escrow_holdIds[0]).to.equal(1)
+            expect(balance).to.equal(balance_expected)
+            expect(heldAmount).to.equal(totalHeldAmount_expected)
+            expect(holdCount).to.equal(holdCount_expected)
+            expect(escrow_holdCount).to.equal(escrow_holdCount_expected)
+            expect(holdIds.length).to.equal(holdsLength_expected)
+            expect(escrow_holdIds.length).to.equal(escrowHoldsLength_expected)
+
+            if (holdCount_expected > 0) {
+                let retrieved_hold = await holdFacet.getHoldForByPartition(
+                    _DEFAULT_PARTITION,
+                    account_A,
+                    1
+                )
+                let escrow_hold = await holdFacet.getHoldForEscrowByPartition(
+                    _DEFAULT_PARTITION,
+                    account_B,
+                    1
+                )
+
+                expect(retrieved_hold.amount_).to.equal(holdAmount_expected)
+                expect(retrieved_hold.escrow_).to.equal(holdEscrow_expected)
+                expect(retrieved_hold.data_).to.equal(holdData_expected)
+                expect(retrieved_hold.operatorData_).to.equal(
+                    holdOperatorData_expected
+                )
+                expect(retrieved_hold.destination_).to.equal(
+                    holdDestination_expected
+                )
+                expect(retrieved_hold.expirationTimestamp_).to.equal(
+                    holdExpirationTimestamp_expected
+                )
+                expect(escrow_hold.amount_).to.equal(holdAmount_expected)
+                expect(escrow_hold.tokenHolder_).to.equal(
+                    holdTokenHolder_expected
+                )
+                expect(escrow_hold.data_).to.equal(holdData_expected)
+                expect(escrow_hold.operatorData_).to.equal(
+                    holdOperatorData_expected
+                )
+                expect(escrow_hold.destination_).to.equal(
+                    holdDestination_expected
+                )
+                expect(escrow_hold.expirationTimestamp_).to.equal(
+                    holdExpirationTimestamp_expected
+                )
+                expect(escrow_hold.id_).to.equal(escrow_HoldId_expected)
+                expect(holdIds[0]).to.equal(holdId_expected)
+                expect(escrow_holdIds[0]).to.equal(escrowHoldId_expected)
+            }
         }
 
-        it('GIVEN a Token WHEN createHoldByPartition hold THEN transaction succeeds', async () => {
-            await expect(
-                holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
-            )
-                .to.emit(holdFacet, 'HeldByPartition')
-                .withArgs(
-                    account_A,
-                    account_A,
-                    _DEFAULT_PARTITION,
-                    1,
-                    Object.values(hold),
-                    '0x'
-                )
+        beforeEach(async () => {
+            currentTimestamp = (await ethers.provider.getBlock('latest'))
+                .timestamp
+            expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
 
-            await checkCreatedHold()
+            hold = {
+                amount: _AMOUNT,
+                expirationTimestamp: expirationTimestamp,
+                escrow: account_B,
+                to: ADDRESS_ZERO,
+                data: _DATA,
+            }
+
+            await deployAll(false)
         })
 
-        it('GIVEN a Token WHEN createHoldFromByPartition hold THEN transaction succeeds', async () => {
-            await erc20Facet.connect(signer_A).approve(account_B, _AMOUNT)
+        describe('Paused', () => {
+            beforeEach(async () => {
+                // Pausing the token
+                await pauseFacet.pause()
+            })
 
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .createHoldFromByPartition(
+            // Create
+            it('GIVEN a paused Token WHEN createHoldByPartition THEN transaction fails with TokenIsPaused', async () => {
+                await expect(
+                    holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
+            })
+
+            it('GIVEN a paused Token WHEN createHoldFromByPartition THEN transaction fails with TokenIsPaused', async () => {
+                await expect(
+                    holdFacet.createHoldFromByPartition(
                         _DEFAULT_PARTITION,
                         account_A,
                         hold,
                         '0x'
                     )
-            )
-                .to.emit(holdFacet, 'HeldByPartition')
-                .withArgs(
-                    account_B,
-                    account_A,
-                    _DEFAULT_PARTITION,
-                    1,
-                    Object.values(hold),
-                    '0x'
-                )
+                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
+            })
 
-            await checkCreatedHold()
-        })
-
-        it('GIVEN a Token WHEN operatorCreateHoldByPartition hold THEN transaction succeeds', async () => {
-            await erc1410Facet.connect(signer_A).authorizeOperator(account_B)
-
-            await expect(
-                holdFacet
-                    .connect(signer_B)
-                    .operatorCreateHoldByPartition(
+            it('GIVEN a paused Token WHEN operatorCreateHoldByPartition THEN transaction fails with TokenIsPaused', async () => {
+                await expect(
+                    holdFacet.operatorCreateHoldByPartition(
                         _DEFAULT_PARTITION,
                         account_A,
                         hold,
                         '0x'
                     )
-            )
-                .to.emit(holdFacet, 'HeldByPartition')
-                .withArgs(
-                    account_B,
-                    account_A,
-                    _DEFAULT_PARTITION,
-                    1,
-                    Object.values(hold),
-                    '0x'
-                )
+                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
+            })
 
-            await erc1410Facet.connect(signer_A).revokeOperator(account_B)
-
-            await checkCreatedHold()
-        })
-
-        it('GIVEN a Token WHEN controllerCreateHoldByPartition hold THEN transaction succeeds', async () => {
-            await expect(
-                holdFacet
-                    .connect(signer_C)
-                    .controllerCreateHoldByPartition(
+            it('GIVEN a paused Token WHEN controllerCreateHoldByPartition THEN transaction fails with TokenIsPaused', async () => {
+                await expect(
+                    holdFacet.controllerCreateHoldByPartition(
                         _DEFAULT_PARTITION,
                         account_A,
                         hold,
                         '0x'
                     )
-            )
-                .to.emit(holdFacet, 'HeldByPartition')
-                .withArgs(
-                    account_C,
-                    account_A,
-                    _DEFAULT_PARTITION,
-                    1,
-                    Object.values(hold),
-                    '0x'
-                )
+                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
+            })
 
-            await checkCreatedHold()
+            // Execute
+            it('GIVEN a paused Token WHEN executeHoldByPartition THEN transaction fails with TokenIsPaused', async () => {
+                await expect(
+                    holdFacet.executeHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        1,
+                        account_A,
+                        account_C,
+                        1
+                    )
+                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
+            })
+
+            // Release
+            it('GIVEN a paused Token WHEN releaseHoldByPartition THEN transaction fails with TokenIsPaused', async () => {
+                await expect(
+                    holdFacet.releaseHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        1,
+                        account_A,
+                        1
+                    )
+                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
+            })
+
+            // Reclaim
+            it('GIVEN a paused Token WHEN reclaimHoldByPartition THEN transaction fails with TokenIsPaused', async () => {
+                await expect(
+                    holdFacet.reclaimHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        1,
+                        account_A
+                    )
+                ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
+            })
         })
 
-        // Execute
+        describe('AccessControl', () => {
+            // Create
+            it('GIVEN an account without authorization WHEN createHoldFromByPartition THEN transaction fails with InsufficientAllowance', async () => {
+                await expect(
+                    holdFacet
+                        .connect(signer_D)
+                        .createHoldFromByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc20Facet,
+                    'InsufficientAllowance'
+                )
+            })
 
-        // Release
+            it('GIVEN an account without operator authorization WHEN operatorCreateHoldByPartition THEN transaction fails with Unauthorized', async () => {
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .operatorCreateHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(holdFacet, 'Unauthorized')
+            })
 
-        // Reclaim
+            it('GIVEN an account without CONTROLLER role WHEN controllerCreateHoldByPartition THEN transaction fails with AccountHasNoRole', async () => {
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .controllerCreateHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(holdFacet, 'AccountHasNoRole')
+            })
+        })
+
+        describe('Control List', () => {
+            // Execute
+            it('GIVEN a blacklisted destination account WHEN executeHoldByPartition THEN transaction fails with AccountIsBlocked', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await controlListFacet.addToControlList(account_C)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .executeHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            account_C,
+                            1
+                        )
+                ).to.be.revertedWithCustomError(
+                    controlListFacet,
+                    'AccountIsBlocked'
+                )
+            })
+
+            it('GIVEN a blacklisted origin account WHEN executeHoldByPartition THEN transaction fails with AccountIsBlocked', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await controlListFacet.addToControlList(account_A)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .executeHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            account_B,
+                            1
+                        )
+                ).to.be.revertedWithCustomError(
+                    controlListFacet,
+                    'AccountIsBlocked'
+                )
+            })
+        })
+
+        describe('Create with wrong input arguments', () => {
+            it('GIVEN a Token WHEN creating hold with amount bigger than balance THEN transaction fails with InsufficientBalance', async () => {
+                let AmountLargerThanBalance = 1000 * _AMOUNT
+
+                let hold_wrong = {
+                    amount: AmountLargerThanBalance,
+                    expirationTimestamp: expirationTimestamp,
+                    escrow: account_B,
+                    to: ADDRESS_ZERO,
+                    data: _DATA,
+                }
+
+                console.log('createHoldByPartition')
+
+                await expect(
+                    holdFacet.createHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        hold_wrong
+                    )
+                ).to.be.revertedWithCustomError(
+                    erc20Facet,
+                    'InsufficientBalance'
+                )
+
+                console.log('createHoldFromByPartition')
+
+                await erc20Facet
+                    .connect(signer_A)
+                    .approve(account_B, AmountLargerThanBalance)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .createHoldFromByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold_wrong,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc20Facet,
+                    'InsufficientBalance'
+                )
+
+                await erc20Facet
+                    .connect(signer_A)
+                    .decreaseAllowance(account_B, AmountLargerThanBalance)
+
+                console.log('operatorCreateHoldByPartition')
+
+                await erc1410Facet
+                    .connect(signer_A)
+                    .authorizeOperator(account_B)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .operatorCreateHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold_wrong,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc20Facet,
+                    'InsufficientBalance'
+                )
+
+                await erc1410Facet.connect(signer_A).revokeOperator(account_B)
+
+                console.log('controllerCreateHoldByPartition')
+
+                await expect(
+                    holdFacet
+                        .connect(signer_C)
+                        .controllerCreateHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold_wrong,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc20Facet,
+                    'InsufficientBalance'
+                )
+            })
+
+            it('GIVEN a Token WHEN createHoldByPartition for wrong partition THEN transaction fails with InvalidPartition', async () => {
+                await deployAll(true)
+
+                console.log('createHoldByPartition')
+
+                await expect(
+                    holdFacet.createHoldByPartition(_WRONG_PARTITION, hold)
+                ).to.be.revertedWithCustomError(
+                    erc1410Facet,
+                    'InvalidPartition'
+                )
+
+                console.log('createHoldFromByPartition')
+
+                console.log('operatorCreateHoldByPartition')
+
+                await erc1410Facet
+                    .connect(signer_A)
+                    .authorizeOperator(account_B)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .operatorCreateHoldByPartition(
+                            _WRONG_PARTITION,
+                            account_A,
+                            hold,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc1410Facet,
+                    'InvalidPartition'
+                )
+
+                await erc1410Facet.connect(signer_A).revokeOperator(account_B)
+
+                console.log('controllerCreateHoldByPartition')
+
+                await expect(
+                    holdFacet
+                        .connect(signer_C)
+                        .controllerCreateHoldByPartition(
+                            _WRONG_PARTITION,
+                            account_A,
+                            hold,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc1410Facet,
+                    'InvalidPartition'
+                )
+            })
+
+            it('GIVEN a Token WHEN createHoldByPartition passing empty escrow THEN transaction fails with ZeroAddressNotAllowed', async () => {
+                let hold_wrong = {
+                    amount: _AMOUNT,
+                    expirationTimestamp: expirationTimestamp,
+                    escrow: ADDRESS_ZERO,
+                    to: ADDRESS_ZERO,
+                    data: _DATA,
+                }
+
+                console.log('createHoldByPartition')
+
+                await expect(
+                    holdFacet.createHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        hold_wrong
+                    )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'ZeroAddressNotAllowed'
+                )
+
+                console.log('createHoldFromByPartition')
+
+                await erc20Facet.connect(signer_A).approve(account_B, _AMOUNT)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .createHoldFromByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold_wrong,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'ZeroAddressNotAllowed'
+                )
+
+                await erc20Facet
+                    .connect(signer_A)
+                    .decreaseAllowance(account_B, _AMOUNT)
+
+                console.log('operatorCreateHoldByPartition')
+
+                await erc1410Facet
+                    .connect(signer_A)
+                    .authorizeOperator(account_B)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .operatorCreateHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold_wrong,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'ZeroAddressNotAllowed'
+                )
+
+                await erc1410Facet.connect(signer_A).revokeOperator(account_B)
+
+                console.log('controllerCreateHoldByPartition')
+
+                await expect(
+                    holdFacet
+                        .connect(signer_C)
+                        .controllerCreateHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold_wrong,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'ZeroAddressNotAllowed'
+                )
+            })
+
+            it('GIVEN a Token WHEN createHoldByPartition passing wrong expirationTimestamp THEN transaction fails with WrongExpirationTimestamp', async () => {
+                let wrongExpirationTimestamp = currentTimestamp - 1
+
+                let hold_wrong = {
+                    amount: _AMOUNT,
+                    expirationTimestamp: wrongExpirationTimestamp,
+                    escrow: account_B,
+                    to: ADDRESS_ZERO,
+                    data: _DATA,
+                }
+
+                console.log('createHoldByPartition')
+
+                await expect(
+                    holdFacet.createHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        hold_wrong
+                    )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'WrongExpirationTimestamp'
+                )
+
+                console.log('createHoldFromByPartition')
+
+                await erc20Facet.connect(signer_A).approve(account_B, _AMOUNT)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .createHoldFromByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold_wrong,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'WrongExpirationTimestamp'
+                )
+
+                await erc20Facet
+                    .connect(signer_A)
+                    .decreaseAllowance(account_B, _AMOUNT)
+
+                console.log('operatorCreateHoldByPartition')
+
+                await erc1410Facet
+                    .connect(signer_A)
+                    .authorizeOperator(account_B)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .operatorCreateHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold_wrong,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'WrongExpirationTimestamp'
+                )
+
+                await erc1410Facet.connect(signer_A).revokeOperator(account_B)
+
+                console.log('controllerCreateHoldByPartition')
+
+                await expect(
+                    holdFacet
+                        .connect(signer_C)
+                        .controllerCreateHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold_wrong,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'WrongExpirationTimestamp'
+                )
+            })
+
+            it('GIVEN a wrong partition WHEN creating hold THEN transaction fails with PartitionNotAllowedInSinglePartitionMode', async () => {
+                console.log('createHoldByPartition')
+
+                await expect(
+                    holdFacet.createHoldByPartition(_WRONG_PARTITION, hold)
+                ).to.be.revertedWithCustomError(
+                    erc1410Facet,
+                    'PartitionNotAllowedInSinglePartitionMode'
+                )
+
+                console.log('createHoldFromByPartition')
+
+                await erc20Facet.connect(signer_A).approve(account_B, _AMOUNT)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .createHoldFromByPartition(
+                            _WRONG_PARTITION,
+                            account_A,
+                            hold,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc1410Facet,
+                    'PartitionNotAllowedInSinglePartitionMode'
+                )
+
+                await erc20Facet
+                    .connect(signer_A)
+                    .decreaseAllowance(account_B, _AMOUNT)
+
+                console.log('operatorCreateHoldByPartition')
+
+                await erc1410Facet
+                    .connect(signer_A)
+                    .authorizeOperator(account_B)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .operatorCreateHoldByPartition(
+                            _WRONG_PARTITION,
+                            account_A,
+                            hold,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc1410Facet,
+                    'PartitionNotAllowedInSinglePartitionMode'
+                )
+
+                await erc1410Facet.connect(signer_A).revokeOperator(account_B)
+
+                console.log('controllerCreateHoldByPartition')
+
+                await expect(
+                    holdFacet
+                        .connect(signer_C)
+                        .controllerCreateHoldByPartition(
+                            _WRONG_PARTITION,
+                            account_A,
+                            hold,
+                            '0x'
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc1410Facet,
+                    'PartitionNotAllowedInSinglePartitionMode'
+                )
+            })
+        })
+
+        describe('Create Holds OK', () => {
+            // Create
+            async function checkCreatedHold(operatorData?: string) {
+                await checkCreatedHold_expected(
+                    0,
+                    _AMOUNT,
+                    1,
+                    1,
+                    hold.amount,
+                    hold.escrow,
+                    hold.data,
+                    operatorData ?? '0x',
+                    hold.to,
+                    hold.expirationTimestamp,
+                    account_A,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                )
+            }
+
+            it('GIVEN a Token WHEN createHoldByPartition hold THEN transaction succeeds', async () => {
+                await expect(
+                    holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+                )
+                    .to.emit(holdFacet, 'HeldByPartition')
+                    .withArgs(
+                        account_A,
+                        account_A,
+                        _DEFAULT_PARTITION,
+                        1,
+                        Object.values(hold),
+                        '0x'
+                    )
+
+                await checkCreatedHold()
+            })
+
+            it('GIVEN a Token WHEN createHoldFromByPartition hold THEN transaction succeeds', async () => {
+                await erc20Facet.connect(signer_A).approve(account_B, _AMOUNT)
+
+                let operatorData = '0x'
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .createHoldFromByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold,
+                            operatorData
+                        )
+                )
+                    .to.emit(holdFacet, 'HeldByPartition')
+                    .withArgs(
+                        account_B,
+                        account_A,
+                        _DEFAULT_PARTITION,
+                        1,
+                        Object.values(hold),
+                        operatorData
+                    )
+
+                await checkCreatedHold(operatorData)
+            })
+
+            it('GIVEN a Token WHEN operatorCreateHoldByPartition hold THEN transaction succeeds', async () => {
+                let operatorData = '0xab56'
+
+                await erc1410Facet
+                    .connect(signer_A)
+                    .authorizeOperator(account_B)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .operatorCreateHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold,
+                            operatorData
+                        )
+                )
+                    .to.emit(holdFacet, 'HeldByPartition')
+                    .withArgs(
+                        account_B,
+                        account_A,
+                        _DEFAULT_PARTITION,
+                        1,
+                        Object.values(hold),
+                        operatorData
+                    )
+
+                await erc1410Facet.connect(signer_A).revokeOperator(account_B)
+
+                await checkCreatedHold(operatorData)
+            })
+
+            it('GIVEN a Token WHEN controllerCreateHoldByPartition hold THEN transaction succeeds', async () => {
+                let operatorData = '0xab56222233'
+
+                await expect(
+                    holdFacet
+                        .connect(signer_C)
+                        .controllerCreateHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            account_A,
+                            hold,
+                            operatorData
+                        )
+                )
+                    .to.emit(holdFacet, 'HeldByPartition')
+                    .withArgs(
+                        account_C,
+                        account_A,
+                        _DEFAULT_PARTITION,
+                        1,
+                        Object.values(hold),
+                        operatorData
+                    )
+
+                await checkCreatedHold(operatorData)
+            })
+        })
+
+        describe('Execute with wrong input arguments', () => {
+            it('GIVEN a wrong escrow id WHEN executeHoldByPartition THEN transaction fails with WrongEscrowHoldId', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_C)
+                        .executeHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            account_C,
+                            1
+                        )
+                ).to.be.revertedWithCustomError(holdFacet, 'WrongEscrowHoldId')
+            })
+
+            it('GIVEN a wrong partition WHEN executeHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode', async () => {
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .executeHoldByPartition(
+                            _WRONG_PARTITION,
+                            1,
+                            account_A,
+                            account_C,
+                            1
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc1410Facet,
+                    'PartitionNotAllowedInSinglePartitionMode'
+                )
+            })
+
+            it('GIVEN a hold WHEN executeHoldByPartition for an amount larger than the total held amount THEN transaction fails with InsufficientHoldBalance', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .executeHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            account_C,
+                            2 * _AMOUNT
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'InsufficientHoldBalance'
+                )
+            })
+
+            it('GIVEN a hold WHEN executeHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached', async () => {
+                let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+
+                hold.expirationTimestamp = finalDate - 1
+
+                await timeTravelFacet.changeSystemTimestamp(initDate)
+
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await timeTravelFacet.changeSystemTimestamp(finalDate)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .executeHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            account_C,
+                            1
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'HoldExpirationReached'
+                )
+            })
+
+            it('GIVEN a hold with a destination WHEN executeHoldByPartition to another destination THEN transaction fails with InvalidDestinationAddress', async () => {
+                hold.to = account_D
+
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .executeHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            account_C,
+                            _AMOUNT
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'InvalidDestinationAddress'
+                )
+            })
+        })
+
+        describe('Release with wrong input arguments', () => {
+            it('GIVEN a wrong escrow id WHEN releaseHoldByPartition THEN transaction fails with WrongEscrowHoldId', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_C)
+                        .releaseHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            1
+                        )
+                ).to.be.revertedWithCustomError(holdFacet, 'WrongEscrowHoldId')
+            })
+
+            it('GIVEN a wrong partition WHEN releaseHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode', async () => {
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .releaseHoldByPartition(
+                            _WRONG_PARTITION,
+                            1,
+                            account_A,
+                            1
+                        )
+                ).to.be.revertedWithCustomError(
+                    erc1410Facet,
+                    'PartitionNotAllowedInSinglePartitionMode'
+                )
+            })
+
+            it('GIVEN a hold WHEN releaseHoldByPartition for an amount larger than the total held amount THEN transaction fails with InsufficientHoldBalance', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .releaseHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            2 * _AMOUNT
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'InsufficientHoldBalance'
+                )
+            })
+
+            it('GIVEN hold WHEN releaseHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached', async () => {
+                let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+
+                hold.expirationTimestamp = finalDate - 1
+
+                await timeTravelFacet.changeSystemTimestamp(initDate)
+
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await timeTravelFacet.changeSystemTimestamp(finalDate)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .releaseHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            1
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'HoldExpirationReached'
+                )
+            })
+        })
+
+        describe('Reclaim with wrong input arguments', () => {
+            it('GIVEN a wrong id WHEN reclaimHoldByPartition THEN transaction fails with WrongHoldId', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet.reclaimHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        2,
+                        account_A
+                    )
+                ).to.be.revertedWithCustomError(holdFacet, 'WrongHoldId')
+            })
+
+            it('GIVEN a wrong partition WHEN reclaimHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode', async () => {
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .reclaimHoldByPartition(_WRONG_PARTITION, 1, account_A)
+                ).to.be.revertedWithCustomError(
+                    erc1410Facet,
+                    'PartitionNotAllowedInSinglePartitionMode'
+                )
+            })
+
+            it('GIVEN hold WHEN reclaimHoldByPartition after expiration date THEN transaction fails with HoldExpirationNotReached', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .reclaimHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'HoldExpirationNotReached'
+                )
+            })
+        })
+
+        describe('Execute OK', () => {
+            it('GIVEN hold with no destination WHEN executeHoldByPartition THEN transaction succeeds', async () => {
+                let balance_before = await erc1410Facet.balanceOf(account_C)
+
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .executeHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            account_C,
+                            1
+                        )
+                )
+                    .to.emit(holdFacet, 'HoldByPartitionExecuted')
+                    .withArgs(account_A, _DEFAULT_PARTITION, 1, 1, account_C)
+
+                await checkCreatedHold_expected(
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    '-',
+                    '0x',
+                    '0x',
+                    '-',
+                    '-',
+                    '-',
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                )
+
+                let balance_after = await erc1410Facet.balanceOf(account_C)
+
+                expect(balance_after.toNumber()).to.equal(
+                    balance_before.add(_AMOUNT).toNumber()
+                )
+            })
+        })
+
+        describe('Release OK', () => {
+            it('GIVEN hold with no destination WHEN releaseHoldByPartition THEN transaction succeeds', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .releaseHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            1
+                        )
+                )
+                    .to.emit(holdFacet, 'HoldByPartitionReleased')
+                    .withArgs(account_A, _DEFAULT_PARTITION, 1, 1)
+
+                await checkCreatedHold_expected(
+                    _AMOUNT,
+                    0,
+                    0,
+                    0,
+                    0,
+                    '-',
+                    '0x',
+                    '0x',
+                    '-',
+                    '-',
+                    '-',
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                )
+            })
+        })
+
+        describe('Reclaim OK', () => {
+            it('GIVEN hold with no destination WHEN reclaimHoldByPartition THEN transaction succeeds', async () => {
+                let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+
+                hold.expirationTimestamp = finalDate - 1
+
+                await timeTravelFacet.changeSystemTimestamp(initDate)
+
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await timeTravelFacet.changeSystemTimestamp(finalDate)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .reclaimHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A
+                        )
+                )
+                    .to.emit(holdFacet, 'HoldByPartitionReclaimed')
+                    .withArgs(
+                        account_B,
+                        account_A,
+                        _DEFAULT_PARTITION,
+                        1,
+                        _AMOUNT
+                    )
+
+                await checkCreatedHold_expected(
+                    _AMOUNT,
+                    0,
+                    0,
+                    0,
+                    0,
+                    '-',
+                    '0x',
+                    '0x',
+                    '-',
+                    '-',
+                    '-',
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                )
+            })
+        })
     })
-
-    describe('Execute and Release with wrong input arguments', () => {})
 })

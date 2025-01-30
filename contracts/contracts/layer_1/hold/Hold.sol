@@ -337,7 +337,6 @@ abstract contract Hold is
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_CONTROLLER_ROLE)
         onlyControllable
-        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldByPartition(
