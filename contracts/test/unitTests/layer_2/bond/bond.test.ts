@@ -559,7 +559,7 @@ describe('Bond Tests', () => {
 
             let hold = {
                 amount: HeldAmount,
-                expirationTimestamp: 99999999,
+                expirationTimestamp: 999999999999999,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
                 data: '0x',
