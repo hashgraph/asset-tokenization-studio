@@ -449,30 +449,29 @@ abstract contract Hold is
 
     function reclaimHoldByPartition(
         bytes32 _partition,
-        uint256 _escrowId,
-        address _escrowAddress
+        address _tokenHolder,
+        uint256 _holdId
     )
         external
         virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidEscrowHoldId(_partition, _escrowAddress, _escrowId)
         returns (bool success_)
     {
         uint256 holdId_;
         address tokenHolder_;
         uint256 amount_;
-        (success_, amount_, holdId_, tokenHolder_) = _reclaimHoldByPartition(
+        (success_, amount_) = _reclaimHoldByPartition(
             _partition,
-            _escrowId,
-            _escrowAddress
+            _tokenHolder,
+            _holdId
         );
         emit HoldByPartitionReclaimed(
             _msgSender(),
-            tokenHolder_,
+            _tokenHolder,
             _partition,
-            holdId_,
+            _holdId,
             amount_
         );
     }

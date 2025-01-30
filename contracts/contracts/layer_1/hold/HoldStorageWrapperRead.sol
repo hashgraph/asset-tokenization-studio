@@ -351,6 +351,7 @@ abstract contract HoldStorageWrapperRead is LocalContext {
             return
                 IHold.HoldData(
                     0,
+                    0,
                     IHold.Hold(0, 0, address(0), address(0), ''),
                     ''
                 );

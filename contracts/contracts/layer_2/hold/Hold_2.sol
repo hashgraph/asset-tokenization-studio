@@ -379,21 +379,19 @@ contract Hold_2 is
 
     function _reclaimHoldByPartition(
         bytes32 _partition,
-        uint256 _escrowId,
-        address _escrowAddress
+        address _tokenHolder,
+        uint256 _holdId
     )
         internal
         virtual
         override(HoldStorageWrapper, HoldStorageWrapper_2)
-        returns (
-            bool success_,
-            uint256 amount_,
-            uint256 holdId_,
-            address tokenHolder_
-        )
+        returns (bool success_, uint256 amount_)
     {
-        (success_, amount_, holdId_, tokenHolder_) = HoldStorageWrapper_2
-            ._reclaimHoldByPartition(_partition, _escrowId, _escrowAddress);
+        (success_, amount_) = HoldStorageWrapper_2._reclaimHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
     }
 
     function getStaticResolverKey()

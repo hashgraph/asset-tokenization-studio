@@ -264,6 +264,7 @@ interface IHold {
 
     struct HoldData {
         uint256 id;
+        uint256 escrowId;
         Hold hold;
         bytes operatorData;
     }
@@ -334,8 +335,8 @@ interface IHold {
 
     function reclaimHoldByPartition(
         bytes32 _partition,
-        uint256 _escrowId,
-        address _escrowAddress
+        address _tokenHolder,
+        uint256 _holdId
     ) external returns (bool success_);
 
     function getHeldAmountFor(
