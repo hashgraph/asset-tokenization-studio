@@ -414,7 +414,7 @@ contract Hold_2 is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](17);
+        staticFunctionSelectors_ = new bytes4[](18);
         staticFunctionSelectors_[selectorIndex++] = this
             .createHoldByPartition
             .selector;
@@ -465,6 +465,9 @@ contract Hold_2 is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getHeldAmountForByPartitionAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHeldAmountFor
             .selector;
     }
 
