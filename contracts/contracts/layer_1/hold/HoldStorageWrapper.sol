@@ -316,6 +316,73 @@ abstract contract HoldStorageWrapper is
         virtual
         returns (bool success_, uint256 holdId_, address tokenHolder_)
     {
+        return
+            _operateHoldByPartition(
+                _partition,
+                _escrowId,
+                _to,
+                _amount,
+                IHold.OperationType.Execute
+            );
+    }
+
+    function _releaseHoldByPartition(
+        bytes32 _partition,
+        uint256 _escrowId,
+        uint256 _amount
+    )
+        internal
+        virtual
+        returns (bool success_, uint256 holdId_, address tokenHolder_)
+    {
+        tokenHolder_ = _getTokenHolderFromEscrowId(
+            _partition,
+            _msgSender(),
+            _escrowId
+        );
+
+        return
+            _operateHoldByPartition(
+                _partition,
+                _escrowId,
+                tokenHolder_,
+                _amount,
+                IHold.OperationType.Release
+            );
+    }
+
+    function _reclaimHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal virtual returns (bool success_, uint256 amount_) {
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+        amount_ = holdData.hold.amount;
+
+        (success_, , ) = _operateHoldByPartition(
+            _partition,
+            holdData.escrowId,
+            _tokenHolder,
+            amount_,
+            IHold.OperationType.Reclaim
+        );
+    }
+
+    function _operateHoldByPartition(
+        bytes32 _partition,
+        uint256 _escrowId,
+        address _to,
+        uint256 _amount,
+        IHold.OperationType _operation
+    )
+        internal
+        virtual
+        returns (bool success_, uint256 holdId_, address tokenHolder_)
+    {
         IHold.HoldData memory holdData = _getHoldFromEscrowId(
             _partition,
             _msgSender(),
@@ -328,17 +395,30 @@ abstract contract HoldStorageWrapper is
             _escrowId
         );
 
-        _beforeExecuteHold(_partition, tokenHolder_, _to);
+        if (_operation == IHold.OperationType.Execute) {
+            if (!_checkControlList(tokenHolder_)) {
+                revert AccountIsBlocked(tokenHolder_);
+            }
+
+            if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
+                revert IHold.InvalidDestinationAddress(holdData.hold.to, _to);
+            }
+        }
+        if (
+            _operation != IHold.OperationType.Reclaim &&
+            _isHoldExpired(holdData)
+        ) {
+            revert IHold.HoldExpirationReached();
+        } else if (
+            _operation == IHold.OperationType.Reclaim &&
+            !_isHoldExpired(holdData)
+        ) {
+            revert IHold.HoldExpirationNotReached();
+        }
+
+        _beforeOperateHold(_partition, tokenHolder_, _to);
 
         _checkHoldAmount(_amount, holdData);
-
-        if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
-            revert IHold.InvalidDestinationAddress(holdData.hold.to, _to);
-        }
-
-        if (_isHoldExpired(holdData)) {
-            revert IHold.HoldExpirationReached();
-        }
 
         holdId_ = holdData.id;
 
@@ -352,80 +432,6 @@ abstract contract HoldStorageWrapper is
             holdData.hold.amount
         );
 
-        success_ = true;
-    }
-
-    function _releaseHoldByPartition(
-        bytes32 _partition,
-        uint256 _escrowId,
-        uint256 _amount
-    )
-        internal
-        virtual
-        returns (bool success_, uint256 holdId_, address tokenHolder_)
-    {
-        IHold.HoldData memory holdData = _getHoldFromEscrowId(
-            _partition,
-            _msgSender(),
-            _escrowId
-        );
-        tokenHolder_ = _getTokenHolderFromEscrowId(
-            _partition,
-            _msgSender(),
-            _escrowId
-        );
-
-        _beforeReleaseHold(_partition, tokenHolder_);
-
-        _checkHoldAmount(_amount, holdData);
-
-        if (_isHoldExpired(holdData)) {
-            revert IHold.HoldExpirationReached();
-        }
-
-        holdId_ = holdData.id;
-
-        _transferHold(
-            _partition,
-            tokenHolder_,
-            holdId_,
-            _escrowId,
-            tokenHolder_,
-            _amount,
-            holdData.hold.amount
-        );
-
-        success_ = true;
-    }
-
-    function _reclaimHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    ) internal virtual returns (bool success_, uint256 amount_) {
-        IHold.HoldData memory holdData = _getHold(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
-
-        _beforeReclaimHold(_partition, _tokenHolder);
-
-        if (!_isHoldExpired(holdData)) {
-            revert IHold.HoldExpirationNotReached();
-        }
-
-        _transferHold(
-            _partition,
-            _tokenHolder,
-            _holdId,
-            holdData.escrowId,
-            _tokenHolder,
-            holdData.hold.amount,
-            holdData.hold.amount
-        );
-
-        amount_ = holdData.hold.amount;
         success_ = true;
     }
 
@@ -585,7 +591,7 @@ abstract contract HoldStorageWrapper is
         _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
     }
 
-    function _beforeExecuteHold(
+    function _beforeOperateHold(
         bytes32 _partition,
         address _tokenHolder,
         address _to
@@ -594,24 +600,10 @@ abstract contract HoldStorageWrapper is
         _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
     }
 
-    function _beforeReleaseHold(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal virtual {
-        _beforeExecuteHold(_partition, _tokenHolder, _tokenHolder);
-    }
-
-    function _beforeReclaimHold(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal virtual {
-        _beforeExecuteHold(_partition, _tokenHolder, _tokenHolder);
-    }
-
     function _checkHoldAmount(
         uint256 _amount,
         IHold.HoldData memory holdData
-    ) internal {
+    ) internal pure {
         if (_amount > holdData.hold.amount) {
             revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
         }
@@ -619,9 +611,10 @@ abstract contract HoldStorageWrapper is
 
     function _isHoldExpired(
         IHold.HoldData memory holdData
-    ) internal returns (bool) {
+    ) internal view returns (bool) {
         if (_blockTimestamp() > holdData.hold.expirationTimestamp) {
             return true;
         }
+        return false;
     }
 }

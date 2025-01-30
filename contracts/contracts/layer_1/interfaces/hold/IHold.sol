@@ -288,6 +288,12 @@ interface IHold {
         mapping(address => mapping(bytes32 => uint256)) escrow_holdNextId;
     }
 
+    enum OperationType {
+        Execute,
+        Release,
+        Reclaim
+    }
+
     function createHoldByPartition(
         bytes32 _partition,
         Hold calldata _hold
