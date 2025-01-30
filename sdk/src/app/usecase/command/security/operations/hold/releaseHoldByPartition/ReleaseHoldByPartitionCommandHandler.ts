@@ -203,142 +203,80 @@
 
 */
 
-import IssueRequest from './IssueRequest.js';
-import RedeemRequest from './RedeemRequest.js';
-import ForceRedeemRequest from './ForceRedeemRequest.js';
-import CreateEquityRequest from './CreateEquityRequest.js';
-import CreateBondRequest from './CreateBondRequest.js';
-import RoleRequest from './RoleRequest.js';
-import ApplyRolesRequest from './ApplyRolesRequest.js';
-import ValidationResponse from './validation/ValidationResponse.js';
-import TransferRequest from './TransferRequest.js';
-import TransferAndLockRequest from './TransferAndLockRequest.js';
-import ForceTransferRequest from './ForceTransferRequest.js';
-import GetAccountBalanceRequest from './GetAccountBalanceRequest.js';
-import GetAccountInfoRequest from './GetAccountInfoRequest.js';
-import PauseRequest from './PauseRequest.js';
-import ControlListRequest from './ControlListRequest.js';
-import GetControlListCountRequest from './GetControlListCountRequest.js';
-import GetControlListMembersRequest from './GetControlListMembersRequest.js';
-import GetDividendsForRequest from './GetDividendsForRequest.js';
-import GetDividendsRequest from './GetDividendsRequest.js';
-import GetAllDividendsRequest from './GetAllDividendsRequest.js';
-import GetVotingRightsForRequest from './GetVotingRightsForRequest.js';
-import GetVotingRightsRequest from './GetVotingRightsRequest.js';
-import GetAllVotingRightsRequest from './GetAllVotingRightsRequest.js';
-import GetCouponForRequest from './GetCouponForRequest.js';
-import GetCouponRequest from './GetCouponRequest.js';
-import GetAllCouponsRequest from './GetAllCouponsRequest.js';
-import GetRoleCountForRequest from './GetRoleCountForRequest.js';
-import GetRolesForRequest from './GetRolesForRequest.js';
-import GetRoleMemberCountRequest from './GetRoleMemberCountRequest.js';
-import GetRoleMembersRequest from './GetRoleMembersRequest.js';
-import GetSecurityDetailsRequest from './GetSecurityDetailsRequest.js';
-import SetDividendsRequest from './SetDividendsRequest.js';
-import SetCouponRequest from './SetCouponRequest.js';
-import SetVotingRightsRequest from './SetVotingRightsRequest.js';
-import GetCouponDetailsRequest from './GetCouponDetailsRequest.js';
-import GetBondDetailsRequest from './GetBondDetailsRequest.js';
-import GetEquityDetailsRequest from './GetEquityDetailsRequest.js';
-import SetMaxSupplyRequest from './SetMaxSupplyRequest.js';
-import GetMaxSupplyRequest from './GetMaxSupplyRequest.js';
-import GetRegulationDetailsRequest from './GetRegulationDetailsRequest.js';
-import GetLockedBalanceRequest from './GetLockedBalanceRequest.js';
-import LockRequest from './LockRequest.js';
-import ReleaseRequest from './ReleaseRequest.js';
-import GetLockCountRequest from './GetLockCountRequest.js';
-import GetLocksIdRequest from './GetLocksIdRequest.js';
-import GetLockRequest from './GetLockRequest.js';
+import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
+import SecurityService from '../../../../../../service/SecurityService.js';
+import {
+  ReleaseHoldByPartitionCommand,
+  ReleaseHoldByPartitionCommandResponse,
+} from './ReleaseHoldByPartitionCommand.js';
+import TransactionService from '../../../../../../service/TransactionService.js';
+import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
+import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
+import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
+import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { SecurityPaused } from '../../../error/SecurityPaused.js';
 
-import GetControlListTypeRequest from './GetControlListTypeRequest.js';
-import InitializationRequest from './InitializationRequest.js';
-import ConnectRequest from './ConnectRequest.js';
-import GetConfigInfoRequest from './GetConfigInfoRequest.js';
-import UpdateConfigRequest from './UpdateConfigRequest.js';
-import UpdateConfigVersionRequest from './UpdateConfigVersionRequest.js';
-import UpdateResolverRequest from './UpdateResolverRequest.js';
-import UpdateMaturityDateRequest from './UpdateMaturityDateRequest.js';
-import SetScheduledBalanceAdjustmentRequest from './SetScheduledBalanceAdjustmentRequest.js';
-import GetScheduledBalanceAdjustmentRequest from './GetScheduledBalanceAdjustmentRequest.js';
-import GetScheduledBalanceAdjustmentCountRequest from './GetScheduledBalanceAdjustmentsCountRequest.js';
-import GetAllScheduledBalanceAdjustmentsRequest from './GetAllScheduledBalanceAdjustmentst.js';
-import GetLastAggregatedBalanceAdjustmentFactorForRequest from './GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
-import GetAggregatedBalanceAdjustmentFactorRequest from './GetAggregatedBalanceAdjustmentFactorRequest.js';
-import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from './GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest.js';
-import ProtectedTransferFromByPartitionRequest from './ProtectedTransferFromByPartitionRequest.js';
-import ProtectedRedeemFromByPartitionRequest from './ProtectedRedeemFromByPartitionRequest.js';
-import GetNounceRequest from './GetNounceRequest.js';
-import PartitionsProtectedRequest from './PartitionsProtectedRequest.js';
-import ProtectedTransferAndLockByPartitionRequest from './ProtectedTransferAndLockByPartitionRequest.js';
-import ReleaseHoldByPartitionRequest from './ReleaseHoldByPartitionRequest.js';
+@CommandHandler(ReleaseHoldByPartitionCommand)
+export class ReleaseHoldByPartitionCommandHandler
+  implements ICommandHandler<ReleaseHoldByPartitionCommand>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+  ) {}
 
-export * from './BaseRequest.js';
-export {
-  CreateEquityRequest,
-  CreateBondRequest,
-  ValidationResponse,
-  IssueRequest,
-  RedeemRequest,
-  ForceRedeemRequest,
-  RoleRequest,
-  ApplyRolesRequest,
-  TransferRequest,
-  ForceTransferRequest,
-  ControlListRequest,
-  GetControlListCountRequest,
-  GetControlListMembersRequest,
-  GetDividendsForRequest,
-  GetDividendsRequest,
-  GetAllDividendsRequest,
-  GetVotingRightsForRequest,
-  GetVotingRightsRequest,
-  GetAllVotingRightsRequest,
-  GetCouponForRequest,
-  GetCouponRequest,
-  GetAllCouponsRequest,
-  GetRoleCountForRequest,
-  GetRolesForRequest,
-  GetRoleMemberCountRequest,
-  GetRoleMembersRequest,
-  SetDividendsRequest,
-  SetCouponRequest,
-  SetVotingRightsRequest,
-  GetAccountBalanceRequest,
-  GetAccountInfoRequest,
-  PauseRequest,
-  GetControlListTypeRequest,
-  InitializationRequest,
-  ConnectRequest,
-  GetSecurityDetailsRequest,
-  GetCouponDetailsRequest,
-  GetBondDetailsRequest,
-  SetMaxSupplyRequest,
-  GetMaxSupplyRequest,
-  GetEquityDetailsRequest,
-  GetRegulationDetailsRequest,
-  GetLockedBalanceRequest,
-  LockRequest,
-  ReleaseRequest,
-  GetLockCountRequest,
-  GetLocksIdRequest,
-  GetLockRequest,
-  TransferAndLockRequest,
-  UpdateResolverRequest,
-  UpdateConfigVersionRequest,
-  UpdateConfigRequest,
-  GetConfigInfoRequest,
-  UpdateMaturityDateRequest,
-  SetScheduledBalanceAdjustmentRequest,
-  GetScheduledBalanceAdjustmentRequest,
-  GetScheduledBalanceAdjustmentCountRequest,
-  GetAllScheduledBalanceAdjustmentsRequest,
-  GetLastAggregatedBalanceAdjustmentFactorForRequest,
-  GetAggregatedBalanceAdjustmentFactorRequest,
-  GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
-  ProtectedTransferFromByPartitionRequest,
-  ProtectedRedeemFromByPartitionRequest,
-  GetNounceRequest,
-  PartitionsProtectedRequest,
-  ProtectedTransferAndLockByPartitionRequest,
-  ReleaseHoldByPartitionRequest
-};
+  async execute(
+    command: ReleaseHoldByPartitionCommand,
+  ): Promise<ReleaseHoldByPartitionCommandResponse> {
+    const { securityId, partitionId, amount, escrowHoldId, targetId } = command;
+    const handler = this.transactionService.getHandler();
+    const security = await this.securityService.get(securityId);
+
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
+
+    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
+      throw new SecurityPaused();
+    }
+
+    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
+      throw new DecimalsOverRange(security.decimals);
+    }
+
+    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
+      : new EvmAddress(targetId);
+
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    const res = await handler.releaseHoldByPartition(
+      securityEvmAddress,
+      partitionId,
+      escrowHoldId,
+      targetEvmAddress,
+      amountBd,
+      securityId,
+    );
+
+    return Promise.resolve(
+      new ReleaseHoldByPartitionCommandResponse(
+        res.error === undefined,
+        res.id!,
+      ),
+    );
+  }
+}

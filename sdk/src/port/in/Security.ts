@@ -272,6 +272,8 @@ import { ProtectPartitionsCommand } from '../../app/usecase/command/security/ope
 import { UnprotectPartitionsCommand } from '../../app/usecase/command/security/operations/unprotectPartitions/UnprotectPartitionsCommand.js';
 import { ProtectedTransferAndLockByPartitionCommand } from '../../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommand.js';
 import ProtectedTransferAndLockByPartitionRequest from './request/ProtectedTransferAndLockByPartitionRequest.js';
+import ReleaseHoldByPartitionRequest from './request/ReleaseHoldByPartitionRequest.js';
+import { ReleaseHoldByPartitionCommand } from 'app/usecase/command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -330,6 +332,9 @@ interface ISecurityInPort {
   getLockedBalanceOf(
     request: GetLockedBalanceRequest,
   ): Promise<BalanceViewModel>;
+  releaseHoldByPartition(
+    request: ReleaseHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -826,6 +831,24 @@ class SecurityInPort implements ISecurityInPort {
         deadline,
         nounce,
         signature,
+      ),
+    );
+  }
+
+  @LogError
+  async releaseHoldByPartition(
+    request: ReleaseHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, partitionId, amount, targetId, escrowHoldId } = request;
+    handleValidation('ReleaseHoldByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ReleaseHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        amount,
+        escrowHoldId,
+        targetId,
       ),
     );
   }

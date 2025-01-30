@@ -307,6 +307,7 @@ import { ProtectedTransferFromByPartitionCommandHandler } from '../app/usecase/c
 import { ProtectedTransferAndLockByPartitionCommandHandler } from '../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommandHandler.js';
 import { PartitionsProtectedQueryHandler } from '../app/usecase/query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQueryHandler';
 import { GetNounceQueryHandler } from '../app/usecase/query/security/protectedPartitions/getNounce/GetNounceQueryHandler';
+import { ReleaseHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -465,6 +466,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetScheduledBalanceAdjustmentCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ReleaseHoldByPartitionCommandHandler,
   },
 ];
 
