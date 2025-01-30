@@ -407,7 +407,7 @@ abstract contract Hold is
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidEscrowHoldId(
             _partition,
-            _tokenHolder,
+            _msgSender(),
             _escrowId,
             _tokenHolder
         )
@@ -443,11 +443,10 @@ abstract contract Hold is
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidEscrowHoldId(
             _partition,
-            _tokenHolder,
+            _msgSender(),
             _escrowId,
             _tokenHolder
         )
-        checkControlList(_tokenHolder)
         returns (bool success_)
     {
         // solhint-disable-next-line
