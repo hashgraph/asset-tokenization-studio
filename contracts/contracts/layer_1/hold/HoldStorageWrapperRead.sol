@@ -300,7 +300,8 @@ abstract contract HoldStorageWrapperRead is LocalContext {
             address tokenHolder_,
             uint256 id_,
             address destination_,
-            bytes memory data_
+            bytes memory data_,
+            bytes memory operatorData_
         )
     {
         uint256 escrowIndex = _getHoldEscrowIndex(
@@ -366,12 +367,13 @@ abstract contract HoldStorageWrapperRead is LocalContext {
             address tokenHolder_,
             uint256 id_,
             address destination_,
-            bytes memory data_
+            bytes memory data_,
+            bytes memory operatorData_
         )
     {
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
-        if (_escrowIndex == 0) return (0, 0, address(0), 0, address(0), '');
+        if (_escrowIndex == 0) return (0, 0, address(0), 0, address(0), '', '');
 
         _escrowIndex--;
 
@@ -395,8 +397,15 @@ abstract contract HoldStorageWrapperRead is LocalContext {
             escrowHoldData.tokenHolder,
             holdData.id,
             holdData.hold.to,
-            holdData.hold.data
+            holdData.hold.data,
+            holdData.operatorData
         );
+    }
+
+    function _getHeldAmountFor(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _holdStorage().totalHeldAmount[_tokenHolder];
     }
 
     function _getHeldAmountForByPartition(
@@ -452,7 +461,8 @@ abstract contract HoldStorageWrapperRead is LocalContext {
             uint256 expirationTimestamp_,
             address escrow_,
             address destination_,
-            bytes memory data_
+            bytes memory data_,
+            bytes memory operatorData_
         )
     {
         IHold.HoldData memory holdData = _getHold(
@@ -465,7 +475,8 @@ abstract contract HoldStorageWrapperRead is LocalContext {
             holdData.hold.expirationTimestamp,
             holdData.hold.escrow,
             holdData.hold.to,
-            holdData.hold.data
+            holdData.hold.data,
+            holdData.operatorData
         );
     }
 
@@ -483,7 +494,8 @@ abstract contract HoldStorageWrapperRead is LocalContext {
             address tokenHolder_,
             uint256 id_,
             address destination_,
-            bytes memory data_
+            bytes memory data_,
+            bytes memory operatorData_
         )
     {
         (
@@ -492,7 +504,8 @@ abstract contract HoldStorageWrapperRead is LocalContext {
             tokenHolder_,
             id_,
             destination_,
-            data_
+            data_,
+            operatorData_
         ) = _getHoldForEscrow(_partition, _escrow, _escrowHoldId);
     }
 
