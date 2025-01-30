@@ -478,24 +478,30 @@ abstract contract Hold is
         );
     }
 
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 amount_) {
+        return _getHeldAmountFor(_tokenHolder);
+    }
+
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view returns (uint256 amount_) {
+    ) external view virtual override returns (uint256 amount_) {
         return _getHeldAmountForByPartition(_partition, _tokenHolder);
     }
 
     function getHoldCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view returns (uint256 holdCount_) {
+    ) external view virtual override returns (uint256 holdCount_) {
         return _getHoldCountForByPartition(_partition, _tokenHolder);
     }
 
     function getHoldCountForEscrowByPartition(
         bytes32 _partition,
         address _escrow
-    ) external view returns (uint256 escrowHoldCount_) {
+    ) external view virtual override returns (uint256 escrowHoldCount_) {
         return _getHoldCountForEscrowByPartition(_partition, _escrow);
     }
 
@@ -504,7 +510,7 @@ abstract contract Hold is
         address _tokenHolder,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view returns (uint256[] memory holdsId_) {
+    ) external view virtual override returns (uint256[] memory holdsId_) {
         return
             _getHoldsIdForByPartition(
                 _partition,
@@ -519,7 +525,7 @@ abstract contract Hold is
         address _escrow,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view returns (uint256[] memory escrowHoldsId_) {
+    ) external view virtual override returns (uint256[] memory escrowHoldsId_) {
         return
             _getHoldsIdForEscrowByPartition(
                 _partition,
@@ -536,12 +542,15 @@ abstract contract Hold is
     )
         external
         view
+        virtual
+        override
         returns (
             uint256 amount_,
             uint256 expirationTimestamp_,
             address escrow_,
             address destination_,
-            bytes memory data_
+            bytes memory data_,
+            bytes memory operatorData_
         )
     {
         return _getHoldForByPartition(_partition, _tokenHolder, _holdId);
@@ -554,13 +563,16 @@ abstract contract Hold is
     )
         external
         view
+        virtual
+        override
         returns (
             uint256 amount_,
             uint256 expirationTimestamp_,
             address tokenHolder_,
             uint256 id_,
             address destination_,
-            bytes memory data_
+            bytes memory data_,
+            bytes memory operatorData_
         )
     {
         return _getHoldForEscrowByPartition(_partition, _escrow, _escrowHoldId);
