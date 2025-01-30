@@ -269,6 +269,85 @@ contract Hold_2 is
             );
     }
 
+    function getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 amount_) {
+        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function getHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        external
+        view
+        virtual
+        override
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        )
+    {
+        return
+            _getHoldForByPartitionAdjusted(_partition, _tokenHolder, _holdId);
+    }
+
+    function getHoldForEscrowByPartition(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _escrowHoldId
+    )
+        external
+        view
+        virtual
+        override
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address tokenHolder_,
+            uint256 id_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        )
+    {
+        return
+            _getHoldForEscrowByPartitionAdjusted(
+                _partition,
+                _escrow,
+                _escrowHoldId
+            );
+    }
+
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 amount_) {
+        return
+            _getHeldAmountForByPartitionAdjusted(
+                _DEFAULT_PARTITION,
+                _tokenHolder
+            );
+    }
+
+    function getHeldAmountForAdjusted(
+        address _tokenHolder
+    ) external view virtual returns (uint256 amount_) {
+        return _getHeldAmountForAdjusted(_tokenHolder);
+    }
+
+    function getHeldAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual returns (uint256 amount_) {
+        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
     function _executeHoldByPartition(
         bytes32 _partition,
         uint256 _escrowId,
