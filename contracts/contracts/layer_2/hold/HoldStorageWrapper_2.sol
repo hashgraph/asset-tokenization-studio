@@ -549,14 +549,14 @@ abstract contract HoldStorageWrapper_2 is
     ) internal virtual override {
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
-        uint256 holdIndex = _getHoldIndex(
+        uint256 currentHoldIndex = _getHoldIndex(
             _partition,
             _tokenHolder,
             _holdData.id
         );
         uint256 labaf = adjustBalancesStorage.labafHolds[_tokenHolder][
             _partition
-        ][holdIndex - 1];
+        ][currentHoldIndex - 1];
 
         adjustBalancesStorage.labafHolds[_tokenHolder][_partition][
             _holdIndex - 1
@@ -566,7 +566,7 @@ abstract contract HoldStorageWrapper_2 is
             super._setHoldAtIndex(
                 _partition,
                 _tokenHolder,
-                holdIndex,
+                _holdIndex,
                 _holdData
             );
     }
