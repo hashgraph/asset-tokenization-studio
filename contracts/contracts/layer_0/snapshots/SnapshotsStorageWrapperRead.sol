@@ -206,7 +206,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {LocalContext} from '../context/LocalContext.sol';
+import {
+    CorporateActionsStorageWrapperRead
+} from '../corporateActions/CorporateActionsStorageWrapperRead.sol';
 import {
     ArraysUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
@@ -221,7 +223,7 @@ import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 // solhint-disable no-unused-vars, custom-errors
 abstract contract SnapshotsStorageWrapperRead is
     ISnapshotsStorageWrapper,
-    LocalContext
+    CorporateActionsStorageWrapperRead
 {
     using ArraysUpgradeable for uint256[];
     using CountersUpgradeable for CountersUpgradeable.Counter;

@@ -266,9 +266,7 @@ contract Cap is ICap, IStaticFunctionSelectors, CapStorageWrapper {
         onlyRole(_CAP_ROLE)
         onlyValidNewMaxSupplyByPartition(_partition, _maxSupply)
         onlyWithoutMultiPartition
-        returns (
-            bool success_
-        )
+        returns (bool success_)
     {
         _setMaxSupplyByPartition(_partition, _maxSupply);
         success_ = true;

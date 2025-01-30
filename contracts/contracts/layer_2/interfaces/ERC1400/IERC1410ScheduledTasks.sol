@@ -203,55 +203,35 @@
 
 */
 
+// SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ScheduledTasksCommon
-} from '../../layer_0/scheduledTasks/ScheduledTasksCommon.sol';
-import {
-    ControlListStorageWrapper
-} from '../controlList/ControlListStorageWrapper.sol';
-import {
-    ProtectedPartitionsStorageWrapper
-} from '../../layer_1/protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
-import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
+interface IERC1410ScheduledTasks {
+    function triggerAndSyncAll(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) external;
 
-// solhint-disable no-empty-blocks
-abstract contract Common is
-    PauseStorageWrapper,
-    ControlListStorageWrapper,
-    ProtectedPartitionsStorageWrapper,
-    ScheduledTasksCommon
-{
-    error AlreadyInitialized();
-    error OnlyDelegateAllowed();
+    function totalSupplyAdjusted() external view returns (uint256);
 
-    modifier onlyUninitialized(bool initialized) {
-        if (initialized) {
-            revert AlreadyInitialized();
-        }
-        _;
-    }
+    function totalSupplyByPartitionAdjusted(
+        bytes32 _partition
+    ) external view returns (uint256);
 
-    modifier onlyDelegate() {
-        if (_msgSender() != address(this)) {
-            revert OnlyDelegateAllowed();
-        }
-        _;
-    }
+    function balanceOfAdjusted(
+        address _tokenHolder
+    ) external view returns (uint256);
 
-    modifier onlyUnProtectedPartitionsOrWildCardRole() {
-        if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
-            );
-        }
-        _;
-    }
+    function balanceOfAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) external view returns (uint256);
+
+    function balanceOfByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256);
 }
