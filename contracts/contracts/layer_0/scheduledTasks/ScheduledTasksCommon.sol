@@ -217,12 +217,7 @@ import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
 import {
     ScheduledTask
 } from '../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
-
-struct ScheduledTasksDataStorage {
-    mapping(uint256 => ScheduledTask) scheduledTasks;
-    uint256 scheduledTaskCount;
-    bool autoCalling;
-}
+import {ScheduledTasksDataStorage} from './ScheduledTasksCommonRead.sol';
 
 abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper {
     error WrongTimestamp(uint256 timeStamp);
@@ -344,16 +339,6 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper {
         return newTaskID;
     }
 
-    function _getScheduledTaskCount() internal view returns (uint256) {
-        return _scheduledTaskStorage().scheduledTaskCount;
-    }
-
-    function _getScheduledTasksByIndex(
-        uint256 _index
-    ) internal view returns (ScheduledTask memory) {
-        return _scheduledTaskStorage().scheduledTasks[_index];
-    }
-
     function slideScheduledTasks(uint256 _pos) private {
         ScheduledTasksDataStorage
             storage scheduledTasks = _scheduledTaskStorage();
@@ -389,36 +374,5 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper {
             storage scheduledTasks = _scheduledTaskStorage();
         delete (scheduledTasks.scheduledTasks[scheduledTasksLength - 1]);
         scheduledTasks.scheduledTaskCount--;
-    }
-
-    function _getScheduledTasks(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (ScheduledTask[] memory scheduledTask_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
-            _pageIndex,
-            _pageLength
-        );
-
-        scheduledTask_ = new ScheduledTask[](
-            LibCommon.getSize(start, end, _getScheduledTaskCount())
-        );
-
-        for (uint256 i = 0; i < scheduledTask_.length; i++) {
-            scheduledTask_[i] = _getScheduledTasksByIndex(start + i);
-        }
-    }
-
-    function _scheduledTaskStorage()
-        internal
-        pure
-        virtual
-        returns (ScheduledTasksDataStorage storage scheduledTasks_)
-    {
-        bytes32 position = _SCHEDULED_TASKS_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledTasks_.slot := position
-        }
     }
 }

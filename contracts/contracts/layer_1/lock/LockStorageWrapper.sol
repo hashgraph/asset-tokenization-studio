@@ -205,13 +205,13 @@
 
 pragma solidity 0.8.18;
 
-import {Common} from "../common/Common.sol";
+import {Common} from '../common/Common.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract LockStorageWrapper is Common  {
+abstract contract LockStorageWrapper is Common {
     using EnumerableSet for EnumerableSet.UintSet;
 
     function _lockByPartition(

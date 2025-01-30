@@ -213,10 +213,8 @@ import {
 import {
     _ERC1410_BASIC_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
-import {
-_DEFAULT_PARTITION
-} from '../../constants/values.sol';
-import {LockStorageWrapperRead} from "../../lock/LockStorageWrapperRead.sol";
+import {_DEFAULT_PARTITION} from '../../constants/values.sol';
+import {LockStorageWrapperRead} from '../../lock/LockStorageWrapperRead.sol';
 
 contract ERC1410BasicStorageWrapperRead is
     LockStorageWrapperRead,
@@ -340,7 +338,7 @@ contract ERC1410BasicStorageWrapperRead is
         uint256 _value,
         address _account,
         bytes32 _partition
-    ) internal virtual {
+    ) internal {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
 
         erc1410Storage.partitions[_account].push(Partition(_value, _partition));
@@ -349,27 +347,29 @@ contract ERC1410BasicStorageWrapperRead is
         ] = _getERC1410BasicStorage().partitions[_account].length;
 
         if (_value != 0) erc1410Storage.balances[_account] += _value;
+        _pushLabafUserPartition(_account);
     }
 
-    function _totalSupply() internal view virtual returns (uint256) {
+    function _totalSupply() internal view returns (uint256) {
         return _getERC1410BasicStorage().totalSupply;
     }
 
-    function _isMultiPartition() internal view virtual returns (bool) {
+    function _isMultiPartition() internal view returns (bool) {
         return _getERC1410BasicStorage().multiPartition;
     }
 
     function _totalSupplyByPartition(
         bytes32 _partition
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         return
             _getERC1410BasicStorage().totalSupplyByPartition[_partition] *
-            _calculateFactorByPartition(_partition);
+            _calculateFactorByPartitionAdjustedAt(
+                _partition,
+                _blockTimestamp()
+            );
     }
 
-    function _balanceOf(
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
+    function _balanceOf(address _tokenHolder) internal view returns (uint256) {
         return
             _getERC1410BasicStorage().balances[_tokenHolder] *
             _calculateFactorByAbafAndTokenHolder(_getAbaf(), _tokenHolder);
@@ -378,7 +378,7 @@ contract ERC1410BasicStorageWrapperRead is
     function _balanceOfByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         if (_validPartition(_partition, _tokenHolder)) {
             ERC1410BasicStorage
                 storage erc1410Storage = _getERC1410BasicStorage();
@@ -400,7 +400,7 @@ contract ERC1410BasicStorageWrapperRead is
 
     function _partitionsOf(
         address _tokenHolder
-    ) internal view virtual returns (bytes32[] memory) {
+    ) internal view returns (bytes32[] memory) {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
         bytes32[] memory partitionsList = new bytes32[](
             erc1410Storage.partitions[_tokenHolder].length
@@ -419,7 +419,7 @@ contract ERC1410BasicStorageWrapperRead is
     function _validPartition(
         bytes32 _partition,
         address _holder
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
         if (erc1410Storage.partitionToIndex[_holder][_partition] == 0) {
             return false;
@@ -431,7 +431,7 @@ contract ERC1410BasicStorageWrapperRead is
     function _validPartitionForReceiver(
         bytes32 _partition,
         address _to
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
 
         uint256 index = erc1410Storage.partitionToIndex[_to][_partition];
@@ -447,7 +447,10 @@ contract ERC1410BasicStorageWrapperRead is
     }
 
     function _adjustTotalAndMaxSupplyByPartition(bytes32 partition) internal {
-        uint256 factor = _calculateFactorByPartition(partition);
+        uint256 factor = _calculateFactorByPartitionAdjustedAt(
+            partition,
+            _blockTimestamp()
+        );
         if (factor == 1) return;
         ERC1410BasicStorage storage basicStorage = _getERC1410BasicStorage();
         basicStorage.totalSupply *= factor;
@@ -503,7 +506,10 @@ contract ERC1410BasicStorageWrapperRead is
     ) internal returns (uint256) {
         return
             _getERC1410BasicStorage()
-                .totalSupply *= _calculateFactorByPartition(partition);
+                .totalSupply *= _calculateFactorByPartitionAdjustedAt(
+                partition,
+                _blockTimestamp()
+            );
     }
 
     function _getERC1410BasicStorage()

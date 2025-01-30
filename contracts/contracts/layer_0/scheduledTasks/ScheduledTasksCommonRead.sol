@@ -203,55 +203,66 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ScheduledTasksCommon
-} from '../../layer_0/scheduledTasks/ScheduledTasksCommon.sol';
+    SnapshotsStorageWrapperRead
+} from '../snapshots/SnapshotsStorageWrapperRead.sol';
 import {
-    ControlListStorageWrapper
-} from '../controlList/ControlListStorageWrapper.sol';
+    _SCHEDULED_TASKS_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {LibCommon} from '../common/LibCommon.sol';
+import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
 import {
-    ProtectedPartitionsStorageWrapper
-} from '../../layer_1/protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
-import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
-import {_WILD_CARD_ROLE} from '../constants/roles.sol';
+    ScheduledTask
+} from '../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 
-// solhint-disable no-empty-blocks
-abstract contract Common is
-    PauseStorageWrapper,
-    ControlListStorageWrapper,
-    ProtectedPartitionsStorageWrapper,
-    ScheduledTasksCommon
-{
-    error AlreadyInitialized();
-    error OnlyDelegateAllowed();
+struct ScheduledTasksDataStorage {
+    mapping(uint256 => ScheduledTask) scheduledTasks;
+    uint256 scheduledTaskCount;
+    bool autoCalling;
+}
 
-    modifier onlyUninitialized(bool initialized) {
-        if (initialized) {
-            revert AlreadyInitialized();
-        }
-        _;
+abstract contract ScheduledTasksCommonRead is SnapshotsStorageWrapperRead {
+    function _getScheduledTaskCount() internal view returns (uint256) {
+        return _scheduledTaskStorage().scheduledTaskCount;
     }
 
-    modifier onlyDelegate() {
-        if (_msgSender() != address(this)) {
-            revert OnlyDelegateAllowed();
-        }
-        _;
+    function _getScheduledTasksByIndex(
+        uint256 _index
+    ) internal view returns (ScheduledTask memory) {
+        return _scheduledTaskStorage().scheduledTasks[_index];
     }
 
-    modifier onlyUnProtectedPartitionsOrWildCardRole() {
-        if (
-            _arePartitionsProtected() &&
-            !_hasRole(_WILD_CARD_ROLE, _msgSender())
-        ) {
-            revert PartitionsAreProtectedAndNoRole(
-                _msgSender(),
-                _WILD_CARD_ROLE
-            );
+    function _getScheduledTasks(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (ScheduledTask[] memory scheduledTask_) {
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
+            _pageIndex,
+            _pageLength
+        );
+
+        scheduledTask_ = new ScheduledTask[](
+            LibCommon.getSize(start, end, _getScheduledTaskCount())
+        );
+
+        for (uint256 i = 0; i < scheduledTask_.length; i++) {
+            scheduledTask_[i] = _getScheduledTasksByIndex(start + i);
         }
-        _;
+    }
+
+    function _scheduledTaskStorage()
+        internal
+        pure
+        virtual
+        returns (ScheduledTasksDataStorage storage scheduledTasks_)
+    {
+        bytes32 position = _SCHEDULED_TASKS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            scheduledTasks_.slot := position
+        }
     }
 }
