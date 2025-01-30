@@ -205,215 +205,215 @@
 
 pragma solidity 0.8.18;
 
-//import {
-//    ERC1410ScheduledTasks_CD_Lib
-//} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
-//import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
-//import {
-//    AdjustBalances_CD_Lib
-//} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
-//import {LockStorageWrapper_2_Read} from './LockStorageWrapper_2_Read.sol';
-//// SPDX-License-Identifier: BSD-3-Clause-Attribution
-//// TODO: Remove those errors of solhint
-//// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-//abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
-//    function _lockByPartition(
-//        bytes32 _partition,
-//        uint256 _amount,
-//        address _tokenHolder,
-//        uint256 _expirationTimestamp
-//    ) internal virtual override returns (bool success_, uint256 lockId_) {
-//        AdjustBalancesStorage
-//            storage adjustBalancesStorage = _getAdjustBalancesStorage();
-//
-//        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
-//            _partition,
-//            _tokenHolder,
-//            address(0)
-//        );
-//
-//        uint256 abaf = _updateTotalLock(
-//            _partition,
-//            _tokenHolder,
-//            adjustBalancesStorage
-//        );
-//
-//        adjustBalancesStorage.labafLocks[_tokenHolder][_partition].push(abaf);
-//
-//        return
-//            super._lockByPartition(
-//                _partition,
-//                _amount,
-//                _tokenHolder,
-//                _expirationTimestamp
-//            );
-//    }
-//
-//    function _releaseByPartition(
-//        bytes32 _partition,
-//        uint256 _lockId,
-//        address _tokenHolder
-//    ) internal virtual override returns (bool success_) {
-//        AdjustBalancesStorage
-//            storage adjustBalancesStorage = _getAdjustBalancesStorage();
-//
-//        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
-//            _partition,
-//            address(0),
-//            _tokenHolder
-//        );
-//
-//        uint256 abaf = _updateTotalLock(
-//            _partition,
-//            _tokenHolder,
-//            adjustBalancesStorage
-//        );
-//
-//        _updateLockByIndex(_partition, _lockId, _tokenHolder, abaf);
-//
-//        success_ = super._releaseByPartition(_partition, _lockId, _tokenHolder);
-//
-//        adjustBalancesStorage.labafLocks[_tokenHolder][_partition].pop();
-//    }
-//
-//    function _setLockAtIndex(
-//        bytes32 _partition,
-//        address _tokenHolder,
-//        uint256 _lockIndex,
-//        LockData memory _lock
-//    ) internal virtual override {
-//        AdjustBalancesStorage
-//            storage adjustBalancesStorage = _getAdjustBalancesStorage();
-//        uint256 lockIndex_lock = _getLockIndex(
-//            _partition,
-//            _tokenHolder,
-//            _lock.id
-//        );
-//        uint256 labaf = adjustBalancesStorage.labafLocks[_tokenHolder][
-//            _partition
-//        ][lockIndex_lock - 1];
-//
-//        adjustBalancesStorage.labafLocks[_tokenHolder][_partition][
-//            _lockIndex - 1
-//        ] = labaf;
-//
-//        return
-//            super._setLockAtIndex(_partition, _tokenHolder, _lockIndex, _lock);
-//    }
-//
-//    function _updateLockByIndex(
-//        bytes32 _partition,
-//        uint256 _lockId,
-//        address _tokenHolder,
-//        uint256 _abaf
-//    ) internal virtual {
-//        uint256 lock_LABAF = AdjustBalances_CD_Lib.getLockLABAFByPartition(
-//            _partition,
-//            _lockId,
-//            _tokenHolder
-//        );
-//
-//        if (_abaf != lock_LABAF) {
-//            uint256 factor_lock = AdjustBalanceLib.calculateFactor(
-//                _abaf,
-//                lock_LABAF
-//            );
-//
-//            uint256 lockIndex = _getLockIndex(
-//                _partition,
-//                _tokenHolder,
-//                _lockId
-//            );
-//
-//            _updateLockAmountByIndex(
-//                _partition,
-//                lockIndex,
-//                _tokenHolder,
-//                factor_lock
-//            );
-//        }
-//    }
-//
-//    function _updateLockAmountByIndex(
-//        bytes32 _partition,
-//        uint256 _lockIndex,
-//        address _tokenHolder,
-//        uint256 _factor
-//    ) internal virtual {
-//        if (_factor == 1) return;
-//        LockDataStorage storage lockStorage = _lockStorage();
-//
-//        lockStorage
-//        .locks[_tokenHolder][_partition][_lockIndex - 1].amount *= _factor;
-//    }
-//
-//    function _updateTotalLock(
-//        bytes32 _partition,
-//        address _tokenHolder,
-//        AdjustBalancesStorage storage adjustBalancesStorage
-//    ) internal returns (uint256 ABAF_) {
-//        ABAF_ = AdjustBalances_CD_Lib.getABAF();
-//
-//        uint256 labaf = AdjustBalances_CD_Lib.getTotalLockLABAF(_tokenHolder);
-//        uint256 LABAFByPartition = AdjustBalances_CD_Lib
-//            .getTotalLockLABAFByPartition(_partition, _tokenHolder);
-//
-//        if (ABAF_ != labaf) {
-//            uint256 factor = AdjustBalanceLib.calculateFactor(ABAF_, labaf);
-//
-//            _updateTotalLockedAmountAndLABAF(
-//                _tokenHolder,
-//                factor,
-//                adjustBalancesStorage,
-//                ABAF_
-//            );
-//        }
-//
-//        if (ABAF_ != LABAFByPartition) {
-//            uint256 factorByPartition = AdjustBalanceLib.calculateFactor(
-//                ABAF_,
-//                LABAFByPartition
-//            );
-//
-//            _updateTotalLockedAmountAndLABAFByPartition(
-//                _partition,
-//                _tokenHolder,
-//                factorByPartition,
-//                adjustBalancesStorage,
-//                ABAF_
-//            );
-//        }
-//    }
-//
-//    function _updateTotalLockedAmountAndLABAF(
-//        address _tokenHolder,
-//        uint256 _factor,
-//        AdjustBalancesStorage storage adjustBalancesStorage,
-//        uint256 _abaf
-//    ) internal virtual {
-//        if (_factor == 1) return;
-//        LockDataStorage storage lockStorage = _lockStorage();
-//
-//        lockStorage.totalLockedAmount[_tokenHolder] *= _factor;
-//        adjustBalancesStorage.labafsTotalLocked[_tokenHolder] = _abaf;
-//    }
-//
-//    function _updateTotalLockedAmountAndLABAFByPartition(
-//        bytes32 _partition,
-//        address _tokenHolder,
-//        uint256 _factor,
-//        AdjustBalancesStorage storage adjustBalancesStorage,
-//        uint256 _abaf
-//    ) internal virtual {
-//        if (_factor == 1) return;
-//        LockDataStorage storage lockStorage = _lockStorage();
-//
-//        lockStorage.lockedAmountByPartition[_tokenHolder][
-//            _partition
-//        ] *= _factor;
-//        adjustBalancesStorage.labafsTotalLockedByPartition[_tokenHolder][
-//            _partition
-//        ] = _abaf;
-//    }
-//}
+import {
+    ERC1410ScheduledTasks_CD_Lib
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
+import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {LockStorageWrapper_2_Read} from './LockStorageWrapper_2_Read.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
+    function _lockByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _tokenHolder,
+        uint256 _expirationTimestamp
+    ) internal virtual override returns (bool success_, uint256 lockId_) {
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+
+        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
+            _partition,
+            _tokenHolder,
+            address(0)
+        );
+
+        uint256 abaf = _updateTotalLock(
+            _partition,
+            _tokenHolder,
+            adjustBalancesStorage
+        );
+
+        adjustBalancesStorage.labafLocks[_tokenHolder][_partition].push(abaf);
+
+        return
+            super._lockByPartition(
+                _partition,
+                _amount,
+                _tokenHolder,
+                _expirationTimestamp
+            );
+    }
+
+    function _releaseByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) internal virtual override returns (bool success_) {
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+
+        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
+            _partition,
+            address(0),
+            _tokenHolder
+        );
+
+        uint256 abaf = _updateTotalLock(
+            _partition,
+            _tokenHolder,
+            adjustBalancesStorage
+        );
+
+        _updateLockByIndex(_partition, _lockId, _tokenHolder, abaf);
+
+        success_ = super._releaseByPartition(_partition, _lockId, _tokenHolder);
+
+        adjustBalancesStorage.labafLocks[_tokenHolder][_partition].pop();
+    }
+
+    function _setLockAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex,
+        LockData memory _lock
+    ) internal virtual override {
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+        uint256 lockIndex_lock = _getLockIndex(
+            _partition,
+            _tokenHolder,
+            _lock.id
+        );
+        uint256 labaf = adjustBalancesStorage.labafLocks[_tokenHolder][
+            _partition
+        ][lockIndex_lock - 1];
+
+        adjustBalancesStorage.labafLocks[_tokenHolder][_partition][
+            _lockIndex - 1
+        ] = labaf;
+
+        return
+            super._setLockAtIndex(_partition, _tokenHolder, _lockIndex, _lock);
+    }
+
+    function _updateLockByIndex(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder,
+        uint256 _abaf
+    ) internal virtual {
+        uint256 lock_LABAF = AdjustBalances_CD_Lib.getLockLABAFByPartition(
+            _partition,
+            _lockId,
+            _tokenHolder
+        );
+
+        if (_abaf != lock_LABAF) {
+            uint256 factor_lock = AdjustBalanceLib.calculateFactor(
+                _abaf,
+                lock_LABAF
+            );
+
+            uint256 lockIndex = _getLockIndex(
+                _partition,
+                _tokenHolder,
+                _lockId
+            );
+
+            _updateLockAmountByIndex(
+                _partition,
+                lockIndex,
+                _tokenHolder,
+                factor_lock
+            );
+        }
+    }
+
+    function _updateLockAmountByIndex(
+        bytes32 _partition,
+        uint256 _lockIndex,
+        address _tokenHolder,
+        uint256 _factor
+    ) internal virtual {
+        if (_factor == 1) return;
+        LockDataStorage storage lockStorage = _lockStorage();
+
+        lockStorage
+        .locks[_tokenHolder][_partition][_lockIndex - 1].amount *= _factor;
+    }
+
+    function _updateTotalLock(
+        bytes32 _partition,
+        address _tokenHolder,
+        AdjustBalancesStorage storage adjustBalancesStorage
+    ) internal returns (uint256 ABAF_) {
+        ABAF_ = AdjustBalances_CD_Lib.getABAF();
+
+        uint256 labaf = AdjustBalances_CD_Lib.getTotalLockLABAF(_tokenHolder);
+        uint256 LABAFByPartition = AdjustBalances_CD_Lib
+            .getTotalLockLABAFByPartition(_partition, _tokenHolder);
+
+        if (ABAF_ != labaf) {
+            uint256 factor = AdjustBalanceLib.calculateFactor(ABAF_, labaf);
+
+            _updateTotalLockedAmountAndLABAF(
+                _tokenHolder,
+                factor,
+                adjustBalancesStorage,
+                ABAF_
+            );
+        }
+
+        if (ABAF_ != LABAFByPartition) {
+            uint256 factorByPartition = AdjustBalanceLib.calculateFactor(
+                ABAF_,
+                LABAFByPartition
+            );
+
+            _updateTotalLockedAmountAndLABAFByPartition(
+                _partition,
+                _tokenHolder,
+                factorByPartition,
+                adjustBalancesStorage,
+                ABAF_
+            );
+        }
+    }
+
+    function _updateTotalLockedAmountAndLABAF(
+        address _tokenHolder,
+        uint256 _factor,
+        AdjustBalancesStorage storage adjustBalancesStorage,
+        uint256 _abaf
+    ) internal virtual {
+        if (_factor == 1) return;
+        LockDataStorage storage lockStorage = _lockStorage();
+
+        lockStorage.totalLockedAmount[_tokenHolder] *= _factor;
+        adjustBalancesStorage.labafsTotalLocked[_tokenHolder] = _abaf;
+    }
+
+    function _updateTotalLockedAmountAndLABAFByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _factor,
+        AdjustBalancesStorage storage adjustBalancesStorage,
+        uint256 _abaf
+    ) internal virtual {
+        if (_factor == 1) return;
+        LockDataStorage storage lockStorage = _lockStorage();
+
+        lockStorage.lockedAmountByPartition[_tokenHolder][
+            _partition
+        ] *= _factor;
+        adjustBalancesStorage.labafsTotalLockedByPartition[_tokenHolder][
+            _partition
+        ] = _abaf;
+    }
+}
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

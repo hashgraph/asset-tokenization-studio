@@ -229,13 +229,14 @@ abstract contract LockStorageWrapperRead is CapStorageWrapperRead {
         mapping(address => mapping(bytes32 => LockData[])) locks;
         mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) lockIds;
         mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) locksIndex;
-        mapping(address => mapping(bytes32 => uint256)) lockNextId;
+        mapping(address => mapping(bytes32 => uint256)) lockNextId; //contador
     }
 
     function _getLockedAmountFor(
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_) {
         uint256 factor = _calculateFactorForLockedAmountByTokenHolder(_tokenHolder);
+        // TODO: revisar si el factor es consistente con el amount_
         return _lockStorage().totalLockedAmount[_tokenHolder] * factor;
     }
 

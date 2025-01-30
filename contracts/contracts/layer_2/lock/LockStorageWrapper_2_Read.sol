@@ -205,93 +205,93 @@
 
 pragma solidity 0.8.18;
 
-//import {
-//    ERC1410BasicStorageWrapperRead
-//} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-//import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
-//import {
-//    ERC1410ScheduledTasksStorageWrapper
-//} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-//import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
-//import {
-//    AdjustBalances_CD_Lib
-//} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
-//// SPDX-License-Identifier: BSD-3-Clause-Attribution
-//// TODO: Remove _ in contract name
-//// solhint-disable-next-line
-//abstract contract LockStorageWrapper_2_Read is
-//    LockStorageWrapper,
-//    ERC1410ScheduledTasksStorageWrapper
-//{
-//    function _getLockedAmountForAdjusted(
-//        address _tokenHolder
-//    ) internal view virtual returns (uint256 amount_) {
-//        uint256 factor = AdjustBalanceLib.calculateFactor(
-//            AdjustBalances_CD_Lib.getABAFAdjusted(),
-//            AdjustBalances_CD_Lib.getTotalLockLABAF(_tokenHolder)
-//        );
-//
-//        return _getLockedAmountFor(_tokenHolder) * factor;
-//    }
-//
-//    function _getLockedAmountForByPartitionAdjusted(
-//        bytes32 _partition,
-//        address _tokenHolder
-//    ) internal view virtual returns (uint256 amount_) {
-//        uint256 factor = AdjustBalanceLib.calculateFactor(
-//            AdjustBalances_CD_Lib.getABAFAdjusted(),
-//            AdjustBalances_CD_Lib.getTotalLockLABAFByPartition(
-//                _partition,
-//                _tokenHolder
-//            )
-//        );
-//        return
-//            _getLockedAmountForByPartition(_partition, _tokenHolder) * factor;
-//    }
-//
-//    function _getLockForByPartitionAdjusted(
-//        bytes32 _partition,
-//        address _tokenHolder,
-//        uint256 _lockId
-//    )
-//        internal
-//        view
-//        virtual
-//        returns (uint256 amount_, uint256 expirationTimestamp_)
-//    {
-//        uint256 factor = AdjustBalanceLib.calculateFactor(
-//            AdjustBalances_CD_Lib.getABAFAdjusted(),
-//            AdjustBalances_CD_Lib.getLockLABAFByPartition(
-//                _partition,
-//                _lockId,
-//                _tokenHolder
-//            )
-//        );
-//
-//        (amount_, expirationTimestamp_) = _getLockForByPartition(
-//            _partition,
-//            _tokenHolder,
-//            _lockId
-//        );
-//        amount_ *= factor;
-//    }
-//
-//    function _addPartitionTo(
-//        uint256 _value,
-//        address _account,
-//        bytes32 _partition
-//    )
-//        internal
-//        virtual
-//        override(
-//            ERC1410BasicStorageWrapperRead,
-//            ERC1410ScheduledTasksStorageWrapper
-//        )
-//    {
-//        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-//            _value,
-//            _account,
-//            _partition
-//        );
-//    }
-//}
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {AdjustBalanceLib} from '../adjustBalances/AdjustBalanceLib.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../adjustBalances/AdjustBalances_CD_Lib.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+abstract contract LockStorageWrapper_2_Read is
+    LockStorageWrapper,
+    ERC1410ScheduledTasksStorageWrapper
+{
+    function _getLockedAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getTotalLockLABAF(_tokenHolder)
+        );
+
+        return _getLockedAmountFor(_tokenHolder) * factor;
+    }
+
+    function _getLockedAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getTotalLockLABAFByPartition(
+                _partition,
+                _tokenHolder
+            )
+        );
+        return
+            _getLockedAmountForByPartition(_partition, _tokenHolder) * factor;
+    }
+
+    function _getLockForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    )
+        internal
+        view
+        virtual
+        returns (uint256 amount_, uint256 expirationTimestamp_)
+    {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getLockLABAFByPartition(
+                _partition,
+                _lockId,
+                _tokenHolder
+            )
+        );
+
+        (amount_, expirationTimestamp_) = _getLockForByPartition(
+            _partition,
+            _tokenHolder,
+            _lockId
+        );
+        amount_ *= factor;
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(
+            ERC1410BasicStorageWrapperRead,
+            ERC1410ScheduledTasksStorageWrapper
+        )
+    {
+        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
+    }
+}
