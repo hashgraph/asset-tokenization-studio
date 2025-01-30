@@ -403,7 +403,13 @@ abstract contract HoldStorageWrapper_2 is
             adjustBalancesStorage
         );
 
-        _updateHoldByIndex(_partition, holdData.id, tokenHolder_, abaf);
+        _updateHoldByIndex(
+            _partition,
+            holdData.id,
+            tokenHolder_,
+            abaf,
+            adjustBalancesStorage
+        );
 
         (success_, holdId_, ) = super._executeHoldByPartition(
             _partition,
@@ -457,7 +463,13 @@ abstract contract HoldStorageWrapper_2 is
             adjustBalancesStorage
         );
 
-        _updateHoldByIndex(_partition, holdData.id, tokenHolder_, abaf);
+        _updateHoldByIndex(
+            _partition,
+            holdData.id,
+            tokenHolder_,
+            abaf,
+            adjustBalancesStorage
+        );
 
         (success_, holdId_, ) = super._releaseHoldByPartition(
             _partition,
@@ -515,7 +527,13 @@ abstract contract HoldStorageWrapper_2 is
             adjustBalancesStorage
         );
 
-        _updateHoldByIndex(_partition, holdData.id, tokenHolder_, abaf);
+        _updateHoldByIndex(
+            _partition,
+            holdData.id,
+            tokenHolder_,
+            abaf,
+            adjustBalancesStorage
+        );
 
         (success_, amount_, holdId_, tokenHolder_) = super
             ._reclaimHoldByPartition(_partition, _escrowId, _escrowAddress);
@@ -624,7 +642,8 @@ abstract contract HoldStorageWrapper_2 is
         bytes32 _partition,
         uint256 _holdId,
         address _tokenHolder,
-        uint256 _abaf
+        uint256 _abaf,
+        AdjustBalancesStorage storage adjustBalancesStorage
     ) internal virtual {
         uint256 hold_LABAF = AdjustBalances_CD_Lib.getHoldLABAFByPartition(
             _partition,
@@ -650,6 +669,9 @@ abstract contract HoldStorageWrapper_2 is
                 _tokenHolder,
                 factor_hold
             );
+            adjustBalancesStorage.labafHolds[_tokenHolder][_partition][
+                holdIndex - 1
+            ] = _abaf;
         }
     }
 
