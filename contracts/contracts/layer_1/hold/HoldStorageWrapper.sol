@@ -218,9 +218,6 @@ import {
     checkNounceAndDeadline,
     verify
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {
-    _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH
-} from '../constants/values.sol';
 
 abstract contract HoldStorageWrapper is
     SnapshotsStorageWrapper,
@@ -590,55 +587,8 @@ abstract contract HoldStorageWrapper is
             .id = escrowHold.id;
 
         holdStorage.escrow_holdsIndex[_escrowAddress][_partition][
-                escrowHold.id
-            ] = _escrowHoldIndex;
-    }
-
-    function _checkCreateHoldSignature(
-        bytes32 _partition,
-        address _from,
-        IHold.ProtectedHold memory _protectedHold
-    ) internal view virtual {
-        if (!_isCreateHoldSignatureValid(_partition, _from, _protectedHold))
-            revert WrongSignature();
-    }
-
-    function _isCreateHoldSignatureValid(
-        bytes32 _partition,
-        address _from,
-        IHold.ProtectedHold memory _protectedHold
-    ) internal view virtual returns (bool) {
-        bytes32 functionHash = getMessageHashCreateHold(
-            _partition,
-            _from,
-            _protectedHold
-        );
-        return
-            verify(
-                _from,
-                functionHash,
-                _protectedHold.signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
-                _blockChainid(),
-                address(this)
-            );
-    }
-
-    function getMessageHashCreateHold(
-        bytes32 _partition,
-        address _from,
-        IHold.ProtectedHold memory _protectedHold
-    ) internal pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
-                    _partition,
-                    _from,
-                    _protectedHold
-                )
-            );
+            escrowHold.id
+        ] = _escrowHoldIndex;
     }
 
     function _beforeHold(

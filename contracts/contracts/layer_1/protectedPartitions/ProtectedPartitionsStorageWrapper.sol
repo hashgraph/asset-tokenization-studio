@@ -14,8 +14,10 @@ import {
 import {
     getMessageHashTransfer,
     getMessageHashRedeem,
+    getMessageHashCreateHold,
     verify
 } from './signatureVerification.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
 
 abstract contract ProtectedPartitionsStorageWrapper is
     IProtectedPartitionsStorageWrapper,
@@ -167,6 +169,37 @@ abstract contract ProtectedPartitionsStorageWrapper is
                 _from,
                 functionHash,
                 _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
+            );
+    }
+
+    function _checkCreateHoldSignature(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold
+    ) internal view virtual {
+        if (!_isCreateHoldSignatureValid(_partition, _from, _protectedHold))
+            revert WrongSignature();
+    }
+
+    function _isCreateHoldSignatureValid(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold
+    ) internal view virtual returns (bool) {
+        bytes32 functionHash = getMessageHashCreateHold(
+            _partition,
+            _from,
+            _protectedHold
+        );
+        return
+            verify(
+                _from,
+                functionHash,
+                _protectedHold.signature,
                 _protectedPartitionsStorage().contractName,
                 _protectedPartitionsStorage().contractVersion,
                 _blockChainid(),
