@@ -243,6 +243,7 @@ interface IHold {
 
     error HoldExpirationNotReached();
     error WrongEscrowHoldId();
+    error WrongHoldId();
     error InvalidDestinationAddress(address holdDestination, address to);
     error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
     error HoldExpirationReached();

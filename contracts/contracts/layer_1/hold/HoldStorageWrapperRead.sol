@@ -227,6 +227,16 @@ abstract contract HoldStorageWrapperRead is LocalContext {
         _;
     }
 
+    modifier onlyWithValidHoldId(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) {
+        if (!_isHoldIdValid(_partition, _tokenHolder, _holdId))
+            revert IHold.WrongHoldId();
+        _;
+    }
+
     function _isEscrowHoldIdValid(
         bytes32 _partition,
         address _escrowAddress,
@@ -234,6 +244,15 @@ abstract contract HoldStorageWrapperRead is LocalContext {
     ) internal view returns (bool) {
         if (_getHoldFromEscrowId(_partition, _escrowAddress, _escrowId).id == 0)
             return false;
+        return true;
+    }
+
+    function _isHoldIdValid(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (bool) {
+        if (_getHold(_partition, _tokenHolder, _holdId).id == 0) return false;
         return true;
     }
 
