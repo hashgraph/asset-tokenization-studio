@@ -272,6 +272,24 @@ import { ProtectPartitionsCommand } from '../../app/usecase/command/security/ope
 import { UnprotectPartitionsCommand } from '../../app/usecase/command/security/operations/unprotectPartitions/UnprotectPartitionsCommand.js';
 import { ProtectedTransferAndLockByPartitionCommand } from '../../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommand.js';
 import ProtectedTransferAndLockByPartitionRequest from './request/ProtectedTransferAndLockByPartitionRequest.js';
+import HoldViewModel from './response/HoldViewModel.js';
+import { GetHoldForByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery.js';
+import { ONE_THOUSAND } from '../../domain/context/shared/SecurityDate.js';
+import { GetHeldAmountForByPartitionQuery } from '../../app/usecase/query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQuery.js';
+import { GetHeldAmountForQuery } from '../../app/usecase/query/security/hold/getHeldAmountFor/GetHeldAmountForQuery.js';
+import { GetHoldCountForByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQuery.js';
+import { GetHoldCountForEscrowByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldCountForEscrowByPartition/GetHoldCountForEscrowByPartitionQuery.js';
+import { GetHoldsIdForByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQuery.js';
+import { GetHoldsIdForEscrowByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldsIdForEscrowByPartition/GetHoldsIdForEscrowByPartitionQuery.js';
+import { GetHoldForEscrowByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldForEscrowByPartition/GetHoldForEscrowByPartitionQuery.js';
+import GetHeldAmountForRequest from './request/GetHeldAmountForRequest.js';
+import GetHeldAmountForByPartitionRequest from './request/GetHeldAmountForByPartitionRequest.js';
+import GetHoldCountForByPartitionRequest from './request/GetHoldCountForByPartitionRequest.js';
+import GetHoldCountForEscrowByPartitionRequest from './request/GetHoldCountForEscrowByPartitionRequest.js';
+import GetHoldsIdForByPartitionRequest from './request/GetHoldsIdForByPartitionRequest.js';
+import GetHoldsIdForEscrowByPartitionRequest from './request/GetHoldsIdForEscrowByPartitionRequest.js';
+import GetHoldForByPartitionRequest from './request/GetHoldForByPartitionRequest.js';
+import GetHoldForEscrowByPartitionRequest from './request/GetHoldForEscrowByPartitionRequest.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -330,6 +348,28 @@ interface ISecurityInPort {
   getLockedBalanceOf(
     request: GetLockedBalanceRequest,
   ): Promise<BalanceViewModel>;
+  getHeldAmountFor(request: GetHeldAmountForRequest): Promise<number>;
+  getHeldAmountForByPartition(
+    request: GetHeldAmountForByPartitionRequest,
+  ): Promise<number>;
+  getHoldCountForByPartition(
+    request: GetHoldCountForByPartitionRequest,
+  ): Promise<number>;
+  getHoldCountForEscrowByPartition(
+    request: GetHoldCountForEscrowByPartitionRequest,
+  ): Promise<number>;
+  getHoldsIdForByPartition(
+    request: GetHoldsIdForByPartitionRequest,
+  ): Promise<number[]>;
+  getHoldsIdForEscrowByPartition(
+    request: GetHoldsIdForEscrowByPartitionRequest,
+  ): Promise<number[]>;
+  getHoldForByPartition(
+    request: GetHoldForByPartitionRequest,
+  ): Promise<HoldViewModel>;
+  getHoldForEscrowByPartition(
+    request: GetHoldForEscrowByPartitionRequest,
+  ): Promise<HoldViewModel>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -828,6 +868,168 @@ class SecurityInPort implements ISecurityInPort {
         signature,
       ),
     );
+  }
+
+  @LogError
+  async getHeldAmountFor(request: GetHeldAmountForRequest): Promise<number> {
+    handleValidation('GetHeldAmountForRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHeldAmountForQuery(request.securityId, request.targetId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHeldAmountForByPartition(
+    request: GetHeldAmountForByPartitionRequest,
+  ): Promise<number> {
+    handleValidation('GetHeldAmountForByPartitionRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHeldAmountForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHoldCountForByPartition(
+    request: GetHoldCountForByPartitionRequest,
+  ): Promise<number> {
+    handleValidation('GetHoldCountForByPartitionRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHoldCountForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHoldCountForEscrowByPartition(
+    request: GetHoldCountForEscrowByPartitionRequest,
+  ): Promise<number> {
+    handleValidation('GetHoldCountForEscrowByPartitionRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHoldCountForEscrowByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.escrow,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHoldsIdForByPartition(
+    request: GetHoldsIdForByPartitionRequest,
+  ): Promise<number[]> {
+    handleValidation('GetHoldsIdForByPartitionRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHoldsIdForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.start,
+          request.end,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHoldsIdForEscrowByPartition(
+    request: GetHoldsIdForEscrowByPartitionRequest,
+  ): Promise<number[]> {
+    handleValidation('GetHoldsIdForEscrowByPartitionRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHoldsIdForEscrowByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.escrow,
+          request.start,
+          request.end,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHoldForByPartition(
+    request: GetHoldForByPartitionRequest,
+  ): Promise<HoldViewModel> {
+    handleValidation('GetHoldForByPartitionRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetHoldForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.holdId,
+        ),
+      )
+    ).payload;
+
+    const hold: HoldViewModel = {
+      id: res.id,
+      amount: res.amount.toString(),
+      expirationDate: new Date(res.expirationTimeStamp * ONE_THOUSAND),
+      tokenHolderAddress: res.tokenHolderAddress,
+      escrowAddress: res.escrowAddress,
+      destinationAddress: res.destinationAddress,
+      data: res.data,
+      operatorData: res.operatorData,
+    };
+
+    return hold;
+  }
+
+  @LogError
+  async getHoldForEscrowByPartition(
+    request: GetHoldForEscrowByPartitionRequest,
+  ): Promise<HoldViewModel> {
+    handleValidation('GetHoldForEscrowByPartitionRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetHoldForEscrowByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.escrow,
+          request.escrowHoldId,
+        ),
+      )
+    ).payload;
+
+    const hold: HoldViewModel = {
+      id: res.id,
+      amount: res.amount.toString(),
+      expirationDate: new Date(res.expirationTimeStamp * ONE_THOUSAND),
+      tokenHolderAddress: res.tokenHolderAddress,
+      escrowAddress: res.escrowAddress,
+      destinationAddress: res.destinationAddress,
+      data: res.data,
+      operatorData: res.operatorData,
+    };
+
+    return hold;
   }
 }
 
