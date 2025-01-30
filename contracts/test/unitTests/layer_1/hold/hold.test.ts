@@ -403,6 +403,98 @@ describe('Hold Tests', () => {
     }
 
     describe('Multi-partition disabled', () => {
+        async function checkCreatedHold_expected(
+            balance_expected: number,
+            totalHeldAmount_expected: number,
+            holdCount_expected: number,
+            escrow_holdCount_expected: number,
+            holdAmount_expected: number,
+            holdEscrow_expected: string,
+            holdData_expected: string,
+            holdOperatorData_expected: string,
+            holdDestination_expected: string,
+            holdExpirationTimestamp_expected: string,
+            holdTokenHolder_expected: string,
+            escrow_HoldId_expected: number,
+            holdsLength_expected: number,
+            holdId_expected: number,
+            escrowHoldsLength_expected: number,
+            escrowHoldId_expected: number
+        ) {
+            let balance = await erc1410Facet.balanceOf(account_A)
+            let heldAmount = await holdFacet.getHeldAmountForByPartition(
+                _DEFAULT_PARTITION,
+                account_A
+            )
+            let holdCount = await holdFacet.getHoldCountForByPartition(
+                _DEFAULT_PARTITION,
+                account_A
+            )
+            let escrow_holdCount =
+                await holdFacet.getHoldCountForEscrowByPartition(
+                    _DEFAULT_PARTITION,
+                    account_B
+                )
+            let holdIds = await holdFacet.getHoldsIdForByPartition(
+                _DEFAULT_PARTITION,
+                account_A,
+                0,
+                100
+            )
+            let escrow_holdIds = await holdFacet.getHoldsIdForEscrowByPartition(
+                _DEFAULT_PARTITION,
+                account_B,
+                0,
+                1
+            )
+
+            expect(balance).to.equal(balance_expected)
+            expect(heldAmount).to.equal(totalHeldAmount_expected)
+            expect(holdCount).to.equal(holdCount_expected)
+            expect(escrow_holdCount).to.equal(escrow_holdCount_expected)
+            expect(holdIds.length).to.equal(holdsLength_expected)
+            expect(escrow_holdIds.length).to.equal(escrowHoldsLength_expected)
+
+            if (holdCount_expected > 0) {
+                let retrieved_hold = await holdFacet.getHoldForByPartition(
+                    _DEFAULT_PARTITION,
+                    account_A,
+                    1
+                )
+                let escrow_hold = await holdFacet.getHoldForEscrowByPartition(
+                    _DEFAULT_PARTITION,
+                    account_B,
+                    1
+                )
+
+                expect(retrieved_hold.amount_).to.equal(holdAmount_expected)
+                expect(retrieved_hold.escrow_).to.equal(holdEscrow_expected)
+                expect(retrieved_hold.data_).to.equal(holdData_expected)
+                //expect(retrieved_hold.operatorData_).to.equal(holdOperatorData_expected)
+                expect(retrieved_hold.destination_).to.equal(
+                    holdDestination_expected
+                )
+                expect(retrieved_hold.expirationTimestamp_).to.equal(
+                    holdExpirationTimestamp_expected
+                )
+                expect(escrow_hold.amount_).to.equal(holdAmount_expected)
+                expect(escrow_hold.tokenHolder_).to.equal(
+                    holdTokenHolder_expected
+                )
+                expect(escrow_hold.data_).to.equal(holdData_expected)
+                //expect(escrow_hold.operatorData_).to.equal(holdOperatorData_expected)
+                expect(escrow_hold.destination_).to.equal(
+                    holdDestination_expected
+                )
+                expect(escrow_hold.expirationTimestamp_).to.equal(
+                    holdExpirationTimestamp_expected
+                )
+                expect(escrow_hold.id_).to.equal(escrow_HoldId_expected)
+                expect(holdIds[0]).to.equal(holdId_expected)
+                expect(escrow_holdIds[0]).to.equal(escrowHoldId_expected)
+            }
+        }
+
         beforeEach(async () => {
             currentTimestamp = (await ethers.provider.getBlock('latest'))
                 .timestamp
@@ -970,72 +1062,27 @@ describe('Hold Tests', () => {
             })
         })
 
-        describe('Holds OK', () => {
+        describe('Create Holds OK', () => {
             // Create
             async function checkCreatedHold() {
-                let balance = await erc1410Facet.balanceOf(account_A)
-                let heldAmount = await holdFacet.getHeldAmountForByPartition(
-                    _DEFAULT_PARTITION,
-                    account_A
-                )
-                let holdCount = await holdFacet.getHoldCountForByPartition(
-                    _DEFAULT_PARTITION,
-                    account_A
-                )
-                let escrow_holdCount =
-                    await holdFacet.getHoldCountForEscrowByPartition(
-                        _DEFAULT_PARTITION,
-                        account_B
-                    )
-                let retrieved_hold = await holdFacet.getHoldForByPartition(
-                    _DEFAULT_PARTITION,
-                    account_A,
-                    1
-                )
-                let escrow_hold = await holdFacet.getHoldForEscrowByPartition(
-                    _DEFAULT_PARTITION,
-                    account_B,
-                    1
-                )
-                let holdIds = await holdFacet.getHoldsIdForByPartition(
-                    _DEFAULT_PARTITION,
-                    account_A,
+                await checkCreatedHold_expected(
                     0,
-                    100
+                    _AMOUNT,
+                    1,
+                    1,
+                    hold.amount,
+                    hold.escrow,
+                    hold.data,
+                    '0x',
+                    hold.to,
+                    hold.expirationTimestamp,
+                    account_A,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
                 )
-                let escrow_holdIds =
-                    await holdFacet.getHoldsIdForEscrowByPartition(
-                        _DEFAULT_PARTITION,
-                        account_B,
-                        0,
-                        1
-                    )
-
-                expect(balance).to.equal(0)
-                expect(heldAmount).to.equal(_AMOUNT)
-                expect(holdCount).to.equal(1)
-                expect(escrow_holdCount).to.equal(1)
-                expect(retrieved_hold.amount_).to.equal(hold.amount)
-                expect(retrieved_hold.escrow_).to.equal(hold.escrow)
-                expect(retrieved_hold.data_).to.equal(hold.data)
-                //expect(retrieved_hold.operatorData_).to.equal('0x')
-                expect(retrieved_hold.destination_).to.equal(hold.to)
-                expect(retrieved_hold.expirationTimestamp_).to.equal(
-                    hold.expirationTimestamp
-                )
-                expect(escrow_hold.amount_).to.equal(hold.amount)
-                expect(escrow_hold.tokenHolder_).to.equal(account_A)
-                expect(escrow_hold.data_).to.equal(hold.data)
-                //expect(escrow_hold.operatorData_).to.equal('0x')
-                expect(escrow_hold.destination_).to.equal(hold.to)
-                expect(escrow_hold.expirationTimestamp_).to.equal(
-                    hold.expirationTimestamp
-                )
-                expect(escrow_hold.id_).to.equal(1)
-                expect(holdIds.length).to.equal(1)
-                expect(holdIds[0]).to.equal(1)
-                expect(escrow_holdIds.length).to.equal(1)
-                expect(escrow_holdIds[0]).to.equal(1)
             }
 
             it('GIVEN a Token WHEN createHoldByPartition hold THEN transaction succeeds', async () => {
@@ -1134,12 +1181,6 @@ describe('Hold Tests', () => {
 
                 await checkCreatedHold()
             })
-
-            // Execute
-
-            // Release
-
-            // Reclaim
         })
 
         describe('Execute with wrong input arguments', () => {
@@ -1195,7 +1236,7 @@ describe('Hold Tests', () => {
                 )
             })
 
-            it('GIVEN hold WHEN executeHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached', async () => {
+            it('GIVEN a hold WHEN executeHoldByPartition after expiration date THEN transaction fails with HoldExpirationReached', async () => {
                 let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
                 let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
 
@@ -1220,6 +1261,27 @@ describe('Hold Tests', () => {
                 ).to.be.revertedWithCustomError(
                     holdFacet,
                     'HoldExpirationReached'
+                )
+            })
+
+            it('GIVEN a hold with a destination WHEN executeHoldByPartition to another destination THEN transaction fails with InvalidDestinationAddress', async () => {
+                hold.to = account_D
+
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .executeHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            account_C,
+                            _AMOUNT
+                        )
+                ).to.be.revertedWithCustomError(
+                    holdFacet,
+                    'InvalidDestinationAddress'
                 )
             })
         })
@@ -1340,6 +1402,143 @@ describe('Hold Tests', () => {
                 ).to.be.revertedWithCustomError(
                     holdFacet,
                     'HoldExpirationNotReached'
+                )
+            })
+        })
+
+        describe('Execute OK', () => {
+            it('GIVEN hold with no destination WHEN executeHoldByPartition THEN transaction succeeds', async () => {
+                let balance_before = await erc1410Facet.balanceOf(account_C)
+
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .executeHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            account_C,
+                            1
+                        )
+                )
+                    .to.emit(holdFacet, 'HoldByPartitionExecuted')
+                    .withArgs(account_A, _DEFAULT_PARTITION, 1, 1, account_C)
+
+                await checkCreatedHold_expected(
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    '-',
+                    '0x',
+                    '0x',
+                    '-',
+                    '-',
+                    '-',
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                )
+
+                let balance_after = await erc1410Facet.balanceOf(account_C)
+
+                expect(balance_after.toNumber()).to.equal(
+                    balance_before.add(_AMOUNT).toNumber()
+                )
+            })
+        })
+
+        describe('Release OK', () => {
+            it('GIVEN hold with no destination WHEN releaseHoldByPartition THEN transaction succeeds', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .releaseHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A,
+                            1
+                        )
+                )
+                    .to.emit(holdFacet, 'HoldByPartitionReleased')
+                    .withArgs(account_A, _DEFAULT_PARTITION, 1, 1)
+
+                await checkCreatedHold_expected(
+                    _AMOUNT,
+                    0,
+                    0,
+                    0,
+                    0,
+                    '-',
+                    '0x',
+                    '0x',
+                    '-',
+                    '-',
+                    '-',
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                )
+            })
+        })
+
+        describe('Reclaim OK', () => {
+            it('GIVEN hold with no destination WHEN reclaimHoldByPartition THEN transaction succeeds', async () => {
+                let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+
+                hold.expirationTimestamp = finalDate - 1
+
+                await timeTravelFacet.changeSystemTimestamp(initDate)
+
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+
+                await timeTravelFacet.changeSystemTimestamp(finalDate)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .reclaimHoldByPartition(
+                            _DEFAULT_PARTITION,
+                            1,
+                            account_A
+                        )
+                )
+                    .to.emit(holdFacet, 'HoldByPartitionReclaimed')
+                    .withArgs(
+                        account_B,
+                        account_A,
+                        _DEFAULT_PARTITION,
+                        1,
+                        _AMOUNT
+                    )
+
+                await checkCreatedHold_expected(
+                    _AMOUNT,
+                    0,
+                    0,
+                    0,
+                    0,
+                    '-',
+                    '0x',
+                    '0x',
+                    '-',
+                    '-',
+                    '-',
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
                 )
             })
         })
