@@ -220,42 +220,46 @@ abstract contract HoldStorageWrapperRead is LocalContext {
     modifier onlyWithValidEscrowHoldId(
         bytes32 _partition,
         address _escrowAddress,
-        uint256 _escrowId,
-        address _tokenHolder
+        uint256 _escrowId
     ) {
-        if (
-            !_isEscrowHoldIdValid(
-                _partition,
-                _escrowAddress,
-                _escrowId,
-                _tokenHolder
-            )
-        ) revert IHold.WrongEscrowHoldId();
+        if (!_isEscrowHoldIdValid(_partition, _escrowAddress, _escrowId))
+            revert IHold.WrongEscrowHoldId();
         _;
     }
 
     function _isEscrowHoldIdValid(
         bytes32 _partition,
         address _escrowAddress,
-        uint256 _escrowId,
-        address _tokenHolder
+        uint256 _escrowId
     ) internal view returns (bool) {
-        if (
-            _getHoldFromEscrowId(
-                _partition,
-                _escrowAddress,
-                _escrowId,
-                _tokenHolder
-            ).id == 0
-        ) return false;
+        if (_getHoldFromEscrowId(_partition, _escrowAddress, _escrowId).id == 0)
+            return false;
         return true;
+    }
+
+    function _getTokenHolderFromEscrowId(
+        bytes32 _partition,
+        address _escrow,
+        uint256 _escrowId
+    ) internal view returns (address tokenHolder_) {
+        uint256 escrowHoldIndex = _getHoldEscrowIndex(
+            _partition,
+            _escrow,
+            _escrowId
+        );
+        IHold.EscrowHoldData memory escrowHold = _getEscrowHoldByIndex(
+            _partition,
+            _escrow,
+            escrowHoldIndex
+        );
+
+        tokenHolder_ = escrowHold.tokenHolder;
     }
 
     function _getHoldFromEscrowId(
         bytes32 _partition,
         address _escrow,
-        uint256 _escrowId,
-        address _tokenHolder
+        uint256 _escrowId
     ) internal view returns (IHold.HoldData memory holdData_) {
         uint256 escrowHoldIndex = _getHoldEscrowIndex(
             _partition,
@@ -270,11 +274,15 @@ abstract contract HoldStorageWrapperRead is LocalContext {
 
         uint256 holdIndex = _getHoldIndex(
             _partition,
-            _tokenHolder,
+            escrowHold.tokenHolder,
             escrowHold.id
         );
 
-        holdData_ = _getHoldByIndex(_partition, _tokenHolder, holdIndex);
+        holdData_ = _getHoldByIndex(
+            _partition,
+            escrowHold.tokenHolder,
+            holdIndex
+        );
     }
 
     function _getHold(

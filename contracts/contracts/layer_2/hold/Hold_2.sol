@@ -351,43 +351,49 @@ contract Hold_2 is
     function _executeHoldByPartition(
         bytes32 _partition,
         uint256 _escrowId,
-        address _tokenHolder,
         address _to,
         uint256 _amount
     )
         internal
         virtual
         override(HoldStorageWrapper, HoldStorageWrapper_2)
-        returns (bool success_)
+        returns (bool success_, uint256 holdId_, address tokenHolder_)
     {
-        return
-            HoldStorageWrapper_2._executeHoldByPartition(
-                _partition,
-                _escrowId,
-                _tokenHolder,
-                _to,
-                _amount
-            );
+        (success_, holdId_, tokenHolder_) = HoldStorageWrapper_2
+            ._executeHoldByPartition(_partition, _escrowId, _to, _amount);
     }
 
     function _releaseHoldByPartition(
         bytes32 _partition,
-        address _tokenHolder,
         uint256 _escrowId,
         uint256 _amount
     )
         internal
         virtual
         override(HoldStorageWrapper, HoldStorageWrapper_2)
-        returns (bool success_)
+        returns (bool success_, uint256 holdId_, address tokenHolder_)
     {
-        return
-            HoldStorageWrapper_2._releaseHoldByPartition(
-                _partition,
-                _tokenHolder,
-                _escrowId,
-                _amount
-            );
+        (success_, holdId_, tokenHolder_) = HoldStorageWrapper_2
+            ._releaseHoldByPartition(_partition, _escrowId, _amount);
+    }
+
+    function _reclaimHoldByPartition(
+        bytes32 _partition,
+        uint256 _escrowId,
+        address _escrowAddress
+    )
+        internal
+        virtual
+        override(HoldStorageWrapper, HoldStorageWrapper_2)
+        returns (
+            bool success_,
+            uint256 amount_,
+            uint256 holdId_,
+            address tokenHolder_
+        )
+    {
+        (success_, amount_, holdId_, tokenHolder_) = HoldStorageWrapper_2
+            ._reclaimHoldByPartition(_partition, _escrowId, _escrowAddress);
     }
 
     function getStaticResolverKey()

@@ -311,31 +311,46 @@ abstract contract HoldStorageWrapper is
     function _executeHoldByPartition(
         bytes32 _partition,
         uint256 _escrowId,
-        address _tokenHolder,
         address _to,
         uint256 _amount
-    ) internal virtual returns (bool success_) {
+    )
+        internal
+        virtual
+        returns (bool success_, uint256 holdId_, address tokenHolder_)
+    {
         IHold.HoldData memory holdData = _getHoldFromEscrowId(
             _partition,
             _msgSender(),
-            _escrowId,
-            _tokenHolder
+            _escrowId
+        );
+        tokenHolder_ = _getTokenHolderFromEscrowId(
+            _partition,
+            _msgSender(),
+            _escrowId
         );
 
         IHold.Hold memory hold = holdData.hold;
+
+        if (_amount > hold.amount) {
+            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
+        }
 
         if (hold.to != address(0) && _to != hold.to) {
             revert IHold.InvalidDestinationAddress(hold.to, _to);
         }
 
-        _beforeExecuteHold(_partition, _tokenHolder, _to);
+        if (_blockTimestamp() > hold.expirationTimestamp) {
+            revert IHold.HoldExpirationReached();
+        }
 
-        _decreaseHeldAmount(_partition, _tokenHolder, _amount, holdData.id);
+        _beforeExecuteHold(_partition, tokenHolder_, _to);
+
+        _decreaseHeldAmount(_partition, tokenHolder_, _amount, holdData.id);
 
         if (hold.amount == _amount) {
             _removeHold(
                 _partition,
-                _tokenHolder,
+                tokenHolder_,
                 holdData.id,
                 _msgSender(),
                 _escrowId
@@ -349,44 +364,115 @@ abstract contract HoldStorageWrapper is
         }
 
         success_ = true;
+        holdId_ = holdData.id;
     }
 
     function _releaseHoldByPartition(
         bytes32 _partition,
-        address _tokenHolder,
         uint256 _escrowId,
         uint256 _amount
-    ) internal virtual returns (bool success_) {
+    )
+        internal
+        virtual
+        returns (bool success_, uint256 holdId_, address tokenHolder_)
+    {
         IHold.HoldData memory holdData = _getHoldFromEscrowId(
             _partition,
             _msgSender(),
-            _escrowId,
-            _tokenHolder
+            _escrowId
+        );
+        tokenHolder_ = _getTokenHolderFromEscrowId(
+            _partition,
+            _msgSender(),
+            _escrowId
         );
 
         IHold.Hold memory hold = holdData.hold;
 
-        _beforeReleaseHold(_partition, _tokenHolder, _tokenHolder);
+        if (_amount > hold.amount) {
+            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
+        }
 
-        _decreaseHeldAmount(_partition, _tokenHolder, _amount, holdData.id);
+        if (_blockTimestamp() > hold.expirationTimestamp) {
+            revert IHold.HoldExpirationReached();
+        }
+
+        _beforeReleaseHold(_partition, tokenHolder_, tokenHolder_);
+
+        _decreaseHeldAmount(_partition, tokenHolder_, _amount, holdData.id);
 
         if (hold.amount == _amount) {
             _removeHold(
                 _partition,
-                _tokenHolder,
+                tokenHolder_,
                 holdData.id,
                 _msgSender(),
                 _escrowId
             );
         }
 
-        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
-            _addPartitionTo(_amount, _tokenHolder, _partition);
+        if (!_validPartitionForReceiver(_partition, tokenHolder_)) {
+            _addPartitionTo(_amount, tokenHolder_, _partition);
         } else {
-            _increaseBalanceByPartition(_tokenHolder, _amount, _partition);
+            _increaseBalanceByPartition(tokenHolder_, _amount, _partition);
         }
 
         success_ = true;
+        holdId_ = holdData.id;
+    }
+
+    function _reclaimHoldByPartition(
+        bytes32 _partition,
+        uint256 _escrowId,
+        address _escrowAddress
+    )
+        internal
+        virtual
+        returns (
+            bool success_,
+            uint256 amount_,
+            uint256 holdId_,
+            address tokenHolder_
+        )
+    {
+        IHold.HoldData memory holdData = _getHoldFromEscrowId(
+            _partition,
+            _escrowAddress,
+            _escrowId
+        );
+        // Updated hold
+        IHold.Hold memory hold = holdData.hold;
+        tokenHolder_ = _getTokenHolderFromEscrowId(
+            _partition,
+            _msgSender(),
+            _escrowId
+        );
+
+        if (_blockTimestamp() < hold.expirationTimestamp) {
+            revert IHold.HoldExpirationNotReached();
+        }
+
+        _beforeReclaimHold(_partition, tokenHolder_, tokenHolder_);
+
+        _decreaseHeldAmount(_partition, tokenHolder_, hold.amount, holdData.id);
+
+        _removeHold(
+            _partition,
+            tokenHolder_,
+            holdData.id,
+            _escrowAddress,
+            _escrowId
+        );
+
+        if (!_validPartitionForReceiver(_partition, tokenHolder_)) {
+            _addPartitionTo(hold.amount, tokenHolder_, _partition);
+        } else {
+            _increaseBalanceByPartition(tokenHolder_, hold.amount, _partition);
+        }
+
+        success_ = true;
+        amount_ = hold.amount;
+        holdId_ = holdData.id;
     }
 
     function _decreaseHeldAmount(
@@ -462,7 +548,7 @@ abstract contract HoldStorageWrapper is
             );
         }
 
-        holdStorage.escrow_holds[_msgSender()][_partition].pop();
+        holdStorage.escrow_holds[_escrow][_partition].pop();
     }
 
     function _setHoldAtIndex(
@@ -504,8 +590,8 @@ abstract contract HoldStorageWrapper is
             .id = escrowHold.id;
 
         holdStorage.escrow_holdsIndex[_escrowAddress][_partition][
-            escrowHold.id
-        ] = _escrowHoldIndex;
+                escrowHold.id
+            ] = _escrowHoldIndex;
     }
 
     function _checkCreateHoldSignature(

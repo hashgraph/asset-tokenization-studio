@@ -331,6 +331,7 @@ abstract contract HoldStorageWrapper_2 is
 
         amount_ *= factor;
     }
+
     function _createHoldByPartition(
         bytes32 _partition,
         address _from,
@@ -366,15 +367,25 @@ abstract contract HoldStorageWrapper_2 is
     function _executeHoldByPartition(
         bytes32 _partition,
         uint256 _escrowId,
-        address _tokenHolder,
         address _to,
         uint256 _amount
-    ) internal virtual override returns (bool success_) {
+    )
+        internal
+        virtual
+        override
+        returns (bool success_, uint256 holdId_, address tokenHolder_)
+    {
+        tokenHolder_ = _getTokenHolderFromEscrowId(
+            _partition,
+            _msgSender(),
+            _escrowId
+        );
+        _checkControlList(tokenHolder_);
+
         IHold.HoldData memory holdData = _getHoldFromEscrowId(
             _partition,
             _msgSender(),
-            _escrowId,
-            _tokenHolder
+            _escrowId
         );
 
         AdjustBalancesStorage
@@ -383,69 +394,151 @@ abstract contract HoldStorageWrapper_2 is
         ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
             _partition,
             address(0),
-            _tokenHolder
+            tokenHolder_
         );
 
         uint256 abaf = _updateTotalHold(
             _partition,
-            _tokenHolder,
+            tokenHolder_,
             adjustBalancesStorage
         );
 
-        _updateHoldByIndex(_partition, holdData.id, _tokenHolder, abaf);
+        _updateHoldByIndex(
+            _partition,
+            holdData.id,
+            tokenHolder_,
+            abaf,
+            adjustBalancesStorage
+        );
 
-        success_ = super._executeHoldByPartition(
+        (success_, holdId_, ) = super._executeHoldByPartition(
             _partition,
             _escrowId,
-            _tokenHolder,
             _to,
             _amount
         );
-
+        // Updated hold amount
+        holdData = _getHoldFromEscrowId(_partition, _msgSender(), _escrowId);
         if (_amount == holdData.hold.amount) {
-            adjustBalancesStorage.labafHolds[_tokenHolder][_partition].pop();
+            adjustBalancesStorage.labafHolds[tokenHolder_][_partition].pop();
         }
     }
 
     function _releaseHoldByPartition(
         bytes32 _partition,
-        address _tokenHolder,
         uint256 _escrowId,
         uint256 _amount
-    ) internal virtual override returns (bool success_) {
+    )
+        internal
+        virtual
+        override
+        returns (bool success_, uint256 holdId_, address tokenHolder_)
+    {
+        tokenHolder_ = _getTokenHolderFromEscrowId(
+            _partition,
+            _msgSender(),
+            _escrowId
+        );
+
+        _checkControlList(tokenHolder_);
+
         IHold.HoldData memory holdData = _getHoldFromEscrowId(
             _partition,
             _msgSender(),
-            _escrowId,
-            _tokenHolder
+            _escrowId
         );
+
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
         ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
             _partition,
             address(0),
-            _tokenHolder
+            tokenHolder_
         );
 
         uint256 abaf = _updateTotalHold(
             _partition,
-            _tokenHolder,
+            tokenHolder_,
             adjustBalancesStorage
         );
 
-        _updateHoldByIndex(_partition, holdData.id, _tokenHolder, abaf);
-
-        success_ = super._releaseHoldByPartition(
+        _updateHoldByIndex(
             _partition,
-            _tokenHolder,
+            holdData.id,
+            tokenHolder_,
+            abaf,
+            adjustBalancesStorage
+        );
+
+        (success_, holdId_, ) = super._releaseHoldByPartition(
+            _partition,
             _escrowId,
             _amount
         );
 
+        // Updated hold amount
+        holdData = _getHoldFromEscrowId(_partition, _msgSender(), _escrowId);
         if (_amount == holdData.hold.amount) {
-            adjustBalancesStorage.labafHolds[_tokenHolder][_partition].pop();
+            adjustBalancesStorage.labafHolds[tokenHolder_][_partition].pop();
         }
+    }
+
+    function _reclaimHoldByPartition(
+        bytes32 _partition,
+        uint256 _escrowId,
+        address _escrowAddress
+    )
+        internal
+        virtual
+        override
+        returns (
+            bool success_,
+            uint256 amount_,
+            uint256 holdId_,
+            address tokenHolder_
+        )
+    {
+        tokenHolder_ = _getTokenHolderFromEscrowId(
+            _partition,
+            _escrowAddress,
+            _escrowId
+        );
+        _checkControlList(tokenHolder_);
+
+        IHold.HoldData memory holdData = _getHoldFromEscrowId(
+            _partition,
+            _escrowAddress,
+            _escrowId
+        );
+
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+
+        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
+            _partition,
+            address(0),
+            tokenHolder_
+        );
+
+        uint256 abaf = _updateTotalHold(
+            _partition,
+            tokenHolder_,
+            adjustBalancesStorage
+        );
+
+        _updateHoldByIndex(
+            _partition,
+            holdData.id,
+            tokenHolder_,
+            abaf,
+            adjustBalancesStorage
+        );
+
+        (success_, amount_, holdId_, tokenHolder_) = super
+            ._reclaimHoldByPartition(_partition, _escrowId, _escrowAddress);
+
+        adjustBalancesStorage.labafHolds[tokenHolder_][_partition].pop();
     }
 
     function _setHoldAtIndex(
@@ -456,14 +549,14 @@ abstract contract HoldStorageWrapper_2 is
     ) internal virtual override {
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
-        uint256 holdIndex = _getHoldIndex(
+        uint256 currentHoldIndex = _getHoldIndex(
             _partition,
             _tokenHolder,
             _holdData.id
         );
         uint256 labaf = adjustBalancesStorage.labafHolds[_tokenHolder][
             _partition
-        ][holdIndex - 1];
+        ][currentHoldIndex - 1];
 
         adjustBalancesStorage.labafHolds[_tokenHolder][_partition][
             _holdIndex - 1
@@ -473,7 +566,7 @@ abstract contract HoldStorageWrapper_2 is
             super._setHoldAtIndex(
                 _partition,
                 _tokenHolder,
-                holdIndex,
+                _holdIndex,
                 _holdData
             );
     }
@@ -549,9 +642,10 @@ abstract contract HoldStorageWrapper_2 is
         bytes32 _partition,
         uint256 _holdId,
         address _tokenHolder,
-        uint256 _abaf
+        uint256 _abaf,
+        AdjustBalancesStorage storage adjustBalancesStorage
     ) internal virtual {
-        uint256 hold_LABAF = AdjustBalances_CD_Lib.getLockLABAFByPartition(
+        uint256 hold_LABAF = AdjustBalances_CD_Lib.getHoldLABAFByPartition(
             _partition,
             _holdId,
             _tokenHolder
@@ -575,6 +669,9 @@ abstract contract HoldStorageWrapper_2 is
                 _tokenHolder,
                 factor_hold
             );
+            adjustBalancesStorage.labafHolds[_tokenHolder][_partition][
+                holdIndex - 1
+            ] = _abaf;
         }
     }
 
