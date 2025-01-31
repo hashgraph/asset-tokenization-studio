@@ -229,6 +229,7 @@ import {
   ScheduledTasks__factory,
   Snapshots_2__factory,
   TransferAndLock__factory,
+  Hold_2__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -270,6 +271,7 @@ import {
   UPDATE_CONFIG_VERSION_GAS,
   UPDATE_MATURITY_DATE_GAS,
   UPDATE_RESOLVER_GAS,
+  EXECUTE_HOLD_BY_PARTITION_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -1811,6 +1813,36 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(PROTECTED_TRANSFER_AND_LOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async executeHoldByPartition(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    partitionId: string,
+    escrowId: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'executeHoldByPartition';
+    LogService.logTrace(`Executing hold with escrow Id ${escrowId}`);
+
+    const factoryInstance = new Hold_2__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [partitionId, escrowId, targetId.toString(), amount.toBigNumber()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(EXECUTE_HOLD_BY_PARTITION_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

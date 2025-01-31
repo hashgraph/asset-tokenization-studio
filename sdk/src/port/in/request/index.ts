@@ -340,4 +340,5 @@ export {
   GetNounceRequest,
   PartitionsProtectedRequest,
   ProtectedTransferAndLockByPartitionRequest,
+  ExecuteHoldByPartitionRequest,
 };

@@ -296,6 +296,7 @@ import {
   PROTECTED_REDEEM_GAS,
   UNPROTECT_PARTITION_GAS,
   PROTECTED_TRANSFER_AND_LOCK_GAS,
+  EXECUTE_HOLD_BY_PARTITION_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -325,6 +326,7 @@ import {
   ScheduledTasks__factory,
   Snapshots__factory,
   TransferAndLock__factory,
+  Hold_2__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -1794,6 +1796,32 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         signature,
         {
           gasLimit: PROTECTED_TRANSFER_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async executeHoldByPartition(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    partitionId: string,
+    escrowId: string,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(`Executing hold with escrow Id ${escrowId}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold_2__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).executeHoldByPartition(
+        partitionId,
+        escrowId,
+        targetId.toString(),
+        amount.toBigNumber(),
+        {
+          gasLimit: EXECUTE_HOLD_BY_PARTITION_GAS,
         },
       ),
       this.networkService.environment,

@@ -207,7 +207,10 @@ import { ICommandHandler } from '../../../../../../core/command/CommandHandler.j
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
 import AccountService from '../../../../../service/AccountService.js';
 import SecurityService from '../../../../../service/SecurityService.js';
-import { ExecuteHoldByPartitionCommand, ExecuteHoldByPartitionCommandResponse } from './ExecuteHoldByPartitionCommand.js';
+import {
+  ExecuteHoldByPartitionCommand,
+  ExecuteHoldByPartitionCommandResponse,
+} from './ExecuteHoldByPartitionCommand.js';
 import TransactionService from '../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
 import BigDecimal from '../../../../../../domain/context/shared/BigDecimal.js';
@@ -218,11 +221,11 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { SecurityPaused } from '../../error/SecurityPaused.js';
-import { NotGrantedRole } from '../../error/NotGrantedRole.js';
-import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole.js';
 
 @CommandHandler(ExecuteHoldByPartitionCommand)
-export class ExecuteHoldByPartitionCommandHandler implements ICommandHandler<ExecuteHoldByPartitionCommand> {
+export class ExecuteHoldByPartitionCommandHandler
+  implements ICommandHandler<ExecuteHoldByPartitionCommand>
+{
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
@@ -236,10 +239,11 @@ export class ExecuteHoldByPartitionCommandHandler implements ICommandHandler<Exe
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
   ) {}
 
-  async execute(command: ExecuteHoldByPartitionCommand): Promise<ExecuteHoldByPartitionCommandResponse> {
-    const { securityId, amount, holdId, targetId, partitionId, sourceId } = command;
+  async execute(
+    command: ExecuteHoldByPartitionCommand,
+  ): Promise<ExecuteHoldByPartitionCommandResponse> {
+    const { securityId, amount, escrowId, targetId, partitionId } = command;
     const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
@@ -252,45 +256,29 @@ export class ExecuteHoldByPartitionCommandHandler implements ICommandHandler<Exe
       throw new SecurityPaused();
     }
 
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._LOCKER_ROLE,
-      ))
-    ) {
-      throw new NotGrantedRole(SecurityRole._LOCKER_ROLE);
-    }
-
     if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
       throw new DecimalsOverRange(security.decimals);
     }
 
-    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
-      : new EvmAddress(sourceId);
-
-      const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
+    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
       ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
       : new EvmAddress(targetId);
 
-
     const amountBd = BigDecimal.fromString(amount, security.decimals);
-
-
 
     const res = await handler.executeHoldByPartition(
       securityEvmAddress,
       targetEvmAddress,
       amountBd,
       partitionId,
-        holdId,
-        targetId,
+      escrowId,
     );
 
     return Promise.resolve(
-      new ExecuteHoldByPartitionCommandResponse(res.error === undefined, res.id!),
+      new ExecuteHoldByPartitionCommandResponse(
+        res.error === undefined,
+        res.id!,
+      ),
     );
   }
 }

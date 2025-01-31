@@ -217,10 +217,9 @@ export class ExecuteHoldByPartitionCommand extends Command<ExecuteHoldByPartitio
   constructor(
     public readonly securityId: string,
     public readonly amount: string,
-    public readonly holdId: string,
+    public readonly escrowId: string,
     public readonly targetId: string,
     public readonly partitionId: string,
-    public readonly sourceId: string,
   ) {
     super();
   }

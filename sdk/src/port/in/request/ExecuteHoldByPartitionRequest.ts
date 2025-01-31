@@ -212,7 +212,6 @@ export default class ExecuteHoldByPartitionRequest extends ValidatedRequest<Exec
   holdId: string;
   targetId: string;
   partitionId: string;
-  sourceId: string;
 
   constructor({
     targetId,
@@ -220,22 +219,19 @@ export default class ExecuteHoldByPartitionRequest extends ValidatedRequest<Exec
     securityId,
     amount,
     partitionId,
-    sourceId,
   }: {
     securityId: string;
     amount: string;
     holdId: string;
     targetId: string;
     partitionId: string;
-    sourceId: string;
   }) {
     super({
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
       targetId: Validation.checkHederaIdFormatOrEvmAddress(),
       holdId: Validation.checkHederaIdFormatOrEvmAddress(),
       amount: Validation.checkAmount(),
-      sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
-      partitionId: Validation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: Validation.checkBytes32Format(),
     });
 
     this.securityId = securityId;
@@ -243,6 +239,5 @@ export default class ExecuteHoldByPartitionRequest extends ValidatedRequest<Exec
     this.holdId = holdId;
     this.amount = amount;
     this.partitionId = partitionId;
-    this.sourceId = sourceId;
   }
 }
