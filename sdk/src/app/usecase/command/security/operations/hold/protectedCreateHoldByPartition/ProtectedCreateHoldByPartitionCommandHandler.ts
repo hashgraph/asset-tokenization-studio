@@ -260,7 +260,7 @@ export class ProtectedCreateHoldByPartitionCommandHandler
       targetId,
       expirationDate,
       deadline,
-      nounce,
+      nonce,
       signature,
     } = command;
     const handler = this.transactionService.getHandler();
@@ -328,8 +328,8 @@ export class ProtectedCreateHoldByPartitionCommandHandler
       sourceEvmAddress,
     );
 
-    if (BigNumber.from(nounce).lte(nextNounce)) {
-      throw new NounceAlreadyUsed(nounce);
+    if (BigNumber.from(nonce).lte(nextNounce)) {
+      throw new NounceAlreadyUsed(nonce);
     }
 
     const res = await handler.protectedCreateHoldByPartition(
@@ -341,7 +341,7 @@ export class ProtectedCreateHoldByPartitionCommandHandler
       targetEvmAddress,
       BigDecimal.fromString(expirationDate),
       BigDecimal.fromString(deadline),
-      BigDecimal.fromString(nounce.toString()),
+      BigDecimal.fromString(nonce.toString()),
       signature,
       securityId,
     );

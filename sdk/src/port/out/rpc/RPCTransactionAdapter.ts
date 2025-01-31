@@ -1922,7 +1922,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     expirationDate: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
@@ -1940,7 +1940,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const protectedHold: ProtectedHold = {
       hold,
       deadline: deadline.toBigNumber(),
-      nonce: nounce.toBigNumber(),
+      nonce: nonce.toBigNumber(),
       signature: signature,
     };
 

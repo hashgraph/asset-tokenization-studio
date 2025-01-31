@@ -216,7 +216,7 @@ export default class ProtectedCreateHoldByPartitionRequest extends ValidatedRequ
   targetId: string;
   expirationDate: string;
   deadline: string;
-  nounce: number;
+  nonce: number;
   signature: string;
 
   constructor({
@@ -228,7 +228,7 @@ export default class ProtectedCreateHoldByPartitionRequest extends ValidatedRequ
     targetId,
     expirationDate,
     deadline,
-    nounce,
+    nonce,
     signature,
   }: {
     securityId: string;
@@ -239,7 +239,7 @@ export default class ProtectedCreateHoldByPartitionRequest extends ValidatedRequ
     targetId: string;
     expirationDate: string;
     deadline: string;
-    nounce: number;
+    nonce: number;
     signature: string;
   }) {
     super({
@@ -249,6 +249,7 @@ export default class ProtectedCreateHoldByPartitionRequest extends ValidatedRequ
       escrow: Validation.checkHederaIdFormatOrEvmAddress(),
       sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
       targetId: Validation.checkHederaIdFormatOrEvmAddress(),
+      nonce: Validation.checkNumber({min: 0}),
       expirationDate: (val) => {
         return SecurityDate.checkDateTimestamp(
           parseInt(val),
@@ -271,7 +272,7 @@ export default class ProtectedCreateHoldByPartitionRequest extends ValidatedRequ
     this.targetId = targetId;
     this.expirationDate = expirationDate;
     this.deadline = deadline;
-    this.nounce = nounce;
+    this.nonce = nonce;
     this.signature = signature;
   }
 }

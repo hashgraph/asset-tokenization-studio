@@ -1956,7 +1956,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     expirationDate: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
@@ -1978,7 +1978,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const protectedHold: ProtectedHold = {
       hold,
       deadline: deadline.toBigNumber(),
-      nonce: nounce.toBigNumber(),
+      nonce: nonce.toBigNumber(),
       signature: signature,
     };
 

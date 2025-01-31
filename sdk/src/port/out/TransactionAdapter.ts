@@ -584,7 +584,7 @@ interface IHoldTransactionAdapter {
     targetId: EvmAddress,
     expirationDate: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>>;
@@ -1061,7 +1061,7 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     expirationDate: BigDecimal,
     deadline: BigDecimal,
-    nounce: BigDecimal,
+    nonce: BigDecimal,
     signature: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
