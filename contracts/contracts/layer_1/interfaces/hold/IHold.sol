@@ -242,11 +242,11 @@ interface IHold {
     );
 
     error HoldExpirationNotReached();
-    error WrongEscrowHoldId();
     error WrongHoldId();
     error InvalidDestinationAddress(address holdDestination, address to);
     error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
     error HoldExpirationReached();
+    error IsNotEscrow();
 
     struct Hold {
         uint256 amount;
@@ -265,15 +265,8 @@ interface IHold {
 
     struct HoldData {
         uint256 id;
-        uint256 escrowId;
         Hold hold;
         bytes operatorData;
-    }
-
-    struct EscrowHoldData {
-        uint256 escrow_id;
-        address tokenHolder;
-        uint256 id; // link to HoldData(id)
     }
 
     struct HoldDataStorage {
@@ -283,10 +276,6 @@ interface IHold {
         mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIds;
         mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) holdsIndex;
         mapping(address => mapping(bytes32 => uint256)) holdNextId;
-        mapping(address => mapping(bytes32 => EscrowHoldData[])) escrow_holds;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) escrow_holdIds;
-        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) escrow_holdsIndex;
-        mapping(address => mapping(bytes32 => uint256)) escrow_holdNextId;
     }
 
     enum OperationType {
@@ -329,14 +318,16 @@ interface IHold {
 
     function executeHoldByPartition(
         bytes32 _partition,
-        uint256 _escrowId,
+        address _tokenHolder,
+        uint256 _holdId,
         address _to,
         uint256 _amount
     ) external returns (bool success_);
 
     function releaseHoldByPartition(
         bytes32 _partition,
-        uint256 _escrowId,
+        address _tokenHolder,
+        uint256 _holdId,
         uint256 _amount
     ) external returns (bool success_);
 
@@ -360,24 +351,12 @@ interface IHold {
         address _tokenHolder
     ) external view returns (uint256 holdCount_);
 
-    function getHoldCountForEscrowByPartition(
-        bytes32 _partition,
-        address _escrow
-    ) external view returns (uint256 escrowHoldCount_);
-
     function getHoldsIdForByPartition(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (uint256[] memory holdsId_);
-
-    function getHoldsIdForEscrowByPartition(
-        bytes32 _partition,
-        address _escrow,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (uint256[] memory escrowHoldsId_);
 
     function getHoldForByPartition(
         bytes32 _partition,
@@ -390,23 +369,6 @@ interface IHold {
             uint256 amount_,
             uint256 expirationTimestamp_,
             address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
-        );
-
-    function getHoldForEscrowByPartition(
-        bytes32 _partition,
-        address _escrow,
-        uint256 _escrowHoldId
-    )
-        external
-        view
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address tokenHolder_,
-            uint256 id_,
             address destination_,
             bytes memory data_,
             bytes memory operatorData_
