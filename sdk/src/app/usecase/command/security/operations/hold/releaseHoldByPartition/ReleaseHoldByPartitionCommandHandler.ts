@@ -220,6 +220,7 @@ import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { SecurityPaused } from '../../../error/SecurityPaused.js';
+import { InsufficientHoldBalance } from '../../../error/InsufficientHoldBalance.js';
 
 @CommandHandler(ReleaseHoldByPartitionCommand)
 export class ReleaseHoldByPartitionCommandHandler
@@ -262,6 +263,17 @@ export class ReleaseHoldByPartitionCommandHandler
       : new EvmAddress(targetId);
 
     const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    const holdDetails = await this.queryAdapter.getHoldForByPartition(
+      securityEvmAddress,
+      partitionId,
+      targetEvmAddress,
+      holdId,
+    );
+
+    if (holdDetails.amount.toBigNumber().lt(amountBd.toBigNumber())) {
+      throw new InsufficientHoldBalance();
+    }
 
     const res = await handler.releaseHoldByPartition(
       securityEvmAddress,
