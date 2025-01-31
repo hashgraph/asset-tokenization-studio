@@ -203,158 +203,21 @@
 
 */
 
-import IssueRequest from './IssueRequest.js';
-import RedeemRequest from './RedeemRequest.js';
-import ForceRedeemRequest from './ForceRedeemRequest.js';
-import CreateEquityRequest from './CreateEquityRequest.js';
-import CreateBondRequest from './CreateBondRequest.js';
-import RoleRequest from './RoleRequest.js';
-import ApplyRolesRequest from './ApplyRolesRequest.js';
-import ValidationResponse from './validation/ValidationResponse.js';
-import TransferRequest from './TransferRequest.js';
-import TransferAndLockRequest from './TransferAndLockRequest.js';
-import ForceTransferRequest from './ForceTransferRequest.js';
-import GetAccountBalanceRequest from './GetAccountBalanceRequest.js';
-import GetAccountInfoRequest from './GetAccountInfoRequest.js';
-import PauseRequest from './PauseRequest.js';
-import ControlListRequest from './ControlListRequest.js';
-import GetControlListCountRequest from './GetControlListCountRequest.js';
-import GetControlListMembersRequest from './GetControlListMembersRequest.js';
-import GetDividendsForRequest from './GetDividendsForRequest.js';
-import GetDividendsRequest from './GetDividendsRequest.js';
-import GetAllDividendsRequest from './GetAllDividendsRequest.js';
-import GetVotingRightsForRequest from './GetVotingRightsForRequest.js';
-import GetVotingRightsRequest from './GetVotingRightsRequest.js';
-import GetAllVotingRightsRequest from './GetAllVotingRightsRequest.js';
-import GetCouponForRequest from './GetCouponForRequest.js';
-import GetCouponRequest from './GetCouponRequest.js';
-import GetAllCouponsRequest from './GetAllCouponsRequest.js';
-import GetRoleCountForRequest from './GetRoleCountForRequest.js';
-import GetRolesForRequest from './GetRolesForRequest.js';
-import GetRoleMemberCountRequest from './GetRoleMemberCountRequest.js';
-import GetRoleMembersRequest from './GetRoleMembersRequest.js';
-import GetSecurityDetailsRequest from './GetSecurityDetailsRequest.js';
-import SetDividendsRequest from './SetDividendsRequest.js';
-import SetCouponRequest from './SetCouponRequest.js';
-import SetVotingRightsRequest from './SetVotingRightsRequest.js';
-import GetCouponDetailsRequest from './GetCouponDetailsRequest.js';
-import GetBondDetailsRequest from './GetBondDetailsRequest.js';
-import GetEquityDetailsRequest from './GetEquityDetailsRequest.js';
-import SetMaxSupplyRequest from './SetMaxSupplyRequest.js';
-import GetMaxSupplyRequest from './GetMaxSupplyRequest.js';
-import GetRegulationDetailsRequest from './GetRegulationDetailsRequest.js';
-import GetLockedBalanceRequest from './GetLockedBalanceRequest.js';
-import LockRequest from './LockRequest.js';
-import ReleaseRequest from './ReleaseRequest.js';
-import GetLockCountRequest from './GetLockCountRequest.js';
-import GetLocksIdRequest from './GetLocksIdRequest.js';
-import GetLockRequest from './GetLockRequest.js';
+import { HoldDetails } from '../../../../../../domain/context/security/HoldDetails.js';
+import { Query } from '../../../../../../core/query/Query.js';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
 
-import GetControlListTypeRequest from './GetControlListTypeRequest.js';
-import InitializationRequest from './InitializationRequest.js';
-import ConnectRequest from './ConnectRequest.js';
-import GetConfigInfoRequest from './GetConfigInfoRequest.js';
-import UpdateConfigRequest from './UpdateConfigRequest.js';
-import UpdateConfigVersionRequest from './UpdateConfigVersionRequest.js';
-import UpdateResolverRequest from './UpdateResolverRequest.js';
-import UpdateMaturityDateRequest from './UpdateMaturityDateRequest.js';
-import SetScheduledBalanceAdjustmentRequest from './SetScheduledBalanceAdjustmentRequest.js';
-import GetScheduledBalanceAdjustmentRequest from './GetScheduledBalanceAdjustmentRequest.js';
-import GetScheduledBalanceAdjustmentCountRequest from './GetScheduledBalanceAdjustmentsCountRequest.js';
-import GetAllScheduledBalanceAdjustmentsRequest from './GetAllScheduledBalanceAdjustmentst.js';
-import GetLastAggregatedBalanceAdjustmentFactorForRequest from './GetLastAggregatedBalanceAdjustmentFactorForRequest.js';
-import GetAggregatedBalanceAdjustmentFactorRequest from './GetAggregatedBalanceAdjustmentFactorRequest.js';
-import GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest from './GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest.js';
-import ProtectedTransferFromByPartitionRequest from './ProtectedTransferFromByPartitionRequest.js';
-import ProtectedRedeemFromByPartitionRequest from './ProtectedRedeemFromByPartitionRequest.js';
-import GetNounceRequest from './GetNounceRequest.js';
-import PartitionsProtectedRequest from './PartitionsProtectedRequest.js';
-import ProtectedTransferAndLockByPartitionRequest from './ProtectedTransferAndLockByPartitionRequest.js';
-import CreateHoldByPartitionRequest from './CreateHoldByPartition.js';
-import CreateHoldFromByPartitionRequest from './CreateHoldFromByPartition.js';
-import ControllerCreateHoldByPartitionRequest from './ControllerCreateHoldFromByPartition.js';
-import ProtectedCreateHoldByPartitionRequest from './ProtectedCreateHoldFromByPartition.js';
-import GetHeldAmountForRequest from './GetHeldAmountForRequest.js';
-import GetHeldAmountForByPartitionRequest from './GetHeldAmountForByPartitionRequest.js';
-import GetHoldCountForByPartitionRequest from './GetHoldCountForByPartitionRequest.js';
-import GetHoldsIdForByPartitionRequest from './GetHoldsIdForByPartitionRequest.js';
-import GetHoldForByPartitionRequest from './GetHoldForByPartitionRequest.js';
+export class GetHoldForByPartitionQueryResponse implements QueryResponse {
+  constructor(public readonly payload: HoldDetails) {}
+}
 
-export * from './BaseRequest.js';
-export {
-  CreateEquityRequest,
-  CreateBondRequest,
-  ValidationResponse,
-  IssueRequest,
-  RedeemRequest,
-  ForceRedeemRequest,
-  RoleRequest,
-  ApplyRolesRequest,
-  TransferRequest,
-  ForceTransferRequest,
-  ControlListRequest,
-  GetControlListCountRequest,
-  GetControlListMembersRequest,
-  GetDividendsForRequest,
-  GetDividendsRequest,
-  GetAllDividendsRequest,
-  GetVotingRightsForRequest,
-  GetVotingRightsRequest,
-  GetAllVotingRightsRequest,
-  GetCouponForRequest,
-  GetCouponRequest,
-  GetAllCouponsRequest,
-  GetRoleCountForRequest,
-  GetRolesForRequest,
-  GetRoleMemberCountRequest,
-  GetRoleMembersRequest,
-  SetDividendsRequest,
-  SetCouponRequest,
-  SetVotingRightsRequest,
-  GetAccountBalanceRequest,
-  GetAccountInfoRequest,
-  PauseRequest,
-  GetControlListTypeRequest,
-  InitializationRequest,
-  ConnectRequest,
-  GetSecurityDetailsRequest,
-  GetCouponDetailsRequest,
-  GetBondDetailsRequest,
-  SetMaxSupplyRequest,
-  GetMaxSupplyRequest,
-  GetEquityDetailsRequest,
-  GetRegulationDetailsRequest,
-  GetLockedBalanceRequest,
-  LockRequest,
-  ReleaseRequest,
-  GetLockCountRequest,
-  GetLocksIdRequest,
-  GetLockRequest,
-  TransferAndLockRequest,
-  UpdateResolverRequest,
-  UpdateConfigVersionRequest,
-  UpdateConfigRequest,
-  GetConfigInfoRequest,
-  UpdateMaturityDateRequest,
-  SetScheduledBalanceAdjustmentRequest,
-  GetScheduledBalanceAdjustmentRequest,
-  GetScheduledBalanceAdjustmentCountRequest,
-  GetAllScheduledBalanceAdjustmentsRequest,
-  GetLastAggregatedBalanceAdjustmentFactorForRequest,
-  GetAggregatedBalanceAdjustmentFactorRequest,
-  GetLastAggregatedBalanceAdjustmentFactorForByPartitionRequest,
-  ProtectedTransferFromByPartitionRequest,
-  ProtectedRedeemFromByPartitionRequest,
-  GetNounceRequest,
-  PartitionsProtectedRequest,
-  ProtectedTransferAndLockByPartitionRequest,
-  CreateHoldByPartitionRequest,
-  CreateHoldFromByPartitionRequest,
-  ControllerCreateHoldByPartitionRequest,
-  ProtectedCreateHoldByPartitionRequest,
-  GetHeldAmountForRequest,
-  GetHeldAmountForByPartitionRequest,
-  GetHoldCountForByPartitionRequest,
-  GetHoldsIdForByPartitionRequest,
-  GetHoldForByPartitionRequest,
-};
+export class GetHoldForByPartitionQuery extends Query<GetHoldForByPartitionQueryResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly partitionId: string,
+    public readonly targetId: string,
+    public readonly holdId: number,
+  ) {
+    super();
+  }
+}
