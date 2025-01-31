@@ -904,7 +904,7 @@ describe('Hold Tests', () => {
 
             it('GIVEN a Token WHEN createHoldByPartition passing wrong expirationTimestamp THEN transaction fails with WrongExpirationTimestamp', async () => {
                 let wrongExpirationTimestamp = currentTimestamp - 1
-
+                
                 let hold_wrong = {
                     amount: _AMOUNT,
                     expirationTimestamp: wrongExpirationTimestamp,
@@ -914,6 +914,8 @@ describe('Hold Tests', () => {
                 }
 
                 console.log('createHoldByPartition')
+
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION,hold_wrong)
 
                 await expect(
                     holdFacet.createHoldByPartition(
@@ -1400,11 +1402,11 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             1,
                             account_C,
-                            1
+                            _AMOUNT
                         )
                 )
                     .to.emit(holdFacet, 'HoldByPartitionExecuted')
-                    .withArgs(account_A, _DEFAULT_PARTITION, 1, 1, account_C)
+                    .withArgs(account_A, _DEFAULT_PARTITION, 1, _AMOUNT, account_C)
 
                 await checkCreatedHold_expected(
                     0,
@@ -1440,10 +1442,10 @@ describe('Hold Tests', () => {
                 await expect(
                     holdFacet
                         .connect(signer_B)
-                        .releaseHoldByPartition(_DEFAULT_PARTITION, 1, 1)
+                        .releaseHoldByPartition(_DEFAULT_PARTITION, 1, _AMOUNT)
                 )
                     .to.emit(holdFacet, 'HoldByPartitionReleased')
-                    .withArgs(account_A, _DEFAULT_PARTITION, 1, 1)
+                    .withArgs(account_A, _DEFAULT_PARTITION, 1, _AMOUNT)
 
                 await checkCreatedHold_expected(
                     _AMOUNT,
