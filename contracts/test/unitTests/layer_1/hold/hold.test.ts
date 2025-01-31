@@ -915,8 +915,6 @@ describe('Hold Tests', () => {
 
                 console.log('createHoldByPartition')
 
-                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION,hold_wrong)
-
                 await expect(
                     holdFacet.createHoldByPartition(
                         _DEFAULT_PARTITION,

@@ -302,6 +302,7 @@ abstract contract Hold is
         onlyValidAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyOperator(_partition, _from)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
@@ -336,6 +337,7 @@ abstract contract Hold is
         onlyValidAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_CONTROLLER_ROLE)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyControllable
         returns (bool success_, uint256 holdId_)
     {
@@ -368,6 +370,9 @@ abstract contract Hold is
         onlyValidAddress(_from)
         onlyValidAddress(_protectedHold.hold.escrow)
         onlyRole(_protectedPartitionsRole(_partition))
+        onlyWithValidExpirationTimestamp(
+            _protectedHold.hold.expirationTimestamp
+        )
         onlyProtectedPartitions
         returns (bool success_, uint256 holdId_)
     {
