@@ -457,8 +457,8 @@ abstract contract Hold is
         virtual
         override
         onlyUnpaused
-        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
         onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
         returns (bool success_)
     {
         uint256 amount_;

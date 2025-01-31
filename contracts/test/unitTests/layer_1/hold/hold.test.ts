@@ -1150,7 +1150,7 @@ describe('Hold Tests', () => {
         })
 
         describe('Execute with wrong input arguments', () => {
-            it('GIVEN a wrong escrow id WHEN executeHoldByPartition THEN transaction fails with WrongEscrowHoldId', async () => {
+            it('GIVEN a wrong escrow id WHEN executeHoldByPartition THEN transaction fails with IsNotEscrow', async () => {
                 await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
 
                 await expect(
@@ -1163,7 +1163,7 @@ describe('Hold Tests', () => {
                             account_C,
                             1
                         )
-                ).to.be.revertedWithCustomError(holdFacet, 'WrongEscrowHoldId')
+                ).to.be.revertedWithCustomError(holdFacet, 'IsNotEscrow')
             })
 
             it('GIVEN a wrong partition WHEN executeHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode', async () => {
@@ -1253,7 +1253,7 @@ describe('Hold Tests', () => {
         })
 
         describe('Release with wrong input arguments', () => {
-            it('GIVEN a wrong escrow id WHEN releaseHoldByPartition THEN transaction fails with WrongEscrowHoldId', async () => {
+            it('GIVEN a wrong escrow WHEN releaseHoldByPartition THEN transaction fails with IsNotEscrow', async () => {
                 await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
 
                 await expect(
@@ -1265,7 +1265,7 @@ describe('Hold Tests', () => {
                             1,
                             1
                         )
-                ).to.be.revertedWithCustomError(holdFacet, 'WrongEscrowHoldId')
+                ).to.be.revertedWithCustomError(holdFacet, 'IsNotEscrow')
             })
 
             it('GIVEN a wrong partition WHEN releaseHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode', async () => {
@@ -1386,11 +1386,17 @@ describe('Hold Tests', () => {
                             account_A,
                             1,
                             account_C,
-                            1
+                            _AMOUNT
                         )
                 )
                     .to.emit(holdFacet, 'HoldByPartitionExecuted')
-                    .withArgs(account_A, _DEFAULT_PARTITION, 1, 1, account_C)
+                    .withArgs(
+                        account_A,
+                        _DEFAULT_PARTITION,
+                        1,
+                        _AMOUNT,
+                        account_C
+                    )
 
                 await checkCreatedHold_expected(
                     0,
@@ -1425,11 +1431,11 @@ describe('Hold Tests', () => {
                             _DEFAULT_PARTITION,
                             account_A,
                             1,
-                            1
+                            _AMOUNT
                         )
                 )
                     .to.emit(holdFacet, 'HoldByPartitionReleased')
-                    .withArgs(account_A, _DEFAULT_PARTITION, 1, 1)
+                    .withArgs(account_A, _DEFAULT_PARTITION, 1, _AMOUNT)
 
                 await checkCreatedHold_expected(
                     _AMOUNT,
