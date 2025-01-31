@@ -1941,7 +1941,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       hold,
       deadline: deadline.toBigNumber(),
       nonce: nonce.toBigNumber(),
-      signature: signature,
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
@@ -1952,6 +1951,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         partitionId,
         sourceId.toString(),
         protectedHold,
+        signature,
         {
           gasLimit: PROTECTED_CREATE_HOLD_GAS,
         },

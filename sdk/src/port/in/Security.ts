@@ -943,7 +943,7 @@ class SecurityInPort implements ISecurityInPort {
       targetId,
       expirationDate,
       deadline,
-      nounce,
+      nonce,
       signature,
     } = request;
     handleValidation('ProtectedCreateHoldByPartitionRequest', request);
@@ -957,7 +957,7 @@ class SecurityInPort implements ISecurityInPort {
         targetId,
         expirationDate,
         deadline,
-        nounce,
+        nonce,
         signature,
       ),
     );

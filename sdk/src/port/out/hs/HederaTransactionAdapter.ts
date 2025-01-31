@@ -1979,12 +1979,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       hold,
       deadline: deadline.toBigNumber(),
       nonce: nonce.toBigNumber(),
-      signature: signature,
     };
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [partitionId, sourceId.toString(), protectedHold],
+      [partitionId, sourceId.toString(), protectedHold, signature],
     );
 
     const functionDataEncoded = new Uint8Array(
