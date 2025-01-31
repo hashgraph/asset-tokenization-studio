@@ -230,8 +230,8 @@ export default class GetHoldsIdForByPartitionRequest extends ValidatedRequest<Ge
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
       targetId: Validation.checkHederaIdFormatOrEvmAddress(),
       partitionId: Validation.checkBytes32Format(),
-      start: Validation.checkNumber({min: 0}),
-      end: Validation.checkNumber({min: 0}),
+      start: Validation.checkNumber({ min: 0 }),
+      end: Validation.checkNumber({ min: 0 }),
     });
 
     this.securityId = securityId;
