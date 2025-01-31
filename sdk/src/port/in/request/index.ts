@@ -270,6 +270,10 @@ import ProtectedRedeemFromByPartitionRequest from './ProtectedRedeemFromByPartit
 import GetNounceRequest from './GetNounceRequest.js';
 import PartitionsProtectedRequest from './PartitionsProtectedRequest.js';
 import ProtectedTransferAndLockByPartitionRequest from './ProtectedTransferAndLockByPartitionRequest.js';
+import CreateHoldByPartitionRequest from './CreateHoldByPartition.js';
+import CreateHoldFromByPartitionRequest from './CreateHoldFromByPartition.js';
+import ControllerCreateHoldByPartitionRequest from './ControllerCreateHoldFromByPartition.js';
+import ProtectedCreateHoldByPartitionRequest from './ProtectedCreateHoldFromByPartition.js';
 
 export * from './BaseRequest.js';
 export {
@@ -339,4 +343,8 @@ export {
   GetNounceRequest,
   PartitionsProtectedRequest,
   ProtectedTransferAndLockByPartitionRequest,
+  CreateHoldByPartitionRequest,
+  CreateHoldFromByPartitionRequest,
+  ControllerCreateHoldByPartitionRequest,
+  ProtectedCreateHoldByPartitionRequest,
 };
