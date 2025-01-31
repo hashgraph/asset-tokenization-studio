@@ -208,6 +208,7 @@ import Validation from './validation/Validation.js';
 
 export default class ExecuteHoldByPartitionRequest extends ValidatedRequest<ExecuteHoldByPartitionRequest> {
   securityId: string;
+  sourceId: string;
   amount: string;
   holdId: string;
   targetId: string;
@@ -215,12 +216,14 @@ export default class ExecuteHoldByPartitionRequest extends ValidatedRequest<Exec
 
   constructor({
     targetId,
+    sourceId,
     holdId,
     securityId,
     amount,
     partitionId,
   }: {
     securityId: string;
+    sourceId: string;
     amount: string;
     holdId: string;
     targetId: string;
@@ -228,6 +231,7 @@ export default class ExecuteHoldByPartitionRequest extends ValidatedRequest<Exec
   }) {
     super({
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
       targetId: Validation.checkHederaIdFormatOrEvmAddress(),
       holdId: Validation.checkHederaIdFormatOrEvmAddress(),
       amount: Validation.checkAmount(),
@@ -235,6 +239,7 @@ export default class ExecuteHoldByPartitionRequest extends ValidatedRequest<Exec
     });
 
     this.securityId = securityId;
+    this.sourceId = sourceId;
     this.targetId = targetId;
     this.holdId = holdId;
     this.amount = amount;

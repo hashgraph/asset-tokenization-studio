@@ -1804,12 +1804,15 @@ export class RPCTransactionAdapter extends TransactionAdapter {
 
   async executeHoldByPartition(
     security: EvmAddress,
+    sourceId: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
-    escrowId: string,
+    holdId: string,
   ): Promise<TransactionResponse<any, Error>> {
-    LogService.logTrace(`Executing hold with escrow Id ${escrowId}`);
+    LogService.logTrace(
+      `Executing hold with Id ${holdId} from account ${sourceId.toString()} to account ${targetId.toString()}`,
+    );
 
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold_2__factory.connect(
@@ -1817,7 +1820,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.signerOrProvider,
       ).executeHoldByPartition(
         partitionId,
-        escrowId,
+        sourceId.toString(),
+        holdId,
         targetId.toString(),
         amount.toBigNumber(),
         {

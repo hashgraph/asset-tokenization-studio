@@ -1820,20 +1820,29 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
   async executeHoldByPartition(
     security: EvmAddress,
+    sourceId: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
-    escrowId: string,
+    holdId: string,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'executeHoldByPartition';
-    LogService.logTrace(`Executing hold with escrow Id ${escrowId}`);
+    LogService.logTrace(
+      `Executing hold with Id ${holdId} from account ${sourceId.toString()} to account ${targetId.toString()}`,
+    );
 
     const factoryInstance = new Hold_2__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [partitionId, escrowId, targetId.toString(), amount.toBigNumber()],
+      [
+        partitionId,
+        sourceId.toString(),
+        holdId,
+        targetId.toString(),
+        amount.toBigNumber(),
+      ],
     );
 
     const functionDataEncoded = new Uint8Array(

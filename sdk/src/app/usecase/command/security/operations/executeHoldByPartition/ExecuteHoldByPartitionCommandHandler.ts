@@ -242,7 +242,8 @@ export class ExecuteHoldByPartitionCommandHandler
   async execute(
     command: ExecuteHoldByPartitionCommand,
   ): Promise<ExecuteHoldByPartitionCommandResponse> {
-    const { securityId, amount, escrowId, targetId, partitionId } = command;
+    const { securityId, sourceId, amount, holdId, targetId, partitionId } =
+      command;
     const handler = this.transactionService.getHandler();
     const security = await this.securityService.get(securityId);
 
@@ -264,14 +265,19 @@ export class ExecuteHoldByPartitionCommandHandler
       ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
       : new EvmAddress(targetId);
 
+    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
+      : new EvmAddress(sourceId);
+
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 
     const res = await handler.executeHoldByPartition(
       securityEvmAddress,
+      sourceEvmAddress,
       targetEvmAddress,
       amountBd,
       partitionId,
-      escrowId,
+      holdId,
     );
 
     return Promise.resolve(

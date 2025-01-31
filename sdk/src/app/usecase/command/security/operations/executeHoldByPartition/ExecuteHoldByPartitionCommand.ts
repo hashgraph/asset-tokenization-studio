@@ -216,8 +216,9 @@ export class ExecuteHoldByPartitionCommandResponse implements CommandResponse {
 export class ExecuteHoldByPartitionCommand extends Command<ExecuteHoldByPartitionCommandResponse> {
   constructor(
     public readonly securityId: string,
+    public readonly sourceId: string,
     public readonly amount: string,
-    public readonly escrowId: string,
+    public readonly holdId: string,
     public readonly targetId: string,
     public readonly partitionId: string,
   ) {

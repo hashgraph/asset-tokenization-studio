@@ -548,10 +548,11 @@ interface IManagementTransactionAdapter {
 interface IHoldTransactionAdapter {
   executeHoldByPartition(
     security: EvmAddress,
+    sourceId: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
-    escrowId: string,
+    holdId: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
@@ -985,10 +986,11 @@ export default abstract class TransactionAdapter
   }
   executeHoldByPartition(
     security: EvmAddress,
+    sourceId: EvmAddress,
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
-    escrowId: string,
+    holdId: string,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');

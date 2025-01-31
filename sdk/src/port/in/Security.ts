@@ -335,7 +335,6 @@ interface ISecurityInPort {
   executeHoldByPartition(
     request: ExecuteHoldByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
-
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -840,12 +839,14 @@ class SecurityInPort implements ISecurityInPort {
   async executeHoldByPartition(
     request: ExecuteHoldByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, amount, holdId, targetId, partitionId } = request;
+    const { securityId, sourceId, amount, holdId, targetId, partitionId } =
+      request;
     handleValidation('ExecuteHoldByPartitionRequest', request);
 
     return await this.commandBus.execute(
       new ExecuteHoldByPartitionCommand(
         securityId,
+        sourceId,
         amount,
         holdId,
         targetId,
