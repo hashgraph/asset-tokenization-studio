@@ -210,19 +210,19 @@ export default class ReleaseHoldByPartitionRequest extends ValidatedRequest<Rele
   securityId: string;
   partitionId: string;
   targetId: string;
-  escrowHoldId: number;
+  holdId: number;
   amount: string;
 
   constructor({
     targetId,
     partitionId,
     securityId,
-    escrowHoldId,
+    holdId,
     amount,
   }: {
     targetId: string;
     partitionId: string;
-    escrowHoldId: number;
+    holdId: number;
     securityId: string;
     amount: string;
   }) {
@@ -235,7 +235,7 @@ export default class ReleaseHoldByPartitionRequest extends ValidatedRequest<Rele
 
     this.securityId = securityId;
     this.targetId = targetId;
-    this.escrowHoldId = escrowHoldId;
+    this.holdId = holdId;
     this.partitionId = partitionId;
     this.amount = amount;
   }

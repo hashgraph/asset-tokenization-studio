@@ -1821,7 +1821,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   async releaseHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrowHoldId: number,
+    holdId: number,
     targetId: EvmAddress,
     amount: BigDecimal,
     securityId: ContractId | string,
@@ -1834,7 +1834,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [partitionId, escrowHoldId, targetId.toString(), amount.toBigNumber()],
+      [partitionId, targetId.toString(), holdId, amount.toBigNumber()],
     );
 
     const functionDataEncoded = new Uint8Array(

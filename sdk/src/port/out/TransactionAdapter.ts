@@ -549,7 +549,7 @@ interface IHoldTransactionAdapter {
   releaseHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrowHoldId: number,
+    holdId: number,
     targetId: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,
@@ -985,7 +985,7 @@ export default abstract class TransactionAdapter
   releaseHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrowHoldId: number,
+    holdId: number,
     targetId: EvmAddress,
     amount: BigDecimal,
     securityId?: ContractId | string,

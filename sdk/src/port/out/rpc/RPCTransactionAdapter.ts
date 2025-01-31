@@ -1805,7 +1805,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
   async releaseHoldByPartition(
     security: EvmAddress,
     partitionId: string,
-    escrowHoldId: number,
+    holdId: number,
     targetId: EvmAddress,
     amount: BigDecimal,
   ): Promise<TransactionResponse> {
@@ -1818,8 +1818,8 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.signerOrProvider,
       ).releaseHoldByPartition(
         partitionId,
-        escrowHoldId,
         targetId.toString(),
+        holdId,
         amount.toBigNumber(),
         {
           gasLimit: RELEASE_HOLD_GAS,

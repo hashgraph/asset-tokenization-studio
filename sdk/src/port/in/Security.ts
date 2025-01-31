@@ -839,7 +839,7 @@ class SecurityInPort implements ISecurityInPort {
   async releaseHoldByPartition(
     request: ReleaseHoldByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, partitionId, amount, targetId, escrowHoldId } = request;
+    const { securityId, partitionId, amount, targetId, holdId } = request;
     handleValidation('ReleaseHoldByPartitionRequest', request);
 
     return await this.commandBus.execute(
@@ -847,7 +847,7 @@ class SecurityInPort implements ISecurityInPort {
         securityId,
         partitionId,
         amount,
-        escrowHoldId,
+        holdId,
         targetId,
       ),
     );

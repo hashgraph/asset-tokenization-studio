@@ -218,7 +218,7 @@ export class ReleaseHoldByPartitionCommand extends Command<ReleaseHoldByPartitio
     public readonly securityId: string,
     public readonly partitionId: string,
     public readonly amount: string,
-    public readonly escrowHoldId: number,
+    public readonly holdId: number,
     public readonly targetId: string,
   ) {
     super();

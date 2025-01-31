@@ -239,7 +239,7 @@ export class ReleaseHoldByPartitionCommandHandler
   async execute(
     command: ReleaseHoldByPartitionCommand,
   ): Promise<ReleaseHoldByPartitionCommandResponse> {
-    const { securityId, partitionId, amount, escrowHoldId, targetId } = command;
+    const { securityId, partitionId, amount, holdId, targetId } = command;
     const handler = this.transactionService.getHandler();
     const security = await this.securityService.get(securityId);
 
@@ -266,7 +266,7 @@ export class ReleaseHoldByPartitionCommandHandler
     const res = await handler.releaseHoldByPartition(
       securityEvmAddress,
       partitionId,
-      escrowHoldId,
+      holdId,
       targetEvmAddress,
       amountBd,
       securityId,
