@@ -278,6 +278,7 @@ export class ExecuteHoldByPartitionCommandHandler
       amountBd,
       partitionId,
       holdId,
+      securityId,
     );
 
     return Promise.resolve(
