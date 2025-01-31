@@ -541,9 +541,12 @@ describe('Holds Layer 2 Tests', () => {
 
     it('GIVEN a hold WHEN adjustBalances THEN execute succeed', async () => {
         await setPreBalanceAdjustment()
-        const balance_Before = await erc1410Facet.balanceOf(account_A)
-        const balance_Before_Partition_1 =
+        const balance_Before_A = await erc1410Facet.balanceOf(account_A)
+        const balance_Before_Partition_1_A =
             await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
+        const balance_Before_C = await erc1410Facet.balanceOf(account_C)
+        const balance_Before_Partition_1_C =
+            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_C)
 
         // HOLD TWICE
         const currentTimestamp = (await ethers.provider.getBlock('latest'))
@@ -581,12 +584,15 @@ describe('Holds Layer 2 Tests', () => {
                 account_A,
                 1,
                 account_C,
-                hold.amount
+                hold.amount * adjustFactor
             )
 
-        const balance_After_Release = await erc1410Facet.balanceOf(account_A)
-        const balance_After_Release_Partition_1 =
+        const balance_After_Execute_A = await erc1410Facet.balanceOf(account_A)
+        const balance_After_Execute_Partition_1_A =
             await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
+        const balance_After_Execute_C = await erc1410Facet.balanceOf(account_C)
+        const balance_After_Execute_Partition_1_C =
+            await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_C)
         const held_Amount_After = await holdFacet.getHeldAmountFor(account_A)
         const held_Amount_After_Partition_1 =
             await holdFacet.getHeldAmountForByPartition(
@@ -594,11 +600,20 @@ describe('Holds Layer 2 Tests', () => {
                 account_A
             )
 
-        expect(balance_After_Release).to.be.equal(
-            balance_Before.sub(amount).mul(adjustFactor)
+        expect(balance_After_Execute_A).to.be.equal(
+            balance_Before_A.sub(amount).sub(amount).mul(adjustFactor)
         )
-        expect(balance_After_Release_Partition_1).to.be.equal(
-            balance_Before_Partition_1.sub(amount).mul(adjustFactor)
+        expect(balance_After_Execute_C).to.be.equal(
+            balance_Before_C.add(amount).mul(adjustFactor)
+        )
+        expect(balance_After_Execute_Partition_1_A).to.be.equal(
+            balance_Before_Partition_1_A
+                .sub(amount)
+                .sub(amount)
+                .mul(adjustFactor)
+        )
+        expect(balance_After_Execute_Partition_1_C).to.be.equal(
+            balance_Before_Partition_1_C.add(amount).mul(adjustFactor)
         )
         expect(held_Amount_After).to.be.equal(
             held_Amount_Before.sub(amount).mul(adjustFactor)
@@ -606,12 +621,16 @@ describe('Holds Layer 2 Tests', () => {
         expect(held_Amount_After_Partition_1).to.be.equal(
             held_Amount_Before_Partition_1.sub(amount).mul(adjustFactor)
         )
-        expect(balance_After_Release.add(held_Amount_After)).to.be.equal(
-            balance_Before.mul(adjustFactor)
+        expect(balance_After_Execute_A.add(held_Amount_After)).to.be.equal(
+            balance_Before_A.sub(amount).mul(adjustFactor)
         )
         expect(
-            balance_After_Release_Partition_1.add(held_Amount_After_Partition_1)
-        ).to.be.equal(balance_Before_Partition_1.mul(adjustFactor))
+            balance_After_Execute_Partition_1_A.add(
+                held_Amount_After_Partition_1
+            )
+        ).to.be.equal(
+            balance_Before_Partition_1_A.sub(amount).mul(adjustFactor)
+        )
     })
 
     it('GIVEN a hold WHEN adjustBalances THEN release succeed', async () => {
@@ -649,12 +668,14 @@ describe('Holds Layer 2 Tests', () => {
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
 
         // RELEASE HOLD
-        await holdFacet.releaseHoldByPartition(
-            _PARTITION_ID_1,
-            account_A,
-            1,
-            hold.amount
-        )
+        await holdFacet
+            .connect(signer_B)
+            .releaseHoldByPartition(
+                _PARTITION_ID_1,
+                account_A,
+                1,
+                hold.amount * adjustFactor
+            )
 
         const balance_After_Release = await erc1410Facet.balanceOf(account_A)
         const balance_After_Release_Partition_1 =

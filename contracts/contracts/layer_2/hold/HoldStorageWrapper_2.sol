@@ -342,7 +342,7 @@ abstract contract HoldStorageWrapper_2 is
         uint256 _holdId,
         address _to
     ) internal virtual override {
-        _adjustHoldBalances(_partition, _tokenHolder, _holdId);
+        _adjustHoldBalances(_partition, _tokenHolder, _holdId, _to);
         super._beforeExecuteHold(_partition, _tokenHolder, _holdId, _to);
     }
 
@@ -351,7 +351,7 @@ abstract contract HoldStorageWrapper_2 is
         address _tokenHolder,
         uint256 _holdId
     ) internal virtual override {
-        _adjustHoldBalances(_partition, _tokenHolder, _holdId);
+        _adjustHoldBalances(_partition, _tokenHolder, _holdId, _tokenHolder);
 
         super._beforeReleaseHold(_partition, _tokenHolder, _holdId);
     }
@@ -361,7 +361,7 @@ abstract contract HoldStorageWrapper_2 is
         address _tokenHolder,
         uint256 _holdId
     ) internal virtual override {
-        _adjustHoldBalances(_partition, _tokenHolder, _holdId);
+        _adjustHoldBalances(_partition, _tokenHolder, _holdId, _tokenHolder);
 
         super._beforeReclaimHold(_partition, _tokenHolder, _holdId);
     }
@@ -369,15 +369,16 @@ abstract contract HoldStorageWrapper_2 is
     function _adjustHoldBalances(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _holdId
+        uint256 _holdId,
+        address _to
     ) internal virtual {
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
         ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
             _partition,
-            address(0),
-            _tokenHolder
+            _tokenHolder,
+            _to
         );
 
         uint256 abaf = _updateTotalHold(
@@ -386,7 +387,7 @@ abstract contract HoldStorageWrapper_2 is
             adjustBalancesStorage
         );
 
-        _updateHoldByIndex(
+        _updateHold(
             _partition,
             _holdId,
             _tokenHolder,
@@ -492,7 +493,7 @@ abstract contract HoldStorageWrapper_2 is
         ] = _abaf;
     }
 
-    function _updateHoldByIndex(
+    function _updateHold(
         bytes32 _partition,
         uint256 _holdId,
         address _tokenHolder,
