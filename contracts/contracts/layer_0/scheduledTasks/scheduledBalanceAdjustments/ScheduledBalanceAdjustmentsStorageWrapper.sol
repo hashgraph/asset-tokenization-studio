@@ -210,9 +210,9 @@ import {
     _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {
-    ScheduledTasksCommon,
+    ScheduledTasksCommonRead,
     ScheduledTasksDataStorage
-} from '../../../layer_0/scheduledTasks/ScheduledTasksCommon.sol';
+} from '../../../layer_0/scheduledTasks/ScheduledTasksCommonRead.sol';
 import {
     CorporateActionDataStorage
 } from '../../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
@@ -225,7 +225,7 @@ import {
 } from '../../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
-    ScheduledTasksCommon
+    ScheduledTasksCommonRead
 {
     function _getScheduledBalanceAdjustmentCount()
         internal
