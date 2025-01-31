@@ -272,6 +272,14 @@ import { ProtectPartitionsCommand } from '../../app/usecase/command/security/ope
 import { UnprotectPartitionsCommand } from '../../app/usecase/command/security/operations/unprotectPartitions/UnprotectPartitionsCommand.js';
 import { ProtectedTransferAndLockByPartitionCommand } from '../../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommand.js';
 import ProtectedTransferAndLockByPartitionRequest from './request/ProtectedTransferAndLockByPartitionRequest.js';
+import CreateHoldByPartitionRequest from './request/CreateHoldByPartition.js';
+import { CreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/createHoldByPartition/CreateHoldByPartitionCommand.js';
+import CreateHoldFromByPartitionRequest from './request/CreateHoldFromByPartition.js';
+import ControllerCreateHoldByPartitionRequest from './request/ControllerCreateHoldFromByPartition.js';
+import ProtectedCreateHoldByPartitionRequest from './request/ProtectedCreateHoldFromByPartition.js';
+import { CreateHoldFromByPartitionCommand } from '../../app/usecase/command/security/operations/hold/createHoldFromByPartition/CreateHoldFromByPartitionCommand.js';
+import { ControllerCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/controllerCreateHoldByPartition/ControllerCreateHoldByPartitionCommand.js';
+import { ProtectedCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/protectedCreateHoldByPartition/ProtectedCreateHoldByPartitionCommand.js';
 import HoldViewModel from './response/HoldViewModel.js';
 import { GetHoldForByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery.js';
 import { ONE_THOUSAND } from '../../domain/context/shared/SecurityDate.js';
@@ -342,6 +350,18 @@ interface ISecurityInPort {
   getLockedBalanceOf(
     request: GetLockedBalanceRequest,
   ): Promise<BalanceViewModel>;
+  createHoldByPartition(
+    request: CreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  createHoldFromByPartition(
+    request: CreateHoldFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  controllerCreateHoldByPartition(
+    request: ControllerCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  protectedCreateHoldByPartition(
+    request: ProtectedCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
   getHeldAmountFor(request: GetHeldAmountForRequest): Promise<number>;
   getHeldAmountForByPartition(
     request: GetHeldAmountForByPartitionRequest,
@@ -850,6 +870,119 @@ class SecurityInPort implements ISecurityInPort {
         expirationDate,
         deadline,
         nounce,
+        signature,
+      ),
+    );
+  }
+
+  @LogError
+  async createHoldByPartition(
+    request: CreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      escrow,
+      targetId,
+      expirationDate,
+    } = request;
+    handleValidation('CreateHoldByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new CreateHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        amount,
+        escrow,
+        targetId,
+        expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async createHoldFromByPartition(
+    request: CreateHoldFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      escrow,
+      sourceId,
+      targetId,
+      expirationDate,
+    } = request;
+    handleValidation('CreateHoldFromByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new CreateHoldFromByPartitionCommand(
+        securityId,
+        partitionId,
+        amount,
+        escrow,
+        sourceId,
+        targetId,
+        expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async controllerCreateHoldByPartition(
+    request: ControllerCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      escrow,
+      sourceId,
+      targetId,
+      expirationDate,
+    } = request;
+    handleValidation('ControllerCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ControllerCreateHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        amount,
+        escrow,
+        sourceId,
+        targetId,
+        expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedCreateHoldByPartition(
+    request: ProtectedCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      escrow,
+      sourceId,
+      targetId,
+      expirationDate,
+      deadline,
+      nonce,
+      signature,
+    } = request;
+    handleValidation('ProtectedCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ProtectedCreateHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        amount,
+        escrow,
+        sourceId,
+        targetId,
+        expirationDate,
+        deadline,
+        nonce,
         signature,
       ),
     );

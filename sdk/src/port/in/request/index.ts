@@ -270,6 +270,10 @@ import ProtectedRedeemFromByPartitionRequest from './ProtectedRedeemFromByPartit
 import GetNounceRequest from './GetNounceRequest.js';
 import PartitionsProtectedRequest from './PartitionsProtectedRequest.js';
 import ProtectedTransferAndLockByPartitionRequest from './ProtectedTransferAndLockByPartitionRequest.js';
+import CreateHoldByPartitionRequest from './CreateHoldByPartition.js';
+import CreateHoldFromByPartitionRequest from './CreateHoldFromByPartition.js';
+import ControllerCreateHoldByPartitionRequest from './ControllerCreateHoldFromByPartition.js';
+import ProtectedCreateHoldByPartitionRequest from './ProtectedCreateHoldFromByPartition.js';
 import GetHeldAmountForRequest from './GetHeldAmountForRequest.js';
 import GetHeldAmountForByPartitionRequest from './GetHeldAmountForByPartitionRequest.js';
 import GetHoldCountForByPartitionRequest from './GetHoldCountForByPartitionRequest.js';
@@ -344,6 +348,10 @@ export {
   GetNounceRequest,
   PartitionsProtectedRequest,
   ProtectedTransferAndLockByPartitionRequest,
+  CreateHoldByPartitionRequest,
+  CreateHoldFromByPartitionRequest,
+  ControllerCreateHoldByPartitionRequest,
+  ProtectedCreateHoldByPartitionRequest,
   GetHeldAmountForRequest,
   GetHeldAmountForByPartitionRequest,
   GetHoldCountForByPartitionRequest,
