@@ -206,61 +206,136 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable max-line-length
+import {Common} from '../common/Common.sol';
+import {_SSI_MANAGER_ROLE} from '../constants/roles.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_SSI_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {SSIManagementStorageWrapper} from './SSIManagementStorageWrapper.sol';
+import {ISSIManagement} from '../interfaces/ssi/ISSIManagement.sol';
 
-// keccak256('security.token.standard.accesscontrol.storage');
-bytes32 constant _ACCESS_CONTROL_STORAGE_POSITION = 0x4765bbd856d800638d39a79262ebc6fdfb5833d0e59f32c5d482fe4c4a3554c1;
+contract SSIManagement is
+    SSIManagementStorageWrapper,
+    IStaticFunctionSelectors,
+    Common
+{
+    function setRevocationRegistryAddress(
+        address _revocationRegistryAddress
+    )
+        external
+        override
+        onlyRole(_SSI_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _setRevocationRegistryAddress(_revocationRegistryAddress);
+    }
 
-// keccak256('security.token.standard.controllist.storage');
-bytes32 constant _CONTROL_LIST_STORAGE_POSITION = 0xd2a97f6f015eb0ef6e78a5d99ed4baddb1001474ec77117d69e09432533577d3;
+    function addIssuer(
+        address _issuer
+    )
+        external
+        override
+        onlyRole(_SSI_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _addIssuer(_issuer);
+        if (!success_) {
+            revert ListedIssuer(_issuer);
+        }
+        emit AddedToIssuerList(_msgSender(), _issuer);
+    }
 
-// keccak256('security.token.standard.pause.storage');
-bytes32 constant _PAUSE_STORAGE_POSITION = 0x5a5b295532a8b6e97bc9d45d68fc49b85a099545bac8f91f77706d392a1cea71;
+    function removeIssuer(
+        address _issuer
+    )
+        external
+        override
+        onlyRole(_SSI_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _removeIssuer(_issuer);
+        if (!success_) {
+            revert UnlistedIssuer(_issuer);
+        }
+        emit RemovedFromIssuerList(_msgSender(), _issuer);
+    }
 
-// keccak256('security.token.standard.cap.storage');
-bytes32 constant _CAP_STORAGE_POSITION = 0x591561cf73f8f1ca1532449c7ce18338a75e9e17f2894af1e41b36e3b013f951;
+    function getRevocationRegistryAddress()
+        external
+        view
+        override
+        returns (address revocationRegistryAddress_)
+    {
+        return _getRevocationRegistryAddress();
+    }
 
-// keccak256('security.token.standard.corporateactions.storage');
-bytes32 constant _CORPORATE_ACTION_STORAGE_POSITION = 0x9db84024bbea48a7580380e27785cf3e0d08fada233c84760c8a5aff47f86e12;
+    function isIssuer(address _issuer) external view override returns (bool) {
+        return _isIssuer(_issuer);
+    }
 
-// keccak256('security.token.standard.erc1595.storage');
-bytes32 constant _ERC1594_STORAGE_POSITION = 0x919465d7e15b775c94035d2b592c0808b79e37ecb2e0ceb66bd8c481f998ee9f;
+    function getIssuerListCount()
+        external
+        view
+        override
+        returns (uint256 issuerListCount_)
+    {
+        return _getIssuerListCount();
+    }
 
-// keccak256('security.token.standard.erc1643.storage');
-bytes32 constant _ERC1643_STORAGE_POSITION = 0xf570af0a020d64f3ea72a78716790700daaeb1b83730feca87e92c517de986ef;
+    function getIssuerListMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (address[] memory members_) {
+        return _getIssuerListMembers(_pageIndex, _pageLength);
+    }
 
-// keccak256('security.token.standard.erc1410.operator.storage');
-bytes32 constant _ERC1410_OPERATOR_STORAGE_POSITION = 0x319c8795293307b302697a4daf045524536834965f40eb730e6ca085ae32ae00;
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _SSI_MANAGEMENT_RESOLVER_KEY;
+    }
 
-// keccak256('security.token.standard.erc1410.basic.storage');
-bytes32 constant _ERC1410_BASIC_STORAGE_POSITION = 0x67661db80d37d3b9810c430f78991b4b5377bdebd3b71b39fbd3427092c1822a;
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .setRevocationRegistryAddress
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.addIssuer.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.removeIssuer.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isIssuer.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getRevocationRegistryAddress
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getIssuerListCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getIssuerListMembers
+            .selector;
+    }
 
-// keccak256('security.token.standard.erc1644.storage');
-bytes32 constant _ERC1644_STORAGE_POSITION = 0x78da7d6f03fa6ff51457b34dfcf6bc00f21877d08759f4b646f714d8f8c539f7;
-
-// keccak256('security.token.standard.erc20.storage');
-bytes32 constant _ERC20_STORAGE_POSITION = 0xd5228ac65cba3eaaef0669de6709c44cfdf33c0f1cce2989d4a133e0214cce57;
-
-// keccak256('security.token.standard.resolverProxy.storage');
-bytes32 constant _RESOLVER_PROXY_STORAGE_POSITION = 0x4833864335c8f29dd85e3f7a36869cb90d5dc7167ae5000f7e1ce4d7c15d14ad;
-
-// keccak256('security.token.standard.snapshot.storage');
-bytes32 constant _SNAPSHOT_STORAGE_POSITION = 0x450898ebb84982a28d8787f0138cfce477c6d811ae3b1db5fdb7ed17e8bda898;
-
-// keccak256('security.token.standard.lock.storage');
-bytes32 constant _LOCK_STORAGE_POSITION = 0xd15962e60f276260fba4c9b4de7fd05f475afe18b48c917ec6f6fcc71c00bf71;
-
-// keccak256('security.token.standard.protectedpartitions.storage');
-bytes32 constant _PROTECTED_PARTITIONS_STORAGE_POSITION = 0x564ecdb30bda57ccdf5f0ccce9a283978b97919c80a3230163042042418b1546;
-
-// keccak256('security.token.standard.ssiManagement.storage');
-bytes32 constant _SSI_MANAGEMENT_STORAGE_POSITION = 0xdbde0b1f7457f92983806323b8056e5eabfce9a23b8924af999a4df0e4154e18;
-
-// keccak256('security.token.standard.hold.storage');
-bytes32 constant _HOLD_STORAGE_POSITION = 0x80346b80475a6f26abb9f460d81c6dbe6a8dd5d1acfb0827cfe37c4263a562ca;
-
-// ERC1410BasicStorageWrapperRead.Partition.amount.slot
-uint256 constant _PARTITION_AMOUNT_OFFSET = 0;
-
-// ERC1410BasicStorageWrapperRead.Partition
-uint256 constant _PARTITION_SIZE = 2;
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(ISSIManagement)
+            .interfaceId;
+    }
+}

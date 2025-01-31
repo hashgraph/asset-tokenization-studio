@@ -203,64 +203,96 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable max-line-length
+interface ISSIManagement {
+    error ListedIssuer(address issuer);
+    error UnlistedIssuer(address issuer);
+    error AccountIsNotIssuer(address issuer);
 
-// keccak256('security.token.standard.accesscontrol.storage');
-bytes32 constant _ACCESS_CONTROL_STORAGE_POSITION = 0x4765bbd856d800638d39a79262ebc6fdfb5833d0e59f32c5d482fe4c4a3554c1;
+    /**
+     * @dev Emitted when an issuer is added to the issuerlist
+     *
+     * @param issuer The issuer that was added to the issuerlist
+     * @param operator The caller of the function that emitted the event
+     */
+    event AddedToIssuerList(address indexed operator, address indexed issuer);
 
-// keccak256('security.token.standard.controllist.storage');
-bytes32 constant _CONTROL_LIST_STORAGE_POSITION = 0xd2a97f6f015eb0ef6e78a5d99ed4baddb1001474ec77117d69e09432533577d3;
+    /**
+     * @dev Emitted when an issuer is removed from the issuerlist
+     *
+     * @param issuer The issuer that was removed from the issuerlist
+     * @param operator The caller of the function that emitted the event
+     */
+    event RemovedFromIssuerList(
+        address indexed operator,
+        address indexed issuer
+    );
 
-// keccak256('security.token.standard.pause.storage');
-bytes32 constant _PAUSE_STORAGE_POSITION = 0x5a5b295532a8b6e97bc9d45d68fc49b85a099545bac8f91f77706d392a1cea71;
+    /**
+     * @dev Updates the revocation registry address
+     *
+     * @param _revocationRegistryAddress revocation list address
+     * @return success_ true or false
+     */
+    function setRevocationRegistryAddress(
+        address _revocationRegistryAddress
+    ) external returns (bool success_);
 
-// keccak256('security.token.standard.cap.storage');
-bytes32 constant _CAP_STORAGE_POSITION = 0x591561cf73f8f1ca1532449c7ce18338a75e9e17f2894af1e41b36e3b013f951;
+    /**
+     * @dev Adds an issuer to the issuer list
+     *
+     * @param _issuer issuer address
+     * @return success_ true or false
+     */
+    function addIssuer(address _issuer) external returns (bool success_);
 
-// keccak256('security.token.standard.corporateactions.storage');
-bytes32 constant _CORPORATE_ACTION_STORAGE_POSITION = 0x9db84024bbea48a7580380e27785cf3e0d08fada233c84760c8a5aff47f86e12;
+    /**
+     * @dev Remove an issuer from the issuer list
+     *
+     * @param _issuer issuer address
+     * @return success_ true or false
+     */
+    function removeIssuer(address _issuer) external returns (bool success_);
 
-// keccak256('security.token.standard.erc1595.storage');
-bytes32 constant _ERC1594_STORAGE_POSITION = 0x919465d7e15b775c94035d2b592c0808b79e37ecb2e0ceb66bd8c481f998ee9f;
+    /**
+     * @dev returns the revocation registry address
+     *
+     * @return revocationRegistryAddress_
+     */
+    function getRevocationRegistryAddress()
+        external
+        view
+        returns (address revocationRegistryAddress_);
 
-// keccak256('security.token.standard.erc1643.storage');
-bytes32 constant _ERC1643_STORAGE_POSITION = 0xf570af0a020d64f3ea72a78716790700daaeb1b83730feca87e92c517de986ef;
+    /**
+     * @dev Checks if an issuer is in the issuer list
+     *
+     * @param _issuer the issuer address
+     * @return bool true or false
+     */
+    function isIssuer(address _issuer) external view returns (bool);
 
-// keccak256('security.token.standard.erc1410.operator.storage');
-bytes32 constant _ERC1410_OPERATOR_STORAGE_POSITION = 0x319c8795293307b302697a4daf045524536834965f40eb730e6ca085ae32ae00;
+    /**
+     * @dev Returns the number of members the issuer list currently has
+     *
+     * @return issuerListCount_ The number of members
+     */
+    function getIssuerListCount()
+        external
+        view
+        returns (uint256 issuerListCount_);
 
-// keccak256('security.token.standard.erc1410.basic.storage');
-bytes32 constant _ERC1410_BASIC_STORAGE_POSITION = 0x67661db80d37d3b9810c430f78991b4b5377bdebd3b71b39fbd3427092c1822a;
-
-// keccak256('security.token.standard.erc1644.storage');
-bytes32 constant _ERC1644_STORAGE_POSITION = 0x78da7d6f03fa6ff51457b34dfcf6bc00f21877d08759f4b646f714d8f8c539f7;
-
-// keccak256('security.token.standard.erc20.storage');
-bytes32 constant _ERC20_STORAGE_POSITION = 0xd5228ac65cba3eaaef0669de6709c44cfdf33c0f1cce2989d4a133e0214cce57;
-
-// keccak256('security.token.standard.resolverProxy.storage');
-bytes32 constant _RESOLVER_PROXY_STORAGE_POSITION = 0x4833864335c8f29dd85e3f7a36869cb90d5dc7167ae5000f7e1ce4d7c15d14ad;
-
-// keccak256('security.token.standard.snapshot.storage');
-bytes32 constant _SNAPSHOT_STORAGE_POSITION = 0x450898ebb84982a28d8787f0138cfce477c6d811ae3b1db5fdb7ed17e8bda898;
-
-// keccak256('security.token.standard.lock.storage');
-bytes32 constant _LOCK_STORAGE_POSITION = 0xd15962e60f276260fba4c9b4de7fd05f475afe18b48c917ec6f6fcc71c00bf71;
-
-// keccak256('security.token.standard.protectedpartitions.storage');
-bytes32 constant _PROTECTED_PARTITIONS_STORAGE_POSITION = 0x564ecdb30bda57ccdf5f0ccce9a283978b97919c80a3230163042042418b1546;
-
-// keccak256('security.token.standard.ssiManagement.storage');
-bytes32 constant _SSI_MANAGEMENT_STORAGE_POSITION = 0xdbde0b1f7457f92983806323b8056e5eabfce9a23b8924af999a4df0e4154e18;
-
-// keccak256('security.token.standard.hold.storage');
-bytes32 constant _HOLD_STORAGE_POSITION = 0x80346b80475a6f26abb9f460d81c6dbe6a8dd5d1acfb0827cfe37c4263a562ca;
-
-// ERC1410BasicStorageWrapperRead.Partition.amount.slot
-uint256 constant _PARTITION_AMOUNT_OFFSET = 0;
-
-// ERC1410BasicStorageWrapperRead.Partition
-uint256 constant _PARTITION_SIZE = 2;
+    /**
+     * @dev Returns an array of members the issuerlist currently has
+     *
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return members_ The array containing the members addresses
+     */
+    function getIssuerListMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory members_);
+}
