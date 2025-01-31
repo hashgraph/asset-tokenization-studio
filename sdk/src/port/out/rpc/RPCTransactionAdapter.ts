@@ -296,6 +296,7 @@ import {
   PROTECTED_REDEEM_GAS,
   UNPROTECT_PARTITION_GAS,
   PROTECTED_TRANSFER_AND_LOCK_GAS,
+  RECLAIM_HOLD_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -317,6 +318,7 @@ import {
   ERC1410ScheduledTasks__factory,
   ERC1643__factory,
   Factory__factory,
+  Hold_2__factory,
   IBond,
   IEquity,
   Lock__factory,
@@ -1794,6 +1796,31 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         signature,
         {
           gasLimit: PROTECTED_TRANSFER_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async reclaimHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    holdId: number,
+    targetId: EvmAddress
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Reclaiming hold amount from account ${targetId.toString()}}`,
+    );
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold_2__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).reclaimHoldByPartition(
+        partitionId,
+        targetId.toString(),
+        holdId,
+        {
+          gasLimit: RECLAIM_HOLD_GAS,
         },
       ),
       this.networkService.environment,
