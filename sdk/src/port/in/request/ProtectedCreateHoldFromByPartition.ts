@@ -249,7 +249,7 @@ export default class ProtectedCreateHoldByPartitionRequest extends ValidatedRequ
       escrow: Validation.checkHederaIdFormatOrEvmAddress(),
       sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
       targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      nonce: Validation.checkNumber({min: 0}),
+      nonce: Validation.checkNumber({ min: 0 }),
       expirationDate: (val) => {
         return SecurityDate.checkDateTimestamp(
           parseInt(val),
