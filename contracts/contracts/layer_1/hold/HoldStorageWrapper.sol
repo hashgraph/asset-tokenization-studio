@@ -268,7 +268,8 @@ abstract contract HoldStorageWrapper is
     function _protectedCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        IHold.ProtectedHold memory _protectedHold
+        IHold.ProtectedHold memory _protectedHold,
+        bytes calldata _signature
     ) internal virtual returns (bool success_, uint256 holdId_) {
         checkNounceAndDeadline(
             _protectedHold.nonce,
@@ -278,7 +279,12 @@ abstract contract HoldStorageWrapper is
             _blockTimestamp()
         );
 
-        _checkCreateHoldSignature(_partition, _from, _protectedHold);
+        _checkCreateHoldSignature(
+            _partition,
+            _from,
+            _protectedHold,
+            _signature
+        );
 
         _setNounce(_protectedHold.nonce, _from);
 

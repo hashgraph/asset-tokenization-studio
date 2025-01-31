@@ -361,7 +361,8 @@ abstract contract Hold is
     function protectedCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        ProtectedHold memory _protectedHold
+        ProtectedHold memory _protectedHold,
+        bytes calldata _signature
     )
         external
         virtual
@@ -379,7 +380,8 @@ abstract contract Hold is
         (success_, holdId_) = _protectedCreateHoldByPartition(
             _partition,
             _from,
-            _protectedHold
+            _protectedHold,
+            _signature
         );
 
         emit HeldByPartition(

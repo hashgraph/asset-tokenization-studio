@@ -507,14 +507,13 @@ describe('ProtectedPartitions Tests', () => {
             expirationTimestamp: expirationTimestamp,
             escrow: account_B,
             to: ADDRESS_ZERO,
-            data: '0x',
+            data: '0x1234',
         }
 
         protectedHold = {
             hold: hold,
             deadline: 9999999999999,
             nonce: 1,
-            signature: '0x1234',
         }
     })
 
@@ -676,7 +675,8 @@ describe('ProtectedPartitions Tests', () => {
                 holdFacet.protectedCreateHoldByPartition(
                     DEFAULT_PARTITION,
                     account_A,
-                    protectedHold
+                    protectedHold,
+                    '0x1234'
                 )
             ).to.be.revertedWithCustomError(holdFacet, 'TokenIsPaused')
         })
@@ -688,7 +688,8 @@ describe('ProtectedPartitions Tests', () => {
                 holdFacet.protectedCreateHoldByPartition(
                     DEFAULT_PARTITION,
                     account_A,
-                    protectedHold
+                    protectedHold,
+                    '0x1234'
                 )
             ).to.be.revertedWithCustomError(holdFacet, 'AccountHasNoRole')
         })
@@ -700,7 +701,8 @@ describe('ProtectedPartitions Tests', () => {
                 holdFacet.protectedCreateHoldByPartition(
                     DEFAULT_PARTITION,
                     ADDRESS_ZERO,
-                    protectedHold
+                    protectedHold,
+                    '0x1234'
                 )
             ).to.be.revertedWithCustomError(holdFacet, 'ZeroAddressNotAllowed')
         })
@@ -714,7 +716,8 @@ describe('ProtectedPartitions Tests', () => {
                 holdFacet.protectedCreateHoldByPartition(
                     DEFAULT_PARTITION,
                     account_A,
-                    protectedHold
+                    protectedHold,
+                    '0x1234'
                 )
             ).to.be.revertedWithCustomError(holdFacet, 'ZeroAddressNotAllowed')
         })
@@ -730,7 +733,8 @@ describe('ProtectedPartitions Tests', () => {
                     .protectedCreateHoldByPartition(
                         DEFAULT_PARTITION,
                         account_A,
-                        protectedHold
+                        protectedHold,
+                        '0x1234'
                     )
             ).to.be.revertedWithCustomError(
                 holdFacet,
@@ -831,7 +835,8 @@ describe('ProtectedPartitions Tests', () => {
                     .protectedCreateHoldByPartition(
                         DEFAULT_PARTITION,
                         account_A,
-                        protectedHold
+                        protectedHold,
+                        '0x1234'
                     )
             ).to.be.rejectedWith('PartitionsAreUnProtected')
         })
@@ -1402,36 +1407,34 @@ describe('ProtectedPartitions Tests', () => {
                         .protectedCreateHoldByPartition(
                             DEFAULT_PARTITION,
                             account_A,
-                            protectedHold
+                            protectedHold,
+                            '0x1234'
                         )
                 ).to.be.rejectedWith('ExpiredDeadline')
             })
 
             it('GIVEN a wrong signature length WHEN performing a protected hold THEN transaction fails with WrongSignatureLength', async () => {
-                protectedHold.signature = '0x12'
-
                 await expect(
                     holdFacet
                         .connect(signer_B)
                         .protectedCreateHoldByPartition(
                             DEFAULT_PARTITION,
                             account_A,
-                            protectedHold
+                            protectedHold,
+                            '0x12'
                         )
                 ).to.be.rejectedWith('WrongSignatureLength')
             })
 
             it('GIVEN a wrong signature WHEN performing a protected hold THEN transaction fails with WrongSignature', async () => {
-                protectedHold.signature =
-                    '0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344'
-
                 await expect(
                     holdFacet
                         .connect(signer_B)
                         .protectedCreateHoldByPartition(
                             DEFAULT_PARTITION,
                             account_A,
-                            protectedHold
+                            protectedHold,
+                            '0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344'
                         )
                 ).to.be.rejectedWith('WrongSignature')
             })
@@ -1445,7 +1448,8 @@ describe('ProtectedPartitions Tests', () => {
                         .protectedCreateHoldByPartition(
                             DEFAULT_PARTITION,
                             account_A,
-                            protectedHold
+                            protectedHold,
+                            '0x1234'
                         )
                 ).to.be.rejectedWith('WrongNounce')
             })
@@ -1472,8 +1476,6 @@ describe('ProtectedPartitions Tests', () => {
                     message
                 )
 
-                protectedHold.signature = signature
-
                 await erc1410Facet
                     .connect(signer_B)
                     .issueByPartition(
@@ -1488,7 +1490,8 @@ describe('ProtectedPartitions Tests', () => {
                     .protectedCreateHoldByPartition(
                         DEFAULT_PARTITION,
                         account_A,
-                        protectedHold
+                        protectedHold,
+                        signature
                     )
             })
         })

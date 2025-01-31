@@ -260,7 +260,6 @@ interface IHold {
         Hold hold;
         uint256 deadline;
         uint256 nonce;
-        bytes signature;
     }
 
     struct HoldData {
@@ -313,7 +312,8 @@ interface IHold {
     function protectedCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        ProtectedHold memory _protectedHold
+        ProtectedHold memory _protectedHold,
+        bytes calldata _signature
     ) external returns (bool success_, uint256 holdId_);
 
     function executeHoldByPartition(

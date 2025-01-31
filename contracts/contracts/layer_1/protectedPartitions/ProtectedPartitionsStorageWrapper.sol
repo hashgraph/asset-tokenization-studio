@@ -179,27 +179,36 @@ abstract contract ProtectedPartitionsStorageWrapper is
     function _checkCreateHoldSignature(
         bytes32 _partition,
         address _from,
-        IHold.ProtectedHold memory _protectedHold
+        IHold.ProtectedHold memory _protectedHold,
+        bytes calldata _signature
     ) internal view virtual {
-        if (!_isCreateHoldSignatureValid(_partition, _from, _protectedHold))
-            revert WrongSignature();
+        if (
+            !_isCreateHoldSignatureValid(
+                _partition,
+                _from,
+                _protectedHold,
+                _signature
+            )
+        ) revert WrongSignature();
     }
 
     function _isCreateHoldSignatureValid(
         bytes32 _partition,
         address _from,
-        IHold.ProtectedHold memory _protectedHold
+        IHold.ProtectedHold memory _protectedHold,
+        bytes calldata _signature
     ) internal view virtual returns (bool) {
         bytes32 functionHash = getMessageHashCreateHold(
             _partition,
             _from,
             _protectedHold
         );
+
         return
             verify(
                 _from,
                 functionHash,
-                _protectedHold.signature,
+                _signature,
                 _protectedPartitionsStorage().contractName,
                 _protectedPartitionsStorage().contractVersion,
                 _blockChainid(),
