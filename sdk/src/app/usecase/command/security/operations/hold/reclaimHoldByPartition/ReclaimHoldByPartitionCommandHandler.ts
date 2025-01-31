@@ -180,7 +180,10 @@ import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { SecurityPaused } from '../../../error/SecurityPaused.js';
-import { ReclaimHoldByPartitionCommand, ReclaimHoldByPartitionCommandResponse } from './ReclaimHoldByPartitionCommand.js';
+import {
+  ReclaimHoldByPartitionCommand,
+  ReclaimHoldByPartitionCommandResponse,
+} from './ReclaimHoldByPartitionCommand.js';
 
 @CommandHandler(ReclaimHoldByPartitionCommand)
 export class ReclaimHoldByPartitionCommandHandler
@@ -216,7 +219,6 @@ export class ReclaimHoldByPartitionCommandHandler
     const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
       ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
       : new EvmAddress(targetId);
-
 
     const res = await handler.reclaimHoldByPartition(
       securityEvmAddress,

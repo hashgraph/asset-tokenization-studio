@@ -1806,7 +1806,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     security: EvmAddress,
     partitionId: string,
     holdId: number,
-    targetId: EvmAddress
+    targetId: EvmAddress,
   ): Promise<TransactionResponse> {
     LogService.logTrace(
       `Reclaiming hold amount from account ${targetId.toString()}}`,
@@ -1815,14 +1815,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await Hold_2__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).reclaimHoldByPartition(
-        partitionId,
-        targetId.toString(),
-        holdId,
-        {
-          gasLimit: RECLAIM_HOLD_GAS,
-        },
-      ),
+      ).reclaimHoldByPartition(partitionId, targetId.toString(), holdId, {
+        gasLimit: RECLAIM_HOLD_GAS,
+      }),
       this.networkService.environment,
     );
   }

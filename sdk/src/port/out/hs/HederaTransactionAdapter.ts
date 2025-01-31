@@ -1826,9 +1826,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'reclaimHoldByPartition';
-    LogService.logTrace(
-      `Reclaiming hold from account ${targetId.toString()}}`,
-    );
+    LogService.logTrace(`Reclaiming hold from account ${targetId.toString()}}`);
     const factoryInstance = new Hold_2__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
