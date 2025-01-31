@@ -301,6 +301,7 @@ abstract contract Hold is
         onlyValidAddress(_from)
         onlyValidAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyOperator(_partition, _from)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
@@ -335,9 +336,9 @@ abstract contract Hold is
         onlyValidAddress(_from)
         onlyValidAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyRole(_CONTROLLER_ROLE)
         onlyControllable
-        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldByPartition(
@@ -369,6 +370,9 @@ abstract contract Hold is
         onlyValidAddress(_from)
         onlyValidAddress(_protectedHold.hold.escrow)
         onlyRole(_protectedPartitionsRole(_partition))
+        onlyWithValidExpirationTimestamp(
+            _protectedHold.hold.expirationTimestamp
+        )
         onlyProtectedPartitions
         returns (bool success_, uint256 holdId_)
     {
@@ -402,7 +406,7 @@ abstract contract Hold is
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidEscrowHoldId(
             _partition,
-            _tokenHolder,
+            _msgSender(),
             _escrowId,
             _tokenHolder
         )
@@ -417,23 +421,46 @@ abstract contract Hold is
             _to,
             _amount
         );
-        emit HoldByPartitionExecuted(
+        emit HoldByPartitionReleased(
             _tokenHolder,
             _partition,
             _escrowId,
-            _amount,
-            _to
+            _amount
         );
     }
 
     function releaseHoldByPartition(
         bytes32 _partition,
-        uint256 _holdId,
+        uint256 _escrowId,
         address _tokenHolder,
         uint256 _amount
-    ) external returns (bool success_) {
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidEscrowHoldId(
+            _partition,
+            _msgSender(),
+            _escrowId,
+            _tokenHolder
+        )
+        returns (bool success_)
+    {
         // solhint-disable-next-line
-        revert('Should never reach this part');
+        success_ = _releaseHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _escrowId,
+            _amount
+        );
+        emit HoldByPartitionReleased(
+            _tokenHolder,
+            _partition,
+            _escrowId,
+            _amount
+        );
     }
 
     function reclaimHoldByPartition(
@@ -445,24 +472,30 @@ abstract contract Hold is
         revert('Should never reach this part');
     }
 
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 amount_) {
+        return _getHeldAmountFor(_tokenHolder);
+    }
+
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view returns (uint256 amount_) {
+    ) external view virtual override returns (uint256 amount_) {
         return _getHeldAmountForByPartition(_partition, _tokenHolder);
     }
 
     function getHoldCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view returns (uint256 holdCount_) {
+    ) external view virtual override returns (uint256 holdCount_) {
         return _getHoldCountForByPartition(_partition, _tokenHolder);
     }
 
     function getHoldCountForEscrowByPartition(
         bytes32 _partition,
         address _escrow
-    ) external view returns (uint256 escrowHoldCount_) {
+    ) external view virtual override returns (uint256 escrowHoldCount_) {
         return _getHoldCountForEscrowByPartition(_partition, _escrow);
     }
 
@@ -471,7 +504,7 @@ abstract contract Hold is
         address _tokenHolder,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view returns (uint256[] memory holdsId_) {
+    ) external view virtual override returns (uint256[] memory holdsId_) {
         return
             _getHoldsIdForByPartition(
                 _partition,
@@ -486,7 +519,7 @@ abstract contract Hold is
         address _escrow,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view returns (uint256[] memory escrowHoldsId_) {
+    ) external view virtual override returns (uint256[] memory escrowHoldsId_) {
         return
             _getHoldsIdForEscrowByPartition(
                 _partition,
@@ -503,12 +536,15 @@ abstract contract Hold is
     )
         external
         view
+        virtual
+        override
         returns (
             uint256 amount_,
             uint256 expirationTimestamp_,
             address escrow_,
             address destination_,
-            bytes memory data_
+            bytes memory data_,
+            bytes memory operatorData_
         )
     {
         return _getHoldForByPartition(_partition, _tokenHolder, _holdId);
@@ -521,13 +557,16 @@ abstract contract Hold is
     )
         external
         view
+        virtual
+        override
         returns (
             uint256 amount_,
             uint256 expirationTimestamp_,
             address tokenHolder_,
             uint256 id_,
             address destination_,
-            bytes memory data_
+            bytes memory data_,
+            bytes memory operatorData_
         )
     {
         return _getHoldForEscrowByPartition(_partition, _escrow, _escrowHoldId);

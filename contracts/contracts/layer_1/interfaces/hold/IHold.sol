@@ -221,7 +221,7 @@ interface IHold {
     event HoldByPartitionExecuted(
         address indexed tokenHolder,
         bytes32 indexed partition,
-        uint256 holdId,
+        uint256 escrowId,
         uint256 amount,
         address to
     );
@@ -229,7 +229,7 @@ interface IHold {
     event HoldByPartitionReleased(
         address indexed tokenHolder,
         bytes32 indexed partition,
-        uint256 holdId,
+        uint256 escrowId,
         uint256 amount
     );
 
@@ -237,7 +237,7 @@ interface IHold {
         address indexed operator,
         address indexed tokenHolder,
         bytes32 indexed partition,
-        uint256 holdId,
+        uint256 escrowId,
         uint256 amount
     );
 
@@ -319,7 +319,7 @@ interface IHold {
 
     function executeHoldByPartition(
         bytes32 _partition,
-        uint256 _holdId,
+        uint256 _escrowId,
         address _tokenHolder,
         address _to,
         uint256 _amount
@@ -327,16 +327,20 @@ interface IHold {
 
     function releaseHoldByPartition(
         bytes32 _partition,
-        uint256 _holdId,
+        uint256 _escrowId,
         address _tokenHolder,
         uint256 _amount
     ) external returns (bool success_);
 
     function reclaimHoldByPartition(
         bytes32 _partition,
-        uint256 _holdId,
+        uint256 _escrowId,
         address _tokenHolder
     ) external returns (bool success_);
+
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view returns (uint256 amount_);
 
     function getHeldAmountForByPartition(
         bytes32 _partition,
@@ -379,7 +383,8 @@ interface IHold {
             uint256 expirationTimestamp_,
             address escrow_,
             address destination_,
-            bytes memory data_
+            bytes memory data_,
+            bytes memory operatorData_
         );
 
     function getHoldForEscrowByPartition(
@@ -395,6 +400,7 @@ interface IHold {
             address tokenHolder_,
             uint256 id_,
             address destination_,
-            bytes memory data_
+            bytes memory data_,
+            bytes memory operatorData_
         );
 }
