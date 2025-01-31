@@ -576,7 +576,13 @@ describe('Holds Layer 2 Tests', () => {
         // EXECUTE HOLD
         await holdFacet
             .connect(signer_B)
-            .executeHoldByPartition(_PARTITION_ID_1, 1, account_C, hold.amount)
+            .executeHoldByPartition(
+                _PARTITION_ID_1,
+                account_A,
+                1,
+                account_C,
+                hold.amount
+            )
 
         const balance_After_Release = await erc1410Facet.balanceOf(account_A)
         const balance_After_Release_Partition_1 =
@@ -643,7 +649,12 @@ describe('Holds Layer 2 Tests', () => {
         await adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
 
         // RELEASE HOLD
-        await holdFacet.releaseHoldByPartition(_PARTITION_ID_1, 1, hold.amount)
+        await holdFacet.releaseHoldByPartition(
+            _PARTITION_ID_1,
+            account_A,
+            1,
+            hold.amount
+        )
 
         const balance_After_Release = await erc1410Facet.balanceOf(account_A)
         const balance_After_Release_Partition_1 =
@@ -852,7 +863,13 @@ describe('Holds Layer 2 Tests', () => {
         // EXECUTE HOLD
         await holdFacet
             .connect(signer_B)
-            .executeHoldByPartition(_PARTITION_ID_1, 1, account_C, hold.amount)
+            .executeHoldByPartition(
+                _PARTITION_ID_1,
+                account_A,
+                1,
+                account_C,
+                hold.amount
+            )
 
         const TotalHoldLABAF_After =
             await adjustBalancesFacet.getTotalHeldLABAFByPartition(
