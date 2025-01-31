@@ -229,8 +229,6 @@ export class ExecuteHoldByPartitionCommandHandler
   constructor(
     @lazyInject(SecurityService)
     public readonly securityService: SecurityService,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
     @lazyInject(RPCQueryAdapter)
@@ -270,6 +268,17 @@ export class ExecuteHoldByPartitionCommandHandler
       : new EvmAddress(sourceId);
 
     const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    const holdDetails = await this.queryAdapter.getHoldForByPartition(
+      securityEvmAddress,
+      partitionId,
+      targetEvmAddress,
+      holdId,
+    );
+
+    if (holdDetails.amount.toBigNumber().lt(amountBd.toBigNumber())) {
+      throw new InsufficientHoldBalance();
+    }
 
     const res = await handler.executeHoldByPartition(
       securityEvmAddress,
