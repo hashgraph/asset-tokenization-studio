@@ -310,11 +310,8 @@ import { GetNounceQueryHandler } from '../app/usecase/query/security/protectedPa
 import { GetHeldAmountForQueryHandler } from '../app/usecase/query/security/hold/getHeldAmountFor/GetHeldAmountForQueryHandler.js';
 import { GetHeldAmountForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQueryHandler.js';
 import { GetHoldCountForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQueryHandler.js';
-import { GetHoldCountForEscrowByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldCountForEscrowByPartition/GetHoldCountForEscrowByPartitionQueryHandler.js';
 import { GetHoldsIdForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQueryHandler.js';
 import { GetHoldForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQueryHandler.js';
-import { GetHoldForEscrowByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldForEscrowByPartition/GetHoldForEscrowByPartitionQueryHandler.js';
-import { GetHoldsIdForEscrowByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldsIdForEscrowByPartition/GetHoldsIdForEscrowByPartitionQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -664,23 +661,11 @@ const QUERY_HANDLERS = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetHoldCountForEscrowByPartitionQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
     useClass: GetHoldsIdForByPartitionQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,
-    useClass: GetHoldsIdForEscrowByPartitionQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
     useClass: GetHoldForByPartitionQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetHoldForEscrowByPartitionQueryHandler,
   },
 ];
 

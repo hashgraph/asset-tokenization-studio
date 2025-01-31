@@ -273,11 +273,8 @@ import ProtectedTransferAndLockByPartitionRequest from './ProtectedTransferAndLo
 import GetHeldAmountForRequest from './GetHeldAmountForRequest.js';
 import GetHeldAmountForByPartitionRequest from './GetHeldAmountForByPartitionRequest.js';
 import GetHoldCountForByPartitionRequest from './GetHoldCountForByPartitionRequest.js';
-import GetHoldCountForEscrowByPartitionRequest from './GetHoldCountForEscrowByPartitionRequest.js';
-import GetHoldsIdForEscrowByPartitionRequest from './GetHoldsIdForEscrowByPartitionRequest.js';
 import GetHoldsIdForByPartitionRequest from './GetHoldsIdForByPartitionRequest.js';
 import GetHoldForByPartitionRequest from './GetHoldForByPartitionRequest.js';
-import GetHoldForEscrowByPartitionRequest from './GetHoldForEscrowByPartitionRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -350,9 +347,6 @@ export {
   GetHeldAmountForRequest,
   GetHeldAmountForByPartitionRequest,
   GetHoldCountForByPartitionRequest,
-  GetHoldCountForEscrowByPartitionRequest,
   GetHoldsIdForByPartitionRequest,
-  GetHoldsIdForEscrowByPartitionRequest,
   GetHoldForByPartitionRequest,
-  GetHoldForEscrowByPartitionRequest,
 };

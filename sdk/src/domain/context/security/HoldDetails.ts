@@ -206,7 +206,6 @@
 import BigDecimal from '../shared/BigDecimal';
 
 export class HoldDetails {
-  id: number;
   expirationTimeStamp: number;
   amount: BigDecimal;
   escrowAddress: string;
@@ -215,7 +214,6 @@ export class HoldDetails {
   data: string;
   operatorData: string;
   constructor(
-    id: number,
     executionTimeStamp: number,
     amount: BigDecimal,
     escrowAddress: string,
@@ -224,7 +222,6 @@ export class HoldDetails {
     data: string,
     operatorData: string,
   ) {
-    this.id = id;
     this.expirationTimeStamp = executionTimeStamp;
     this.amount = amount;
     this.escrowAddress = escrowAddress;

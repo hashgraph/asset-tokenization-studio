@@ -1218,23 +1218,6 @@ export class RPCQueryAdapter {
     return holdCountForByPartition.toNumber();
   }
 
-  async getHoldCountForEscrowByPartition(
-    address: EvmAddress,
-    partitionId: string,
-    escrow: EvmAddress,
-  ): Promise<number> {
-    LogService.logTrace(
-      `Getting Hold Count For Escrow ${escrow} by partition ${partitionId}`,
-    );
-
-    const holdCountForEscrowByPartition = await this.connect(
-      Hold_2__factory,
-      address.toString(),
-    ).getHoldCountForEscrowByPartition(partitionId, escrow.toString());
-
-    return holdCountForEscrowByPartition.toNumber();
-  }
-
   async getHoldsIdForByPartition(
     address: EvmAddress,
     partitionId: string,
@@ -1254,30 +1237,6 @@ export class RPCQueryAdapter {
     return holdsIdForByPartition.map((id) => id.toNumber());
   }
 
-  async getHoldsIdForEscrowByPartition(
-    address: EvmAddress,
-    partitionId: string,
-    escrow: EvmAddress,
-    start: number,
-    end: number,
-  ): Promise<number[]> {
-    LogService.logTrace(
-      `Getting Holds Id For Escrow ${escrow} by partition ${partitionId} from ${start} to ${end}`,
-    );
-
-    const holdsIdForEscrowByPartition = await this.connect(
-      Hold_2__factory,
-      address.toString(),
-    ).getHoldsIdForEscrowByPartition(
-      partitionId,
-      escrow.toString(),
-      start,
-      end,
-    );
-
-    return holdsIdForEscrowByPartition.map((id) => id.toNumber());
-  }
-
   async getHoldForByPartition(
     address: EvmAddress,
     partitionId: string,
@@ -1294,38 +1253,10 @@ export class RPCQueryAdapter {
     ).getHoldForByPartition(partitionId, targetId.toString(), holdId);
 
     return new HoldDetails(
-      holdId,
       hold.expirationTimestamp_.toNumber(),
       new BigDecimal(hold.amount_.toString()),
       hold.escrow_,
       targetId.toString(),
-      hold.destination_,
-      hold.data_,
-      hold.operatorData_,
-    );
-  }
-
-  async getHoldForEscrowByPartition(
-    address: EvmAddress,
-    partitionId: string,
-    escrow: EvmAddress,
-    escrowHoldId: number,
-  ): Promise<HoldDetails> {
-    LogService.logTrace(
-      `Getting hold details for escrow ${escrow} id ${escrowHoldId} by partition ${partitionId}`,
-    );
-
-    const hold = await this.connect(
-      Hold_2__factory,
-      address.toString(),
-    ).getHoldForEscrowByPartition(partitionId, escrow.toString(), escrowHoldId);
-
-    return new HoldDetails(
-      hold.id_.toNumber(),
-      hold.expirationTimestamp_.toNumber(),
-      new BigDecimal(hold.amount_.toString()),
-      escrow.toString(),
-      hold.tokenHolder_,
       hold.destination_,
       hold.data_,
       hold.operatorData_,
