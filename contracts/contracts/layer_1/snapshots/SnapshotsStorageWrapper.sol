@@ -365,9 +365,7 @@ abstract contract SnapshotsStorageWrapper is
     ) internal virtual {
         _updateSnapshot(
             _snapshotStorage().accountHeldBalanceSnapshots[account],
-            // TODO : replace 0 with commentted method when function implement in HoldStorageWrapperRead
-            0
-            // _getHeldAmountFor(account)
+            _getHeldAmountFor(account)
         );
         _updateSnapshot(
             _snapshotStorage().accountPartitionHeldBalanceSnapshots[account][

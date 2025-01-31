@@ -218,9 +218,6 @@ import {
     checkNounceAndDeadline,
     verify
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {
-    _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH
-} from '../constants/values.sol';
 
 abstract contract HoldStorageWrapper is
     SnapshotsStorageWrapper,
@@ -240,9 +237,6 @@ abstract contract HoldStorageWrapper is
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         holdId_ = ++holdStorage.holdNextId[_from][_partition];
-        uint256 escrowId_ = ++holdStorage.escrow_holdNextId[_hold.escrow][
-            _partition
-        ];
 
         IHold.HoldData memory hold = IHold.HoldData(
             holdId_,
@@ -250,22 +244,12 @@ abstract contract HoldStorageWrapper is
             _operatorData
         );
 
-        IHold.EscrowHoldData memory escrow = IHold.EscrowHoldData(
-            escrowId_,
-            _from,
-            holdId_
-        );
-
         holdStorage.holds[_from][_partition].push(hold);
-        holdStorage.escrow_holds[_hold.escrow][_partition].push(escrow);
         holdStorage.holdIds[_from][_partition].add(holdId_);
-        holdStorage.escrow_holdIds[_hold.escrow][_partition].add(escrowId_);
         holdStorage.holdsIndex[_from][_partition][holdId_] = holdStorage
         .holds[_from][_partition].length;
         holdStorage.heldAmountByPartition[_from][_partition] += _hold.amount;
-        holdStorage.escrow_holdsIndex[_hold.escrow][_partition][
-            escrowId_
-        ] = holdStorage.escrow_holds[_hold.escrow][_partition].length;
+        holdStorage.totalHeldAmount[_from] += _hold.amount;
 
         success_ = true;
     }
@@ -284,7 +268,8 @@ abstract contract HoldStorageWrapper is
     function _protectedCreateHoldByPartition(
         bytes32 _partition,
         address _from,
-        IHold.ProtectedHold memory _protectedHold
+        IHold.ProtectedHold memory _protectedHold,
+        bytes calldata _signature
     ) internal virtual returns (bool success_, uint256 holdId_) {
         checkNounceAndDeadline(
             _protectedHold.nonce,
@@ -294,7 +279,12 @@ abstract contract HoldStorageWrapper is
             _blockTimestamp()
         );
 
-        _checkCreateHoldSignature(_partition, _from, _protectedHold);
+        _checkCreateHoldSignature(
+            _partition,
+            _from,
+            _protectedHold,
+            _signature
+        );
 
         _setNounce(_protectedHold.nonce, _from);
 
@@ -309,36 +299,120 @@ abstract contract HoldStorageWrapper is
 
     function _executeHoldByPartition(
         bytes32 _partition,
-        uint256 _escrowId,
         address _tokenHolder,
+        uint256 _holdId,
         address _to,
         uint256 _amount
     ) internal virtual returns (bool success_) {
-        IHold.HoldData memory holdData = _getHoldFromEscrowId(
-            _partition,
-            _msgSender(),
-            _escrowId,
-            _tokenHolder
-        );
+        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _to);
 
-        IHold.Hold memory hold = holdData.hold;
-
-        if (hold.to != address(0) && _to != hold.to) {
-            revert IHold.InvalidDestinationAddress(hold.to, _to);
-        }
-
-        _beforeExecuteHold(_partition, _tokenHolder, _to);
-
-        _decreaseHeldAmount(_partition, _tokenHolder, _amount, holdData.id);
-
-        if (hold.amount == _amount) {
-            _removeHold(
+        return
+            _operateHoldByPartition(
                 _partition,
                 _tokenHolder,
-                holdData.id,
-                _msgSender(),
-                _escrowId
+                _holdId,
+                _to,
+                _amount,
+                IHold.OperationType.Execute
             );
+    }
+
+    function _releaseHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        uint256 _amount
+    ) internal virtual returns (bool success_) {
+        _beforeReleaseHold(_partition, _tokenHolder, _holdId);
+
+        return
+            _operateHoldByPartition(
+                _partition,
+                _tokenHolder,
+                _holdId,
+                _tokenHolder,
+                _amount,
+                IHold.OperationType.Release
+            );
+    }
+
+    function _reclaimHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal virtual returns (bool success_, uint256 amount_) {
+        _beforeReclaimHold(_partition, _tokenHolder, _holdId);
+
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+        amount_ = holdData.hold.amount;
+
+        success_ = _operateHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId,
+            _tokenHolder,
+            amount_,
+            IHold.OperationType.Reclaim
+        );
+    }
+
+    function _operateHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to,
+        uint256 _amount,
+        IHold.OperationType _operation
+    ) internal virtual returns (bool success_) {
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+
+        if (_operation == IHold.OperationType.Execute) {
+            if (!_checkControlList(_tokenHolder)) {
+                revert AccountIsBlocked(_tokenHolder);
+            }
+
+            if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
+                revert IHold.InvalidDestinationAddress(holdData.hold.to, _to);
+            }
+        }
+        if (_operation != IHold.OperationType.Reclaim) {
+            if (_isHoldExpired(holdData.hold))
+                revert IHold.HoldExpirationReached();
+            if (!_isEscrow(holdData.hold, _msgSender()))
+                revert IHold.IsNotEscrow();
+        } else if (
+            _operation == IHold.OperationType.Reclaim &&
+            !_isHoldExpired(holdData.hold)
+        ) {
+            revert IHold.HoldExpirationNotReached();
+        }
+
+        _checkHoldAmount(_amount, holdData);
+
+        _transferHold(_partition, _tokenHolder, _holdId, _to, _amount);
+
+        success_ = true;
+    }
+
+    function _transferHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to,
+        uint256 _amount
+    ) internal {
+        if (
+            _decreaseHeldAmount(_partition, _tokenHolder, _amount, _holdId) == 0
+        ) {
+            _removeHold(_partition, _tokenHolder, _holdId);
         }
 
         if (!_validPartitionForReceiver(_partition, _to)) {
@@ -346,46 +420,6 @@ abstract contract HoldStorageWrapper is
         } else {
             _increaseBalanceByPartition(_to, _amount, _partition);
         }
-
-        success_ = true;
-    }
-
-    function _releaseHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _escrowId,
-        uint256 _amount
-    ) internal virtual returns (bool success_) {
-        IHold.HoldData memory holdData = _getHoldFromEscrowId(
-            _partition,
-            _msgSender(),
-            _escrowId,
-            _tokenHolder
-        );
-
-        IHold.Hold memory hold = holdData.hold;
-
-        _beforeReleaseHold(_partition, _tokenHolder, _tokenHolder);
-
-        _decreaseHeldAmount(_partition, _tokenHolder, _amount, holdData.id);
-
-        if (hold.amount == _amount) {
-            _removeHold(
-                _partition,
-                _tokenHolder,
-                holdData.id,
-                _msgSender(),
-                _escrowId
-            );
-        }
-
-        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
-            _addPartitionTo(_amount, _tokenHolder, _partition);
-        } else {
-            _increaseBalanceByPartition(_tokenHolder, _amount, _partition);
-        }
-
-        success_ = true;
     }
 
     function _decreaseHeldAmount(
@@ -393,23 +427,24 @@ abstract contract HoldStorageWrapper is
         address _tokenHolder,
         uint256 _amount,
         uint256 _holdId
-    ) internal {
+    ) internal returns (uint256 newHoldBalance_) {
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
 
-        holdStorage.heldAmountByPartition[_tokenHolder][_partition] -= _amount;
         holdStorage.totalHeldAmount[_tokenHolder] -= _amount;
+        holdStorage.heldAmountByPartition[_tokenHolder][_partition] -= _amount;
         holdStorage
-        .holds[_tokenHolder][_partition][holdIndex].hold.amount -= _amount;
+        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount -= _amount;
+
+        newHoldBalance_ = holdStorage
+        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount;
     }
 
     function _removeHold(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _holdId,
-        address _escrow,
-        uint256 _escrowId
+        uint256 _holdId
     ) internal {
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
@@ -434,34 +469,6 @@ abstract contract HoldStorageWrapper is
         }
 
         holdStorage.holds[_tokenHolder][_partition].pop();
-
-        // Remove escrow hold
-        uint256 escrowHoldIndex = holdStorage.escrow_holdsIndex[_escrow][
-            _partition
-        ][_escrowId];
-        holdStorage.escrow_holdsIndex[_escrow][_partition][_escrowId] = 0;
-        holdStorage.escrow_holdIds[_escrow][_partition].remove(_escrowId);
-
-        uint256 escrowLastIndex = _getEscrowHoldCountForByPartition(
-            _partition,
-            _escrow
-        );
-
-        if (escrowHoldIndex < escrowLastIndex) {
-            IHold.EscrowHoldData memory lastEscrowHold = _getEscrowHoldByIndex(
-                _partition,
-                _escrow,
-                escrowLastIndex
-            );
-            _setEscrowHoldAtIndex(
-                _partition,
-                _escrow,
-                escrowHoldIndex,
-                lastEscrowHold
-            );
-        }
-
-        holdStorage.escrow_holds[_msgSender()][_partition].pop();
     }
 
     function _setHoldAtIndex(
@@ -484,76 +491,6 @@ abstract contract HoldStorageWrapper is
         ] = _holdIndex;
     }
 
-    function _setEscrowHoldAtIndex(
-        bytes32 _partition,
-        address _escrowAddress,
-        uint256 _escrowHoldIndex,
-        IHold.EscrowHoldData memory escrowHold
-    ) internal virtual {
-        IHold.HoldDataStorage storage holdStorage = _holdStorage();
-
-        holdStorage
-        .escrow_holds[_escrowAddress][_partition][_escrowHoldIndex - 1]
-            .escrow_id = escrowHold.escrow_id;
-        holdStorage
-        .escrow_holds[_escrowAddress][_partition][_escrowHoldIndex - 1]
-            .tokenHolder = escrowHold.tokenHolder;
-        holdStorage
-        .escrow_holds[_escrowAddress][_partition][_escrowHoldIndex - 1]
-            .id = escrowHold.id;
-
-        holdStorage.escrow_holdsIndex[_escrowAddress][_partition][
-            escrowHold.id
-        ] = _escrowHoldIndex;
-    }
-
-    function _checkCreateHoldSignature(
-        bytes32 _partition,
-        address _from,
-        IHold.ProtectedHold memory _protectedHold
-    ) internal view virtual {
-        if (!_isCreateHoldSignatureValid(_partition, _from, _protectedHold))
-            revert WrongSignature();
-    }
-
-    function _isCreateHoldSignatureValid(
-        bytes32 _partition,
-        address _from,
-        IHold.ProtectedHold memory _protectedHold
-    ) internal view virtual returns (bool) {
-        bytes32 functionHash = getMessageHashCreateHold(
-            _partition,
-            _from,
-            _protectedHold
-        );
-        return
-            verify(
-                _from,
-                functionHash,
-                _protectedHold.signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
-                _blockChainid(),
-                address(this)
-            );
-    }
-
-    function getMessageHashCreateHold(
-        bytes32 _partition,
-        address _from,
-        IHold.ProtectedHold memory _protectedHold
-    ) internal pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encode(
-                    _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
-                    _partition,
-                    _from,
-                    _protectedHold
-                )
-            );
-    }
-
     function _beforeHold(
         bytes32 _partition,
         address _tokenHolder,
@@ -566,6 +503,7 @@ abstract contract HoldStorageWrapper is
     function _beforeExecuteHold(
         bytes32 _partition,
         address _tokenHolder,
+        uint256 _holdId,
         address _to
     ) internal virtual {
         _updateAccountSnapshot(_to, _partition);
@@ -575,16 +513,40 @@ abstract contract HoldStorageWrapper is
     function _beforeReleaseHold(
         bytes32 _partition,
         address _tokenHolder,
-        address _to
+        uint256 _holdId
     ) internal virtual {
-        _beforeExecuteHold(_partition, _tokenHolder, _to);
+        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _tokenHolder);
     }
 
     function _beforeReclaimHold(
         bytes32 _partition,
         address _tokenHolder,
-        address _to
+        uint256 _holdId
     ) internal virtual {
-        _beforeExecuteHold(_partition, _tokenHolder, _to);
+        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _tokenHolder);
+    }
+
+    function _checkHoldAmount(
+        uint256 _amount,
+        IHold.HoldData memory holdData
+    ) internal pure {
+        if (_amount > holdData.hold.amount) {
+            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
+        }
+    }
+
+    function _isHoldExpired(
+        IHold.Hold memory _hold
+    ) internal view returns (bool) {
+        if (_blockTimestamp() > _hold.expirationTimestamp) return true;
+        return false;
+    }
+
+    function _isEscrow(
+        IHold.Hold memory _hold,
+        address _escrow
+    ) internal pure returns (bool) {
+        if (_escrow == _hold.escrow) return true;
+        return false;
     }
 }

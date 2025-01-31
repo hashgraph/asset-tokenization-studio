@@ -269,10 +269,62 @@ contract Hold_2 is
             );
     }
 
+    function getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 amount_) {
+        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function getHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        external
+        view
+        virtual
+        override
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        )
+    {
+        return
+            _getHoldForByPartitionAdjusted(_partition, _tokenHolder, _holdId);
+    }
+
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 amount_) {
+        return
+            _getHeldAmountForByPartitionAdjusted(
+                _DEFAULT_PARTITION,
+                _tokenHolder
+            );
+    }
+
+    function getHeldAmountForAdjusted(
+        address _tokenHolder
+    ) external view virtual returns (uint256 amount_) {
+        return _getHeldAmountForAdjusted(_tokenHolder);
+    }
+
+    function getHeldAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual returns (uint256 amount_) {
+        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
     function _executeHoldByPartition(
         bytes32 _partition,
-        uint256 _escrowId,
         address _tokenHolder,
+        uint256 _holdId,
         address _to,
         uint256 _amount
     )
@@ -281,20 +333,19 @@ contract Hold_2 is
         override(HoldStorageWrapper, HoldStorageWrapper_2)
         returns (bool success_)
     {
-        return
-            HoldStorageWrapper_2._executeHoldByPartition(
-                _partition,
-                _escrowId,
-                _tokenHolder,
-                _to,
-                _amount
-            );
+        success_ = HoldStorageWrapper_2._executeHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId,
+            _to,
+            _amount
+        );
     }
 
     function _releaseHoldByPartition(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _escrowId,
+        uint256 _holdId,
         uint256 _amount
     )
         internal
@@ -302,13 +353,67 @@ contract Hold_2 is
         override(HoldStorageWrapper, HoldStorageWrapper_2)
         returns (bool success_)
     {
-        return
-            HoldStorageWrapper_2._releaseHoldByPartition(
-                _partition,
-                _tokenHolder,
-                _escrowId,
-                _amount
-            );
+        success_ = HoldStorageWrapper_2._releaseHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId,
+            _amount
+        );
+    }
+
+    function _reclaimHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        internal
+        virtual
+        override(HoldStorageWrapper, HoldStorageWrapper_2)
+        returns (bool success_, uint256 amount_)
+    {
+        (success_, amount_) = HoldStorageWrapper_2._reclaimHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+    }
+
+    function _beforeExecuteHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to
+    ) internal virtual override(HoldStorageWrapper, HoldStorageWrapper_2) {
+        HoldStorageWrapper_2._beforeExecuteHold(
+            _partition,
+            _tokenHolder,
+            _holdId,
+            _to
+        );
+    }
+
+    function _beforeReleaseHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal virtual override(HoldStorageWrapper, HoldStorageWrapper_2) {
+        HoldStorageWrapper_2._beforeReleaseHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+    }
+
+    function _beforeReclaimHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal virtual override(HoldStorageWrapper, HoldStorageWrapper_2) {
+        HoldStorageWrapper_2._beforeReclaimHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
     }
 
     function getStaticResolverKey()
@@ -361,19 +466,19 @@ contract Hold_2 is
             .getHoldCountForByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldCountForEscrowByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
             .getHoldsIdForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldsIdForEscrowByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getHoldForByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldForEscrowByPartition
+            .getHeldAmountForAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHeldAmountForByPartitionAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHeldAmountFor
             .selector;
     }
 
