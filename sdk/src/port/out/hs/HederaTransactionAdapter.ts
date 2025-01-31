@@ -235,16 +235,20 @@ import {
   _PARTITION_ID_1,
   ADD_TO_CONTROL_LIST_GAS,
   AUTHORIZE_OPERATOR_GAS,
+  CONTROLLER_CREATE_HOLD_GAS,
   CONTROLLER_REDEEM_GAS,
   CONTROLLER_TRANSFER_GAS,
   CREATE_BOND_ST_GAS,
   CREATE_EQUITY_ST_GAS,
+  CREATE_HOLD_FROM_GAS,
+  CREATE_HOLD_GAS,
   GRANT_ROLES_GAS,
   ISSUE_GAS,
   LOCK_GAS,
   MAX_ROLES_GAS,
   PAUSE_GAS,
   PROTECT_PARTITION_GAS,
+  PROTECTED_CREATE_HOLD_GAS,
   PROTECTED_REDEEM_GAS,
   PROTECTED_TRANSFER_AND_LOCK_GAS,
   PROTECTED_TRANSFER_GAS,
@@ -312,6 +316,7 @@ import { Interface } from 'ethers/lib/utils.js';
 import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
 import { TransactionType } from '../TransactionResponseEnums.js';
 import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
+import { Hold, ProtectedHold } from '../../../domain/context/security/Hold.js';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -1813,6 +1818,182 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(PROTECTED_TRANSFER_AND_LOCK_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async createHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'createHoldByPartition';
+    LogService.logTrace(
+      `Holding ${amount} tokens from account ${targetId.toString()} until ${expirationDate} with escrow ${escrow}`,
+    );
+
+    const factoryInstance = new Hold_2__factory().attach(security.toString());
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [partitionId, hold],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(CREATE_HOLD_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async createHoldFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'createHoldFromByPartition';
+    LogService.logTrace(
+      `Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
+    );
+
+    const factoryInstance = new Hold_2__factory().attach(security.toString());
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [partitionId, sourceId.toString(), hold, '0x'],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(CREATE_HOLD_FROM_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async controllerCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'controllerCreateHoldByPartition';
+    LogService.logTrace(
+      `Controller Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
+    );
+
+    const factoryInstance = new Hold_2__factory().attach(security.toString());
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [partitionId, sourceId.toString(), hold, '0x'],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(CONTROLLER_CREATE_HOLD_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async protectedCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    escrow: EvmAddress,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'protectedCreateHoldByPartition';
+    LogService.logTrace(
+      `Protected Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
+    );
+
+    const factoryInstance = new Hold_2__factory().attach(security.toString());
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: expirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    const protectedHold: ProtectedHold = {
+      hold,
+      deadline: deadline.toBigNumber(),
+      nonce: nonce.toBigNumber(),
+    };
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [partitionId, sourceId.toString(), protectedHold, signature],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(PROTECTED_CREATE_HOLD_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

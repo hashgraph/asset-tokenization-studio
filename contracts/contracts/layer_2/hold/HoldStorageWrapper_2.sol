@@ -230,107 +230,6 @@ abstract contract HoldStorageWrapper_2 is
     HoldStorageWrapper,
     ERC1410ScheduledTasksStorageWrapper
 {
-    function _getHeldAmountForAdjusted(
-        address _tokenHolder
-    ) internal view virtual returns (uint256 amount_) {
-        uint256 factor = AdjustBalanceLib.calculateFactor(
-            AdjustBalances_CD_Lib.getABAFAdjusted(),
-            AdjustBalances_CD_Lib.getTotalHeldLABAF(_tokenHolder)
-        );
-
-        return _getHeldAmountFor(_tokenHolder) * factor;
-    }
-
-    function _getHeldAmountForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 amount_) {
-        uint256 factor = AdjustBalanceLib.calculateFactor(
-            AdjustBalances_CD_Lib.getABAFAdjusted(),
-            AdjustBalances_CD_Lib.getTotalHeldLABAFByPartition(
-                _partition,
-                _tokenHolder
-            )
-        );
-        return _getHeldAmountForByPartition(_partition, _tokenHolder) * factor;
-    }
-
-    function _getHoldForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    )
-        internal
-        view
-        virtual
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
-        )
-    {
-        uint256 factor = AdjustBalanceLib.calculateFactor(
-            AdjustBalances_CD_Lib.getABAFAdjusted(),
-            AdjustBalances_CD_Lib.getHoldLABAFByPartition(
-                _partition,
-                _holdId,
-                _tokenHolder
-            )
-        );
-
-        (
-            amount_,
-            expirationTimestamp_,
-            escrow_,
-            destination_,
-            data_,
-            operatorData_
-        ) = _getHoldForByPartition(_partition, _tokenHolder, _holdId);
-        amount_ *= factor;
-    }
-
-    function _getHoldForEscrowByPartitionAdjusted(
-        bytes32 _partition,
-        address _escrow,
-        uint256 _escrowHoldId
-    )
-        internal
-        view
-        virtual
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address tokenHolder_,
-            uint256 id_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
-        )
-    {
-        (
-            amount_,
-            expirationTimestamp_,
-            tokenHolder_,
-            id_,
-            destination_,
-            data_,
-            operatorData_
-        ) = _getHoldForEscrowByPartition(_partition, _escrow, _escrowHoldId);
-
-        uint256 factor = AdjustBalanceLib.calculateFactor(
-            AdjustBalances_CD_Lib.getABAFAdjusted(),
-            AdjustBalances_CD_Lib.getHoldLABAFByPartition(
-                _partition,
-                id_,
-                tokenHolder_
-            )
-        );
-
-        amount_ *= factor;
-    }
     function _createHoldByPartition(
         bytes32 _partition,
         address _from,
@@ -365,44 +264,29 @@ abstract contract HoldStorageWrapper_2 is
 
     function _executeHoldByPartition(
         bytes32 _partition,
-        uint256 _escrowId,
         address _tokenHolder,
+        uint256 _holdId,
         address _to,
         uint256 _amount
     ) internal virtual override returns (bool success_) {
-        IHold.HoldData memory holdData = _getHoldFromEscrowId(
-            _partition,
-            _msgSender(),
-            _escrowId,
-            _tokenHolder
-        );
-
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
-        ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
-            _partition,
-            address(0),
-            _tokenHolder
-        );
-
-        uint256 abaf = _updateTotalHold(
-            _partition,
-            _tokenHolder,
-            adjustBalancesStorage
-        );
-
-        _updateHoldByIndex(_partition, holdData.id, _tokenHolder, abaf);
-
         success_ = super._executeHoldByPartition(
             _partition,
-            _escrowId,
             _tokenHolder,
+            _holdId,
             _to,
             _amount
         );
+        // Updated hold amount
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
 
-        if (_amount == holdData.hold.amount) {
+        if (holdData.hold.amount == 0) {
             adjustBalancesStorage.labafHolds[_tokenHolder][_partition].pop();
         }
     }
@@ -410,22 +294,91 @@ abstract contract HoldStorageWrapper_2 is
     function _releaseHoldByPartition(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _escrowId,
+        uint256 _holdId,
         uint256 _amount
     ) internal virtual override returns (bool success_) {
-        IHold.HoldData memory holdData = _getHoldFromEscrowId(
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+
+        success_ = super._releaseHoldByPartition(
             _partition,
-            _msgSender(),
-            _escrowId,
-            _tokenHolder
+            _tokenHolder,
+            _holdId,
+            _amount
         );
+
+        // Updated hold amount
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+
+        if (holdData.hold.amount == 0) {
+            adjustBalancesStorage.labafHolds[_tokenHolder][_partition].pop();
+        }
+    }
+
+    function _reclaimHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal virtual override returns (bool success_, uint256 amount_) {
+        AdjustBalancesStorage
+            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+
+        (success_, amount_) = super._reclaimHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+
+        adjustBalancesStorage.labafHolds[_tokenHolder][_partition].pop();
+    }
+
+    function _beforeExecuteHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to
+    ) internal virtual override {
+        _adjustHoldBalances(_partition, _tokenHolder, _holdId, _to);
+        super._beforeExecuteHold(_partition, _tokenHolder, _holdId, _to);
+    }
+
+    function _beforeReleaseHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal virtual override {
+        _adjustHoldBalances(_partition, _tokenHolder, _holdId, _tokenHolder);
+
+        super._beforeReleaseHold(_partition, _tokenHolder, _holdId);
+    }
+
+    function _beforeReclaimHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal virtual override {
+        _adjustHoldBalances(_partition, _tokenHolder, _holdId, _tokenHolder);
+
+        super._beforeReclaimHold(_partition, _tokenHolder, _holdId);
+    }
+
+    function _adjustHoldBalances(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to
+    ) internal virtual {
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
         ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
             _partition,
-            address(0),
-            _tokenHolder
+            _tokenHolder,
+            _to
         );
 
         uint256 abaf = _updateTotalHold(
@@ -434,18 +387,13 @@ abstract contract HoldStorageWrapper_2 is
             adjustBalancesStorage
         );
 
-        _updateHoldByIndex(_partition, holdData.id, _tokenHolder, abaf);
-
-        success_ = super._releaseHoldByPartition(
+        _updateHold(
             _partition,
+            _holdId,
             _tokenHolder,
-            _escrowId,
-            _amount
+            abaf,
+            adjustBalancesStorage
         );
-
-        if (_amount == holdData.hold.amount) {
-            adjustBalancesStorage.labafHolds[_tokenHolder][_partition].pop();
-        }
     }
 
     function _setHoldAtIndex(
@@ -456,14 +404,14 @@ abstract contract HoldStorageWrapper_2 is
     ) internal virtual override {
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
-        uint256 holdIndex = _getHoldIndex(
+        uint256 currentHoldIndex = _getHoldIndex(
             _partition,
             _tokenHolder,
             _holdData.id
         );
         uint256 labaf = adjustBalancesStorage.labafHolds[_tokenHolder][
             _partition
-        ][holdIndex - 1];
+        ][currentHoldIndex - 1];
 
         adjustBalancesStorage.labafHolds[_tokenHolder][_partition][
             _holdIndex - 1
@@ -473,7 +421,7 @@ abstract contract HoldStorageWrapper_2 is
             super._setHoldAtIndex(
                 _partition,
                 _tokenHolder,
-                holdIndex,
+                _holdIndex,
                 _holdData
             );
     }
@@ -545,13 +493,14 @@ abstract contract HoldStorageWrapper_2 is
         ] = _abaf;
     }
 
-    function _updateHoldByIndex(
+    function _updateHold(
         bytes32 _partition,
         uint256 _holdId,
         address _tokenHolder,
-        uint256 _abaf
+        uint256 _abaf,
+        AdjustBalancesStorage storage adjustBalancesStorage
     ) internal virtual {
-        uint256 hold_LABAF = AdjustBalances_CD_Lib.getLockLABAFByPartition(
+        uint256 hold_LABAF = AdjustBalances_CD_Lib.getHoldLABAFByPartition(
             _partition,
             _holdId,
             _tokenHolder
@@ -575,6 +524,9 @@ abstract contract HoldStorageWrapper_2 is
                 _tokenHolder,
                 factor_hold
             );
+            adjustBalancesStorage.labafHolds[_tokenHolder][_partition][
+                holdIndex - 1
+            ] = _abaf;
         }
     }
 
@@ -608,6 +560,68 @@ abstract contract HoldStorageWrapper_2 is
             _account,
             _partition
         );
+    }
+
+    function _getHeldAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getTotalHeldLABAF(_tokenHolder)
+        );
+
+        return _getHeldAmountFor(_tokenHolder) * factor;
+    }
+
+    function _getHeldAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getTotalHeldLABAFByPartition(
+                _partition,
+                _tokenHolder
+            )
+        );
+        return _getHeldAmountForByPartition(_partition, _tokenHolder) * factor;
+    }
+
+    function _getHoldForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        internal
+        view
+        virtual
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        )
+    {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjusted(),
+            AdjustBalances_CD_Lib.getHoldLABAFByPartition(
+                _partition,
+                _holdId,
+                _tokenHolder
+            )
+        );
+
+        (
+            amount_,
+            expirationTimestamp_,
+            escrow_,
+            destination_,
+            data_,
+            operatorData_
+        ) = _getHoldForByPartition(_partition, _tokenHolder, _holdId);
+        amount_ *= factor;
     }
 
     function _checkNewMaxSupply(

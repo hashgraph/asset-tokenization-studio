@@ -203,339 +203,179 @@
 
 */
 
-pragma solidity 0.8.18;
-
+import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
+import AccountService from '../../../../../../service/AccountService.js';
+import SecurityService from '../../../../../../service/SecurityService.js';
+import TransactionService from '../../../../../../service/TransactionService.js';
+import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
+import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
+import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
+import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { SecurityPaused } from '../../../error/SecurityPaused.js';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
-import {HoldStorageWrapper} from './HoldStorageWrapper.sol';
+  ProtectedCreateHoldByPartitionCommand,
+  ProtectedCreateHoldByPartitionCommandResponse,
+} from './ProtectedCreateHoldByPartitionCommand.js';
+import { PartitionsUnProtected } from '../../../error/PartitionsUnprotected.js';
 import {
-    ERC1410ControllerStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
-import {_CONTROLLER_ROLE} from '../constants/roles.sol';
+  getProtectedPartitionRole,
+  SecurityRole,
+} from 'domain/context/security/SecurityRole.js';
+import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
+import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
+import { BigNumber } from 'ethers';
+import { NounceAlreadyUsed } from '../../../error/NounceAlreadyUsed.js';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-abstract contract Hold is
-    IHold,
-    IStaticFunctionSelectors,
-    HoldStorageWrapper,
-    ERC1410ControllerStorageWrapper
+@CommandHandler(ProtectedCreateHoldByPartitionCommand)
+export class ProtectedCreateHoldByPartitionCommandHandler
+  implements ICommandHandler<ProtectedCreateHoldByPartitionCommand>
 {
-    function createHoldByPartition(
-        bytes32 _partition,
-        Hold calldata _hold
-    )
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyValidAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _msgSender(),
-            _hold,
-            ''
-        );
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+  ) {}
 
-        emit HeldByPartition(
-            _msgSender(),
-            _msgSender(),
-            _partition,
-            holdId_,
-            _hold,
-            ''
-        );
+  async execute(
+    command: ProtectedCreateHoldByPartitionCommand,
+  ): Promise<ProtectedCreateHoldByPartitionCommandResponse> {
+    const {
+      securityId,
+      partitionId,
+      escrow,
+      amount,
+      sourceId,
+      targetId,
+      expirationDate,
+      deadline,
+      nonce,
+      signature,
+    } = command;
+    const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
+    const security = await this.securityService.get(securityId);
+
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
+
+    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
+      throw new SecurityPaused();
     }
 
-    function createHoldFromByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    )
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyValidAddress(_from)
-        onlyValidAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _createHoldFromByPartition(
-            _partition,
-            _from,
-            _hold,
-            _operatorData
-        );
-
-        emit HeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
+    if (!security.arePartitionsProtected) {
+      throw new PartitionsUnProtected();
     }
 
-    function operatorCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    )
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyValidAddress(_from)
-        onlyValidAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyOperator(_partition, _from)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _from,
-            _hold,
-            _operatorData
-        );
+    const protectedPartitionRole = getProtectedPartitionRole(
+      partitionId,
+    ) as SecurityRole;
 
-        emit HeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
+    if (
+      account.evmAddress &&
+      !(await this.queryAdapter.hasRole(
+        securityEvmAddress,
+        new EvmAddress(account.evmAddress!),
+        protectedPartitionRole,
+      ))
+    ) {
+      throw new NotGrantedRole(protectedPartitionRole);
     }
 
-    function controllerCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    )
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyValidAddress(_from)
-        onlyValidAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyRole(_CONTROLLER_ROLE)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyControllable
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _from,
-            _hold,
-            _operatorData
-        );
-
-        emit HeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
+    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
+      throw new DecimalsOverRange(security.decimals);
     }
 
-    function protectedCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        ProtectedHold memory _protectedHold,
-        bytes calldata _signature
-    )
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyValidAddress(_from)
-        onlyValidAddress(_protectedHold.hold.escrow)
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyWithValidExpirationTimestamp(
-            _protectedHold.hold.expirationTimestamp
-        )
-        onlyProtectedPartitions
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _protectedCreateHoldByPartition(
-            _partition,
-            _from,
-            _protectedHold,
-            _signature
-        );
+    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
+      : new EvmAddress(sourceId);
 
-        emit HeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _protectedHold.hold,
-            ''
-        );
+    const escrowEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(escrow)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(escrow)
+      : new EvmAddress(escrow);
+
+    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
+      : new EvmAddress(targetId);
+
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    if (
+      account.evmAddress &&
+      (
+        await this.queryAdapter.balanceOf(securityEvmAddress, sourceEvmAddress)
+      ).lt(amountBd.toBigNumber())
+    ) {
+      throw new InsufficientBalance();
     }
 
-    function executeHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
-        address _to,
-        uint256 _amount
-    )
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
-        checkControlList(_to)
-        returns (bool success_)
-    {
-        success_ = _executeHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId,
-            _to,
-            _amount
-        );
+    const nextNounce = await this.queryAdapter.getNounceFor(
+      securityEvmAddress,
+      sourceEvmAddress,
+    );
 
-        emit HoldByPartitionExecuted(
-            _tokenHolder,
-            _partition,
-            _holdId,
-            _amount,
-            _to
-        );
+    if (BigNumber.from(nonce).lte(nextNounce)) {
+      throw new NounceAlreadyUsed(nonce);
     }
 
-    function releaseHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
-        uint256 _amount
-    )
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
-        returns (bool success_)
-    {
-        success_ = _releaseHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId,
-            _amount
-        );
-        emit HoldByPartitionReleased(
-            _tokenHolder,
-            _partition,
-            _holdId,
-            _amount
-        );
+    const res = await handler.protectedCreateHoldByPartition(
+      securityEvmAddress,
+      partitionId,
+      amountBd,
+      escrowEvmAddress,
+      sourceEvmAddress,
+      targetEvmAddress,
+      BigDecimal.fromString(expirationDate),
+      BigDecimal.fromString(deadline),
+      BigDecimal.fromString(nonce.toString()),
+      signature,
+      securityId,
+    );
+
+    if (!res.id)
+      throw new Error(
+        'Protected Create Hold By Partition Command Handler response id empty',
+      );
+
+    let holdId: string;
+
+    if (res.response && res.response.holdId) {
+      holdId = res.response.holdId;
+    } else {
+      const numberOfResultsItems = 2;
+
+      // * Recover the new contract ID from Event data from the Mirror Node
+      const results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        numberOfResultsItems,
+      );
+
+      if (!results || results.length !== numberOfResultsItems) {
+        throw new Error('Invalid data structure');
+      }
+
+      holdId = results[1];
     }
 
-    function reclaimHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    )
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
-        returns (bool success_)
-    {
-        uint256 amount_;
-        (success_, amount_) = _reclaimHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
-        emit HoldByPartitionReclaimed(
-            _msgSender(),
-            _tokenHolder,
-            _partition,
-            _holdId,
-            amount_
-        );
-    }
-
-    function getHeldAmountFor(
-        address _tokenHolder
-    ) external view virtual override returns (uint256 amount_) {
-        return _getHeldAmountFor(_tokenHolder);
-    }
-
-    function getHeldAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 amount_) {
-        return _getHeldAmountForByPartition(_partition, _tokenHolder);
-    }
-
-    function getHoldCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 holdCount_) {
-        return _getHoldCountForByPartition(_partition, _tokenHolder);
-    }
-
-    function getHoldsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view virtual override returns (uint256[] memory holdsId_) {
-        return
-            _getHoldsIdForByPartition(
-                _partition,
-                _tokenHolder,
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function getHoldForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    )
-        external
-        view
-        virtual
-        override
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
-        )
-    {
-        return _getHoldForByPartition(_partition, _tokenHolder, _holdId);
-    }
+    return Promise.resolve(
+      new ProtectedCreateHoldByPartitionCommandResponse(
+        parseInt(holdId, 16),
+        res.id!,
+      ),
+    );
+  }
 }
