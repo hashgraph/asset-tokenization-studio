@@ -407,19 +407,14 @@ describe('Hold Tests', () => {
             balance_expected: number,
             totalHeldAmount_expected: number,
             holdCount_expected: number,
-            escrow_holdCount_expected: number,
             holdAmount_expected: number,
             holdEscrow_expected: string,
             holdData_expected: string,
             holdOperatorData_expected: string,
             holdDestination_expected: string,
             holdExpirationTimestamp_expected: string,
-            holdTokenHolder_expected: string,
-            escrow_HoldId_expected: number,
             holdsLength_expected: number,
-            holdId_expected: number,
-            escrowHoldsLength_expected: number,
-            escrowHoldId_expected: number
+            holdId_expected: number
         ) {
             let balance = await erc1410Facet.balanceOf(account_A)
             let heldAmount = await holdFacet.getHeldAmountForByPartition(
@@ -430,40 +425,22 @@ describe('Hold Tests', () => {
                 _DEFAULT_PARTITION,
                 account_A
             )
-            let escrow_holdCount =
-                await holdFacet.getHoldCountForEscrowByPartition(
-                    _DEFAULT_PARTITION,
-                    account_B
-                )
             let holdIds = await holdFacet.getHoldsIdForByPartition(
                 _DEFAULT_PARTITION,
                 account_A,
                 0,
                 100
             )
-            let escrow_holdIds = await holdFacet.getHoldsIdForEscrowByPartition(
-                _DEFAULT_PARTITION,
-                account_B,
-                0,
-                1
-            )
 
             expect(balance).to.equal(balance_expected)
             expect(heldAmount).to.equal(totalHeldAmount_expected)
             expect(holdCount).to.equal(holdCount_expected)
-            expect(escrow_holdCount).to.equal(escrow_holdCount_expected)
             expect(holdIds.length).to.equal(holdsLength_expected)
-            expect(escrow_holdIds.length).to.equal(escrowHoldsLength_expected)
 
             if (holdCount_expected > 0) {
                 let retrieved_hold = await holdFacet.getHoldForByPartition(
                     _DEFAULT_PARTITION,
                     account_A,
-                    1
-                )
-                let escrow_hold = await holdFacet.getHoldForEscrowByPartition(
-                    _DEFAULT_PARTITION,
-                    account_B,
                     1
                 )
 
@@ -479,23 +456,7 @@ describe('Hold Tests', () => {
                 expect(retrieved_hold.expirationTimestamp_).to.equal(
                     holdExpirationTimestamp_expected
                 )
-                expect(escrow_hold.amount_).to.equal(holdAmount_expected)
-                expect(escrow_hold.tokenHolder_).to.equal(
-                    holdTokenHolder_expected
-                )
-                expect(escrow_hold.data_).to.equal(holdData_expected)
-                expect(escrow_hold.operatorData_).to.equal(
-                    holdOperatorData_expected
-                )
-                expect(escrow_hold.destination_).to.equal(
-                    holdDestination_expected
-                )
-                expect(escrow_hold.expirationTimestamp_).to.equal(
-                    holdExpirationTimestamp_expected
-                )
-                expect(escrow_hold.id_).to.equal(escrow_HoldId_expected)
                 expect(holdIds[0]).to.equal(holdId_expected)
-                expect(escrow_holdIds[0]).to.equal(escrowHoldId_expected)
             }
         }
 
@@ -566,8 +527,8 @@ describe('Hold Tests', () => {
                 await expect(
                     holdFacet.executeHoldByPartition(
                         _DEFAULT_PARTITION,
-                        1,
                         account_A,
+                        1,
                         account_C,
                         1
                     )
@@ -579,8 +540,8 @@ describe('Hold Tests', () => {
                 await expect(
                     holdFacet.releaseHoldByPartition(
                         _DEFAULT_PARTITION,
-                        1,
                         account_A,
+                        1,
                         1
                     )
                 ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
@@ -591,8 +552,8 @@ describe('Hold Tests', () => {
                 await expect(
                     holdFacet.reclaimHoldByPartition(
                         _DEFAULT_PARTITION,
-                        1,
-                        account_A
+                        account_A,
+                        1
                     )
                 ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
             })
@@ -655,8 +616,8 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .executeHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
                             account_A,
+                            1,
                             account_C,
                             1
                         )
@@ -676,8 +637,8 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .executeHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
                             account_A,
+                            1,
                             account_B,
                             1
                         )
@@ -1073,17 +1034,12 @@ describe('Hold Tests', () => {
                     0,
                     _AMOUNT,
                     1,
-                    1,
                     hold.amount,
                     hold.escrow,
                     hold.data,
                     operatorData ?? '0x',
                     hold.to,
                     hold.expirationTimestamp,
-                    account_A,
-                    1,
-                    1,
-                    1,
                     1,
                     1
                 )
@@ -1194,7 +1150,7 @@ describe('Hold Tests', () => {
         })
 
         describe('Execute with wrong input arguments', () => {
-            it('GIVEN a wrong escrow id WHEN executeHoldByPartition THEN transaction fails with WrongEscrowHoldId', async () => {
+            it('GIVEN a wrong escrow id WHEN executeHoldByPartition THEN transaction fails with IsNotEscrow', async () => {
                 await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
 
                 await expect(
@@ -1202,12 +1158,12 @@ describe('Hold Tests', () => {
                         .connect(signer_C)
                         .executeHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
                             account_A,
+                            1,
                             account_C,
                             1
                         )
-                ).to.be.revertedWithCustomError(holdFacet, 'WrongEscrowHoldId')
+                ).to.be.revertedWithCustomError(holdFacet, 'IsNotEscrow')
             })
 
             it('GIVEN a wrong partition WHEN executeHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode', async () => {
@@ -1216,8 +1172,8 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .executeHoldByPartition(
                             _WRONG_PARTITION,
-                            1,
                             account_A,
+                            1,
                             account_C,
                             1
                         )
@@ -1235,8 +1191,8 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .executeHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
                             account_A,
+                            1,
                             account_C,
                             2 * _AMOUNT
                         )
@@ -1263,8 +1219,8 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .executeHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
                             account_A,
+                            1,
                             account_C,
                             1
                         )
@@ -1284,8 +1240,8 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .executeHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
                             account_A,
+                            1,
                             account_C,
                             _AMOUNT
                         )
@@ -1297,7 +1253,7 @@ describe('Hold Tests', () => {
         })
 
         describe('Release with wrong input arguments', () => {
-            it('GIVEN a wrong escrow id WHEN releaseHoldByPartition THEN transaction fails with WrongEscrowHoldId', async () => {
+            it('GIVEN a wrong escrow WHEN releaseHoldByPartition THEN transaction fails with IsNotEscrow', async () => {
                 await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
 
                 await expect(
@@ -1305,11 +1261,11 @@ describe('Hold Tests', () => {
                         .connect(signer_C)
                         .releaseHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
                             account_A,
+                            1,
                             1
                         )
-                ).to.be.revertedWithCustomError(holdFacet, 'WrongEscrowHoldId')
+                ).to.be.revertedWithCustomError(holdFacet, 'IsNotEscrow')
             })
 
             it('GIVEN a wrong partition WHEN releaseHoldByPartition THEN transaction fails with PartitionNotAllowedInSinglePartitionMode', async () => {
@@ -1318,8 +1274,8 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .releaseHoldByPartition(
                             _WRONG_PARTITION,
-                            1,
                             account_A,
+                            1,
                             1
                         )
                 ).to.be.revertedWithCustomError(
@@ -1336,8 +1292,8 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .releaseHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
                             account_A,
+                            1,
                             2 * _AMOUNT
                         )
                 ).to.be.revertedWithCustomError(
@@ -1363,8 +1319,8 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .releaseHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
                             account_A,
+                            1,
                             1
                         )
                 ).to.be.revertedWithCustomError(
@@ -1381,8 +1337,8 @@ describe('Hold Tests', () => {
                 await expect(
                     holdFacet.reclaimHoldByPartition(
                         _DEFAULT_PARTITION,
-                        2,
-                        account_A
+                        account_A,
+                        2
                     )
                 ).to.be.revertedWithCustomError(holdFacet, 'WrongHoldId')
             })
@@ -1391,7 +1347,7 @@ describe('Hold Tests', () => {
                 await expect(
                     holdFacet
                         .connect(signer_B)
-                        .reclaimHoldByPartition(_WRONG_PARTITION, 1, account_A)
+                        .reclaimHoldByPartition(_WRONG_PARTITION, account_A, 1)
                 ).to.be.revertedWithCustomError(
                     erc1410Facet,
                     'PartitionNotAllowedInSinglePartitionMode'
@@ -1406,8 +1362,8 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .reclaimHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
-                            account_A
+                            account_A,
+                            1
                         )
                 ).to.be.revertedWithCustomError(
                     holdFacet,
@@ -1427,30 +1383,31 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .executeHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
                             account_A,
+                            1,
                             account_C,
-                            1
+                            _AMOUNT
                         )
                 )
                     .to.emit(holdFacet, 'HoldByPartitionExecuted')
-                    .withArgs(account_A, _DEFAULT_PARTITION, 1, 1, account_C)
+                    .withArgs(
+                        account_A,
+                        _DEFAULT_PARTITION,
+                        1,
+                        _AMOUNT,
+                        account_C
+                    )
 
                 await checkCreatedHold_expected(
                     0,
                     0,
                     0,
                     0,
-                    0,
                     '-',
                     '0x',
                     '0x',
                     '-',
                     '-',
-                    '-',
-                    0,
-                    0,
-                    0,
                     0,
                     0
                 )
@@ -1472,29 +1429,24 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .releaseHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
                             account_A,
-                            1
+                            1,
+                            _AMOUNT
                         )
                 )
                     .to.emit(holdFacet, 'HoldByPartitionReleased')
-                    .withArgs(account_A, _DEFAULT_PARTITION, 1, 1)
+                    .withArgs(account_A, _DEFAULT_PARTITION, 1, _AMOUNT)
 
                 await checkCreatedHold_expected(
                     _AMOUNT,
                     0,
                     0,
                     0,
-                    0,
                     '-',
                     '0x',
                     '0x',
                     '-',
                     '-',
-                    '-',
-                    0,
-                    0,
-                    0,
                     0,
                     0
                 )
@@ -1519,8 +1471,8 @@ describe('Hold Tests', () => {
                         .connect(signer_B)
                         .reclaimHoldByPartition(
                             _DEFAULT_PARTITION,
-                            1,
-                            account_A
+                            account_A,
+                            1
                         )
                 )
                     .to.emit(holdFacet, 'HoldByPartitionReclaimed')
@@ -1537,16 +1489,11 @@ describe('Hold Tests', () => {
                     0,
                     0,
                     0,
-                    0,
                     '-',
                     '0x',
                     '0x',
                     '-',
                     '-',
-                    '-',
-                    0,
-                    0,
-                    0,
                     0,
                     0
                 )

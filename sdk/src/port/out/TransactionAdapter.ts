@@ -546,6 +546,48 @@ interface IManagementTransactionAdapter {
 }
 
 interface IHoldTransactionAdapter {
+  createHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  createHoldFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  controllerCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  protectedCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    escrow: EvmAddress,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
   releaseHoldByPartition(
     security: EvmAddress,
     partitionId: string,
@@ -555,6 +597,7 @@ interface IHoldTransactionAdapter {
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -980,6 +1023,56 @@ export default abstract class TransactionAdapter
     decimals: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  createHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  createHoldFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  controllerCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  protectedCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    escrow: EvmAddress,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
   releaseHoldByPartition(
