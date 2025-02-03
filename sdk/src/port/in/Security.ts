@@ -903,8 +903,8 @@ class SecurityInPort implements ISecurityInPort {
       new CreateHoldByPartitionCommand(
         securityId,
         partitionId,
-        amount,
         escrow,
+        amount,
         targetId,
         expirationDate,
       ),
