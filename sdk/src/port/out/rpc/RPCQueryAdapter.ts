@@ -242,6 +242,7 @@ import {
   Security__factory,
   DiamondFacet__factory,
   ProtectedPartitions__factory,
+  Hold_2__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -262,6 +263,7 @@ import {
 import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
 import { DividendFor } from '../../../domain/context/equity/DividendFor';
 import { VotingFor } from '../../../domain/context/equity/VotingFor';
+import { HoldDetails } from 'domain/context/security/HoldDetails.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -1166,5 +1168,98 @@ export class RPCQueryAdapter {
     );
     //TODO implement factory to call the method
     return 1;
+  }
+
+  async getHeldAmountFor(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(`Getting Held Amount For ${targetId}`);
+
+    const heldAmountFor = await this.connect(
+      Hold_2__factory,
+      address.toString(),
+    ).getHeldAmountFor(targetId.toString());
+
+    return heldAmountFor.toNumber();
+  }
+
+  async getHeldAmountForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting Held Amount For ${targetId} by partition ${partitionId}`,
+    );
+
+    const heldAmountForByPartition = await this.connect(
+      Hold_2__factory,
+      address.toString(),
+    ).getHeldAmountForByPartition(partitionId, targetId.toString());
+
+    return heldAmountForByPartition.toNumber();
+  }
+
+  async getHoldCountForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting Hold Count For ${address} by partition ${partitionId}`,
+    );
+
+    const holdCountForByPartition = await this.connect(
+      Hold_2__factory,
+      address.toString(),
+    ).getHoldCountForByPartition(partitionId, targetId.toString());
+
+    return holdCountForByPartition.toNumber();
+  }
+
+  async getHoldsIdForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    target: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<number[]> {
+    LogService.logTrace(
+      `Getting Holds Id For ${target} by partition ${partitionId} from ${start} to ${end}`,
+    );
+
+    const holdsIdForByPartition = await this.connect(
+      Hold_2__factory,
+      address.toString(),
+    ).getHoldsIdForByPartition(partitionId, target.toString(), start, end);
+
+    return holdsIdForByPartition.map((id) => id.toNumber());
+  }
+
+  async getHoldForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    holdId: number,
+  ): Promise<HoldDetails> {
+    LogService.logTrace(
+      `Getting hold details for ${targetId} id ${holdId} by partition ${partitionId}`,
+    );
+
+    const hold = await this.connect(
+      Hold_2__factory,
+      address.toString(),
+    ).getHoldForByPartition(partitionId, targetId.toString(), holdId);
+
+    return new HoldDetails(
+      hold.expirationTimestamp_.toNumber(),
+      new BigDecimal(hold.amount_.toString()),
+      hold.escrow_,
+      targetId.toString(),
+      hold.destination_,
+      hold.data_,
+      hold.operatorData_,
+    );
   }
 }

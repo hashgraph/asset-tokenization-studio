@@ -211,6 +211,7 @@ import {
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract LockStorageWrapper is SnapshotsStorageWrapper {
@@ -292,6 +293,7 @@ abstract contract LockStorageWrapper is SnapshotsStorageWrapper {
 
         success_ = true;
     }
+
     // solhint-disable no-unused-vars
     function _beforeLock(
         bytes32 _partition,
@@ -309,6 +311,7 @@ abstract contract LockStorageWrapper is SnapshotsStorageWrapper {
     ) internal virtual {
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }
+
     // solhint-enable no-unused-vars
     function _setLockAtIndex(
         bytes32 _partition,
