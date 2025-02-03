@@ -603,9 +603,6 @@ interface IHoldTransactionAdapter {
     targetId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-}
-
-interface IHoldTransactionAdapter {
   executeHoldByPartition(
     security: EvmAddress,
     sourceId: EvmAddress,
