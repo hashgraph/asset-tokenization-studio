@@ -210,7 +210,7 @@ export default class ExecuteHoldByPartitionRequest extends ValidatedRequest<Exec
   securityId: string;
   sourceId: string;
   amount: string;
-  holdId: string;
+  holdId: number;
   targetId: string;
   partitionId: string;
 
@@ -225,7 +225,7 @@ export default class ExecuteHoldByPartitionRequest extends ValidatedRequest<Exec
     securityId: string;
     sourceId: string;
     amount: string;
-    holdId: string;
+    holdId: number;
     targetId: string;
     partitionId: string;
   }) {
@@ -233,7 +233,7 @@ export default class ExecuteHoldByPartitionRequest extends ValidatedRequest<Exec
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
       sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
       targetId: Validation.checkHederaIdFormatOrEvmAddress(),
-      holdId: Validation.checkHederaIdFormatOrEvmAddress(),
+      holdId: Validation.checkNumber({min: 0}),
       amount: Validation.checkAmount(),
       partitionId: Validation.checkBytes32Format(),
     });

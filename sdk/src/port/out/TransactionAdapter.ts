@@ -609,7 +609,7 @@ interface IHoldTransactionAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
-    holdId: string,
+    holdId: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
@@ -1116,7 +1116,7 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
-    holdId: string,
+    holdId: number,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');

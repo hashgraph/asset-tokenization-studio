@@ -991,8 +991,8 @@ class SecurityInPort implements ISecurityInPort {
       new ProtectedCreateHoldByPartitionCommand(
         securityId,
         partitionId,
-        amount,
         escrow,
+        amount,
         sourceId,
         targetId,
         expirationDate,

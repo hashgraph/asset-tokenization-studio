@@ -205,7 +205,6 @@
 
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../service/AccountService.js';
 import SecurityService from '../../../../../service/SecurityService.js';
 import {
   ExecuteHoldByPartitionCommand,
@@ -221,6 +220,7 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { SecurityPaused } from '../../error/SecurityPaused.js';
+import { InsufficientHoldBalance } from '../../error/InsufficientHoldBalance.js';
 
 @CommandHandler(ExecuteHoldByPartitionCommand)
 export class ExecuteHoldByPartitionCommandHandler
