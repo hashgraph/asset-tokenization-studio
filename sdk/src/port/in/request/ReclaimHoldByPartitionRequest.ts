@@ -194,11 +194,13 @@ export default class ReclaimHoldByPartitionRequest extends ValidatedRequest<Recl
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
       targetId: Validation.checkHederaIdFormatOrEvmAddress(),
       partitionId: Validation.checkBytes32Format(),
+      holdId: Validation.checkNumber({ min: 0 }),
     });
 
     this.securityId = securityId;
     this.targetId = targetId;
     this.holdId = holdId;
     this.partitionId = partitionId;
+    this.holdId = holdId;
   }
 }
