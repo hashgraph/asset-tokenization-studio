@@ -279,6 +279,7 @@ import GetHeldAmountForByPartitionRequest from './GetHeldAmountForByPartitionReq
 import GetHoldCountForByPartitionRequest from './GetHoldCountForByPartitionRequest.js';
 import GetHoldsIdForByPartitionRequest from './GetHoldsIdForByPartitionRequest.js';
 import GetHoldForByPartitionRequest from './GetHoldForByPartitionRequest.js';
+import ReleaseHoldByPartitionRequest from './ReleaseHoldByPartitionRequest.js';
 import ReclaimHoldByPartitionRequest from './ReclaimHoldByPartitionRequest.js';
 
 export * from './BaseRequest.js';
@@ -358,5 +359,6 @@ export {
   GetHoldCountForByPartitionRequest,
   GetHoldsIdForByPartitionRequest,
   GetHoldForByPartitionRequest,
+  ReleaseHoldByPartitionRequest,
   ReclaimHoldByPartitionRequest,
 };

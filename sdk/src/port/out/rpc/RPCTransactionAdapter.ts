@@ -300,6 +300,7 @@ import {
   CREATE_HOLD_FROM_GAS,
   CONTROLLER_CREATE_HOLD_GAS,
   PROTECTED_CREATE_HOLD_GAS,
+  RELEASE_HOLD_GAS,
   RECLAIM_HOLD_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
@@ -322,6 +323,7 @@ import {
   ERC1410ScheduledTasks__factory,
   ERC1643__factory,
   Factory__factory,
+  Hold_2__factory,
   IBond,
   IEquity,
   Lock__factory,
@@ -330,7 +332,6 @@ import {
   ScheduledTasks__factory,
   Snapshots__factory,
   TransferAndLock__factory,
-  Hold_2__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -1955,6 +1956,33 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         signature,
         {
           gasLimit: PROTECTED_CREATE_HOLD_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async releaseHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    holdId: number,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Releasing hold amount ${amount} from account ${targetId.toString()}}`,
+    );
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold_2__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).releaseHoldByPartition(
+        partitionId,
+        targetId.toString(),
+        holdId,
+        amount.toBigNumber(),
+        {
+          gasLimit: RELEASE_HOLD_GAS,
         },
       ),
       this.networkService.environment,
