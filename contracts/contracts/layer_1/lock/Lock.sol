@@ -205,7 +205,7 @@
 
 pragma solidity 0.8.18;
 
-import "../interfaces/lock/ILockStorageWrapper.sol";
+import '../interfaces/lock/ILockStorageWrapper.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
@@ -214,10 +214,12 @@ import {LockStorageWrapper} from './LockStorageWrapper.sol';
 import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {_LOCKER_ROLE} from '../constants/roles.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-//TODO: COMENTADO ANTES
-abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
-
-    // TODO HECHO
+contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
+    /// THINGS TODO
+    /// 1. Review Lock_2 external functions to check if it are included here.
+    /// 2. Review Coordination methods to be removed. OPTIONAL
+    /// 3. Review LockStorageWrapper methods with TODO (pending to implement AdjustedAt functions).
+    /// 4. Review non amounts methods if there are necessary in LockStorageWrapper Read and move it to LockStorageWrapper.
     function lockByPartition(
         bytes32 _partition,
         uint256 _amount,
@@ -248,7 +250,7 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
             _expirationTimestamp
         );
     }
-    // TODO HECHO
+
     function releaseByPartition(
         bytes32 _partition,
         uint256 _lockId,
@@ -279,7 +281,6 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         return _getLockedAmountForByPartition(_partition, _tokenHolder);
     }
 
-    //todo: ok
     function getLockCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
@@ -313,9 +314,8 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         override
         returns (uint256 amount_, uint256 expirationTimestamp_)
     {
-        return _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
+        return _getLockForByPartition(_partition, _tokenHolder, _lockId);
     }
-
 
     // Uses default parititon in case Multipartition is not activated
     function lock(
@@ -381,7 +381,7 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     function getLockedAmountFor(
         address _tokenHolder
     ) external view virtual override returns (uint256 amount_) {
-        return _getLockedAmountForByPartitionAdjusted(_DEFAULT_PARTITION,_tokenHolder);
+        return _getLockedAmountFor(_DEFAULT_PARTITION, _tokenHolder);
     }
 
     function getLockCountFor(
@@ -390,7 +390,6 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         return _getLockCountForByPartition(_DEFAULT_PARTITION, _tokenHolder);
     }
 
-    //TODO: OK
     function getLocksIdFor(
         address _tokenHolder,
         uint256 _pageIndex,
@@ -416,13 +415,17 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         returns (uint256 amount_, uint256 expirationTimestamp_)
     {
         return
-            _getLockForByPartitionAdjusted(_DEFAULT_PARTITION, _tokenHolder, _lockId);
+            _getLockForByPartitionAdjustedAt(
+                _DEFAULT_PARTITION,
+                _tokenHolder,
+                _lockId
+            );
     }
 
     function getLockedAmountForAdjusted(
         address _tokenHolder
     ) external view virtual returns (uint256 amount_) {
-        return _getLockedAmountForAdjusted(_tokenHolder);
+        return _getLockedAmountFor(_tokenHolder);
     }
 
     function getLockedAmountForByPartitionAdjusted(
@@ -431,6 +434,4 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     ) external view virtual returns (uint256 amount_) {
         return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
-
-
 }

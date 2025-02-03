@@ -304,10 +304,13 @@ contract AdjustBalancesStorageWrapperRead is
         uint256 lockId,
         uint256 timestamp
     ) internal view returns (uint256) {
-        return calculateFactor(
-            getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage().labafLocks[tokenHolder][partition][lockId]
-        );
+        return
+            calculateFactor(
+                getAbafAdjustedAt(timestamp),
+                _getAdjustBalancesStorage().labafLocks[tokenHolder][partition][
+                    lockId
+                ]
+            );
     }
 
     function _calculateFactorByTokenHolderAndPartitionIndex(
@@ -323,24 +326,40 @@ contract AdjustBalancesStorageWrapperRead is
         );
     }
 
-    function _calculateFactorForLockedAmountByTokenHolder(
-        address tokenHolder
+    function _calculateFactorForLockedAmountByTokenHolderAdjustedAt(
+        address tokenHolder,
+        uint256 timestamp
     ) internal view returns (uint256 factor) {
         factor = calculateFactor(
-            _getAbaf(),
+            getAbafAdjustedAt(timestamp),
             _getAdjustBalancesStorage().labafsTotalLocked[tokenHolder]
         );
     }
 
-    function _calculateFactorForLockedAmountByTokenHolderAndPartition(
+    function _calculateFactorForLockedAmountByTokenHolderAndPartitionAdjustedAt(
         address tokenHolder,
-        bytes32 partition
+        bytes32 partition,
+        uint256 timestamp
     ) internal view returns (uint256 factor) {
         factor = calculateFactor(
-            _getAbaf(),
+            getAbafAdjustedAt(timestamp),
             _getAdjustBalancesStorage().labafsTotalLockedByPartition[
                 tokenHolder
             ][partition]
+        );
+    }
+
+    function _calculateFactorForLockedAmountByTokenHolderPartitionAndLockIndexAdjustedAt(
+        address tokenHolder,
+        bytes32 partition,
+        uint256 lockIndex,
+        uint256 timestamp
+    ) internal view returns (uint256 factor) {
+        factor = calculateFactor(
+            getAbafAdjustedAt(timestamp),
+            _getAdjustBalancesStorage().labafLocks[tokenHolder][partition][
+                lockIndex - 1
+            ]
         );
     }
 

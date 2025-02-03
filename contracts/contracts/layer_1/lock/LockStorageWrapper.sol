@@ -205,7 +205,7 @@
 
 pragma solidity 0.8.18;
 
-import "@hashgraph/asset-tokenization-contracts/contracts/layer_2/adjustBalances/AdjustBalanceLib.sol";
+import '@hashgraph/asset-tokenization-contracts/contracts/layer_2/adjustBalances/AdjustBalanceLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
@@ -250,11 +250,9 @@ abstract contract LockStorageWrapper is Common {
         _beforeRelease(_partition, _lockId, _tokenHolder);
         uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
 
-        LockData memory lock = _getLockByIndex(
-            _partition,
-            _tokenHolder,
-            lockIndex
-        );
+        LockData memory lock = lockStorage.locks[_tokenHolder][_partition][
+            lockIndex - 1
+        ];
 
         //_removeLock(_partition, _tokenHolder, _lockId);
         LockDataStorage storage lockStorage = _lockStorage();
@@ -271,11 +269,9 @@ abstract contract LockStorageWrapper is Common {
         );
 
         if (lockIndex < lastIndex) {
-            LockData memory lastLock = _getLockByIndex(
-                _partition,
-                _tokenHolder,
-                lastIndex
-            );
+            LockData memory lastLock = lockStorage.locks[_tokenHolder][
+                _partition
+            ][lastIndex - 1];
             _setLockAtIndex(_partition, _tokenHolder, lockIndex, lastLock);
         }
 
@@ -327,27 +323,4 @@ abstract contract LockStorageWrapper is Common {
 
         lockStorage.locksIndex[_tokenHolder][_partition][lock.id] = _lockIndex;
     }
-
-//    function _updateLockByIndex(
-//        bytes32 _partition,
-//        uint256 _lockId,
-//        address _tokenHolder,
-//        uint256 _abaf
-//    ) internal virtual {
-//        LockDataStorage storage lockStorage = _lockStorage();
-//
-//        uint256 currentLABAF = lockStorage.labafsTotalLockedByPartition[_tokenHolder][_partition];
-//
-//        // Verificamos si es necesario actualizar el ABAF
-//        if (_abaf != currentLABAF) {
-//            uint256 factor = AdjustBalanceLib.calculateFactor(_abaf, currentLABAF);
-//
-//            uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
-//
-//            _updateLockAmountByIndex(_partition, lockIndex, _tokenHolder, factor);
-//
-//            lockStorage.labafsTotalLockedByPartition[_tokenHolder][_partition] = _abaf;
-//        }
-//    }
-
 }

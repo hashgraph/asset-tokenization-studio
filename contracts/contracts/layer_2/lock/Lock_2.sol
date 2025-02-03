@@ -219,13 +219,12 @@ import {
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 contract Lock_2 is Lock, LockStorageWrapper_2 {
-
-//    function getLockedAmountForByPartition(
-//        bytes32 _partition,
-//        address _tokenHolder
-//    ) external view virtual override returns (uint256 amount_) {
-//        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
-//    }
+    //    function getLockedAmountForByPartition(
+    //        bytes32 _partition,
+    //        address _tokenHolder
+    //    ) external view virtual override returns (uint256 amount_) {
+    //        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    //    }
 
     function getLockedAmountForByPartition(
         bytes32 _partition,
@@ -270,7 +269,7 @@ contract Lock_2 is Lock, LockStorageWrapper_2 {
         returns (uint256 amount_, uint256 expirationTimestamp_)
     {
         return
-            _getLockForByPartitionAdjusted(
+            _getLockForByPartitionAdjustedAt(
                 _DEFAULT_PARTITION,
                 _tokenHolder,
                 _lockId
@@ -421,4 +420,4 @@ contract Lock_2 is Lock, LockStorageWrapper_2 {
         staticInterfaceIds_[selectorsIndex++] = type(ILock).interfaceId;
     }
 }
- //solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+//solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
