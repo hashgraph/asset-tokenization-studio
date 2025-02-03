@@ -206,104 +206,79 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_KYC_ROLE} from '../constants/roles.sol';
 import {IKYC} from '../interfaces/kyc/IKYC.sol';
-import {KYCStorageWrapper} from './KYCStorageWrapper.sol';
-import {SSIManagement} from '../ssi/SSIManagement.sol';
-import {_KYC_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {
+    SSIManagementStorageWrapper
+} from '../ssi/SSIManagementStorageWrapper.sol';
+import {_KYC_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {LibCommon} from '../common/LibCommon.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-contract KYC is KYCStorageWrapper, SSIManagement {
-    function grantKYC(
-        address _account,
-        string memory _VCid,
-        uint256 _validFrom,
-        uint256 _validTo,
-        address _issuer
-    )
-        external
-        virtual
-        override
-        onlyRole(_KYC_ROLE)
-        onlyValidKYCAddressAndStatus(KYCStatus.GRANTED, _account)
-        onlyValidDates(_validFrom, _validTo)
-        checkIssuerList(_issuer)
-        returns (bool success_)
-    {
-        success_ = _grantKYC(_account, _VCid, _validFrom, _validTo, _issuer);
-        emit KYCGranted(_account, _msgSender());
+abstract contract KYCStorageWrapperRead is IKYC, SSIManagementStorageWrapper {
+    using LibCommon for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    struct KYCStorage {
+        mapping(address => KYCData) kyc;
+        mapping(KYCStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
     }
 
-    function revokeKYC(
+    modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) {
+        if (_validFrom > _validTo || _validTo < _blockTimestamp()) {
+            revert InvalidDates();
+        }
+        _;
+    }
+
+    modifier onlyValidKYCAddressAndStatus(
+        KYCStatus _kycStatus,
         address _account
-    )
-        external
-        virtual
-        override
-        onlyRole(_KYC_ROLE)
-        onlyValidKYCAddressAndStatus(KYCStatus.REVOKED, _account)
-        returns (bool success_)
-    {
-        success_ = _revokeKYC(_account);
-        emit KYCRevoked(_account, _msgSender());
+    ) {
+        if (_getKYCFor(_account) == _kycStatus) revert InvalidKYCStatus();
+        if (_account == address(0)) revert InvalidZeroAddress();
+        _;
     }
 
-    function getKYCFor(
+    function _getKYCFor(
         address _account
-    ) external view virtual override returns (KYCStatus kycStatus_) {
-        kycStatus_ = _getKYCFor(_account);
+    ) internal view virtual returns (KYCStatus kycStatus_) {
+        kycStatus_ = _KYCStorage().kyc[_account].validTo > _blockTimestamp() &&
+            _KYCStorage().kyc[_account].validFrom < _blockTimestamp() &&
+            _isIssuer(_KYCStorage().kyc[_account].issuer)
+            ? KYCStatus.GRANTED
+            : _KYCStorage().kycAddressesByStatus[KYCStatus.REVOKED].contains(
+                _account
+            )
+            ? KYCStatus.REVOKED
+            : KYCStatus.NOT_GRANTED;
     }
 
-    function getKYCAccountsCount(
+    function _getKYCAccountsCount(
         KYCStatus _kycStatus
-    ) external view virtual override returns (uint256 KYCAccountsCount_) {
-        KYCAccountsCount_ = _getKYCAccountsCount(_kycStatus);
+    ) internal view virtual returns (uint256 KYCAccountsCount_) {
+        KYCAccountsCount_ = _KYCStorage()
+            .kycAddressesByStatus[_kycStatus]
+            .length();
     }
 
-    function getKYCAccounts(
+    function _getKYCAccounts(
         KYCStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view virtual override returns (address[] memory accounts_) {
-        accounts_ = _getKYCAccounts(_kycStatus, _pageIndex, _pageLength);
+    ) internal view virtual returns (address[] memory accounts_) {
+        accounts_ = _KYCStorage().kycAddressesByStatus[_kycStatus].getFromSet(
+            _pageIndex,
+            _pageLength
+        );
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _KYC_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
-        staticFunctionSelectors_[selectorIndex++] = this.grantKYC.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.revokeKYC.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getKYCFor.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getKYCAccountsCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getKYCAccounts
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IKYC).interfaceId;
+    function _KYCStorage() internal pure returns (KYCStorage storage kyc_) {
+        bytes32 position = _KYC_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            kyc_.slot := position
+        }
     }
 }

@@ -297,6 +297,7 @@ contract SSIManagement is
     function getStaticResolverKey()
         external
         pure
+        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -306,6 +307,7 @@ contract SSIManagement is
     function getStaticFunctionSelectors()
         external
         pure
+        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -331,6 +333,7 @@ contract SSIManagement is
     function getStaticInterfaceIds()
         external
         pure
+        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

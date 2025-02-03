@@ -214,8 +214,46 @@ interface IKYC {
         address issuer;
     }
 
+    enum KYCStatus {
+        NOT_GRANTED,
+        // Addresses with a KYC that has not been explicitly revoked
+        GRANTED,
+        // Addresses with a KYC that has been explicitly revoked
+        REVOKED
+    }
+
     error InvalidDates();
-    error KYCAlreadyGranted();
+    error InvalidKYCStatus();
+    error KYCIsNotGranted();
+    error InvalidZeroAddress();
+
+    /**
+     * @dev Emitted when a KYC is granted
+     *
+     * @param account The address for which the KYC is granted
+     * @param issuer The address of the issuer of the KYC
+     */
+
+    event KYCGranted(address indexed account, address indexed issuer);
+
+    /**
+     * @dev Emitted when a KYC is revoked
+     *
+     * @param account The address for which the KYC is revoked
+     * @param issuer The address of the issuer of the KYC
+     */
+    event KYCRevoked(address indexed account, address indexed issuer);
+
+    /**
+     * @dev Grant kyc to an address
+     *
+     * @param _account user whose KYC is being granted
+     * @param _VCid credential Id
+     * @param _validFrom start date of the KYC
+     * @param _validTo end date of the KYC
+     * @param _issuer issurer of the KYC
+     * @return success_ true or false
+     */
 
     function grantKYC(
         address _account,
@@ -225,18 +263,48 @@ interface IKYC {
         address _issuer
     ) external returns (bool success_);
 
+    /**
+     * @dev Revoke kyc to an address
+     *
+     * @param _account user whose KYC is being revoked
+     * @return success_ true or false
+     */
+
     function revokeKYC(address _account) external returns (bool success_);
+
+    /**
+     * @dev Get the status of the KYC for an account
+     *
+     * @param _account the account to check
+     * @return kycStatus_ GRANTED, REVOKED or NOT_GRANTED
+     */
 
     function getKYCFor(
         address _account
-    ) external view returns (uint256 kycStatus_);
+    ) external view returns (KYCStatus kycStatus_);
+
+    /**
+     * @dev Get the count of accounts with a given KYC status
+     *
+     * @param _kycStatus GRANTED, REVOKED or NOT_GRANTED
+     * @return KYCAccountsCount_ count of accounts with the given KYC status
+     */
 
     function getKYCAccountsCount(
-        uint256 _kycStatus
+        KYCStatus _kycStatus
     ) external view returns (uint256 KYCAccountsCount_);
 
+    /**
+     * @dev Returns an array of accounts with a given KYC status
+     *
+     * @param _kycStatus GRANTED, REVOKED or NOT_GRANTED
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return accounts_ The array containing the accounts addresses
+     */
+
     function getKYCAccounts(
-        uint256 _kycStatus,
+        KYCStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view returns (address[] memory accounts_);
