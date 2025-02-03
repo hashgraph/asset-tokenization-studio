@@ -506,7 +506,7 @@ describe('KYC Tests', () => {
             let KYC_Count_After = await kycFacet.getKYCAccountsCount(1)
             let KYCAccounts = await kycFacet.getKYCAccounts(1, 0, 100)
 
-            expect(KYCFor_B_After).to.equal(0)
+            expect(KYCFor_B_After).to.equal(2)
             expect(KYC_Count_After).to.equal(0)
             expect(KYCAccounts.length).to.equal(0)
         })

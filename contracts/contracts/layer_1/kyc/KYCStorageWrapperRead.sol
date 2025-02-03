@@ -244,15 +244,15 @@ abstract contract KYCStorageWrapperRead is SSIManagementStorageWrapper {
     function _getKYCFor(
         address _account
     ) internal view virtual returns (IKYC.KYCStatus kycStatus_) {
-        kycStatus_ = _KYCStorage().kyc[_account].validTo > _blockTimestamp() &&
-            _KYCStorage().kyc[_account].validFrom < _blockTimestamp() &&
+        kycStatus_ = _KYCStorage().kyc[_account].validTo >= _blockTimestamp() &&
+            _KYCStorage().kyc[_account].validFrom <= _blockTimestamp() &&
             _isIssuer(_KYCStorage().kyc[_account].issuer)
             ? IKYC.KYCStatus.GRANTED
             : _KYCStorage()
                 .kycAddressesByStatus[IKYC.KYCStatus.REVOKED]
                 .contains(_account)
-                ? IKYC.KYCStatus.REVOKED
-                : IKYC.KYCStatus.NOT_GRANTED;
+            ? IKYC.KYCStatus.REVOKED
+            : IKYC.KYCStatus.NOT_GRANTED;
     }
 
     function _getKYCAccountsCount(

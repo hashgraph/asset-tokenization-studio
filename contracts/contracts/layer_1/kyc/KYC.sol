@@ -227,6 +227,7 @@ contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper {
         virtual
         override
         onlyRole(_KYC_ROLE)
+        onlyUnpaused
         onlyValidKYCAddressAndStatus(KYCStatus.GRANTED, _account)
         onlyValidDates(_validFrom, _validTo)
         checkIssuerList(_issuer)
@@ -243,6 +244,7 @@ contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper {
         virtual
         override
         onlyRole(_KYC_ROLE)
+        onlyUnpaused
         onlyValidKYCAddressAndStatus(KYCStatus.REVOKED, _account)
         returns (bool success_)
     {
