@@ -242,6 +242,8 @@ export interface DeployedBusinessLogics {
     diamondFacet: IStaticFunctionSelectors
     accessControl: IStaticFunctionSelectors
     controlList: IStaticFunctionSelectors
+    kyc: IStaticFunctionSelectors
+    ssiManagement: IStaticFunctionSelectors
     corporateActionsSecurity: IStaticFunctionSelectors
     pause: IStaticFunctionSelectors
     eRC20_2: IStaticFunctionSelectors

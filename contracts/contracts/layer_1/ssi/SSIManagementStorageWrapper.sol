@@ -216,7 +216,7 @@ import {
 } from '../constants/storagePositions.sol';
 import {ISSIManagement} from '../interfaces/ssi/ISSIManagement.sol';
 
-abstract contract SSIManagementStorageWrapper is ISSIManagement, LocalContext {
+abstract contract SSIManagementStorageWrapper is LocalContext {
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -228,7 +228,7 @@ abstract contract SSIManagementStorageWrapper is ISSIManagement, LocalContext {
     // modifiers
     modifier checkIssuerList(address issuer) {
         if (!_isIssuer(issuer)) {
-            revert AccountIsNotIssuer(issuer);
+            revert ISSIManagement.AccountIsNotIssuer(issuer);
         }
         _;
     }
