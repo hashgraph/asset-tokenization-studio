@@ -301,6 +301,7 @@ import {
   CONTROLLER_CREATE_HOLD_GAS,
   PROTECTED_CREATE_HOLD_GAS,
   RELEASE_HOLD_GAS,
+  RECLAIM_HOLD_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -1984,6 +1985,26 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           gasLimit: RELEASE_HOLD_GAS,
         },
       ),
+      this.networkService.environment,
+    );
+  }
+
+  async reclaimHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    holdId: number,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Reclaiming hold amount from account ${targetId.toString()}}`,
+    );
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold_2__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).reclaimHoldByPartition(partitionId, targetId.toString(), holdId, {
+        gasLimit: RECLAIM_HOLD_GAS,
+      }),
       this.networkService.environment,
     );
   }

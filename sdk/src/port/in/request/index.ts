@@ -280,6 +280,7 @@ import GetHoldCountForByPartitionRequest from './GetHoldCountForByPartitionReque
 import GetHoldsIdForByPartitionRequest from './GetHoldsIdForByPartitionRequest.js';
 import GetHoldForByPartitionRequest from './GetHoldForByPartitionRequest.js';
 import ReleaseHoldByPartitionRequest from './ReleaseHoldByPartitionRequest.js';
+import ReclaimHoldByPartitionRequest from './ReclaimHoldByPartitionRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -359,4 +360,5 @@ export {
   GetHoldsIdForByPartitionRequest,
   GetHoldForByPartitionRequest,
   ReleaseHoldByPartitionRequest,
+  ReclaimHoldByPartitionRequest,
 };

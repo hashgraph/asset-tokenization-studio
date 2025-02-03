@@ -252,6 +252,7 @@ import {
   PROTECTED_REDEEM_GAS,
   PROTECTED_TRANSFER_AND_LOCK_GAS,
   PROTECTED_TRANSFER_GAS,
+  RECLAIM_HOLD_GAS,
   REDEEM_GAS,
   RELEASE_GAS,
   RELEASE_HOLD_GAS,
@@ -2025,6 +2026,34 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(RELEASE_HOLD_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async reclaimHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    holdId: number,
+    targetId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'reclaimHoldByPartition';
+    LogService.logTrace(`Reclaiming hold from account ${targetId.toString()}}`);
+    const factoryInstance = new Hold_2__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [partitionId, targetId.toString(), holdId],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(RECLAIM_HOLD_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);
