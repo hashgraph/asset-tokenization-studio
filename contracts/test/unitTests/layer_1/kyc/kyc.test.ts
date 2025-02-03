@@ -217,6 +217,8 @@ import {
     BusinessLogicResolver,
     SSIManagement,
     TimeTravel,
+    T3RevocationRegistry,
+    T3RevocationRegistry__factory,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -230,6 +232,8 @@ import {
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
     ADDRESS_ZERO,
+    deployContractWithFactory,
+    DeployContractWithFactoryCommand,
 } from '@scripts'
 import { dateToUnixTimestamp } from 'test/dateFormatter'
 
@@ -255,6 +259,7 @@ describe('KYC Tests', () => {
     let pauseFacet: Pause
     let ssiManagementFacet: SSIManagement
     let timeTravelFacet: TimeTravel
+    let revocationList: T3RevocationRegistry
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -284,6 +289,19 @@ describe('KYC Tests', () => {
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+
+        let reovationListDeployed = await deployContractWithFactory(
+            new DeployContractWithFactoryCommand({
+                factory: new T3RevocationRegistry__factory(),
+                signer: signer_A,
+            })
+        )
+
+        revocationList = await ethers.getContractAt(
+            'T3RevocationRegistry',
+            reovationListDeployed.address,
+            signer_C
+        )
     })
 
     after(async () => {
@@ -566,7 +584,12 @@ describe('KYC Tests', () => {
 
             let KYcFor_B_After_Grant = await kycFacet.getKYCFor(account_B)
 
-            // Revoke from list
+            await revocationList.connect(signer_C).revoke(_VC_ID)
+
+            let KYCFor_B_After_Revoking_VC = await kycFacet.getKYCFor(account_B)
+
+            expect(KYcFor_B_After_Grant).to.equal(1)
+            expect(KYCFor_B_After_Revoking_VC).to.equal(0)
         })
     })
 })
