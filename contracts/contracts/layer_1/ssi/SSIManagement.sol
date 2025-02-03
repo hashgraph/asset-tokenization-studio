@@ -216,6 +216,7 @@ import {SSIManagementStorageWrapper} from './SSIManagementStorageWrapper.sol';
 import {ISSIManagement} from '../interfaces/ssi/ISSIManagement.sol';
 
 contract SSIManagement is
+    ISSIManagement,
     SSIManagementStorageWrapper,
     IStaticFunctionSelectors,
     Common

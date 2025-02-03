@@ -422,6 +422,10 @@ import {
     Cap_2TimeTravel__factory,
     ControlList__factory,
     ControlListTimeTravel__factory,
+    KYC__factory,
+    KYCTimeTravel__factory,
+    SSIManagement__factory,
+    SSIManagementTimeTravel__factory,
     CorporateActionsSecurity__factory,
     CorporateActionsSecurityTimeTravel__factory,
     DiamondFacet__factory,
@@ -645,6 +649,28 @@ export async function deployAtsContracts({
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.ControlList.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
+        kyc: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new KYC__factory(),
+                new KYCTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.KYC.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
+        ssiManagement: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new SSIManagement__factory(),
+                new SSIManagementTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.SSIManagement.addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -887,6 +913,10 @@ export async function deployAtsContracts({
             ),
             cap: await deployContractWithFactory(commands.cap),
             controlList: await deployContractWithFactory(commands.controlList),
+            kyc: await deployContractWithFactory(commands.kyc),
+            ssiManagement: await deployContractWithFactory(
+                commands.ssiManagement
+            ),
             pause: await deployContractWithFactory(commands.pause),
             lock: await deployContractWithFactory(commands.lock),
             hold: await deployContractWithFactory(commands.hold),
