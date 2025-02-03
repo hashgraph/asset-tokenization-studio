@@ -206,28 +206,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IKYC} from '../interfaces/kyc/IKYC.sol';
-import {_KYC_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
+import {KYCStorageWrapperRead} from './KYCStorageWrapperRead.sol';
 import {
-    SSIManagementStorageWrapper
-} from '../ssi/SSIManagementStorageWrapper.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-abstract contract KYCStorageWrapper is SSIManagementStorageWrapper, IKYC {
-    struct KYCStorage {
-        mapping(address => KYCData) kyc;
-    }
-
-    modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) {
-        if (_validFrom > _validTo || _validTo < _blockTimestamp()) {
-            revert InvalidDates();
-        }
-        _;
-    }
-
-    modifier checkKYCIsAlreadyGranted(address _account) {
-        _;
-    }
+abstract contract KYCStorageWrapper is KYCStorageWrapperRead {
+    using EnumerableSet for EnumerableSet.AddressSet;
 
     function _grantKYC(
         address _account,
@@ -235,21 +220,23 @@ abstract contract KYCStorageWrapper is SSIManagementStorageWrapper, IKYC {
         uint256 _validFrom,
         uint256 _validTo,
         address _issuer
-    ) internal virtual returns (bool success_) {
+    ) internal returns (bool success_) {
         _KYCStorage().kyc[_account] = KYCData(
             _validFrom,
             _validTo,
             _VCid,
             _issuer
         );
+        _KYCStorage().kycAddressesByStatus[KYCStatus.GRANTED].add(_account);
+        _KYCStorage().kycAddressesByStatus[KYCStatus.REVOKED].remove(_account);
         success_ = true;
     }
 
-    function _KYCStorage() internal pure returns (KYCStorage storage kyc_) {
-        bytes32 position = _KYC_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            kyc_.slot := position
-        }
+    function _revokeKYC(address _account) internal returns (bool success_) {
+        if (_getKYCFor(_account) != KYCStatus.GRANTED) revert KYCIsNotGranted();
+        delete _KYCStorage().kyc[_account];
+        _KYCStorage().kycAddressesByStatus[KYCStatus.REVOKED].add(_account);
+        _KYCStorage().kycAddressesByStatus[KYCStatus.GRANTED].remove(_account);
+        success_ = true;
     }
 }
