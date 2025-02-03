@@ -215,7 +215,7 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {Common} from '../common/Common.sol';
 
-contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper, Common {
+contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper {
     function grantKYC(
         address _account,
         string memory _VCid,

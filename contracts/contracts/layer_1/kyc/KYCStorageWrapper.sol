@@ -211,8 +211,9 @@ import {KYCStorageWrapperRead} from './KYCStorageWrapperRead.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {Common} from '../common/Common.sol';
 
-abstract contract KYCStorageWrapper is KYCStorageWrapperRead {
+abstract contract KYCStorageWrapper is Common {
     using EnumerableSet for EnumerableSet.AddressSet;
 
     function _grantKYC(

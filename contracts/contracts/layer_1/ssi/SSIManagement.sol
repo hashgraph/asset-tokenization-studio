@@ -217,8 +217,8 @@ import {ISSIManagement} from '../interfaces/ssi/ISSIManagement.sol';
 
 contract SSIManagement is
     ISSIManagement,
-    SSIManagementStorageWrapper,
     IStaticFunctionSelectors,
+    SSIManagementStorageWrapper,
     Common
 {
     function setRevocationRegistryAddress(
