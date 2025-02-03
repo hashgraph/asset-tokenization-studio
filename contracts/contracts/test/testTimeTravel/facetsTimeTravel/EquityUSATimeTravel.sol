@@ -203,18 +203,16 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Cap_2} from '../../layer_2/cap/Cap_2.sol';
+import {EquityUSA} from '../../../layer_3/equityUSA/EquityUSA.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-contract Cap_2TimeTravel is Cap_2, TimeTravelStorageWrapper {
+contract EquityUSATimeTravel is EquityUSA, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view

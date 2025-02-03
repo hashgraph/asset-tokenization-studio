@@ -204,17 +204,15 @@
 */
 
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {KYC} from '../../layer_1/kyc/KYC.sol';
+import {AccessControl} from '../../../layer_1/accessControl/AccessControl.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-contract KYCTimeTravel is KYC, TimeTravelStorageWrapper {
+contract AccessControlTimeTravel is AccessControl, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view

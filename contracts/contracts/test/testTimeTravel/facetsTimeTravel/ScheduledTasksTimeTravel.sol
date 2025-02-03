@@ -203,21 +203,18 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    CorporateActionsSecurity
-} from '../../layer_2/corporateActions/CorporateActionsSecurity.sol';
+    ScheduledTasks
+} from '../../../layer_2/scheduledTasks/scheduledTasks/ScheduledTasks.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-contract CorporateActionsSecurityTimeTravel is
-    CorporateActionsSecurity,
-    TimeTravelStorageWrapper
-{
+contract ScheduledTasksTimeTravel is ScheduledTasks, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view

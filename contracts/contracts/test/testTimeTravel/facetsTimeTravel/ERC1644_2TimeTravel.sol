@@ -204,15 +204,19 @@
 */
 
 // SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
-import {ERC1643} from '../../layer_1/ERC1400/ERC1643/ERC1643.sol';
+import {ERC1644_2} from '../../../layer_2/ERC1400/ERC1644/ERC1644_2.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-contract ERC1643TimeTravel is ERC1643, TimeTravelStorageWrapper {
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+contract ERC1644_2TimeTravel is ERC1644_2, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view

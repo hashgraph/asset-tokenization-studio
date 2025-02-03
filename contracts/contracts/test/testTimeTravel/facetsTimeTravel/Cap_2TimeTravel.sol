@@ -204,17 +204,17 @@
 */
 
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {Lock_2} from '../../layer_2/lock/Lock_2.sol';
+import {Cap_2} from '../../../layer_2/cap/Cap_2.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-// TODO: Remove those errors of solhint
-// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-contract Lock_2TimeTravel is Lock_2, TimeTravelStorageWrapper {
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+contract Cap_2TimeTravel is Cap_2, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view
@@ -224,4 +224,3 @@ contract Lock_2TimeTravel is Lock_2, TimeTravelStorageWrapper {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 }
-// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

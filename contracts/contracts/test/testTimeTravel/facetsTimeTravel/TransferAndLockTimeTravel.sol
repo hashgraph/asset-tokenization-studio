@@ -203,19 +203,19 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
 import {
-    ScheduledSnapshots
-} from '../../layer_2/scheduledTasks/scheduledSnapshots/ScheduledSnapshots.sol';
+    TransferAndLock
+} from '../../../layer_3/transferAndLock/TransferAndLock.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-contract ScheduledSnapshotsTimeTravel is
-    ScheduledSnapshots,
+contract TransferAndLockTimeTravel is
+    TransferAndLock,
     TimeTravelStorageWrapper
 {
     function _blockTimestamp()

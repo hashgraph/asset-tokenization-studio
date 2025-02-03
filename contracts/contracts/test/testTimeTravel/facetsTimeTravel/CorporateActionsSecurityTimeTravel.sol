@@ -206,13 +206,18 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {AccessControl} from '../../layer_1/accessControl/AccessControl.sol';
+import {
+    CorporateActionsSecurity
+} from '../../../layer_2/corporateActions/CorporateActionsSecurity.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-contract AccessControlTimeTravel is AccessControl, TimeTravelStorageWrapper {
+contract CorporateActionsSecurityTimeTravel is
+    CorporateActionsSecurity,
+    TimeTravelStorageWrapper
+{
     function _blockTimestamp()
         internal
         view

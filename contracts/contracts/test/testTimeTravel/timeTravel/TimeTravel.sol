@@ -206,19 +206,79 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {BondUSA} from '../../layer_3/bondUSA/BondUSA.sol';
+import {TimeTravelStorageWrapper} from './TimeTravelStorageWrapper.sol';
 import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {ITimeTravel} from '../interfaces/ITimeTravel.sol';
 
-contract BondUSATimeTravel is BondUSA, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
+contract TimeTravel is
+    IStaticFunctionSelectors,
+    ITimeTravel,
+    TimeTravelStorageWrapper
+{
+    function changeSystemTimestamp(uint256 newTimestamp) external override {
+        _changeSystemTimestamp(newTimestamp);
+    }
+
+    function resetSystemTimestamp() external override {
+        _resetSystemTimestamp();
+    }
+
+    function blockTimestamp() external view override returns (uint256) {
+        return _blockTimestamp();
+    }
+
+    /*
+     * @dev Check the chainId of the current block (only for testing)
+     * @param chainId The chainId to check
+     */
+    function checkBlockChainid(uint256 chainId) external pure {
+        _checkBlockChainid(chainId);
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
     {
-        return TimeTravelStorageWrapper._blockTimestamp();
+        staticResolverKey_ = _TIME_TRAVEL_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](4);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .changeSystemTimestamp
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .resetSystemTimestamp
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .blockTimestamp
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .checkBlockChainid
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(ITimeTravel).interfaceId;
     }
 }

@@ -203,20 +203,18 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {ERC1594_2} from '../../layer_2/ERC1400/ERC1594/ERC1594_2.sol';
+import {Lock_2} from '../../../layer_2/lock/Lock_2.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-contract ERC1594_2TimeTravel is ERC1594_2, TimeTravelStorageWrapper {
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+contract Lock_2TimeTravel is Lock_2, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view
@@ -226,3 +224,4 @@ contract ERC1594_2TimeTravel is ERC1594_2, TimeTravelStorageWrapper {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
