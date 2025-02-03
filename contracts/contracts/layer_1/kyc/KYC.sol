@@ -245,7 +245,7 @@ contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper {
         override
         onlyRole(_KYC_ROLE)
         onlyUnpaused
-        onlyValidKYCAddressAndStatus(KYCStatus.REVOKED, _account)
+        onlyValidKYCAddressAndStatus(KYCStatus.NOT_GRANTED, _account)
         returns (bool success_)
     {
         success_ = _revokeKYC(_account);

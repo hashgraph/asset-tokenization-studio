@@ -232,7 +232,7 @@ abstract contract KYCStorageWrapper is Common {
         _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.GRANTED].add(
             _account
         );
-        _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.REVOKED].remove(
+        _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.NOT_GRANTED].remove(
             _account
         );
         success_ = true;
@@ -242,7 +242,7 @@ abstract contract KYCStorageWrapper is Common {
         if (_getKYCFor(_account) != IKYC.KYCStatus.GRANTED)
             revert IKYC.KYCIsNotGranted();
         delete _KYCStorage().kyc[_account];
-        _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.REVOKED].add(
+        _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.NOT_GRANTED].add(
             _account
         );
         _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.GRANTED].remove(

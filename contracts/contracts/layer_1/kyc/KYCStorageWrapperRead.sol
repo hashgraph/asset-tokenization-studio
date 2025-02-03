@@ -248,10 +248,6 @@ abstract contract KYCStorageWrapperRead is SSIManagementStorageWrapper {
             _KYCStorage().kyc[_account].validFrom <= _blockTimestamp() &&
             _isIssuer(_KYCStorage().kyc[_account].issuer)
             ? IKYC.KYCStatus.GRANTED
-            : _KYCStorage()
-                .kycAddressesByStatus[IKYC.KYCStatus.REVOKED]
-                .contains(_account)
-            ? IKYC.KYCStatus.REVOKED
             : IKYC.KYCStatus.NOT_GRANTED;
     }
 

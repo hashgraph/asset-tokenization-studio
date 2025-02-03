@@ -217,9 +217,7 @@ interface IKYC {
     enum KYCStatus {
         NOT_GRANTED,
         // Addresses with a KYC that has not been explicitly revoked
-        GRANTED,
-        // Addresses with a KYC that has been explicitly revoked
-        REVOKED
+        GRANTED
     }
 
     error InvalidDates();
