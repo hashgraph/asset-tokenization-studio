@@ -226,8 +226,8 @@ import {
 // TODO: Remove _ in contract name
 // solhint-disable-next-line
 abstract contract CapStorageWrapper_2 is
-    CapStorageWrapper,
     CorporateActionsStorageWrapper,
+    CapStorageWrapper,
     ScheduledBalanceAdjustmentsStorageWrapper
 {
     function _getMaxSupplyAdjusted()
