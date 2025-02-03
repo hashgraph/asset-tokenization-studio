@@ -216,11 +216,10 @@ import {
     IFactory,
     BusinessLogicResolver,
     SSIManagement,
+    TimeTravel,
 } from '@typechain'
 import {
     PAUSER_ROLE,
-    LOCKER_ROLE,
-    ISSUER_ROLE,
     SSI_MANAGER_ROLE,
     KYC_ROLE,
     MAX_UINT256,
@@ -232,6 +231,7 @@ import {
     deployAtsFullInfrastructure,
     ADDRESS_ZERO,
 } from '@scripts'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const _VALID_FROM = 0
 const _VALID_TO = 99999999999999
@@ -254,6 +254,7 @@ describe('KYC Tests', () => {
     let kycFacet: KYC
     let pauseFacet: Pause
     let ssiManagementFacet: SSIManagement
+    let timeTravelFacet: TimeTravel
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -264,7 +265,7 @@ describe('KYC Tests', () => {
     before(async () => {
         snapshot = await takeSnapshot()
         // mute | mock console.log
-        //console.log = () => {}
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
@@ -277,6 +278,7 @@ describe('KYC Tests', () => {
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
                     useDeployed: false,
+                    timeTravelEnabled: true,
                 })
             )
 
@@ -286,6 +288,10 @@ describe('KYC Tests', () => {
 
     after(async () => {
         await snapshot.restore()
+    })
+
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     beforeEach(async () => {
@@ -348,6 +354,13 @@ describe('KYC Tests', () => {
             diamond.address,
             signer_C
         )
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
+            diamond.address,
+            signer_A
+        )
+
+        await ssiManagementFacet.addIssuer(account_C)
     })
 
     describe('Paused', () => {
@@ -453,15 +466,107 @@ describe('KYC Tests', () => {
         })
     })
 
-    it('GIVEN a VC WHEN grantKYC THEN transaction succeed', async () => {
-        await ssiManagementFacet.addIssuer(account_C)
+    describe('KYC OK', () => {
+        it('GIVEN a VC WHEN grantKYC THEN transaction succeed', async () => {
+            let KYCFor_B_Before = await kycFacet.getKYCFor(account_B)
+            let KYC_Count_Before = await kycFacet.getKYCAccountsCount(1)
 
-        await kycFacet.grantKYC(
-            account_B,
-            _VC_ID,
-            _VALID_FROM,
-            _VALID_TO,
-            account_C
-        )
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            let KYCFor_B_After = await kycFacet.getKYCFor(account_B)
+            let KYC_Count_After = await kycFacet.getKYCAccountsCount(1)
+            let KYCAccounts = await kycFacet.getKYCAccounts(1, 0, 100)
+
+            expect(KYCFor_B_Before).to.equal(0)
+            expect(KYCFor_B_After).to.equal(1)
+            expect(KYC_Count_Before).to.equal(0)
+            expect(KYC_Count_After).to.equal(1)
+            expect(KYCAccounts.length).to.equal(1)
+            expect(KYCAccounts[0]).to.equal(account_B)
+        })
+
+        it('GIVEN a VC WHEN revokeKYC THEN transaction succeed', async () => {
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            await kycFacet.revokeKYC(account_B)
+
+            let KYCFor_B_After = await kycFacet.getKYCFor(account_B)
+            let KYC_Count_After = await kycFacet.getKYCAccountsCount(1)
+            let KYCAccounts = await kycFacet.getKYCAccounts(1, 0, 100)
+
+            expect(KYCFor_B_After).to.equal(0)
+            expect(KYC_Count_After).to.equal(0)
+            expect(KYCAccounts.length).to.equal(0)
+        })
+
+        it('Check KYC status after expiration', async () => {
+            let initDate = dateToUnixTimestamp('2030-01-01T00:00:03Z')
+            let finalDate = dateToUnixTimestamp('2030-02-01T00:00:03Z')
+            await timeTravelFacet.changeSystemTimestamp(initDate)
+
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                initDate,
+                finalDate,
+                account_C
+            )
+
+            let KYcFor_B_After_Grant = await kycFacet.getKYCFor(account_B)
+
+            await timeTravelFacet.changeSystemTimestamp(finalDate + 1)
+
+            let KYCFor_B_After_Expiration = await kycFacet.getKYCFor(account_B)
+
+            expect(KYcFor_B_After_Grant).to.equal(1)
+            expect(KYCFor_B_After_Expiration).to.equal(0)
+        })
+
+        it('Check KYC status after issuer removed', async () => {
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            let KYcFor_B_After_Grant = await kycFacet.getKYCFor(account_B)
+
+            await ssiManagementFacet.removeIssuer(account_C)
+
+            let KYCFor_B_After_Cancelling_Issuer = await kycFacet.getKYCFor(
+                account_B
+            )
+
+            expect(KYcFor_B_After_Grant).to.equal(1)
+            expect(KYCFor_B_After_Cancelling_Issuer).to.equal(0)
+        })
+
+        it('Check KYC status after issuer revokes VC', async () => {
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            let KYcFor_B_After_Grant = await kycFacet.getKYCFor(account_B)
+
+            // Revoke from list
+        })
     })
 })
