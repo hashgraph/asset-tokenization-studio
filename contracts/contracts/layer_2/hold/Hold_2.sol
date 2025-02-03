@@ -298,33 +298,6 @@ contract Hold_2 is
             _getHoldForByPartitionAdjusted(_partition, _tokenHolder, _holdId);
     }
 
-    function getHoldForEscrowByPartition(
-        bytes32 _partition,
-        address _escrow,
-        uint256 _escrowHoldId
-    )
-        external
-        view
-        virtual
-        override
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address tokenHolder_,
-            uint256 id_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
-        )
-    {
-        return
-            _getHoldForEscrowByPartitionAdjusted(
-                _partition,
-                _escrow,
-                _escrowHoldId
-            );
-    }
-
     function getHeldAmountFor(
         address _tokenHolder
     ) external view virtual override returns (uint256 amount_) {
@@ -350,8 +323,8 @@ contract Hold_2 is
 
     function _executeHoldByPartition(
         bytes32 _partition,
-        uint256 _escrowId,
         address _tokenHolder,
+        uint256 _holdId,
         address _to,
         uint256 _amount
     )
@@ -360,20 +333,19 @@ contract Hold_2 is
         override(HoldStorageWrapper, HoldStorageWrapper_2)
         returns (bool success_)
     {
-        return
-            HoldStorageWrapper_2._executeHoldByPartition(
-                _partition,
-                _escrowId,
-                _tokenHolder,
-                _to,
-                _amount
-            );
+        success_ = HoldStorageWrapper_2._executeHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId,
+            _to,
+            _amount
+        );
     }
 
     function _releaseHoldByPartition(
         bytes32 _partition,
         address _tokenHolder,
-        uint256 _escrowId,
+        uint256 _holdId,
         uint256 _amount
     )
         internal
@@ -381,13 +353,67 @@ contract Hold_2 is
         override(HoldStorageWrapper, HoldStorageWrapper_2)
         returns (bool success_)
     {
-        return
-            HoldStorageWrapper_2._releaseHoldByPartition(
-                _partition,
-                _tokenHolder,
-                _escrowId,
-                _amount
-            );
+        success_ = HoldStorageWrapper_2._releaseHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId,
+            _amount
+        );
+    }
+
+    function _reclaimHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        internal
+        virtual
+        override(HoldStorageWrapper, HoldStorageWrapper_2)
+        returns (bool success_, uint256 amount_)
+    {
+        (success_, amount_) = HoldStorageWrapper_2._reclaimHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+    }
+
+    function _beforeExecuteHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to
+    ) internal virtual override(HoldStorageWrapper, HoldStorageWrapper_2) {
+        HoldStorageWrapper_2._beforeExecuteHold(
+            _partition,
+            _tokenHolder,
+            _holdId,
+            _to
+        );
+    }
+
+    function _beforeReleaseHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal virtual override(HoldStorageWrapper, HoldStorageWrapper_2) {
+        HoldStorageWrapper_2._beforeReleaseHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+    }
+
+    function _beforeReclaimHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal virtual override(HoldStorageWrapper, HoldStorageWrapper_2) {
+        HoldStorageWrapper_2._beforeReclaimHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
     }
 
     function getStaticResolverKey()
@@ -408,7 +434,7 @@ contract Hold_2 is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](18);
+        staticFunctionSelectors_ = new bytes4[](15);
         staticFunctionSelectors_[selectorIndex++] = this
             .createHoldByPartition
             .selector;
@@ -440,19 +466,10 @@ contract Hold_2 is
             .getHoldCountForByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldCountForEscrowByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
             .getHoldsIdForByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldsIdForEscrowByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
             .getHoldForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldForEscrowByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getHeldAmountForAdjusted
