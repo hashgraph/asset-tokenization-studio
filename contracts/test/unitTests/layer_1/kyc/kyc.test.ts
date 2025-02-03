@@ -203,82 +203,161 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-pragma solidity 0.8.18;
-
-import {IKYC} from '../interfaces/kyc/IKYC.sol';
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { takeSnapshot, time } from '@nomicfoundation/hardhat-network-helpers'
+import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
-    SSIManagementStorageWrapper
-} from '../ssi/SSIManagementStorageWrapper.sol';
-import {_KYC_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {LibCommon} from '../common/LibCommon.sol';
+    type ResolverProxy,
+    type KYC,
+    Pause,
+    IFactory,
+    BusinessLogicResolver,
+} from '@typechain'
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    PAUSER_ROLE,
+    LOCKER_ROLE,
+    ISSUER_ROLE,
+    SSI_MANAGER_ROLE,
+    KYC_ROLE,
+    MAX_UINT256,
+    deployEquityFromFactory,
+    Rbac,
+    RegulationSubType,
+    RegulationType,
+    DeployAtsFullInfrastructureCommand,
+    deployAtsFullInfrastructure,
+} from '@scripts'
 
-abstract contract KYCStorageWrapperRead is IKYC, SSIManagementStorageWrapper {
-    using LibCommon for EnumerableSet.AddressSet;
-    using EnumerableSet for EnumerableSet.AddressSet;
+const _VALID_FROM = 0
+const _VALID_TO = 99999999999999
 
-    struct KYCStorage {
-        mapping(address => KYCData) kyc;
-        mapping(KYCStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
-    }
+describe('KYC Tests', () => {
+    let diamond: ResolverProxy
+    let signer_A: SignerWithAddress
+    let signer_B: SignerWithAddress
+    let signer_C: SignerWithAddress
+    let signer_D: SignerWithAddress
 
-    modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) {
-        if (_validFrom > _validTo || _validTo < _blockTimestamp()) {
-            revert InvalidDates();
-        }
-        _;
-    }
+    let account_A: string
+    let account_B: string
+    let account_C: string
+    let account_D: string
 
-    modifier onlyValidKYCAddressAndStatus(
-        KYCStatus _kycStatus,
-        address _account
-    ) {
-        if (_getKYCFor(_account) == _kycStatus) revert InvalidKYCStatus();
-        if (_account == address(0)) revert InvalidZeroAddress();
-        _;
-    }
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
+    let kycFacet: KYC
+    let pauseFacet: Pause
 
-    function _getKYCFor(
-        address _account
-    ) internal view virtual returns (KYCStatus kycStatus_) {
-        kycStatus_ = _KYCStorage().kyc[_account].validTo > _blockTimestamp() &&
-            _KYCStorage().kyc[_account].validFrom < _blockTimestamp() &&
-            _isIssuer(_KYCStorage().kyc[_account].issuer)
-            ? KYCStatus.GRANTED
-            : _KYCStorage().kycAddressesByStatus[KYCStatus.REVOKED].contains(
-                _account
+    const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
+    let currentTimestamp = 0
+    let expirationTimestamp = 0
+
+    let snapshot: SnapshotRestorer
+
+    before(async () => {
+        snapshot = await takeSnapshot()
+        // mute | mock console.log
+        console.log = () => {}
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+        account_D = signer_D.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                })
             )
-                ? KYCStatus.REVOKED
-                : KYCStatus.NOT_GRANTED;
-    }
 
-    function _getKYCAccountsCount(
-        KYCStatus _kycStatus
-    ) internal view virtual returns (uint256 KYCAccountsCount_) {
-        KYCAccountsCount_ = _KYCStorage()
-            .kycAddressesByStatus[_kycStatus]
-            .length();
-    }
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
 
-    function _getKYCAccounts(
-        KYCStatus _kycStatus,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (address[] memory accounts_) {
-        accounts_ = _KYCStorage().kycAddressesByStatus[_kycStatus].getFromSet(
-            _pageIndex,
-            _pageLength
-        );
-    }
+    after(async () => {
+        await snapshot.restore()
+    })
 
-    function _KYCStorage() internal pure returns (KYCStorage storage kyc_) {
-        bytes32 position = _KYC_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            kyc_.slot := position
+    beforeEach(async () => {
+        currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
+        expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
+
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_A],
         }
-    }
-}
+        const rbacPausable: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_A],
+        }
+        const rbacSSIssuer: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_C],
+        }
+        const init_rbacs: Rbac[] = [rbacKYC, rbacPausable, rbacSSIssuer]
+
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: false,
+            name: 'TEST_KYC',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
+
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_A)
+        pauseFacet = await ethers.getContractAt(
+            'Pause',
+            diamond.address,
+            signer_A
+        )
+    })
+
+    describe('Paused', () => {
+        beforeEach(async () => {
+            // Pausing the token
+            await pauseFacet.pause()
+        })
+
+        it('GIVEN a paused Token WHEN grantKYC THEN transaction fails with TokenIsPaused', async () => {
+            // lockByPartition with data fails
+            await expect(
+                kycFacet.grantKYC(
+                    account_B,
+                    '',
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_C
+                )
+            ).to.be.rejectedWith('TokenIsPaused')
+        })
+    })
+})

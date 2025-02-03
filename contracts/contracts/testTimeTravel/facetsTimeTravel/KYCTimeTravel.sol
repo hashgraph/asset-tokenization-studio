@@ -203,82 +203,24 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IKYC} from '../interfaces/kyc/IKYC.sol';
+import {KYC} from '../../layer_1/kyc/KYC.sol';
 import {
-    SSIManagementStorageWrapper
-} from '../ssi/SSIManagementStorageWrapper.sol';
-import {_KYC_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {LibCommon} from '../common/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../layer_1/context/LocalContext.sol';
 
-abstract contract KYCStorageWrapperRead is IKYC, SSIManagementStorageWrapper {
-    using LibCommon for EnumerableSet.AddressSet;
-    using EnumerableSet for EnumerableSet.AddressSet;
-
-    struct KYCStorage {
-        mapping(address => KYCData) kyc;
-        mapping(KYCStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
-    }
-
-    modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) {
-        if (_validFrom > _validTo || _validTo < _blockTimestamp()) {
-            revert InvalidDates();
-        }
-        _;
-    }
-
-    modifier onlyValidKYCAddressAndStatus(
-        KYCStatus _kycStatus,
-        address _account
-    ) {
-        if (_getKYCFor(_account) == _kycStatus) revert InvalidKYCStatus();
-        if (_account == address(0)) revert InvalidZeroAddress();
-        _;
-    }
-
-    function _getKYCFor(
-        address _account
-    ) internal view virtual returns (KYCStatus kycStatus_) {
-        kycStatus_ = _KYCStorage().kyc[_account].validTo > _blockTimestamp() &&
-            _KYCStorage().kyc[_account].validFrom < _blockTimestamp() &&
-            _isIssuer(_KYCStorage().kyc[_account].issuer)
-            ? KYCStatus.GRANTED
-            : _KYCStorage().kycAddressesByStatus[KYCStatus.REVOKED].contains(
-                _account
-            )
-                ? KYCStatus.REVOKED
-                : KYCStatus.NOT_GRANTED;
-    }
-
-    function _getKYCAccountsCount(
-        KYCStatus _kycStatus
-    ) internal view virtual returns (uint256 KYCAccountsCount_) {
-        KYCAccountsCount_ = _KYCStorage()
-            .kycAddressesByStatus[_kycStatus]
-            .length();
-    }
-
-    function _getKYCAccounts(
-        KYCStatus _kycStatus,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (address[] memory accounts_) {
-        accounts_ = _KYCStorage().kycAddressesByStatus[_kycStatus].getFromSet(
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function _KYCStorage() internal pure returns (KYCStorage storage kyc_) {
-        bytes32 position = _KYC_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            kyc_.slot := position
-        }
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+contract KYCTimeTravel is KYC, TimeTravelStorageWrapper {
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }
