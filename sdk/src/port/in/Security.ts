@@ -296,6 +296,8 @@ import ReleaseHoldByPartitionRequest from './request/ReleaseHoldByPartitionReque
 import { ReleaseHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommand.js';
 import ReclaimHoldByPartitionRequest from './request/ReclaimHoldByPartitionRequest.js';
 import { ReclaimHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommand.js';
+import { ExecuteHoldByPartitionCommand } from '../../app/usecase/command/security/operations/executeHoldByPartition/ExecuteHoldByPartitionCommand.js';
+import ExecuteHoldByPartitionRequest from './request/ExecuteHoldByPartitionRequest.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -384,6 +386,9 @@ interface ISecurityInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   reclaimHoldByPartition(
     request: ReclaimHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  executeHoldByPartition(
+    request: ExecuteHoldByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
@@ -1124,6 +1129,26 @@ class SecurityInPort implements ISecurityInPort {
         partitionId,
         holdId,
         targetId,
+      ),
+    );
+  }
+
+  @LogError
+  async executeHoldByPartition(
+    request: ExecuteHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, sourceId, amount, holdId, targetId, partitionId } =
+      request;
+    handleValidation('ExecuteHoldByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ExecuteHoldByPartitionCommand(
+        securityId,
+        sourceId,
+        amount,
+        holdId,
+        targetId,
+        partitionId,
       ),
     );
   }

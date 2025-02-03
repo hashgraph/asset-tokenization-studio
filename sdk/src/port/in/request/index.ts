@@ -249,6 +249,7 @@ import ReleaseRequest from './ReleaseRequest.js';
 import GetLockCountRequest from './GetLockCountRequest.js';
 import GetLocksIdRequest from './GetLocksIdRequest.js';
 import GetLockRequest from './GetLockRequest.js';
+import ExecuteHoldByPartitionRequest from './ExecuteHoldByPartitionRequest.js';
 
 import GetControlListTypeRequest from './GetControlListTypeRequest.js';
 import InitializationRequest from './InitializationRequest.js';
@@ -361,4 +362,5 @@ export {
   GetHoldForByPartitionRequest,
   ReleaseHoldByPartitionRequest,
   ReclaimHoldByPartitionRequest,
+  ExecuteHoldByPartitionRequest,
 };

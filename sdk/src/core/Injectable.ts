@@ -248,6 +248,7 @@ import { ReleaseCommandHandler } from '../app/usecase/command/security/operation
 import { LockCountQueryHandler } from '../app/usecase/query/security/lockCount/LockCountQueryHandler.js';
 import { GetLockQueryHandler } from '../app/usecase/query/security/getLock/GetLockQueryHandler.js';
 import { LocksIdQueryHandler } from '../app/usecase/query/security/locksId/LocksIdQueryHandler.js';
+import { ExecuteHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/executeHoldByPartition/ExecuteHoldByPartitionCommandHandler.js';
 
 import { WalletEvents } from '../app/service/event/WalletEvent.js';
 import { CommandHandlerType } from './command/CommandBus.js';
@@ -500,6 +501,10 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: ReclaimHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ExecuteHoldByPartitionCommandHandler,
   },
 ];
 
