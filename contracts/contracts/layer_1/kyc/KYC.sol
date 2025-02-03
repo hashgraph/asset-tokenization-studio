@@ -210,6 +210,7 @@ import {_KYC_ROLE} from '../constants/roles.sol';
 import {IKYC} from '../interfaces/kyc/IKYC.sol';
 import {KYCStorageWrapper} from './KYCStorageWrapper.sol';
 import {SSIManagement} from '../ssi/SSIManagement.sol';
+import {_KYC_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
 contract KYC is KYCStorageWrapper, SSIManagement {
     function grantKYC(
@@ -264,6 +265,16 @@ contract KYC is KYCStorageWrapper, SSIManagement {
         uint256 _pageLength
     ) external view virtual override returns (address[] memory accounts_) {
         accounts_ = _getKYCAccounts(_kycStatus, _pageIndex, _pageLength);
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _KYC_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()

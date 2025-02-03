@@ -296,6 +296,7 @@ contract SSIManagement is
     function getStaticResolverKey()
         external
         pure
+        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
