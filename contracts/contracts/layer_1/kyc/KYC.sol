@@ -228,7 +228,8 @@ contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper {
         override
         onlyRole(_KYC_ROLE)
         onlyUnpaused
-        onlyValidKYCAddressAndStatus(KYCStatus.GRANTED, _account)
+        checkAddress(_account)
+        checkKYCStatus(KYCStatus.NOT_GRANTED, _account)
         onlyValidDates(_validFrom, _validTo)
         checkIssuerList(_issuer)
         returns (bool success_)
@@ -245,17 +246,23 @@ contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper {
         override
         onlyRole(_KYC_ROLE)
         onlyUnpaused
-        onlyValidKYCAddressAndStatus(KYCStatus.NOT_GRANTED, _account)
+        checkAddress(_account)
         returns (bool success_)
     {
         success_ = _revokeKYC(_account);
         emit KYCRevoked(_account, _msgSender());
     }
 
-    function getKYCFor(
+    function getKYCStatusFor(
         address _account
     ) external view virtual override returns (KYCStatus kycStatus_) {
-        kycStatus_ = _getKYCFor(_account);
+        kycStatus_ = _getKYCStatusFor(_account);
+    }
+
+    function getKYCFor(
+        address _account
+    ) external view virtual override returns (KYCData memory kyc_) {
+        kyc_ = _getKYCFor(_account);
     }
 
     function getKYCAccountsCount(
@@ -289,10 +296,13 @@ contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_ = new bytes4[](6);
         staticFunctionSelectors_[selectorIndex++] = this.grantKYC.selector;
         staticFunctionSelectors_[selectorIndex++] = this.revokeKYC.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getKYCFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getKYCStatusFor
+            .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getKYCAccountsCount
             .selector;

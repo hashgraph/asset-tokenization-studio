@@ -227,24 +227,18 @@ abstract contract KYCStorageWrapper is Common {
             _validFrom,
             _validTo,
             _VCid,
-            _issuer
+            _issuer,
+            IKYC.KYCStatus.GRANTED
         );
         _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.GRANTED].add(
-            _account
-        );
-        _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.NOT_GRANTED].remove(
             _account
         );
         success_ = true;
     }
 
     function _revokeKYC(address _account) internal returns (bool success_) {
-        if (_getKYCFor(_account) != IKYC.KYCStatus.GRANTED)
-            revert IKYC.KYCIsNotGranted();
         delete _KYCStorage().kyc[_account];
-        _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.NOT_GRANTED].add(
-            _account
-        );
+
         _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.GRANTED].remove(
             _account
         );

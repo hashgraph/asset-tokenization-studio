@@ -212,6 +212,7 @@ interface IKYC {
         uint256 validTo;
         string VCid;
         address issuer;
+        KYCStatus status;
     }
 
     enum KYCStatus {
@@ -274,12 +275,23 @@ interface IKYC {
      * @dev Get the status of the KYC for an account
      *
      * @param _account the account to check
-     * @return kycStatus_ GRANTED, REVOKED or NOT_GRANTED
+     * @return kycStatus_ GRANTED or NOT_GRANTED
+     */
+
+    function getKYCStatusFor(
+        address _account
+    ) external view returns (KYCStatus kycStatus_);
+
+    /**
+     * @dev Get all the info of the KYC for an account
+     *
+     * @param _account the account to check
+     * @return kyc_
      */
 
     function getKYCFor(
         address _account
-    ) external view returns (KYCStatus kycStatus_);
+    ) external view returns (KYCData memory kyc_);
 
     /**
      * @dev Get the count of accounts with a given KYC status
