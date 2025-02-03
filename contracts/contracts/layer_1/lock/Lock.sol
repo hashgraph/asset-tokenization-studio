@@ -271,11 +271,7 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
             _lockId
         );
     }
-    //TODO: revisar si estan los balances ajustados y ver si tiene consistencia con capa 0
-    // Lo que no pueda resolver capa 1 se lo paso a capa 0
-    // revisar que estaba hecho en la capa 2, si necesita adaptacion en la capa 1 y luego ir a capa 0
 
-    //TODO: REVISAR AMOUNT
     function getLockedAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
@@ -317,8 +313,9 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         override
         returns (uint256 amount_, uint256 expirationTimestamp_)
     {
-        return _getLockForByPartition(_partition, _tokenHolder, _lockId);
+        return _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
     }
+
 
     // Uses default parititon in case Multipartition is not activated
     function lock(
@@ -381,14 +378,12 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         );
     }
 
-    //TODO: a medias, revisar si el factor y el amount son correctos
     function getLockedAmountFor(
         address _tokenHolder
     ) external view virtual override returns (uint256 amount_) {
-        return _getLockedAmountFor(_tokenHolder);
+        return _getLockedAmountForByPartitionAdjusted(_DEFAULT_PARTITION,_tokenHolder);
     }
 
-    // TODO: OK
     function getLockCountFor(
         address _tokenHolder
     ) external view virtual override returns (uint256 lockCount_) {
@@ -410,7 +405,6 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
             );
     }
 
-    // TODO: OK, va a capa 0 y pilla el lock
     function getLockFor(
         address _tokenHolder,
         uint256 _lockId
@@ -422,6 +416,21 @@ abstract contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         returns (uint256 amount_, uint256 expirationTimestamp_)
     {
         return
-            _getLockForByPartition(_DEFAULT_PARTITION, _tokenHolder, _lockId);
+            _getLockForByPartitionAdjusted(_DEFAULT_PARTITION, _tokenHolder, _lockId);
     }
+
+    function getLockedAmountForAdjusted(
+        address _tokenHolder
+    ) external view virtual returns (uint256 amount_) {
+        return _getLockedAmountForAdjusted(_tokenHolder);
+    }
+
+    function getLockedAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual returns (uint256 amount_) {
+        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+
 }

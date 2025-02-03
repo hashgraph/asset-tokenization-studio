@@ -223,6 +223,7 @@ abstract contract LockStorageWrapper_2_Read is
     LockStorageWrapper,
     ERC1410ScheduledTasksStorageWrapper
 {
+    //TODO:DONE
     function _getLockedAmountForAdjusted(
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_) {
@@ -234,6 +235,7 @@ abstract contract LockStorageWrapper_2_Read is
         return _getLockedAmountFor(_tokenHolder) * factor;
     }
 
+    //TODO:DONE
     function _getLockedAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
@@ -248,7 +250,7 @@ abstract contract LockStorageWrapper_2_Read is
         return
             _getLockedAmountForByPartition(_partition, _tokenHolder) * factor;
     }
-
+    // TODO: DONE
     function _getLockForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder,
@@ -276,6 +278,7 @@ abstract contract LockStorageWrapper_2_Read is
         amount_ *= factor;
     }
 
+    //TODO: ES NECESARIA?
     function _addPartitionTo(
         uint256 _value,
         address _account,

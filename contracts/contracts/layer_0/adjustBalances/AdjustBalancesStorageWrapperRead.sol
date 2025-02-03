@@ -298,6 +298,18 @@ contract AdjustBalancesStorageWrapperRead is
             );
     }
 
+    function _calculateFactorLockedAmountForByPartitionAdjustedAt(
+        bytes32 partition,
+        address tokenHolder,
+        uint256 lockId,
+        uint256 timestamp
+    ) internal view returns (uint256) {
+        return calculateFactor(
+            getAbafAdjustedAt(timestamp),
+            _getAdjustBalancesStorage().labafLocks[tokenHolder][partition][lockId]
+        );
+    }
+
     function _calculateFactorByTokenHolderAndPartitionIndex(
         uint256 abaf,
         address tokenHolder,

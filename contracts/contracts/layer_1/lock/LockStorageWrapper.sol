@@ -205,10 +205,11 @@
 
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
+import "@hashgraph/asset-tokenization-contracts/contracts/layer_2/adjustBalances/AdjustBalanceLib.sol";
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {Common} from '../common/Common.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract LockStorageWrapper is Common {
@@ -326,4 +327,27 @@ abstract contract LockStorageWrapper is Common {
 
         lockStorage.locksIndex[_tokenHolder][_partition][lock.id] = _lockIndex;
     }
+
+//    function _updateLockByIndex(
+//        bytes32 _partition,
+//        uint256 _lockId,
+//        address _tokenHolder,
+//        uint256 _abaf
+//    ) internal virtual {
+//        LockDataStorage storage lockStorage = _lockStorage();
+//
+//        uint256 currentLABAF = lockStorage.labafsTotalLockedByPartition[_tokenHolder][_partition];
+//
+//        // Verificamos si es necesario actualizar el ABAF
+//        if (_abaf != currentLABAF) {
+//            uint256 factor = AdjustBalanceLib.calculateFactor(_abaf, currentLABAF);
+//
+//            uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
+//
+//            _updateLockAmountByIndex(_partition, lockIndex, _tokenHolder, factor);
+//
+//            lockStorage.labafsTotalLockedByPartition[_tokenHolder][_partition] = _abaf;
+//        }
+//    }
+
 }
