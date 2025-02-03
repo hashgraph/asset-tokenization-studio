@@ -209,10 +209,13 @@ pragma solidity 0.8.18;
 import {_KYC_ROLE} from '../constants/roles.sol';
 import {IKYC} from '../interfaces/kyc/IKYC.sol';
 import {KYCStorageWrapper} from './KYCStorageWrapper.sol';
-import {SSIManagement} from '../ssi/SSIManagement.sol';
 import {_KYC_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../common/Common.sol';
 
-contract KYC is KYCStorageWrapper, SSIManagement {
+contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper, Common {
     function grantKYC(
         address _account,
         string memory _VCid,

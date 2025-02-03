@@ -215,6 +215,7 @@ import {
     Pause,
     IFactory,
     BusinessLogicResolver,
+    SSIManagement,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -229,10 +230,12 @@ import {
     RegulationType,
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
+    ADDRESS_ZERO,
 } from '@scripts'
 
 const _VALID_FROM = 0
 const _VALID_TO = 99999999999999
+const _VC_ID = 'VC_24'
 
 describe('KYC Tests', () => {
     let diamond: ResolverProxy
@@ -250,6 +253,7 @@ describe('KYC Tests', () => {
     let businessLogicResolver: BusinessLogicResolver
     let kycFacet: KYC
     let pauseFacet: Pause
+    let ssiManagementFacet: SSIManagement
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -260,7 +264,7 @@ describe('KYC Tests', () => {
     before(async () => {
         snapshot = await takeSnapshot()
         // mute | mock console.log
-        console.log = () => {}
+        //console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
@@ -296,11 +300,11 @@ describe('KYC Tests', () => {
             role: PAUSER_ROLE,
             members: [account_A],
         }
-        const rbacSSIssuer: Rbac = {
+        const rbacSSIManager: Rbac = {
             role: SSI_MANAGER_ROLE,
             members: [account_C],
         }
-        const init_rbacs: Rbac[] = [rbacKYC, rbacPausable, rbacSSIssuer]
+        const init_rbacs: Rbac[] = [rbacKYC, rbacPausable, rbacSSIManager]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -339,6 +343,11 @@ describe('KYC Tests', () => {
             diamond.address,
             signer_A
         )
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_C
+        )
     })
 
     describe('Paused', () => {
@@ -348,16 +357,111 @@ describe('KYC Tests', () => {
         })
 
         it('GIVEN a paused Token WHEN grantKYC THEN transaction fails with TokenIsPaused', async () => {
-            // lockByPartition with data fails
             await expect(
                 kycFacet.grantKYC(
                     account_B,
-                    '',
+                    _VC_ID,
                     _VALID_FROM,
                     _VALID_TO,
                     account_C
                 )
-            ).to.be.rejectedWith('TokenIsPaused')
+            ).to.be.revertedWithCustomError(kycFacet, 'TokenIsPaused')
         })
+
+        it('GIVEN a paused Token WHEN revokeKYC THEN transaction fails with TokenIsPaused', async () => {
+            await expect(
+                kycFacet.revokeKYC(account_B)
+            ).to.be.revertedWithCustomError(kycFacet, 'TokenIsPaused')
+        })
+    })
+
+    describe('Access Control', () => {
+        it('GIVEN a non KYC account WHEN grantKYC THEN transaction fails with AccountHasNoRole', async () => {
+            await expect(
+                kycFacet
+                    .connect(signer_C)
+                    .grantKYC(
+                        account_B,
+                        _VC_ID,
+                        _VALID_FROM,
+                        _VALID_TO,
+                        account_C
+                    )
+            ).to.be.revertedWithCustomError(kycFacet, 'AccountHasNoRole')
+        })
+
+        it('GIVEN a paused Token WHEN revokeKYC THEN transaction fails with AccountHasNoRole', async () => {
+            await expect(
+                kycFacet.connect(signer_C).revokeKYC(account_B)
+            ).to.be.rejectedWith('AccountHasNoRole')
+        })
+    })
+
+    describe('KYC Wrong input data', () => {
+        it('GIVEN account ZERO WHEN grantKYC THEN transaction fails with InvalidZeroAddress', async () => {
+            await expect(
+                kycFacet.grantKYC(
+                    ADDRESS_ZERO,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidZeroAddress')
+        })
+
+        it('GIVEN account ZERO WHEN revokeKYC THEN transaction fails with InvalidZeroAddress', async () => {
+            await expect(
+                kycFacet.revokeKYC(ADDRESS_ZERO)
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidZeroAddress')
+        })
+
+        it('GIVEN wrong Valid From Date WHEN grantKYC THEN transaction fails with InvalidDates', async () => {
+            await expect(
+                kycFacet.grantKYC(
+                    account_B,
+                    _VC_ID,
+                    _VALID_TO + 1,
+                    _VALID_TO,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidDates')
+        })
+
+        it('GIVEN wrong Valid To Date WHEN grantKYC THEN transaction fails with InvalidDates', async () => {
+            await expect(
+                kycFacet.grantKYC(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    currentTimestamp - 1,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidDates')
+        })
+
+        it('GIVEN wrong issuer WHEN grantKYC THEN transaction fails with AccountIsNotIssuer', async () => {
+            await expect(
+                kycFacet.grantKYC(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_D
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'AccountIsNotIssuer')
+        })
+    })
+
+    it('GIVEN a VC WHEN grantKYC THEN transaction succeed', async () => {
+        await ssiManagementFacet.addIssuer(account_C)
+
+        await kycFacet.grantKYC(
+            account_B,
+            _VC_ID,
+            _VALID_FROM,
+            _VALID_TO,
+            account_C
+        )
     })
 })

@@ -206,6 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {IKYC} from '../interfaces/kyc/IKYC.sol';
 import {KYCStorageWrapperRead} from './KYCStorageWrapperRead.sol';
 import {
     EnumerableSet
@@ -221,22 +222,31 @@ abstract contract KYCStorageWrapper is KYCStorageWrapperRead {
         uint256 _validTo,
         address _issuer
     ) internal returns (bool success_) {
-        _KYCStorage().kyc[_account] = KYCData(
+        _KYCStorage().kyc[_account] = IKYC.KYCData(
             _validFrom,
             _validTo,
             _VCid,
             _issuer
         );
-        _KYCStorage().kycAddressesByStatus[KYCStatus.GRANTED].add(_account);
-        _KYCStorage().kycAddressesByStatus[KYCStatus.REVOKED].remove(_account);
+        _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.GRANTED].add(
+            _account
+        );
+        _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.REVOKED].remove(
+            _account
+        );
         success_ = true;
     }
 
     function _revokeKYC(address _account) internal returns (bool success_) {
-        if (_getKYCFor(_account) != KYCStatus.GRANTED) revert KYCIsNotGranted();
+        if (_getKYCFor(_account) != IKYC.KYCStatus.GRANTED)
+            revert IKYC.KYCIsNotGranted();
         delete _KYCStorage().kyc[_account];
-        _KYCStorage().kycAddressesByStatus[KYCStatus.REVOKED].add(_account);
-        _KYCStorage().kycAddressesByStatus[KYCStatus.GRANTED].remove(_account);
+        _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.REVOKED].add(
+            _account
+        );
+        _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.GRANTED].remove(
+            _account
+        );
         success_ = true;
     }
 }
