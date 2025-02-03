@@ -231,6 +231,7 @@ export default class ReleaseHoldByPartitionRequest extends ValidatedRequest<Rele
       targetId: Validation.checkHederaIdFormatOrEvmAddress(),
       partitionId: Validation.checkBytes32Format(),
       amount: Validation.checkAmount(),
+      holdId: Validation.checkNumber({ min: 0 }),
     });
 
     this.securityId = securityId;
@@ -238,5 +239,6 @@ export default class ReleaseHoldByPartitionRequest extends ValidatedRequest<Rele
     this.holdId = holdId;
     this.partitionId = partitionId;
     this.amount = amount;
+    this.holdId = holdId;
   }
 }
