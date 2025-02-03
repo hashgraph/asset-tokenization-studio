@@ -225,7 +225,7 @@ import { PartitionsUnProtected } from '../../../error/PartitionsUnprotected.js';
 import {
   getProtectedPartitionRole,
   SecurityRole,
-} from 'domain/context/security/SecurityRole.js';
+} from '../../../../../../../domain/context/security/SecurityRole.js';
 import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
 import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
 import { BigNumber } from 'ethers';
