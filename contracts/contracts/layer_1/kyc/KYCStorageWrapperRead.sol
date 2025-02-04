@@ -251,7 +251,7 @@ abstract contract KYCStorageWrapperRead is SSIManagementStorageWrapper {
 
         if (kycFor.validTo < _blockTimestamp())
             return IKYC.KYCStatus.NOT_GRANTED;
-        if (kycFor.validFrom >= _blockTimestamp())
+        if (kycFor.validFrom > _blockTimestamp())
             return IKYC.KYCStatus.NOT_GRANTED;
         if (!_isIssuer(kycFor.issuer)) return IKYC.KYCStatus.NOT_GRANTED;
         if (

@@ -296,7 +296,7 @@ interface IKYC {
     /**
      * @dev Get the count of accounts with a given KYC status
      *
-     * @param _kycStatus GRANTED, REVOKED or NOT_GRANTED
+     * @param _kycStatus GRANTED or NOT_GRANTED
      * @return KYCAccountsCount_ count of accounts with the given KYC status
      */
 
