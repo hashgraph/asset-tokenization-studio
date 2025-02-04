@@ -207,9 +207,11 @@
 pragma solidity 0.8.18;
 
 import {ERC1410BasicStorageWrapper} from './ERC1410BasicStorageWrapper.sol';
+import {IERC1410Operator} from '../../interfaces/ERC1400/IERC1410Operator.sol';
 import {
     _ERC1410_OPERATOR_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
+import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
 
 abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
     struct ERC1410OperatorStorage {
@@ -257,21 +259,18 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
     }
 
     function _operatorTransferByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
+        IERC1410Operator.OperatorTransferData calldata _operatorTransferData
     ) internal virtual returns (bytes32) {
         _transferByPartition(
-            _from,
-            _to,
-            _value,
-            _partition,
-            _data,
+            _operatorTransferData.from,
+            IERC1410Basic.BasicTransferInfo(
+                _operatorTransferData.to,
+                _operatorTransferData.value
+            ),
+            _operatorTransferData.partition,
+            _operatorTransferData.data,
             _msgSender(),
-            _operatorData
+            _operatorTransferData.operatorData
         );
     }
 

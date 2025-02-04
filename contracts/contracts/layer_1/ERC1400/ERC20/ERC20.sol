@@ -212,6 +212,7 @@ import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {IKYC} from '../../interfaces/kyc/IKYC.sol';
 
 abstract contract ERC20 is
     IERC20,
@@ -265,6 +266,8 @@ abstract contract ERC20 is
         checkControlList(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _msgSender())
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, to)
         returns (bool)
     {
         return _transfer(_msgSender(), to, value);
@@ -284,6 +287,8 @@ abstract contract ERC20 is
         checkControlList(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, from)
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, to)
         returns (bool)
     {
         return _transferFrom(_msgSender(), from, to, value);
