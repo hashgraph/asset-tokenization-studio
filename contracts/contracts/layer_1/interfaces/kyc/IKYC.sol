@@ -217,7 +217,6 @@ interface IKYC {
 
     enum KYCStatus {
         NOT_GRANTED,
-        // Addresses with a KYC that has not been explicitly revoked
         GRANTED
     }
 
@@ -307,7 +306,7 @@ interface IKYC {
     /**
      * @dev Returns an array of accounts with a given KYC status
      *
-     * @param _kycStatus GRANTED, REVOKED or NOT_GRANTED
+     * @param _kycStatus GRANTED or NOT_GRANTED
      * @param _pageIndex members to skip : _pageIndex * _pageLength
      * @param _pageLength number of members to return
      * @return accounts_ The array containing the accounts addresses
