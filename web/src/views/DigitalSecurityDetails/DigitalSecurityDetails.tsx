@@ -245,6 +245,7 @@ import { Management } from "./Components/Management/Management";
 import { BalanceAdjustment } from "./Components/BalanceAdjustment/BalanceAdjustment";
 import { Locker } from "./Components/Locker/Locker";
 import { Cap } from "./Components/Cap/Cap";
+import { Hold } from "./Components/Hold/Hold";
 
 export const DigitalSecurityDetails = () => {
   const { t: tHeader } = useTranslation("security", {
@@ -393,6 +394,11 @@ export const DigitalSecurityDetails = () => {
         header: tTabs("locker"),
       });
     }
+
+    adminTabs.push({
+      content: <Hold />,
+      header: tTabs("hold"),
+    });
 
     const hasCapRole = roles.find((role) => role === SecurityRole._CAP_ROLE);
 

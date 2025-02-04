@@ -203,46 +203,53 @@
 
 */
 
-import AccountViewModel from './AccountViewModel.js';
-import BalanceViewModel from './BalanceViewModel.js';
-import ContractViewModel from './ContractViewModel.js';
-import DividendsForViewModel from './DividendsForViewModel.js';
-import DividendsViewModel from './DividendsViewModel.js';
-import CouponForViewModel from './CouponForViewModel.js';
-import CouponViewModel from './CouponViewModel.js';
-import SecurityViewModel from './SecurityViewModel.js';
-import TransactionResultViewModel from './TransactionResultViewModel.js';
-import BondDetailsViewModel from './BondDetailsViewModel.js';
-import EquityDetailsViewModel from './EquityDetailsViewModel.js';
-import CouponDetailsViewModel from './CouponDetailsViewModel.js';
-import MaxSupplyViewModel from './MaxSupplyViewModel.js';
-import VotingRightsForViewModel from './VotingRightsForViewModel.js';
-import VotingRightsViewModel from './VotingRightsViewModel.js';
-import RegulationViewModel from './RegulationViewModel.js';
-import LockViewModel from './LockViewModel.js';
-import ConfigInfoViewModel from './ConfigInfoViewModel.js';
-import ScheduledBalanceAdjustmentViewModel from './ScheduledBalanceAdjustmentViewModel.js';
-import HoldViewModel from './HoldViewModel.js';
-
-export {
-  AccountViewModel,
-  BalanceViewModel,
-  ContractViewModel,
-  DividendsForViewModel,
-  DividendsViewModel,
-  CouponForViewModel,
-  CouponViewModel,
-  SecurityViewModel,
-  TransactionResultViewModel,
-  BondDetailsViewModel,
-  EquityDetailsViewModel,
-  CouponDetailsViewModel,
-  MaxSupplyViewModel,
-  VotingRightsForViewModel,
-  VotingRightsViewModel,
-  RegulationViewModel,
-  LockViewModel,
-  ConfigInfoViewModel,
-  ScheduledBalanceAdjustmentViewModel,
+import {
+  GetHoldForByPartitionRequest,
+  GetHoldsIdForByPartitionRequest,
   HoldViewModel,
+} from "@hashgraph/asset-tokenization-sdk";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import SDKService from "../../services/SDKService";
+import { DEFAULT_PARTITION } from "../../utils/constants";
+
+export const GET_HOLDS = (securityId: string, targetId: string) =>
+  `GET_HOLDS_${securityId}_${targetId}`;
+
+export const useGetHolds = (
+  request: GetHoldsIdForByPartitionRequest,
+  options?: UseQueryOptions<
+    HoldViewModel[],
+    unknown,
+    HoldViewModel[],
+    string[]
+  >,
+) => {
+  return useQuery(
+    [GET_HOLDS(request.securityId, request.targetId)],
+    async () => {
+      try {
+        const holdIds = await SDKService.getHoldsId(request);
+
+        const holdDetails = await Promise.all(
+          holdIds.map(async (holdId) => {
+            const holdRequest = new GetHoldForByPartitionRequest({
+              securityId: request.securityId,
+              targetId: request.targetId,
+              holdId: Number(holdId),
+              partitionId: DEFAULT_PARTITION,
+            });
+            return await SDKService.getHoldDetails(holdRequest);
+          }),
+        );
+
+        return holdDetails.filter(
+          (hold): hold is HoldViewModel => hold !== null,
+        );
+      } catch (error) {
+        console.error("Error fetching holds", error);
+        throw error;
+      }
+    },
+    options,
+  );
 };

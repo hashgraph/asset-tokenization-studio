@@ -284,6 +284,14 @@ import {
   GetLocksIdRequest,
   GetLockRequest,
   LockViewModel,
+  HoldViewModel,
+  CreateHoldFromByPartitionRequest,
+  GetHoldsIdForByPartitionRequest,
+  GetHoldForByPartitionRequest,
+  CreateHoldByPartitionRequest,
+  ReclaimHoldByPartitionRequest,
+  ReleaseHoldByPartitionRequest,
+  ExecuteHoldByPartitionRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -718,6 +726,60 @@ export class SDKService {
 
   public static async getLock(req: GetLockRequest): Promise<LockViewModel> {
     return await Security.getLock(req);
+  }
+
+  public static async getHoldsId(
+    req: GetHoldsIdForByPartitionRequest,
+  ): Promise<number[]> {
+    return await Security.getHoldsIdForByPartition(req);
+  }
+
+  public static async getHoldDetails(
+    req: GetHoldForByPartitionRequest,
+  ): Promise<HoldViewModel> {
+    return await Security.getHoldForByPartition(req);
+  }
+
+  public static async createHoldFromByPartition(
+    req: CreateHoldFromByPartitionRequest,
+  ): Promise<number> {
+    const response = await Security.createHoldFromByPartition(req);
+    return response.payload;
+  }
+
+  public static async controllerCreateHoldByPartition(
+    req: CreateHoldFromByPartitionRequest,
+  ): Promise<number> {
+    const response = await Security.controllerCreateHoldByPartition(req);
+    return response.payload;
+  }
+
+  public static async createHoldByPartition(
+    req: CreateHoldByPartitionRequest,
+  ): Promise<number> {
+    const response = await Security.createHoldByPartition(req);
+    return response.payload;
+  }
+
+  public static async reclaimHoldByPartition(
+    req: ReclaimHoldByPartitionRequest,
+  ): Promise<boolean> {
+    const response = await Security.reclaimHoldByPartition(req);
+    return response.payload;
+  }
+
+  public static async releaseHoldByPartition(
+    req: ReleaseHoldByPartitionRequest,
+  ): Promise<boolean> {
+    const response = await Security.releaseHoldByPartition(req);
+    return response.payload;
+  }
+
+  public static async executeHoldByPartition(
+    req: ExecuteHoldByPartitionRequest,
+  ): Promise<boolean> {
+    const response = await Security.executeHoldByPartition(req);
+    return response.payload;
   }
 
   // MANAGEMENT ////////////////////////////////////////////
