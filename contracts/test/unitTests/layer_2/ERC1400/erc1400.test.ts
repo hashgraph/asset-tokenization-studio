@@ -215,6 +215,8 @@ import {
     type AccessControl,
     type Equity,
     type ControlList,
+    KYC,
+    SSIManagement,
     TimeTravel,
     ERC20_2,
     ERC1594_2,
@@ -243,6 +245,8 @@ import {
     IS_NOT_OPERATOR_ERROR_ID,
     IS_PAUSED_ERROR_ID,
     LOCKER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
     OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
     PAUSER_ROLE,
@@ -325,9 +329,12 @@ describe('ERC1400 Tests', () => {
     let erc1644Facet: ERC1644_2
     let adjustBalancesFacet: AdjustBalances
     let timeTravelFacet: TimeTravel
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
         await grantRolesToAccounts()
+        await grantKYCToAccounts()
         await connectFacetsToSigners()
         await setMaxSupply(singlePartition)
         await issueTokens(singlePartition)
@@ -340,6 +347,21 @@ describe('ERC1400 Tests', () => {
         await accessControlFacet.grantRole(CAP_ROLE, account_A)
         await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
         await accessControlFacet.grantRole(LOCKER_ROLE, account_A)
+        await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
+        await accessControlFacet.grantRole(KYC_ROLE, account_A)
+    }
+
+    async function grantKYCToAccounts() {
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet
+            .connect(signer_A)
+            .grantKYC(account_A, '', 0, 9999999999, account_A)
+        await kycFacet
+            .connect(signer_A)
+            .grantKYC(account_B, '', 0, 9999999999, account_A)
+        await kycFacet
+            .connect(signer_A)
+            .grantKYC(account_C, '', 0, 9999999999, account_A)
     }
 
     async function connectFacetsToSigners() {
@@ -674,6 +696,12 @@ describe('ERC1400 Tests', () => {
         erc1644Facet = await ethers.getContractAt('ERC1644_2', diamond.address)
 
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
+
+        kycFacet = await ethers.getContractAt('KYC', diamond.address)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address
+        )
     }
 
     function set_initRbacs(): Rbac[] {
@@ -681,6 +709,7 @@ describe('ERC1400 Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
+
         const corporateActionPause: Rbac = {
             role: CORPORATE_ACTION_ROLE,
             members: [account_B],
@@ -721,7 +750,15 @@ describe('ERC1400 Tests', () => {
                 role: PAUSER_ROLE,
                 members: [account_B],
             }
-            const init_rbacs: Rbac[] = [rbacPause]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -772,8 +809,22 @@ describe('ERC1400 Tests', () => {
                 diamond.address,
                 signer_A
             )
+            kycFacet = await ethers.getContractAt(
+                'KYC',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SSIManagement',
+                diamond.address,
+                signer_A
+            )
 
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+            await ssiManagementFacet.addIssuer(account_E)
+            await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_E)
+            await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
+            await kycFacet.grantKYC(account_D, '', 0, 9999999999, account_E)
 
             await erc1410Facet.issueByPartition(
                 _PARTITION_ID_1,
@@ -1329,7 +1380,7 @@ describe('ERC1400 Tests', () => {
                 data,
                 operatorData
             )
-            basicTransferInfo.amount = 2 * balanceOf_C_Original
+            basicTransferInfo.value = 2 * balanceOf_C_Original
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
@@ -1355,7 +1406,7 @@ describe('ERC1400 Tests', () => {
                 operatorData
             )
 
-            operatorTransferData.amount = 2 * balanceOf_E_Original
+            operatorTransferData.value = 2 * balanceOf_E_Original
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejected
@@ -2031,11 +2082,26 @@ describe('ERC1400 Tests', () => {
                 'ControlList',
                 newDiamond.address
             )
+            kycFacet = await ethers.getContractAt(
+                'KYC',
+                newDiamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SSIManagement',
+                newDiamond.address,
+                signer_A
+            )
 
             // accounts are blacklisted by default (white list)
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
             await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
+            await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
+            await accessControlFacet.grantRole(KYC_ROLE, account_B)
+
+            await ssiManagementFacet.addIssuer(account_E)
+            await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
 
             // Using account A (with role)
             erc1410Facet = erc1410Facet.connect(signer_A)
@@ -2362,7 +2428,15 @@ describe('ERC1400 Tests', () => {
                 role: PAUSER_ROLE,
                 members: [account_B],
             }
-            const init_rbacs: Rbac[] = [rbacPause]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -2409,8 +2483,21 @@ describe('ERC1400 Tests', () => {
                 diamond.address,
                 signer_A
             )
+            kycFacet = await ethers.getContractAt(
+                'KYC',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SSIManagement',
+                diamond.address,
+                signer_A
+            )
 
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+            await ssiManagementFacet.addIssuer(account_E)
+            await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_E)
+            await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
 
             await erc1410Facet.issueByPartition(
                 _PARTITION_ID_1,
@@ -2582,6 +2669,18 @@ describe('ERC1400 Tests', () => {
                 factory,
                 businessLogicResolverAddress: businessLogicResolver.address,
             })
+            basicTransferInfo = {
+                to: account_D,
+                value: amount,
+            }
+            operatorTransferData = {
+                partition: _PARTITION_ID_1,
+                from: account_E,
+                to: account_D,
+                value: amount,
+                data: data,
+                operatorData: operatorData,
+            }
         })
 
         afterEach(async () => {
@@ -2653,6 +2752,10 @@ describe('ERC1400 Tests', () => {
                 )
                 await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
                 await accessControlFacet.grantRole(CAP_ROLE, account_A)
+                await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
+                await accessControlFacet.grantRole(KYC_ROLE, account_A)
+
+                await grantKYCToAccounts()
 
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -2723,6 +2826,10 @@ describe('ERC1400 Tests', () => {
                 )
                 await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
                 await accessControlFacet.grantRole(CAP_ROLE, account_A)
+                await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
+                await accessControlFacet.grantRole(KYC_ROLE, account_A)
+
+                await grantKYCToAccounts()
 
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -2766,6 +2873,10 @@ describe('ERC1400 Tests', () => {
                 )
                 await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
                 await accessControlFacet.grantRole(CAP_ROLE, account_A)
+                await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
+                await accessControlFacet.grantRole(KYC_ROLE, account_A)
+
+                await grantKYCToAccounts()
 
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)

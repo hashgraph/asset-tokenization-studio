@@ -217,12 +217,16 @@ import {
     type Hold_2,
     IFactory,
     BusinessLogicResolver,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     SNAPSHOT_ROLE,
     PAUSER_ROLE,
     ISSUER_ROLE,
     LOCKER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
@@ -265,6 +269,8 @@ describe('Snapshots Tests', () => {
     let pauseFacet: Pause
     let lockFacet: Lock_2
     let holdFacet: Hold_2
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     before(async () => {
         // mute | mock console.log
@@ -350,6 +356,12 @@ describe('Snapshots Tests', () => {
         lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
 
         holdFacet = await ethers.getContractAt('Hold_2', diamond.address)
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_A
+        )
     })
 
     it('GIVEN an account without snapshot role WHEN takeSnapshot THEN transaction fails with AccountHasNoRole', async () => {
@@ -423,6 +435,12 @@ describe('Snapshots Tests', () => {
         accessControlFacet = accessControlFacet.connect(signer_A)
         await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_C)
         await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
+        await accessControlFacet.grantRole(KYC_ROLE, account_B)
+
+        await ssiManagementFacet.addIssuer(account_A)
+        await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
+        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
         // Using account C (with role)
         snapshotFacet = snapshotFacet.connect(signer_C)
         erc1410Facet = erc1410Facet.connect(signer_A)

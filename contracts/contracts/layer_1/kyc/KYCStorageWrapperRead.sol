@@ -254,8 +254,12 @@ abstract contract KYCStorageWrapperRead is SSIManagementStorageWrapper {
         if (kycFor.validFrom > _blockTimestamp())
             return IKYC.KYCStatus.NOT_GRANTED;
         if (!_isIssuer(kycFor.issuer)) return IKYC.KYCStatus.NOT_GRANTED;
+
+        address revocationListAddress = _getRevocationRegistryAddress();
+
         if (
-            IRevocationList(_getRevocationRegistryAddress()).revoked(
+            revocationListAddress != address(0) &&
+            IRevocationList(revocationListAddress).revoked(
                 kycFor.issuer,
                 kycFor.VCid
             )

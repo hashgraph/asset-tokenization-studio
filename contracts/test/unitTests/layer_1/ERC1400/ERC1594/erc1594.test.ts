@@ -217,6 +217,8 @@ import {
     ERC20,
     IFactory,
     BusinessLogicResolver,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
@@ -225,6 +227,8 @@ import {
     FROM_ACCOUNT_NULL_ERROR_ID,
     IS_PAUSED_ERROR_ID,
     ISSUER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
     PAUSER_ROLE,
     SUCCESS,
@@ -266,6 +270,8 @@ describe('ERC1594 Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let controlList: ControlList
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     describe('Multi partition mode', () => {
         before(async () => {
@@ -747,7 +753,15 @@ describe('ERC1594 Tests', () => {
                 role: ISSUER_ROLE,
                 members: [account_C],
             }
-            const init_rbacs: Rbac[] = [rbacPause, rbacIssuer]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [rbacPause, rbacIssuer, rbacKYC, rbacSSI]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -809,8 +823,22 @@ describe('ERC1594 Tests', () => {
                 diamond.address
             )
 
+            kycFacet = await ethers.getContractAt(
+                'KYC',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SSIManagement',
+                diamond.address,
+                signer_A
+            )
+
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+            await ssiManagementFacet.addIssuer(account_E)
+            await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
+            await kycFacet.grantKYC(account_D, '', 0, 9999999999, account_E)
         })
 
         describe('Paused', () => {

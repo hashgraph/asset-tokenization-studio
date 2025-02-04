@@ -220,6 +220,8 @@ import {
     IFactory,
     BusinessLogicResolver,
     Hold_2,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -229,6 +231,8 @@ import {
     RegulationSubType,
     RegulationType,
     WILD_CARD_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
     LOCKER_ROLE,
@@ -325,6 +329,8 @@ describe('ProtectedPartitions Tests', () => {
     let controlListFacet: ControlList
     let accessControlFacet: AccessControl
     let holdFacet: Hold_2
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     let protectedHold: any
     let hold: any
@@ -370,16 +376,36 @@ describe('ProtectedPartitions Tests', () => {
             address
         )
         holdFacet = await ethers.getContractAt('Hold_2', address)
+        kycFacet = await ethers.getContractAt('KYC', address)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            address
+        )
+    }
+
+    async function grantKYC() {
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet
+            .connect(signer_B)
+            .grantKYC(account_A, '', 0, 9999999999, account_A)
+        await kycFacet
+            .connect(signer_B)
+            .grantKYC(account_B, '', 0, 9999999999, account_A)
+        await kycFacet
+            .connect(signer_B)
+            .grantKYC(account_C, '', 0, 9999999999, account_A)
     }
 
     async function setProtected() {
         await setFacets(diamond_ProtectedPartitions.address)
         domain.chainId = await network.provider.send('eth_chainId')
         domain.verifyingContract = diamond_ProtectedPartitions.address
+        await grantKYC()
     }
 
     async function setUnProtected() {
         await setFacets(diamond_UnprotectedPartitions.address)
+        await grantKYC()
     }
 
     before(async () => {
@@ -430,6 +456,14 @@ describe('ProtectedPartitions Tests', () => {
             role: LOCKER_ROLE,
             members: [account_B],
         }
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
         const init_rbacs: Rbac[] = [
             rbacPause,
             rbacControlList,
@@ -437,6 +471,8 @@ describe('ProtectedPartitions Tests', () => {
             rbacProtectedPartitions,
             rbacProtectedPartitions_1,
             rbacLocker,
+            rbacKYC,
+            rbacSSI,
         ]
 
         diamond_UnprotectedPartitions = await deployEquityFromFactory({

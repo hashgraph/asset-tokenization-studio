@@ -219,12 +219,16 @@ import {
     IFactory,
     BusinessLogicResolver,
     TimeTravel,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     PAUSER_ROLE,
     CONTROLLER_ROLE,
     ISSUER_ROLE,
     CONTROL_LIST_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
@@ -266,6 +270,8 @@ describe('Hold Tests', () => {
     let controlListFacet: ControlList
     let erc20Facet: ERC20
     let timeTravelFacet: TimeTravel
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -326,11 +332,21 @@ describe('Hold Tests', () => {
             role: CONTROL_LIST_ROLE,
             members: [account_E],
         }
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
         const init_rbacs: Rbac[] = [
             rbacIssuer,
             rbacController,
             rbacPausable,
             rbacControlList,
+            rbacKYC,
+            rbacSSI,
         ]
 
         diamond = await deployEquityFromFactory({
@@ -394,6 +410,17 @@ describe('Hold Tests', () => {
             diamond.address,
             signer_A
         )
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_A
+        )
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
+        await kycFacet.grantKYC(account_B, '', 0, 9999999999, account_A)
+        await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
 
         await erc1410Facet.issueByPartition(
             _DEFAULT_PARTITION,
