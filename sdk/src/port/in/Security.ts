@@ -934,8 +934,8 @@ class SecurityInPort implements ISecurityInPort {
       new CreateHoldFromByPartitionCommand(
         securityId,
         partitionId,
-        amount,
         escrow,
+        amount,
         sourceId,
         targetId,
         expirationDate,
@@ -961,8 +961,8 @@ class SecurityInPort implements ISecurityInPort {
       new ControllerCreateHoldByPartitionCommand(
         securityId,
         partitionId,
-        amount,
         escrow,
+        amount,
         sourceId,
         targetId,
         expirationDate,
