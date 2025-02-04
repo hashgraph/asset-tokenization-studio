@@ -204,25 +204,96 @@
 */
 
 // SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
 pragma solidity 0.8.18;
 
-import {ERC1644_2} from '../../layer_2/ERC1400/ERC1644/ERC1644_2.sol';
+import {IKYC} from '../interfaces/kyc/IKYC.sol';
 import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+    SSIManagementStorageWrapper
+} from '../ssi/SSIManagementStorageWrapper.sol';
+import {_KYC_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {LibCommon} from '../common/LibCommon.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {IRevocationList} from '../interfaces/kyc/IRevocationList.sol';
 
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-contract ERC1644_2TimeTravel is ERC1644_2, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
-        return TimeTravelStorageWrapper._blockTimestamp();
+abstract contract KYCStorageWrapperRead is SSIManagementStorageWrapper {
+    using LibCommon for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    struct KYCStorage {
+        mapping(address => IKYC.KYCData) kyc;
+        mapping(IKYC.KYCStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
+    }
+
+    modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) {
+        if (_validFrom > _validTo || _validTo < _blockTimestamp()) {
+            revert IKYC.InvalidDates();
+        }
+        _;
+    }
+
+    modifier checkKYCStatus(IKYC.KYCStatus _kycStatus, address _account) {
+        if (_getKYCStatusFor(_account) != _kycStatus)
+            revert IKYC.InvalidKYCStatus();
+        _;
+    }
+
+    modifier checkAddress(address _account) {
+        if (_account == address(0)) revert IKYC.InvalidZeroAddress();
+        _;
+    }
+
+    function _getKYCStatusFor(
+        address _account
+    ) internal view virtual returns (IKYC.KYCStatus kycStatus_) {
+        IKYC.KYCData memory kycFor = _getKYCFor(_account);
+
+        if (kycFor.validTo < _blockTimestamp())
+            return IKYC.KYCStatus.NOT_GRANTED;
+        if (kycFor.validFrom > _blockTimestamp())
+            return IKYC.KYCStatus.NOT_GRANTED;
+        if (!_isIssuer(kycFor.issuer)) return IKYC.KYCStatus.NOT_GRANTED;
+        if (
+            IRevocationList(_getRevocationRegistryAddress()).revoked(
+                kycFor.issuer,
+                kycFor.VCid
+            )
+        ) return IKYC.KYCStatus.NOT_GRANTED;
+
+        return kycFor.status;
+    }
+
+    function _getKYCFor(
+        address _account
+    ) internal view virtual returns (IKYC.KYCData memory) {
+        return _KYCStorage().kyc[_account];
+    }
+
+    function _getKYCAccountsCount(
+        IKYC.KYCStatus _kycStatus
+    ) internal view virtual returns (uint256 KYCAccountsCount_) {
+        KYCAccountsCount_ = _KYCStorage()
+            .kycAddressesByStatus[_kycStatus]
+            .length();
+    }
+
+    function _getKYCAccounts(
+        IKYC.KYCStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (address[] memory accounts_) {
+        accounts_ = _KYCStorage().kycAddressesByStatus[_kycStatus].getFromSet(
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function _KYCStorage() internal pure returns (KYCStorage storage kyc_) {
+        bytes32 position = _KYC_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            kyc_.slot := position
+        }
     }
 }

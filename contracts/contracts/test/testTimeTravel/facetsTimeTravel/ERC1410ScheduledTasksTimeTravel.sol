@@ -203,18 +203,23 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
 import {
-    ScheduledTasks
-} from '../../layer_2/scheduledTasks/scheduledTasks/ScheduledTasks.sol';
+    ERC1410ScheduledTasks
+} from '../../../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasks.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-contract ScheduledTasksTimeTravel is ScheduledTasks, TimeTravelStorageWrapper {
+contract ERC1410ScheduledTasksTimeTravel is
+    ERC1410ScheduledTasks,
+    TimeTravelStorageWrapper
+{
     function _blockTimestamp()
         internal
         view

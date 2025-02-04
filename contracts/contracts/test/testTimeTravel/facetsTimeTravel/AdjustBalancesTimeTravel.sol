@@ -203,16 +203,17 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-
-import {BondUSA} from '../../layer_3/bondUSA/BondUSA.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {
+    AdjustBalances
+} from '../../../layer_2/adjustBalances/AdjustBalances.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-contract BondUSATimeTravel is BondUSA, TimeTravelStorageWrapper {
+contract AdjustBalancesTimeTravel is AdjustBalances, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view

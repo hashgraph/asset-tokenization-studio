@@ -203,24 +203,56 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {SSIManagement} from '../../layer_1/ssi/SSIManagement.sol';
 import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+    ITimeTravelStorageWrapper
+} from '../interfaces/ITimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-contract SSIManagementTimeTravel is SSIManagement, TimeTravelStorageWrapper {
+abstract contract TimeTravelStorageWrapper is
+    ITimeTravelStorageWrapper,
+    LocalContext
+{
+    /* solhint-disable state-visibility */
+
+    // keccak256("security.token.standard.timeTravel.resolverKey")
+    bytes32 constant _TIME_TRAVEL_RESOLVER_KEY =
+        0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8;
+    uint256 _timestamp;
+
+    constructor() {
+        _checkBlockChainid(_blockChainid());
+    }
+
+    function _checkBlockChainid(uint256 chainId) internal pure {
+        if (chainId != 1337) revert WrongChainId();
+    }
+
+    function _changeSystemTimestamp(uint256 _newSystemTime) internal {
+        if (_newSystemTime == 0) {
+            revert InvalidTimestamp(_newSystemTime);
+        }
+
+        uint256 _oldSystemTime = _timestamp;
+        _timestamp = _newSystemTime;
+
+        emit SystemTimestampChanged(_oldSystemTime, _newSystemTime);
+    }
+
+    function _resetSystemTimestamp() internal {
+        _timestamp = 0;
+        emit SystemTimestampReset();
+    }
+
     function _blockTimestamp()
         internal
         view
-        override(LocalContext, TimeTravelStorageWrapper)
+        virtual
+        override
         returns (uint256)
     {
-        return TimeTravelStorageWrapper._blockTimestamp();
+        return _timestamp == 0 ? block.timestamp : _timestamp;
     }
 }

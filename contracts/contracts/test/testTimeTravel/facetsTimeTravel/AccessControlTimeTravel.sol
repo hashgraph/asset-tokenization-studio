@@ -203,21 +203,16 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    TransferAndLock
-} from '../../layer_3/transferAndLock/TransferAndLock.sol';
+import {AccessControl} from '../../../layer_1/accessControl/AccessControl.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-contract TransferAndLockTimeTravel is
-    TransferAndLock,
-    TimeTravelStorageWrapper
-{
+contract AccessControlTimeTravel is AccessControl, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view

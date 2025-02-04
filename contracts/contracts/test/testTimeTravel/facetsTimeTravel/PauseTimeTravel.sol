@@ -206,13 +206,13 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {AccessControl} from '../../layer_1/accessControl/AccessControl.sol';
+import {Pause} from '../../../layer_1/pause/Pause.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-contract AccessControlTimeTravel is AccessControl, TimeTravelStorageWrapper {
+contract PauseTimeTravel is Pause, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view

@@ -203,16 +203,21 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {EquityUSA} from '../../layer_3/equityUSA/EquityUSA.sol';
+import {
+    ScheduledSnapshots
+} from '../../../layer_2/scheduledTasks/scheduledSnapshots/ScheduledSnapshots.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-contract EquityUSATimeTravel is EquityUSA, TimeTravelStorageWrapper {
+contract ScheduledSnapshotsTimeTravel is
+    ScheduledSnapshots,
+    TimeTravelStorageWrapper
+{
     function _blockTimestamp()
         internal
         view

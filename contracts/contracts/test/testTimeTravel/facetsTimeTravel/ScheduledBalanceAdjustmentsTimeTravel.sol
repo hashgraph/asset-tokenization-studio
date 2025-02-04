@@ -203,20 +203,21 @@
 
 */
 
-// SPDX-License-Identifier: MIT
-// Contract copy-pasted form OZ and extended
-
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {ERC20_2} from '../../layer_2/ERC1400/ERC20/ERC20_2.sol';
+import {
+    ScheduledBalanceAdjustments
+} from '../../../layer_2/scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustments.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-// TODO: Remove those errors of solhint
-// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors
-contract ERC20_2TimeTravel is ERC20_2, TimeTravelStorageWrapper {
+contract ScheduledBalanceAdjustmentsTimeTravel is
+    ScheduledBalanceAdjustments,
+    TimeTravelStorageWrapper
+{
     function _blockTimestamp()
         internal
         view
@@ -226,4 +227,3 @@ contract ERC20_2TimeTravel is ERC20_2, TimeTravelStorageWrapper {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
 }
-// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors

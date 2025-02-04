@@ -208,11 +208,11 @@ pragma solidity 0.8.18;
 
 import {
     CorporateActionsSecurity
-} from '../../layer_2/corporateActions/CorporateActionsSecurity.sol';
+} from '../../../layer_2/corporateActions/CorporateActionsSecurity.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
 contract CorporateActionsSecurityTimeTravel is
     CorporateActionsSecurity,
