@@ -226,18 +226,18 @@ abstract contract LockStorageWrapper is Common {
 
         LockDataStorage storage lockStorage = _lockStorage();
 
-        lockId_ = ++lockStorage.lockNextId[_tokenHolder][_partition];
+        lockId_ = ++lockStorage.nextLockIdByUserAndPartition[_tokenHolder][_partition];
 
         LockData memory lock = LockData(lockId_, _amount, _expirationTimestamp);
 
-        lockStorage.locks[_tokenHolder][_partition].push(lock);
-        lockStorage.lockIds[_tokenHolder][_partition].add(lockId_);
-        lockStorage.locksIndex[_tokenHolder][_partition][lockId_] = lockStorage
-        .locks[_tokenHolder][_partition].length;
-        lockStorage.lockedAmountByPartition[_tokenHolder][
+        lockStorage.locksByUserAndPartition[_tokenHolder][_partition].push(lock);
+        lockStorage.lockIdsByUserAndPartition[_tokenHolder][_partition].add(lockId_);
+        lockStorage.lockIndexByUserPartitionAndId[_tokenHolder][_partition][lockId_] = lockStorage
+        .locksByUserAndPartition[_tokenHolder][_partition].length;
+        lockStorage.totalLockedAmountByUserAndPartition[_tokenHolder][
             _partition
         ] += _amount;
-        lockStorage.totalLockedAmount[_tokenHolder] += _amount;
+        lockStorage.totalLockedAmountByUser[_tokenHolder] += _amount;
 
         success_ = true;
     }
@@ -250,18 +250,18 @@ abstract contract LockStorageWrapper is Common {
         _beforeRelease(_partition, _lockId, _tokenHolder);
         uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
 
-        LockData memory lock = lockStorage.locks[_tokenHolder][_partition][
+        LockData memory lock = lockStorage.locksByUserAndPartition[_tokenHolder][_partition][
             lockIndex - 1
         ];
 
         //_removeLock(_partition, _tokenHolder, _lockId);
         LockDataStorage storage lockStorage = _lockStorage();
 
-        lockStorage.lockedAmountByPartition[_tokenHolder][_partition] -= lock
+        lockStorage.totalLockedAmountByUserAndPartition[_tokenHolder][_partition] -= lock
             .amount;
-        lockStorage.totalLockedAmount[_tokenHolder] -= lock.amount;
-        lockStorage.locksIndex[_tokenHolder][_partition][lock.id] = 0;
-        lockStorage.lockIds[_tokenHolder][_partition].remove(lock.id);
+        lockStorage.totalLockedAmountByUser[_tokenHolder] -= lock.amount;
+        lockStorage.lockIndexByUserPartitionAndId[_tokenHolder][_partition][lock.id] = 0;
+        lockStorage.lockIdsByUserAndPartition[_tokenHolder][_partition].remove(lock.id);
 
         uint256 lastIndex = _getLockCountForByPartition(
             _partition,
@@ -269,13 +269,13 @@ abstract contract LockStorageWrapper is Common {
         );
 
         if (lockIndex < lastIndex) {
-            LockData memory lastLock = lockStorage.locks[_tokenHolder][
+            LockData memory lastLock = lockStorage.locksByUserAndPartition[_tokenHolder][
                 _partition
             ][lastIndex - 1];
             _setLockAtIndex(_partition, _tokenHolder, lockIndex, lastLock);
         }
 
-        lockStorage.locks[_tokenHolder][_partition].pop();
+        lockStorage.locksByUserAndPartition[_tokenHolder][_partition].pop();
 
         if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
             _addPartitionTo(lock.amount, _tokenHolder, _partition);
@@ -313,14 +313,14 @@ abstract contract LockStorageWrapper is Common {
     ) internal virtual {
         LockDataStorage storage lockStorage = _lockStorage();
 
-        lockStorage.locks[_tokenHolder][_partition][_lockIndex - 1].id = lock
+        lockStorage.locksByUserAndPartition[_tokenHolder][_partition][_lockIndex - 1].id = lock
             .id;
         lockStorage
-        .locks[_tokenHolder][_partition][_lockIndex - 1].amount = lock.amount;
+        .locksByUserAndPartition[_tokenHolder][_partition][_lockIndex - 1].amount = lock.amount;
         lockStorage
-        .locks[_tokenHolder][_partition][_lockIndex - 1]
+        .locksByUserAndPartition[_tokenHolder][_partition][_lockIndex - 1]
             .expirationTimestamp = lock.expirationTimestamp;
 
-        lockStorage.locksIndex[_tokenHolder][_partition][lock.id] = _lockIndex;
+        lockStorage.lockIndexByUserPartitionAndId[_tokenHolder][_partition][lock.id] = _lockIndex;
     }
 }
