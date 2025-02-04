@@ -300,6 +300,9 @@ const holdType = {
     ],
 }
 
+let basicTransferInfo: any
+let operatorTransferData: any
+
 describe('ProtectedPartitions Tests', () => {
     let diamond_UnprotectedPartitions: ResolverProxy
     let diamond_ProtectedPartitions: ResolverProxy
@@ -514,6 +517,20 @@ describe('ProtectedPartitions Tests', () => {
             hold: hold,
             deadline: 9999999999999,
             nonce: 1,
+        }
+
+        basicTransferInfo = {
+            to: account_B,
+            value: amount,
+        }
+
+        operatorTransferData = {
+            partition: DEFAULT_PARTITION,
+            from: account_A,
+            to: account_B,
+            value: amount,
+            data: '0x1234',
+            operatorData: '0x1234',
         }
     })
 
@@ -869,8 +886,7 @@ describe('ProtectedPartitions Tests', () => {
                 await expect(
                     erc1410Facet.transferByPartition(
                         DEFAULT_PARTITION,
-                        account_B,
-                        amount,
+                        basicTransferInfo,
                         '0x1234'
                     )
                 ).to.be.rejectedWith('PartitionsAreProtectedAndNoRole')
@@ -886,12 +902,7 @@ describe('ProtectedPartitions Tests', () => {
 
                 await expect(
                     erc1410Facet.operatorTransferByPartition(
-                        DEFAULT_PARTITION,
-                        account_A,
-                        account_B,
-                        amount,
-                        '0x1234',
-                        '0x1234'
+                        operatorTransferData
                     )
                 ).to.be.rejectedWith('PartitionsAreProtectedAndNoRole')
             })
@@ -1026,10 +1037,11 @@ describe('ProtectedPartitions Tests', () => {
                     DEFAULT_PARTITION
                 )
 
+                basicTransferInfo.to = account_C
+
                 await erc1410Facet.transferByPartition(
                     DEFAULT_PARTITION,
-                    account_C,
-                    amount,
+                    basicTransferInfo,
                     '0x1234'
                 )
             })
@@ -1052,12 +1064,7 @@ describe('ProtectedPartitions Tests', () => {
                 erc1410Facet = erc1410Facet.connect(signer_C)
 
                 await erc1410Facet.operatorTransferByPartition(
-                    DEFAULT_PARTITION,
-                    account_A,
-                    account_B,
-                    amount,
-                    '0x1234',
-                    '0x1234'
+                    operatorTransferData
                 )
             })
 

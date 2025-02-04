@@ -278,6 +278,8 @@ const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
+let basicTransferInfo: any
+let operatorTransferData: any
 
 interface BalanceAdjustedValues {
     maxSupply: BigNumber
@@ -785,6 +787,20 @@ describe('ERC1400 Tests', () => {
                 balanceOf_E_Original,
                 '0x'
             )
+
+            basicTransferInfo = {
+                to: account_D,
+                value: amount,
+            }
+
+            operatorTransferData = {
+                partition: _PARTITION_ID_1,
+                from: account_E,
+                to: account_D,
+                value: amount,
+                data: data,
+                operatorData: operatorData,
+            }
         })
 
         afterEach(async () => {
@@ -897,8 +913,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_D,
-                    amount,
+                    basicTransferInfo,
                     data
                 )
             ).to.be.rejectedWith('TokenIsPaused')
@@ -907,14 +922,7 @@ describe('ERC1400 Tests', () => {
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(IS_PAUSED_ERROR_ID)
@@ -1042,8 +1050,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_D,
-                    amount,
+                    basicTransferInfo,
                     data
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
@@ -1054,14 +1061,7 @@ describe('ERC1400 Tests', () => {
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(
@@ -1092,8 +1092,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_D,
-                    amount,
+                    basicTransferInfo,
                     data
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
@@ -1102,14 +1101,7 @@ describe('ERC1400 Tests', () => {
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(TO_ACCOUNT_BLOCKED_ERROR_ID)
@@ -1128,14 +1120,7 @@ describe('ERC1400 Tests', () => {
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(FROM_ACCOUNT_BLOCKED_ERROR_ID)
@@ -1289,8 +1274,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_2,
-                    account_D,
-                    amount,
+                    basicTransferInfo,
                     data
                 )
             ).to.be.rejectedWith('InvalidPartition')
@@ -1345,11 +1329,11 @@ describe('ERC1400 Tests', () => {
                 data,
                 operatorData
             )
+            basicTransferInfo.amount = 2 * balanceOf_C_Original
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_D,
-                    2 * balanceOf_C_Original,
+                    basicTransferInfo,
                     data
                 )
             ).to.be.rejected
@@ -1370,15 +1354,10 @@ describe('ERC1400 Tests', () => {
                 data,
                 operatorData
             )
+
+            operatorTransferData.amount = 2 * balanceOf_E_Original
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    2 * balanceOf_E_Original,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejected
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(
@@ -1451,21 +1430,17 @@ describe('ERC1400 Tests', () => {
                 data,
                 operatorData
             )
+
+            operatorTransferData.from = ADDRESS_ZERO
+            basicTransferInfo.to = ADDRESS_ZERO
+
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    ADDRESS_ZERO,
-                    account_D,
-                    balanceOf_E_Original,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejected
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    ADDRESS_ZERO,
-                    balanceOf_C_Original,
+                    basicTransferInfo,
                     data
                 )
             ).to.be.rejected
@@ -1541,8 +1516,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_D,
-                    amount,
+                    basicTransferInfo,
                     data
                 )
             )
@@ -1570,14 +1544,7 @@ describe('ERC1400 Tests', () => {
             )
             erc1410Facet = erc1410Facet.connect(signer_C)
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             )
                 .to.emit(erc1410Facet, 'TransferByPartition')
                 .withArgs(
@@ -1655,8 +1622,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_D,
-                    amount,
+                    basicTransferInfo,
                     data
                 )
             )
@@ -1694,14 +1660,7 @@ describe('ERC1400 Tests', () => {
 
             // transfer From
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             )
                 .to.emit(erc1410Facet, 'SnapshotTriggered')
                 .withArgs(account_C, 2)
@@ -2475,8 +2434,7 @@ describe('ERC1400 Tests', () => {
                 await expect(
                     erc1410Facet.transferByPartition(
                         _PARTITION_ID_2,
-                        account_D,
-                        amount,
+                        basicTransferInfo,
                         data
                     )
                 )
@@ -2515,14 +2473,12 @@ describe('ERC1400 Tests', () => {
                     )
                     .withArgs(_PARTITION_ID_2)
                 // TODO canTransferByPartition
+                operatorTransferData.partition = _PARTITION_ID_2
+                operatorTransferData.from = account_C
+                operatorTransferData.operatorData = data
                 await expect(
                     erc1410Facet.operatorTransferByPartition(
-                        _PARTITION_ID_2,
-                        account_C,
-                        account_D,
-                        amount,
-                        data,
-                        data
+                        operatorTransferData
                     )
                 )
                     .to.be.revertedWithCustomError(
@@ -2887,10 +2843,11 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // Transaction Partition 1
+                basicTransferInfo.to = account_B
+
                 await erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_B,
-                    amount,
+                    basicTransferInfo,
                     '0x'
                 )
 
@@ -2915,13 +2872,14 @@ describe('ERC1400 Tests', () => {
 
                 // Transaction Partition 1
                 await erc1410Facet.authorizeOperator(account_A)
+
+                operatorTransferData.from = account_A
+                operatorTransferData.to = account_B
+                operatorTransferData.data = '0x'
+                operatorTransferData.operatorData = '0x'
+
                 await erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_A,
-                    account_B,
-                    amount,
-                    '0x',
-                    '0x'
+                    operatorTransferData
                 )
 
                 // After Transaction Partition 1 Values

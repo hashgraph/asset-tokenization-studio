@@ -260,6 +260,7 @@ const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
 const ONE_SECOND = 1
+let holdIdentifier: any
 
 describe('Holds Layer 2 Tests', () => {
     let diamond: ResolverProxy
@@ -428,6 +429,11 @@ describe('Holds Layer 2 Tests', () => {
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+        holdIdentifier = {
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_A,
+            holdId: 1,
+        }
     })
 
     beforeEach(async () => {
@@ -466,9 +472,7 @@ describe('Holds Layer 2 Tests', () => {
                 account_A
             )
         const hold_Before = await holdFacet.getHoldForByPartition(
-            _PARTITION_ID_1,
-            account_A,
-            1
+            holdIdentifier
         )
 
         // adjustBalances
@@ -508,11 +512,7 @@ describe('Holds Layer 2 Tests', () => {
                 _PARTITION_ID_1,
                 account_A
             )
-        const hold_After = await holdFacet.getHoldForByPartition(
-            _PARTITION_ID_1,
-            account_A,
-            1
-        )
+        const hold_After = await holdFacet.getHoldForByPartition(holdIdentifier)
         const balance_After = await erc1410Facet.balanceOf(account_A)
         const balance_After_Partition_1 =
             await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)
@@ -580,9 +580,7 @@ describe('Holds Layer 2 Tests', () => {
         await holdFacet
             .connect(signer_B)
             .executeHoldByPartition(
-                _PARTITION_ID_1,
-                account_A,
-                1,
+                holdIdentifier,
                 account_C,
                 hold.amount * adjustFactor
             )
@@ -670,12 +668,7 @@ describe('Holds Layer 2 Tests', () => {
         // RELEASE HOLD
         await holdFacet
             .connect(signer_B)
-            .releaseHoldByPartition(
-                _PARTITION_ID_1,
-                account_A,
-                1,
-                hold.amount * adjustFactor
-            )
+            .releaseHoldByPartition(holdIdentifier, hold.amount * adjustFactor)
 
         const balance_After_Release = await erc1410Facet.balanceOf(account_A)
         const balance_After_Release_Partition_1 =
@@ -746,7 +739,7 @@ describe('Holds Layer 2 Tests', () => {
             (await ethers.provider.getBlock('latest')).timestamp +
                 2 * ONE_SECOND
         )
-        await holdFacet.reclaimHoldByPartition(_PARTITION_ID_1, account_A, 1)
+        await holdFacet.reclaimHoldByPartition(holdIdentifier)
 
         const balance_After_Release = await erc1410Facet.balanceOf(account_A)
         const balance_After_Release_Partition_1 =
@@ -884,13 +877,7 @@ describe('Holds Layer 2 Tests', () => {
         // EXECUTE HOLD
         await holdFacet
             .connect(signer_B)
-            .executeHoldByPartition(
-                _PARTITION_ID_1,
-                account_A,
-                1,
-                account_C,
-                hold.amount
-            )
+            .executeHoldByPartition(holdIdentifier, account_C, hold.amount)
 
         const TotalHoldLABAF_After =
             await adjustBalancesFacet.getTotalHeldLABAFByPartition(

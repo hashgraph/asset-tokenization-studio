@@ -454,10 +454,15 @@ describe('Snapshots Tests', () => {
             '0x'
         )
         erc1410Facet = erc1410Facet.connect(signer_C)
+
+        let basicTransferInfo = {
+            to: account_A,
+            value: amount,
+        }
+
         await erc1410Facet.transferByPartition(
             _PARTITION_ID_1,
-            account_A,
-            amount,
+            basicTransferInfo,
             '0x'
         )
 
