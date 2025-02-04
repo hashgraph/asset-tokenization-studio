@@ -203,67 +203,118 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable max-line-length
+interface IKYC {
+    struct KYCData {
+        uint256 validFrom;
+        uint256 validTo;
+        string VCid;
+        address issuer;
+        KYCStatus status;
+    }
 
-// keccak256('security.token.standard.accesscontrol.resolverKey');
-bytes32 constant _ACCESS_CONTROL_RESOLVER_KEY = 0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6;
+    enum KYCStatus {
+        NOT_GRANTED,
+        GRANTED
+    }
 
-// keccak256('security.token.standard.controllist.resolverKey');
-bytes32 constant _CONTROL_LIST_RESOLVER_KEY = 0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c;
+    error InvalidDates();
+    error InvalidKYCStatus();
+    error KYCIsNotGranted();
+    error InvalidZeroAddress();
 
-// keccak256('security.token.standard.pause.resolverKey');
-bytes32 constant _PAUSE_RESOLVER_KEY = 0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c;
+    /**
+     * @dev Emitted when a KYC is granted
+     *
+     * @param account The address for which the KYC is granted
+     * @param issuer The address of the issuer of the KYC
+     */
 
-// keccak256('security.token.standard.cap.resolverKey');
-bytes32 constant _CAP_RESOLVER_KEY = 0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b;
+    event KYCGranted(address indexed account, address indexed issuer);
 
-// keccak256('security.token.standard.erc20.resolverKey');
-bytes32 constant _ERC20_RESOLVER_KEY = 0x064c883089ba1a596d9146c7aaa73c19ef8825f374c67a9538787c3d12e68dc5;
+    /**
+     * @dev Emitted when a KYC is revoked
+     *
+     * @param account The address for which the KYC is revoked
+     * @param issuer The address of the issuer of the KYC
+     */
+    event KYCRevoked(address indexed account, address indexed issuer);
 
-// keccak256('security.token.standard.erc1594.resolverKey');
-bytes32 constant _ERC1594_RESOLVER_KEY = 0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f;
+    /**
+     * @dev Grant kyc to an address
+     *
+     * @param _account user whose KYC is being granted
+     * @param _VCid credential Id
+     * @param _validFrom start date of the KYC
+     * @param _validTo end date of the KYC
+     * @param _issuer issurer of the KYC
+     * @return success_ true or false
+     */
 
-// keccak256('security.token.standard.erc1643.resolverKey');
-bytes32 constant _ERC1643_RESOLVER_KEY = 0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625;
+    function grantKYC(
+        address _account,
+        string memory _VCid,
+        uint256 _validFrom,
+        uint256 _validTo,
+        address _issuer
+    ) external returns (bool success_);
 
-// keccak256('security.token.standard.erc1410.resolverKey');
-bytes32 constant _ERC1410_RESOLVER_KEY = 0x0d714ae58404788b445b639b0a0bcf37eeeb2e661bfa542569f5555a9a40b5b2;
+    /**
+     * @dev Revoke kyc to an address
+     *
+     * @param _account user whose KYC is being revoked
+     * @return success_ true or false
+     */
 
-// keccak256('security.token.standard.erc1644.resolverKey');
-bytes32 constant _ERC1644_RESOLVER_KEY = 0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d;
+    function revokeKYC(address _account) external returns (bool success_);
 
-// keccak256('security.token.standard.snapshots.resolverKey');
-bytes32 constant _SNAPSHOTS_RESOLVER_KEY = 0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf;
+    /**
+     * @dev Get the status of the KYC for an account
+     *
+     * @param _account the account to check
+     * @return kycStatus_ GRANTED or NOT_GRANTED
+     */
 
-// keccak256("security.token.standard.resolver.proxy.resolverKey")
-bytes32 constant _RESOLVER_PROXY_RESOLVER_KEY = 0x6fe19cad2a96b3f5852be16d059cc4c233139891fc04dc506c03d297d5f12c1e;
+    function getKYCStatusFor(
+        address _account
+    ) external view returns (KYCStatus kycStatus_);
 
-// keccak256("security.token.standard.diamond.loupe.resolverKey")
-bytes32 constant _DIAMOND_LOUPE_RESOLVER_KEY = 0x086a1dd0b9bfa39267d1de30445a8edeb3a1f50c8a0a82c91f9dee3608e83567;
+    /**
+     * @dev Get all the info of the KYC for an account
+     *
+     * @param _account the account to check
+     * @return kyc_
+     */
 
-// keccak256("security.token.standard.diamond.cut.resolverKey")
-bytes32 constant _DIAMOND_CUT_RESOLVER_KEY = 0xb66fc45b2670ed2c4ce03061121e6c8e53bce06e161f95afad8e57671b64fca8;
+    function getKYCFor(
+        address _account
+    ) external view returns (KYCData memory kyc_);
 
-// keccak256("security.token.standard.diamond.resolverKey")
-bytes32 constant _DIAMOND_RESOLVER_KEY = 0x1b5212ea37fb29e99afa2812a5d7d7e662a477424d3de1a18cc3871a2ee94d78;
+    /**
+     * @dev Get the count of accounts with a given KYC status
+     *
+     * @param _kycStatus GRANTED or NOT_GRANTED
+     * @return KYCAccountsCount_ count of accounts with the given KYC status
+     */
 
-// keccak256("security.token.standard.corporateActions.resolverKey")
-bytes32 constant _CORPORATE_ACTIONS_RESOLVER_KEY = 0x3cc74200ccfb5d585a6d170f8824979dbf1b592e0a41eef41cf6d86cf4882077;
+    function getKYCAccountsCount(
+        KYCStatus _kycStatus
+    ) external view returns (uint256 KYCAccountsCount_);
 
-// keccak256("security.token.standard.lock.resolverKey")
-bytes32 constant _LOCK_RESOLVER_KEY = 0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9;
+    /**
+     * @dev Returns an array of accounts with a given KYC status
+     *
+     * @param _kycStatus GRANTED or NOT_GRANTED
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return accounts_ The array containing the accounts addresses
+     */
 
-// keccak256("security.token.standard.protected.partitions.resolverKey")
-bytes32 constant _PROTECTED_PARTITIONS_RESOLVER_KEY = 0x6d65d2938c05a4d952aff0845c1baa5bea04d4544db74f8b3b26004d1d58d58f;
-
-// keccak256("security.token.standard.ssi.management.resolverKey")
-bytes32 constant _SSI_MANAGEMENT_RESOLVER_KEY = 0x46df6aaf3742e0cbad136a74fb679b686e087dcc3a3d92d1c4ce2f3ef1b508a0;
-
-// keccak256("security.token.standard.kyc.resolverKey")
-bytes32 constant _KYC_RESOLVER_KEY = 0xf516a0f6b4726244ae916c590cd26c2b593d7d448e46e43714fb9f9435c46e32;
-
-// keccak256("security.token.standard.hold.resolverKey")
-bytes32 constant _HOLD_RESOLVER_KEY = 0x49c539aaa7273888cd36649dc1b9a58a0bc7f54b639f84f2a7074d99b0754f6d;
+    function getKYCAccounts(
+        KYCStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory accounts_);
+}
