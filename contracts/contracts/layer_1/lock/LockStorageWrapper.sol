@@ -221,7 +221,7 @@ abstract contract LockStorageWrapper is Common {
         address _tokenHolder,
         uint256 _expirationTimestamp
     ) internal virtual returns (bool success_, uint256 lockId_) {
-        _beforeLock(_partition, _amount, _tokenHolder, _expirationTimestamp);
+        _updateLockedBalancesBeforeLock(_partition, _amount, _tokenHolder, _expirationTimestamp);
         _reduceBalanceByPartition(_tokenHolder, _amount, _partition);
 
         LockDataStorage storage lockStorage = _lockStorage();
@@ -247,7 +247,7 @@ abstract contract LockStorageWrapper is Common {
         uint256 _lockId,
         address _tokenHolder
     ) internal virtual returns (bool success_) {
-        _beforeRelease(_partition, _lockId, _tokenHolder);
+        _updateLockedBalancesBeforeRelease(_partition, _lockId, _tokenHolder);
         uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
 
         LockData memory lock = lockStorage.locksByUserAndPartition[_tokenHolder][_partition][
@@ -288,7 +288,7 @@ abstract contract LockStorageWrapper is Common {
         success_ = true;
     }
     // solhint-disable no-unused-vars
-    function _beforeLock(
+    function _updateLockedBalancesBeforeLock(
         bytes32 _partition,
         uint256 _amount,
         address _tokenHolder,
@@ -297,7 +297,7 @@ abstract contract LockStorageWrapper is Common {
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }
 
-    function _beforeRelease(
+    function _updateLockedBalancesBeforeRelease(
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder

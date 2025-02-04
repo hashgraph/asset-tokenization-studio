@@ -205,18 +205,19 @@
 
 pragma solidity 0.8.18;
 
-import '../interfaces/lock/ILockStorageWrapper.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ILock} from '../interfaces/lock/ILock.sol';
-import {LockStorageWrapper} from './LockStorageWrapper.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
-import {_LOCKER_ROLE} from '../constants/roles.sol';
+import {IStaticFunctionSelectors} from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
+import {ERC1410BasicStorageWrapperRead} from "../../layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol";
+import {_DEFAULT_PARTITION} from "../../layer_0/constants/values.sol";
+import {AccessControlStorageWrapper} from "../accessControl/AccessControlStorageWrapper.sol";
+import {_LOCKER_ROLE} from "../constants/roles.sol";
+import {ILock} from "../interfaces/lock/ILock.sol";
+import {PauseStorageWrapper} from "../pause/PauseStorageWrapper.sol";
+import {LockStorageWrapper} from "./LockStorageWrapper.sol";
+import {_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     /// THINGS TODO
-    /// 1. Review Lock_2 external functions to check if it are included here.
     /// 2. Review Coordination methods to be removed. OPTIONAL
     /// 3. Review LockStorageWrapper methods with TODO (pending to implement AdjustedAt functions).
     /// 4. Review non amounts methods if there are necessary in LockStorageWrapper Read and move it to LockStorageWrapper.
@@ -433,5 +434,75 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         address _tokenHolder
     ) external view virtual returns (uint256 amount_) {
         return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+
+    function getStaticResolverKey()
+    external
+    pure
+    virtual
+    override
+    returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _LOCK_RESOLVER_KEY;
+    }
+
+
+    function getStaticFunctionSelectors()
+    external
+    pure
+    virtual
+    override
+    returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](14);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .lockByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .releaseByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockedAmountForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockCountForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLocksIdForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.lock.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.release.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockedAmountFor
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockCountFor
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getLocksIdFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getLockFor.selector;
+        //TODO: Check if these (ADJUSTED) are necessary
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockedAmountForAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockedAmountForByPartitionAdjusted
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+    external
+    pure
+    virtual
+    override
+    returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(ILock).interfaceId;
     }
 }
