@@ -225,7 +225,6 @@ import {
   ERC1410ScheduledTasks__factory,
   ERC1643__factory,
   Factory__factory,
-  Hold_2__factory,
   Lock_2__factory,
   ScheduledTasks__factory,
   Snapshots_2__factory,
@@ -2067,7 +2066,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
-    holdId: string,
+    holdId: number,
     securityId: ContractId | string,
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'executeHoldByPartition';

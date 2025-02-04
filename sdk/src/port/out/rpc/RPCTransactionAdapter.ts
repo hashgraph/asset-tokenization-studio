@@ -324,7 +324,6 @@ import {
   ERC1410ScheduledTasks__factory,
   ERC1643__factory,
   Factory__factory,
-  Hold_2__factory,
   IBond,
   IEquity,
   Lock__factory,
@@ -2017,7 +2016,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     amount: BigDecimal,
     partitionId: string,
-    holdId: string,
+    holdId: number,
   ): Promise<TransactionResponse<any, Error>> {
     LogService.logTrace(
       `Executing hold with Id ${holdId} from account ${sourceId.toString()} to account ${targetId.toString()}`,
