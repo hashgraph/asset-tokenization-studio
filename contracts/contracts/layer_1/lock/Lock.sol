@@ -205,22 +205,25 @@
 
 pragma solidity 0.8.18;
 
-import {IStaticFunctionSelectors} from "../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol";
-import {ERC1410BasicStorageWrapperRead} from "../../layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol";
-import {_DEFAULT_PARTITION} from "../../layer_0/constants/values.sol";
-import {AccessControlStorageWrapper} from "../accessControl/AccessControlStorageWrapper.sol";
-import {_LOCKER_ROLE} from "../constants/roles.sol";
-import {ILock} from "../interfaces/lock/ILock.sol";
-import {PauseStorageWrapper} from "../pause/PauseStorageWrapper.sol";
-import {LockStorageWrapper} from "./LockStorageWrapper.sol";
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {
+    AccessControlStorageWrapper
+} from '../accessControl/AccessControlStorageWrapper.sol';
+import {_LOCKER_ROLE} from '../constants/roles.sol';
+import {ILock} from '../interfaces/lock/ILock.sol';
+import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
+import {LockStorageWrapper} from './LockStorageWrapper.sol';
 import {_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
-    /// THINGS TODO
     /// 2. Review Coordination methods to be removed. OPTIONAL
-    /// 3. Review LockStorageWrapper methods with TODO (pending to implement AdjustedAt functions).
-    /// 4. Review non amounts methods if there are necessary in LockStorageWrapper Read and move it to LockStorageWrapper.
     function lockByPartition(
         bytes32 _partition,
         uint256 _amount,
@@ -436,24 +439,22 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
-
     function getStaticResolverKey()
-    external
-    pure
-    virtual
-    override
-    returns (bytes32 staticResolverKey_)
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
     {
         staticResolverKey_ = _LOCK_RESOLVER_KEY;
     }
 
-
     function getStaticFunctionSelectors()
-    external
-    pure
-    virtual
-    override
-    returns (bytes4[] memory staticFunctionSelectors_)
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](14);
@@ -495,11 +496,11 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     }
 
     function getStaticInterfaceIds()
-    external
-    pure
-    virtual
-    override
-    returns (bytes4[] memory staticInterfaceIds_)
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
     {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;

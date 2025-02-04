@@ -345,7 +345,8 @@ abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
         LockDataStorage storage lockStorage = _lockStorage();
 
         lockStorage
-        .locksByUserAndPartition[_tokenHolder][_partition][_lockIndex - 1].amount *= _factor;
+        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
+            .amount *= _factor;
     }
 
     function _updateTotalLock(
@@ -395,7 +396,7 @@ abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
         if (_factor == 1) return;
         LockDataStorage storage lockStorage = _lockStorage();
 
-        lockStorage.totalLockedAmountByUser[_tokenHolder] *= _factor;
+        lockStorage.totalLockedAmountByAccount[_tokenHolder] *= _factor;
         adjustBalancesStorage.labafsTotalLocked[_tokenHolder] = _abaf;
     }
 
@@ -409,7 +410,7 @@ abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
         if (_factor == 1) return;
         LockDataStorage storage lockStorage = _lockStorage();
 
-        lockStorage.totalLockedAmountByUserAndPartition[_tokenHolder][
+        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
             _partition
         ] *= _factor;
         adjustBalancesStorage.labafsTotalLockedByPartition[_tokenHolder][
