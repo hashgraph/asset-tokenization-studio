@@ -192,6 +192,13 @@ export const HoldCreate = () => {
                 control={control}
                 id="destinationAccount"
                 placeholder={tCreate("destinationAccount.label")}
+                rules={{
+                  validate: (value: string) => {
+                    if (!value || value === undefined) return true;
+
+                    return isHederaValidAddress(value);
+                  },
+                }}
               />
             </Stack>
             <Stack w="full">
