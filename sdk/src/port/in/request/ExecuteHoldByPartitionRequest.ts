@@ -232,7 +232,7 @@ export default class ExecuteHoldByPartitionRequest extends ValidatedRequest<Exec
     super({
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
       sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
+      targetId: Validation.checkHederaIdFormatOrEvmAddress(true),
       holdId: Validation.checkNumber({ min: 0 }),
       amount: Validation.checkAmount(),
       partitionId: Validation.checkBytes32Format(),

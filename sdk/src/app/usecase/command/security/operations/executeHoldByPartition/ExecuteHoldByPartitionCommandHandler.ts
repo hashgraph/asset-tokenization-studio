@@ -221,6 +221,7 @@ import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeA
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { SecurityPaused } from '../../error/SecurityPaused.js';
 import { InsufficientHoldBalance } from '../../error/InsufficientHoldBalance.js';
+import { EVM_ZERO_ADDRESS } from '../../../../../../core/Constants.js';
 
 @CommandHandler(ExecuteHoldByPartitionCommand)
 export class ExecuteHoldByPartitionCommandHandler
@@ -259,9 +260,12 @@ export class ExecuteHoldByPartitionCommandHandler
       throw new DecimalsOverRange(security.decimals);
     }
 
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
+    const targetEvmAddress: EvmAddress =
+      targetId === '0.0.0'
+        ? new EvmAddress(EVM_ZERO_ADDRESS)
+        : HEDERA_FORMAT_ID_REGEX.exec(targetId)
+          ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
+          : new EvmAddress(targetId);
 
     const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
       ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
