@@ -215,6 +215,9 @@ import {CapStorageWrapperRead} from '../cap/CapStorageWrapperRead.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract LockStorageWrapperRead is CapStorageWrapperRead {
+    // error
+    error WrongLockId();
+
     using LibCommon for EnumerableSet.UintSet;
 
     struct LockData {
@@ -399,7 +402,11 @@ abstract contract LockStorageWrapperRead is CapStorageWrapperRead {
         uint256 timestamp
     ) internal view returns (LockData memory lock) {
         LockDataStorage storage lockStorage = _lockStorage();
-        if (_isLockIdInvalid(lockIndex)) return lock;
+        if (_isLockIdInvalid(lockIndex)) {
+            return lock;
+        } else {
+            revert WrongLockId();
+        }
         assert(
             lockIndex - 1 <
                 lockStorage
@@ -428,5 +435,32 @@ abstract contract LockStorageWrapperRead is CapStorageWrapperRead {
         assembly {
             lock_.slot := position
         }
+    }
+
+    function _isLockedExpirationTimestamp(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (bool) {
+        LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
+
+        if (lock.expirationTimestamp > _blockTimestamp()) return false;
+
+        return true;
+    }
+
+    function _isLockIdInvalid(uint256 lockIndex) internal pure returns (bool) {
+        return lockIndex == 0;
+    }
+
+    function _getLockIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (uint256) {
+        return
+            _lockStorage().lockIndexByAccountPartitionAndId[_tokenHolder][
+                _partition
+            ][_lockId];
     }
 }

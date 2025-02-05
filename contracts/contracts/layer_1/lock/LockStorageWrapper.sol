@@ -210,9 +210,10 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {Common} from '../common/Common.sol';
+import {ILockStorageWrapper} from '../interfaces/lock/ILockStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract LockStorageWrapper is Common {
+abstract contract LockStorageWrapper is ILockStorageWrapper, Common {
     using EnumerableSet for EnumerableSet.UintSet;
 
     function _lockByPartition(
@@ -343,32 +344,5 @@ abstract contract LockStorageWrapper is Common {
         lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
             lock.id
         ] = _lockIndex;
-    }
-
-    function _isLockedExpirationTimestamp(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId
-    ) internal view returns (bool) {
-        LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
-
-        if (lock.expirationTimestamp > _blockTimestamp()) return false;
-
-        return true;
-    }
-
-    function _isLockIdInvalid(uint256 lockIndex) internal pure returns (bool) {
-        return lockIndex == 0;
-    }
-
-    function _getLockIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId
-    ) internal view returns (uint256) {
-        return
-            _lockStorage().lockIndexByAccountPartitionAndId[_tokenHolder][
-                _partition
-            ][_lockId];
     }
 }

@@ -229,9 +229,9 @@ contract AdjustBalancesStorageWrapperRead is
         // Last Aggregated Balance Adjustment per allowance
         mapping(address => mapping(address => uint256)) labafsAllowances;
         // Locks
-        mapping(address => uint256) labafsTotalLocked;
-        mapping(address => mapping(bytes32 => uint256)) labafsTotalLockedByPartition;
-        mapping(address => mapping(bytes32 => uint256[])) labafLocks;
+        mapping(address => uint256) labafLockedAmountByAccount;
+        mapping(address => mapping(bytes32 => uint256)) labafLockedAmountByAccountAndPartition;
+        mapping(address => mapping(bytes32 => uint256[])) labafLockedAmountByAccountPartitionAndIndex;
     }
 
     function _updateLabafByPartition(bytes32 partition) internal {
@@ -307,9 +307,10 @@ contract AdjustBalancesStorageWrapperRead is
         return
             _calculateFactor(
                 _getAbafAdjustedAt(timestamp),
-                _getAdjustBalancesStorage().labafLocks[tokenHolder][partition][
-                    lockId
-                ]
+                _getAdjustBalancesStorage()
+                    .labafLockedAmountByAccountPartitionAndIndex[tokenHolder][
+                        partition
+                    ][lockId]
             );
     }
 
@@ -332,7 +333,7 @@ contract AdjustBalancesStorageWrapperRead is
     ) internal view returns (uint256 factor) {
         factor = _calculateFactor(
             _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage().labafsTotalLocked[tokenHolder]
+            _getAdjustBalancesStorage().labafLockedAmountByAccount[tokenHolder]
         );
     }
 
@@ -343,7 +344,7 @@ contract AdjustBalancesStorageWrapperRead is
     ) internal view returns (uint256 factor) {
         factor = _calculateFactor(
             _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage().labafsTotalLockedByPartition[
+            _getAdjustBalancesStorage().labafLockedAmountByAccountAndPartition[
                 tokenHolder
             ][partition]
         );
@@ -357,9 +358,10 @@ contract AdjustBalancesStorageWrapperRead is
     ) internal view returns (uint256 factor) {
         factor = _calculateFactor(
             _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage().labafLocks[tokenHolder][partition][
-                lockIndex - 1
-            ]
+            _getAdjustBalancesStorage()
+                .labafLockedAmountByAccountPartitionAndIndex[tokenHolder][
+                    partition
+                ][lockIndex - 1]
         );
     }
 

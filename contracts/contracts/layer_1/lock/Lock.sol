@@ -223,7 +223,7 @@ import {_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
-    /// 2. Review Coordination methods to be removed. OPTIONAL
+    // Functions
     function lockByPartition(
         bytes32 _partition,
         uint256 _amount,

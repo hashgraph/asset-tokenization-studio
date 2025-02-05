@@ -238,7 +238,9 @@ abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
             adjustBalancesStorage
         );
 
-        adjustBalancesStorage.labafLocks[_tokenHolder][_partition].push(abaf);
+        adjustBalancesStorage
+        .labafLockedAmountByAccountPartitionAndIndex[_tokenHolder][_partition]
+            .push(abaf);
 
         return
             super._lockByPartition(
@@ -273,7 +275,9 @@ abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
 
         success_ = super._releaseByPartition(_partition, _lockId, _tokenHolder);
 
-        adjustBalancesStorage.labafLocks[_tokenHolder][_partition].pop();
+        adjustBalancesStorage
+        .labafLockedAmountByAccountPartitionAndIndex[_tokenHolder][_partition]
+            .pop();
     }
 
     function _setLockAtIndex(
@@ -289,19 +293,20 @@ abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
             _tokenHolder,
             _lock.id
         );
-        uint256 labaf = adjustBalancesStorage.labafLocks[_tokenHolder][
-            _partition
-        ][lockIndex_lock - 1];
+        uint256 labaf = adjustBalancesStorage
+            .labafLockedAmountByAccountPartitionAndIndex[_tokenHolder][
+                _partition
+            ][lockIndex_lock - 1];
 
-        adjustBalancesStorage.labafLocks[_tokenHolder][_partition][
-            _lockIndex - 1
-        ] = labaf;
+        adjustBalancesStorage.labafLockedAmountByAccountPartitionAndIndex[
+            _tokenHolder
+        ][_partition][_lockIndex - 1] = labaf;
 
         return
             super._setLockAtIndex(_partition, _tokenHolder, _lockIndex, _lock);
     }
 
-    //TODO: FALTAN LAS DE ABAJO
+    //TODO: NO SON NECESARIAS LAS DE ABAJO PORQUE YA SE HACEN
     function _updateLockByIndex(
         bytes32 _partition,
         uint256 _lockId,
@@ -397,7 +402,7 @@ abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
         LockDataStorage storage lockStorage = _lockStorage();
 
         lockStorage.totalLockedAmountByAccount[_tokenHolder] *= _factor;
-        adjustBalancesStorage.labafsTotalLocked[_tokenHolder] = _abaf;
+        adjustBalancesStorage.labafLockedAmountByAccount[_tokenHolder] = _abaf;
     }
 
     function _updateTotalLockedAmountAndLABAFByPartition(
@@ -413,9 +418,9 @@ abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
         lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
             _partition
         ] *= _factor;
-        adjustBalancesStorage.labafsTotalLockedByPartition[_tokenHolder][
-            _partition
-        ] = _abaf;
+        adjustBalancesStorage.labafLockedAmountByAccountAndPartition[
+            _tokenHolder
+        ][_partition] = _abaf;
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
