@@ -272,7 +272,7 @@ export class ExecuteHoldByPartitionCommandHandler
     const holdDetails = await this.queryAdapter.getHoldForByPartition(
       securityEvmAddress,
       partitionId,
-      targetEvmAddress,
+      sourceEvmAddress,
       holdId,
     );
 
