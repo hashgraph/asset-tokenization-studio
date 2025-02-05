@@ -203,45 +203,24 @@
 
 */
 
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {IKYC} from '../interfaces/kyc/IKYC.sol';
-import {KYCStorageWrapperRead} from './KYCStorageWrapperRead.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {Common} from '../common/Common.sol';
+    ScheduledTasks
+} from '../../../layer_2/scheduledTasks/scheduledTasks/ScheduledTasks.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-abstract contract KYCStorageWrapper is Common {
-    using EnumerableSet for EnumerableSet.AddressSet;
-
-    function _grantKYC(
-        address _account,
-        string memory _VCid,
-        uint256 _validFrom,
-        uint256 _validTo,
-        address _issuer
-    ) internal returns (bool success_) {
-        _KYCStorage().kyc[_account] = IKYC.KYCData(
-            _validFrom,
-            _validTo,
-            _VCid,
-            _issuer,
-            IKYC.KYCStatus.GRANTED
-        );
-        _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.GRANTED].add(
-            _account
-        );
-        success_ = true;
-    }
-
-    function _revokeKYC(address _account) internal returns (bool success_) {
-        delete _KYCStorage().kyc[_account];
-
-        _KYCStorage().kycAddressesByStatus[IKYC.KYCStatus.GRANTED].remove(
-            _account
-        );
-        success_ = true;
+contract ScheduledTasksTimeTravel is ScheduledTasks, TimeTravelStorageWrapper {
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

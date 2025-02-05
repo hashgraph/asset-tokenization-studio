@@ -203,25 +203,19 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {Snapshots_2} from '../../layer_2/snapshots/Snapshots_2.sol';
-import {
-    TimeTravelStorageWrapper
-} from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+contract T3RevocationRegistry {
+    mapping(address => mapping(string => bool)) public revoked;
 
-// TODO: Remove those errors of solhint
-// solhint-disable  contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-contract Snapshots_2TimeTravel is Snapshots_2, TimeTravelStorageWrapper {
-    function _blockTimestamp()
-        internal
-        view
-        override(LocalContext, TimeTravelStorageWrapper)
-        returns (uint256)
-    {
-        return TimeTravelStorageWrapper._blockTimestamp();
+    constructor() {}
+
+    function revoke(string memory vcId) public {
+        revoked[msg.sender][vcId] = true;
+    }
+
+    function cancelRevoke(string memory vcId) public {
+        delete revoked[msg.sender][vcId];
     }
 }
-// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

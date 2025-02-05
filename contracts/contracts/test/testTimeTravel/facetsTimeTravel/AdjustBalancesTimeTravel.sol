@@ -205,11 +205,13 @@
 
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {AdjustBalances} from '../../layer_2/adjustBalances/AdjustBalances.sol';
+import {
+    AdjustBalances
+} from '../../../layer_2/adjustBalances/AdjustBalances.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
 contract AdjustBalancesTimeTravel is AdjustBalances, TimeTravelStorageWrapper {
     function _blockTimestamp()

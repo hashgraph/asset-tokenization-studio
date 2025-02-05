@@ -203,16 +203,16 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {ERC1643} from '../../layer_1/ERC1400/ERC1643/ERC1643.sol';
+import {Pause} from '../../../layer_1/pause/Pause.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-contract ERC1643TimeTravel is ERC1643, TimeTravelStorageWrapper {
+contract PauseTimeTravel is Pause, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view

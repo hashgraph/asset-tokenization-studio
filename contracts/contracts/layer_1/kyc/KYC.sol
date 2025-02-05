@@ -209,10 +209,13 @@ pragma solidity 0.8.18;
 import {_KYC_ROLE} from '../constants/roles.sol';
 import {IKYC} from '../interfaces/kyc/IKYC.sol';
 import {KYCStorageWrapper} from './KYCStorageWrapper.sol';
-import {SSIManagement} from '../ssi/SSIManagement.sol';
 import {_KYC_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../common/Common.sol';
 
-contract KYC is KYCStorageWrapper, SSIManagement {
+contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper {
     function grantKYC(
         address _account,
         string memory _VCid,
@@ -224,7 +227,9 @@ contract KYC is KYCStorageWrapper, SSIManagement {
         virtual
         override
         onlyRole(_KYC_ROLE)
-        onlyValidKYCAddressAndStatus(KYCStatus.GRANTED, _account)
+        onlyUnpaused
+        checkAddress(_account)
+        checkKYCStatus(KYCStatus.NOT_GRANTED, _account)
         onlyValidDates(_validFrom, _validTo)
         checkIssuerList(_issuer)
         returns (bool success_)
@@ -240,17 +245,24 @@ contract KYC is KYCStorageWrapper, SSIManagement {
         virtual
         override
         onlyRole(_KYC_ROLE)
-        onlyValidKYCAddressAndStatus(KYCStatus.REVOKED, _account)
+        onlyUnpaused
+        checkAddress(_account)
         returns (bool success_)
     {
         success_ = _revokeKYC(_account);
         emit KYCRevoked(_account, _msgSender());
     }
 
-    function getKYCFor(
+    function getKYCStatusFor(
         address _account
     ) external view virtual override returns (KYCStatus kycStatus_) {
-        kycStatus_ = _getKYCFor(_account);
+        kycStatus_ = _getKYCStatusFor(_account);
+    }
+
+    function getKYCFor(
+        address _account
+    ) external view virtual override returns (KYCData memory kyc_) {
+        kyc_ = _getKYCFor(_account);
     }
 
     function getKYCAccountsCount(
@@ -284,10 +296,13 @@ contract KYC is KYCStorageWrapper, SSIManagement {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_ = new bytes4[](6);
         staticFunctionSelectors_[selectorIndex++] = this.grantKYC.selector;
         staticFunctionSelectors_[selectorIndex++] = this.revokeKYC.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getKYCFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getKYCStatusFor
+            .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getKYCAccountsCount
             .selector;

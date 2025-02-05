@@ -215,48 +215,63 @@ import {LibCommon} from '../common/LibCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {IRevocationList} from '../interfaces/kyc/IRevocationList.sol';
 
-abstract contract KYCStorageWrapperRead is IKYC, SSIManagementStorageWrapper {
+abstract contract KYCStorageWrapperRead is SSIManagementStorageWrapper {
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
     struct KYCStorage {
-        mapping(address => KYCData) kyc;
-        mapping(KYCStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
+        mapping(address => IKYC.KYCData) kyc;
+        mapping(IKYC.KYCStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
     }
 
     modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) {
         if (_validFrom > _validTo || _validTo < _blockTimestamp()) {
-            revert InvalidDates();
+            revert IKYC.InvalidDates();
         }
         _;
     }
 
-    modifier onlyValidKYCAddressAndStatus(
-        KYCStatus _kycStatus,
-        address _account
-    ) {
-        if (_getKYCFor(_account) == _kycStatus) revert InvalidKYCStatus();
-        if (_account == address(0)) revert InvalidZeroAddress();
+    modifier checkKYCStatus(IKYC.KYCStatus _kycStatus, address _account) {
+        if (_getKYCStatusFor(_account) != _kycStatus)
+            revert IKYC.InvalidKYCStatus();
         _;
+    }
+
+    modifier checkAddress(address _account) {
+        if (_account == address(0)) revert IKYC.InvalidZeroAddress();
+        _;
+    }
+
+    function _getKYCStatusFor(
+        address _account
+    ) internal view virtual returns (IKYC.KYCStatus kycStatus_) {
+        IKYC.KYCData memory kycFor = _getKYCFor(_account);
+
+        if (kycFor.validTo < _blockTimestamp())
+            return IKYC.KYCStatus.NOT_GRANTED;
+        if (kycFor.validFrom > _blockTimestamp())
+            return IKYC.KYCStatus.NOT_GRANTED;
+        if (!_isIssuer(kycFor.issuer)) return IKYC.KYCStatus.NOT_GRANTED;
+        if (
+            IRevocationList(_getRevocationRegistryAddress()).revoked(
+                kycFor.issuer,
+                kycFor.VCid
+            )
+        ) return IKYC.KYCStatus.NOT_GRANTED;
+
+        return kycFor.status;
     }
 
     function _getKYCFor(
         address _account
-    ) internal view virtual returns (KYCStatus kycStatus_) {
-        kycStatus_ = _KYCStorage().kyc[_account].validTo > _blockTimestamp() &&
-            _KYCStorage().kyc[_account].validFrom < _blockTimestamp() &&
-            _isIssuer(_KYCStorage().kyc[_account].issuer)
-            ? KYCStatus.GRANTED
-            : _KYCStorage().kycAddressesByStatus[KYCStatus.REVOKED].contains(
-                _account
-            )
-            ? KYCStatus.REVOKED
-            : KYCStatus.NOT_GRANTED;
+    ) internal view virtual returns (IKYC.KYCData memory) {
+        return _KYCStorage().kyc[_account];
     }
 
     function _getKYCAccountsCount(
-        KYCStatus _kycStatus
+        IKYC.KYCStatus _kycStatus
     ) internal view virtual returns (uint256 KYCAccountsCount_) {
         KYCAccountsCount_ = _KYCStorage()
             .kycAddressesByStatus[_kycStatus]
@@ -264,7 +279,7 @@ abstract contract KYCStorageWrapperRead is IKYC, SSIManagementStorageWrapper {
     }
 
     function _getKYCAccounts(
-        KYCStatus _kycStatus,
+        IKYC.KYCStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (address[] memory accounts_) {

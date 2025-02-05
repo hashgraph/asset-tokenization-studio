@@ -212,14 +212,12 @@ interface IKYC {
         uint256 validTo;
         string VCid;
         address issuer;
+        KYCStatus status;
     }
 
     enum KYCStatus {
         NOT_GRANTED,
-        // Addresses with a KYC that has not been explicitly revoked
-        GRANTED,
-        // Addresses with a KYC that has been explicitly revoked
-        REVOKED
+        GRANTED
     }
 
     error InvalidDates();
@@ -276,17 +274,28 @@ interface IKYC {
      * @dev Get the status of the KYC for an account
      *
      * @param _account the account to check
-     * @return kycStatus_ GRANTED, REVOKED or NOT_GRANTED
+     * @return kycStatus_ GRANTED or NOT_GRANTED
      */
 
-    function getKYCFor(
+    function getKYCStatusFor(
         address _account
     ) external view returns (KYCStatus kycStatus_);
 
     /**
+     * @dev Get all the info of the KYC for an account
+     *
+     * @param _account the account to check
+     * @return kyc_
+     */
+
+    function getKYCFor(
+        address _account
+    ) external view returns (KYCData memory kyc_);
+
+    /**
      * @dev Get the count of accounts with a given KYC status
      *
-     * @param _kycStatus GRANTED, REVOKED or NOT_GRANTED
+     * @param _kycStatus GRANTED or NOT_GRANTED
      * @return KYCAccountsCount_ count of accounts with the given KYC status
      */
 
@@ -297,7 +306,7 @@ interface IKYC {
     /**
      * @dev Returns an array of accounts with a given KYC status
      *
-     * @param _kycStatus GRANTED, REVOKED or NOT_GRANTED
+     * @param _kycStatus GRANTED or NOT_GRANTED
      * @param _pageIndex members to skip : _pageIndex * _pageLength
      * @param _pageLength number of members to return
      * @return accounts_ The array containing the accounts addresses

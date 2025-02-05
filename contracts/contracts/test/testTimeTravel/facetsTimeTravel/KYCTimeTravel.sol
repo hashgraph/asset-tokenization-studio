@@ -203,21 +203,18 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    ScheduledSnapshots
-} from '../../layer_2/scheduledTasks/scheduledSnapshots/ScheduledSnapshots.sol';
+import {KYC} from '../../../layer_1/kyc/KYC.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
 
-contract ScheduledSnapshotsTimeTravel is
-    ScheduledSnapshots,
-    TimeTravelStorageWrapper
-{
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+contract KYCTimeTravel is KYC, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view
