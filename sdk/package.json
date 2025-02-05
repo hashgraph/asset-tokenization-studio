@@ -63,6 +63,7 @@
     "@hashgraph/sdk": "2.51.0",
     "@metamask/detect-provider": "^2.0.0",
     "@metamask/providers": "^12.0.0",
+    "@terminal3/verify_vc": "^0.0.20",
     "@walletconnect/modal": "^2.6.2",
     "axios": "^1.5.0",
     "cd": "^0.3.3",

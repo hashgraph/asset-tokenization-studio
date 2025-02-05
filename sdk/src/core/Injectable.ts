@@ -316,6 +316,11 @@ import { GetHeldAmountForByPartitionQueryHandler } from '../app/usecase/query/se
 import { GetHoldCountForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQueryHandler.js';
 import { GetHoldsIdForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQueryHandler.js';
 import { GetHoldForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQueryHandler.js';
+import { GetKYCForQueryHandler } from '../app/usecase/query/security/kyc/getKycFor/GetKYCForQueryHandler.js';
+import { GetKYCAccountsCountQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsCount/GetKYCAccountsCountQueryHandler.js';
+import { GetKYCAccountsQueryHandler } from '../app/usecase/query/security/kyc/getKycAccounts/GetKYCAccountsQueryHandler.js';
+import { GrantKYCCommandHandler } from '../app/usecase/command/security/operations/kyc/grantKyc/GrantKYCCommandHandler.js';
+import { RevokeKYCCommandHandler } from '../app/usecase/command/security/operations/kyc/revokeKyc/RevokeKYCCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -435,6 +440,15 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: ProtectedCreateHoldByPartitionCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: GrantKYCCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RevokeKYCCommandHandler,
+  },
+
   // Bond Operations
   {
     token: TOKENS.COMMAND_HANDLER,
@@ -686,6 +700,18 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetHoldForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCAccountsCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCAccountsQueryHandler,
   },
 ];
 

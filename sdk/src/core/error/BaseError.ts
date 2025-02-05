@@ -248,6 +248,7 @@ export enum ErrorCode {
   RoleNotAssigned = '20003',
   SecurityPaused = '20010',
   SecurityUnPaused = '20014',
+  UnlistedIssuer = '20019',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',

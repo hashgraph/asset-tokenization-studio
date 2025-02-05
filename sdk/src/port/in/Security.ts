@@ -292,6 +292,19 @@ import GetHeldAmountForByPartitionRequest from './request/GetHeldAmountForByPart
 import GetHoldCountForByPartitionRequest from './request/GetHoldCountForByPartitionRequest.js';
 import GetHoldsIdForByPartitionRequest from './request/GetHoldsIdForByPartitionRequest.js';
 import GetHoldForByPartitionRequest from './request/GetHoldForByPartitionRequest.js';
+import { GrantKYCCommand } from '../../app/usecase/command/security/operations/kyc/grantKyc/GrantKYCCommand.js';
+import { RevokeKYCCommand } from '../../app/usecase/command/security/operations/kyc/revokeKyc/RevokeKYCCommand.js';
+import { GetKYCAccountsQuery } from '../../app/usecase/query/security/kyc/getKycAccounts/GetKYCAccountsQuery.js';
+import { GetKYCAccountsCountQuery } from '../../app/usecase/query/security/kyc/getKycAccountsCount/GetKYCAccountsCountQuery.js';
+import { GetKYCForQuery } from '../../app/usecase/query/security/kyc/getKycFor/GetKYCForQuery.js';
+import GrantKYCRequest from './request/GrantKYCRequest.js';
+import RevokeKYCRequest from './request/RevokeKYCRequest.js';
+import GetKYCAccountsRequest from './request/GetKYCAccountsRequest.js';
+import GetKYCAccountsCountRequest from './request/GetKYCAccountsCountRequest.js';
+import GetKYCForRequest from './request/GetKYCForRequest.js';
+import { Terminal3VC } from '../../domain/context/kyc/terminal3.js';
+import { verifyVc } from '@terminal3/verify_vc';
+import { SignedCredential } from '@terminal3/vc_core';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -375,6 +388,15 @@ interface ISecurityInPort {
   getHoldForByPartition(
     request: GetHoldForByPartitionRequest,
   ): Promise<HoldViewModel>;
+  grantKYC(
+    request: GrantKYCRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  revokeKYC(
+    request: RevokeKYCRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  getKYCAccounts(request: GetKYCAccountsRequest): Promise<string[]>;
+  getKYCAccountsCount(request: GetKYCAccountsCountRequest): Promise<number>;
+  getKYCFor(request: GetKYCForRequest): Promise<number>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -1081,6 +1103,86 @@ class SecurityInPort implements ISecurityInPort {
     };
 
     return hold;
+  }
+
+  @LogError
+  async grantKYC(
+    request: GrantKYCRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('GrantKYCRequest', request);
+
+    const signedCredential: SignedCredential = Terminal3VC.vcFromBase64(
+      request.vcBase64,
+    );
+    await verifyVc(signedCredential);
+
+    return await this.commandBus.execute(
+      new GrantKYCCommand(
+        request.securityId,
+        request.targetId,
+        signedCredential.issuer,
+        signedCredential.id,
+        signedCredential.validFrom,
+        signedCredential.validUntil,
+      ),
+    );
+  }
+
+  @LogError
+  async revokeKYC(
+    request: RevokeKYCRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('RevokeKYCRequest', request);
+
+    return await this.commandBus.execute(
+      new RevokeKYCCommand(request.securityId, request.targetId),
+    );
+  }
+
+  @LogError
+  async getKYCFor(request: GetKYCForRequest): Promise<number> {
+    handleValidation('GetKYCForRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetKYCForQuery(request.securityId, request.targetId),
+      )
+    ).payload;
+
+    return res;
+  }
+
+  @LogError
+  async getKYCAccountsCount(
+    request: GetKYCAccountsCountRequest,
+  ): Promise<number> {
+    handleValidation('GetKYCAccountsCountRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetKYCAccountsCountQuery(request.securityId, request.kycStatus),
+      )
+    ).payload;
+
+    return res;
+  }
+
+  @LogError
+  async getKYCAccounts(request: GetKYCAccountsRequest): Promise<string[]> {
+    handleValidation('GetKYCAccountsRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetKYCAccountsQuery(
+          request.securityId,
+          request.kycStatus,
+          request.start,
+          request.end,
+        ),
+      )
+    ).payload;
+
+    return res;
   }
 }
 
