@@ -230,7 +230,12 @@ contract SSIManagement is
         onlyUnpaused
         returns (bool success_)
     {
+        address oldRevocationRegistryAddress = _getRevocationRegistryAddress();
         success_ = _setRevocationRegistryAddress(_revocationRegistryAddress);
+        emit RevocationRegistryUpdated(
+            oldRevocationRegistryAddress,
+            _getRevocationRegistryAddress()
+        );
     }
 
     function addIssuer(

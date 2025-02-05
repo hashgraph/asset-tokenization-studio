@@ -422,9 +422,13 @@ describe('KYC Tests', () => {
 
     describe('SSIManagement OK', () => {
         it('GIVEN a revocationList WHEN setRevocationRegistryAddress THEN transaction succeed', async () => {
-            await ssiManagementFacet.setRevocationRegistryAddress(
-                revocationList.address
+            expect(
+                await ssiManagementFacet.setRevocationRegistryAddress(
+                    revocationList.address
+                )
             )
+                .to.emit(ssiManagementFacet, 'RevocationRegistryAddressSet')
+                .withArgs(ethers.constants.AddressZero, revocationList.address)
 
             let revocationListAddress =
                 await ssiManagementFacet.getRevocationRegistryAddress()
