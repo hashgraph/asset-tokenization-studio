@@ -221,6 +221,10 @@ export default {
   form: {
     title: "Title",
     description: "Description",
+    originalAccount: {
+      label: "Original Account",
+      placeholder: "0.0.1234567",
+    },
     targetId: {
       label: "Target ID",
       placeholder: "0.0.1234567",
