@@ -22,7 +22,6 @@ import { useWalletStore } from "../../../../store/walletStore";
 import { useState } from "react";
 import {
   useCreateHoldByPartition,
-  useCreateHoldFromByPartition,
   useForceCreateHoldFromByPartition,
 } from "../../../../hooks/mutations/useHold";
 import {
@@ -51,10 +50,7 @@ export const HoldCreate = () => {
     mutate: createHoldByPartitionMutate,
     isLoading: isLoadingHoldByPartitionMutate,
   } = useCreateHoldByPartition();
-  const {
-    mutate: createHoldFromByPartitionMutate,
-    isLoading: isLoadingHoldFromByPartitionMutate,
-  } = useCreateHoldFromByPartition();
+
   const {
     mutate: forceCreateHoldFromByPartitionMutate,
     isLoading: isLoadingForceHoldFromByPartitionMutate,
@@ -88,32 +84,17 @@ export const HoldCreate = () => {
       escrow: escrowAccount.toString(),
       expirationDate: dateToUnixTimestamp(expirationDate),
       partitionId: DEFAULT_PARTITION,
-      targetId: originalAccount.toString(),
       securityId,
+      targetId: destinationAccount ?? "0.0.0",
     };
 
     if (forceHold) {
       const request = new CreateHoldFromByPartitionRequest({
         ...baseRequest,
-        sourceId: destinationAccount ?? "",
+        sourceId: originalAccount.toString(),
       });
 
       forceCreateHoldFromByPartitionMutate(request, {
-        onSuccess: () => {
-          reset();
-        },
-      });
-
-      return;
-    }
-
-    if (destinationAccount) {
-      const request = new CreateHoldFromByPartitionRequest({
-        ...baseRequest,
-        sourceId: destinationAccount,
-      });
-
-      createHoldFromByPartitionMutate(request, {
         onSuccess: () => {
           reset();
         },
@@ -136,9 +117,7 @@ export const HoldCreate = () => {
   };
 
   const showLoading =
-    isLoadingHoldByPartitionMutate ||
-    isLoadingHoldFromByPartitionMutate ||
-    isLoadingForceHoldFromByPartitionMutate;
+    isLoadingHoldByPartitionMutate || isLoadingForceHoldFromByPartitionMutate;
 
   return (
     <Stack w="full" h="full" layerStyle="container">

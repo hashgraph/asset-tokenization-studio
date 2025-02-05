@@ -4,6 +4,7 @@ import {
   DefinitionList,
   PhosphorIcon,
   PopUp,
+  Text,
   useToast,
 } from "io-bricks-ui";
 import { useState } from "react";
@@ -72,7 +73,7 @@ export const HoldList = () => {
   const { data, isLoading } = useGetHolds(request);
   const { mutate } = useReclaimHoldByPartition();
 
-  const showEmpty = !isLoading && !data;
+  const showEmpty = !isLoading && data?.length === 0;
 
   return (
     <VStack gap={12} w="auto" pt={4}>
@@ -80,7 +81,11 @@ export const HoldList = () => {
       <Center w={900}>
         <VStack gap={4} w={"full"}>
           {isLoading && <Box>Loading...</Box>}
-          {showEmpty && <Box>{tList("noHolds")}</Box>}
+          {showEmpty && (
+            <Box>
+              <Text>{tList("noHolds")}</Text>
+            </Box>
+          )}
           {!showEmpty &&
             data &&
             data.map((hold, index) => {

@@ -31,7 +31,6 @@ import {
   ReleaseHoldByPartitionRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { DEFAULT_PARTITION } from "../../../../utils/constants";
-import { useWalletStore } from "../../../../store/walletStore";
 
 enum TypeMode {
   execute = "execute",
@@ -42,6 +41,7 @@ interface FormValues {
   holdId: string;
   amount: string;
   destinationAccount?: string | null;
+  originalAccount?: string | null;
 }
 
 export const HoldManage = () => {
@@ -52,8 +52,6 @@ export const HoldManage = () => {
   const [manageMode, setManageMode] = useState<keyof typeof TypeMode>(
     TypeMode.execute,
   );
-
-  const { address } = useWalletStore();
 
   const { t: tType } = useTranslation("security", {
     keyPrefix:
@@ -82,21 +80,22 @@ export const HoldManage = () => {
   const onSubmit = () => {
     setIsMutating(true);
 
-    const { amount, destinationAccount, holdId } = getValues();
+    const { amount, destinationAccount, originalAccount, holdId } = getValues();
 
     const defaultRequest = {
       amount: String(amount),
       partitionId: DEFAULT_PARTITION,
       holdId: Number(holdId),
       securityId,
-      targetId: address,
+      targetId: destinationAccount!,
     };
 
     if (manageMode === "execute") {
       const request = new ExecuteHoldByPartitionRequest({
         ...defaultRequest,
-        sourceId: destinationAccount!,
+        sourceId: originalAccount!,
       });
+
       executeHoldByPartitionMutate(request, {
         onSettled() {
           setIsMutating(false);
@@ -156,7 +155,10 @@ export const HoldManage = () => {
               key={mode}
               paddingX={16}
               paddingY={2}
-              onClick={() => setManageMode(mode)}
+              onClick={() => {
+                reset();
+                setManageMode(mode);
+              }}
               borderRadius={8}
               position="relative"
               zIndex={1}
@@ -208,17 +210,17 @@ export const HoldManage = () => {
                 placeholder={tForm("holdId.label")}
               />
             </Stack>
-            {manageMode === TypeMode.execute && (
+            {manageMode === "execute" && (
               <Stack w="full">
                 <HStack justifySelf="flex-start">
                   <Text textStyle="BodyTextRegularSM">
-                    {tForm("destinationAccount.label")}
+                    {tForm("originalAccount.label")}
                   </Text>
                 </HStack>
                 <InputController
                   control={control}
-                  id="destinationAccount"
-                  placeholder={tForm("destinationAccount.label")}
+                  id="originalAccount"
+                  placeholder={tForm("originalAccount.label")}
                   isRequired={true}
                   rules={{
                     required,
@@ -227,6 +229,23 @@ export const HoldManage = () => {
                 />
               </Stack>
             )}
+            <Stack w="full">
+              <HStack justifySelf="flex-start">
+                <Text textStyle="BodyTextRegularSM">
+                  {tForm("destinationAccount.label")}
+                </Text>
+              </HStack>
+              <InputController
+                control={control}
+                id="destinationAccount"
+                placeholder={tForm("destinationAccount.label")}
+                isRequired={true}
+                rules={{
+                  required,
+                  validate: { isHederaValidAddress },
+                }}
+              />
+            </Stack>
             <Stack w="full">
               <HStack justifySelf="flex-start">
                 <Text textStyle="BodyTextRegularSM">
