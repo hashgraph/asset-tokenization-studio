@@ -487,12 +487,12 @@ const createHold = async (
       amount,
       escrow.toString(),
       account,
-      targetId ? targetId.toString() : sourceId.toString(),
+      sourceId.toString(),
       '0x',
       '0x',
     ),
   ]);
-  holds.set(targetId ? targetId.toString() : account, accountHolds);
+  holds.set(sourceId.toString(), accountHolds);
 
   increaseHeldBalance(sourceId, amount);
   const currentAccount = new EvmAddress(identifiers(user_account.id)[1]);
