@@ -439,14 +439,6 @@ contract ERC1410BasicStorageWrapperRead is
         return index != 0;
     }
 
-    //TODO: account its not used
-    function _adjustBalanceByPartitionAndAccount(
-        bytes32 partition,
-        address account
-    ) internal {
-        _adjustTotalAndMaxSupplyByPartition(partition);
-    }
-
     function _adjustTotalAndMaxSupplyByPartition(bytes32 partition) internal {
         uint256 factor = _calculateFactorByPartitionAdjustedAt(
             partition,
