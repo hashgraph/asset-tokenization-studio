@@ -282,7 +282,10 @@ export class CreateHoldByPartitionCommandHandler
     if (
       account.evmAddress &&
       (
-        await this.queryAdapter.balanceOf(securityEvmAddress, targetEvmAddress)
+        await this.queryAdapter.balanceOf(
+          securityEvmAddress,
+          new EvmAddress(account.evmAddress),
+        )
       ).lt(amountBd.toBigNumber())
     ) {
       throw new InsufficientBalance();
