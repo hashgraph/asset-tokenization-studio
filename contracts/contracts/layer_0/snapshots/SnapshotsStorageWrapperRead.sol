@@ -244,14 +244,21 @@ abstract contract SnapshotsStorageWrapperRead is
     }
 
     struct SnapshotStorage {
+        // Snapshots for total balances per account
         mapping(address => Snapshots) accountBalanceSnapshots;
+        // Snapshots for balances per account and partition
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionBalanceSnapshots;
-        mapping(address => PartitionSnapshots) accountPartitionSnapshots;
-        Snapshots totalSupplySnapshots;
+        // Metadata for partitions associated with each account
+        mapping(address => PartitionSnapshots) accountPartitionMetadata;
+        Snapshots totalSupplySnapshots; // Snapshots for the total supply
         // Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
+        // Unique ID for the current snapshot
         CountersUpgradeable.Counter currentSnapshotId;
+        // Snapshots for locked balances per account
         mapping(address => Snapshots) accountLockedBalanceSnapshots;
+        // Snapshots for locked balances per account and partition
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
+        // Snapshots for the total supply by partition
         mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
     }
 

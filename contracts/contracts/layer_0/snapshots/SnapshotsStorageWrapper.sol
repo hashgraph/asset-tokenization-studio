@@ -245,7 +245,7 @@ abstract contract SnapshotsStorageWrapper is
         address _tokenHolder
     ) internal view returns (bytes32[] memory) {
         PartitionSnapshots storage partitionSnapshots = _snapshotStorage()
-            .accountPartitionSnapshots[_tokenHolder];
+            .accountPartitionMetadata[_tokenHolder];
 
         (bool found, uint256 index) = _indexFor(
             _snapshotID,
@@ -279,7 +279,7 @@ abstract contract SnapshotsStorageWrapper is
             _snapshotStorage().accountPartitionBalanceSnapshots[account][
                 partition
             ],
-            _snapshotStorage().accountPartitionSnapshots[account],
+            _snapshotStorage().accountPartitionMetadata[account],
             _balanceOfByPartition(partition, account),
             _partitionsOf(account)
         );

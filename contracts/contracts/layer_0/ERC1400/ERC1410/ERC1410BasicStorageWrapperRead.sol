@@ -439,13 +439,6 @@ contract ERC1410BasicStorageWrapperRead is
         return index != 0;
     }
 
-    function _adjustBalanceByPartitionAndAccount(
-        bytes32 partition,
-        address account
-    ) internal {
-        _adjustTotalAndMaxSupplyByPartition(partition);
-    }
-
     function _adjustTotalAndMaxSupplyByPartition(bytes32 partition) internal {
         uint256 factor = _calculateFactorByPartitionAdjustedAt(
             partition,
@@ -464,11 +457,11 @@ contract ERC1410BasicStorageWrapperRead is
     ) internal {
         uint256 abaf = _getAbaf();
         ERC1410BasicStorage storage basicStorage = _getERC1410BasicStorage();
-        adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
-        adjustTotalBalanceFor(basicStorage, abaf, account);
+        _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
+        _adjustTotalBalanceFor(basicStorage, abaf, account);
     }
 
-    function adjustPartitionBalanceFor(
+    function _adjustPartitionBalanceFor(
         ERC1410BasicStorage storage basicStorage,
         uint256 abaf,
         bytes32 partition,
@@ -491,7 +484,7 @@ contract ERC1410BasicStorageWrapperRead is
         );
     }
 
-    function adjustTotalBalanceFor(
+    function _adjustTotalBalanceFor(
         ERC1410BasicStorage storage basicStorage,
         uint256 abaf,
         address account
