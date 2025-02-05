@@ -205,13 +205,15 @@
 
 pragma solidity 0.8.18;
 
-import {Common} from '../common/Common.sol';
+import '@hashgraph/asset-tokenization-contracts/contracts/layer_2/adjustBalances/AdjustBalanceLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {Common} from '../common/Common.sol';
+import {ILockStorageWrapper} from '../interfaces/lock/ILockStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract LockStorageWrapper is Common {
+abstract contract LockStorageWrapper is ILockStorageWrapper, Common {
     using EnumerableSet for EnumerableSet.UintSet;
 
     function _lockByPartition(
@@ -220,23 +222,36 @@ abstract contract LockStorageWrapper is Common {
         address _tokenHolder,
         uint256 _expirationTimestamp
     ) internal virtual returns (bool success_, uint256 lockId_) {
-        _beforeLock(_partition, _amount, _tokenHolder, _expirationTimestamp);
+        _updateLockedBalancesBeforeLock(
+            _partition,
+            _amount,
+            _tokenHolder,
+            _expirationTimestamp
+        );
         _reduceBalanceByPartition(_tokenHolder, _amount, _partition);
 
         LockDataStorage storage lockStorage = _lockStorage();
 
-        lockId_ = ++lockStorage.lockNextId[_tokenHolder][_partition];
+        lockId_ = ++lockStorage.nextLockIdByAccountAndPartition[_tokenHolder][
+            _partition
+        ];
 
         LockData memory lock = LockData(lockId_, _amount, _expirationTimestamp);
 
-        lockStorage.locks[_tokenHolder][_partition].push(lock);
-        lockStorage.lockIds[_tokenHolder][_partition].add(lockId_);
-        lockStorage.locksIndex[_tokenHolder][_partition][lockId_] = lockStorage
-        .locks[_tokenHolder][_partition].length;
-        lockStorage.lockedAmountByPartition[_tokenHolder][
+        lockStorage.locksByAccountAndPartition[_tokenHolder][_partition].push(
+            lock
+        );
+        lockStorage.lockIdsByAccountAndPartition[_tokenHolder][_partition].add(
+            lockId_
+        );
+        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
+            lockId_
+        ] = lockStorage
+        .locksByAccountAndPartition[_tokenHolder][_partition].length;
+        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
             _partition
         ] += _amount;
-        lockStorage.totalLockedAmount[_tokenHolder] += _amount;
+        lockStorage.totalLockedAmountByAccount[_tokenHolder] += _amount;
 
         success_ = true;
     }
@@ -246,23 +261,25 @@ abstract contract LockStorageWrapper is Common {
         uint256 _lockId,
         address _tokenHolder
     ) internal virtual returns (bool success_) {
-        _beforeRelease(_partition, _lockId, _tokenHolder);
+        _updateLockedBalancesBeforeRelease(_partition, _lockId, _tokenHolder);
         uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
 
-        LockData memory lock = _getLockByIndex(
-            _partition,
-            _tokenHolder,
-            lockIndex
-        );
+        LockData memory lock = lockStorage.locksByAccountAndPartition[
+            _tokenHolder
+        ][_partition][lockIndex - 1];
 
         //_removeLock(_partition, _tokenHolder, _lockId);
         LockDataStorage storage lockStorage = _lockStorage();
 
-        lockStorage.lockedAmountByPartition[_tokenHolder][_partition] -= lock
-            .amount;
-        lockStorage.totalLockedAmount[_tokenHolder] -= lock.amount;
-        lockStorage.locksIndex[_tokenHolder][_partition][lock.id] = 0;
-        lockStorage.lockIds[_tokenHolder][_partition].remove(lock.id);
+        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
+            _partition
+        ] -= lock.amount;
+        lockStorage.totalLockedAmountByAccount[_tokenHolder] -= lock.amount;
+        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
+            lock.id
+        ] = 0;
+        lockStorage
+        .lockIdsByAccountAndPartition[_tokenHolder][_partition].remove(lock.id);
 
         uint256 lastIndex = _getLockCountForByPartition(
             _partition,
@@ -270,15 +287,13 @@ abstract contract LockStorageWrapper is Common {
         );
 
         if (lockIndex < lastIndex) {
-            LockData memory lastLock = _getLockByIndex(
-                _partition,
-                _tokenHolder,
-                lastIndex
-            );
+            LockData memory lastLock = lockStorage.locksByAccountAndPartition[
+                _tokenHolder
+            ][_partition][lastIndex - 1];
             _setLockAtIndex(_partition, _tokenHolder, lockIndex, lastLock);
         }
 
-        lockStorage.locks[_tokenHolder][_partition].pop();
+        lockStorage.locksByAccountAndPartition[_tokenHolder][_partition].pop();
 
         if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
             _addPartitionTo(lock.amount, _tokenHolder, _partition);
@@ -291,7 +306,7 @@ abstract contract LockStorageWrapper is Common {
         success_ = true;
     }
     // solhint-disable no-unused-vars
-    function _beforeLock(
+    function _updateLockedBalancesBeforeLock(
         bytes32 _partition,
         uint256 _amount,
         address _tokenHolder,
@@ -300,7 +315,7 @@ abstract contract LockStorageWrapper is Common {
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }
 
-    function _beforeRelease(
+    function _updateLockedBalancesBeforeRelease(
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
@@ -316,14 +331,18 @@ abstract contract LockStorageWrapper is Common {
     ) internal virtual {
         LockDataStorage storage lockStorage = _lockStorage();
 
-        lockStorage.locks[_tokenHolder][_partition][_lockIndex - 1].id = lock
-            .id;
         lockStorage
-        .locks[_tokenHolder][_partition][_lockIndex - 1].amount = lock.amount;
+        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
+            .id = lock.id;
         lockStorage
-        .locks[_tokenHolder][_partition][_lockIndex - 1]
+        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
+            .amount = lock.amount;
+        lockStorage
+        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
             .expirationTimestamp = lock.expirationTimestamp;
 
-        lockStorage.locksIndex[_tokenHolder][_partition][lock.id] = _lockIndex;
+        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
+            lock.id
+        ] = _lockIndex;
     }
 }
