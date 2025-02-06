@@ -612,7 +612,11 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [_PARTITION_ID_1, targetId.toString(), amount.toHexString(), '0x'],
+      [
+        _PARTITION_ID_1,
+        { to: targetId.toString(), value: amount.toHexString() },
+        '0x',
+      ],
     );
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -1318,12 +1322,14 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
       [
-        partitionId,
-        sourceId.toString(),
-        targetId.toString(),
-        amount.toHexString(),
-        '0x',
-        '0x',
+        {
+          partition: partitionId,
+          from: sourceId.toString(),
+          to: targetId.toString(),
+          value: amount.toHexString(),
+          data: '0x',
+          operatorData: '0x',
+        },
       ],
     );
 
