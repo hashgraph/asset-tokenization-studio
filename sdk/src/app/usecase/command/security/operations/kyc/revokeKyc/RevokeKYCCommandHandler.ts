@@ -218,6 +218,8 @@ import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNo
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { SecurityPaused } from '../../../error/SecurityPaused.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
+import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
+import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
 
 @CommandHandler(RevokeKYCCommand)
 export class RevokeKYCCommandHandler
@@ -251,9 +253,16 @@ export class RevokeKYCCommandHandler
       throw new SecurityPaused();
     }
 
-    await this.validationService.validateKycAddresses(securityEvmAddress, [
-      new EvmAddress(account.evmAddress!),
-    ]);
+    if (
+      account.evmAddress &&
+      !(await this.queryAdapter.hasRole(
+        securityEvmAddress,
+        new EvmAddress(account.evmAddress!),
+        SecurityRole._KYC_ROLE,
+      ))
+    ) {
+      throw new NotGrantedRole(SecurityRole._KYC_ROLE);
+    }
 
     const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
       ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)

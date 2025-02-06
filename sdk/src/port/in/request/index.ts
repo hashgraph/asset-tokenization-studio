@@ -279,6 +279,11 @@ import GetHeldAmountForByPartitionRequest from './GetHeldAmountForByPartitionReq
 import GetHoldCountForByPartitionRequest from './GetHoldCountForByPartitionRequest.js';
 import GetHoldsIdForByPartitionRequest from './GetHoldsIdForByPartitionRequest.js';
 import GetHoldForByPartitionRequest from './GetHoldForByPartitionRequest.js';
+import GetKYCAccountsRequest from './GetKYCAccountsRequest.js';
+import GetKYCAccountsCountRequest from './GetKYCAccountsCountRequest.js';
+import GetKYCForRequest from './GetKYCForRequest.js';
+import RevokeKYCRequest from './RevokeKYCRequest.js';
+import GrantKYCRequest from './GrantKYCRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -357,4 +362,9 @@ export {
   GetHoldCountForByPartitionRequest,
   GetHoldsIdForByPartitionRequest,
   GetHoldForByPartitionRequest,
+  GetKYCAccountsRequest,
+  GetKYCAccountsCountRequest,
+  GetKYCForRequest,
+  RevokeKYCRequest,
+  GrantKYCRequest,
 };

@@ -215,7 +215,8 @@ import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { SecurityPaused } from '../../../error/SecurityPaused.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
+import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
+import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
 
 @CommandHandler(GrantKYCCommand)
 export class GrantKYCCommandHandler
@@ -230,8 +231,6 @@ export class GrantKYCCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
   ) {}
 
   async execute(command: GrantKYCCommand): Promise<GrantKYCCommandResponse> {
@@ -252,25 +251,32 @@ export class GrantKYCCommandHandler
         : issuer.toString(),
     );
 
-    await this.validationService.validateIssuer(
-      securityEvmAddress,
-      issuerEvmAddress,
-    );
+    // await this.validationService.validateIssuer(
+    //   securityEvmAddress,
+    //   issuerEvmAddress,
+    // );
 
     if (await this.queryAdapter.isPaused(securityEvmAddress)) {
       throw new SecurityPaused();
     }
 
-    await this.validationService.validateKycAddresses(securityEvmAddress, [
-      new EvmAddress(account.evmAddress!),
-    ]);
+    if (
+      account.evmAddress &&
+      !(await this.queryAdapter.hasRole(
+        securityEvmAddress,
+        new EvmAddress(account.evmAddress!),
+        SecurityRole._KYC_ROLE,
+      ))
+    ) {
+      throw new NotGrantedRole(SecurityRole._KYC_ROLE);
+    }
 
     const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
       ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
       : new EvmAddress(targetId);
 
     if (
-      BigDecimal.fromString(validFrom).isLowerThan(
+      BigDecimal.fromString(validFrom).isGreaterThan(
         BigDecimal.fromString(validTo),
       )
     ) {
@@ -281,8 +287,8 @@ export class GrantKYCCommandHandler
       securityEvmAddress,
       targetEvmAddress,
       VCId,
-      BigDecimal.fromString(validFrom as string),
-      BigDecimal.fromString(validTo as string),
+      BigDecimal.fromString(validFrom),
+      BigDecimal.fromString(validTo),
       issuerEvmAddress,
     );
 

@@ -1115,21 +1115,31 @@ class SecurityInPort implements ISecurityInPort {
     const signedCredential: SignedCredential = Terminal3VC.vcFromBase64(
       request.vcBase64,
     );
-    await verifyVc(signedCredential);
+    const verificationResult = await verifyVc(signedCredential);
+    if (!verificationResult.isValid) {
+      throw new Error('Invalid VC');
+    }
+
+    const issuer: string = signedCredential.issuer.split(':').pop()!;
 
     signedCredential.validFrom =
-      signedCredential.validFrom ?? new Date().toISOString();
+      signedCredential.validFrom ?? new Date().toString();
+    signedCredential.validFrom = Date.parse(
+      signedCredential.validFrom,
+    ).toString();
     signedCredential.validUntil =
-      signedCredential.validUntil ?? MaxUint256.toString();
+      signedCredential.validUntil == ''
+        ? MaxUint256.toString()
+        : signedCredential.validUntil;
 
     return await this.commandBus.execute(
       new GrantKYCCommand(
         request.securityId,
         request.targetId,
-        signedCredential.issuer,
         signedCredential.id,
+        issuer,
         signedCredential.validFrom,
-        signedCredential.validUntil,
+        signedCredential.validUntil as string,
       ),
     );
   }

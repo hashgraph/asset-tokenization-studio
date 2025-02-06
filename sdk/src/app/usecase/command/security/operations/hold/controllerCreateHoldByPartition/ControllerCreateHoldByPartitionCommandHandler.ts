@@ -221,7 +221,7 @@ import {
   ControllerCreateHoldByPartitionCommand,
   ControllerCreateHoldByPartitionCommandResponse,
 } from './ControllerCreateHoldByPartitionCommand.js';
-import { SecurityRole } from 'domain/context/security/SecurityRole.js';
+import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
 import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
 

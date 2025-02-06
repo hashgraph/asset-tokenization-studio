@@ -264,7 +264,7 @@ import {
 import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
 import { DividendFor } from '../../../domain/context/equity/DividendFor';
 import { VotingFor } from '../../../domain/context/equity/VotingFor';
-import { HoldDetails } from 'domain/context/security/HoldDetails.js';
+import { HoldDetails } from '../../../domain/context/security/HoldDetails.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 

@@ -221,18 +221,18 @@ export default class ValidationService extends Service {
     super();
   }
 
-  async validateIssuer(
-    securityEvmAddress: EvmAddress,
-    issuerEvmAddress: EvmAddress,
-  ): Promise<boolean> {
-    if (
-      !(await this.queryAdapter.isIssuer(securityEvmAddress, issuerEvmAddress))
-    ) {
-      throw new UnlistedIssuer();
-    } else {
-      return true;
-    }
-  }
+  // async validateIssuer(
+  //   securityEvmAddress: EvmAddress,
+  //   issuerEvmAddress: EvmAddress,
+  // ): Promise<boolean> {
+  //   if (
+  //     !(await this.queryAdapter.isIssuer(securityEvmAddress, issuerEvmAddress))
+  //   ) {
+  //     throw new UnlistedIssuer();
+  //   } else {
+  //     return true;
+  //   }
+  // }
 
   async validateKycAddresses(
     securityEvmAddress: EvmAddress,
