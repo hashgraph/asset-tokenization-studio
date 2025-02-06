@@ -204,32 +204,32 @@
 */
 
 import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator';
-import {
-  SetRevocationRegistryAddressCommand,
-  SetRevocationRegistryAddressCommandResponse,
-} from './setRevocationRegistryAddressCommand';
+import { AddIssuerCommand, AddIssuerCommandResponse } from './AddIssuerCommand';
 import { ICommandHandler } from '../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
 import TransactionService from '../../../../service/TransactionService';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
 import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter';
+import { SecurityPaused } from '../../security/error/SecurityPaused';
+import { AccountIsAlreadyAnIssuer } from '../error/AccountAlreadyInControlList';
 
-@CommandHandler(SetRevocationRegistryAddressCommand)
-export class SetRevocationRegistryAddressCommandHandler
-  implements ICommandHandler<SetRevocationRegistryAddressCommand>
+@CommandHandler(AddIssuerCommand)
+export class AddIssuerCommandHandler
+  implements ICommandHandler<AddIssuerCommand>
 {
   constructor(
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
   ) {}
 
-  async execute(
-    command: SetRevocationRegistryAddressCommand,
-  ): Promise<SetRevocationRegistryAddressCommandResponse> {
-    const { securityId, revocationRegistryId } = command;
+  async execute(command: AddIssuerCommand): Promise<AddIssuerCommandResponse> {
+    const { securityId, issuerId } = command;
     const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
@@ -238,22 +238,31 @@ export class SetRevocationRegistryAddressCommandHandler
         : securityId.toString(),
     );
 
-    const revocationRegistryEvmAddress: EvmAddress =
-      HEDERA_FORMAT_ID_REGEX.test(revocationRegistryId)
-        ? await this.mirrorNodeAdapter.accountToEvmAddress(revocationRegistryId)
-        : new EvmAddress(revocationRegistryId);
+    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
+      throw new SecurityPaused();
+    }
 
-    const res = await handler.setRevocationRegistryAddress(
+    const issuerEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.test(issuerId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(issuerId)
+      : new EvmAddress(issuerId);
+
+    const isIssuer = await this.queryAdapter.isIssuer(
       securityEvmAddress,
-      revocationRegistryEvmAddress,
+      issuerEvmAddress,
+    );
+
+    if (isIssuer) {
+      throw new AccountIsAlreadyAnIssuer(issuerId);
+    }
+
+    const res = await handler.addIssuer(
+      securityEvmAddress,
+      issuerEvmAddress,
       securityId,
     );
 
     return Promise.resolve(
-      new SetRevocationRegistryAddressCommandResponse(
-        res.error === undefined,
-        res.id!,
-      ),
+      new AddIssuerCommandResponse(res.error === undefined, res.id!),
     );
   }
 }

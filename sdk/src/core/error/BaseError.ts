@@ -233,6 +233,7 @@ export enum ErrorCode {
 
   // Error codes for Logic Errors (Prefix: 2XXXX)
   AccountAlreadyInControlList = '20013',
+  AccountIsAlreadyAnIssuer = '20019',
   AccountFreeze = '20008',
   AccountInBlackList = '20011',
   AccountNotAssociatedToSecurity = '20001',

@@ -203,48 +203,65 @@
 
 */
 
-import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
-import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
-import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
-import SecurityService from '../../../../service/SecurityService.js';
-import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId.js';
-import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator';
 import {
-  GetRevocationRegistryAddressQuery,
-  GetRevocationRegistryAddressQueryResponse,
-} from './getRevocationRegistryAddressQuery.js';
+  SetRevocationRegistryAddressCommand,
+  SetRevocationRegistryAddressCommandResponse,
+} from './SetRevocationRegistryAddressCommand';
+import { ICommandHandler } from '../../../../../core/command/CommandHandler';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
+import TransactionService from '../../../../service/TransactionService';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter';
+import { SecurityPaused } from '../../security/error/SecurityPaused';
 
-@QueryHandler(GetRevocationRegistryAddressQuery)
-export class GetRevocationRegistryAddressQueryHandler
-  implements IQueryHandler<GetRevocationRegistryAddressQuery>
+@CommandHandler(SetRevocationRegistryAddressCommand)
+export class SetRevocationRegistryAddressCommandHandler
+  implements ICommandHandler<SetRevocationRegistryAddressCommand>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
     @lazyInject(MirrorNodeAdapter)
-    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
   ) {}
 
   async execute(
-    query: GetRevocationRegistryAddressQuery,
-  ): Promise<GetRevocationRegistryAddressQueryResponse> {
-    const { securityId } = query;
-    const security = await this.securityService.get(securityId);
-    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
+    command: SetRevocationRegistryAddressCommand,
+  ): Promise<SetRevocationRegistryAddressCommandResponse> {
+    const { securityId, revocationRegistryId } = command;
+    const handler = this.transactionService.getHandler();
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(securityId)
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
         ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
         : securityId.toString(),
     );
 
-    const res =
-      await this.queryAdapter.getRevocationRegistryAddress(securityEvmAddress);
+    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
+      throw new SecurityPaused();
+    }
 
-    return new GetRevocationRegistryAddressQueryResponse(res);
+    const revocationRegistryEvmAddress: EvmAddress =
+      HEDERA_FORMAT_ID_REGEX.test(revocationRegistryId)
+        ? await this.mirrorNodeAdapter.accountToEvmAddress(revocationRegistryId)
+        : new EvmAddress(revocationRegistryId);
+
+    const res = await handler.setRevocationRegistryAddress(
+      securityEvmAddress,
+      revocationRegistryEvmAddress,
+      securityId,
+    );
+
+    return Promise.resolve(
+      new SetRevocationRegistryAddressCommandResponse(
+        res.error === undefined,
+        res.id!,
+      ),
+    );
   }
 }

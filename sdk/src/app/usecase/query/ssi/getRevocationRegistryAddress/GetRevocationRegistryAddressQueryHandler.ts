@@ -203,124 +203,48 @@
 
 */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { LogError } from '../../core/decorator/LogErrorDecorator.js';
-import { handleValidation } from './Common';
-import { QueryBus } from '../../core/query/QueryBus';
-import Injectable from '../../core/Injectable';
-import { CommandBus } from '../../core/command/CommandBus';
-import SetRevocationRegistryAddressRequest from './request/SetRevocationRegistryAddressRequest';
-import AddIssuerRequest from './request/AddIssuerRequest';
-import RemoveIssuerRequest from './request/RemoveIssuerRequest';
-import { SetRevocationRegistryAddressCommand } from '../../app/usecase/command/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand.js';
-import { AddIssuerCommand } from '../../app/usecase/command/ssi/addIssuer/AddIssuerCommand.js';
-import { RemoveIssuerCommand } from '../../app/usecase/command/ssi/removeIssuer/RemoveIssuerCommand.js';
-import GetRevocationRegistryAddressRequest from './request/GetRevocationRegistryAddressRequest.js';
-import GetIssuerListCountRequest from './request/GetIssuerListCountRequest.js';
-import GetIssuerListMembersRequest from './request/GetIssuerListMembersRequest.js';
-import { GetRevocationRegistryAddressQuery } from '../../app/usecase/query/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery.js';
-import { GetIssuerListCountQuery } from '../../app/usecase/query/ssi/getIssuerListCount/GetIssuerListCountQuery.js';
-import { GetIssuerListMembersQuery } from '../../app/usecase/query/ssi/getIssuerListMembers/GetIssuerListMembersQuery.js';
+import { QueryHandler } from '../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../service/SecurityService.js';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId.js';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress.js';
+import {
+  GetRevocationRegistryAddressQuery,
+  GetRevocationRegistryAddressQueryResponse,
+} from './GetRevocationRegistryAddressQuery.js';
 
-interface ISSIManagementInPort {
-  setRevocationRegistryAddress(
-    request: SetRevocationRegistryAddressRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  addIssuer(
-    request: AddIssuerRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  removeIssuer(
-    request: RemoveIssuerRequest,
-  ): Promise<{ payload: boolean; transactionId: string }>;
-  getRevocationRegistryAddress(
-    request: GetRevocationRegistryAddressRequest,
-  ): Promise<string>;
-  getIssuerListCount(request: GetIssuerListCountRequest): Promise<number>;
-  getIssuerListMembers(request: GetIssuerListMembersRequest): Promise<string[]>;
-}
-
-class SSIManagementInPort implements ISSIManagementInPort {
+@QueryHandler(GetRevocationRegistryAddressQuery)
+export class GetRevocationRegistryAddressQueryHandler
+  implements IQueryHandler<GetRevocationRegistryAddressQuery>
+{
   constructor(
-    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
-    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(MirrorNodeAdapter)
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
   ) {}
 
-  @LogError
-  async addIssuer(
-    request: AddIssuerRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, issuerId } = request;
-    handleValidation('AddIssuerRequest', request);
+  async execute(
+    query: GetRevocationRegistryAddressQuery,
+  ): Promise<GetRevocationRegistryAddressQueryResponse> {
+    const { securityId } = query;
+    const security = await this.securityService.get(securityId);
+    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-    return await this.commandBus.execute(
-      new AddIssuerCommand(securityId, issuerId),
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.exec(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
     );
-  }
 
-  @LogError
-  async setRevocationRegistryAddress(
-    request: SetRevocationRegistryAddressRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, revocationRegistryId } = request;
-    handleValidation('SetRevocationRegistryAddressRequest', request);
+    const res =
+      await this.queryAdapter.getRevocationRegistryAddress(securityEvmAddress);
 
-    return await this.commandBus.execute(
-      new SetRevocationRegistryAddressCommand(securityId, revocationRegistryId),
-    );
-  }
-
-  @LogError
-  async removeIssuer(
-    request: RemoveIssuerRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId, issuerId } = request;
-    handleValidation('RemoveIssuerRequest', request);
-
-    return await this.commandBus.execute(
-      new RemoveIssuerCommand(securityId, issuerId),
-    );
-  }
-
-  @LogError
-  async getRevocationRegistryAddress(
-    request: GetRevocationRegistryAddressRequest,
-  ): Promise<string> {
-    const { securityId } = request;
-    handleValidation('GetRevocationRegistryAddressRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetRevocationRegistryAddressQuery(securityId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getIssuerListCount(
-    request: GetIssuerListCountRequest,
-  ): Promise<number> {
-    const { securityId } = request;
-    handleValidation('GetIssuerListCountRequest', request);
-
-    return (
-      await this.queryBus.execute(new GetIssuerListCountQuery(securityId))
-    ).payload;
-  }
-
-  @LogError
-  async getIssuerListMembers(
-    request: GetIssuerListMembersRequest,
-  ): Promise<string[]> {
-    const { securityId, start, end } = request;
-    handleValidation('GetIssuerListMembersRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetIssuerListMembersQuery(securityId, start, end),
-      )
-    ).payload;
+    return new GetRevocationRegistryAddressQueryResponse(res);
   }
 }
-
-const SSIManagement = new SSIManagementInPort();
-export default SSIManagement;

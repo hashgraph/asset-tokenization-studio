@@ -316,12 +316,12 @@ import { GetHeldAmountForByPartitionQueryHandler } from '../app/usecase/query/se
 import { GetHoldCountForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQueryHandler.js';
 import { GetHoldsIdForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQueryHandler.js';
 import { GetHoldForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQueryHandler.js';
-import { AddIssuerCommandHandler } from '../app/usecase/command/ssi/addIssuer/addIssuerCommandHandler.js';
-import { RemoveIssuerCommandHandler } from '../app/usecase/command/ssi/removeIssuer/removeIssuerCommandHandler.js';
-import { SetRevocationRegistryAddressCommandHandler } from '../app/usecase/command/ssi/setRevocationRegistryAddress/setRevocationRegistryAddressCommandHandler.js';
-import { GetIssuerListCountQueryHandler } from '../app/usecase/query/ssi/getIssuerListCount/getIssuerListCountQueryHandler.js';
-import { GetIssuerListMembersQueryHandler } from '../app/usecase/query/ssi/getIssuerListMembers/getIssuerListMembersQueryHandler.js';
-import { GetRevocationRegistryAddressQueryHandler } from '../app/usecase/query/ssi/getRevocationRegistryAddress/getRevocationRegistryAddressQueryHandler.js';
+import { AddIssuerCommandHandler } from '../app/usecase/command/ssi/addIssuer/AddIssuerCommandHandler.js';
+import { RemoveIssuerCommandHandler } from '../app/usecase/command/ssi/removeIssuer/RemoveIssuerCommandHandler.js';
+import { SetRevocationRegistryAddressCommandHandler } from '../app/usecase/command/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommandHandler.js';
+import { GetIssuerListCountQueryHandler } from '../app/usecase/query/ssi/getIssuerListCount/GetIssuerListCountQueryHandler.js';
+import { GetIssuerListMembersQueryHandler } from '../app/usecase/query/ssi/getIssuerListMembers/GetIssuerListMembersQueryHandler.js';
+import { GetRevocationRegistryAddressQueryHandler } from '../app/usecase/query/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),

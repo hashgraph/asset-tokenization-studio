@@ -207,13 +207,15 @@ import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDeco
 import {
   RemoveIssuerCommand,
   RemoveIssuerCommandResponse,
-} from './removeIssuerCommand';
+} from './RemoveIssuerCommand';
 import { ICommandHandler } from '../../../../../core/command/CommandHandler';
 import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
 import TransactionService from '../../../../service/TransactionService';
 import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter';
 import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
 import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter';
+import { SecurityPaused } from '../../security/error/SecurityPaused';
 
 @CommandHandler(RemoveIssuerCommand)
 export class RemoveIssuerCommandHandler
@@ -224,6 +226,8 @@ export class RemoveIssuerCommandHandler
     public readonly transactionService: TransactionService,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
   ) {}
 
   async execute(
@@ -237,6 +241,10 @@ export class RemoveIssuerCommandHandler
         ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
         : securityId.toString(),
     );
+
+    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
+      throw new SecurityPaused();
+    }
 
     const issuerEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.test(issuerId)
       ? await this.mirrorNodeAdapter.accountToEvmAddress(issuerId)
