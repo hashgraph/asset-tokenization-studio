@@ -606,23 +606,13 @@ describe('Transfer and lock Tests', () => {
                 factory,
             })
 
-            lockFacet = await ethers.getContractAt(
-                'Lock',
+            lockFacet = Lock__factory.connect(diamond.address, signer_C)
+            transferAndLockFacet = TransferAndLock__factory.connect(
                 diamond.address,
                 signer_C
             )
-            transferAndLockFacet = await ethers.getContractAt(
-                'TransferAndLock',
-                diamond.address,
-                signer_C
-            )
-            pauseFacet = await ethers.getContractAt(
-                'Pause',
-                diamond.address,
-                signer_D
-            )
-            erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
+            pauseFacet = Pause__factory.connect(diamond.address, signer_D)
+            erc1410Facet = ERC1410ScheduledTasks__factory.connect(
                 diamond.address,
                 signer_B
             )

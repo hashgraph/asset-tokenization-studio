@@ -330,6 +330,40 @@ interface ISecurityInPort {
   getLockedBalanceOf(
     request: GetLockedBalanceRequest,
   ): Promise<BalanceViewModel>;
+  createHoldByPartition(
+    request: CreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  createHoldFromByPartition(
+    request: CreateHoldFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  controllerCreateHoldByPartition(
+    request: ControllerCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  protectedCreateHoldByPartition(
+    request: ProtectedCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  getHeldAmountFor(request: GetHeldAmountForRequest): Promise<number>;
+  getHeldAmountForByPartition(
+    request: GetHeldAmountForByPartitionRequest,
+  ): Promise<number>;
+  getHoldCountForByPartition(
+    request: GetHoldCountForByPartitionRequest,
+  ): Promise<number>;
+  getHoldsIdForByPartition(
+    request: GetHoldsIdForByPartitionRequest,
+  ): Promise<number[]>;
+  getHoldForByPartition(
+    request: GetHoldForByPartitionRequest,
+  ): Promise<HoldViewModel>;
+  releaseHoldByPartition(
+    request: ReleaseHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  reclaimHoldByPartition(
+    request: ReclaimHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  executeHoldByPartition(
+    request: ExecuteHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -826,6 +860,407 @@ class SecurityInPort implements ISecurityInPort {
         deadline,
         nounce,
         signature,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedTransferFromByPartition(
+    request: ProtectedTransferFromByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      sourceId,
+      targetId,
+      amount,
+      deadline,
+      nounce,
+      signature,
+    } = request;
+    handleValidation('ProtectedTransferFromByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ProtectedTransferFromByPartitionCommand(
+        securityId,
+        partitionId,
+        sourceId,
+        targetId,
+        amount,
+        deadline,
+        nounce,
+        signature,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedRedeemFromByPartition(
+    request: ProtectedRedeemFromByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const {
+      securityId,
+      amount,
+      sourceId,
+      partitionId,
+      deadline,
+      nounce,
+      signature,
+    } = request;
+    handleValidation('ProtectedRedeemFromByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ProtectedRedeemFromByPartitionCommand(
+        securityId,
+        partitionId,
+        sourceId,
+        amount,
+        deadline,
+        nounce,
+        signature,
+      ),
+    );
+  }
+
+  @LogError
+  async arePartitionsProtected(
+    request: PartitionsProtectedRequest,
+  ): Promise<boolean> {
+    handleValidation('PartitionsProtectedRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new PartitionsProtectedQuery(request.securityId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getNounce(request: GetNounceRequest): Promise<number> {
+    handleValidation('GetNounceRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetNounceQuery(request.securityId, request.targetId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async protectPartitions(
+    request: PartitionsProtectedRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId } = request;
+    handleValidation('PartitionsProtectedRequest', request);
+
+    return await this.commandBus.execute(
+      new ProtectPartitionsCommand(securityId),
+    );
+  }
+
+  @LogError
+  async unprotectPartitions(
+    request: PartitionsProtectedRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId } = request;
+    handleValidation('PartitionsProtectedRequest', request);
+
+    return await this.commandBus.execute(
+      new UnprotectPartitionsCommand(securityId),
+    );
+  }
+
+  @LogError
+  async protectedTransferAndLockByPartition(
+    request: ProtectedTransferAndLockByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      targetId,
+      sourceId,
+      expirationDate,
+      deadline,
+      nounce,
+      signature,
+    } = request;
+    handleValidation('ProtectedTransferAndLockByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ProtectedTransferAndLockByPartitionCommand(
+        securityId,
+        partitionId,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+        deadline,
+        nounce,
+        signature,
+      ),
+    );
+  }
+
+  @LogError
+  async createHoldByPartition(
+    request: CreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      escrow,
+      targetId,
+      expirationDate,
+    } = request;
+    handleValidation('CreateHoldByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new CreateHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        targetId,
+        expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async createHoldFromByPartition(
+    request: CreateHoldFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      escrow,
+      sourceId,
+      targetId,
+      expirationDate,
+    } = request;
+    handleValidation('CreateHoldFromByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new CreateHoldFromByPartitionCommand(
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async controllerCreateHoldByPartition(
+    request: ControllerCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      escrow,
+      sourceId,
+      targetId,
+      expirationDate,
+    } = request;
+    handleValidation('ControllerCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ControllerCreateHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedCreateHoldByPartition(
+    request: ProtectedCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    const {
+      securityId,
+      partitionId,
+      amount,
+      escrow,
+      sourceId,
+      targetId,
+      expirationDate,
+      deadline,
+      nonce,
+      signature,
+    } = request;
+    handleValidation('ProtectedCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ProtectedCreateHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        escrow,
+        amount,
+        sourceId,
+        targetId,
+        expirationDate,
+        deadline,
+        nonce,
+        signature,
+      ),
+    );
+  }
+
+  @LogError
+  async getHeldAmountFor(request: GetHeldAmountForRequest): Promise<number> {
+    handleValidation('GetHeldAmountForRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHeldAmountForQuery(request.securityId, request.targetId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHeldAmountForByPartition(
+    request: GetHeldAmountForByPartitionRequest,
+  ): Promise<number> {
+    handleValidation('GetHeldAmountForByPartitionRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHeldAmountForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHoldCountForByPartition(
+    request: GetHoldCountForByPartitionRequest,
+  ): Promise<number> {
+    handleValidation('GetHoldCountForByPartitionRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHoldCountForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHoldsIdForByPartition(
+    request: GetHoldsIdForByPartitionRequest,
+  ): Promise<number[]> {
+    handleValidation('GetHoldsIdForByPartitionRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetHoldsIdForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.start,
+          request.end,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getHoldForByPartition(
+    request: GetHoldForByPartitionRequest,
+  ): Promise<HoldViewModel> {
+    handleValidation('GetHoldForByPartitionRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetHoldForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.holdId,
+        ),
+      )
+    ).payload;
+
+    const hold: HoldViewModel = {
+      id: request.holdId,
+      amount: res.amount.toString(),
+      expirationDate: new Date(res.expirationTimeStamp * ONE_THOUSAND),
+      tokenHolderAddress: res.tokenHolderAddress,
+      escrowAddress: res.escrowAddress,
+      destinationAddress: res.destinationAddress,
+      data: res.data,
+      operatorData: res.operatorData,
+    };
+
+    return hold;
+  }
+
+  @LogError
+  async releaseHoldByPartition(
+    request: ReleaseHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, partitionId, amount, targetId, holdId } = request;
+    handleValidation('ReleaseHoldByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ReleaseHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        amount,
+        holdId,
+        targetId,
+      ),
+    );
+  }
+
+  @LogError
+  async reclaimHoldByPartition(
+    request: ReclaimHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, partitionId, targetId, holdId } = request;
+    handleValidation('ReclaimHoldByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ReclaimHoldByPartitionCommand(
+        securityId,
+        partitionId,
+        holdId,
+        targetId,
+      ),
+    );
+  }
+
+  @LogError
+  async executeHoldByPartition(
+    request: ExecuteHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, sourceId, amount, holdId, targetId, partitionId } =
+      request;
+    handleValidation('ExecuteHoldByPartitionRequest', request);
+
+    return await this.commandBus.execute(
+      new ExecuteHoldByPartitionCommand(
+        securityId,
+        sourceId,
+        amount,
+        holdId,
+        targetId,
+        partitionId,
       ),
     );
   }

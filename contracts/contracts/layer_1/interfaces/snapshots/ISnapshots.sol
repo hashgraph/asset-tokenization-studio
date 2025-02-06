@@ -244,4 +244,15 @@ interface ISnapshots {
         uint256 _snapshotID,
         address _tokenHolder
     ) external view returns (uint256 balance_);
+
+    function heldBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_);
+
+    function heldBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_);
 }

@@ -214,6 +214,7 @@ import {
     type AccessControl,
     TimeTravel,
     Lock_2,
+    Hold_2,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
@@ -287,6 +288,7 @@ describe('Equity Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock_2
+    let holdFacet: Hold_2
     let erc1410Facet: ERC1410ScheduledTasks
     let timeTravelFacet: TimeTravel
 
@@ -377,6 +379,18 @@ describe('Equity Tests', () => {
         balanceAdjustmentExecutionDateInSeconds = dateToUnixTimestamp(
             '2030-01-01T00:00:10Z'
         )
+        equityFacet = EquityUSATimeTravel__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
+        holdFacet = Hold_2__factory.connect(diamond.address, signer_A)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
 
         votingData = {
             recordDate: votingRecordDateInSeconds.toString(),

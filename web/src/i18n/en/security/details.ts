@@ -256,6 +256,9 @@ export default {
     },
     details: {
       title: "Details",
+      availableBalance: "Available balance",
+      lockBalance: "Lock balance",
+      heldBalance: "Held balance",
     },
     error: {
       targetId: "Sorry, there was an error. Probably wrong address",

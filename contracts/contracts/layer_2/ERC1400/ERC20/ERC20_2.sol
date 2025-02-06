@@ -462,3 +462,4 @@ contract ERC20_2 is IERC20_2, ERC20, ERC20StorageWrapper_2 {
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase, no-unused-vars, custom-errors

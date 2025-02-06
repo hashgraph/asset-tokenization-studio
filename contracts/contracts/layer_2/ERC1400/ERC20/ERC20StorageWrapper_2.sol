@@ -284,3 +284,4 @@ contract ERC20StorageWrapper_2 is
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

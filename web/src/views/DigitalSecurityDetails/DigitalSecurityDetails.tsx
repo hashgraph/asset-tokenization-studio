@@ -403,6 +403,27 @@ export const DigitalSecurityDetails = () => {
       });
     }
 
+    if (!isPaused) {
+      adminTabs.push({
+        content: <Locker />,
+        header: tTabs("locker"),
+      });
+    }
+
+    adminTabs.push({
+      content: <Hold />,
+      header: tTabs("hold"),
+    });
+
+    const hasCapRole = roles.find((role) => role === SecurityRole._CAP_ROLE);
+
+    if (!isPaused && hasCapRole) {
+      adminTabs.push({
+        content: <Cap />,
+        header: tTabs("cap"),
+      });
+    }
+
     if (equityDetails?.votingRight && hasCorporateActionsRole && !isPaused) {
       adminTabs.push({
         content: <VotingRights />,

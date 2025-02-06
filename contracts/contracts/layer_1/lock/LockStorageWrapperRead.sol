@@ -212,6 +212,7 @@ import {ILockStorageWrapper} from '../interfaces/lock/ILockStorageWrapper.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract LockStorageWrapperRead is ILockStorageWrapper, LocalContext {

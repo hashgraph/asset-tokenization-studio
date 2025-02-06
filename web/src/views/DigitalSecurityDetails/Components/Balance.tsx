@@ -228,6 +228,7 @@ interface BalanceSearchFieldValue {
 }
 
 export const Balance = ({ id, detailsResponse }: BalanceProps) => {
+  const { details } = useSecurityStore();
   const {
     control,
     formState: { isValid },
@@ -296,6 +297,55 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
     },
   );
 
+  const { data: lockers, refetch: refetchLockers } = useGetLockers(
+    new GetLocksIdRequest({
+      securityId: id!,
+      targetId: targetId ?? "",
+      start: 0,
+      end: 100,
+    }),
+    {
+      enabled: !!targetId,
+      refetchOnWindowFocus: false,
+      onSuccess: () => {
+        setIsLoadingLockers(false);
+      },
+      onError: () => {
+        setIsLoadingLockers(false);
+        toast.show({
+          duration: 3000,
+          title: tError("targetId"),
+          status: "error",
+        });
+      },
+    },
+  );
+
+  const { data: heldBalance, refetch: refetchHolds } = useGetHeldAmountFor(
+    new GetHeldAmountForRequest({
+      securityId: id!,
+      targetId: targetId ?? "",
+    }),
+    {
+      enabled: !!targetId,
+      refetchOnWindowFocus: false,
+      select(data) {
+        return Number(data) / Math.pow(10, Number(details?.decimals));
+      },
+      onSuccess: () => {
+        setIsLoadingHolds(false);
+      },
+      onError: () => {
+        setIsLoadingHolds(false);
+        toast.show({
+          duration: 3000,
+          title: tError("targetId"),
+          status: "error",
+        });
+      },
+    },
+  );
+
   useEffect(() => {
     if (targetId && !balance) {
       setIsLoading(true);
@@ -310,9 +360,41 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
     return isLoading || isLoadingLockers;
   }, [isLoading, isLoadingLockers]);
 
+  const isLoadingTotal = useMemo(() => {
+    return isLoading || isLoadingLockers || isLoadingHolds;
+  }, [isLoading, isLoadingLockers, isLoadingHolds]);
+
   const onSubmit = ({ search }: BalanceSearchFieldValue) => {
     setTargetId(search);
   };
+
+  const lockBalance = useMemo(() => {
+    if (!lockers) {
+      return "-";
+    }
+
+    return lockers.reduce((acc, current) => {
+      return acc + Number(current.amount);
+    }, 0);
+  }, [lockers]);
+
+  const totalBalance = useMemo(() => {
+    if (!balance?.value) {
+      return "-";
+    }
+
+    let totalBalance = Number(balance?.value);
+
+    if (lockBalance !== "-") {
+      totalBalance += Number(lockBalance);
+    }
+
+    if (Number(heldBalance) > 0) {
+      totalBalance += Number(heldBalance);
+    }
+
+    return totalBalance;
+  }, [heldBalance, lockBalance, balance]);
 
   const lockBalance = useMemo(() => {
     if (!lockers) {

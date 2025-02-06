@@ -407,3 +407,4 @@ abstract contract ERC20StorageWrapper_2_Read is
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

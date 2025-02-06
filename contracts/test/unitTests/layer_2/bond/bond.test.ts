@@ -279,6 +279,7 @@ describe('Bond Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock_2
+    let holdFacet: Hold_2
     let erc1410Facet: ERC1410ScheduledTasks
     let timeTravelFacet: TimeTravel
 

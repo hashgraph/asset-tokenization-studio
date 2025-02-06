@@ -278,6 +278,7 @@ task(
             scheduledTasks,
             corporateActionsSecurity,
             lock,
+            hold,
             transferAndLock,
             adjustBalances,
         } = await deployAtsFullInfrastructure(
