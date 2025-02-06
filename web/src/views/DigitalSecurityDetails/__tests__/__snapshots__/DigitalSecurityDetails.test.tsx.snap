@@ -807,7 +807,24 @@ exports[`DigitalSecurityDetails render correctly 1`] = `
                       <p
                         class="css-ncp2jn"
                       >
-                        Locked balance
+                        Lock balance
+                      </p>
+                      <p
+                        class="css-vzbq89"
+                      >
+                        - 
+                      </p>
+                    </div>
+                    <div
+                      class="chakra-stack css-nkhb6s"
+                    />
+                    <div
+                      class="chakra-stack css-1h4ws66"
+                    >
+                      <p
+                        class="css-ncp2jn"
+                      >
+                        Held balance
                       </p>
                       <p
                         class="css-vzbq89"
