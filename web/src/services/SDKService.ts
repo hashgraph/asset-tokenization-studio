@@ -292,6 +292,7 @@ import {
   ReclaimHoldByPartitionRequest,
   ReleaseHoldByPartitionRequest,
   ExecuteHoldByPartitionRequest,
+  GetHeldAmountForRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -780,6 +781,13 @@ export class SDKService {
   ): Promise<boolean> {
     const response = await Security.executeHoldByPartition(req);
     return response.payload;
+  }
+
+  public static async getHeldAmountFor(
+    req: GetHeldAmountForRequest,
+  ): Promise<number> {
+    const response = await Security.getHeldAmountFor(req);
+    return response;
   }
 
   // MANAGEMENT ////////////////////////////////////////////

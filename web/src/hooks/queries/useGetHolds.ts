@@ -204,6 +204,7 @@
 */
 
 import {
+  GetHeldAmountForRequest,
   GetHoldForByPartitionRequest,
   GetHoldsIdForByPartitionRequest,
   HoldViewModel,
@@ -214,6 +215,8 @@ import { DEFAULT_PARTITION } from "../../utils/constants";
 
 export const GET_HOLDS = (securityId: string, targetId: string) =>
   `GET_HOLDS_${securityId}_${targetId}`;
+export const GET_HELD_BALANCE = (securityId: string, targetId: string) =>
+  `GET_HELD_BALANCE_${securityId}_${targetId}`;
 
 export const useGetHolds = (
   request: GetHoldsIdForByPartitionRequest,
@@ -245,6 +248,26 @@ export const useGetHolds = (
         return holdDetails.filter(
           (hold): hold is HoldViewModel => hold !== null,
         );
+      } catch (error) {
+        console.error("Error fetching holds", error);
+        throw error;
+      }
+    },
+    options,
+  );
+};
+
+export const useGetHeldAmountFor = (
+  request: GetHeldAmountForRequest,
+  options?: UseQueryOptions<number, unknown, number, string[]>,
+) => {
+  return useQuery(
+    [GET_HELD_BALANCE(request.securityId, request.targetId)],
+    async () => {
+      try {
+        const heldAmount = await SDKService.getHeldAmountFor(request);
+
+        return heldAmount;
       } catch (error) {
         console.error("Error fetching holds", error);
         throw error;
