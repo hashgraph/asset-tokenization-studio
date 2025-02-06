@@ -303,6 +303,8 @@ let user_account: Account;
 let configVersion: number;
 let configId: string;
 let resolverAddress: string;
+let revocationRegistryAddress: string;
+let issuersList: string[] = [];
 
 function grantRole(account: string, newRole: SecurityRole): void {
   let r = roles.get(account);
@@ -922,6 +924,30 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     async (address: EvmAddress, target: EvmAddress) => {
       const account = '0x' + target.toString().toUpperCase().substring(2);
       return nonces.get(account) ?? 0;
+    },
+  );
+
+  singletonInstance.getRevocationRegistryAddress = jest.fn(
+    async (address: EvmAddress) => {
+      return revocationRegistryAddress ?? '';
+    },
+  );
+
+  singletonInstance.getIssuerListMembers = jest.fn(
+    async (address: EvmAddress, start: number, end: number) => {
+      return issuersList.slice(start*end, start+start*end);
+    },
+  );
+
+  singletonInstance.getIssuerListCount = jest.fn(
+    async (address: EvmAddress) => {
+      return issuersList.length;
+    },
+  );
+
+  singletonInstance.isIssuer = jest.fn(
+    async (address: EvmAddress, issuer: EvmAddress) => {
+      return issuersList.includes(issuer.toString());
     },
   );
 
@@ -1609,6 +1635,46 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
       increaseLockedBalance(targetId, amount);
       decreaseBalance(sourceId, amount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.setRevocationRegistryAddress = jest.fn(
+    async (
+      security: EvmAddress,
+      registryAddress: EvmAddress,
+    ) => {
+      revocationRegistryAddress = registryAddress.toString();
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.addIssuer = jest.fn(
+    async (
+      security: EvmAddress,
+      issuerAddress: EvmAddress,
+    ) => {
+      issuersList.push(issuerAddress.toString());
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.removeIssuer = jest.fn(
+    async (
+      security: EvmAddress,
+      issuerAddress: EvmAddress,
+    ) => {
+      issuersList = issuersList.filter(issuer => issuer !== issuerAddress.toString());
 
       return {
         status: 'success',

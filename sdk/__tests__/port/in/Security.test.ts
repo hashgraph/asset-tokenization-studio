@@ -229,6 +229,7 @@ import {
   SDK,
   Security,
   TransferAndLockRequest,
+  SetRevocationRegistryAddressRequest,
 } from '../../../src/index.js';
 import TransferRequest from '../../../src/port/in/request/TransferRequest.js';
 import RedeemRequest from '../../../src/port/in/request/RedeemRequest.js';
@@ -1070,4 +1071,111 @@ describe('🧪 Security tests', () => {
       ).value,
     ).toEqual((+protectedTransferAmount).toString());
   }, 600_000);
+
+  it('Set revocation registry address', async () => {
+    const revocationRegistryAddress = '0x1234567890123456789012345678901234567890';
+
+    expect(await Security.setRevocationRegistryAddress(
+      new SetRevocationRegistryAddressRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: revocationRegistryAddress,
+      }),
+    )).payload.toBe(true);
+
+    expect(
+      (
+        await Security.getRevocationRegistryAddress(
+          new GetRevocationRegistryAddressRequest({
+            securityId: equity.evmDiamondAddress!,
+          }),
+        )
+      ),
+    ).toEqual(revocationRegistryAddress);
+  });
+
+  it('Add and remove issuer', async () => {
+    const issuer = '0x1234567890123456789012345678901234567890';
+
+    expect(await Security.addIssuer(
+      new AddIssuerRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: issuerAddress,
+      }),
+    )).payload.toBe(true);
+
+    expect(
+      (
+        await Security.getIssuerListMembers(
+          new GetIssuerListMembersRequest({
+            securityId: equity.evmDiamondAddress!,
+            start: 0,
+            end: 1,
+          }),
+        )
+      ),
+    ).toEqual([issuer]);
+
+    expect(
+      (
+        await Security.getIssuerListCount(
+          new GetIssuerListCountRequest({
+            securityId: equity.evmDiamondAddress!,
+          }),
+        )
+      ),
+    ).toEqual(1);
+
+    expect(
+      (
+        await Security.isIssuer(
+          new IsIssuerRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: issuer,
+          }),
+        )
+      ),
+    ).toBe(true);
+
+    expect(await Security.removeIssuer(
+      new RemoveIssuerRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: issuer,
+      }),
+    )).payload.toBe(true);
+
+    expect(
+      (
+        await Security.getIssuerListCount(
+          new GetIssuerListCountRequest({
+            securityId: equity.evmDiamondAddress!,
+          }),
+        )
+      ),
+    ).toEqual(0);
+
+    expect(
+      (
+        await Security.isIssuer(
+          new IsIssuerRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: issuer,
+          }),
+        )
+      ),
+    ).toBe(false);
+
+    expect(
+      (
+        await Security.getIssuerListMembers(
+          new GetIssuerListMembersRequest({
+            securityId: equity.evmDiamondAddress!,
+            start: 0,
+            end: 1,
+          }),
+        )
+      ),
+    ).toEqual([]);
+
+  });
+
 });
