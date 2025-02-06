@@ -39,6 +39,7 @@
     "test:accessControl": "npx hardhat test test/unitTests/layer_1/accessControl/accessControl.test.ts",
     "test:controlList": "npx hardhat test test/unitTests/layer_1/controlList/controlList.test.ts",
     "test:kyc": "npx hardhat test test/unitTests/layer_1/kyc/kyc.test.ts",
+    "test:ssi": "npx hardhat test test/unitTests/layer_1/ssi/ssi.test.ts",
     "test:pause": "npx hardhat test test/unitTests/layer_1/pause/pause.test.ts",
     "test:corporateActions": "npx hardhat test test/unitTests/layer_2/corporateActions/corporateActions.test.ts",
     "test:erc1643": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC1643/erc1643.test.ts",
