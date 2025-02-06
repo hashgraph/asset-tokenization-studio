@@ -214,7 +214,7 @@ export class GetIssuerListMembersQuery extends Query<GetIssuerListMembersQueryRe
   constructor(
     public readonly securityId: string,
     public readonly start: number,
-    public readonly end: number
+    public readonly end: number,
   ) {
     super();
   }

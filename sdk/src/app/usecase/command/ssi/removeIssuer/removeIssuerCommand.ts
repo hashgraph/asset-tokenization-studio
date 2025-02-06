@@ -215,8 +215,8 @@ export class RemoveIssuerCommandResponse implements CommandResponse {
 
 export class RemoveIssuerCommand extends Command<RemoveIssuerCommandResponse> {
   constructor(
-   public readonly securityId: string,
-   public readonly issuerId: string,
+    public readonly securityId: string,
+    public readonly issuerId: string,
   ) {
     super();
   }

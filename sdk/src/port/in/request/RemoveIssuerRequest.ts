@@ -212,7 +212,7 @@ export default class RemoveIssuerRequest extends ValidatedRequest<RemoveIssuerRe
 
   constructor({
     securityId,
-    issuerId
+    issuerId,
   }: {
     issuerId: string;
     securityId: string;

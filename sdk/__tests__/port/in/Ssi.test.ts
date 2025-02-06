@@ -378,7 +378,6 @@ describe('🧪 SSI Management tests', () => {
   }, 600_000);
 
   it('Issuer functionality work successfully', async () => {
-
     //Add issuer
     expect(
       (

@@ -212,7 +212,7 @@ export default class AddIssuerRequest extends ValidatedRequest<AddIssuerRequest>
 
   constructor({
     securityId,
-    issuerId
+    issuerId,
   }: {
     issuerId: string;
     securityId: string;

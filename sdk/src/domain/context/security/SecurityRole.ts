@@ -263,5 +263,5 @@ export const SecurityRoleLabel = new Map<SecurityRole, string>([
     'Protected Partitions Participant',
   ],
   [SecurityRole._WILD_CARD_ROLE, 'Wild Card'],
-  [SecurityRole._SSI_MANAGER_ROLE, 'SSI Manager']
+  [SecurityRole._SSI_MANAGER_ROLE, 'SSI Manager'],
 ]);

@@ -212,7 +212,7 @@ export default class SetRevocationRegistryAddressRequest extends ValidatedReques
 
   constructor({
     securityId,
-    revocationRegistryId
+    revocationRegistryId,
   }: {
     revocationRegistryId: string;
     securityId: string;
