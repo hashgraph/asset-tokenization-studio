@@ -289,6 +289,7 @@ const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
 const nonces = new Map<string, number>();
 
 let controlList: string[] = [];
+let issuerList: string[] = [];
 
 let securityInfo: Security;
 let equityInfo: EquityDetails;
@@ -303,6 +304,7 @@ let user_account: Account;
 let configVersion: number;
 let configId: string;
 let resolverAddress: string;
+let revocationRegistryAddress: string;
 
 function grantRole(account: string, newRole: SecurityRole): void {
   let r = roles.get(account);
@@ -606,6 +608,30 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       return listMembers;
     },
   );
+
+  singletonInstance.getIssuerListMembers = jest.fn(
+    async (address: EvmAddress, start: number, end: number) => {
+      const issuerListMembers: string[] = [];
+
+      for (let i = start; i < end; i++) {
+        issuerListMembers.push(issuerList[i]);
+      }
+
+      return issuerListMembers;
+    },
+  );
+
+  singletonInstance.getIssuerListCount = jest.fn(
+    async (address: EvmAddress) => {
+      return issuerList.length;
+    },
+  );
+
+  singletonInstance.getRevocationRegistryAddress = jest.fn(async function (
+    security: EvmAddress,
+  ) {
+    return revocationRegistryAddress;
+  });
 
   singletonInstance.getControlListCount = jest.fn(
     async (address: EvmAddress) => {
@@ -1116,6 +1142,48 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       } as TransactionResponse;
     },
   );
+
+  singletonInstance.addIssuer = jest.fn(
+    async (address: EvmAddress, issuerId: EvmAddress) => {
+      const account = identifiers(issuerId.toString())[1];
+
+      if (issuerList.findIndex((item) => item == account) == -1) {
+        issuerList.push(account);
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.removeIssuer = jest.fn(
+    async (address: EvmAddress, issuerId: EvmAddress) => {
+      const account = identifiers(issuerId.toString())[1];
+
+      if (issuerList.findIndex((item) => item == account) !== -1) {
+        issuerList = issuerList.filter((item) => item !== account);
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.setRevocationRegistryAddress = jest.fn(async function (
+    security: EvmAddress,
+    revocationRegistry: EvmAddress,
+  ) {
+    revocationRegistryAddress = revocationRegistry.toString();
+
+    return {
+      status: 'success',
+      id: transactionId,
+    } as TransactionResponse;
+  });
 
   singletonInstance.addToControlList = jest.fn(
     async (address: EvmAddress, targetId: EvmAddress) => {

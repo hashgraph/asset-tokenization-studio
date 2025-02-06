@@ -243,6 +243,7 @@ import {
   DiamondFacet__factory,
   ProtectedPartitions__factory,
   Hold_2__factory,
+  SSIManagement__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -263,7 +264,7 @@ import {
 import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/ScheduledBalanceAdjustment.js';
 import { DividendFor } from '../../../domain/context/equity/DividendFor';
 import { VotingFor } from '../../../domain/context/equity/VotingFor';
-import { HoldDetails } from 'domain/context/security/HoldDetails.js';
+import { HoldDetails } from '../../../domain/context/security/HoldDetails.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -1261,5 +1262,51 @@ export class RPCQueryAdapter {
       hold.data_,
       hold.operatorData_,
     );
+  }
+
+  async getRevocationRegistryAddress(address: EvmAddress): Promise<string> {
+    LogService.logTrace(
+      `Getting Revocation Registry Address of ${address.toString()}`,
+    );
+
+    return await this.connect(
+      SSIManagement__factory,
+      address.toString(),
+    ).getRevocationRegistryAddress();
+  }
+
+  async getIssuerListCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting Issuer List Count of ${address.toString()}`);
+
+    const count = await this.connect(
+      SSIManagement__factory,
+      address.toString(),
+    ).getIssuerListCount();
+
+    return count.toNumber();
+  }
+
+  async getIssuerListMembers(
+    address: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting Issuer List Count of ${address.toString()} from ${start} to ${end}`,
+    );
+
+    return await this.connect(
+      SSIManagement__factory,
+      address.toString(),
+    ).getIssuerListMembers(start, end);
+  }
+
+  async isIssuer(address: EvmAddress, issuer: EvmAddress): Promise<boolean> {
+    LogService.logTrace(`Getting if ${issuer.toString()} is an Issuer`);
+
+    return await this.connect(
+      SSIManagement__factory,
+      address.toString(),
+    ).isIssuer(issuer.toString());
   }
 }

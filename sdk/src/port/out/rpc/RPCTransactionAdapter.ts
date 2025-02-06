@@ -300,6 +300,9 @@ import {
   CREATE_HOLD_FROM_GAS,
   CONTROLLER_CREATE_HOLD_GAS,
   PROTECTED_CREATE_HOLD_GAS,
+  ADD_ISSUER_GAS,
+  SET_REVOCATION_REGISTRY_GAS,
+  REMOVE_ISSUER_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -330,6 +333,7 @@ import {
   Snapshots__factory,
   TransferAndLock__factory,
   Hold_2__factory,
+  SSIManagement__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -1956,6 +1960,59 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           gasLimit: PROTECTED_CREATE_HOLD_GAS,
         },
       ),
+      this.networkService.environment,
+    );
+  }
+
+  async setRevocationRegistryAddress(
+    security: EvmAddress,
+    revocationRegistry: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Setting revocation registry address ${revocationRegistry}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await SSIManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).setRevocationRegistryAddress(revocationRegistry.toString(), {
+        gasLimit: SET_REVOCATION_REGISTRY_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async addIssuer(
+    security: EvmAddress,
+    issuer: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Adding issuer ${issuer}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await SSIManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).addIssuer(issuer.toString(), {
+        gasLimit: ADD_ISSUER_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async removeIssuer(
+    security: EvmAddress,
+    issuer: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Removing issuer ${issuer}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await SSIManagement__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).removeIssuer(issuer.toString(), {
+        gasLimit: REMOVE_ISSUER_GAS,
+      }),
       this.networkService.environment,
     );
   }

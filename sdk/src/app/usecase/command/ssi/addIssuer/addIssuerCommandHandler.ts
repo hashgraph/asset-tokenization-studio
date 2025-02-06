@@ -203,69 +203,29 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import SecurityService from '../../../../../../service/SecurityService.js';
-import TransactionService from '../../../../../../service/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../../error/SecurityPaused.js';
-import {
-  ProtectedCreateHoldByPartitionCommand,
-  ProtectedCreateHoldByPartitionCommandResponse,
-} from './ProtectedCreateHoldByPartitionCommand.js';
-import { PartitionsUnProtected } from '../../../error/PartitionsUnprotected.js';
-import {
-  getProtectedPartitionRole,
-  SecurityRole,
-} from '../../../../../../../domain/context/security/SecurityRole.js';
-import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
-import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
-import { BigNumber } from 'ethers';
-import { NounceAlreadyUsed } from '../../../error/NounceAlreadyUsed.js';
+import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator';
+import { AddIssuerCommand, AddIssuerCommandResponse } from './addIssuerCommand';
+import { ICommandHandler } from '../../../../../core/command/CommandHandler';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
+import TransactionService from '../../../../service/TransactionService';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId';
 
-@CommandHandler(ProtectedCreateHoldByPartitionCommand)
-export class ProtectedCreateHoldByPartitionCommandHandler
-  implements ICommandHandler<ProtectedCreateHoldByPartitionCommand>
+@CommandHandler(AddIssuerCommand)
+export class AddIssuerCommandHandler
+  implements ICommandHandler<AddIssuerCommand>
 {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
     @lazyInject(TransactionService)
     public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
   ) {}
 
-  async execute(
-    command: ProtectedCreateHoldByPartitionCommand,
-  ): Promise<ProtectedCreateHoldByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      escrow,
-      amount,
-      sourceId,
-      targetId,
-      expirationDate,
-      deadline,
-      nonce,
-      signature,
-    } = command;
+  async execute(command: AddIssuerCommand): Promise<AddIssuerCommandResponse> {
+    const { securityId, issuerId } = command;
     const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
       HEDERA_FORMAT_ID_REGEX.test(securityId)
@@ -273,109 +233,18 @@ export class ProtectedCreateHoldByPartitionCommandHandler
         : securityId.toString(),
     );
 
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
+    const issuerEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.test(issuerId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(issuerId)
+      : new EvmAddress(issuerId);
 
-    if (!security.arePartitionsProtected) {
-      throw new PartitionsUnProtected();
-    }
-
-    const protectedPartitionRole = getProtectedPartitionRole(
-      partitionId,
-    ) as SecurityRole;
-
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        protectedPartitionRole,
-      ))
-    ) {
-      throw new NotGrantedRole(protectedPartitionRole);
-    }
-
-    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
-      : new EvmAddress(sourceId);
-
-    const escrowEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(escrow)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(escrow)
-      : new EvmAddress(escrow);
-
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
-
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
-
-    if (
-      account.evmAddress &&
-      (
-        await this.queryAdapter.balanceOf(securityEvmAddress, sourceEvmAddress)
-      ).lt(amountBd.toBigNumber())
-    ) {
-      throw new InsufficientBalance();
-    }
-
-    const nextNounce = await this.queryAdapter.getNounceFor(
+    const res = await handler.addIssuer(
       securityEvmAddress,
-      sourceEvmAddress,
-    );
-
-    if (BigNumber.from(nonce).lte(nextNounce)) {
-      throw new NounceAlreadyUsed(nonce);
-    }
-
-    const res = await handler.protectedCreateHoldByPartition(
-      securityEvmAddress,
-      partitionId,
-      amountBd,
-      escrowEvmAddress,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      BigDecimal.fromString(deadline),
-      BigDecimal.fromString(nonce.toString()),
-      signature,
+      issuerEvmAddress,
       securityId,
     );
 
-    if (!res.id)
-      throw new Error(
-        'Protected Create Hold By Partition Command Handler response id empty',
-      );
-
-    let holdId: string;
-
-    if (res.response && res.response.holdId) {
-      holdId = res.response.holdId;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
-      }
-
-      holdId = results[1];
-    }
-
     return Promise.resolve(
-      new ProtectedCreateHoldByPartitionCommandResponse(
-        parseInt(holdId, 16),
-        res.id!,
-      ),
+      new AddIssuerCommandResponse(res.error === undefined, res.id!),
     );
   }
 }

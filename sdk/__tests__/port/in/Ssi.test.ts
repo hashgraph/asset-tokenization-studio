@@ -203,179 +203,233 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import SecurityService from '../../../../../../service/SecurityService.js';
-import TransactionService from '../../../../../../service/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../../error/SecurityPaused.js';
 import {
-  ProtectedCreateHoldByPartitionCommand,
-  ProtectedCreateHoldByPartitionCommandResponse,
-} from './ProtectedCreateHoldByPartitionCommand.js';
-import { PartitionsUnProtected } from '../../../error/PartitionsUnprotected.js';
+  AddIssuerRequest,
+  CreateEquityRequest,
+  Equity,
+  GetIssuerListCountRequest,
+  GetIssuerListMembersRequest,
+  GetRevocationRegistryAddressRequest,
+  LoggerTransports,
+  RemoveIssuerRequest,
+  SDK,
+  SetRevocationRegistryAddressRequest,
+} from '../../../src';
 import {
-  getProtectedPartitionRole,
-  SecurityRole,
-} from '../../../../../../../domain/context/security/SecurityRole.js';
-import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
-import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
-import { BigNumber } from 'ethers';
-import { NounceAlreadyUsed } from '../../../error/NounceAlreadyUsed.js';
+  CastRegulationSubType,
+  CastRegulationType,
+  RegulationSubType,
+  RegulationType,
+} from '../../../src/domain/context/factory/RegulationType';
+import { MirrorNode } from '../../../src/domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay';
+import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter';
+import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter';
+import NetworkService from '../../../src/app/service/NetworkService';
+import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter';
+import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel';
+import {
+  CLIENT_ACCOUNT_ECDSA,
+  CLIENT_ACCOUNT_ECDSA_A,
+  FACTORY_ADDRESS,
+  RESOLVER_ADDRESS,
+} from '../../config';
+import Injectable from '../../../src/core/Injectable';
+import Account from '../../../src/domain/context/account/Account';
+import { ethers, Wallet } from 'ethers';
+import SSIManagement from '../../../src/port/in/SSIManagement';
 
-@CommandHandler(ProtectedCreateHoldByPartitionCommand)
-export class ProtectedCreateHoldByPartitionCommandHandler
-  implements ICommandHandler<ProtectedCreateHoldByPartitionCommand>
-{
-  constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-  ) {}
+SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
-  async execute(
-    command: ProtectedCreateHoldByPartitionCommand,
-  ): Promise<ProtectedCreateHoldByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      escrow,
-      amount,
-      sourceId,
-      targetId,
-      expirationDate,
-      deadline,
-      nonce,
-      signature,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+const decimals = 0;
+const name = 'TEST_SECURITY_TOKEN';
+const symbol = 'TEST';
+const isin = 'ABCDE123456Z';
+const votingRight = true;
+const informationRight = false;
+const liquidationRight = true;
+const subscriptionRight = false;
+const conversionRight = true;
+const redemptionRight = false;
+const putRight = true;
+const dividendRight = 1;
+const currency = '0x345678';
+const numberOfShares = 0;
+const nominalValue = 1000;
+const regulationType = RegulationType.REG_D;
+const regulationSubType = RegulationSubType.B_506;
+const countries = 'AF,HG,BN';
+const info = 'Anything';
+const configId =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const configVersion = 1;
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
+const mirrorNode: MirrorNode = {
+  name: 'testmirrorNode',
+  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
+};
 
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
+const rpcNode: JsonRpcRelay = {
+  name: 'testrpcNode',
+  baseUrl: 'http://127.0.0.1:7546/api',
+};
+
+let th: RPCTransactionAdapter;
+let mirrorNodeAdapter: MirrorNodeAdapter;
+
+describe('🧪 SSI Management tests', () => {
+  let ns: NetworkService;
+  let rpcQueryAdapter: RPCQueryAdapter;
+  let equity: SecurityViewModel;
+
+  const url = 'http://127.0.0.1:7546';
+  const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
+
+  const wallet = new Wallet(
+    CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
+    customHttpProvider,
+  );
+
+  beforeAll(async () => {
+    try {
+      mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
+      mirrorNodeAdapter.set(mirrorNode);
+
+      th = Injectable.resolve(RPCTransactionAdapter);
+      ns = Injectable.resolve(NetworkService);
+      rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
+
+      rpcQueryAdapter.init();
+      ns.environment = 'testnet';
+      ns.configuration = {
+        factoryAddress: FACTORY_ADDRESS,
+        resolverAddress: RESOLVER_ADDRESS,
+      };
+      ns.mirrorNode = mirrorNode;
+      ns.rpcNode = rpcNode;
+
+      await th.init(true);
+      const account = new Account({
+        id: CLIENT_ACCOUNT_ECDSA.id.toString(),
+        evmAddress: CLIENT_ACCOUNT_ECDSA.evmAddress,
+        alias: CLIENT_ACCOUNT_ECDSA.alias,
+        privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
+        publicKey: CLIENT_ACCOUNT_ECDSA.publicKey,
+      });
+      await th.register(account, true);
+
+      th.signerOrProvider = wallet;
+
+      const requestST = new CreateEquityRequest({
+        name,
+        symbol,
+        isin,
+        decimals,
+        isWhiteList: false,
+        isControllable: true,
+        arePartitionsProtected: false,
+        isMultiPartition: false,
+        diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares: numberOfShares.toString(),
+        nominalValue: nominalValue.toString(),
+        regulationType: CastRegulationType.toNumber(regulationType),
+        regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
+        isCountryControlListWhiteList: true,
+        countries,
+        info,
+        configId,
+        configVersion,
+      });
+
+      equity = (await Equity.create(requestST)).security;
+    } catch (error) {
+      console.error('Error in beforeAll setup:', error);
     }
+  }, 900_000);
 
-    if (!security.arePartitionsProtected) {
-      throw new PartitionsUnProtected();
-    }
-
-    const protectedPartitionRole = getProtectedPartitionRole(
-      partitionId,
-    ) as SecurityRole;
-
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        protectedPartitionRole,
-      ))
-    ) {
-      throw new NotGrantedRole(protectedPartitionRole);
-    }
-
-    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
-      : new EvmAddress(sourceId);
-
-    const escrowEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(escrow)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(escrow)
-      : new EvmAddress(escrow);
-
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
-
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
-
-    if (
-      account.evmAddress &&
+  it('Set and Get revocation registry successfully', async () => {
+    expect(
       (
-        await this.queryAdapter.balanceOf(securityEvmAddress, sourceEvmAddress)
-      ).lt(amountBd.toBigNumber())
-    ) {
-      throw new InsufficientBalance();
-    }
+        await SSIManagement.setRevocationRegistryAddress(
+          new SetRevocationRegistryAddressRequest({
+            securityId: equity.evmDiamondAddress!,
+            revocationRegistryId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          }),
+        )
+      ).payload,
+    ).toBe(true);
 
-    const nextNounce = await this.queryAdapter.getNounceFor(
-      securityEvmAddress,
-      sourceEvmAddress,
-    );
-
-    if (BigNumber.from(nonce).lte(nextNounce)) {
-      throw new NounceAlreadyUsed(nonce);
-    }
-
-    const res = await handler.protectedCreateHoldByPartition(
-      securityEvmAddress,
-      partitionId,
-      amountBd,
-      escrowEvmAddress,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      BigDecimal.fromString(deadline),
-      BigDecimal.fromString(nonce.toString()),
-      signature,
-      securityId,
-    );
-
-    if (!res.id)
-      throw new Error(
-        'Protected Create Hold By Partition Command Handler response id empty',
-      );
-
-    let holdId: string;
-
-    if (res.response && res.response.holdId) {
-      holdId = res.response.holdId;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
-      }
-
-      holdId = results[1];
-    }
-
-    return Promise.resolve(
-      new ProtectedCreateHoldByPartitionCommandResponse(
-        parseInt(holdId, 16),
-        res.id!,
+    expect(
+      await SSIManagement.getRevocationRegistryAddress(
+        new GetRevocationRegistryAddressRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
       ),
-    );
-  }
-}
+    ).toEqual(CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString());
+  }, 600_000);
+
+  it('Issuer functionality work successfully', async () => {
+
+    //Add issuer
+    expect(
+      (
+        await SSIManagement.addIssuer(
+          new AddIssuerRequest({
+            securityId: equity.evmDiamondAddress!,
+            issuerId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    //Get Issuer List
+    expect(
+      await SSIManagement.getIssuerListCount(
+        new GetIssuerListCountRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      ),
+    ).toEqual(1);
+
+    //Get Issuer List Members
+    expect(
+      await SSIManagement.getIssuerListMembers(
+        new GetIssuerListMembersRequest({
+          securityId: equity.evmDiamondAddress!,
+          start: 0,
+          end: 1,
+        }),
+      ),
+    ).toContain(CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString());
+
+    //Remove Issuer
+    expect(
+      (
+        await SSIManagement.removeIssuer(
+          new RemoveIssuerRequest({
+            securityId: equity.evmDiamondAddress!,
+            issuerId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    //Get Issuer List
+    expect(
+      await SSIManagement.getIssuerListCount(
+        new GetIssuerListCountRequest({
+          securityId: equity.evmDiamondAddress!,
+        }),
+      ),
+    ).toEqual(0);
+  }, 600_000);
+});

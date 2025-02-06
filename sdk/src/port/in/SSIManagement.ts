@@ -203,179 +203,124 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import SecurityService from '../../../../../../service/SecurityService.js';
-import TransactionService from '../../../../../../service/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
-import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../../error/SecurityPaused.js';
-import {
-  ProtectedCreateHoldByPartitionCommand,
-  ProtectedCreateHoldByPartitionCommandResponse,
-} from './ProtectedCreateHoldByPartitionCommand.js';
-import { PartitionsUnProtected } from '../../../error/PartitionsUnprotected.js';
-import {
-  getProtectedPartitionRole,
-  SecurityRole,
-} from '../../../../../../../domain/context/security/SecurityRole.js';
-import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
-import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
-import { BigNumber } from 'ethers';
-import { NounceAlreadyUsed } from '../../../error/NounceAlreadyUsed.js';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { LogError } from '../../core/decorator/LogErrorDecorator.js';
+import { handleValidation } from './Common';
+import { QueryBus } from '../../core/query/QueryBus';
+import Injectable from '../../core/Injectable';
+import { CommandBus } from '../../core/command/CommandBus';
+import SetRevocationRegistryAddressRequest from './request/SetRevocationRegistryAddressRequest';
+import AddIssuerRequest from './request/AddIssuerRequest';
+import RemoveIssuerRequest from './request/RemoveIssuerRequest';
+import { SetRevocationRegistryAddressCommand } from '../../app/usecase/command/ssi/setRevocationRegistryAddress/setRevocationRegistryAddressCommand';
+import { AddIssuerCommand } from '../../app/usecase/command/ssi/addIssuer/addIssuerCommand';
+import { RemoveIssuerCommand } from '../../app/usecase/command/ssi/removeIssuer/removeIssuerCommand';
+import GetRevocationRegistryAddressRequest from './request/GetRevocationRegistryAddressRequest.js';
+import GetIssuerListCountRequest from './request/GetIssuerListCountRequest.js';
+import GetIssuerListMembersRequest from './request/GetIssuerListMembersRequest.js';
+import { GetRevocationRegistryAddressQuery } from '../../app/usecase/query/ssi/getRevocationRegistryAddress/getRevocationRegistryAddressQuery.js';
+import { GetIssuerListCountQuery } from '../../app/usecase/query/ssi/getIssuerListCount/getIssuerListCountQuery.js';
+import { GetIssuerListMembersQuery } from '../../app/usecase/query/ssi/getIssuerListMembers/getIssuerListMembersQuery.js';
 
-@CommandHandler(ProtectedCreateHoldByPartitionCommand)
-export class ProtectedCreateHoldByPartitionCommandHandler
-  implements ICommandHandler<ProtectedCreateHoldByPartitionCommand>
-{
+interface ISSIManagementInPort {
+  setRevocationRegistryAddress(
+    request: SetRevocationRegistryAddressRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  addIssuer(
+    request: AddIssuerRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  removeIssuer(
+    request: RemoveIssuerRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  getRevocationRegistryAddress(
+    request: GetRevocationRegistryAddressRequest,
+  ): Promise<string>;
+  getIssuerListCount(request: GetIssuerListCountRequest): Promise<number>;
+  getIssuerListMembers(request: GetIssuerListMembersRequest): Promise<string[]>;
+}
+
+class SSIManagementInPort implements ISSIManagementInPort {
   constructor(
-    @lazyInject(SecurityService)
-    public readonly securityService: SecurityService,
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
+    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
   ) {}
 
-  async execute(
-    command: ProtectedCreateHoldByPartitionCommand,
-  ): Promise<ProtectedCreateHoldByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      escrow,
-      amount,
-      sourceId,
-      targetId,
-      expirationDate,
-      deadline,
-      nonce,
-      signature,
-    } = command;
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-    const security = await this.securityService.get(securityId);
+  @LogError
+  async addIssuer(
+    request: AddIssuerRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, issuerId } = request;
+    handleValidation('AddIssuerRequest', request);
 
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    if (!security.arePartitionsProtected) {
-      throw new PartitionsUnProtected();
-    }
-
-    const protectedPartitionRole = getProtectedPartitionRole(
-      partitionId,
-    ) as SecurityRole;
-
-    if (
-      account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        protectedPartitionRole,
-      ))
-    ) {
-      throw new NotGrantedRole(protectedPartitionRole);
-    }
-
-    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
-      throw new DecimalsOverRange(security.decimals);
-    }
-
-    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
-      : new EvmAddress(sourceId);
-
-    const escrowEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(escrow)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(escrow)
-      : new EvmAddress(escrow);
-
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
-
-    const amountBd = BigDecimal.fromString(amount, security.decimals);
-
-    if (
-      account.evmAddress &&
-      (
-        await this.queryAdapter.balanceOf(securityEvmAddress, sourceEvmAddress)
-      ).lt(amountBd.toBigNumber())
-    ) {
-      throw new InsufficientBalance();
-    }
-
-    const nextNounce = await this.queryAdapter.getNounceFor(
-      securityEvmAddress,
-      sourceEvmAddress,
-    );
-
-    if (BigNumber.from(nonce).lte(nextNounce)) {
-      throw new NounceAlreadyUsed(nonce);
-    }
-
-    const res = await handler.protectedCreateHoldByPartition(
-      securityEvmAddress,
-      partitionId,
-      amountBd,
-      escrowEvmAddress,
-      sourceEvmAddress,
-      targetEvmAddress,
-      BigDecimal.fromString(expirationDate),
-      BigDecimal.fromString(deadline),
-      BigDecimal.fromString(nonce.toString()),
-      signature,
-      securityId,
-    );
-
-    if (!res.id)
-      throw new Error(
-        'Protected Create Hold By Partition Command Handler response id empty',
-      );
-
-    let holdId: string;
-
-    if (res.response && res.response.holdId) {
-      holdId = res.response.holdId;
-    } else {
-      const numberOfResultsItems = 2;
-
-      // * Recover the new contract ID from Event data from the Mirror Node
-      const results = await this.mirrorNodeAdapter.getContractResults(
-        res.id.toString(),
-        numberOfResultsItems,
-      );
-
-      if (!results || results.length !== numberOfResultsItems) {
-        throw new Error('Invalid data structure');
-      }
-
-      holdId = results[1];
-    }
-
-    return Promise.resolve(
-      new ProtectedCreateHoldByPartitionCommandResponse(
-        parseInt(holdId, 16),
-        res.id!,
-      ),
+    return await this.commandBus.execute(
+      new AddIssuerCommand(securityId, issuerId),
     );
   }
+
+  @LogError
+  async setRevocationRegistryAddress(
+    request: SetRevocationRegistryAddressRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, revocationRegistryId } = request;
+    handleValidation('SetRevocationRegistryAddressRequest', request);
+
+    return await this.commandBus.execute(
+      new SetRevocationRegistryAddressCommand(securityId, revocationRegistryId),
+    );
+  }
+
+  @LogError
+  async removeIssuer(
+    request: RemoveIssuerRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, issuerId } = request;
+    handleValidation('RemoveIssuerRequest', request);
+
+    return await this.commandBus.execute(
+      new RemoveIssuerCommand(securityId, issuerId),
+    );
+  }
+
+  @LogError
+  async getRevocationRegistryAddress(
+    request: GetRevocationRegistryAddressRequest,
+  ): Promise<string> {
+    const { securityId } = request;
+    handleValidation('GetRevocationRegistryAddressRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetRevocationRegistryAddressQuery(securityId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getIssuerListCount(
+    request: GetIssuerListCountRequest,
+  ): Promise<number> {
+    const { securityId } = request;
+    handleValidation('GetIssuerListCountRequest', request);
+
+    return (
+      await this.queryBus.execute(new GetIssuerListCountQuery(securityId))
+    ).payload;
+  }
+
+  @LogError
+  async getIssuerListMembers(
+    request: GetIssuerListMembersRequest,
+  ): Promise<string[]> {
+    const { securityId, start, end } = request;
+    handleValidation('GetIssuerListMembersRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetIssuerListMembersQuery(securityId, start, end),
+      )
+    ).payload;
+  }
 }
+
+const SSIManagement = new SSIManagementInPort();
+export default SSIManagement;
