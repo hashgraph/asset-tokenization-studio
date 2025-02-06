@@ -285,6 +285,7 @@ import RemoveIssuerRequest from './RemoveIssuerRequest.js';
 import GetRevocationRegistryAddressRequest from './GetRevocationRegistryAddressRequest.js';
 import GetIssuerListCountRequest from './GetIssuerListCountRequest.js';
 import GetIssuerListMembersRequest from './GetIssuerListMembersRequest.js';
+import IsIssuerRequest from './IsIssuerRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -369,4 +370,5 @@ export {
   GetRevocationRegistryAddressRequest,
   GetIssuerListCountRequest,
   GetIssuerListMembersRequest,
+  IsIssuerRequest,
 };

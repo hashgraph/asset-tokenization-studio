@@ -951,6 +951,12 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     },
   );
 
+  singletonInstance.isIssuer = jest.fn(
+    async (address: EvmAddress, issuer: EvmAddress) => {
+      const account = identifiers(issuer.toString())[1];
+      return issuerList.findIndex((item) => item == account) !== -1;
+    },
+  );
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
   };

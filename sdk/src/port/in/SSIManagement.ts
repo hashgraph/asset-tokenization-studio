@@ -221,6 +221,8 @@ import GetIssuerListMembersRequest from './request/GetIssuerListMembersRequest.j
 import { GetRevocationRegistryAddressQuery } from '../../app/usecase/query/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery.js';
 import { GetIssuerListCountQuery } from '../../app/usecase/query/ssi/getIssuerListCount/GetIssuerListCountQuery.js';
 import { GetIssuerListMembersQuery } from '../../app/usecase/query/ssi/getIssuerListMembers/GetIssuerListMembersQuery.js';
+import IsIssuerRequest from './request/IsIssuerRequest.js';
+import { IsIssuerQuery } from '../../app/usecase/query/ssi/isIssuer/IsIssuerQuery.js';
 
 interface ISSIManagementInPort {
   setRevocationRegistryAddress(
@@ -237,6 +239,7 @@ interface ISSIManagementInPort {
   ): Promise<string>;
   getIssuerListCount(request: GetIssuerListCountRequest): Promise<number>;
   getIssuerListMembers(request: GetIssuerListMembersRequest): Promise<string[]>;
+  isIssuer(request: IsIssuerRequest): Promise<boolean>;
 }
 
 class SSIManagementInPort implements ISSIManagementInPort {
@@ -318,6 +321,16 @@ class SSIManagementInPort implements ISSIManagementInPort {
       await this.queryBus.execute(
         new GetIssuerListMembersQuery(securityId, start, end),
       )
+    ).payload;
+  }
+
+  @LogError
+  async isIssuer(request: IsIssuerRequest): Promise<boolean> {
+    const { securityId, issuerId } = request;
+    handleValidation('IsIssuerRequest', request);
+
+    return (
+      await this.queryBus.execute(new IsIssuerQuery(securityId, issuerId))
     ).payload;
   }
 }

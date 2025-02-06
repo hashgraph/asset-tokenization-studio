@@ -322,6 +322,7 @@ import { SetRevocationRegistryAddressCommandHandler } from '../app/usecase/comma
 import { GetIssuerListCountQueryHandler } from '../app/usecase/query/ssi/getIssuerListCount/GetIssuerListCountQueryHandler.js';
 import { GetIssuerListMembersQueryHandler } from '../app/usecase/query/ssi/getIssuerListMembers/GetIssuerListMembersQueryHandler.js';
 import { GetRevocationRegistryAddressQueryHandler } from '../app/usecase/query/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQueryHandler.js';
+import { IsIssuerQueryHandler } from '../app/usecase/query/ssi/isIssuer/IsIssuerQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -716,6 +717,10 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetRevocationRegistryAddressQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsIssuerQueryHandler,
   },
 ];
 
