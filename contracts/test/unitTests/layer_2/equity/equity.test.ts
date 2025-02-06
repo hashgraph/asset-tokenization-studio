@@ -222,6 +222,7 @@ import {
     EquityUSATimeTravel__factory,
     Pause__factory,
     Lock_2__factory,
+    Hold_2__factory,
     ERC1410ScheduledTasks__factory,
     TimeTravel__factory,
 } from '@typechain'
@@ -237,6 +238,7 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
+    ADDRESS_ZERO,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 import { dateToUnixTimestamp } from 'test/dateFormatter'
@@ -363,6 +365,7 @@ describe('Equity Tests', () => {
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
         lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
+        holdFacet = Hold_2__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
@@ -379,18 +382,6 @@ describe('Equity Tests', () => {
         balanceAdjustmentExecutionDateInSeconds = dateToUnixTimestamp(
             '2030-01-01T00:00:10Z'
         )
-        equityFacet = EquityUSATimeTravel__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
-        holdFacet = Hold_2__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
 
         votingData = {
             recordDate: votingRecordDateInSeconds.toString(),
@@ -548,6 +539,58 @@ describe('Equity Tests', () => {
                 '0x'
             )
             await lockFacet.lock(LockedAmount, account_A, 99999999999)
+
+            // set dividend
+            await expect(equityFacet.setDividends(dividendData))
+                .to.emit(equityFacet, 'DividendSet')
+                .withArgs(
+                    '0x0000000000000000000000000000000000000000000000000000000000000001',
+                    1,
+                    account_C,
+                    dividendsRecordDateInSeconds,
+                    dividendsExecutionDateInSeconds,
+                    dividendsAmountPerEquity
+                )
+
+            // check list members
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds + 1
+            )
+            const dividendFor = await equityFacet.getDividendsFor(1, account_A)
+
+            expect(dividendFor.tokenBalance).to.equal(TotalAmount)
+            expect(dividendFor.recordDateReached).to.equal(true)
+        })
+
+        it('GIVEN an account with corporateActions role WHEN setDividends and hold THEN transaction succeeds', async () => {
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            // Using account C (with role)
+            equityFacet = equityFacet.connect(signer_C)
+            erc1410Facet = erc1410Facet.connect(signer_C)
+
+            // issue and hold
+            const TotalAmount = number_Of_Shares
+            const HeldAmount = TotalAmount - 5n
+
+            await erc1410Facet.issueByPartition(
+                DEFAULT_PARTITION,
+                account_A,
+                TotalAmount,
+                '0x'
+            )
+
+            let hold = {
+                amount: HeldAmount,
+                expirationTimestamp: 999999999999999,
+                escrow: account_B,
+                to: ADDRESS_ZERO,
+                data: '0x',
+            }
+
+            await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)
 
             // set dividend
             await expect(equityFacet.setDividends(dividendData))

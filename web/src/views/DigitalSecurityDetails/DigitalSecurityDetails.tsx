@@ -245,6 +245,7 @@ import { Management } from "./Components/Management/Management";
 import { BalanceAdjustment } from "./Components/BalanceAdjustment/BalanceAdjustment";
 import { Locker } from "./Components/Locker/Locker";
 import { Cap } from "./Components/Cap/Cap";
+import { Hold } from "./Components/Hold/Hold";
 
 export const DigitalSecurityDetails = () => {
   const { t: tHeader } = useTranslation("security", {
@@ -384,22 +385,6 @@ export const DigitalSecurityDetails = () => {
         header: details?.isWhiteList
           ? tTabs("allowedList")
           : tTabs("blockedList"),
-      });
-    }
-
-    if (!isPaused) {
-      adminTabs.push({
-        content: <Locker />,
-        header: tTabs("locker"),
-      });
-    }
-
-    const hasCapRole = roles.find((role) => role === SecurityRole._CAP_ROLE);
-
-    if (!isPaused && hasCapRole) {
-      adminTabs.push({
-        content: <Cap />,
-        header: tTabs("cap"),
       });
     }
 

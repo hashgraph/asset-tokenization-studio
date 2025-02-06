@@ -226,6 +226,10 @@ contract AdjustBalancesStorageWrapperRead {
         mapping(address => uint256) labafsTotalLocked;
         mapping(address => mapping(bytes32 => uint256)) labafsTotalLockedByPartition;
         mapping(address => mapping(bytes32 => uint256[])) labafLocks;
+        // Holds
+        mapping(address => uint256) labafsTotalHeld;
+        mapping(address => mapping(bytes32 => uint256)) labafsTotalHeldByPartition;
+        mapping(address => mapping(bytes32 => uint256[])) labafHolds;
     }
 
     function _getAdjustBalancesStorage()

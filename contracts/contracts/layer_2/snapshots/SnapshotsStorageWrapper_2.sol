@@ -219,6 +219,8 @@ import {
     ERC1410ScheduledTasks_CD_Lib
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
 import {Lock_2_CD_Lib} from '../lock/Lock_2_CD_Lib.sol';
+import {Hold_2_CD_Lib} from '../hold/Hold_2_CD_Lib.sol';
+
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
@@ -444,5 +446,4 @@ contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
         }
     }
 }
-// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

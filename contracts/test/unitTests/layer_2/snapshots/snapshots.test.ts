@@ -365,9 +365,6 @@ describe('Snapshots Layer 2 Tests', () => {
             balanceOf_B_Original,
             '0x'
         )
-        snapshotFacet = Snapshots_2__factory.connect(diamond.address, signer_A)
-        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
-    })
 
         // schedule tasks
         const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(

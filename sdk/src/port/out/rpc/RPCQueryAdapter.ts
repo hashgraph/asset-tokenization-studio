@@ -242,6 +242,7 @@ import {
   Security__factory,
   DiamondFacet__factory,
   ProtectedPartitions__factory,
+  Hold_2__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';

@@ -214,12 +214,14 @@ import {
     AccessControl,
     Pause,
     Lock_2,
+    Hold_2,
     TimeTravel,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
     ERC1410ScheduledTasks__factory,
     Lock_2__factory,
+    Hold_2__factory,
     Pause__factory,
     AccessControl__factory,
     BondUSATimeTravel__factory,
@@ -238,6 +240,7 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
+    ADDRESS_ZERO,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 import { dateToUnixTimestamp } from 'test/dateFormatter'
@@ -363,6 +366,7 @@ describe('Bond Tests', () => {
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
         lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
+        holdFacet = Hold_2__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
@@ -505,6 +509,63 @@ describe('Bond Tests', () => {
                 '0x'
             )
             await lockFacet.lock(LockedAmount, account_A, 99999999999)
+
+            // set coupon
+            await expect(bondFacet.setCoupon(couponData))
+                .to.emit(bondFacet, 'CouponSet')
+                .withArgs(
+                    '0x0000000000000000000000000000000000000000000000000000000000000033',
+                    numberOfCoupons + 1,
+                    account_C,
+                    couponRecordDateInSeconds,
+                    couponExecutionDateInSeconds,
+                    couponRate
+                )
+
+            // check list members
+            await timeTravelFacet.changeSystemTimestamp(
+                couponRecordDateInSeconds + 1
+            )
+            await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
+
+            const couponFor = await bondFacet.getCouponFor(
+                numberOfCoupons + 1,
+                account_A
+            )
+
+            expect(couponFor.tokenBalance).to.equal(TotalAmount)
+            expect(couponFor.recordDateReached).to.equal(true)
+        })
+
+        it('GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds', async () => {
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            // Using account C (with role)
+            bondFacet = bondFacet.connect(signer_C)
+            erc1410Facet = erc1410Facet.connect(signer_C)
+
+            // issue and hold
+            const TotalAmount = numberOfUnits
+            const HeldAmount = TotalAmount - 5
+
+            await erc1410Facet.issueByPartition(
+                DEFAULT_PARTITION,
+                account_A,
+                TotalAmount,
+                '0x'
+            )
+
+            let hold = {
+                amount: HeldAmount,
+                expirationTimestamp: 999999999999999,
+                escrow: account_B,
+                to: ADDRESS_ZERO,
+                data: '0x',
+            }
+
+            await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)
 
             // set coupon
             await expect(bondFacet.setCoupon(couponData))

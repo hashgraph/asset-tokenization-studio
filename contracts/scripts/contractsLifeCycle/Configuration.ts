@@ -251,55 +251,6 @@ export async function contractCall(
     return results
 }
 
-export interface DeployedContract {
-    address: string
-    proxyAddress?: string
-    proxyAdminAddress?: string
-}
-
-export interface ContractConfig {
-    name: ContractName
-    factoryName: ContractFactoryName
-    deployType: DeployType
-    addresses?: Record<Network, DeployedContract>
-}
-
-export default class Configuration {
-    // private _privateKeys: Record<Network, string[]>;
-    // private _endpoints: Record<Network, Endpoints>;
-    // private _contracts: Record<ContractName, ContractConfig>;
-
-    public static get privateKeys(): Record<Network, string[]> {
-        return NETWORKS.reduce((result, network) => {
-            result[network] = Configuration._getEnvironmentVariableList({
-                name: `${network.toUpperCase()}_PRIVATE_KEY_#`,
-            })
-            return result
-        }, {} as Record<Network, string[]>)
-    }
-
-    public static get endpoints(): Record<Network, Endpoints> {
-        return NETWORKS.reduce((result, network) => {
-            result[network] = {
-                jsonRpc: Configuration._getEnvironmentVariable({
-                    name: `${network.toUpperCase()}_JSON_RPC_ENDPOINT`,
-                    defaultValue:
-                        network === 'local'
-                            ? 'http://localhost:7546'
-                            : `https://${network}.hash.io/api`,
-                }),
-                mirror: Configuration._getEnvironmentVariable({
-                    name: `${network.toUpperCase()}_MIRROR_NODE_ENDPOINT`,
-                    defaultValue:
-                        network === 'local'
-                            ? 'http://localhost:5551'
-                            : `https://${network}.mirrornode.hedera.com`,
-                }),
-            }
-            return result
-        }, {} as Record<Network, Endpoints>)
-    }
-
 function encodeFunctionCall(functionName: string, parameters: any[], abi: any) {
     const functionAbi = abi.find(
         (func: { name: string; type: string }) =>

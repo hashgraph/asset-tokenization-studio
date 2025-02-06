@@ -217,4 +217,3 @@ interface ISnapshots_2 {
     ) external view returns (uint8 decimals_);
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

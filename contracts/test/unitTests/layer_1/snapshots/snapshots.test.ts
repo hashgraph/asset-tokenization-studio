@@ -214,6 +214,7 @@ import {
     type ERC1410ScheduledTasks,
     type AccessControl,
     type Lock_2,
+    type Hold_2,
     IFactory,
     BusinessLogicResolver,
 } from '@typechain'
@@ -229,6 +230,7 @@ import {
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
     MAX_UINT256,
+    ADDRESS_ZERO,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 

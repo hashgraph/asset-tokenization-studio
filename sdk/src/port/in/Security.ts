@@ -272,6 +272,32 @@ import { ProtectPartitionsCommand } from '../../app/usecase/command/security/ope
 import { UnprotectPartitionsCommand } from '../../app/usecase/command/security/operations/unprotectPartitions/UnprotectPartitionsCommand.js';
 import { ProtectedTransferAndLockByPartitionCommand } from '../../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommand.js';
 import ProtectedTransferAndLockByPartitionRequest from './request/ProtectedTransferAndLockByPartitionRequest.js';
+import CreateHoldByPartitionRequest from './request/CreateHoldByPartition.js';
+import { CreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/createHoldByPartition/CreateHoldByPartitionCommand.js';
+import CreateHoldFromByPartitionRequest from './request/CreateHoldFromByPartition.js';
+import ControllerCreateHoldByPartitionRequest from './request/ControllerCreateHoldFromByPartition.js';
+import ProtectedCreateHoldByPartitionRequest from './request/ProtectedCreateHoldFromByPartition.js';
+import { CreateHoldFromByPartitionCommand } from '../../app/usecase/command/security/operations/hold/createHoldFromByPartition/CreateHoldFromByPartitionCommand.js';
+import { ControllerCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/controllerCreateHoldByPartition/ControllerCreateHoldByPartitionCommand.js';
+import { ProtectedCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/protectedCreateHoldByPartition/ProtectedCreateHoldByPartitionCommand.js';
+import HoldViewModel from './response/HoldViewModel.js';
+import { GetHoldForByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQuery.js';
+import { ONE_THOUSAND } from '../../domain/context/shared/SecurityDate.js';
+import { GetHeldAmountForByPartitionQuery } from '../../app/usecase/query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQuery.js';
+import { GetHeldAmountForQuery } from '../../app/usecase/query/security/hold/getHeldAmountFor/GetHeldAmountForQuery.js';
+import { GetHoldCountForByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQuery.js';
+import { GetHoldsIdForByPartitionQuery } from '../../app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQuery.js';
+import GetHeldAmountForRequest from './request/GetHeldAmountForRequest.js';
+import GetHeldAmountForByPartitionRequest from './request/GetHeldAmountForByPartitionRequest.js';
+import GetHoldCountForByPartitionRequest from './request/GetHoldCountForByPartitionRequest.js';
+import GetHoldsIdForByPartitionRequest from './request/GetHoldsIdForByPartitionRequest.js';
+import GetHoldForByPartitionRequest from './request/GetHoldForByPartitionRequest.js';
+import ReleaseHoldByPartitionRequest from './request/ReleaseHoldByPartitionRequest.js';
+import { ReleaseHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommand.js';
+import ReclaimHoldByPartitionRequest from './request/ReclaimHoldByPartitionRequest.js';
+import { ReclaimHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommand.js';
+import { ExecuteHoldByPartitionCommand } from '../../app/usecase/command/security/operations/executeHoldByPartition/ExecuteHoldByPartitionCommand.js';
+import ExecuteHoldByPartitionRequest from './request/ExecuteHoldByPartitionRequest.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -724,144 +750,6 @@ class SecurityInPort implements ISecurityInPort {
     const maxSupply: MaxSupplyViewModel = { value: res.payload.toString() };
 
     return maxSupply;
-  }
-
-  @LogError
-  async protectedTransferFromByPartition(
-    request: ProtectedTransferFromByPartitionRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const {
-      securityId,
-      partitionId,
-      sourceId,
-      targetId,
-      amount,
-      deadline,
-      nounce,
-      signature,
-    } = request;
-    handleValidation('ProtectedTransferFromByPartitionRequest', request);
-
-    return await this.commandBus.execute(
-      new ProtectedTransferFromByPartitionCommand(
-        securityId,
-        partitionId,
-        sourceId,
-        targetId,
-        amount,
-        deadline,
-        nounce,
-        signature,
-      ),
-    );
-  }
-
-  @LogError
-  async protectedRedeemFromByPartition(
-    request: ProtectedRedeemFromByPartitionRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const {
-      securityId,
-      amount,
-      sourceId,
-      partitionId,
-      deadline,
-      nounce,
-      signature,
-    } = request;
-    handleValidation('ProtectedRedeemFromByPartitionRequest', request);
-
-    return await this.commandBus.execute(
-      new ProtectedRedeemFromByPartitionCommand(
-        securityId,
-        partitionId,
-        sourceId,
-        amount,
-        deadline,
-        nounce,
-        signature,
-      ),
-    );
-  }
-
-  @LogError
-  async arePartitionsProtected(
-    request: PartitionsProtectedRequest,
-  ): Promise<boolean> {
-    handleValidation('PartitionsProtectedRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new PartitionsProtectedQuery(request.securityId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async getNounce(request: GetNounceRequest): Promise<number> {
-    handleValidation('GetNounceRequest', request);
-
-    return (
-      await this.queryBus.execute(
-        new GetNounceQuery(request.securityId, request.targetId),
-      )
-    ).payload;
-  }
-
-  @LogError
-  async protectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId } = request;
-    handleValidation('PartitionsProtectedRequest', request);
-
-    return await this.commandBus.execute(
-      new ProtectPartitionsCommand(securityId),
-    );
-  }
-
-  @LogError
-  async unprotectPartitions(
-    request: PartitionsProtectedRequest,
-  ): Promise<{ payload: boolean; transactionId: string }> {
-    const { securityId } = request;
-    handleValidation('PartitionsProtectedRequest', request);
-
-    return await this.commandBus.execute(
-      new UnprotectPartitionsCommand(securityId),
-    );
-  }
-
-  @LogError
-  async protectedTransferAndLockByPartition(
-    request: ProtectedTransferAndLockByPartitionRequest,
-  ): Promise<{ payload: number; transactionId: string }> {
-    const {
-      securityId,
-      partitionId,
-      amount,
-      targetId,
-      sourceId,
-      expirationDate,
-      deadline,
-      nounce,
-      signature,
-    } = request;
-    handleValidation('ProtectedTransferAndLockByPartitionRequest', request);
-
-    return await this.commandBus.execute(
-      new ProtectedTransferAndLockByPartitionCommand(
-        securityId,
-        partitionId,
-        amount,
-        sourceId,
-        targetId,
-        expirationDate,
-        deadline,
-        nounce,
-        signature,
-      ),
-    );
   }
 
   @LogError

@@ -293,6 +293,7 @@ abstract contract LockStorageWrapper is SnapshotsStorageWrapper {
 
         success_ = true;
     }
+
     // solhint-disable no-unused-vars
     function _beforeLock(
         bytes32 _partition,
@@ -310,6 +311,7 @@ abstract contract LockStorageWrapper is SnapshotsStorageWrapper {
     ) internal virtual {
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }
+
     // solhint-enable no-unused-vars
     function _setLockAtIndex(
         bytes32 _partition,
