@@ -203,318 +203,217 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-
-// TODO: Delacre own interface in layer_0
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 import {
-    IERC1410StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
+    IAdjustBalances
+} from '../interfaces/adjustBalances/IAdjustBalances.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {_BALANCE_ADJUSTMENTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
 import {
-    _ERC1410_BASIC_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {_DEFAULT_PARTITION} from '../../constants/values.sol';
-import {LockStorageWrapperRead} from '../../lock/LockStorageWrapperRead.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
-contract ERC1410BasicStorageWrapperRead is
-    LockStorageWrapperRead,
-    IERC1410StorageWrapper
-{
-    // Represents a fungible set of tokens.
-    struct Partition {
-        uint256 amount;
-        bytes32 partition;
+contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
+    function adjustBalances(
+        uint256 factor,
+        uint8 decimals
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_ADJUSTMENT_BALANCE_ROLE)
+        checkFactor(factor)
+        returns (bool success_)
+    {
+        ScheduledTasks_CD_Lib.triggerScheduledTasks(0);
+        _adjustBalances(factor, decimals);
+        success_ = true;
     }
 
-    struct ERC1410BasicStorage {
-        uint256 totalSupply;
-        mapping(bytes32 => uint256) totalSupplyByPartition;
-        // Mapping from investor to aggregated balance across all investor token sets
-        mapping(address => uint256) balances;
-        // Mapping from investor to their partitions
-        mapping(address => Partition[]) partitions;
-        // Mapping from (investor, partition) to index of corresponding partition in partitions
-        // @dev Stored value is always greater by 1 to avoid the 0 value of every index
-        mapping(address => mapping(bytes32 => uint256)) partitionToIndex;
-        bool multiPartition;
-        bool initialized;
+    function getABAF() external view virtual override returns (uint256) {
+        return _getABAF();
     }
 
-    modifier onlyWithoutMultiPartition() {
-        if (_isMultiPartition()) {
-            revert NotAllowedInMultiPartitionMode();
-        }
-        _;
+    function getABAFAdjusted()
+        external
+        view
+        virtual
+        override
+        returns (uint256)
+    {
+        return _getABAFAdjusted();
     }
 
-    modifier onlyDefaultPartitionWithSinglePartition(bytes32 partition) {
-        if (!_isMultiPartition() && partition != _DEFAULT_PARTITION) {
-            revert PartitionNotAllowedInSinglePartitionMode(partition);
-        }
-        _;
+    function getABAFAdjustedAt(
+        uint256 _timestamp
+    ) external view virtual override returns (uint256) {
+        return _getABAFAdjustedAt(_timestamp);
     }
 
-    modifier onlyValidAddress(address account) {
-        _checkValidAddress(account);
-        _;
+    function getLABAFByUser(
+        address _account
+    ) external view virtual override returns (uint256) {
+        return _getLABAFByUser(_account);
     }
 
-    function _checkValidAddress(address account) internal pure {
-        if (account == address(0)) {
-            revert ZeroAddressNotAllowed();
-        }
-    }
-
-    function _reduceBalanceByPartition(
-        address _from,
-        uint256 _value,
+    function getLABAFByPartition(
         bytes32 _partition
-    ) internal virtual {
-        if (!_validPartition(_partition, _from)) {
-            revert IERC1410StorageWrapper.InvalidPartition(_from, _partition);
-        }
-
-        uint256 balance = _balanceOfByPartition(_partition, _from);
-
-        if (balance < _value) {
-            revert IERC1410StorageWrapper.InsufficientBalance(
-                _from,
-                balance,
-                _value,
-                _partition
-            );
-        }
-
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-
-        uint256 index = erc1410Storage.partitionToIndex[_from][_partition] - 1;
-
-        if (erc1410Storage.partitions[_from][index].amount == _value) {
-            _deletePartitionForHolder(_from, _partition, index);
-        } else {
-            erc1410Storage.partitions[_from][index].amount -= _value;
-        }
-
-        erc1410Storage.balances[_from] -= _value;
+    ) external view virtual override returns (uint256) {
+        return _getLABAFByPartition(_partition);
     }
 
-    function _deletePartitionForHolder(
-        address _holder,
+    function getLABAFByUserAndPartition(
         bytes32 _partition,
-        uint256 index
-    ) internal virtual {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        if (index != erc1410Storage.partitions[_holder].length - 1) {
-            erc1410Storage.partitions[_holder][index] = erc1410Storage
-                .partitions[_holder][
-                    erc1410Storage.partitions[_holder].length - 1
-                ];
-            erc1410Storage.partitionToIndex[_holder][
-                erc1410Storage.partitions[_holder][index].partition
-            ] = index + 1;
-        }
-        delete erc1410Storage.partitionToIndex[_holder][_partition];
-        erc1410Storage.partitions[_holder].pop();
+        address _account
+    ) external view virtual override returns (uint256) {
+        return _getLABAFByUserAndPartition(_partition, _account);
     }
 
-    function _increaseBalanceByPartition(
-        address _from,
-        uint256 _value,
-        bytes32 _partition
-    ) internal virtual {
-        if (!_validPartition(_partition, _from)) {
-            revert IERC1410StorageWrapper.InvalidPartition(_from, _partition);
-        }
-
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-
-        uint256 index = erc1410Storage.partitionToIndex[_from][_partition] - 1;
-
-        erc1410Storage.partitions[_from][index].amount += _value;
-        erc1410Storage.balances[_from] += _value;
+    function getAllowanceLABAF(
+        address _owner,
+        address _spender
+    ) external view virtual override returns (uint256) {
+        return _getAllowanceLABAF(_owner, _spender);
     }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    ) internal {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-
-        erc1410Storage.partitions[_account].push(Partition(_value, _partition));
-        erc1410Storage.partitionToIndex[_account][
-            _partition
-        ] = _getERC1410BasicStorage().partitions[_account].length;
-
-        if (_value != 0) erc1410Storage.balances[_account] += _value;
-        _pushLabafUserPartition(_account);
+    function getTotalLockLABAF(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getTotalLockLABAF(_tokenHolder);
     }
 
-    function _totalSupply() internal view returns (uint256) {
-        return _getERC1410BasicStorage().totalSupply;
-    }
-
-    function _isMultiPartition() internal view returns (bool) {
-        return _getERC1410BasicStorage().multiPartition;
-    }
-
-    function _totalSupplyByPartition(
-        bytes32 _partition
-    ) internal view returns (uint256) {
-        return
-            _getERC1410BasicStorage().totalSupplyByPartition[_partition] *
-            _calculateFactorByPartitionAdjustedAt(
-                _partition,
-                _blockTimestamp()
-            );
-    }
-
-    function _balanceOf(address _tokenHolder) internal view returns (uint256) {
-        return
-            _getERC1410BasicStorage().balances[_tokenHolder] *
-            _calculateFactorByAbafAndTokenHolder(_getABAF(), _tokenHolder);
-    }
-
-    function _balanceOfByPartition(
+    function getTotalLockLABAFByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view returns (uint256) {
-        if (_validPartition(_partition, _tokenHolder)) {
-            ERC1410BasicStorage
-                storage erc1410Storage = _getERC1410BasicStorage();
-            uint256 partitionsIndex = erc1410Storage.partitionToIndex[
-                _tokenHolder
-            ][_partition];
-            return
-                erc1410Storage
-                .partitions[_tokenHolder][partitionsIndex - 1].amount *
-                _calculateFactorByTokenHolderAndPartitionIndex(
-                    _getABAF(),
-                    _tokenHolder,
-                    partitionsIndex
-                );
-        } else {
-            return 0;
-        }
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getTotalLockLABAFByPartition(_partition, _tokenHolder);
     }
 
-    function _partitionsOf(
+    function getLockLABAFByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex
+    ) external view virtual override returns (uint256) {
+        return _getLockLABAFByIndex(_partition, _tokenHolder, _lockIndex);
+    }
+
+    function getLockLABAFByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
         address _tokenHolder
-    ) internal view returns (bytes32[] memory) {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        bytes32[] memory partitionsList = new bytes32[](
-            erc1410Storage.partitions[_tokenHolder].length
-        );
-        for (
-            uint256 i = 0;
-            i < erc1410Storage.partitions[_tokenHolder].length;
-            i++
-        ) {
-            partitionsList[i] = erc1410Storage
-            .partitions[_tokenHolder][i].partition;
-        }
-        return partitionsList;
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getLockLABAFByPartition(_partition, _lockId, _tokenHolder);
     }
 
-    function _validPartition(
+    function getTotalHeldLABAF(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getTotalHeldLABAF(_tokenHolder);
+    }
+
+    function getTotalHeldLABAFByPartition(
         bytes32 _partition,
-        address _holder
-    ) internal view returns (bool) {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        if (erc1410Storage.partitionToIndex[_holder][_partition] == 0) {
-            return false;
-        } else {
-            return true;
-        }
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getTotalHeldLABAFByPartition(_partition, _tokenHolder);
     }
 
-    function _validPartitionForReceiver(
+    function getHoldLABAFByIndex(
         bytes32 _partition,
-        address _to
-    ) internal view returns (bool) {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-
-        uint256 index = erc1410Storage.partitionToIndex[_to][_partition];
-
-        return index != 0;
+        address _tokenHolder,
+        uint256 _holdIndex
+    ) external view virtual override returns (uint256) {
+        return _getHoldLABAFByIndex(_partition, _tokenHolder, _holdIndex);
     }
 
-    function _adjustTotalAndMaxSupplyByPartition(bytes32 partition) internal {
-        uint256 factor = _calculateFactorByPartitionAdjustedAt(
-            partition,
-            _blockTimestamp()
-        );
-        if (factor == 1) return;
-        ERC1410BasicStorage storage basicStorage = _getERC1410BasicStorage();
-        basicStorage.totalSupply *= factor;
-        _adjustMaxSupplyByPartition(partition, factor);
-        _updateLabafByPartition(partition);
+    function getHoldLABAFByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getHoldLABAFByPartition(_partition, _holdId, _tokenHolder);
     }
 
-    function _adjustTotalBalanceAndPartitionBalanceFor(
-        bytes32 partition,
-        address account
-    ) internal {
-        uint256 abaf = _getABAF();
-        ERC1410BasicStorage storage basicStorage = _getERC1410BasicStorage();
-        _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
-        _adjustTotalBalanceFor(basicStorage, abaf, account);
-    }
-
-    function _adjustPartitionBalanceFor(
-        ERC1410BasicStorage storage basicStorage,
-        uint256 abaf,
-        bytes32 partition,
-        address account
-    ) private {
-        uint256 partitionsIndex = basicStorage.partitionToIndex[account][
-            partition
-        ];
-        if (partitionsIndex == 0) return;
-        uint256 factor = _calculateFactorByTokenHolderAndPartitionIndex(
-            abaf,
-            account,
-            partitionsIndex
-        );
-        basicStorage.partitions[account][partitionsIndex - 1].amount *= factor;
-        _updateLabafByTokenHolderAndPartitionIndex(
-            abaf,
-            account,
-            partitionsIndex
-        );
-    }
-
-    function _adjustTotalBalanceFor(
-        ERC1410BasicStorage storage basicStorage,
-        uint256 abaf,
-        address account
-    ) private {
-        uint256 factor = _calculateFactorByAbafAndTokenHolder(abaf, account);
-        basicStorage.balances[account] *= factor;
-        _updateLabafByTokenHolder(abaf, account);
-    }
-
-    function _getTotalSupplyByPartition(
-        bytes32 partition
-    ) internal returns (uint256) {
-        return
-            _getERC1410BasicStorage()
-                .totalSupply *= _calculateFactorByPartitionAdjustedAt(
-                partition,
-                _blockTimestamp()
-            );
-    }
-
-    function _getERC1410BasicStorage()
-        internal
+    function getStaticResolverKey()
+        external
         pure
         virtual
-        returns (ERC1410BasicStorage storage erc1410BasicStorage_)
+        override
+        returns (bytes32 staticResolverKey_)
     {
-        bytes32 position = _ERC1410_BASIC_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1410BasicStorage_.slot := position
-        }
+        staticResolverKey_ = _BALANCE_ADJUSTMENTS_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](16);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .adjustBalances
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getABAF.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getABAFAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getABAFAdjustedAt
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLABAFByUser
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLABAFByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLABAFByUserAndPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getAllowanceLABAF
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalLockLABAF
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalLockLABAFByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockLABAFByIndex
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockLABAFByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalHeldLABAF
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalHeldLABAFByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldLABAFByIndex
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldLABAFByPartition
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IAdjustBalances)
+            .interfaceId;
     }
 }
