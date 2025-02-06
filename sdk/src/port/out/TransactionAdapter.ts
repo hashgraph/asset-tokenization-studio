@@ -1085,7 +1085,6 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
-
   grantKYC(
     security: EvmAddress,
     targetId: EvmAddress,
@@ -1097,7 +1096,6 @@ export default abstract class TransactionAdapter
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
-
   revokeKYC(
     security: EvmAddress,
     targetId: EvmAddress,
