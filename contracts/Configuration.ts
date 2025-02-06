@@ -229,8 +229,6 @@ export const CONTRACT_NAMES = [
     'AccessControl',
     'Cap',
     'ControlList',
-    'KYC',
-    'SSIManagement',
     'Pause',
     'ERC20',
     'ERC1410ScheduledTasks',

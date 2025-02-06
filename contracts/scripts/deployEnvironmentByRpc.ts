@@ -281,8 +281,6 @@ function buildEmptyEnvironment(): Environment {
             diamondFacet: {} as IStaticFunctionSelectors,
             accessControl: {} as IStaticFunctionSelectors,
             controlList: {} as IStaticFunctionSelectors,
-            kyc: {} as IStaticFunctionSelectors,
-            ssiManagement: {} as IStaticFunctionSelectors,
             corporateActionsSecurity: {} as IStaticFunctionSelectors,
             pause: {} as IStaticFunctionSelectors,
             eRC20_2: {} as IStaticFunctionSelectors,

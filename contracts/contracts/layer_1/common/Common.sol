@@ -217,15 +217,13 @@ import {
     ControlListStorageWrapper
 } from '../controlList/ControlListStorageWrapper.sol';
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
-import {KYCStorageWrapperRead} from '../kyc/KYCStorageWrapperRead.sol';
 
 // solhint-disable no-empty-blocks
 contract Common is
     AccessControlStorageWrapper,
     PauseStorageWrapper,
     ControlListStorageWrapper,
-    ProtectedPartitionsStorageWrapper,
-    KYCStorageWrapperRead
+    ProtectedPartitionsStorageWrapper
 {
     error AlreadyInitialized();
     error OnlyDelegateAllowed();
