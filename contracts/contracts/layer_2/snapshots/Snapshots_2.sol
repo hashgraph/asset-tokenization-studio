@@ -350,6 +350,42 @@ contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
             );
     }
 
+    function _heldBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256 balance_)
+    {
+        return
+            SnapshotsStorageWrapper_2._heldBalanceOfAtSnapshot(
+                _snapshotID,
+                _tokenHolder
+            );
+    }
+
+    function _heldBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    )
+        internal
+        view
+        virtual
+        override(SnapshotsStorageWrapper, SnapshotsStorageWrapper_2)
+        returns (uint256 balance_)
+    {
+        return
+            SnapshotsStorageWrapper_2._heldBalanceOfAtSnapshotByPartition(
+                _partition,
+                _snapshotID,
+                _tokenHolder
+            );
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -368,7 +404,7 @@ contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](10);
+        staticFunctionSelectors_ = new bytes4[](12);
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .balanceOfAtSnapshot
@@ -392,6 +428,12 @@ contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
             .lockedBalanceOfAtSnapshotByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
+            .heldBalanceOfAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .heldBalanceOfAtSnapshotByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
             .ABAFAtSnapshot
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
@@ -412,4 +454,5 @@ contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
         staticInterfaceIds_[selectorsIndex++] = type(ISnapshots_2).interfaceId;
     }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

@@ -258,3 +258,9 @@ bytes32 constant _LOCK_RESOLVER_KEY = 0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fdda
 
 // keccak256("security.token.standard.protected.partitions.resolverKey")
 bytes32 constant _PROTECTED_PARTITIONS_RESOLVER_KEY = 0x6d65d2938c05a4d952aff0845c1baa5bea04d4544db74f8b3b26004d1d58d58f;
+
+// keccak256("security.token.standard.hold.resolverKey")
+bytes32 constant _HOLD_RESOLVER_KEY = 0x49c539aaa7273888cd36649dc1b9a58a0bc7f54b639f84f2a7074d99b0754f6d;
+
+// keccak256("security.token.standard.protected.partitions.resolverKey")
+bytes32 constant _PROTECTED_PARTITIONS_RESOLVER_KEY = 0x6d65d2938c05a4d952aff0845c1baa5bea04d4544db74f8b3b26004d1d58d58f;

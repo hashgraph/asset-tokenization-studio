@@ -414,3 +414,4 @@ contract Lock_2 is Lock, LockStorageWrapper_2 {
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

@@ -508,6 +508,25 @@ describe('CAP Tests', () => {
         })
     })
 
+    describe('New Max Supply By Partition Too High', () => {
+        it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyByPartitionTooHigh', async () => {
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            await accessControlFacet.grantRole(CAP_ROLE, account_C)
+
+            // Using account C (non role)
+            capFacet = capFacet.connect(signer_C)
+
+            // add to list fails
+            await expect(
+                capFacet.setMaxSupplyByPartition(
+                    _PARTITION_ID_1,
+                    maxSupply * 100
+                )
+            ).to.eventually.be.rejectedWith('NewMaxSupplyByPartitionTooHigh')
+        })
+    })
+
     describe('New Max Supply OK', () => {
         it('GIVEN a token WHEN setMaxSupply THEN transaction succeeds', async () => {
             accessControlFacet = accessControlFacet.connect(signer_A)

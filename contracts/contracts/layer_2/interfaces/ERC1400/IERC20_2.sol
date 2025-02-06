@@ -217,3 +217,4 @@ interface IERC20_2 {
     ) external view returns (uint8);
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
