@@ -203,104 +203,105 @@
 
 */
 
-import dividends from "./dividends";
-import coupons from "./coupons";
-import roleManagement from "./roleManagement";
-import management from "./management";
-import allowedList from "./allowedList";
-import votingRights from "./votingRight";
-import balanceAdjustment from "./balanceAdjustment";
-import locker from "./locker";
-import cap from "./cap";
-import hold from "./hold";
-
 export default {
-  header: {
-    title: "Digital security details",
-  },
   tabs: {
-    balance: "Balance",
-    allowedList: "Allowed list",
-    blockedList: "Blocked list",
-    details: "Details",
-    dividends: "Dividends",
-    balanceAdjustment: "Balance Adjustment",
-    coupons: "Coupons",
-    votingRights: "Voting rights",
-    roleManagement: "Role management",
-    management: "Management",
-    locker: "Locker",
-    cap: "Cap",
-    hold: "Hold",
+    list: "List",
+    create: "Create",
+    manage: "Manage",
+  },
+  list: {
+    id: "Hold ID",
+    originalAccount: "Original Account",
+    destinationAccount: "Destination Account",
+    escrowAccount: "Escrow Account",
+    expirationDate: "Expiration Date",
+    amount: "Amount",
+    noHolds: "No holds found",
+  },
+  form: {
+    title: "Title",
+    description: "Description",
+    originalAccount: {
+      label: "Original Account",
+      placeholder: "0.0.1234567",
+    },
+    targetId: {
+      label: "Target ID",
+      placeholder: "0.0.1234567",
+    },
+    amount: {
+      label: "Amount",
+      placeholder: "Amount",
+    },
+    destinationAccount: {
+      label: "Destination Account",
+      placeholder: "0.0.1234567",
+    },
+    holdId: {
+      label: "Hold ID",
+      placeholder: "1",
+    },
   },
   actions: {
-    redeem: "Redeem",
-    transfer: "Transfer",
-    mint: "Mint",
-    forceTransfer: "Force transfer",
-    forceRedeem: "Force redeem",
-    dangerZone: {
-      title: "Danger zone",
-      subtitle: "Pause security token",
-      buttonActive: "Active",
-      buttonInactive: "Inactive",
+    confirmReclaimPopUp: {
+      title: "Reclaim",
+      description: "Are you sure you want to reclaim the hold?",
+      confirmText: "Confirm",
+      cancelText: "Cancel",
+    },
+    confirmHoldPopUp: {
+      title: "New hold",
+      description: "Are you sure you want to create a new hold?",
+      confirmText: "Confirm",
+      cancelText: "Cancel",
+    },
+    confirmManage: {
+      title: "Confirmation",
+      description: "Are you sure you want to proceed with this operation?",
+      confirmText: "Confirm",
+      cancelText: "Cancel",
     },
   },
-  dividends,
-  balanceAdjustment,
-  coupons,
-  balance: {
-    search: {
-      title: "Display balances",
-      subtitle: "Add the ID account to preview its balance",
-      placeholder: "0.0.19253",
-      button: "Search ID",
+  create: {
+    title: "Create hold",
+    description: "Fill the form to create a new hold",
+    originalAccount: {
+      label: "Original Account",
+      placeholder: "0.0.1234567",
     },
-    details: {
-      title: "Details",
-      availableBalance: "Available balance",
-      lockBalance: "Lock balance",
-      heldBalance: "Held balance",
+    destinationAccount: {
+      label: "Destination Account",
+      placeholder: "0.0.1234567",
     },
-    error: {
-      targetId: "Sorry, there was an error. Probably wrong address",
+    escrowAccount: {
+      label: "Escrow Account",
+      placeholder: "0.0.1234567",
+    },
+    expirationDate: {
+      label: "Expiration Date",
+      placeholder: "Select expiration date",
+    },
+    amount: {
+      label: "Amount",
+      placeholder: "Amount",
     },
   },
-  roleManagement,
-  management,
-  allowedList,
-  votingRights,
-  locker,
-  cap,
-  hold,
-  benefits: {
-    dividends: "Dividends",
-    balanceAdjustments: "Balance Adjustments",
-    coupons: "Coupons",
-    id: "Id",
-    recordDate: "Record date",
-    executionDate: "Execution date",
-    dividendAmount: "Dividend amount",
-    couponRate: "Rate",
-    snapshot: "Snapshot Id",
-    factor: "Factor",
-    decimals: "Decimals",
+  manage: {
+    release: "Release",
+    execute: "Execute",
   },
-  bond: {
-    updateMaturityDate: {
-      toast: {
-        title: "Confirmation",
-        subtitle: "Are you sure you want to change the maturity date?",
-        cancelButtonText: "Cancel",
-        confirmButtonText: "Confirm",
-      },
-      messages: {
-        success: "Success: ",
-        updateMaturityDateSuccessful:
-          "Maturity date has been updated successfully",
-        error: "Error: ",
-        updateMaturityDateFailed: "Update maturity date failed",
-      },
-    },
+  release: {
+    title: "Release Hold",
+    description: "Fill the form to release a hold",
+  },
+  execute: {
+    title: "Execute Hold",
+    description: "Fill the form to execute a hold",
+  },
+  messages: {
+    success: "Success: ",
+    descriptionSuccess: "The hold operation has been executed successfully",
+    error: "Error: ",
+    descriptionFailed: "The hold operation has failed",
   },
 };
