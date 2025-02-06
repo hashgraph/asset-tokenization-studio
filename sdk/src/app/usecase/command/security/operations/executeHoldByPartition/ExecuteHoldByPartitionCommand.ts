@@ -203,104 +203,25 @@
 
 */
 
-import dividends from "./dividends";
-import coupons from "./coupons";
-import roleManagement from "./roleManagement";
-import management from "./management";
-import allowedList from "./allowedList";
-import votingRights from "./votingRight";
-import balanceAdjustment from "./balanceAdjustment";
-import locker from "./locker";
-import cap from "./cap";
-import hold from "./hold";
+import { Command } from '../../../../../../core/command/Command.js';
+import { CommandResponse } from '../../../../../../core/command/CommandResponse.js';
 
-export default {
-  header: {
-    title: "Digital security details",
-  },
-  tabs: {
-    balance: "Balance",
-    allowedList: "Allowed list",
-    blockedList: "Blocked list",
-    details: "Details",
-    dividends: "Dividends",
-    balanceAdjustment: "Balance Adjustment",
-    coupons: "Coupons",
-    votingRights: "Voting rights",
-    roleManagement: "Role management",
-    management: "Management",
-    locker: "Locker",
-    cap: "Cap",
-    hold: "Hold",
-  },
-  actions: {
-    redeem: "Redeem",
-    transfer: "Transfer",
-    mint: "Mint",
-    forceTransfer: "Force transfer",
-    forceRedeem: "Force redeem",
-    dangerZone: {
-      title: "Danger zone",
-      subtitle: "Pause security token",
-      buttonActive: "Active",
-      buttonInactive: "Inactive",
-    },
-  },
-  dividends,
-  balanceAdjustment,
-  coupons,
-  balance: {
-    search: {
-      title: "Display balances",
-      subtitle: "Add the ID account to preview its balance",
-      placeholder: "0.0.19253",
-      button: "Search ID",
-    },
-    details: {
-      title: "Details",
-      availableBalance: "Available balance",
-      lockBalance: "Lock balance",
-      heldBalance: "Held balance",
-    },
-    error: {
-      targetId: "Sorry, there was an error. Probably wrong address",
-    },
-  },
-  roleManagement,
-  management,
-  allowedList,
-  votingRights,
-  locker,
-  cap,
-  hold,
-  benefits: {
-    dividends: "Dividends",
-    balanceAdjustments: "Balance Adjustments",
-    coupons: "Coupons",
-    id: "Id",
-    recordDate: "Record date",
-    executionDate: "Execution date",
-    dividendAmount: "Dividend amount",
-    couponRate: "Rate",
-    snapshot: "Snapshot Id",
-    factor: "Factor",
-    decimals: "Decimals",
-  },
-  bond: {
-    updateMaturityDate: {
-      toast: {
-        title: "Confirmation",
-        subtitle: "Are you sure you want to change the maturity date?",
-        cancelButtonText: "Cancel",
-        confirmButtonText: "Confirm",
-      },
-      messages: {
-        success: "Success: ",
-        updateMaturityDateSuccessful:
-          "Maturity date has been updated successfully",
-        error: "Error: ",
-        updateMaturityDateFailed: "Update maturity date failed",
-      },
-    },
-  },
-};
+export class ExecuteHoldByPartitionCommandResponse implements CommandResponse {
+  constructor(
+    public readonly payload: boolean,
+    public readonly transactionId: string,
+  ) {}
+}
+
+export class ExecuteHoldByPartitionCommand extends Command<ExecuteHoldByPartitionCommandResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly sourceId: string,
+    public readonly amount: string,
+    public readonly holdId: number,
+    public readonly targetId: string,
+    public readonly partitionId: string,
+  ) {
+    super();
+  }
+}

@@ -207,22 +207,29 @@ import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionA
 import {
   ControlListRequest,
   CreateEquityRequest,
+  CreateHoldByPartitionRequest,
   Equity,
+  ExecuteHoldByPartitionRequest,
   ForceRedeemRequest,
   ForceTransferRequest,
   GetAccountBalanceRequest,
   GetControlListCountRequest,
   GetControlListMembersRequest,
   GetControlListTypeRequest,
+  GetHeldAmountForRequest,
+  GetHoldCountForByPartitionRequest,
+  GetHoldsIdForByPartitionRequest,
   GetLockCountRequest,
   GetLocksIdRequest,
   IssueRequest,
   LoggerTransports,
   PartitionsProtectedRequest,
   PauseRequest,
+  ProtectedCreateHoldByPartitionRequest,
   ProtectedRedeemFromByPartitionRequest,
   ProtectedTransferAndLockByPartitionRequest,
   ProtectedTransferFromByPartitionRequest,
+  ReleaseHoldByPartitionRequest,
   ReleaseRequest,
   Role,
   RoleRequest,
@@ -257,6 +264,7 @@ import {
 } from '../../../src/domain/context/factory/RegulationType.js';
 import Account from '../../../src/domain/context/account/Account.js';
 import { keccak256 } from 'js-sha3';
+import { _PARTITION_ID_1 } from '../../../src/core/Constants.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -918,6 +926,129 @@ describe('🧪 Security tests', () => {
     ).toBe(SecurityControlListType.BLACKLIST);
   });
 
+  it('Hold balance and Release', async () => {
+    const issuedAmount = '10';
+    const heldAmount = '2';
+    const expirationTimeStamp = '9991976120';
+
+    await Security.issue(
+      new IssueRequest({
+        amount: issuedAmount,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        securityId: equity.evmDiamondAddress!,
+      }),
+    );
+
+    expect(
+      (
+        await Security.createHoldByPartition(
+          new CreateHoldByPartitionRequest({
+            securityId: equity.evmDiamondAddress!,
+            partitionId: _PARTITION_ID_1,
+            amount: heldAmount,
+            escrow: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+            expirationDate: expirationTimeStamp,
+          }),
+        )
+      ).payload,
+    ).toBe(1);
+
+    expect(
+      (
+        await Security.getBalanceOf(
+          new GetAccountBalanceRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          }),
+        )
+      ).value,
+    ).toEqual((+issuedAmount - +heldAmount).toString());
+
+    expect(
+      await Security.getHeldAmountFor(
+        new GetHeldAmountForRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        }),
+      ),
+    ).toEqual(heldAmount);
+
+    const holdCount = await Security.getHoldCountForByPartition(
+      new GetHoldCountForByPartitionRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        partitionId: _PARTITION_ID_1,
+      }),
+    );
+
+    expect(holdCount).toEqual(1);
+
+    // check hold id
+    const holdId = await Security.getHoldsIdForByPartition(
+      new GetHoldsIdForByPartitionRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        partitionId: _PARTITION_ID_1,
+        start: 0,
+        end: 1,
+      }),
+    );
+
+    expect(holdId.length).toEqual(1);
+
+    expect(holdId[0]).toEqual(1);
+
+    expect(
+      (
+        await Security.releaseHoldByPartition(
+          new ReleaseHoldByPartitionRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+            holdId: 1,
+            partitionId: _PARTITION_ID_1,
+            amount: heldAmount,
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    expect(
+      await Security.getHeldAmountFor(
+        new GetHeldAmountForRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        }),
+      ),
+    ).toEqual('0');
+
+    expect(
+      (
+        await Security.getBalanceOf(
+          new GetAccountBalanceRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          }),
+        )
+      ).value,
+    ).toEqual((+issuedAmount).toString());
+
+    await Security.redeem(
+      new RedeemRequest({
+        securityId: equity.evmDiamondAddress!,
+        amount: heldAmount,
+      }),
+    );
+
+    await Security.controllerRedeem(
+      new ForceRedeemRequest({
+        securityId: equity.evmDiamondAddress!,
+        amount: (+issuedAmount - +heldAmount).toString(),
+        sourceId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+      }),
+    );
+  }, 600_000);
+
   it('Protect and UnProtect a security', async () => {
     expect(
       (
@@ -1069,5 +1200,116 @@ describe('🧪 Security tests', () => {
         )
       ).value,
     ).toEqual((+protectedTransferAmount).toString());
+  }, 600_000);
+
+  it('Protected hold securities', async () => {
+    const issueAmount = BigInt(100);
+    const protectedHoldAmount = BigInt(1);
+    const partitionBytes32 =
+      '0x0000000000000000000000000000000000000000000000000000000000000001';
+
+    const balanceECDSA_A = BigInt(
+      (
+        await Security.getBalanceOf(
+          new GetAccountBalanceRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          }),
+        )
+      ).value,
+    );
+
+    const balanceECDSA = BigInt(
+      (
+        await Security.getBalanceOf(
+          new GetAccountBalanceRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          }),
+        )
+      ).value,
+    );
+
+    await Security.issue(
+      new IssueRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        amount: issueAmount.toString(),
+      }),
+    );
+
+    const encodedValue = ethers.utils.defaultAbiCoder.encode(
+      ['bytes32', 'bytes32'],
+      [SecurityRole._PROTECTED_PARTITIONS_PARTICIPANT_ROLE, partitionBytes32],
+    );
+    const hash = keccak256(encodedValue);
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: '0x' + hash,
+      }),
+    );
+
+    expect(
+      (
+        await Security.protectedCreateHoldByPartition(
+          new ProtectedCreateHoldByPartitionRequest({
+            securityId: equity.evmDiamondAddress!,
+            partitionId: partitionBytes32,
+            sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+            expirationDate: '9999999999',
+            amount: protectedHoldAmount.toString(),
+            deadline: '9999999999',
+            nonce: 3,
+            signature: 'vvvv',
+            escrow: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          }),
+        )
+      ).payload,
+    ).toBe(1);
+
+    expect(
+      BigInt(
+        (
+          await Security.getBalanceOf(
+            new GetAccountBalanceRequest({
+              securityId: equity.evmDiamondAddress!,
+              targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            }),
+          )
+        ).value,
+      ),
+    ).toEqual(balanceECDSA_A + issueAmount - protectedHoldAmount);
+
+    expect(
+      (
+        await Security.executeHoldByPartition(
+          new ExecuteHoldByPartitionRequest({
+            securityId: equity.evmDiamondAddress!,
+            partitionId: partitionBytes32,
+            sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+            amount: protectedHoldAmount.toString(),
+            holdId: 1,
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    expect(
+      BigInt(
+        (
+          await Security.getBalanceOf(
+            new GetAccountBalanceRequest({
+              securityId: equity.evmDiamondAddress!,
+              targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+            }),
+          )
+        ).value,
+      ),
+    ).toEqual(balanceECDSA + protectedHoldAmount);
   }, 600_000);
 });

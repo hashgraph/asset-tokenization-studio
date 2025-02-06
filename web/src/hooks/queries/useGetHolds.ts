@@ -203,104 +203,76 @@
 
 */
 
-import dividends from "./dividends";
-import coupons from "./coupons";
-import roleManagement from "./roleManagement";
-import management from "./management";
-import allowedList from "./allowedList";
-import votingRights from "./votingRight";
-import balanceAdjustment from "./balanceAdjustment";
-import locker from "./locker";
-import cap from "./cap";
-import hold from "./hold";
+import {
+  GetHeldAmountForRequest,
+  GetHoldForByPartitionRequest,
+  GetHoldsIdForByPartitionRequest,
+  HoldViewModel,
+} from "@hashgraph/asset-tokenization-sdk";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import SDKService from "../../services/SDKService";
+import { DEFAULT_PARTITION } from "../../utils/constants";
 
-export default {
-  header: {
-    title: "Digital security details",
-  },
-  tabs: {
-    balance: "Balance",
-    allowedList: "Allowed list",
-    blockedList: "Blocked list",
-    details: "Details",
-    dividends: "Dividends",
-    balanceAdjustment: "Balance Adjustment",
-    coupons: "Coupons",
-    votingRights: "Voting rights",
-    roleManagement: "Role management",
-    management: "Management",
-    locker: "Locker",
-    cap: "Cap",
-    hold: "Hold",
-  },
-  actions: {
-    redeem: "Redeem",
-    transfer: "Transfer",
-    mint: "Mint",
-    forceTransfer: "Force transfer",
-    forceRedeem: "Force redeem",
-    dangerZone: {
-      title: "Danger zone",
-      subtitle: "Pause security token",
-      buttonActive: "Active",
-      buttonInactive: "Inactive",
+export const GET_HOLDS = (securityId: string, targetId: string) =>
+  `GET_HOLDS_${securityId}_${targetId}`;
+export const GET_HELD_BALANCE = (securityId: string, targetId: string) =>
+  `GET_HELD_BALANCE_${securityId}_${targetId}`;
+
+export const useGetHolds = (
+  request: GetHoldsIdForByPartitionRequest,
+  options?: UseQueryOptions<
+    HoldViewModel[],
+    unknown,
+    HoldViewModel[],
+    string[]
+  >,
+) => {
+  return useQuery(
+    [GET_HOLDS(request.securityId, request.targetId)],
+    async () => {
+      try {
+        const holdIds = await SDKService.getHoldsId(request);
+
+        const holdDetails = await Promise.all(
+          holdIds.map(async (holdId) => {
+            const holdRequest = new GetHoldForByPartitionRequest({
+              securityId: request.securityId,
+              targetId: request.targetId,
+              holdId: Number(holdId),
+              partitionId: DEFAULT_PARTITION,
+            });
+            return await SDKService.getHoldDetails(holdRequest);
+          }),
+        );
+
+        return holdDetails.filter(
+          (hold): hold is HoldViewModel => hold !== null,
+        );
+      } catch (error) {
+        console.error("Error fetching holds", error);
+        throw error;
+      }
     },
-  },
-  dividends,
-  balanceAdjustment,
-  coupons,
-  balance: {
-    search: {
-      title: "Display balances",
-      subtitle: "Add the ID account to preview its balance",
-      placeholder: "0.0.19253",
-      button: "Search ID",
+    options,
+  );
+};
+
+export const useGetHeldAmountFor = (
+  request: GetHeldAmountForRequest,
+  options?: UseQueryOptions<number, unknown, number, string[]>,
+) => {
+  return useQuery(
+    [GET_HELD_BALANCE(request.securityId, request.targetId)],
+    async () => {
+      try {
+        const heldAmount = await SDKService.getHeldAmountFor(request);
+
+        return heldAmount;
+      } catch (error) {
+        console.error("Error fetching holds", error);
+        throw error;
+      }
     },
-    details: {
-      title: "Details",
-      availableBalance: "Available balance",
-      lockBalance: "Lock balance",
-      heldBalance: "Held balance",
-    },
-    error: {
-      targetId: "Sorry, there was an error. Probably wrong address",
-    },
-  },
-  roleManagement,
-  management,
-  allowedList,
-  votingRights,
-  locker,
-  cap,
-  hold,
-  benefits: {
-    dividends: "Dividends",
-    balanceAdjustments: "Balance Adjustments",
-    coupons: "Coupons",
-    id: "Id",
-    recordDate: "Record date",
-    executionDate: "Execution date",
-    dividendAmount: "Dividend amount",
-    couponRate: "Rate",
-    snapshot: "Snapshot Id",
-    factor: "Factor",
-    decimals: "Decimals",
-  },
-  bond: {
-    updateMaturityDate: {
-      toast: {
-        title: "Confirmation",
-        subtitle: "Are you sure you want to change the maturity date?",
-        cancelButtonText: "Cancel",
-        confirmButtonText: "Confirm",
-      },
-      messages: {
-        success: "Success: ",
-        updateMaturityDateSuccessful:
-          "Maturity date has been updated successfully",
-        error: "Error: ",
-        updateMaturityDateFailed: "Update maturity date failed",
-      },
-    },
-  },
+    options,
+  );
 };

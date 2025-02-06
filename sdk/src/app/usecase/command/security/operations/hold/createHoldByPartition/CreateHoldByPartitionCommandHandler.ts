@@ -222,6 +222,7 @@ import {
   CreateHoldByPartitionCommandResponse,
 } from './CreateHoldByPartitionCommand.js';
 import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
+import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
 
 @CommandHandler(CreateHoldByPartitionCommand)
 export class CreateHoldByPartitionCommandHandler
@@ -273,16 +274,22 @@ export class CreateHoldByPartitionCommandHandler
       ? await this.mirrorNodeAdapter.accountToEvmAddress(escrow)
       : new EvmAddress(escrow);
 
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
+    const targetEvmAddress: EvmAddress =
+      targetId === '0.0.0'
+        ? new EvmAddress(EVM_ZERO_ADDRESS)
+        : HEDERA_FORMAT_ID_REGEX.exec(targetId)
+          ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
+          : new EvmAddress(targetId);
 
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 
     if (
       account.evmAddress &&
       (
-        await this.queryAdapter.balanceOf(securityEvmAddress, targetEvmAddress)
+        await this.queryAdapter.balanceOf(
+          securityEvmAddress,
+          new EvmAddress(account.evmAddress),
+        )
       ).lt(amountBd.toBigNumber())
     ) {
       throw new InsufficientBalance();
