@@ -248,6 +248,12 @@ interface IHold {
     error HoldExpirationReached();
     error IsNotEscrow();
 
+    struct HoldIdentifier {
+        bytes32 partition;
+        address tokenHolder;
+        uint256 holdId;
+    }
+
     struct Hold {
         uint256 amount;
         uint256 expirationTimestamp;
@@ -317,24 +323,18 @@ interface IHold {
     ) external returns (bool success_, uint256 holdId_);
 
     function executeHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
     ) external returns (bool success_);
 
     function releaseHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     ) external returns (bool success_);
 
     function reclaimHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        HoldIdentifier calldata _holdIdentifier
     ) external returns (bool success_);
 
     function getHeldAmountFor(
@@ -359,9 +359,7 @@ interface IHold {
     ) external view returns (uint256[] memory holdsId_);
 
     function getHoldForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        HoldIdentifier calldata _holdIdentifier
     )
         external
         view

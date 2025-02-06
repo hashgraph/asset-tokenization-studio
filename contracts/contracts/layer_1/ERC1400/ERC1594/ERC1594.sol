@@ -214,6 +214,7 @@ import {ERC1594StorageWrapper} from './ERC1594StorageWrapper.sol';
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
 import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
+import {IKYC} from '../../interfaces/kyc/IKYC.sol';
 
 contract ERC1594 is
     IERC1594,
@@ -256,6 +257,8 @@ contract ERC1594 is
         checkControlList(_to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _msgSender())
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)
     {
         // Add a function to validate the `_data` parameter
         _transfer(_msgSender(), _to, _value);
@@ -289,6 +292,8 @@ contract ERC1594 is
         checkControlList(_from)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _from)
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)
     {
         // Add a function to validate the `_data` parameter
         _transferFrom(_msgSender(), _from, _to, _value);
@@ -317,6 +322,7 @@ contract ERC1594 is
         checkControlList(_tokenHolder)
         onlyWithoutMultiPartition
         onlyIssuable
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _tokenHolder)
     {
         _issue(_tokenHolder, _value, _data);
     }
@@ -339,6 +345,7 @@ contract ERC1594 is
         checkControlList(_msgSender())
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _msgSender())
     {
         _redeem(_value, _data);
     }
@@ -365,6 +372,7 @@ contract ERC1594 is
         checkControlList(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _tokenHolder)
     {
         _redeemFrom(_tokenHolder, _value, _data);
     }
