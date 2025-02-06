@@ -216,6 +216,7 @@ import {
     ERC1410StandardStorageWrapper
 } from '../ERC1410/ERC1410StandardStorageWrapper.sol';
 import {IFactory} from '../../../interfaces/factory/IFactory.sol';
+import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
 
 abstract contract ERC20StorageWrapper is
     IERC20StorageWrapper,
@@ -328,8 +329,7 @@ abstract contract ERC20StorageWrapper is
         bytes memory data;
         _transferByPartition(
             from,
-            to,
-            value,
+            IERC1410Basic.BasicTransferInfo(to, value),
             _DEFAULT_PARTITION,
             data,
             spender,
@@ -345,8 +345,7 @@ abstract contract ERC20StorageWrapper is
     ) internal virtual returns (bool) {
         _transferByPartition(
             from,
-            to,
-            value,
+            IERC1410Basic.BasicTransferInfo(to, value),
             _DEFAULT_PARTITION,
             '',
             address(0),

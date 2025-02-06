@@ -957,8 +957,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.signerOrProvider,
       ).transferByPartition(
         _PARTITION_ID_1,
-        targetId.toString(),
-        amount.toBigNumber(),
+        {
+          to: targetId.toString(),
+          value: amount.toBigNumber(),
+        },
         '0x',
         {
           gasLimit: TRANSFER_GAS,
@@ -1441,12 +1443,14 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         security.toString(),
         this.signerOrProvider,
       ).operatorTransferByPartition(
-        partitionId,
-        sourceId.toString(),
-        targetId.toString(),
-        amount.toBigNumber(),
-        '0x',
-        '0x',
+        {
+          partition: partitionId,
+          from: sourceId.toString(),
+          to: targetId.toString(),
+          value: '0x',
+          data: '0x',
+          operatorData: '0x',
+        },
         { gasLimit: TRANSFER_OPERATOR_GAS },
       ),
       this.networkService.environment,

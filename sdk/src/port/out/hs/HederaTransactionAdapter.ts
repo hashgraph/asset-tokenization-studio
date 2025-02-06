@@ -316,6 +316,10 @@ import { ResolverProxyConfiguration } from '../../../domain/context/factory/Reso
 import { TransactionType } from '../TransactionResponseEnums.js';
 import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
 import { Hold, ProtectedHold } from '../../../domain/context/security/Hold.js';
+import {
+  BasicTransferInfo,
+  OperatorTransferData,
+} from 'domain/context/factory/ERC1410Metadata.js';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -610,9 +614,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
+
+    const basicTransferInfo: BasicTransferInfo = {
+      to: targetId.toString(),
+      value: amount.toHexString(),
+    };
+
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [_PARTITION_ID_1, targetId.toString(), amount.toHexString(), '0x'],
+      [_PARTITION_ID_1, basicTransferInfo, '0x'],
     );
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -1315,16 +1325,18 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       security.toString(),
     );
 
+    const operatorTransferData: OperatorTransferData = {
+      partition: partitionId,
+      from: sourceId.toString(),
+      to: targetId.toString(),
+      value: amount.toHexString(),
+      data: '0x',
+      operatorData: '0x',
+    };
+
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [
-        partitionId,
-        sourceId.toString(),
-        targetId.toString(),
-        amount.toHexString(),
-        '0x',
-        '0x',
-      ],
+      [operatorTransferData],
     );
 
     const functionDataEncoded = new Uint8Array(

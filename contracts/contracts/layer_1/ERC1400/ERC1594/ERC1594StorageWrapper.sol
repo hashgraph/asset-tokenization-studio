@@ -219,9 +219,12 @@ import {
     _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
     _TO_ACCOUNT_NULL_ERROR_ID,
     _ALLOWANCE_REACHED_ERROR_ID,
-    _SUCCESS
+    _SUCCESS,
+    _FROM_ACCOUNT_KYC_ERROR_ID,
+    _TO_ACCOUNT_KYC_ERROR_ID
 } from '../../constants/values.sol';
 import {ERC20StorageWrapper} from '../ERC20/ERC20StorageWrapper.sol';
+import {IKYC} from '../../interfaces/kyc/IKYC.sol';
 
 abstract contract ERC1594StorageWrapper is
     ERC20StorageWrapper,
@@ -336,6 +339,12 @@ abstract contract ERC1594StorageWrapper is
         if (!_checkControlList(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
+        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _msgSender())) {
+            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        }
+        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)) {
+            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        }
         if (_balanceOf(_msgSender()) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
@@ -378,6 +387,12 @@ abstract contract ERC1594StorageWrapper is
         }
         if (!_checkControlList(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _from)) {
+            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        }
+        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)) {
+            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
         if (_allowance(_from, _msgSender()) < _value) {
             return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));

@@ -214,6 +214,7 @@ import {
     ERC1410ControllerStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
 import {_CONTROLLER_ROLE} from '../constants/roles.sol';
+import {IKYC} from '../interfaces/kyc/IKYC.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -395,9 +396,7 @@ abstract contract Hold is
     }
 
     function executeHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
     )
@@ -405,80 +404,64 @@ abstract contract Hold is
         virtual
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
+        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
+        onlyWithValidHoldId(_holdIdentifier)
+        checkControlList(_holdIdentifier.tokenHolder)
         checkControlList(_to)
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _holdIdentifier.tokenHolder)
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)
         returns (bool success_)
     {
-        success_ = _executeHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId,
-            _to,
-            _amount
-        );
+        success_ = _executeHoldByPartition(_holdIdentifier, _to, _amount);
 
         emit HoldByPartitionExecuted(
-            _tokenHolder,
-            _partition,
-            _holdId,
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.partition,
+            _holdIdentifier.holdId,
             _amount,
             _to
         );
     }
 
     function releaseHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     )
         external
         virtual
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
+        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
+        onlyWithValidHoldId(_holdIdentifier)
         returns (bool success_)
     {
-        success_ = _releaseHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId,
-            _amount
-        );
+        success_ = _releaseHoldByPartition(_holdIdentifier, _amount);
         emit HoldByPartitionReleased(
-            _tokenHolder,
-            _partition,
-            _holdId,
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.partition,
+            _holdIdentifier.holdId,
             _amount
         );
     }
 
     function reclaimHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        HoldIdentifier calldata _holdIdentifier
     )
         external
         virtual
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
+        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
+        onlyWithValidHoldId(_holdIdentifier)
         returns (bool success_)
     {
         uint256 amount_;
-        (success_, amount_) = _reclaimHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
+        (success_, amount_) = _reclaimHoldByPartition(_holdIdentifier);
         emit HoldByPartitionReclaimed(
             _msgSender(),
-            _tokenHolder,
-            _partition,
-            _holdId,
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.partition,
+            _holdIdentifier.holdId,
             amount_
         );
     }
@@ -519,9 +502,7 @@ abstract contract Hold is
     }
 
     function getHoldForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        HoldIdentifier calldata _holdIdentifier
     )
         external
         view
@@ -536,6 +517,6 @@ abstract contract Hold is
             bytes memory operatorData_
         )
     {
-        return _getHoldForByPartition(_partition, _tokenHolder, _holdId);
+        return _getHoldForByPartition(_holdIdentifier);
     }
 }
