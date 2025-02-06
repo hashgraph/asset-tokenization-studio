@@ -22,7 +22,6 @@
 - **[Code of conduct](#code-of-conduct)**<br>
 - **[License](#license)**<br>
 
-
 # Development manifesto
 
 The development of the project follows enterprise-grade practices for software development. Using DDD, hexagonal architecture, and the CQS pattern, all within an agile methodology.
@@ -49,7 +48,6 @@ npm run install:all
 This will install the dependencies in all projects and sets up the links between them.
 
 You can now start developing in any of the modules.
-
 
 # Build
 
@@ -114,17 +112,17 @@ These variables are only required if you are integrating Hedera Wallet Connect f
     REACT_APP_BOND_CONFIG_VERSION="0"
     REACT_APP_SHOW_DISCLAIMER="true"
 
-    REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
-    REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
-    REACT_APP_RPC_RESOLVER='0.0.5383403'
-    REACT_APP_RPC_FACTORY='0.0.5383498'
+   REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
+   REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
+   REACT_APP_RPC_RESOLVER='0.0.5423638'
+   REACT_APP_RPC_FACTORY='0.0.5423681'
 
-    REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
-    REACT_APP_DAPP_NAME="Asset Tokenization Studio"
-    REACT_APP_DAPP_DESCRIPTION="Asset Tokenization Studio. Built on Hedera Hashgraph."
-    REACT_APP_DAPP_URL="https://wc.ats.com/"
-    REACT_APP_DAPP_ICONS='["https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg"]'
-    ```
+   REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
+   REACT_APP_DAPP_NAME="Asset Tokenization Studio"
+   REACT_APP_DAPP_DESCRIPTION="Asset Tokenization Studio. Built on Hedera Hashgraph."
+   REACT_APP_DAPP_URL="https://wc.ats.com/"
+   REACT_APP_DAPP_ICONS='["https://stablecoinstudio.com/static/media/hedera-hbar-logo.4fd73fb360de0fc15d378e0c3ebe6c80.svg"]'
+   ```
 
 5. Save the file and proceed with running the application.
 
@@ -133,12 +131,11 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 In order to run the application locally:
 
 - Clone the repository
-- Install the application as described in the *Installation* section
-- Create a ".env" file in the *web* module (using the ".env.sample" file as a template)
-- Open a terminal and go to the *web* folder
-- Run the command : __yarn dev__
-- Open a browser and type in the URL displayed in the terminal (by default it will be : *http://localhost:5173*)
-
+- Install the application as described in the _Installation_ section
+- Create a ".env" file in the _web_ module (using the ".env.sample" file as a template)
+- Open a terminal and go to the _web_ folder
+- Run the command : **yarn dev**
+- Open a browser and type in the URL displayed in the terminal (by default it will be : _http://localhost:5173_)
 
 # Support
 
