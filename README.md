@@ -115,8 +115,8 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 
    REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
    REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
-   REACT_APP_RPC_RESOLVER='0.0.5423638'
-   REACT_APP_RPC_FACTORY='0.0.5423681'
+   REACT_APP_RPC_RESOLVER='0.0.5479997'
+   REACT_APP_RPC_FACTORY='0.0.5480051'
 
    REACT_APP_PROJECT_ID="your_project_id_from_walletconnect"
    REACT_APP_DAPP_NAME="Asset Tokenization Studio"

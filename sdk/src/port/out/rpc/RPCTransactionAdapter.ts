@@ -296,6 +296,13 @@ import {
   PROTECTED_REDEEM_GAS,
   UNPROTECT_PARTITION_GAS,
   PROTECTED_TRANSFER_AND_LOCK_GAS,
+  CREATE_HOLD_GAS,
+  CREATE_HOLD_FROM_GAS,
+  CONTROLLER_CREATE_HOLD_GAS,
+  PROTECTED_CREATE_HOLD_GAS,
+  RELEASE_HOLD_GAS,
+  RECLAIM_HOLD_GAS,
+  EXECUTE_HOLD_BY_PARTITION_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -347,6 +354,7 @@ import {
 } from '../../../domain/context/factory/RegulationType.js';
 import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
 import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
+import { Hold, ProtectedHold } from '../../../domain/context/security/Hold.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -1659,145 +1667,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       }),
       this.networkService.environment,
       SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT,
-    );
-  }
-
-  async protectPartitions(
-    address: EvmAddress,
-  ): Promise<TransactionResponse<any, Error>> {
-    LogService.logTrace(
-      `Protecting Partitions for security: ${address.toString()}`,
-    );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ProtectedPartitions__factory.connect(
-        address.toString(),
-        this.signerOrProvider,
-      ).protectPartitions({ gasLimit: PROTECT_PARTITION_GAS }),
-      this.networkService.environment,
-    );
-  }
-
-  async protectedRedeemFromByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    sourceId: EvmAddress,
-    amount: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
-  ): Promise<TransactionResponse<any, Error>> {
-    LogService.logTrace(
-      `Protected Redeeming ${amount} securities from account ${sourceId.toString()}`,
-    );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).protectedRedeemFromByPartition(
-        partitionId,
-        sourceId.toString(),
-        amount.toBigNumber(),
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
-        {
-          gasLimit: PROTECTED_REDEEM_GAS,
-        },
-      ),
-      this.networkService.environment,
-    );
-  }
-
-  async unprotectPartitions(
-    address: EvmAddress,
-  ): Promise<TransactionResponse<any, Error>> {
-    LogService.logTrace(
-      `Unprotecting Partitions for security: ${address.toString()}`,
-    );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ProtectedPartitions__factory.connect(
-        address.toString(),
-        this.signerOrProvider,
-      ).unprotectPartitions({ gasLimit: UNPROTECT_PARTITION_GAS }),
-      this.networkService.environment,
-    );
-  }
-
-  async protectedTransferAndLockByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
-  ): Promise<TransactionResponse<any, Error>> {
-    LogService.logTrace(
-      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()} and locking them until ${expirationDate.toString()}`,
-    );
-
-    const transferAndLockData: TransferAndLock = {
-      from: sourceId.toString(),
-      to: targetId.toString(),
-      amount: amount.toBigNumber(),
-      data: '0x',
-      expirationTimestamp: expirationDate.toBigNumber(),
-    };
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await TransferAndLock__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).protectedTransferAndLockByPartition(
-        partitionId,
-        transferAndLockData,
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
-        {
-          gasLimit: PROTECTED_TRANSFER_AND_LOCK_GAS,
-        },
-      ),
-      this.networkService.environment,
-    );
-  }
-
-  async protectedTransferFromByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    amount: BigDecimal,
-    deadline: BigDecimal,
-    nounce: BigDecimal,
-    signature: string,
-  ): Promise<TransactionResponse<any, Error>> {
-    LogService.logTrace(
-      `Protected Transfering ${amount} securities from account ${sourceId.toString()} to account ${targetId.toString()}`,
-    );
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ERC1410ScheduledTasks__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).protectedTransferFromByPartition(
-        partitionId,
-        sourceId.toString(),
-        targetId.toString(),
-        amount.toBigNumber(),
-        deadline.toBigNumber(),
-        nounce.toBigNumber(),
-        signature,
-        {
-          gasLimit: PROTECTED_TRANSFER_GAS,
-        },
-      ),
-      this.networkService.environment,
     );
   }
 

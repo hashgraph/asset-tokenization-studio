@@ -284,6 +284,15 @@ import {
   GetLocksIdRequest,
   GetLockRequest,
   LockViewModel,
+  HoldViewModel,
+  CreateHoldFromByPartitionRequest,
+  GetHoldsIdForByPartitionRequest,
+  GetHoldForByPartitionRequest,
+  CreateHoldByPartitionRequest,
+  ReclaimHoldByPartitionRequest,
+  ReleaseHoldByPartitionRequest,
+  ExecuteHoldByPartitionRequest,
+  GetHeldAmountForRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -710,14 +719,6 @@ export class SDKService {
     req: GetLockedBalanceRequest,
   ): Promise<BalanceViewModel> {
     return await Security.getLockedBalanceOf(req);
-  }
-
-  public static async getLocksId(req: GetLocksIdRequest): Promise<string[]> {
-    return await Security.getLocksId(req);
-  }
-
-  public static async getLock(req: GetLockRequest): Promise<LockViewModel> {
-    return await Security.getLock(req);
   }
 
   public static async getLocksId(req: GetLocksIdRequest): Promise<string[]> {

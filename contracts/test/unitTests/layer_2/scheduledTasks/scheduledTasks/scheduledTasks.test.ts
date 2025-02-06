@@ -379,8 +379,6 @@ describe('Scheduled Tasks Tests', () => {
             INITIAL_AMOUNT,
             '0x'
         )
-        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
-    })
 
         // Using account C (with role)
         equityFacet = equityFacet.connect(signer_C)

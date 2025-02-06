@@ -238,6 +238,7 @@ import { ScheduledBalanceAdjustment } from '../src/domain/context/equity/Schedul
 import { DividendFor } from '../src/domain/context/equity/DividendFor';
 import { VotingFor } from '../src/domain/context/equity/VotingFor';
 import DfnsSettings from '../src/domain/context/custodialWalletSettings/DfnsSettings.js';
+import { HoldDetails } from '../src/domain/context/security/HoldDetails.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -407,60 +408,6 @@ function decreaseBalance(targetId: EvmAddress, amount: BigDecimal): void {
       .toString();
     balances.set(account, accountBalance);
   }
-}
-
-function createBondMockImplementation(
-  _securityInfo: Security,
-  _bondInfo: BondDetails,
-  _couponInfo: CouponDetails,
-  _factory: EvmAddress,
-  _resolver: EvmAddress,
-  _configId: string,
-  _configVersion: number,
-  _diamondOwnerAccount?: EvmAddress,
-): Promise<TransactionResponse> {
-  securityInfo = _securityInfo;
-
-  const ids = identifiers(securityEvmAddress);
-  securityInfo.diamondAddress = HederaId.from(ids[0]);
-  securityInfo.evmDiamondAddress = new EvmAddress(ids[1]);
-  securityInfo.type = SecurityType.BOND;
-  securityInfo.regulation = {
-    type: _securityInfo.regulationType ?? '',
-    subType: _securityInfo.regulationsubType ?? '',
-    dealSize: '0',
-    accreditedInvestors: 'ACCREDITATION REQUIRED',
-    maxNonAccreditedInvestors: 0,
-    manualInvestorVerification:
-      'VERIFICATION INVESTORS FINANCIAL DOCUMENTS REQUIRED',
-    internationalInvestors: 'ALLOWED',
-    resaleHoldPeriod: 'NOT APPLICABLE',
-  };
-
-  bondInfo = _bondInfo;
-  couponInfo = _couponInfo;
-
-  configVersion = _configVersion;
-  configId = _configId;
-  resolverAddress = _resolver.toString();
-
-  const diff = bondInfo.maturityDate - couponInfo.firstCouponDate;
-  const numberOfCoupons = Math.ceil(diff / couponInfo.couponFrequency);
-
-  for (let i = 0; i < numberOfCoupons; i++) {
-    const timeStamp =
-      couponInfo.firstCouponDate + couponInfo.couponFrequency * i;
-    const coupon = new Coupon(timeStamp, timeStamp, couponInfo.couponRate, 0);
-    coupons.push(coupon);
-  }
-
-  return Promise.resolve({
-    status: 'success',
-    id: transactionId,
-    response: {
-      bondAddress: securityEvmAddress,
-    },
-  });
 }
 
 function createBondMockImplementation(
@@ -1031,19 +978,6 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     ) {
       return Math.random();
     });
-
-  singletonInstance.arePartitionsProtected = jest.fn(
-    async (address: EvmAddress) => {
-      return securityInfo.arePartitionsProtected ?? false;
-    },
-  );
-
-  singletonInstance.getNounceFor = jest.fn(
-    async (address: EvmAddress, target: EvmAddress) => {
-      const account = '0x' + target.toString().toUpperCase().substring(2);
-      return nonces.get(account) ?? 0;
-    },
-  );
 
   singletonInstance.arePartitionsProtected = jest.fn(
     async (address: EvmAddress) => {
@@ -1878,112 +1812,6 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     ) => {
       decreaseHeldBalance(sourceId, amount);
       increaseBalance(targetId, amount);
-
-      return {
-        status: 'success',
-        id: transactionId,
-      } as TransactionResponse;
-    },
-  );
-
-  singletonInstance.protectPartitions = jest.fn(async () => {
-    securityInfo.arePartitionsProtected = true;
-    return {
-      status: 'success',
-      id: transactionId,
-    } as TransactionResponse;
-  });
-
-  singletonInstance.unprotectPartitions = jest.fn(async () => {
-    securityInfo.arePartitionsProtected = false;
-    return {
-      status: 'success',
-      id: transactionId,
-    } as TransactionResponse;
-  });
-
-  singletonInstance.protectedTransferFromByPartition = jest.fn(
-    async (
-      security: EvmAddress,
-      partitionId: string,
-      sourceId: EvmAddress,
-      targetId: EvmAddress,
-      amount: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-    ) => {
-      increaseBalance(targetId, amount);
-      decreaseBalance(sourceId, amount);
-
-      return {
-        status: 'success',
-        id: transactionId,
-      } as TransactionResponse;
-    },
-  );
-
-  singletonInstance.protectedRedeemFromByPartition = jest.fn(
-    async (
-      security: EvmAddress,
-      partitionId: string,
-      sourceId: EvmAddress,
-      amount: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-    ) => {
-      decreaseBalance(sourceId, amount);
-
-      return {
-        status: 'success',
-        id: transactionId,
-      } as TransactionResponse;
-    },
-  );
-
-  singletonInstance.protectedTransferAndLockByPartition = jest.fn(
-    async (
-      security: EvmAddress,
-      partitionId: string,
-      amount: BigDecimal,
-      sourceId: EvmAddress,
-      targetId: EvmAddress,
-      expirationDate: BigDecimal,
-      deadline: BigDecimal,
-      nounce: BigDecimal,
-      signature: string,
-    ) => {
-      const account = '0x' + targetId.toString().toUpperCase().substring(2);
-
-      const accountLocks = locks.get(account);
-      const lockIds = locksIds.get(account);
-      const lastLockId = lastLockIds.get(account) ?? 0;
-
-      const newLastLockId = lastLockId + 1;
-
-      if (!lockIds) locksIds.set(account, [newLastLockId]);
-      else {
-        lockIds.push(newLastLockId);
-        locksIds.set(account, lockIds);
-      }
-      if (!accountLocks) {
-        const newLock: lock = new Map();
-        newLock.set(newLastLockId, [
-          expirationDate.toString(),
-          amount.toString(),
-        ]);
-        locks.set(account, newLock);
-      } else {
-        accountLocks.set(newLastLockId, [
-          expirationDate.toString(),
-          amount.toString(),
-        ]);
-        locks.set(account, accountLocks);
-      }
-
-      increaseLockedBalance(targetId, amount);
-      decreaseBalance(sourceId, amount);
 
       return {
         status: 'success',

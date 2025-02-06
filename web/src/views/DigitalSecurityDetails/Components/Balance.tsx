@@ -211,12 +211,15 @@ import { useTranslation } from "react-i18next";
 import { isHederaValidAddress, required } from "../../../utils/rules";
 import {
   GetAccountBalanceRequest,
+  GetHeldAmountForRequest,
   GetLocksIdRequest,
   SecurityViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useGetBalanceOf } from "../../../hooks/queries/useGetSecurityDetails";
 import { useEffect, useMemo, useState } from "react";
 import { useGetLockers } from "../../../hooks/queries/useGetLockers";
+import { useGetHeldAmountFor } from "../../../hooks/queries/useGetHolds";
+import { useSecurityStore } from "../../../store/securityStore";
 
 interface BalanceProps {
   id?: string;
@@ -249,6 +252,7 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
   const [targetId, setTargetId] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isLoadingLockers, setIsLoadingLockers] = useState<boolean>(false);
+  const [isLoadingHolds, setIsLoadingHolds] = useState<boolean>(false);
   const toast = useToast();
 
   const { data: balance, refetch } = useGetBalanceOf(
@@ -264,30 +268,6 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
       },
       onError: () => {
         setIsLoading(false);
-        toast.show({
-          duration: 3000,
-          title: tError("targetId"),
-          status: "error",
-        });
-      },
-    },
-  );
-
-  const { data: lockers, refetch: refetchLockers } = useGetLockers(
-    new GetLocksIdRequest({
-      securityId: id!,
-      targetId: targetId ?? "",
-      start: 0,
-      end: 100,
-    }),
-    {
-      enabled: !!targetId,
-      refetchOnWindowFocus: false,
-      onSuccess: () => {
-        setIsLoadingLockers(false);
-      },
-      onError: () => {
-        setIsLoadingLockers(false);
         toast.show({
           duration: 3000,
           title: tError("targetId"),
@@ -350,15 +330,13 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
     if (targetId && !balance) {
       setIsLoading(true);
       setIsLoadingLockers(true);
+      setIsLoadingHolds(true);
       refetch();
       refetchLockers();
+      refetchHolds();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [targetId]);
-
-  const isLoadingTotal = useMemo(() => {
-    return isLoading || isLoadingLockers;
-  }, [isLoading, isLoadingLockers]);
 
   const isLoadingTotal = useMemo(() => {
     return isLoading || isLoadingLockers || isLoadingHolds;
@@ -395,28 +373,6 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
 
     return totalBalance;
   }, [heldBalance, lockBalance, balance]);
-
-  const lockBalance = useMemo(() => {
-    if (!lockers) {
-      return "-";
-    }
-
-    return lockers.reduce((acc, current) => {
-      return acc + Number(current.amount);
-    }, 0);
-  }, [lockers]);
-
-  const totalBalance = useMemo(() => {
-    if (!balance?.value) {
-      return "-";
-    }
-
-    if (lockBalance === "-") {
-      return Number(balance?.value);
-    }
-
-    return Number(lockBalance) + Number(balance?.value);
-  }, [lockBalance, balance]);
 
   return (
     <VStack gap={6}>
@@ -492,7 +448,9 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
               justifyContent={"center"}
             >
               <VStack alignItems={"flex-start"}>
-                <Text textStyle="ElementsRegularXS">Available balance</Text>
+                <Text textStyle="ElementsRegularXS">
+                  {tDetails("availableBalance")}
+                </Text>
                 <Text textStyle="ElementsSemiboldSM">
                   {balance?.value ?? "-"}{" "}
                   {tProperties(detailsResponse.symbol ?? "")}
@@ -502,9 +460,23 @@ export const Balance = ({ id, detailsResponse }: BalanceProps) => {
               <VStack w={"1px"} h={"40px"} bgColor={"gray.500"} />
 
               <VStack alignItems={"flex-start"}>
-                <Text textStyle="ElementsRegularXS">Locked balance</Text>
+                <Text textStyle="ElementsRegularXS">
+                  {tDetails("lockBalance")}
+                </Text>
                 <Text textStyle="ElementsSemiboldSM">
-                  {lockBalance ?? "-"}{" "}
+                  {lockBalance ?? "0"}{" "}
+                  {tProperties(detailsResponse.symbol ?? "")}
+                </Text>
+              </VStack>
+
+              <VStack w={"1px"} h={"40px"} bgColor={"gray.500"} />
+
+              <VStack alignItems={"flex-start"}>
+                <Text textStyle="ElementsRegularXS">
+                  {tDetails("heldBalance")}
+                </Text>
+                <Text textStyle="ElementsSemiboldSM">
+                  {heldBalance ?? "-"}{" "}
                   {tProperties(detailsResponse.symbol ?? "")}
                 </Text>
               </VStack>

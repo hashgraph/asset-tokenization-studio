@@ -345,4 +345,3 @@ contract CapStorageWrapper is
     }
 }
 // solhint-enable no-unused-vars, custom-errors
-// solhint-enable no-unused-vars, custom-errors

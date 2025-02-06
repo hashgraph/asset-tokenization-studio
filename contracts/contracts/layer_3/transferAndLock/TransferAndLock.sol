@@ -362,62 +362,6 @@ contract TransferAndLock is
         );
     }
 
-    function protectedTransferAndLockByPartition(
-        bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLockData,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    )
-        external
-        virtual
-        override
-        onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(
-            _transferAndLockData.expirationTimestamp
-        )
-        onlyProtectedPartitions
-        returns (bool success_, uint256 lockId_)
-    {
-        _protectedTransferAndLockByPartition(
-            _partition,
-            _transferAndLockData,
-            _deadline,
-            _nounce,
-            _signature
-        );
-    }
-
-    function protectedTransferAndLock(
-        TransferAndLockStruct calldata _transferAndLockData,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    )
-        external
-        virtual
-        override
-        onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
-        onlyRole(_protectedPartitionsRole(_DEFAULT_PARTITION))
-        onlyUnpaused
-        onlyWithoutMultiPartition
-        onlyWithValidExpirationTimestamp(
-            _transferAndLockData.expirationTimestamp
-        )
-        onlyProtectedPartitions
-        returns (bool success_, uint256 lockId_)
-    {
-        _protectedTransferAndLock(
-            _transferAndLockData,
-            _deadline,
-            _nounce,
-            _signature
-        );
-    }
-
     function _beforeTokenTransfer(
         bytes32 partition,
         address from,

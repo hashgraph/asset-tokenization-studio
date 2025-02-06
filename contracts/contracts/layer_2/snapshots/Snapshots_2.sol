@@ -455,4 +455,3 @@ contract Snapshots_2 is ISnapshots_2, Snapshots, SnapshotsStorageWrapper_2 {
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

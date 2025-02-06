@@ -418,4 +418,3 @@ abstract contract LockStorageWrapper_2 is LockStorageWrapper_2_Read {
     }
 }
 // solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
