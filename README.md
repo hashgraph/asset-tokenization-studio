@@ -31,6 +31,7 @@ The development of the project follows enterprise-grade practices for software d
 By using DDD (Domain-Driven Design), we aim to create a shared language among all members of the project team, which allows us to focus our development efforts on thoroughly understanding the processes and rules of the domain. This helps to bring benefits such as increased efficiency and improved communication.
 
 # Prerequisites
+
 Ensure the following tools are installed with these versions:
 
 - **Node:**`v20.17.0`
@@ -68,7 +69,7 @@ To run the project, you'll need to configure environment variables in the `.env`
 
 ## Required Environment Variables
 
-### *General Settings*
+### _General Settings_
 
 - **`REACT_APP_EQUITY_CONFIG_ID`**: Configuration Id for Equities.
 - **`REACT_APP_EQUITY_CONFIG_VERSION`**: Equity Version.
@@ -76,7 +77,7 @@ To run the project, you'll need to configure environment variables in the `.env`
 - **`REACT_APP_BOND_CONFIG_VERSION`**: Bond Version.
 - **`REACT_APP_SHOW_DISCLAIMER`**: Set this value to `"true"` to show a disclaimer in the application.
 
-### *Network Configuration*
+### _Network Configuration_
 
 - **`REACT_APP_MIRROR_NODE`**: The URL of the Hedera Mirror Node API used to query historical data from the Hedera testnet. Example: `https://testnet.mirrornode.hedera.com/api/v1/`
 - **`REACT_APP_RPC_NODE`**: The RPC node URL used to communicate with the Hedera testnet. Example: `https://testnet.hashio.io/api`
@@ -98,19 +99,19 @@ These variables are only required if you are integrating Hedera Wallet Connect f
 1. Navigate to the `web` module folder.
 2. Copy the `.env.sample` file to create a new `.env` file:
 
-    ```bash
-    cp .env.sample .env
-    ```
+   ```bash
+   cp .env.sample .env
+   ```
 
 3. Open the `.env` file in your preferred text editor.
 4. Replace the placeholder values with your actual environment settings. For example:
 
-    ```bash
-    REACT_APP_EQUITY_CONFIG_ID='0x0000000000000000000000000000000000000000000000000000000000000001'
-    REACT_APP_EQUITY_CONFIG_VERSION="0"
-    REACT_APP_BOND_CONFIG_ID="0x0000000000000000000000000000000000000000000000000000000000000002"
-    REACT_APP_BOND_CONFIG_VERSION="0"
-    REACT_APP_SHOW_DISCLAIMER="true"
+   ```bash
+   REACT_APP_EQUITY_CONFIG_ID='0x0000000000000000000000000000000000000000000000000000000000000001'
+   REACT_APP_EQUITY_CONFIG_VERSION="0"
+   REACT_APP_BOND_CONFIG_ID="0x0000000000000000000000000000000000000000000000000000000000000002"
+   REACT_APP_BOND_CONFIG_VERSION="0"
+   REACT_APP_SHOW_DISCLAIMER="true"
 
    REACT_APP_MIRROR_NODE="https://testnet.mirrornode.hedera.com/api/v1/"
    REACT_APP_RPC_NODE="https://testnet.hashio.io/api"
