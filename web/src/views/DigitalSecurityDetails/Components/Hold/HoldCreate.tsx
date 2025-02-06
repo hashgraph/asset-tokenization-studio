@@ -138,21 +138,21 @@ export const HoldCreate = () => {
           onClose();
         }}
       />
-      {roles.includes(SecurityRole._CONTROLLER_ROLE) && (
-        <HStack justifyContent={"flex-end"}>
-          <Button
-            data-testid="force-hold-button"
-            variant="secondary"
-            onClick={() => {
-              setForceHold(true);
-            }}
-          >
-            Force hold
-          </Button>
-        </HStack>
-      )}
       <Center w="full" h="full" bg="neutral.dark.600">
         <VStack align="flex-start" p={6} gap={4}>
+          {roles.includes(SecurityRole._CONTROLLER_ROLE) && (
+            <HStack w={"full"} justifyContent={"flex-end"}>
+              <Button
+                data-testid="force-hold-button"
+                variant="secondary"
+                onClick={() => {
+                  setForceHold(true);
+                }}
+              >
+                Force hold
+              </Button>
+            </HStack>
+          )}
           <VStack align="flex-start" gap={0}>
             <Heading textStyle="HeadingMediumLG">{tCreate("title")}</Heading>
             <Text textStyle="BodyRegularMD">{tCreate("description")}</Text>
