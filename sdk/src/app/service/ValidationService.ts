@@ -209,7 +209,7 @@ import { RPCQueryAdapter } from '../../port/out/rpc/RPCQueryAdapter.js';
 import { UnlistedIssuer } from '../usecase/command/security/error/UnlistedIssuer.js';
 import Service from './Service.js';
 import { singleton } from 'tsyringe';
-import { SecurityRole } from 'domain/context/security/SecurityRole.js';
+import { SecurityRole } from '../../domain/context/security/SecurityRole.js';
 import { NotGrantedRole } from '../usecase/command/security/error/NotGrantedRole.js';
 
 @singleton()

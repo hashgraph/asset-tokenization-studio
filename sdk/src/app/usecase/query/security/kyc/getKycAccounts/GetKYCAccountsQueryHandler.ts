@@ -244,7 +244,8 @@ export class GetKYCAccountsQueryHandler
       securityEvmAddress,
       kycStatus,
       start,
-      end    );
+      end,
+    );
 
     return new GetKYCAccountsQueryResponse(res);
   }

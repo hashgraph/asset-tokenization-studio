@@ -600,7 +600,6 @@ interface IKYCTransactionAdapter {
     issuer: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
-
   revokeKYC(
     security: EvmAddress,
     targetId: EvmAddress,

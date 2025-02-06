@@ -219,8 +219,8 @@ export class GrantKYCCommand extends Command<GrantKYCCommandResponse> {
     public readonly targetId: string,
     public readonly VCId: string,
     public readonly issuer: string,
-    public readonly validFrom?: string,
-    public readonly validTo?: string,
+    public readonly validFrom: string,
+    public readonly validTo: string,
   ) {
     super();
   }

@@ -305,6 +305,7 @@ import GetKYCForRequest from './request/GetKYCForRequest.js';
 import { Terminal3VC } from '../../domain/context/kyc/terminal3.js';
 import { verifyVc } from '@terminal3/verify_vc';
 import { SignedCredential } from '@terminal3/vc_core';
+import { MaxUint256 } from '@ethersproject/constants';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -1115,6 +1116,11 @@ class SecurityInPort implements ISecurityInPort {
       request.vcBase64,
     );
     await verifyVc(signedCredential);
+
+    signedCredential.validFrom =
+      signedCredential.validFrom ?? new Date().toISOString();
+    signedCredential.validUntil =
+      signedCredential.validUntil ?? MaxUint256.toString();
 
     return await this.commandBus.execute(
       new GrantKYCCommand(

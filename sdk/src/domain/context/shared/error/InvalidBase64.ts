@@ -203,91 +203,10 @@
 
 */
 
-import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
-import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
-import AccountService from '../../../../../../service/AccountService.js';
-import { GrantKYCCommand, GrantKYCCommandResponse } from './GrantKYCCommand.js';
-import TransactionService from '../../../../../../service/TransactionService.js';
-import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
-import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
-import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import { SecurityPaused } from '../../../error/SecurityPaused.js';
-import ValidationService from '../../../../../../service/ValidationService.js';
+import BaseError, { ErrorCode } from '../../../../core/error/BaseError.js';
 
-@CommandHandler(GrantKYCCommand)
-export class GrantKYCCommandHandler
-  implements ICommandHandler<GrantKYCCommand>
-{
-  constructor(
-    @lazyInject(AccountService)
-    public readonly accountService: AccountService,
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
-  ) {}
-
-  async execute(command: GrantKYCCommand): Promise<GrantKYCCommandResponse> {
-    const { securityId, targetId, VCId, issuer, validFrom, validTo } = command;
-
-    const handler = this.transactionService.getHandler();
-    const account = this.accountService.getCurrentAccount();
-
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
-    const issuerEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(issuer)
-        ? (await this.mirrorNodeAdapter.getContractInfo(issuer)).evmAddress
-        : issuer.toString(),
-    );
-
-    await this.validationService.validateIssuer(
-      securityEvmAddress,
-      issuerEvmAddress,
-    );
-
-    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
-      throw new SecurityPaused();
-    }
-
-    await this.validationService.validateKycAddresses(securityEvmAddress, [
-      new EvmAddress(account.evmAddress!),
-    ]);
-
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
-
-    if (
-      BigDecimal.fromString(validFrom).isLowerThan(
-        BigDecimal.fromString(validTo),
-      )
-    ) {
-      throw new Error('validTo must be later than validFrom.');
-    }
-
-    const res = await handler.grantKYC(
-      securityEvmAddress,
-      targetEvmAddress,
-      VCId,
-      BigDecimal.fromString(validFrom as string),
-      BigDecimal.fromString(validTo as string),
-      issuerEvmAddress,
-    );
-
-    return Promise.resolve(
-      new GrantKYCCommandResponse(res.error === undefined, res.id!),
-    );
+export class InvalidBase64 extends BaseError {
+  constructor(value: string) {
+    super(ErrorCode.InvalidBase64, `Bytes ${value} is not valid`);
   }
 }

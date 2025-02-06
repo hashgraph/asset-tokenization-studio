@@ -210,6 +210,7 @@ export enum ErrorCode {
   ContractKeyInvalid = '10006',
   EmptyValue = '10017',
   InvalidAmount = '10008',
+  InvalidBase64 = '10011',
   InvalidBytes = '10007',
   InvalidBytes3 = '10003',
   InvalidBytes32 = '10002',

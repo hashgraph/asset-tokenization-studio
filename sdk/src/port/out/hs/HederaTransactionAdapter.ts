@@ -2019,7 +2019,13 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [targetId.toString(), vcBase64, validFrom.toBigNumber(), validTo.toBigNumber(), issuer.toString()],
+      [
+        targetId.toString(),
+        vcBase64,
+        validFrom.toBigNumber(),
+        validTo.toBigNumber(),
+        issuer.toString(),
+      ],
     );
 
     const functionDataEncoded = new Uint8Array(
