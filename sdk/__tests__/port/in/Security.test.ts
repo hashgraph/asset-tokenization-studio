@@ -1128,13 +1128,13 @@ describe('🧪 Security tests', () => {
     issuerPrivateKey = issuerPrivateKey ? '0x' + issuerPrivateKey : '';
     const vcBase64 = await createVcT3(issuerPrivateKey);
     const decodedVC = Buffer.from(vcBase64, 'base64').toString('utf-8');
-    let vcJson = JSON.parse(decodedVC);
+    const vcJson = JSON.parse(decodedVC);
     const oneSecondBeforeNow = new Date(Date.now() - 1000).toISOString(); // 1 second before now
     vcJson.validUntil = oneSecondBeforeNow;
     const corruptedVcJson = JSON.stringify(vcJson);
     const wrongVcBase64 = Buffer.from(corruptedVcJson).toString('base64');
 
-    expect(
+    await expect(
       async () =>
         (
           await Security.grantKYC(
