@@ -207,8 +207,8 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+    ERC20StorageWrapperRead
+} from '../../layer_0/ERC1400/ERC20/ERC20StorageWrapperRead.sol';
 import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     ISnapshotsStorageWrapper
@@ -223,7 +223,7 @@ import {
 // solhint-disable no-unused-vars, custom-errors
 abstract contract SnapshotsStorageWrapper is
     ISnapshotsStorageWrapper,
-    ERC1410BasicStorageWrapperRead
+    ERC20StorageWrapperRead
 {
     function _balanceOfAtSnapshot(
         uint256 _snapshotID,

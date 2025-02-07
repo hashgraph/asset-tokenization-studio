@@ -214,8 +214,13 @@ import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {AdjustBalancesStorageWrapper} from './AdjustBalancesStorageWrapper.sol';
 
-contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
+contract AdjustBalances is
+    IAdjustBalances,
+    IStaticFunctionSelectors,
+    AdjustBalancesStorageWrapper
+{
     function adjustBalances(
         uint256 factor,
         uint8 decimals
@@ -228,7 +233,7 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         checkFactor(factor)
         returns (bool success_)
     {
-        ScheduledTasks_CD_Lib.triggerScheduledTasks(0);
+        _triggerScheduledTasks(0, _blockTimestamp());
         _adjustBalances(factor, decimals);
         success_ = true;
     }

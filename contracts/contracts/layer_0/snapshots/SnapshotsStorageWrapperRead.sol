@@ -260,6 +260,8 @@ abstract contract SnapshotsStorageWrapperRead is
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
         // Snapshots for the total supply by partition
         mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
+        Snapshots ABAFSnapshots;
+        Snapshots decimals;
     }
 
     event SnapshotTriggered(address indexed operator, uint256 snapshotId);
@@ -267,6 +269,18 @@ abstract contract SnapshotsStorageWrapperRead is
     function _takeSnapshot() internal returns (uint256 snapshotID_) {
         snapshotID_ = _snapshot();
         emit SnapshotTaken(_msgSender(), snapshotID_);
+    }
+
+    function _updateDecimalsSnapshot(uint8 decimals) internal {
+        _updateSnapshot(_snapshotStorage().decimals, decimals);
+    }
+
+    function _updateABAFSnapshot(uint256 abaf) internal {
+        _updateSnapshot(_snapshotStorage().ABAFSnapshots, abaf);
+    }
+
+    function _updateAssetTotalSupplySnapshot(uint256 totalSupply) internal {
+        _updateSnapshot(_snapshotStorage().totalSupplySnapshots, totalSupply);
     }
 
     function _snapshot() internal returns (uint256) {

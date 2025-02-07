@@ -203,99 +203,46 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {MappingLib} from '../common/MappingLib.sol';
+import {_ERC20_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {
-    _ADJUST_BALANCES_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
+    IERC20StorageWrapper
+} from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';
 import {
     ERC1410BasicStorageWrapperRead
-} from '../ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-import {
-    IAdjustBalancesStorageWrapper
-} from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+} from '../ERC1410/ERC1410BasicStorageWrapperRead.sol';
 
-contract AdjustBalancesStorageWrapperRead is
-    IAdjustBalancesStorageWrapper,
-    ERC1410BasicStorageWrapperRead
-{
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
-        _;
+abstract contract ERC20StorageWrapperRead is ERC1410BasicStorageWrapperRead {
+    struct ERC20Storage {
+        string name;
+        string symbol;
+        string isin;
+        uint8 decimals;
+        bool initialized;
+        mapping(address => mapping(address => uint256)) allowed;
+        IERC20StorageWrapper.SecurityType securityType;
     }
 
-    function _adjustBalances(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _beforeBalanceAdjustment(_factor, _decimals);
+    function _adjustDecimals(uint8 decimals) internal {
+        _getErc20Storage().decimals += decimals;
+    }
 
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-        AdjustBalancesStorage
-            storage adjustBalancesStorage = _getAdjustBalancesStorage();
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-        CapDataStorage storage capStorage = _capStorage();
+    function _decimals() internal view returns (uint8) {
+        return _getErc20Storage().decimals;
+    }
 
-        erc1410Storage.totalSupply *= _factor;
-
-        if (_getABAF() == 0) {
-            adjustBalancesStorage.abaf = _factor;
-        } else {
-            adjustBalancesStorage.abaf *= _factor;
+    function _getErc20Storage()
+        internal
+        view
+        virtual
+        returns (ERC20Storage storage erc20Storage_)
+    {
+        bytes32 position = _ERC20_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc20Storage_.slot := position
         }
-
-        erc20Storage.decimals += _decimals;
-        if (capStorage.maxSupply != _MAX_UINT256) {
-            capStorage.maxSupply *= _factor;
-        }
-
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
-    }
-
-    // solhint-disable no-unused-vars
-    function _beforeBalanceAdjustment(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _updateDecimalsSnapshot();
-        _updateABAFSnapshot();
-        _updateAssetTotalSupplySnapshot();
-    }
-
-    function _getHoldLABAFByPartition(
-        bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
-        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
-        if (holdIndex == 0) return 0;
-        return _getHoldLABAFByIndex(_partition, _tokenHolder, holdIndex);
-    }
-
-    function _getLockLABAFByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
-        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
-        if (lockIndex == 0) return 0;
-        return _getLockLABAFByIndex(_partition, _tokenHolder, lockIndex);
-    }
-
-    function _getLABAFByUserAndPartition(
-        bytes32 _partition,
-        address _account
-    ) internal view virtual returns (uint256) {
-        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
-            _account
-        ][_partition];
-
-        if (partitionsIndex == 0) return 0;
-        return
-            _getAdjustBalancesStorage().labafUserPartition[_account][
-                partitionsIndex - 1
-            ];
     }
 }

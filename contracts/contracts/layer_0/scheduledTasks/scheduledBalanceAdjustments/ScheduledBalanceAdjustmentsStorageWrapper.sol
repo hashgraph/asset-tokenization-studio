@@ -207,25 +207,27 @@
 pragma solidity 0.8.18;
 
 import {
-    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {
-    ScheduledTasksCommonRead,
-    ScheduledTasksDataStorage
-} from '../../../layer_0/scheduledTasks/ScheduledTasksCommonRead.sol';
+    ScheduledSnapshotsStorageWrapperRead
+} from '../scheduledSnapshots/ScheduledSnapshotsStorageWrapperRead.sol';
 import {
     CorporateActionDataStorage
 } from '../../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
 import {
     CorporateActionsStorageWrapperRead
 } from '../../corporateActions/CorporateActionsStorageWrapperRead.sol';
-import {IEquity} from '../../../layer_2/interfaces/equity/IEquity.sol';
 import {
     ScheduledTask
 } from '../../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
+import {
+    ScheduledTasksDataStorage
+} from '../../../layer_0/scheduledTasks/ScheduledTasksCommonRead.sol';
+import {
+    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
+import {IEquity} from '../../../layer_2/interfaces/equity/IEquity.sol';
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
-    ScheduledTasksCommonRead
+    ScheduledSnapshotsStorageWrapperRead
 {
     function _getScheduledBalanceAdjustmentCount()
         internal

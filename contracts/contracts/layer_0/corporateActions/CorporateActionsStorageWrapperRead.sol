@@ -218,6 +218,10 @@ import {
     _CORPORATE_ACTION_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 import {LocalContext} from '../context/LocalContext.sol';
+import {
+    SNAPSHOT_TASK_TYPE,
+    BALANCE_ADJUSTMENT_TASK_TYPE
+} from '../constants/values.sol';
 
 contract CorporateActionsStorageWrapperRead is LocalContext {
     using LibCommon for EnumerableSet.Bytes32Set;
@@ -298,6 +302,16 @@ contract CorporateActionsStorageWrapperRead is LocalContext {
     ) internal view virtual returns (bytes memory) {
         return
             _corporateActionsStorage().actionsData[actionId].results[resultId];
+    }
+
+    function _isSnapshotTaskType(bytes memory data) internal returns (bool) {
+        return abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE;
+    }
+
+    function _isBalanceAdjustmentTaskType(
+        bytes memory data
+    ) internal returns (bool) {
+        return abi.decode(data, (bytes32)) == BALANCE_ADJUSTMENT_TASK_TYPE;
     }
 
     function _corporateActionsStorage()
