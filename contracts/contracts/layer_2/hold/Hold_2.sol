@@ -277,9 +277,7 @@ contract Hold_2 is
     }
 
     function getHoldForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        HoldIdentifier calldata _holdIdentifier
     )
         external
         view
@@ -294,8 +292,7 @@ contract Hold_2 is
             bytes memory operatorData_
         )
     {
-        return
-            _getHoldForByPartitionAdjusted(_partition, _tokenHolder, _holdId);
+        return _getHoldForByPartitionAdjusted(_holdIdentifier);
     }
 
     function getHeldAmountFor(
@@ -322,9 +319,7 @@ contract Hold_2 is
     }
 
     function _executeHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
     )
@@ -334,18 +329,14 @@ contract Hold_2 is
         returns (bool success_)
     {
         success_ = HoldStorageWrapper_2._executeHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId,
+            _holdIdentifier,
             _to,
             _amount
         );
     }
 
     function _releaseHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     )
         internal
@@ -354,17 +345,13 @@ contract Hold_2 is
         returns (bool success_)
     {
         success_ = HoldStorageWrapper_2._releaseHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId,
+            _holdIdentifier,
             _amount
         );
     }
 
     function _reclaimHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        HoldIdentifier calldata _holdIdentifier
     )
         internal
         virtual
@@ -372,48 +359,27 @@ contract Hold_2 is
         returns (bool success_, uint256 amount_)
     {
         (success_, amount_) = HoldStorageWrapper_2._reclaimHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId
+            _holdIdentifier
         );
     }
 
     function _beforeExecuteHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        HoldIdentifier calldata _holdIdentifier,
         address _to
     ) internal virtual override(HoldStorageWrapper, HoldStorageWrapper_2) {
-        HoldStorageWrapper_2._beforeExecuteHold(
-            _partition,
-            _tokenHolder,
-            _holdId,
-            _to
-        );
+        HoldStorageWrapper_2._beforeExecuteHold(_holdIdentifier, _to);
     }
 
     function _beforeReleaseHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        HoldIdentifier calldata _holdIdentifier
     ) internal virtual override(HoldStorageWrapper, HoldStorageWrapper_2) {
-        HoldStorageWrapper_2._beforeReleaseHold(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
+        HoldStorageWrapper_2._beforeReleaseHold(_holdIdentifier);
     }
 
     function _beforeReclaimHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        HoldIdentifier calldata _holdIdentifier
     ) internal virtual override(HoldStorageWrapper, HoldStorageWrapper_2) {
-        HoldStorageWrapper_2._beforeReclaimHold(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
+        HoldStorageWrapper_2._beforeReclaimHold(_holdIdentifier);
     }
 
     function getStaticResolverKey()

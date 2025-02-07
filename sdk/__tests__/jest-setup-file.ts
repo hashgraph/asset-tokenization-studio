@@ -238,6 +238,7 @@ import { ScheduledBalanceAdjustment } from '../src/domain/context/equity/Schedul
 import { DividendFor } from '../src/domain/context/equity/DividendFor';
 import { VotingFor } from '../src/domain/context/equity/VotingFor';
 import DfnsSettings from '../src/domain/context/custodialWalletSettings/DfnsSettings.js';
+import { HoldDetails } from '../src/domain/context/security/HoldDetails.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -268,12 +269,14 @@ function identifiers(accountId: HederaId | string): string[] {
 
 type balance = Map<string, string>;
 type lock = Map<number, string[]>;
+type hold = Map<number, HoldDetails[]>;
 const securityEvmAddress = '0x0000000000000000000000000000000000000001';
 const transactionId =
   '0x0102030405060708010203040506070801020304050607080x0102030405060708';
 const HBAR_balances: balance = new Map();
 const balances: balance = new Map();
 const lockedBalances: balance = new Map();
+const heldBalances: balance = new Map();
 const coupons: Coupon[] = [];
 const couponsFor = new Map<number, balance>();
 const dividends: Dividend[] = [];
@@ -284,7 +287,10 @@ const roles = new Map<string, SecurityRole[]>();
 const accounts_with_roles = new Map<string, string[]>();
 const locksIds = new Map<string, number[]>();
 const locks = new Map<string, lock>();
+const holds = new Map<string, hold>();
+const holdsIds = new Map<string, number[]>();
 const lastLockIds = new Map<string, number>();
+const lastHoldIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
 const nonces = new Map<string, number>();
 
@@ -331,6 +337,30 @@ function revokeRole(account: string, oldRole: SecurityRole): void {
         accounts_with_roles.set(oldRole, accounts);
       }
     }
+  }
+}
+
+function increaseHeldBalance(targetId: EvmAddress, amount: BigDecimal): void {
+  const account = identifiers(targetId.toString())[1];
+  let accountHeldBalance = heldBalances.get(account);
+  if (accountHeldBalance) {
+    accountHeldBalance = BigDecimal.fromString(accountHeldBalance)
+      .toBigNumber()
+      .add(amount.toBigNumber())
+      .toString();
+    heldBalances.set(account, accountHeldBalance);
+  } else heldBalances.set(account, amount.toString());
+}
+
+function decreaseHeldBalance(targetId: EvmAddress, amount: BigDecimal): void {
+  const account = identifiers(targetId.toString())[1];
+  let accountHeldBalance = heldBalances.get(account);
+  if (accountHeldBalance) {
+    accountHeldBalance = BigDecimal.fromString(accountHeldBalance)
+      .toBigNumber()
+      .sub(amount.toBigNumber())
+      .toString();
+    heldBalances.set(account, accountHeldBalance);
   }
 }
 
@@ -435,6 +465,43 @@ function createBondMockImplementation(
     },
   });
 }
+
+const createHold = async (
+  sourceId: EvmAddress,
+  expirationDate: BigDecimal,
+  amount: BigDecimal,
+  escrow: EvmAddress,
+  targetId?: EvmAddress,
+): Promise<TransactionResponse> => {
+  const account = `0x${sourceId.toString().toUpperCase().substring(2)}`;
+
+  const accountHolds = holds.get(account) ?? new Map();
+  const holdIds = holdsIds.get(account) ?? [];
+  const lastHoldId = lastHoldIds.get(account) ?? 0;
+  const newLastHoldId = lastHoldId + 1;
+
+  holdIds.push(newLastHoldId);
+  holdsIds.set(account, holdIds);
+
+  accountHolds.set(newLastHoldId, [
+    new HoldDetails(
+      expirationDate.toBigNumber().toNumber(),
+      amount,
+      escrow.toString(),
+      account,
+      sourceId.toString(),
+      '0x',
+      '0x',
+    ),
+  ]);
+  holds.set(sourceId.toString(), accountHolds);
+
+  increaseHeldBalance(sourceId, amount);
+  const currentAccount = new EvmAddress(identifiers(user_account.id)[1]);
+  decreaseBalance(targetId ? sourceId : currentAccount, amount);
+
+  return { status: 'success', id: transactionId } as TransactionResponse;
+};
 
 jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
   const actual = jest.requireActual('../src/port/out/rpc/RPCQueryAdapter.ts');
@@ -948,6 +1015,68 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     async (address: EvmAddress, target: EvmAddress) => {
       const account = '0x' + target.toString().toUpperCase().substring(2);
       return nonces.get(account) ?? 0;
+    },
+  );
+
+  singletonInstance.getHeldAmountFor = jest.fn(
+    async (address: EvmAddress, targetId: EvmAddress) => {
+      const heldBalance = heldBalances.get(
+        '0x' + targetId.toString().toUpperCase().substring(2),
+      );
+      if (heldBalance) return heldBalance;
+      return 0;
+    },
+  );
+
+  singletonInstance.getHoldCountForByPartition = jest.fn(
+    async (address: EvmAddress, partitionId: string, targetId: EvmAddress) => {
+      const holdIds = holdsIds.get(
+        '0x' + targetId.toString().toUpperCase().substring(2),
+      );
+      if (holdIds) return holdIds.length;
+      return 0;
+    },
+  );
+
+  singletonInstance.getHoldsIdForByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      target: EvmAddress,
+      start: number,
+      end: number,
+    ) => {
+      const holdIds = holdsIds.get(
+        '0x' + target.toString().toUpperCase().substring(2),
+      );
+      if (!holdIds) return [];
+      return holdIds;
+    },
+  );
+
+  singletonInstance.getHoldForByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      targetId: EvmAddress,
+      holdId: number,
+    ) => {
+      const accountHolds = holds.get(
+        '0x' + targetId.toString().toUpperCase().substring(2),
+      );
+      const emptyHold = new HoldDetails(
+        0,
+        new BigDecimal(BigNumber.from(0)),
+        '',
+        '',
+        '',
+        '',
+        '',
+      );
+      if (!accountHolds) return emptyHold;
+      const accountHold = accountHolds.get(holdId);
+      if (!accountHold) return emptyHold;
+      return accountHold[0];
     },
   );
 
@@ -1683,6 +1812,80 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
       increaseLockedBalance(targetId, amount);
       decreaseBalance(sourceId, amount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.createHoldByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      escrow: EvmAddress,
+      amount: BigDecimal,
+      targetId: EvmAddress,
+      expirationDate: BigDecimal,
+    ) => createHold(targetId, expirationDate, amount, escrow),
+  );
+
+  singletonInstance.protectedCreateHoldByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      amount: BigDecimal,
+      escrow: EvmAddress,
+      sourceId: EvmAddress,
+      targetId: EvmAddress,
+      expirationDate: BigDecimal,
+      deadline: BigDecimal,
+      nonce: BigDecimal,
+      signature: string,
+    ) => createHold(sourceId, expirationDate, amount, escrow, targetId),
+  );
+
+  singletonInstance.releaseHoldByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      holdId: number,
+      targetId: EvmAddress,
+      amount: BigDecimal,
+    ) => {
+      const accountHolds = holds.get(
+        '0x' + targetId.toString().toUpperCase().substring(2),
+      );
+      const holdEntry = accountHolds?.get(holdId);
+
+      const heldAmount =
+        holdEntry && holdEntry.length > 0
+          ? holdEntry[0].amount
+          : BigDecimal.fromString('0');
+
+      decreaseHeldBalance(targetId, heldAmount);
+      const currentAccount = new EvmAddress(identifiers(user_account.id)[1]);
+      increaseBalance(currentAccount, heldAmount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.executeHoldByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      sourceId: EvmAddress,
+      targetId: EvmAddress,
+      amount: BigDecimal,
+      partitionId: string,
+      holdId: number,
+    ) => {
+      decreaseHeldBalance(sourceId, amount);
+      increaseBalance(targetId, amount);
 
       return {
         status: 'success',

@@ -235,7 +235,7 @@ export default class CreateHoldByPartitionRequest extends ValidatedRequest<Creat
       partitionId: Validation.checkBytes32Format(),
       amount: Validation.checkAmount(),
       escrow: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
+      targetId: Validation.checkHederaIdFormatOrEvmAddress(true),
       expirationDate: (val) => {
         return SecurityDate.checkDateTimestamp(
           parseInt(val),

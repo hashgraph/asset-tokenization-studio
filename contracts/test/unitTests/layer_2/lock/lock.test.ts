@@ -227,6 +227,8 @@ import {
     Lock_2__factory,
     Equity__factory,
     TimeTravel__factory,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -235,6 +237,8 @@ import {
     CAP_ROLE,
     CONTROLLER_ROLE,
     LOCKER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     CORPORATE_ACTION_ROLE,
     deployEquityFromFactory,
     Rbac,
@@ -280,6 +284,8 @@ describe('Locks Layer 2 Tests', () => {
     let equityFacet: Equity
     let lockFacet: Lock_2
     let timeTravelFacet: TimeTravel
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     async function deployAsset(multiPartition: boolean) {
         const init_rbacs: Rbac[] = set_initRbacs()
@@ -344,6 +350,12 @@ describe('Locks Layer 2 Tests', () => {
             diamond.address,
             defaultSigner
         )
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_A
+        )
     }
 
     function set_initRbacs(): Rbac[] {
@@ -381,6 +393,10 @@ describe('Locks Layer 2 Tests', () => {
             _PARTITION_ID_2,
             maxSupply_Partition_2_Original
         )
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
+        await kycFacet.grantKYC(account_B, '', 0, 9999999999, account_A)
 
         await erc1410Facet.issueByPartition(
             _PARTITION_ID_1,

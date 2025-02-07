@@ -254,8 +254,10 @@ import {
   PROTECTED_REDEEM_GAS,
   PROTECTED_TRANSFER_AND_LOCK_GAS,
   PROTECTED_TRANSFER_GAS,
+  RECLAIM_HOLD_GAS,
   REDEEM_GAS,
   RELEASE_GAS,
+  RELEASE_HOLD_GAS,
   REMOVE_DOCUMENT_GAS,
   REMOVE_FROM_CONTROL_LIST_GAS,
   REMOVE_ISSUER_GAS,
@@ -279,6 +281,7 @@ import {
   UPDATE_CONFIG_VERSION_GAS,
   UPDATE_MATURITY_DATE_GAS,
   UPDATE_RESOLVER_GAS,
+  EXECUTE_HOLD_BY_PARTITION_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -320,6 +323,10 @@ import { ResolverProxyConfiguration } from '../../../domain/context/factory/Reso
 import { TransactionType } from '../TransactionResponseEnums.js';
 import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
 import { Hold, ProtectedHold } from '../../../domain/context/security/Hold.js';
+import {
+  BasicTransferInfo,
+  OperatorTransferData,
+} from 'domain/context/factory/ERC1410Metadata.js';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -614,9 +621,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
+
+    const basicTransferInfo: BasicTransferInfo = {
+      to: targetId.toString(),
+      value: amount.toHexString(),
+    };
+
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [_PARTITION_ID_1, targetId.toString(), amount.toHexString(), '0x'],
+      [_PARTITION_ID_1, basicTransferInfo, '0x'],
     );
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -1319,16 +1332,18 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       security.toString(),
     );
 
+    const operatorTransferData: OperatorTransferData = {
+      partition: partitionId,
+      from: sourceId.toString(),
+      to: targetId.toString(),
+      value: amount.toHexString(),
+      data: '0x',
+      operatorData: '0x',
+    };
+
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [
-        partitionId,
-        sourceId.toString(),
-        targetId.toString(),
-        amount.toHexString(),
-        '0x',
-        '0x',
-      ],
+      [operatorTransferData],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -1997,6 +2012,104 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(PROTECTED_CREATE_HOLD_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async releaseHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    holdId: number,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'releaseHoldByPartition';
+    LogService.logTrace(
+      `Releasing hold amount ${amount} from account ${targetId.toString()}}`,
+    );
+    const factoryInstance = new Hold_2__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [partitionId, targetId.toString(), holdId, amount.toBigNumber()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(RELEASE_HOLD_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async reclaimHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    holdId: number,
+    targetId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'reclaimHoldByPartition';
+    LogService.logTrace(`Reclaiming hold from account ${targetId.toString()}}`);
+    const factoryInstance = new Hold_2__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [partitionId, targetId.toString(), holdId],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(RECLAIM_HOLD_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async executeHoldByPartition(
+    security: EvmAddress,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    partitionId: string,
+    holdId: number,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'executeHoldByPartition';
+    LogService.logTrace(
+      `Executing hold with Id ${holdId} from account ${sourceId.toString()} to account ${targetId.toString()}`,
+    );
+
+    const factoryInstance = new Hold_2__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [
+        partitionId,
+        sourceId.toString(),
+        holdId,
+        targetId.toString(),
+        amount.toBigNumber(),
+      ],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(EXECUTE_HOLD_BY_PARTITION_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

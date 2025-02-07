@@ -249,6 +249,7 @@ import ReleaseRequest from './ReleaseRequest.js';
 import GetLockCountRequest from './GetLockCountRequest.js';
 import GetLocksIdRequest from './GetLocksIdRequest.js';
 import GetLockRequest from './GetLockRequest.js';
+import ExecuteHoldByPartitionRequest from './ExecuteHoldByPartitionRequest.js';
 
 import GetControlListTypeRequest from './GetControlListTypeRequest.js';
 import InitializationRequest from './InitializationRequest.js';
@@ -279,6 +280,8 @@ import GetHeldAmountForByPartitionRequest from './GetHeldAmountForByPartitionReq
 import GetHoldCountForByPartitionRequest from './GetHoldCountForByPartitionRequest.js';
 import GetHoldsIdForByPartitionRequest from './GetHoldsIdForByPartitionRequest.js';
 import GetHoldForByPartitionRequest from './GetHoldForByPartitionRequest.js';
+import ReleaseHoldByPartitionRequest from './ReleaseHoldByPartitionRequest.js';
+import ReclaimHoldByPartitionRequest from './ReclaimHoldByPartitionRequest.js';
 import AddIssuerRequest from './AddIssuerRequest.js';
 import SetRevocationRegistryAddressRequest from './SetRevocationRegistryAddressRequest.js';
 import RemoveIssuerRequest from './RemoveIssuerRequest.js';
@@ -364,6 +367,9 @@ export {
   GetHoldCountForByPartitionRequest,
   GetHoldsIdForByPartitionRequest,
   GetHoldForByPartitionRequest,
+  ReleaseHoldByPartitionRequest,
+  ReclaimHoldByPartitionRequest,
+  ExecuteHoldByPartitionRequest,
   AddIssuerRequest,
   SetRevocationRegistryAddressRequest,
   RemoveIssuerRequest,

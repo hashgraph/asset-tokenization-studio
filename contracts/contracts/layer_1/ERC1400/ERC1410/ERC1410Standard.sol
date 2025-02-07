@@ -211,6 +211,7 @@ import {
     ERC1410StandardStorageWrapper
 } from './ERC1410StandardStorageWrapper.sol';
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
+import {IKYC} from '../../interfaces/kyc/IKYC.sol';
 
 abstract contract ERC1410Standard is
     IERC1410Standard,
@@ -232,11 +233,11 @@ abstract contract ERC1410Standard is
         override
         checkMaxSupply(_value)
         checkMaxSupplyForPartition(_partition, _value)
-        onlyValidAddress(_tokenHolder)
         checkControlList(_tokenHolder)
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_ISSUER_ROLE)
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _tokenHolder)
     {
         _issueByPartition(_partition, _tokenHolder, _value, _data);
     }
@@ -257,6 +258,7 @@ abstract contract ERC1410Standard is
         onlyDefaultPartitionWithSinglePartition(_partition)
         checkControlList(_msgSender())
         onlyUnProtectedPartitionsOrWildCardRole
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _msgSender())
     {
         // Add the function to validate the `_data` parameter
         _redeemByPartition(
@@ -292,6 +294,7 @@ abstract contract ERC1410Standard is
         checkControlList(_msgSender())
         onlyOperator(_partition, _tokenHolder)
         onlyUnProtectedPartitionsOrWildCardRole
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _tokenHolder)
     {
         _redeemByPartition(
             _partition,

@@ -298,19 +298,15 @@ abstract contract HoldStorageWrapper is
     }
 
     function _executeHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        IHold.HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
     ) internal virtual returns (bool success_) {
-        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _to);
+        _beforeExecuteHold(_holdIdentifier, _to);
 
         return
             _operateHoldByPartition(
-                _partition,
-                _tokenHolder,
-                _holdId,
+                _holdIdentifier,
                 _to,
                 _amount,
                 IHold.OperationType.Execute
@@ -318,61 +314,43 @@ abstract contract HoldStorageWrapper is
     }
 
     function _releaseHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        IHold.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     ) internal virtual returns (bool success_) {
-        _beforeReleaseHold(_partition, _tokenHolder, _holdId);
+        _beforeReleaseHold(_holdIdentifier);
 
         return
             _operateHoldByPartition(
-                _partition,
-                _tokenHolder,
-                _holdId,
-                _tokenHolder,
+                _holdIdentifier,
+                _holdIdentifier.tokenHolder,
                 _amount,
                 IHold.OperationType.Release
             );
     }
 
     function _reclaimHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        IHold.HoldIdentifier calldata _holdIdentifier
     ) internal virtual returns (bool success_, uint256 amount_) {
-        _beforeReclaimHold(_partition, _tokenHolder, _holdId);
+        _beforeReclaimHold(_holdIdentifier);
 
-        IHold.HoldData memory holdData = _getHold(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
+        IHold.HoldData memory holdData = _getHold(_holdIdentifier);
         amount_ = holdData.hold.amount;
 
         success_ = _operateHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId,
-            _tokenHolder,
+            _holdIdentifier,
+            _holdIdentifier.tokenHolder,
             amount_,
             IHold.OperationType.Reclaim
         );
     }
 
     function _operateHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        IHold.HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount,
         IHold.OperationType _operation
     ) internal virtual returns (bool success_) {
-        IHold.HoldData memory holdData = _getHold(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
+        IHold.HoldData memory holdData = _getHold(_holdIdentifier);
 
         if (_operation == IHold.OperationType.Execute) {
             if (!_checkControlList(_tokenHolder)) {
@@ -397,78 +375,91 @@ abstract contract HoldStorageWrapper is
 
         _checkHoldAmount(_amount, holdData);
 
-        _transferHold(_partition, _tokenHolder, _holdId, _to, _amount);
+        _transferHold(_holdIdentifier, _to, _amount);
 
         success_ = true;
     }
 
     function _transferHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        IHold.HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
     ) internal {
-        if (
-            _decreaseHeldAmount(_partition, _tokenHolder, _amount, _holdId) == 0
-        ) {
-            _removeHold(_partition, _tokenHolder, _holdId);
+        if (_decreaseHeldAmount(_holdIdentifier, _amount) == 0) {
+            _removeHold(_holdIdentifier);
         }
 
-        if (!_validPartitionForReceiver(_partition, _to)) {
-            _addPartitionTo(_amount, _to, _partition);
+        if (!_validPartitionForReceiver(_holdIdentifier.partition, _to)) {
+            _addPartitionTo(_amount, _to, _holdIdentifier.partition);
         } else {
-            _increaseBalanceByPartition(_to, _amount, _partition);
+            _increaseBalanceByPartition(
+                _to,
+                _amount,
+                _holdIdentifier.partition
+            );
         }
     }
 
     function _decreaseHeldAmount(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _amount,
-        uint256 _holdId
+        IHold.HoldIdentifier calldata _holdIdentifier,
+        uint256 _amount
     ) internal returns (uint256 newHoldBalance_) {
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
-        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+        uint256 holdIndex = _getHoldIndex(_holdIdentifier);
 
-        holdStorage.totalHeldAmount[_tokenHolder] -= _amount;
-        holdStorage.heldAmountByPartition[_tokenHolder][_partition] -= _amount;
+        holdStorage.totalHeldAmount[_holdIdentifier.tokenHolder] -= _amount;
+        holdStorage.heldAmountByPartition[_holdIdentifier.tokenHolder][
+            _holdIdentifier.partition
+        ] -= _amount;
         holdStorage
-        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount -= _amount;
+        .holds[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
+            holdIndex - 1
+        ].hold.amount -= _amount;
 
         newHoldBalance_ = holdStorage
-        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount;
+        .holds[_holdIdentifier.tokenHolder][_holdIdentifier.partition][
+            holdIndex - 1
+        ].hold.amount;
     }
 
     function _removeHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        IHold.HoldIdentifier calldata _holdIdentifier
     ) internal {
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         // Remove Hold
-        uint256 holdIndex = holdStorage.holdsIndex[_tokenHolder][_partition][
-            _holdId
-        ];
-        holdStorage.holdsIndex[_tokenHolder][_partition][_holdId] = 0;
-        holdStorage.holdIds[_tokenHolder][_partition].remove(_holdId);
+        uint256 holdIndex = holdStorage.holdsIndex[_holdIdentifier.tokenHolder][
+            _holdIdentifier.partition
+        ][_holdIdentifier.holdId];
+        holdStorage.holdsIndex[_holdIdentifier.tokenHolder][
+            _holdIdentifier.partition
+        ][_holdIdentifier.holdId] = 0;
+        holdStorage
+        .holdIds[_holdIdentifier.tokenHolder][_holdIdentifier.partition].remove(
+                _holdIdentifier.holdId
+            );
 
         uint256 holdLastIndex = _getHoldCountForByPartition(
-            _partition,
-            _tokenHolder
+            _holdIdentifier.partition,
+            _holdIdentifier.tokenHolder
         );
         if (holdIndex < holdLastIndex) {
             IHold.HoldData memory lastHold = _getHoldByIndex(
-                _partition,
-                _tokenHolder,
+                _holdIdentifier.partition,
+                _holdIdentifier.tokenHolder,
                 holdLastIndex
             );
-            _setHoldAtIndex(_partition, _tokenHolder, holdIndex, lastHold);
+            _setHoldAtIndex(
+                _holdIdentifier.partition,
+                _holdIdentifier.tokenHolder,
+                holdIndex,
+                lastHold
+            );
         }
 
-        holdStorage.holds[_tokenHolder][_partition].pop();
+        holdStorage
+        .holds[_holdIdentifier.tokenHolder][_holdIdentifier.partition].pop();
     }
 
     function _setHoldAtIndex(
@@ -501,29 +492,26 @@ abstract contract HoldStorageWrapper is
     }
 
     function _beforeExecuteHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        IHold.HoldIdentifier calldata _holdIdentifier,
         address _to
     ) internal virtual {
-        _updateAccountSnapshot(_to, _partition);
-        _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
+        _updateAccountSnapshot(_to, _holdIdentifier.partition);
+        _updateAccountHeldBalancesSnapshot(
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.partition
+        );
     }
 
     function _beforeReleaseHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        IHold.HoldIdentifier calldata _holdIdentifier
     ) internal virtual {
-        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _tokenHolder);
+        _beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 
     function _beforeReclaimHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        IHold.HoldIdentifier calldata _holdIdentifier
     ) internal virtual {
-        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _tokenHolder);
+        _beforeExecuteHold(_holdIdentifier, _holdIdentifier.tokenHolder);
     }
 
     function _checkHoldAmount(

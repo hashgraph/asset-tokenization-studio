@@ -208,6 +208,7 @@ pragma solidity 0.8.18;
 
 import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
 import {ERC1410BasicStorageWrapper} from './ERC1410BasicStorageWrapper.sol';
+import {IKYC} from '../../interfaces/kyc/IKYC.sol';
 
 abstract contract ERC1410Basic is IERC1410Basic, ERC1410BasicStorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
@@ -225,25 +226,24 @@ abstract contract ERC1410Basic is IERC1410Basic, ERC1410BasicStorageWrapper {
 
     /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
     /// @param _partition The partition from which to transfer tokens
-    /// @param _to The address to which to transfer tokens to
-    /// @param _value The amount of tokens to transfer from `_partition`
+    /// @param _basicTransferInfo The address to which to transfer tokens to and the amount
     /// @param _data Additional data attached to the transfer of tokens
     /// @return The partition to which the transferred tokens were allocated for the _to address
     function transferByPartition(
         bytes32 _partition,
-        address _to,
-        uint256 _value,
+        BasicTransferInfo calldata _basicTransferInfo,
         bytes calldata _data
     )
         external
         virtual
         override
         onlyUnpaused
-        onlyValidAddress(_to)
         checkControlList(_msgSender())
-        checkControlList(_to)
+        checkControlList(_basicTransferInfo.to)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _msgSender())
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _basicTransferInfo.to)
         returns (bytes32)
     {
         // Add a function to verify the `_data` parameter
@@ -256,8 +256,7 @@ abstract contract ERC1410Basic is IERC1410Basic, ERC1410BasicStorageWrapper {
         // in event is address(0) same for the `_operatorData`
         _transferByPartition(
             msg.sender,
-            _to,
-            _value,
+            _basicTransferInfo,
             _partition,
             _data,
             address(0),

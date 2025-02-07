@@ -248,6 +248,7 @@ import { ReleaseCommandHandler } from '../app/usecase/command/security/operation
 import { LockCountQueryHandler } from '../app/usecase/query/security/lockCount/LockCountQueryHandler.js';
 import { GetLockQueryHandler } from '../app/usecase/query/security/getLock/GetLockQueryHandler.js';
 import { LocksIdQueryHandler } from '../app/usecase/query/security/locksId/LocksIdQueryHandler.js';
+import { ExecuteHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/executeHoldByPartition/ExecuteHoldByPartitionCommandHandler.js';
 
 import { WalletEvents } from '../app/service/event/WalletEvent.js';
 import { CommandHandlerType } from './command/CommandBus.js';
@@ -316,6 +317,8 @@ import { GetHeldAmountForByPartitionQueryHandler } from '../app/usecase/query/se
 import { GetHoldCountForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQueryHandler.js';
 import { GetHoldsIdForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQueryHandler.js';
 import { GetHoldForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQueryHandler.js';
+import { ReleaseHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommandHandler.js';
+import { ReclaimHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommandHandler.js';
 import { AddIssuerCommandHandler } from '../app/usecase/command/ssi/addIssuer/AddIssuerCommandHandler.js';
 import { RemoveIssuerCommandHandler } from '../app/usecase/command/ssi/removeIssuer/RemoveIssuerCommandHandler.js';
 import { SetRevocationRegistryAddressCommandHandler } from '../app/usecase/command/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommandHandler.js';
@@ -497,6 +500,18 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetScheduledBalanceAdjustmentCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ReleaseHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ReclaimHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ExecuteHoldByPartitionCommandHandler,
   },
   {
     token: TOKENS.COMMAND_HANDLER,
