@@ -285,7 +285,6 @@ describe('CAP Tests', () => {
     beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
-            role: PAUSER_ROLE,
             members: [account_B],
         }
         const rbacKYC: Rbac = {

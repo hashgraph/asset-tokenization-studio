@@ -354,7 +354,11 @@ import {
 } from '../../../domain/context/factory/RegulationType.js';
 import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
 import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
-import { Hold, ProtectedHold } from '../../../domain/context/security/Hold.js';
+import {
+  Hold,
+  HoldIdentifier,
+  ProtectedHold,
+} from '../../../domain/context/security/Hold.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -1977,19 +1981,20 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(
       `Releasing hold amount ${amount} from account ${targetId.toString()}}`,
     );
+
+    const holdIdentifier: HoldIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      holdId,
+    };
+
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold_2__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).releaseHoldByPartition(
-        partitionId,
-        targetId.toString(),
-        holdId,
-        amount.toBigNumber(),
-        {
-          gasLimit: RELEASE_HOLD_GAS,
-        },
-      ),
+      ).releaseHoldByPartition(holdIdentifier, amount.toBigNumber(), {
+        gasLimit: RELEASE_HOLD_GAS,
+      }),
       this.networkService.environment,
     );
   }
@@ -2003,11 +2008,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(
       `Reclaiming hold amount from account ${targetId.toString()}}`,
     );
+
+    const holdIdentifier: HoldIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      holdId,
+    };
+
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold_2__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).reclaimHoldByPartition(partitionId, targetId.toString(), holdId, {
+      ).reclaimHoldByPartition(holdIdentifier, {
         gasLimit: RECLAIM_HOLD_GAS,
       }),
       this.networkService.environment,
@@ -2026,14 +2038,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Executing hold with Id ${holdId} from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
+    const holdIdentifier: HoldIdentifier = {
+      partition: partitionId,
+      tokenHolder: sourceId.toString(),
+      holdId,
+    };
+
     return RPCTransactionResponseAdapter.manageResponse(
       await Hold_2__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).executeHoldByPartition(
-        partitionId,
-        sourceId.toString(),
-        holdId,
+        holdIdentifier,
         targetId.toString(),
         amount.toBigNumber(),
         {

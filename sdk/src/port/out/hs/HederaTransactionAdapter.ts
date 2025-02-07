@@ -318,7 +318,11 @@ import { Interface } from 'ethers/lib/utils.js';
 import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
 import { TransactionType } from '../TransactionResponseEnums.js';
 import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
-import { Hold, ProtectedHold } from '../../../domain/context/security/Hold.js';
+import {
+  Hold,
+  HoldIdentifier,
+  ProtectedHold,
+} from '../../../domain/context/security/Hold.js';
 import {
   BasicTransferInfo,
   OperatorTransferData,
@@ -2027,9 +2031,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     );
     const factoryInstance = new Hold_2__factory().attach(security.toString());
 
+    const holdIdentifier: HoldIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      holdId,
+    };
+
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [partitionId, targetId.toString(), holdId, amount.toBigNumber()],
+      [holdIdentifier, amount.toBigNumber()],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -2055,9 +2065,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Reclaiming hold from account ${targetId.toString()}}`);
     const factoryInstance = new Hold_2__factory().attach(security.toString());
 
+    const holdIdentifier: HoldIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      holdId,
+    };
+
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [partitionId, targetId.toString(), holdId],
+      [holdIdentifier],
     );
 
     const functionDataEncoded = new Uint8Array(
@@ -2088,15 +2104,15 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
 
     const factoryInstance = new Hold_2__factory().attach(security.toString());
 
+    const holdIdentifier: HoldIdentifier = {
+      partition: partitionId,
+      tokenHolder: sourceId.toString(),
+      holdId,
+    };
+
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [
-        partitionId,
-        sourceId.toString(),
-        holdId,
-        targetId.toString(),
-        amount.toBigNumber(),
-      ],
+      [holdIdentifier, targetId.toString(), amount.toBigNumber()],
     );
 
     const functionDataEncoded = new Uint8Array(
