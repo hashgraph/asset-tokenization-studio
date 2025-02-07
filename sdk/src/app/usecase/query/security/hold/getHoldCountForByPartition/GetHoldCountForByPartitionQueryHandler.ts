@@ -242,11 +242,9 @@ export class GetHoldCountForByPartitionQueryHandler
         : securityId.toString(),
     );
 
-    const targetEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.exec(targetId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(targetId)).evmAddress
-        : targetId.toString(),
-    );
+    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
+      : new EvmAddress(targetId);
 
     const res = await this.queryAdapter.getHoldCountForByPartition(
       securityEvmAddress,

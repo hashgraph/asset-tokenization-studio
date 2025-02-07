@@ -229,7 +229,6 @@ import {
     AdjustBalancesStorageWrapperRead
 } from './AdjustBalancesStorageWrapperRead.sol';
 import {_MAX_UINT256} from '../constants/values.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 
 contract AdjustBalancesStorageWrapper is
     IAdjustBalancesStorageWrapper,
@@ -408,9 +407,7 @@ contract AdjustBalancesStorageWrapper is
         uint256 _holdId,
         address _tokenHolder
     ) internal view virtual returns (uint256) {
-        uint256 holdIndex = _getHoldIndex(
-            IHold.HoldIdentifier(_partition, _tokenHolder, _holdId)
-        );
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
         if (holdIndex == 0) return 0;
         return _getHoldLABAFByIndex(_partition, _tokenHolder, holdIndex);
     }

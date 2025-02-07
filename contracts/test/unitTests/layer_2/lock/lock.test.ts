@@ -367,15 +367,7 @@ describe('Locks Layer 2 Tests', () => {
             role: CORPORATE_ACTION_ROLE,
             members: [account_B],
         }
-        const rbacKYC: Rbac = {
-            role: KYC_ROLE,
-            members: [account_B],
-        }
-        const rbacSSI: Rbac = {
-            role: SSI_MANAGER_ROLE,
-            members: [account_A],
-        }
-        return [rbacPause, corporateActionPause, rbacKYC, rbacSSI]
+        return [rbacPause, corporateActionPause]
     }
 
     async function setPreBalanceAdjustment() {

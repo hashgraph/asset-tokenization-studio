@@ -300,6 +300,9 @@ import {
   CREATE_HOLD_FROM_GAS,
   CONTROLLER_CREATE_HOLD_GAS,
   PROTECTED_CREATE_HOLD_GAS,
+  RELEASE_HOLD_GAS,
+  RECLAIM_HOLD_GAS,
+  EXECUTE_HOLD_BY_PARTITION_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -1958,6 +1961,83 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         signature,
         {
           gasLimit: PROTECTED_CREATE_HOLD_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async releaseHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    holdId: number,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Releasing hold amount ${amount} from account ${targetId.toString()}}`,
+    );
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold_2__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).releaseHoldByPartition(
+        partitionId,
+        targetId.toString(),
+        holdId,
+        amount.toBigNumber(),
+        {
+          gasLimit: RELEASE_HOLD_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async reclaimHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    holdId: number,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Reclaiming hold amount from account ${targetId.toString()}}`,
+    );
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold_2__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).reclaimHoldByPartition(partitionId, targetId.toString(), holdId, {
+        gasLimit: RECLAIM_HOLD_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async executeHoldByPartition(
+    security: EvmAddress,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    amount: BigDecimal,
+    partitionId: string,
+    holdId: number,
+  ): Promise<TransactionResponse<any, Error>> {
+    LogService.logTrace(
+      `Executing hold with Id ${holdId} from account ${sourceId.toString()} to account ${targetId.toString()}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await Hold_2__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).executeHoldByPartition(
+        partitionId,
+        sourceId.toString(),
+        holdId,
+        targetId.toString(),
+        amount.toBigNumber(),
+        {
+          gasLimit: EXECUTE_HOLD_BY_PARTITION_GAS,
         },
       ),
       this.networkService.environment,
