@@ -1251,7 +1251,11 @@ export class RPCQueryAdapter {
     const hold = await this.connect(
       Hold_2__factory,
       address.toString(),
-    ).getHoldForByPartition(partitionId, targetId.toString(), holdId);
+    ).getHoldForByPartition({
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      holdId,
+    });
 
     return new HoldDetails(
       hold.expirationTimestamp_.toNumber(),
