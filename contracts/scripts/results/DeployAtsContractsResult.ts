@@ -226,6 +226,7 @@ import {
     Snapshots,
     TransferAndLock,
     Lock,
+    Hold,
     ProtectedPartitions,
     TimeTravel,
 } from '@typechain'
@@ -252,6 +253,7 @@ export interface DeployAtsContractsResultParams {
     corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActionsSecurity>
     transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     lock: DeployContractWithFactoryResult<Lock>
+    hold: DeployContractWithFactoryResult<Hold>
     adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
     protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
     timeTravel?: DeployContractWithFactoryResult<TimeTravel>
@@ -279,6 +281,7 @@ export default class DeployAtsContractsResult {
     public readonly corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActionsSecurity>
     public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     public readonly lock: DeployContractWithFactoryResult<Lock>
+    public readonly hold: DeployContractWithFactoryResult<Hold>
     public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
     public readonly protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
     public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
@@ -305,6 +308,7 @@ export default class DeployAtsContractsResult {
         corporateActionsSecurity,
         transferAndLock,
         lock,
+        hold,
         adjustBalances,
         protectedPartitions,
         timeTravel,
@@ -330,6 +334,7 @@ export default class DeployAtsContractsResult {
         this.corporateActionsSecurity = corporateActionsSecurity
         this.transferAndLock = transferAndLock
         this.lock = lock
+        this.hold = hold
         this.adjustBalances = adjustBalances
         this.protectedPartitions = protectedPartitions
         this.timeTravel = timeTravel
