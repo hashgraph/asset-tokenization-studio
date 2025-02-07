@@ -303,7 +303,7 @@ const rpcNode: JsonRpcRelay = {
 let th: RPCTransactionAdapter;
 let mirrorNodeAdapter: MirrorNodeAdapter;
 
-async function createVcT3(issuerPrivateKey: string) {
+async function createVcT3(issuerPrivateKey: string): Promise <string> {
   const issuer = new EthrDID(issuerPrivateKey, 'polygon');
   const holderDid = new DID(
     'ethr',
