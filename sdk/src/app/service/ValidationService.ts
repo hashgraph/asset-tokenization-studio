@@ -206,7 +206,7 @@
 import { lazyInject } from '../../core/decorator/LazyInjectDecorator.js';
 import EvmAddress from '../../domain/context/contract/EvmAddress.js';
 import { RPCQueryAdapter } from '../../port/out/rpc/RPCQueryAdapter.js';
-//import { UnlistedIssuer } from '../usecase/command/security/error/UnlistedIssuer.js';
+import { UnlistedIssuer } from '../usecase/command/security/error/UnlistedIssuer.js';
 import Service from './Service.js';
 import { singleton } from 'tsyringe';
 import { SecurityRole } from '../../domain/context/security/SecurityRole.js';
@@ -221,18 +221,18 @@ export default class ValidationService extends Service {
     super();
   }
 
-  // async validateIssuer(
-  //   securityEvmAddress: EvmAddress,
-  //   issuerEvmAddress: EvmAddress,
-  // ): Promise<boolean> {
-  //   if (
-  //     !(await this.queryAdapter.isIssuer(securityEvmAddress, issuerEvmAddress))
-  //   ) {
-  //     throw new UnlistedIssuer();
-  //   } else {
-  //     return true;
-  //   }
-  // }
+  async validateIssuer(
+    securityEvmAddress: EvmAddress,
+    issuerEvmAddress: EvmAddress,
+  ): Promise<boolean> {
+    if (
+      !(await this.queryAdapter.isIssuer(securityEvmAddress, issuerEvmAddress))
+    ) {
+      throw new UnlistedIssuer();
+    } else {
+      return true;
+    }
+  }
 
   async validateKycAddresses(
     securityEvmAddress: EvmAddress,

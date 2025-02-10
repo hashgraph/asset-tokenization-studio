@@ -241,6 +241,8 @@ import {
   GetKYCForRequest,
   GrantKYCRequest,
   RevokeKYCRequest,
+  AddIssuerRequest,
+  SSIManagement,
 } from '../../../src/index.js';
 import TransferRequest from '../../../src/port/in/request/TransferRequest.js';
 import RedeemRequest from '../../../src/port/in/request/RedeemRequest.js';
@@ -253,6 +255,7 @@ import {
   CLIENT_ACCOUNT_ECDSA_A,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
+  CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT,
 } from '../../config.js';
 import NetworkService from '../../../src/app/service/NetworkService.js';
 import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter.js';
@@ -272,6 +275,7 @@ import { keccak256 } from 'js-sha3';
 import { _PARTITION_ID_1 } from '../../../src/core/Constants.js';
 import { createEcdsaCredential, EthrDID } from '@terminal3/ecdsa_vc';
 import { DID, type VerificationOptions } from '@terminal3/vc_core';
+import PrivateKey from '../../../src/domain/context/account/PrivateKey.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -311,8 +315,9 @@ const rpcNode: JsonRpcRelay = {
 let th: RPCTransactionAdapter;
 let mirrorNodeAdapter: MirrorNodeAdapter;
 
-async function createVcT3(issuerPrivateKey: string): Promise <string> {
-  const issuer = new EthrDID(issuerPrivateKey, 'polygon');
+async function createVcT3(): Promise<string> {
+  const issuerPrivateKey = CLIENT_ACCOUNT_ECDSA.privateKey as PrivateKey;
+  const issuer = new EthrDID(issuerPrivateKey.key as string, 'polygon');
   const holderDid = new DID(
     'ethr',
     CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
@@ -1362,13 +1367,24 @@ describe('🧪 Security tests', () => {
       new RoleRequest({
         securityId: equity.evmDiamondAddress!,
         targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._ISSUER_ROLE,
+      }),
+    );
+    await SSIManagement.addIssuer(
+      new AddIssuerRequest({
+        securityId: equity.evmDiamondAddress!,
+        issuerId: CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT as string,
+      }),
+    );
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
         role: SecurityRole._KYC_ROLE,
       }),
     );
 
-    let issuerPrivateKey = process.env.CLIENT_PRIVATE_KEY_ECDSA_1 ?? '';
-    issuerPrivateKey = issuerPrivateKey ? '0x' + issuerPrivateKey : '';
-    const vcBase64 = await createVcT3(issuerPrivateKey);
+    const vcBase64 = await createVcT3();
     const decodedVC = Buffer.from(vcBase64, 'base64').toString('utf-8');
     const vcJson = JSON.parse(decodedVC);
     const oneSecondBeforeNow = new Date(Date.now() - 1000).toISOString(); // 1 second before now

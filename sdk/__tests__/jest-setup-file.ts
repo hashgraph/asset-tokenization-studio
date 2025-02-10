@@ -1861,21 +1861,32 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       if (!accountKycStatus) {
         kycAccountsList.push(account);
       }
-    });
 
-    singletonInstance.revokeKYC = jest.fn(
-      async (security: EvmAddress, targetId: EvmAddress) => {
-        const account = '0x' + targetId.toString().toUpperCase().substring(2);
-  
-        const accountKycStatus = kycAccountsList.includes(account);
-  
-        if (accountKycStatus) {
-          kycAccountsList = kycAccountsList.filter(
-            (kycAccount) => kycAccount != account,
-          );
-        }
-      });
-  
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.revokeKYC = jest.fn(
+    async (security: EvmAddress, targetId: EvmAddress) => {
+      const account = '0x' + targetId.toString().toUpperCase().substring(2);
+
+      const accountKycStatus = kycAccountsList.includes(account);
+
+      if (accountKycStatus) {
+        kycAccountsList = kycAccountsList.filter(
+          (kycAccount) => kycAccount != account,
+        );
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
 
   singletonInstance.createHoldByPartition = jest.fn(
     async (

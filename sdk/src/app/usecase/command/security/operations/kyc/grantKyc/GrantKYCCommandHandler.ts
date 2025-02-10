@@ -206,6 +206,7 @@
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
 import AccountService from '../../../../../../service/AccountService.js';
+import ValidationService from '../../../../../../service/ValidationService.js';
 import { GrantKYCCommand, GrantKYCCommandResponse } from './GrantKYCCommand.js';
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
@@ -231,6 +232,8 @@ export class GrantKYCCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
 
   async execute(command: GrantKYCCommand): Promise<GrantKYCCommandResponse> {
@@ -251,10 +254,10 @@ export class GrantKYCCommandHandler
         : issuer.toString(),
     );
 
-    // await this.validationService.validateIssuer(
-    //   securityEvmAddress,
-    //   issuerEvmAddress,
-    // );
+    await this.validationService.validateIssuer(
+      securityEvmAddress,
+      issuerEvmAddress,
+    );
 
     if (await this.queryAdapter.isPaused(securityEvmAddress)) {
       throw new SecurityPaused();
