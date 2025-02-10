@@ -49,9 +49,6 @@ jobs:
         with:
           node-version: 18.x
 
-      - name: Clean npm cache 🧹
-        run: npm cache clean --force
-
       - name: Install dependencies Contracts
         working-directory: contracts
         run: |
@@ -61,6 +58,9 @@ jobs:
       - name: Test Contracts
         working-directory: contracts
         run: npm run test
+
+      - name: Clean npm cache 🧹
+        run: npm cache clean --force
 
       - name: Install dependencies SDK
         working-directory: sdk
