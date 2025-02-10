@@ -217,10 +217,7 @@ export class GrantKYCCommand extends Command<GrantKYCCommandResponse> {
   constructor(
     public readonly securityId: string,
     public readonly targetId: string,
-    public readonly VCId: string,
-    public readonly issuer: string,
-    public readonly validFrom: string,
-    public readonly validTo: string,
+    public readonly vcBase64: string,
   ) {
     super();
   }

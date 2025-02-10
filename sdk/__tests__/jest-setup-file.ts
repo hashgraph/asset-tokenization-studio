@@ -241,7 +241,7 @@ import DfnsSettings from '../src/domain/context/custodialWalletSettings/DfnsSett
 import { HoldDetails } from '../src/domain/context/security/HoldDetails.js';
 
 //* Mock console.log() method
-global.console.log = jest.fn();
+//global.console.log = jest.fn();
 //* Mock isWeb() method
 Injectable.isWeb = jest.fn(() => true);
 

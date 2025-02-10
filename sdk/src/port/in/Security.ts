@@ -308,10 +308,6 @@ import RevokeKYCRequest from './request/RevokeKYCRequest.js';
 import GetKYCAccountsRequest from './request/GetKYCAccountsRequest.js';
 import GetKYCAccountsCountRequest from './request/GetKYCAccountsCountRequest.js';
 import GetKYCForRequest from './request/GetKYCForRequest.js';
-import { Terminal3VC } from '../../domain/context/kyc/terminal3.js';
-import { verifyVc } from '@terminal3/verify_vc';
-import { SignedCredential } from '@terminal3/vc_core';
-import { MaxUint256 } from '@ethersproject/constants';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -1182,34 +1178,11 @@ class SecurityInPort implements ISecurityInPort {
   ): Promise<{ payload: boolean; transactionId: string }> {
     handleValidation('GrantKYCRequest', request);
 
-    const signedCredential: SignedCredential = Terminal3VC.vcFromBase64(
-      request.vcBase64,
-    );
-    const verificationResult = await verifyVc(signedCredential);
-    if (!verificationResult.isValid) {
-      throw new Error('Invalid VC');
-    }
-
-    const issuer: string = signedCredential.issuer.split(':').pop()!;
-
-    signedCredential.validFrom =
-      signedCredential.validFrom ?? new Date().toString();
-    signedCredential.validFrom = Date.parse(
-      signedCredential.validFrom,
-    ).toString();
-    signedCredential.validUntil =
-      signedCredential.validUntil == ''
-        ? MaxUint256.toString()
-        : signedCredential.validUntil;
-
     return await this.commandBus.execute(
       new GrantKYCCommand(
         request.securityId,
         request.targetId,
-        signedCredential.id,
-        issuer,
-        signedCredential.validFrom,
-        signedCredential.validUntil as string,
+        request.vcBase64,
       ),
     );
   }
