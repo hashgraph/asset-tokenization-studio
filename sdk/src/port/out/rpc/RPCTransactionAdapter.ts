@@ -306,6 +306,8 @@ import {
   ADD_ISSUER_GAS,
   SET_REVOCATION_REGISTRY_GAS,
   REMOVE_ISSUER_GAS,
+  GRANT_KYC_GAS,
+  REVOKE_KYC_GAS,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -337,6 +339,7 @@ import {
   TransferAndLock__factory,
   Hold_2__factory,
   SSIManagement__factory,
+  KYC__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -2112,6 +2115,53 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         this.signerOrProvider,
       ).removeIssuer(issuer.toString(), {
         gasLimit: REMOVE_ISSUER_GAS,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async grantKYC(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    VCId: string,
+    validFrom: BigDecimal,
+    validTo: BigDecimal,
+    issuer: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Granting KYC from issuer ${issuer.toString()} to address ${targetId.toString()} with VC id ${VCId}`,
+    );
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await KYC__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).grantKYC(
+        targetId.toString(),
+        VCId,
+        validFrom.toBigNumber(),
+        validTo.toBigNumber(),
+        issuer.toString(),
+        {
+          gasLimit: GRANT_KYC_GAS,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async revokeKYC(
+    security: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(`Revoking KYC to address ${targetId.toString()}`);
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await KYC__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).revokeKYC(targetId.toString(), {
+        gasLimit: REVOKE_KYC_GAS,
       }),
       this.networkService.environment,
     );

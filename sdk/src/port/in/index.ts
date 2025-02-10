@@ -212,6 +212,7 @@ import Event from './Event.js';
 import Network from './Network.js';
 import Factory from './Factory.js';
 import Management from './Management.js';
+import SSIManagement from './SSIManagement.js';
 
 export {
   Security,
@@ -223,6 +224,7 @@ export {
   Network,
   Factory,
   Management,
+  SSIManagement,
 };
 
 export * from './request';
