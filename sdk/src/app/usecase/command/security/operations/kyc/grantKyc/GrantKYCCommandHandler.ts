@@ -276,8 +276,8 @@ export class GrantKYCCommandHandler
     );
 
     await this.validationService.validateIssuer(
-      securityEvmAddress,
-      issuerEvmAddress,
+      securityId,
+      issuer,
     );
 
     if (await this.queryAdapter.isPaused(securityEvmAddress)) {
