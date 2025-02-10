@@ -203,127 +203,127 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {LibCommon} from '../../layer_0/common/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    _CORPORATE_ACTION_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
-import {
-    SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE
-} from '../constants/values.sol';
-
-contract CorporateActionsStorageWrapperRead is LocalContext {
-    using LibCommon for EnumerableSet.Bytes32Set;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    function _getCorporateAction(
-        bytes32 _corporateActionId
-    ) internal view virtual returns (bytes32 actionType_, bytes memory data_) {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        actionType_ = corporateActions_
-            .actionsData[_corporateActionId]
-            .actionType;
-        data_ = corporateActions_.actionsData[_corporateActionId].data;
-    }
-
-    function _getCorporateActionCount()
-        internal
-        view
-        virtual
-        returns (uint256 corporateActionCount_)
-    {
-        return _corporateActionsStorage().actions.length();
-    }
-
-    function _getCorporateActionIds(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function _getCorporateActionCountByType(
-        bytes32 _actionType
-    ) internal view virtual returns (uint256 corporateActionCount_) {
-        return _corporateActionsStorage().actionsByType[_actionType].length();
-    }
-
-    function _getCorporateActionIdsByType(
-        bytes32 _actionType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage()
-            .actionsByType[_actionType]
-            .getFromSet(_pageIndex, _pageLength);
-    }
-
-    function _getResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
-        bytes memory result;
-
-        if (_getCorporateActionResultCount(actionId) > resultId)
-            result = _getCorporateActionResult(actionId, resultId);
-
-        return result;
-    }
-
-    function _getCorporateActionResultCount(
-        bytes32 actionId
-    ) internal view virtual returns (uint256) {
-        return _corporateActionsStorage().actionsData[actionId].results.length;
-    }
-
-    /**
-     * @dev returns a corporate action result.
-     *
-     * @param actionId The corporate action Id
-     */
-    function _getCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
-        return
-            _corporateActionsStorage().actionsData[actionId].results[resultId];
-    }
-
-    function _isSnapshotTaskType(bytes memory data) internal returns (bool) {
-        return abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE;
-    }
-
-    function _isBalanceAdjustmentTaskType(
-        bytes memory data
-    ) internal returns (bool) {
-        return abi.decode(data, (bytes32)) == BALANCE_ADJUSTMENT_TASK_TYPE;
-    }
-
-    function _corporateActionsStorage()
-        internal
-        pure
-        virtual
-        returns (CorporateActionDataStorage storage corporateActions_)
-    {
-        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            corporateActions_.slot := position
-        }
-    }
-}
+//import {
+//    IStaticFunctionSelectors
+//} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+//import {Common} from '../../../layer_1/common/Common.sol';
+//import {_SCHEDULED_TASKS_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
+//import {
+//    CorporateActionsStorageWrapperSecurity
+//} from '../../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+//import {
+//    IScheduledTasks
+//} from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
+//import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+//import {
+//    EnumerableSet
+//} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+//
+//contract ScheduledTasks is
+//    IStaticFunctionSelectors,
+//    IScheduledTasks,
+//    Common,
+//    CorporateActionsStorageWrapperSecurity
+//{
+//    using EnumerableSet for EnumerableSet.Bytes32Set;
+//
+//    // solhint-disable no-unused-vars
+//    function onScheduledTaskTriggered(
+//        uint256 _pos,
+//        uint256 _scheduledTasksLength,
+//        bytes memory _data
+//    ) external virtual override onlyAutoCalling(_scheduledTaskStorage()) {
+//        _onScheduledTaskTriggered(_data);
+//    } // solhint-enable no-unused-vars
+//
+//    function triggerPendingScheduledTasks()
+//        external
+//        virtual
+//        override
+//        onlyUnpaused
+//        returns (uint256)
+//    {
+//        return _triggerScheduledTasks(0);
+//    }
+//
+//    function triggerScheduledTasks(
+//        uint256 _max
+//    ) external virtual override onlyUnpaused returns (uint256) {
+//        return _triggerScheduledTasks(_max);
+//    }
+//
+//    function scheduledTaskCount()
+//        external
+//        view
+//        virtual
+//        override
+//        returns (uint256)
+//    {
+//        return _getScheduledTaskCount();
+//    }
+//
+//    function getScheduledTasks(
+//        uint256 _pageIndex,
+//        uint256 _pageLength
+//    )
+//        external
+//        view
+//        virtual
+//        override
+//        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
+//    {
+//        scheduledTask_ = _getScheduledTasks(_pageIndex, _pageLength);
+//    }
+//
+//    function getStaticResolverKey()
+//        external
+//        pure
+//        virtual
+//        override
+//        returns (bytes32 staticResolverKey_)
+//    {
+//        staticResolverKey_ = _SCHEDULED_TASKS_RESOLVER_KEY;
+//    }
+//
+//    function getStaticFunctionSelectors()
+//        external
+//        pure
+//        virtual
+//        override
+//        returns (bytes4[] memory staticFunctionSelectors_)
+//    {
+//        uint256 selectorIndex;
+//        staticFunctionSelectors_ = new bytes4[](5);
+//        staticFunctionSelectors_[selectorIndex++] = this
+//            .triggerPendingScheduledTasks
+//            .selector;
+//        staticFunctionSelectors_[selectorIndex++] = this
+//            .triggerScheduledTasks
+//            .selector;
+//        staticFunctionSelectors_[selectorIndex++] = this
+//            .scheduledTaskCount
+//            .selector;
+//        staticFunctionSelectors_[selectorIndex++] = this
+//            .getScheduledTasks
+//            .selector;
+//        staticFunctionSelectors_[selectorIndex++] = this
+//            .onScheduledTaskTriggered
+//            .selector;
+//    }
+//
+//    function getStaticInterfaceIds()
+//        external
+//        pure
+//        virtual
+//        override
+//        returns (bytes4[] memory staticInterfaceIds_)
+//    {
+//        staticInterfaceIds_ = new bytes4[](1);
+//        uint256 selectorsIndex;
+//        staticInterfaceIds_[selectorsIndex++] = type(IScheduledTasks)
+//            .interfaceId;
+//    }
+//}

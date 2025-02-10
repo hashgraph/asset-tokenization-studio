@@ -274,18 +274,14 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper {
     }
 
     function _triggerScheduledTasks(
-        bytes4 onScheduledTaskTriggeredSelector,
         uint256 _max,
         uint256 _timestamp
     ) internal returns (uint256) {
         uint256 scheduledTasksLength = _getScheduledTaskCount();
 
-        if (scheduledTasksLength == 0) {
-            return 0;
-        }
+        if (scheduledTasksLength == 0) return 0;
 
         uint256 max = _max;
-
         uint256 newTaskID;
 
         if (max > scheduledTasksLength || max == 0) {
@@ -305,29 +301,11 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper {
 
                 scheduledTasks.autoCalling = true;
 
-                // solhint-disable-next-line
-                // TODO: Change it
-                (bool success, bytes memory data) = address(this).delegatecall(
-                    abi.encodeWithSelector(
-                        onScheduledTaskTriggeredSelector,
-                        pos,
-                        scheduledTasksLength,
-                        currentScheduledTask.data
-                    )
-                );
-                if (!success) {
-                    if (data.length > 0) {
-                        // solhint-disable-next-line
-                        assembly {
-                            let returndata_size := mload(data)
-                            revert(add(32, data), returndata_size)
-                        }
-                    } else {
-                        // solhint-disable-next-line
-                        revert(
-                            'onScheduledTaskTriggered method failed without reason'
-                        );
-                    }
+                if (_isSnapshotTaskType(currentScheduledTask.data)) {
+                    triggerSnapshotTaskType();
+                }
+                if (_isBalanceAdjustmentTaskType(currentScheduledTask.data)) {
+                    triggerBalanceAdjustmentTaskType();
                 }
 
                 scheduledTasks.autoCalling = false;
@@ -337,6 +315,14 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper {
         }
 
         return newTaskID;
+    }
+
+    function triggerSnapshotTaskType() private {
+        // TODO: Implement it
+    }
+
+    function triggerBalanceAdjustmentTaskType() private {
+        // TODO: Implement it
     }
 
     function slideScheduledTasks(uint256 _pos) private {

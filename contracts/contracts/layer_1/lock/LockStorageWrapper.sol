@@ -205,7 +205,6 @@
 
 pragma solidity 0.8.18;
 
-import '@hashgraph/asset-tokenization-contracts/contracts/layer_2/adjustBalances/AdjustBalanceLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
@@ -264,12 +263,10 @@ abstract contract LockStorageWrapper is ILockStorageWrapper, Common {
         _updateLockedBalancesBeforeRelease(_partition, _lockId, _tokenHolder);
         uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
 
+        LockDataStorage storage lockStorage = _lockStorage();
         LockData memory lock = lockStorage.locksByAccountAndPartition[
             _tokenHolder
         ][_partition][lockIndex - 1];
-
-        //_removeLock(_partition, _tokenHolder, _lockId);
-        LockDataStorage storage lockStorage = _lockStorage();
 
         lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
             _partition
