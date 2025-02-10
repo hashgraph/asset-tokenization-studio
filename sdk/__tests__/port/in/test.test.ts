@@ -247,7 +247,6 @@ import { createEcdsaCredential, EthrDID } from '@terminal3/ecdsa_vc';
 import { DID, type VerificationOptions } from '@terminal3/vc_core';
 import PrivateKey from '../../../src/domain/context/account/PrivateKey.js';
 
-
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
 const decimals = 0;

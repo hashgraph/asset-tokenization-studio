@@ -304,7 +304,6 @@ const rpcNode: JsonRpcRelay = {
 let th: RPCTransactionAdapter;
 let mirrorNodeAdapter: MirrorNodeAdapter;
 
-
 describe('🧪 Security tests', () => {
   let ns: NetworkService;
   let rpcQueryAdapter: RPCQueryAdapter;
