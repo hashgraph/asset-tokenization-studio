@@ -14,7 +14,6 @@ jobs:
       CLIENT_PUBLIC_KEY_ECDSA_1: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_1 }}
       CLIENT_ACCOUNT_ID_ECDSA_1: "0.0.1328"
       CLIENT_EVM_ADDRESS_ECDSA_1: "0x0000000000000000000000000000000000000530"
-      CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT: "0x97C50bb12E1C6284cF2855cdba95c5D60AEE44CF"
       CLIENT_PRIVATE_KEY_ECDSA_2: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_2 }}
       CLIENT_PUBLIC_KEY_ECDSA_2: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
       CLIENT_ACCOUNT_ID_ECDSA_2: "0.0.2168740"
@@ -49,6 +48,9 @@ jobs:
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
         with:
           node-version: 18.x
+
+      - name: Clean npm cache 🧹
+        run: npm cache clean --force
 
       - name: Install dependencies Contracts
         working-directory: contracts
