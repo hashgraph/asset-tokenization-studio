@@ -252,9 +252,9 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
 
     function _getPendingScheduledBalanceAdjustmentsAt(
         uint256 _timestamp
-    ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
+    ) internal view returns (uint256 pendingAbaf_, uint8 pendingDecimals_) {
         // * Initialization
-        pendingABAF_ = 1;
+        pendingAbaf_ = 1;
         pendingDecimals_ = 0;
 
         uint256 scheduledTaskCount = _getScheduledTaskCount();
@@ -274,7 +274,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
                         balanceAdjustmentData,
                         (IEquity.ScheduledBalanceAdjustment)
                     );
-                pendingABAF_ *= balanceAdjustment.factor;
+                pendingAbaf_ *= balanceAdjustment.factor;
                 pendingDecimals_ += balanceAdjustment.decimals;
             } else {
                 break;

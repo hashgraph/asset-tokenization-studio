@@ -372,7 +372,7 @@ contract ERC1410BasicStorageWrapperRead is
     function _balanceOf(address _tokenHolder) internal view returns (uint256) {
         return
             _getERC1410BasicStorage().balances[_tokenHolder] *
-            _calculateFactorByAbafAndTokenHolder(_getABAF(), _tokenHolder);
+            _calculateFactorByAbafAndTokenHolder(_getAbaf(), _tokenHolder);
     }
 
     function _balanceOfByPartition(
@@ -389,7 +389,7 @@ contract ERC1410BasicStorageWrapperRead is
                 erc1410Storage
                 .partitions[_tokenHolder][partitionsIndex - 1].amount *
                 _calculateFactorByTokenHolderAndPartitionIndex(
-                    _getABAF(),
+                    _getAbaf(),
                     _tokenHolder,
                     partitionsIndex
                 );
@@ -458,7 +458,7 @@ contract ERC1410BasicStorageWrapperRead is
         bytes32 partition,
         address account
     ) internal {
-        uint256 abaf = _getABAF();
+        uint256 abaf = _getAbaf();
         ERC1410BasicStorage storage basicStorage = _getERC1410BasicStorage();
         _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
         adjustTotalBalanceFor(basicStorage, abaf, account);

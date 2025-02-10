@@ -238,108 +238,108 @@ contract AdjustBalances is
         success_ = true;
     }
 
-    function getABAF() external view virtual override returns (uint256) {
-        return _getABAF();
+    function getAbaf() external view virtual override returns (uint256) {
+        return _getAbaf();
     }
 
-    function getABAFAdjusted()
+    function getAbafAdjusted()
         external
         view
         virtual
         override
         returns (uint256)
     {
-        return _getABAFAdjusted();
+        return _getAbafAdjusted();
     }
 
-    function getABAFAdjustedAt(
+    function getAbafAdjustedAt(
         uint256 _timestamp
     ) external view virtual override returns (uint256) {
-        return _getABAFAdjustedAt(_timestamp);
+        return _getAbafAdjustedAt(_timestamp);
     }
 
-    function getLABAFByUser(
+    function getLabafByUser(
         address _account
     ) external view virtual override returns (uint256) {
-        return _getLABAFByUser(_account);
+        return _getLabafByUser(_account);
     }
 
-    function getLABAFByPartition(
+    function getLabafByPartition(
         bytes32 _partition
     ) external view virtual override returns (uint256) {
-        return _getLABAFByPartition(_partition);
+        return _getLabafByPartition(_partition);
     }
 
-    function getLABAFByUserAndPartition(
+    function getLabafByUserAndPartition(
         bytes32 _partition,
         address _account
     ) external view virtual override returns (uint256) {
-        return _getLABAFByUserAndPartition(_partition, _account);
+        return _getLabafByUserAndPartition(_partition, _account);
     }
 
-    function getAllowanceLABAF(
+    function getAllowanceLabaf(
         address _owner,
         address _spender
     ) external view virtual override returns (uint256) {
-        return _getAllowanceLABAF(_owner, _spender);
+        return _getAllowanceLabaf(_owner, _spender);
     }
 
-    function getTotalLockLABAF(
+    function getTotalLockLabaf(
         address _tokenHolder
     ) external view virtual override returns (uint256 labaf_) {
-        return _getTotalLockLABAF(_tokenHolder);
+        return _getTotalLockLabaf(_tokenHolder);
     }
 
-    function getTotalLockLABAFByPartition(
+    function getTotalLockLabafByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view virtual override returns (uint256 labaf_) {
-        return _getTotalLockLABAFByPartition(_partition, _tokenHolder);
+        return _getTotalLockLabafByPartition(_partition, _tokenHolder);
     }
 
-    function getLockLABAFByIndex(
+    function getLockLabafByIndex(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockIndex
     ) external view virtual override returns (uint256) {
-        return _getLockLABAFByIndex(_partition, _tokenHolder, _lockIndex);
+        return _getLockLabafByIndex(_partition, _tokenHolder, _lockIndex);
     }
 
-    function getLockLABAFByPartition(
+    function getLockLabafByPartition(
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
     ) external view virtual override returns (uint256 labaf_) {
-        return _getLockLABAFByPartition(_partition, _lockId, _tokenHolder);
+        return _getLockLabafByPartition(_partition, _lockId, _tokenHolder);
     }
 
-    function getTotalHeldLABAF(
+    function getTotalHeldLabaf(
         address _tokenHolder
     ) external view virtual override returns (uint256 labaf_) {
-        return _getTotalHeldLABAF(_tokenHolder);
+        return _getTotalHeldLabaf(_tokenHolder);
     }
 
-    function getTotalHeldLABAFByPartition(
+    function getTotalHeldLabafByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view virtual override returns (uint256 labaf_) {
-        return _getTotalHeldLABAFByPartition(_partition, _tokenHolder);
+        return _getTotalHeldLabafByPartition(_partition, _tokenHolder);
     }
 
-    function getHoldLABAFByIndex(
+    function getHoldLabafByIndex(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _holdIndex
     ) external view virtual override returns (uint256) {
-        return _getHoldLABAFByIndex(_partition, _tokenHolder, _holdIndex);
+        return _getHoldLabafByIndex(_partition, _tokenHolder, _holdIndex);
     }
 
-    function getHoldLABAFByPartition(
+    function getHoldLabafByPartition(
         bytes32 _partition,
         uint256 _holdId,
         address _tokenHolder
     ) external view virtual override returns (uint256 labaf_) {
-        return _getHoldLABAFByPartition(_partition, _holdId, _tokenHolder);
+        return _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
     }
 
     function getStaticResolverKey()
@@ -364,48 +364,48 @@ contract AdjustBalances is
         staticFunctionSelectors_[selectorIndex++] = this
             .adjustBalances
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getABAF.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getAbaf.selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getABAFAdjusted
+            .getAbafAdjusted
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getABAFAdjustedAt
+            .getAbafAdjustedAt
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLABAFByUser
+            .getLabafByUser
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLABAFByPartition
+            .getLabafByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLABAFByUserAndPartition
+            .getLabafByUserAndPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getAllowanceLABAF
+            .getAllowanceLabaf
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLABAF
+            .getTotalLockLabaf
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLABAFByPartition
+            .getTotalLockLabafByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLockLABAFByIndex
+            .getLockLabafByIndex
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLockLABAFByPartition
+            .getLockLabafByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalHeldLABAF
+            .getTotalHeldLabaf
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalHeldLABAFByPartition
+            .getTotalHeldLabafByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldLABAFByIndex
+            .getHoldLabafByIndex
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldLABAFByPartition
+            .getHoldLabafByPartition
             .selector;
     }
 

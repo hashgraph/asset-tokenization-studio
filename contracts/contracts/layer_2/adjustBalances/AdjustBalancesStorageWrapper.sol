@@ -233,11 +233,11 @@ contract AdjustBalancesStorageWrapper is IAdjustBalancesStorageWrapper, Common {
     function _beforeBalanceAdjustment() internal virtual {
         // TODO: Verify correctness
         _updateDecimalsSnapshot(_decimals());
-        _updateABAFSnapshot(_getABAF());
+        _updateAbafSnapshot(_getAbaf());
         _updateAssetTotalSupplySnapshot(_totalSupply());
     }
 
-    function _getHoldLABAFByPartition(
+    function _getHoldLabafByPartition(
         bytes32 _partition,
         uint256 _holdId,
         address _tokenHolder
@@ -245,21 +245,21 @@ contract AdjustBalancesStorageWrapper is IAdjustBalancesStorageWrapper, Common {
         // TODO: Add with holds impl.
         //        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
         //        if (holdIndex == 0) return 0;
-        //        return _getHoldLABAFByIndex(_partition, _tokenHolder, holdIndex);
+        //        return _getHoldLabafByIndex(_partition, _tokenHolder, holdIndex);
         return 0;
     }
 
-    function _getLockLABAFByPartition(
+    function _getLockLabafByPartition(
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
     ) internal view returns (uint256) {
         uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
         if (lockIndex == 0) return 0;
-        return _getLockLABAFByIndex(_partition, _tokenHolder, lockIndex);
+        return _getLockLabafByIndex(_partition, _tokenHolder, lockIndex);
     }
 
-    function _getLABAFByUserAndPartition(
+    function _getLabafByUserAndPartition(
         bytes32 _partition,
         address _account
     ) internal view returns (uint256) {

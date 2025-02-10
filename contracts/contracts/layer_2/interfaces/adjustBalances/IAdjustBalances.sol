@@ -212,67 +212,67 @@ interface IAdjustBalances {
         uint8 decimals
     ) external returns (bool success_);
 
-    function getABAF() external view returns (uint256);
+    function getAbaf() external view returns (uint256);
 
-    function getABAFAdjusted() external view returns (uint256);
+    function getAbafAdjusted() external view returns (uint256);
 
-    function getABAFAdjustedAt(
+    function getAbafAdjustedAt(
         uint256 _timestamp
     ) external view returns (uint256);
 
-    function getLABAFByUser(address _account) external view returns (uint256);
+    function getLabafByUser(address _account) external view returns (uint256);
 
-    function getLABAFByPartition(
+    function getLabafByPartition(
         bytes32 _partition
     ) external view returns (uint256);
 
-    function getLABAFByUserAndPartition(
+    function getLabafByUserAndPartition(
         bytes32 _partition,
         address _account
     ) external view returns (uint256);
 
-    function getAllowanceLABAF(
+    function getAllowanceLabaf(
         address _owner,
         address _spender
     ) external view returns (uint256);
 
-    function getTotalLockLABAF(
+    function getTotalLockLabaf(
         address _tokenHolder
     ) external view returns (uint256 labaf_);
 
-    function getTotalLockLABAFByPartition(
+    function getTotalLockLabafByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 labaf_);
 
-    function getLockLABAFByIndex(
+    function getLockLabafByIndex(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockIndex
     ) external view returns (uint256);
 
-    function getLockLABAFByPartition(
+    function getLockLabafByPartition(
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
     ) external view returns (uint256 labaf_);
 
-    function getTotalHeldLABAF(
+    function getTotalHeldLabaf(
         address _tokenHolder
     ) external view returns (uint256 labaf_);
 
-    function getTotalHeldLABAFByPartition(
+    function getTotalHeldLabafByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 labaf_);
 
-    function getHoldLABAFByIndex(
+    function getHoldLabafByIndex(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _holdIndex
     ) external view returns (uint256);
 
-    function getHoldLABAFByPartition(
+    function getHoldLabafByPartition(
         bytes32 _partition,
         uint256 _holdId,
         address _tokenHolder

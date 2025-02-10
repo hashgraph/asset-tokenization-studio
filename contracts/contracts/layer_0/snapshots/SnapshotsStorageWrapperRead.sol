@@ -260,7 +260,7 @@ abstract contract SnapshotsStorageWrapperRead is
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
         // Snapshots for the total supply by partition
         mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
-        Snapshots ABAFSnapshots;
+        Snapshots abafSnapshots;
         Snapshots decimals;
     }
 
@@ -275,8 +275,8 @@ abstract contract SnapshotsStorageWrapperRead is
         _updateSnapshot(_snapshotStorage().decimals, decimals);
     }
 
-    function _updateABAFSnapshot(uint256 abaf) internal {
-        _updateSnapshot(_snapshotStorage().ABAFSnapshots, abaf);
+    function _updateAbafSnapshot(uint256 abaf) internal {
+        _updateSnapshot(_snapshotStorage().abafSnapshots, abaf);
     }
 
     function _updateAssetTotalSupplySnapshot(uint256 totalSupply) internal {
