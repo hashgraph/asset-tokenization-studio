@@ -208,7 +208,7 @@ import Service from './Service.js';
 import { singleton } from 'tsyringe';
 import { QueryBus } from '../../core/query/QueryBus.js';
 import Injectable from '../../core/Injectable.js';
-import { IsIssuerQuery } from 'app/usecase/query/ssi/isIssuer/IsIssuerQuery.js';
+import { IsIssuerQuery } from '../../app/usecase/query/ssi/isIssuer/IsIssuerQuery.js';
 
 @singleton()
 export default class ValidationService extends Service {
