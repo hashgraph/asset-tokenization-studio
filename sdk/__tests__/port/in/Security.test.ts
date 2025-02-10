@@ -508,6 +508,10 @@ describe('🧪 Security tests', () => {
     );
   }, 900_000);
 
+  afterAll(async () => {
+    jest.clearAllMocks();
+  });
+
   it('Get security', async () => {
     const equityInfo = await Security.getInfo(
       new GetSecurityDetailsRequest({
