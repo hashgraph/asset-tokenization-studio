@@ -282,6 +282,13 @@ import GetHoldsIdForByPartitionRequest from './GetHoldsIdForByPartitionRequest.j
 import GetHoldForByPartitionRequest from './GetHoldForByPartitionRequest.js';
 import ReleaseHoldByPartitionRequest from './ReleaseHoldByPartitionRequest.js';
 import ReclaimHoldByPartitionRequest from './ReclaimHoldByPartitionRequest.js';
+import AddIssuerRequest from './AddIssuerRequest.js';
+import SetRevocationRegistryAddressRequest from './SetRevocationRegistryAddressRequest.js';
+import RemoveIssuerRequest from './RemoveIssuerRequest.js';
+import GetRevocationRegistryAddressRequest from './GetRevocationRegistryAddressRequest.js';
+import GetIssuerListCountRequest from './GetIssuerListCountRequest.js';
+import GetIssuerListMembersRequest from './GetIssuerListMembersRequest.js';
+import IsIssuerRequest from './IsIssuerRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -363,4 +370,11 @@ export {
   ReleaseHoldByPartitionRequest,
   ReclaimHoldByPartitionRequest,
   ExecuteHoldByPartitionRequest,
+  AddIssuerRequest,
+  SetRevocationRegistryAddressRequest,
+  RemoveIssuerRequest,
+  GetRevocationRegistryAddressRequest,
+  GetIssuerListCountRequest,
+  GetIssuerListMembersRequest,
+  IsIssuerRequest,
 };

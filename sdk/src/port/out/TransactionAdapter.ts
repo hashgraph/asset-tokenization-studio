@@ -614,12 +614,31 @@ interface IHoldTransactionAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface ISSIManagementTransactionAdapter {
+  setRevocationRegistryAddress(
+    security: EvmAddress,
+    revocationRegistry: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  addIssuer(
+    security: EvmAddress,
+    issuer: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse>;
+  removeIssuer(
+    security: EvmAddress,
+    issuer: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
     RoleTransactionAdapter,
     IManagementTransactionAdapter,
-    IHoldTransactionAdapter
+    IHoldTransactionAdapter,
+    ISSIManagementTransactionAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1118,6 +1137,27 @@ export default abstract class TransactionAdapter
     partitionId: string,
     holdId: number,
     securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  addIssuer(
+    security: EvmAddress,
+    issuer: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  setRevocationRegistryAddress(
+    security: EvmAddress,
+    revocationRegistry: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  removeIssuer(
+    security: EvmAddress,
+    issuer: EvmAddress,
+    securityId: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }

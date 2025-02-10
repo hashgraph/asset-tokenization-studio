@@ -203,108 +203,65 @@
 
 */
 
-export enum ErrorCode {
-  // Error codes for Input Data (Prefix: 1XXXX)
-  AccountIdInValid = '10001',
-  AccountIdNotExists = '10026',
-  ContractKeyInvalid = '10006',
-  EmptyValue = '10017',
-  InvalidAmount = '10008',
-  InvalidBytes = '10007',
-  InvalidBytes3 = '10003',
-  InvalidBytes32 = '10002',
-  InvalidContractId = '10014',
-  InvalidDividendType = '10028',
-  InvalidEvmAddress = '10023',
-  InvalidIdFormatHedera = '10009',
-  InvalidIdFormatHederaIdOrEvmAddress = '10010',
-  InvalidLength = '10016',
-  InvalidRange = '10018',
-  InvalidRegulationSubType = '10030',
-  InvalidRegulationSubTypeForType = '10031',
-  InvalidRegulationType = '10029',
-  InvalidRequest = '10024',
-  InvalidRole = '10019',
-  InvalidSecurityType = '10020',
-  InvalidType = '10015',
-  InvalidValue = '10021',
-  PublicKeyInvalid = '10004',
-  ValidationChecks = '10022',
+import { CommandHandler } from '../../../../../core/decorator/CommandHandlerDecorator';
+import {
+  SetRevocationRegistryAddressCommand,
+  SetRevocationRegistryAddressCommandResponse,
+} from './SetRevocationRegistryAddressCommand';
+import { ICommandHandler } from '../../../../../core/command/CommandHandler';
+import { lazyInject } from '../../../../../core/decorator/LazyInjectDecorator';
+import TransactionService from '../../../../service/TransactionService';
+import { MirrorNodeAdapter } from '../../../../../port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '../../../../../domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../domain/context/shared/HederaId';
+import { RPCQueryAdapter } from '../../../../../port/out/rpc/RPCQueryAdapter';
+import { SecurityPaused } from '../../security/error/SecurityPaused';
 
-  // Error codes for Logic Errors (Prefix: 2XXXX)
-  AccountAlreadyInControlList = '20013',
-  AccountIsAlreadyAnIssuer = '20020',
-  AccountFreeze = '20008',
-  AccountInBlackList = '20011',
-  AccountNotAssociatedToSecurity = '20001',
-  AccountNotInControlList = '20015',
-  AccountNotInWhiteList = '20012',
-  InsufficientBalance = '20009',
-  InsufficientFunds = '20005',
-  InsufficientHoldBalance = '20019',
-  MaxSupplyReached = '20002',
-  NounceAlreadyUsed = '20016',
-  OperationNotAllowed = '20004',
-  PartitionsProtected = '20017',
-  PartitionsUnprotected = '20018',
-  RoleNotAssigned = '20003',
-  SecurityPaused = '20010',
-  SecurityUnPaused = '20014',
+@CommandHandler(SetRevocationRegistryAddressCommand)
+export class SetRevocationRegistryAddressCommandHandler
+  implements ICommandHandler<SetRevocationRegistryAddressCommand>
+{
+  constructor(
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+  ) {}
 
-  // Error codes for System Errors (Prefix: 3XXXX)
-  ContractNotFound = '30002',
-  InvalidResponse = '30005',
-  NotFound = '30006',
-  ReceiptNotReceived = '30001',
-  RuntimeError = '30004',
-  Unexpected = '30003',
+  async execute(
+    command: SetRevocationRegistryAddressCommand,
+  ): Promise<SetRevocationRegistryAddressCommandResponse> {
+    const { securityId, revocationRegistryId } = command;
+    const handler = this.transactionService.getHandler();
 
-  // Error codes for Provider Errors (Prefix: 4XXXX)
-  DeploymentError = '40006', // Fixed typo here
-  InitializationError = '40001',
-  PairingError = '40002',
-  PairingRejected = '40008',
-  ProviderError = '40007',
-  SigningError = '40004',
-  TransactionCheck = '40003',
-  TransactionError = '40005',
-}
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
 
-export enum ErrorCategory {
-  InputData = '1',
-  Logic = '2',
-  System = '3',
-  Provider = '4',
-}
+    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
+      throw new SecurityPaused();
+    }
 
-export function getErrorCategory(errorCode: ErrorCode): ErrorCategory {
-  switch (true) {
-    case errorCode.startsWith(ErrorCategory.InputData):
-      return ErrorCategory.InputData;
-    case errorCode.startsWith(ErrorCategory.Logic):
-      return ErrorCategory.Logic;
-    default:
-      return ErrorCategory.System;
-  }
-}
+    const revocationRegistryEvmAddress: EvmAddress =
+      HEDERA_FORMAT_ID_REGEX.test(revocationRegistryId)
+        ? await this.mirrorNodeAdapter.accountToEvmAddress(revocationRegistryId)
+        : new EvmAddress(revocationRegistryId);
 
-export default class BaseError extends Error {
-  message: string;
-  errorCode: ErrorCode;
-  errorCategory: ErrorCategory;
+    const res = await handler.setRevocationRegistryAddress(
+      securityEvmAddress,
+      revocationRegistryEvmAddress,
+      securityId,
+    );
 
-  /**
-   * Generic Error Constructor
-   */
-  constructor(code: ErrorCode, msg: string) {
-    super(msg);
-    this.message = msg;
-    this.errorCode = code;
-    this.errorCategory = getErrorCategory(code);
-    Object.setPrototypeOf(this, BaseError.prototype);
-  }
-
-  toString(stack = false): string {
-    return `${this.errorCode} - ${stack ? this.stack : this.message}`;
+    return Promise.resolve(
+      new SetRevocationRegistryAddressCommandResponse(
+        res.error === undefined,
+        res.id!,
+      ),
+    );
   }
 }

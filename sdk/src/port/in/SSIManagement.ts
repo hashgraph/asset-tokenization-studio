@@ -203,108 +203,137 @@
 
 */
 
-export enum ErrorCode {
-  // Error codes for Input Data (Prefix: 1XXXX)
-  AccountIdInValid = '10001',
-  AccountIdNotExists = '10026',
-  ContractKeyInvalid = '10006',
-  EmptyValue = '10017',
-  InvalidAmount = '10008',
-  InvalidBytes = '10007',
-  InvalidBytes3 = '10003',
-  InvalidBytes32 = '10002',
-  InvalidContractId = '10014',
-  InvalidDividendType = '10028',
-  InvalidEvmAddress = '10023',
-  InvalidIdFormatHedera = '10009',
-  InvalidIdFormatHederaIdOrEvmAddress = '10010',
-  InvalidLength = '10016',
-  InvalidRange = '10018',
-  InvalidRegulationSubType = '10030',
-  InvalidRegulationSubTypeForType = '10031',
-  InvalidRegulationType = '10029',
-  InvalidRequest = '10024',
-  InvalidRole = '10019',
-  InvalidSecurityType = '10020',
-  InvalidType = '10015',
-  InvalidValue = '10021',
-  PublicKeyInvalid = '10004',
-  ValidationChecks = '10022',
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { LogError } from '../../core/decorator/LogErrorDecorator.js';
+import { handleValidation } from './Common';
+import { QueryBus } from '../../core/query/QueryBus';
+import Injectable from '../../core/Injectable';
+import { CommandBus } from '../../core/command/CommandBus';
+import SetRevocationRegistryAddressRequest from './request/SetRevocationRegistryAddressRequest';
+import AddIssuerRequest from './request/AddIssuerRequest';
+import RemoveIssuerRequest from './request/RemoveIssuerRequest';
+import { SetRevocationRegistryAddressCommand } from '../../app/usecase/command/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand.js';
+import { AddIssuerCommand } from '../../app/usecase/command/ssi/addIssuer/AddIssuerCommand.js';
+import { RemoveIssuerCommand } from '../../app/usecase/command/ssi/removeIssuer/RemoveIssuerCommand.js';
+import GetRevocationRegistryAddressRequest from './request/GetRevocationRegistryAddressRequest.js';
+import GetIssuerListCountRequest from './request/GetIssuerListCountRequest.js';
+import GetIssuerListMembersRequest from './request/GetIssuerListMembersRequest.js';
+import { GetRevocationRegistryAddressQuery } from '../../app/usecase/query/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery.js';
+import { GetIssuerListCountQuery } from '../../app/usecase/query/ssi/getIssuerListCount/GetIssuerListCountQuery.js';
+import { GetIssuerListMembersQuery } from '../../app/usecase/query/ssi/getIssuerListMembers/GetIssuerListMembersQuery.js';
+import IsIssuerRequest from './request/IsIssuerRequest.js';
+import { IsIssuerQuery } from '../../app/usecase/query/ssi/isIssuer/IsIssuerQuery.js';
 
-  // Error codes for Logic Errors (Prefix: 2XXXX)
-  AccountAlreadyInControlList = '20013',
-  AccountIsAlreadyAnIssuer = '20020',
-  AccountFreeze = '20008',
-  AccountInBlackList = '20011',
-  AccountNotAssociatedToSecurity = '20001',
-  AccountNotInControlList = '20015',
-  AccountNotInWhiteList = '20012',
-  InsufficientBalance = '20009',
-  InsufficientFunds = '20005',
-  InsufficientHoldBalance = '20019',
-  MaxSupplyReached = '20002',
-  NounceAlreadyUsed = '20016',
-  OperationNotAllowed = '20004',
-  PartitionsProtected = '20017',
-  PartitionsUnprotected = '20018',
-  RoleNotAssigned = '20003',
-  SecurityPaused = '20010',
-  SecurityUnPaused = '20014',
-
-  // Error codes for System Errors (Prefix: 3XXXX)
-  ContractNotFound = '30002',
-  InvalidResponse = '30005',
-  NotFound = '30006',
-  ReceiptNotReceived = '30001',
-  RuntimeError = '30004',
-  Unexpected = '30003',
-
-  // Error codes for Provider Errors (Prefix: 4XXXX)
-  DeploymentError = '40006', // Fixed typo here
-  InitializationError = '40001',
-  PairingError = '40002',
-  PairingRejected = '40008',
-  ProviderError = '40007',
-  SigningError = '40004',
-  TransactionCheck = '40003',
-  TransactionError = '40005',
+interface ISSIManagementInPort {
+  setRevocationRegistryAddress(
+    request: SetRevocationRegistryAddressRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  addIssuer(
+    request: AddIssuerRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  removeIssuer(
+    request: RemoveIssuerRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  getRevocationRegistryAddress(
+    request: GetRevocationRegistryAddressRequest,
+  ): Promise<string>;
+  getIssuerListCount(request: GetIssuerListCountRequest): Promise<number>;
+  getIssuerListMembers(request: GetIssuerListMembersRequest): Promise<string[]>;
+  isIssuer(request: IsIssuerRequest): Promise<boolean>;
 }
 
-export enum ErrorCategory {
-  InputData = '1',
-  Logic = '2',
-  System = '3',
-  Provider = '4',
-}
+class SSIManagementInPort implements ISSIManagementInPort {
+  constructor(
+    private readonly commandBus: CommandBus = Injectable.resolve(CommandBus),
+    private readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
+  ) {}
 
-export function getErrorCategory(errorCode: ErrorCode): ErrorCategory {
-  switch (true) {
-    case errorCode.startsWith(ErrorCategory.InputData):
-      return ErrorCategory.InputData;
-    case errorCode.startsWith(ErrorCategory.Logic):
-      return ErrorCategory.Logic;
-    default:
-      return ErrorCategory.System;
+  @LogError
+  async addIssuer(
+    request: AddIssuerRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, issuerId } = request;
+    handleValidation('AddIssuerRequest', request);
+
+    return await this.commandBus.execute(
+      new AddIssuerCommand(securityId, issuerId),
+    );
+  }
+
+  @LogError
+  async setRevocationRegistryAddress(
+    request: SetRevocationRegistryAddressRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, revocationRegistryId } = request;
+    handleValidation('SetRevocationRegistryAddressRequest', request);
+
+    return await this.commandBus.execute(
+      new SetRevocationRegistryAddressCommand(securityId, revocationRegistryId),
+    );
+  }
+
+  @LogError
+  async removeIssuer(
+    request: RemoveIssuerRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    const { securityId, issuerId } = request;
+    handleValidation('RemoveIssuerRequest', request);
+
+    return await this.commandBus.execute(
+      new RemoveIssuerCommand(securityId, issuerId),
+    );
+  }
+
+  @LogError
+  async getRevocationRegistryAddress(
+    request: GetRevocationRegistryAddressRequest,
+  ): Promise<string> {
+    const { securityId } = request;
+    handleValidation('GetRevocationRegistryAddressRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetRevocationRegistryAddressQuery(securityId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getIssuerListCount(
+    request: GetIssuerListCountRequest,
+  ): Promise<number> {
+    const { securityId } = request;
+    handleValidation('GetIssuerListCountRequest', request);
+
+    return (
+      await this.queryBus.execute(new GetIssuerListCountQuery(securityId))
+    ).payload;
+  }
+
+  @LogError
+  async getIssuerListMembers(
+    request: GetIssuerListMembersRequest,
+  ): Promise<string[]> {
+    const { securityId, start, end } = request;
+    handleValidation('GetIssuerListMembersRequest', request);
+
+    return (
+      await this.queryBus.execute(
+        new GetIssuerListMembersQuery(securityId, start, end),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async isIssuer(request: IsIssuerRequest): Promise<boolean> {
+    const { securityId, issuerId } = request;
+    handleValidation('IsIssuerRequest', request);
+
+    return (
+      await this.queryBus.execute(new IsIssuerQuery(securityId, issuerId))
+    ).payload;
   }
 }
 
-export default class BaseError extends Error {
-  message: string;
-  errorCode: ErrorCode;
-  errorCategory: ErrorCategory;
-
-  /**
-   * Generic Error Constructor
-   */
-  constructor(code: ErrorCode, msg: string) {
-    super(msg);
-    this.message = msg;
-    this.errorCode = code;
-    this.errorCategory = getErrorCategory(code);
-    Object.setPrototypeOf(this, BaseError.prototype);
-  }
-
-  toString(stack = false): string {
-    return `${this.errorCode} - ${stack ? this.stack : this.message}`;
-  }
-}
+const SSIManagement = new SSIManagementInPort();
+export default SSIManagement;
