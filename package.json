@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/hedera-asset-tokenization",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "asset tokenization",
   "scripts": {
     "install:all": "node install.js && npm run prepare",

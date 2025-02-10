@@ -239,7 +239,7 @@ export default class ControllerCreateHoldByPartitionRequest extends ValidatedReq
       amount: Validation.checkAmount(),
       escrow: Validation.checkHederaIdFormatOrEvmAddress(),
       sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
-      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
+      targetId: Validation.checkHederaIdFormatOrEvmAddress(true),
       expirationDate: (val) => {
         return SecurityDate.checkDateTimestamp(
           parseInt(val),

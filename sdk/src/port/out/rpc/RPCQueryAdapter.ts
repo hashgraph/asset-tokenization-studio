@@ -243,6 +243,7 @@ import {
   DiamondFacet__factory,
   ProtectedPartitions__factory,
   Hold_2__factory,
+  SSIManagement__factory,
   KYC__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
@@ -1266,6 +1267,52 @@ export class RPCQueryAdapter {
       hold.data_,
       hold.operatorData_,
     );
+  }
+
+  async getRevocationRegistryAddress(address: EvmAddress): Promise<string> {
+    LogService.logTrace(
+      `Getting Revocation Registry Address of ${address.toString()}`,
+    );
+
+    return await this.connect(
+      SSIManagement__factory,
+      address.toString(),
+    ).getRevocationRegistryAddress();
+  }
+
+  async getIssuerListCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting Issuer List Count of ${address.toString()}`);
+
+    const count = await this.connect(
+      SSIManagement__factory,
+      address.toString(),
+    ).getIssuerListCount();
+
+    return count.toNumber();
+  }
+
+  async getIssuerListMembers(
+    address: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting Issuer List Count of ${address.toString()} from ${start} to ${end}`,
+    );
+
+    return await this.connect(
+      SSIManagement__factory,
+      address.toString(),
+    ).getIssuerListMembers(start, end);
+  }
+
+  async isIssuer(address: EvmAddress, issuer: EvmAddress): Promise<boolean> {
+    LogService.logTrace(`Getting if ${issuer.toString()} is an Issuer`);
+
+    return await this.connect(
+      SSIManagement__factory,
+      address.toString(),
+    ).isIssuer(issuer.toString());
   }
 
   async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<number> {
