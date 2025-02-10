@@ -220,7 +220,7 @@ export default class ValidationService extends Service {
   async validateIssuer(securityId: string, issuerId: string): Promise<boolean> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     if (
-      !(await this.queryBus.execute(new IsIssuerQuery(securityId, issuerId)))
+      !((await this.queryBus.execute(new IsIssuerQuery(securityId, issuerId))).payload)
     ) {
       throw new UnlistedIssuer();
     } else {
