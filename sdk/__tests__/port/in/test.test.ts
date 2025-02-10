@@ -203,110 +203,327 @@
 
 */
 
-export enum ErrorCode {
-  // Error codes for Input Data (Prefix: 1XXXX)
-  AccountIdInValid = '10001',
-  AccountIdNotExists = '10026',
-  ContractKeyInvalid = '10006',
-  EmptyValue = '10017',
-  InvalidAmount = '10008',
-  InvalidBase64 = '10011',
-  InvalidBytes = '10007',
-  InvalidBytes3 = '10003',
-  InvalidBytes32 = '10002',
-  InvalidContractId = '10014',
-  InvalidDividendType = '10028',
-  InvalidEvmAddress = '10023',
-  InvalidIdFormatHedera = '10009',
-  InvalidIdFormatHederaIdOrEvmAddress = '10010',
-  InvalidLength = '10016',
-  InvalidRange = '10018',
-  InvalidRegulationSubType = '10030',
-  InvalidRegulationSubTypeForType = '10031',
-  InvalidRegulationType = '10029',
-  InvalidRequest = '10024',
-  InvalidRole = '10019',
-  InvalidSecurityType = '10020',
-  InvalidType = '10015',
-  InvalidValue = '10021',
-  PublicKeyInvalid = '10004',
-  ValidationChecks = '10022',
+import {
+  AddIssuerRequest,
+  CreateEquityRequest,
+  Equity,
+  GetKYCAccountsCountRequest,
+  GetKYCAccountsRequest,
+  GetKYCForRequest,
+  GrantKYCRequest,
+  LoggerTransports,
+  RevokeKYCRequest,
+  Role,
+  RoleRequest,
+  SDK,
+  Security,
+} from '../../../src';
+import {
+  CastRegulationSubType,
+  CastRegulationType,
+  RegulationSubType,
+  RegulationType,
+} from '../../../src/domain/context/factory/RegulationType';
+import { MirrorNode } from '../../../src/domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay';
+import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter';
+import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter';
+import NetworkService from '../../../src/app/service/NetworkService';
+import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter';
+import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel';
+import {
+  CLIENT_ACCOUNT_ECDSA,
+  CLIENT_ACCOUNT_ECDSA_A,
+  CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT,
+  FACTORY_ADDRESS,
+  RESOLVER_ADDRESS,
+} from '../../config';
+import Injectable from '../../../src/core/Injectable';
+import Account from '../../../src/domain/context/account/Account';
+import { ethers, Wallet } from 'ethers';
+import SSIManagement from '../../../src/port/in/SSIManagement';
+import { SecurityRole } from '../../../src/domain/context/security/SecurityRole.js';
+import { createEcdsaCredential, EthrDID } from '@terminal3/ecdsa_vc';
+import { DID, type VerificationOptions } from '@terminal3/vc_core';
+import PrivateKey from '../../../src/domain/context/account/PrivateKey.js';
 
-  // Error codes for Logic Errors (Prefix: 2XXXX)
-  AccountAlreadyInControlList = '20013',
-  AccountIsAlreadyAnIssuer = '20020',
-  AccountFreeze = '20008',
-  AccountInBlackList = '20011',
-  AccountNotAssociatedToSecurity = '20001',
-  AccountNotInControlList = '20015',
-  AccountNotInWhiteList = '20012',
-  InsufficientBalance = '20009',
-  InsufficientFunds = '20005',
-  InsufficientHoldBalance = '20019',
-  MaxSupplyReached = '20002',
-  NounceAlreadyUsed = '20016',
-  OperationNotAllowed = '20004',
-  PartitionsProtected = '20017',
-  PartitionsUnprotected = '20018',
-  RoleNotAssigned = '20003',
-  SecurityPaused = '20010',
-  SecurityUnPaused = '20014',
-  UnlistedIssuer = '20021',
+SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
-  // Error codes for System Errors (Prefix: 3XXXX)
-  ContractNotFound = '30002',
-  InvalidResponse = '30005',
-  NotFound = '30006',
-  ReceiptNotReceived = '30001',
-  RuntimeError = '30004',
-  Unexpected = '30003',
+const decimals = 0;
+const name = 'TEST_SECURITY_TOKEN';
+const symbol = 'TEST';
+const isin = 'ABCDE123456Z';
+const votingRight = true;
+const informationRight = false;
+const liquidationRight = true;
+const subscriptionRight = false;
+const conversionRight = true;
+const redemptionRight = false;
+const putRight = true;
+const dividendRight = 1;
+const currency = '0x345678';
+const numberOfShares = 0;
+const nominalValue = 1000;
+const regulationType = RegulationType.REG_D;
+const regulationSubType = RegulationSubType.B_506;
+const countries = 'AF,HG,BN';
+const info = 'Anything';
+const configId =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const configVersion = 1;
 
-  // Error codes for Provider Errors (Prefix: 4XXXX)
-  DeploymentError = '40006', // Fixed typo here
-  InitializationError = '40001',
-  PairingError = '40002',
-  PairingRejected = '40008',
-  ProviderError = '40007',
-  SigningError = '40004',
-  TransactionCheck = '40003',
-  TransactionError = '40005',
+const mirrorNode: MirrorNode = {
+  name: 'testmirrorNode',
+  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
+};
+
+const rpcNode: JsonRpcRelay = {
+  name: 'testrpcNode',
+  baseUrl: 'http://127.0.0.1:7546/api',
+};
+
+let th: RPCTransactionAdapter;
+let mirrorNodeAdapter: MirrorNodeAdapter;
+
+async function createVcT3(): Promise<string> {
+  const issuerPrivateKey = CLIENT_ACCOUNT_ECDSA.privateKey as PrivateKey;
+  const issuer = new EthrDID(issuerPrivateKey.key as string, 'polygon');
+  const holderDid = new DID(
+    'ethr',
+    CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+  );
+
+  // Creating a credential with BBS+ signature
+  const claims = { kyc: 'passed' };
+  const revocationRegistryAddress =
+    '0x77Fb69B24e4C659CE03fB129c19Ad591374C349e';
+  const didRegistryAddress = '0x312C15922c22B60f5557bAa1A85F2CdA4891C39a';
+  const provider = new ethers.providers.JsonRpcProvider(
+    'https://testnet.hashio.io/api',
+  );
+  const options = {
+    revocationRegistryAddress,
+    provider,
+    didRegistryAddress,
+  } as unknown as VerificationOptions;
+
+  const vc = await createEcdsaCredential(
+    issuer,
+    holderDid,
+    claims,
+    ['KycCredential'],
+    undefined,
+    undefined,
+    options,
+  );
+
+  const vcString = JSON.stringify(vc);
+  const vcBase64 = Buffer.from(vcString).toString('base64');
+
+  return vcBase64;
 }
 
-export enum ErrorCategory {
-  InputData = '1',
-  Logic = '2',
-  System = '3',
-  Provider = '4',
-}
+describe('🧪KYC tests', () => {
+  let ns: NetworkService;
+  let rpcQueryAdapter: RPCQueryAdapter;
+  let equity: SecurityViewModel;
 
-export function getErrorCategory(errorCode: ErrorCode): ErrorCategory {
-  switch (true) {
-    case errorCode.startsWith(ErrorCategory.InputData):
-      return ErrorCategory.InputData;
-    case errorCode.startsWith(ErrorCategory.Logic):
-      return ErrorCategory.Logic;
-    default:
-      return ErrorCategory.System;
-  }
-}
+  const url = 'http://127.0.0.1:7546';
+  const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
 
-export default class BaseError extends Error {
-  message: string;
-  errorCode: ErrorCode;
-  errorCategory: ErrorCategory;
+  const wallet = new Wallet(
+    CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
+    customHttpProvider,
+  );
 
-  /**
-   * Generic Error Constructor
-   */
-  constructor(code: ErrorCode, msg: string) {
-    super(msg);
-    this.message = msg;
-    this.errorCode = code;
-    this.errorCategory = getErrorCategory(code);
-    Object.setPrototypeOf(this, BaseError.prototype);
-  }
+  beforeAll(async () => {
+    try {
+      mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
+      mirrorNodeAdapter.set(mirrorNode);
 
-  toString(stack = false): string {
-    return `${this.errorCode} - ${stack ? this.stack : this.message}`;
-  }
-}
+      th = Injectable.resolve(RPCTransactionAdapter);
+      ns = Injectable.resolve(NetworkService);
+      rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
+
+      rpcQueryAdapter.init();
+      ns.environment = 'testnet';
+      ns.configuration = {
+        factoryAddress: FACTORY_ADDRESS,
+        resolverAddress: RESOLVER_ADDRESS,
+      };
+      ns.mirrorNode = mirrorNode;
+      ns.rpcNode = rpcNode;
+
+      await th.init(true);
+      const account = new Account({
+        id: CLIENT_ACCOUNT_ECDSA.id.toString(),
+        evmAddress: CLIENT_ACCOUNT_ECDSA.evmAddress,
+        alias: CLIENT_ACCOUNT_ECDSA.alias,
+        privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
+        publicKey: CLIENT_ACCOUNT_ECDSA.publicKey,
+      });
+      await th.register(account, true);
+
+      th.signerOrProvider = wallet;
+
+      const requestST = new CreateEquityRequest({
+        name,
+        symbol,
+        isin,
+        decimals,
+        isWhiteList: false,
+        isControllable: true,
+        arePartitionsProtected: false,
+        isMultiPartition: false,
+        diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares: numberOfShares.toString(),
+        nominalValue: nominalValue.toString(),
+        regulationType: CastRegulationType.toNumber(regulationType),
+        regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
+        isCountryControlListWhiteList: true,
+        countries,
+        info,
+        configId,
+        configVersion,
+      });
+
+      equity = (await Equity.create(requestST)).security;
+    } catch (error) {
+      console.error('Error in beforeAll setup:', error);
+    }
+  }, 900_000);
+
+  it('Grant and revoke KYC', async () => {
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._ISSUER_ROLE,
+      }),
+    );
+    await SSIManagement.addIssuer(
+      new AddIssuerRequest({
+        securityId: equity.evmDiamondAddress!,
+        issuerId: CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT as string,
+      }),
+    );
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._KYC_ROLE,
+      }),
+    );
+
+    const vcBase64 = await createVcT3();
+    const decodedVC = Buffer.from(vcBase64, 'base64').toString('utf-8');
+    const vcJson = JSON.parse(decodedVC);
+    const oneSecondBeforeNow = new Date(Date.now() - 1000).toISOString();
+    vcJson.validUntil = oneSecondBeforeNow;
+    const corruptedVcJson = JSON.stringify(vcJson);
+    const wrongVcBase64 = Buffer.from(corruptedVcJson).toString('base64');
+
+    await expect(
+      async () =>
+        (
+          await Security.grantKYC(
+            new GrantKYCRequest({
+              securityId: equity.evmDiamondAddress!,
+              targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+              vcBase64: wrongVcBase64,
+            }),
+          )
+        ).payload,
+    ).rejects.toThrow('Invalid VC');
+
+    expect(
+      (
+        await Security.grantKYC(
+          new GrantKYCRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            vcBase64: vcBase64,
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    expect(
+      await Security.getKYCAccounts(
+        new GetKYCAccountsRequest({
+          securityId: equity.evmDiamondAddress!,
+          kycStatus: 1,
+          start: 0,
+          end: 1,
+        }),
+      ),
+    ).toEqual([CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString()]);
+
+    expect(
+      await Security.getKYCAccountsCount(
+        new GetKYCAccountsCountRequest({
+          securityId: equity.evmDiamondAddress!,
+          kycStatus: 1,
+        }),
+      ),
+    ).toEqual(1);
+
+    expect(
+      await Security.getKYCFor(
+        new GetKYCForRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        }),
+      ),
+    ).toEqual(true);
+
+    expect(
+      (
+        await Security.revokeKYC(
+          new RevokeKYCRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    expect(
+      await Security.getKYCAccounts(
+        new GetKYCAccountsRequest({
+          securityId: equity.evmDiamondAddress!,
+          kycStatus: 1,
+          start: 0,
+          end: 1,
+        }),
+      ),
+    ).toEqual([]);
+
+    expect(
+      await Security.getKYCAccountsCount(
+        new GetKYCAccountsCountRequest({
+          securityId: equity.evmDiamondAddress!,
+          kycStatus: 1,
+        }),
+      ),
+    ).toEqual(0);
+
+    expect(
+      await Security.getKYCFor(
+        new GetKYCForRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        }),
+      ),
+    ).toEqual(false);
+  }, 600_000);
+});

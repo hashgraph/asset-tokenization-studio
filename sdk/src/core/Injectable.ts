@@ -326,6 +326,11 @@ import { GetIssuerListCountQueryHandler } from '../app/usecase/query/ssi/getIssu
 import { GetIssuerListMembersQueryHandler } from '../app/usecase/query/ssi/getIssuerListMembers/GetIssuerListMembersQueryHandler.js';
 import { GetRevocationRegistryAddressQueryHandler } from '../app/usecase/query/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQueryHandler.js';
 import { IsIssuerQueryHandler } from '../app/usecase/query/ssi/isIssuer/IsIssuerQueryHandler.js';
+import { GetKYCForQueryHandler } from '../app/usecase/query/security/kyc/getKycFor/GetKYCForQueryHandler.js';
+import { GetKYCAccountsCountQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsCount/GetKYCAccountsCountQueryHandler.js';
+import { GetKYCAccountsQueryHandler } from '../app/usecase/query/security/kyc/getKycAccounts/GetKYCAccountsQueryHandler.js';
+import { GrantKYCCommandHandler } from '../app/usecase/command/security/operations/kyc/grantKyc/GrantKYCCommandHandler.js';
+import { RevokeKYCCommandHandler } from '../app/usecase/command/security/operations/kyc/revokeKyc/RevokeKYCCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -445,6 +450,15 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: ProtectedCreateHoldByPartitionCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: GrantKYCCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RevokeKYCCommandHandler,
+  },
+
   // Bond Operations
   {
     token: TOKENS.COMMAND_HANDLER,
@@ -736,6 +750,18 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: IsIssuerQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCAccountsCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCAccountsQueryHandler,
   },
 ];
 
