@@ -217,15 +217,10 @@ export default class ValidationService extends Service {
     super();
   }
 
-  async validateIssuer(
-    securityId: string,
-    issuerId: string,
-  ): Promise<boolean> {
+  async validateIssuer(securityId: string, issuerId: string): Promise<boolean> {
     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     if (
-      !(await this.queryBus.execute(
-        new IsIssuerQuery(securityId, issuerId),
-      ))
+      !(await this.queryBus.execute(new IsIssuerQuery(securityId, issuerId)))
     ) {
       throw new UnlistedIssuer();
     } else {
@@ -233,19 +228,19 @@ export default class ValidationService extends Service {
     }
   }
 
-//   async validateKycAddresses(
-//     securityEvmAddress: EvmAddress,
-//     addresses: EvmAddress[],
-//   ): Promise<void> {
-//     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
-//     for (const address of addresses) {
-//       const isKycValid = await this.queryAdapter.getKYCFor(
-//         securityEvmAddress,
-//         address,
-//       );
-//       if (!isKycValid) {
-//         throw new NotGrantedRole(SecurityRole._KYC_ROLE);
-//       }
-//     }
-//   }
+  //   async validateKycAddresses(
+  //     securityEvmAddress: EvmAddress,
+  //     addresses: EvmAddress[],
+  //   ): Promise<void> {
+  //     this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+  //     for (const address of addresses) {
+  //       const isKycValid = await this.queryAdapter.getKYCFor(
+  //         securityEvmAddress,
+  //         address,
+  //       );
+  //       if (!isKycValid) {
+  //         throw new NotGrantedRole(SecurityRole._KYC_ROLE);
+  //       }
+  //     }
+  //   }
 }
