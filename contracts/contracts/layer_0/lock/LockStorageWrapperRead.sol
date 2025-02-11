@@ -215,8 +215,10 @@ import {CapStorageWrapperRead} from '../cap/CapStorageWrapperRead.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract LockStorageWrapperRead is CapStorageWrapperRead {
-    // error
+    // TODO: Create interface to the errors or carry to layer 1
     error WrongLockId();
+    error WrongExpirationTimestamp();
+    error LockExpirationNotReached();
 
     using LibCommon for EnumerableSet.UintSet;
 
@@ -233,6 +235,32 @@ abstract contract LockStorageWrapperRead is CapStorageWrapperRead {
         mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) lockIdsByAccountAndPartition;
         mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) lockIndexByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => uint256)) nextLockIdByAccountAndPartition;
+    }
+
+    modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp) {
+        if (_expirationTimestamp < _blockTimestamp())
+            revert WrongExpirationTimestamp();
+        _;
+    }
+
+    modifier onlyWithValidLockId(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) {
+        if (!_isLockIdInvalid(_getLockIndex(_partition, _tokenHolder, _lockId)))
+            revert WrongLockId();
+        _;
+    }
+
+    modifier onlyWithLockedExpirationTimestamp(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) {
+        if (!_isLockedExpirationTimestamp(_partition, _tokenHolder, _lockId))
+            revert LockExpirationNotReached();
+        _;
     }
 
     function _getLockedAmountFor(
@@ -313,7 +341,7 @@ abstract contract LockStorageWrapperRead is CapStorageWrapperRead {
         virtual
         returns (uint256 amount, uint256 expirationTimestamp)
     {
-        return _getLockForByPartitionAdjustedAt(partition, tokenHolder, lockId);
+        return _getLockForByPartitionAdjustedAt(partition, tokenHolder, lockId, _blockTimestamp());
     }
 
     function _getLockForByPartitionAdjustedAt(

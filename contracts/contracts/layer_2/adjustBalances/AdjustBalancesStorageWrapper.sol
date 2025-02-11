@@ -206,124 +206,71 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {Common} from '../../layer_1/common/Common.sol';
 import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+    IAdjustBalancesStorageWrapper
+} from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    _CORPORATE_ACTION_STORAGE_POSITION
+    _ADJUST_BALANCES_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
-import {
-    SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE
-} from '../constants/values.sol';
 
-contract CorporateActionsStorageWrapperRead is LocalContext {
-    using LibCommon for EnumerableSet.Bytes32Set;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    function _getCorporateAction(
-        bytes32 _corporateActionId
-    ) internal view virtual returns (bytes32 actionType_, bytes memory data_) {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        actionType_ = corporateActions_
-            .actionsData[_corporateActionId]
-            .actionType;
-        data_ = corporateActions_.actionsData[_corporateActionId].data;
+contract AdjustBalancesStorageWrapper is IAdjustBalancesStorageWrapper, Common {
+    modifier checkFactor(uint256 _factor) {
+        if (_factor == 0) revert FactorIsZero();
+        _;
     }
 
-    function _getCorporateActionCount()
-        internal
-        view
-        virtual
-        returns (uint256 corporateActionCount_)
-    {
-        return _corporateActionsStorage().actions.length();
+    function _adjustBalances(uint256 _factor, uint8 _decimals) internal {
+        _beforeBalanceAdjustment();
+        _adjustTotalSupply(_factor);
+        _adjustDecimals(_decimals);
+        _adjustMaxSupply(_factor);
+        _updateAbaf(_factor);
+        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
     }
 
-    function _getCorporateActionIds(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
-            _pageIndex,
-            _pageLength
-        );
+    // solhint-disable no-unused-vars
+    function _beforeBalanceAdjustment() internal virtual {
+        // TODO: Verify correctness
+        _updateDecimalsSnapshot(_decimals());
+        _updateAbafSnapshot(_getAbaf());
+        _updateAssetTotalSupplySnapshot(_totalSupply());
     }
 
-    function _getCorporateActionCountByType(
-        bytes32 _actionType
-    ) internal view virtual returns (uint256 corporateActionCount_) {
-        return _corporateActionsStorage().actionsByType[_actionType].length();
+    function _getHoldLabafByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder
+    ) internal view returns (uint256) {
+        // TODO: Add with holds impl.
+        //        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+        //        if (holdIndex == 0) return 0;
+        //        return _getHoldLabafByIndex(_partition, _tokenHolder, holdIndex);
+        return 0;
     }
 
-    function _getCorporateActionIdsByType(
-        bytes32 _actionType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage()
-            .actionsByType[_actionType]
-            .getFromSet(_pageIndex, _pageLength);
+    function _getLockLabafByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) internal view returns (uint256) {
+        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
+        if (lockIndex == 0) return 0;
+        return _getLockLabafByIndex(_partition, _tokenHolder, lockIndex);
     }
 
-    function _getResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
-        bytes memory result;
+    function _getLabafByUserAndPartition(
+        bytes32 _partition,
+        address _account
+    ) internal view returns (uint256) {
+        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
+            _account
+        ][_partition];
 
-        if (_getCorporateActionResultCount(actionId) > resultId)
-            result = _getCorporateActionResult(actionId, resultId);
-
-        return result;
-    }
-
-    function _getCorporateActionResultCount(
-        bytes32 actionId
-    ) internal view virtual returns (uint256) {
-        return _corporateActionsStorage().actionsData[actionId].results.length;
-    }
-
-    /**
-     * @dev returns a corporate action result.
-     *
-     * @param actionId The corporate action Id
-     */
-    function _getCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
+        if (partitionsIndex == 0) return 0;
         return
-            _corporateActionsStorage().actionsData[actionId].results[resultId];
-    }
-
-    function _isSnapshotTaskType(bytes memory data) internal returns (bool) {
-        return abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE;
-    }
-
-    function _isBalanceAdjustmentTaskType(
-        bytes memory data
-    ) internal returns (bool) {
-        return abi.decode(data, (bytes32)) == BALANCE_ADJUSTMENT_TASK_TYPE;
-    }
-
-    function _corporateActionsStorage()
-        internal
-        pure
-        virtual
-        returns (CorporateActionDataStorage storage corporateActions_)
-    {
-        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            corporateActions_.slot := position
-        }
+            _getAdjustBalancesStorage().labafUserPartition[_account][
+                partitionsIndex - 1
+            ];
     }
 }

@@ -205,125 +205,220 @@
 
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {
+    IAdjustBalances
+} from '../interfaces/adjustBalances/IAdjustBalances.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {_BALANCE_ADJUSTMENTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {AdjustBalancesStorageWrapper} from './AdjustBalancesStorageWrapper.sol';
 
-import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {LibCommon} from '../../layer_0/common/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    _CORPORATE_ACTION_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
-import {
-    SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE
-} from '../constants/values.sol';
-
-contract CorporateActionsStorageWrapperRead is LocalContext {
-    using LibCommon for EnumerableSet.Bytes32Set;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    function _getCorporateAction(
-        bytes32 _corporateActionId
-    ) internal view virtual returns (bytes32 actionType_, bytes memory data_) {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        actionType_ = corporateActions_
-            .actionsData[_corporateActionId]
-            .actionType;
-        data_ = corporateActions_.actionsData[_corporateActionId].data;
+contract AdjustBalances is
+    IAdjustBalances,
+    IStaticFunctionSelectors,
+    AdjustBalancesStorageWrapper
+{
+    function adjustBalances(
+        uint256 factor,
+        uint8 decimals
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_ADJUSTMENT_BALANCE_ROLE)
+        checkFactor(factor)
+        returns (bool success_)
+    {
+        _triggerScheduledTasks(0, _blockTimestamp());
+        _adjustBalances(factor, decimals);
+        success_ = true;
     }
 
-    function _getCorporateActionCount()
-        internal
+    function getAbaf() external view virtual override returns (uint256) {
+        return _getAbaf();
+    }
+
+    function getAbafAdjusted()
+        external
         view
         virtual
-        returns (uint256 corporateActionCount_)
+        override
+        returns (uint256)
     {
-        return _corporateActionsStorage().actions.length();
+        return _getAbafAdjusted();
     }
 
-    function _getCorporateActionIds(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
-            _pageIndex,
-            _pageLength
-        );
+    function getAbafAdjustedAt(
+        uint256 _timestamp
+    ) external view virtual override returns (uint256) {
+        return _getAbafAdjustedAt(_timestamp);
     }
 
-    function _getCorporateActionCountByType(
-        bytes32 _actionType
-    ) internal view virtual returns (uint256 corporateActionCount_) {
-        return _corporateActionsStorage().actionsByType[_actionType].length();
+    function getLabafByUser(
+        address _account
+    ) external view virtual override returns (uint256) {
+        return _getLabafByUser(_account);
     }
 
-    function _getCorporateActionIdsByType(
-        bytes32 _actionType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage()
-            .actionsByType[_actionType]
-            .getFromSet(_pageIndex, _pageLength);
+    function getLabafByPartition(
+        bytes32 _partition
+    ) external view virtual override returns (uint256) {
+        return _getLabafByPartition(_partition);
     }
 
-    function _getResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
-        bytes memory result;
-
-        if (_getCorporateActionResultCount(actionId) > resultId)
-            result = _getCorporateActionResult(actionId, resultId);
-
-        return result;
+    function getLabafByUserAndPartition(
+        bytes32 _partition,
+        address _account
+    ) external view virtual override returns (uint256) {
+        return _getLabafByUserAndPartition(_partition, _account);
     }
 
-    function _getCorporateActionResultCount(
-        bytes32 actionId
-    ) internal view virtual returns (uint256) {
-        return _corporateActionsStorage().actionsData[actionId].results.length;
+    function getAllowanceLabaf(
+        address _owner,
+        address _spender
+    ) external view virtual override returns (uint256) {
+        return _getAllowanceLabaf(_owner, _spender);
     }
 
-    /**
-     * @dev returns a corporate action result.
-     *
-     * @param actionId The corporate action Id
-     */
-    function _getCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
-        return
-            _corporateActionsStorage().actionsData[actionId].results[resultId];
+    function getTotalLockLabaf(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getTotalLockLabaf(_tokenHolder);
     }
 
-    function _isSnapshotTaskType(bytes memory data) internal returns (bool) {
-        return abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE;
+    function getTotalLockLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getTotalLockLabafByPartition(_partition, _tokenHolder);
     }
 
-    function _isBalanceAdjustmentTaskType(
-        bytes memory data
-    ) internal returns (bool) {
-        return abi.decode(data, (bytes32)) == BALANCE_ADJUSTMENT_TASK_TYPE;
+    function getLockLabafByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex
+    ) external view virtual override returns (uint256) {
+        return _getLockLabafByIndex(_partition, _tokenHolder, _lockIndex);
     }
 
-    function _corporateActionsStorage()
-        internal
+    function getLockLabafByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getLockLabafByPartition(_partition, _lockId, _tokenHolder);
+    }
+
+    function getTotalHeldLabaf(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getTotalHeldLabaf(_tokenHolder);
+    }
+
+    function getTotalHeldLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getTotalHeldLabafByPartition(_partition, _tokenHolder);
+    }
+
+    function getHoldLabafByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex
+    ) external view virtual override returns (uint256) {
+        return _getHoldLabafByIndex(_partition, _tokenHolder, _holdIndex);
+    }
+
+    function getHoldLabafByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
+    }
+
+    function getStaticResolverKey()
+        external
         pure
         virtual
-        returns (CorporateActionDataStorage storage corporateActions_)
+        override
+        returns (bytes32 staticResolverKey_)
     {
-        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            corporateActions_.slot := position
-        }
+        staticResolverKey_ = _BALANCE_ADJUSTMENTS_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](16);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .adjustBalances
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getAbaf.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getAbafAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getAbafAdjustedAt
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLabafByUser
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLabafByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLabafByUserAndPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getAllowanceLabaf
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalLockLabaf
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalLockLabafByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockLabafByIndex
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getLockLabafByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalHeldLabaf
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalHeldLabafByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldLabafByIndex
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldLabafByPartition
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IAdjustBalances)
+            .interfaceId;
     }
 }

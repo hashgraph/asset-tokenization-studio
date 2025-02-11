@@ -206,7 +206,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC20_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
 import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
 import {
@@ -220,16 +219,6 @@ abstract contract ERC20StorageWrapper is
     IERC20StorageWrapper,
     ERC1410StandardStorageWrapper
 {
-    struct ERC20Storage {
-        string name;
-        string symbol;
-        string isin;
-        uint8 decimals;
-        bool initialized;
-        mapping(address => mapping(address => uint256)) allowed;
-        SecurityType securityType;
-    }
-
     /**
      * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
      * Beware that changing an allowance with this method brings the risk that someone may use both the old
@@ -435,18 +424,5 @@ abstract contract ERC20StorageWrapper is
             info: erc20Info,
             securityType: erc20Storage.securityType
         });
-    }
-
-    function _getErc20Storage()
-        internal
-        view
-        virtual
-        returns (ERC20Storage storage erc20Storage_)
-    {
-        bytes32 position = _ERC20_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc20Storage_.slot := position
-        }
     }
 }
