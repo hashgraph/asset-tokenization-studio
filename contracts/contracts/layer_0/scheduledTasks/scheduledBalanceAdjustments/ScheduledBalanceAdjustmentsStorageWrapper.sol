@@ -213,9 +213,6 @@ import {
     CorporateActionDataStorage
 } from '../../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
 import {
-    CorporateActionsStorageWrapperRead
-} from '../../corporateActions/CorporateActionsStorageWrapperRead.sol';
-import {
     ScheduledTask
 } from '../../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 import {

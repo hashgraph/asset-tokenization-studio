@@ -207,8 +207,8 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ScheduledTasksCommon
-} from '../../layer_0/scheduledTasks/ScheduledTasksCommon.sol';
+    CorporateActionsStorageWrapper_2
+} from '../../layer_0/corporateActions/CorporateActionsStorageWrapper_2.sol';
 import {
     ControlListStorageWrapper
 } from '../controlList/ControlListStorageWrapper.sol';
@@ -223,7 +223,7 @@ abstract contract Common is
     PauseStorageWrapper,
     ControlListStorageWrapper,
     ProtectedPartitionsStorageWrapper,
-    ScheduledTasksCommon
+    CorporateActionsStorageWrapper_2
 {
     error AlreadyInitialized();
     error OnlyDelegateAllowed();

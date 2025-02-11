@@ -220,12 +220,57 @@ import {
 import {LocalContext} from '../context/LocalContext.sol';
 import {
     SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE
+    BALANCE_ADJUSTMENT_TASK_TYPE,
+    SNAPSHOT_RESULT_ID
 } from '../constants/values.sol';
 
-contract CorporateActionsStorageWrapperRead is LocalContext {
+contract CorporateActionsStorageWrapper_1 is LocalContext {
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    function _onScheduledSnapshotTriggered(
+        uint256 _snapShotID,
+        bytes memory _data
+    ) internal virtual {
+        if (_data.length > 0) {
+            bytes32 actionId = abi.decode(_data, (bytes32));
+            _addSnapshotToAction(actionId, _snapShotID);
+        }
+    }
+
+    function _addSnapshotToAction(
+        bytes32 _actionId,
+        uint256 _snapshotId
+    ) internal virtual {
+        bytes memory result = abi.encodePacked(_snapshotId);
+
+        _updateCorporateActionResult(_actionId, SNAPSHOT_RESULT_ID, result);
+    }
+
+    function _updateCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId,
+        bytes memory newResult
+    ) internal virtual {
+        CorporateActionDataStorage
+            storage corporateActions_ = _corporateActionsStorage();
+        bytes[] memory results = corporateActions_
+            .actionsData[actionId]
+            .results;
+
+        if (results.length > resultId) {
+            corporateActions_.actionsData[actionId].results[
+                resultId
+            ] = newResult;
+            return;
+        }
+
+        for (uint256 i = results.length; i < resultId; i++) {
+            corporateActions_.actionsData[actionId].results.push('');
+        }
+
+        corporateActions_.actionsData[actionId].results.push(newResult);
+    }
 
     function _getCorporateAction(
         bytes32 _corporateActionId
@@ -304,13 +349,15 @@ contract CorporateActionsStorageWrapperRead is LocalContext {
             _corporateActionsStorage().actionsData[actionId].results[resultId];
     }
 
-    function _isSnapshotTaskType(bytes memory data) internal returns (bool) {
+    function _isSnapshotTaskType(
+        bytes memory data
+    ) internal pure returns (bool) {
         return abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE;
     }
 
     function _isBalanceAdjustmentTaskType(
         bytes memory data
-    ) internal returns (bool) {
+    ) internal pure returns (bool) {
         return abi.decode(data, (bytes32)) == BALANCE_ADJUSTMENT_TASK_TYPE;
     }
 

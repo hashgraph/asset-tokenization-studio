@@ -210,16 +210,14 @@ import {MappingLib} from '../common/MappingLib.sol';
 import {
     _ADJUST_BALANCES_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
-import {
-    ERC20StorageWrapperRead
-} from '../ERC1400/ERC20/ERC20StorageWrapperRead.sol';
+import {ScheduledTasksCommon} from '../scheduledTasks/ScheduledTasksCommon.sol';
 import {
     IAdjustBalancesStorageWrapper
 } from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
 
 contract AdjustBalancesStorageWrapper_2 is
     IAdjustBalancesStorageWrapper,
-    ERC20StorageWrapperRead
+    ScheduledTasksCommon
 {
     // solhint-disable no-unused-vars
     function _adjustBalances(uint256 _factor, uint8 _decimals) internal {

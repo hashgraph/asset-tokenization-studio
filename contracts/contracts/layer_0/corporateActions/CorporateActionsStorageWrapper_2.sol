@@ -231,7 +231,7 @@ import {
     AdjustBalancesStorageWrapper_2
 } from '../adjustBalances/AdjustBalancesStorageWrapper_2.sol';
 
-contract CorporateActionsStorageWrapper is
+contract CorporateActionsStorageWrapper_2 is
     ICorporateActionsStorageWrapper,
     AdjustBalancesStorageWrapper_2
 {
@@ -386,16 +386,6 @@ contract CorporateActionsStorageWrapper is
         }*/
     }
 
-    function _onScheduledSnapshotTriggered(
-        uint256 _snapShotID,
-        bytes memory _data
-    ) internal virtual {
-        if (_data.length > 0) {
-            bytes32 actionId = abi.decode(_data, (bytes32));
-            _addSnapshotToAction(actionId, _snapShotID);
-        }
-    }
-
     function _onScheduledBalanceAdjustmentTriggered(
         bytes memory _data
     ) internal virtual {
@@ -420,15 +410,6 @@ contract CorporateActionsStorageWrapper is
         }
     }
 
-    function _addSnapshotToAction(
-        bytes32 _actionId,
-        uint256 _snapshotId
-    ) internal virtual {
-        bytes memory result = abi.encodePacked(_snapshotId);
-
-        _updateCorporateActionResult(_actionId, SNAPSHOT_RESULT_ID, result);
-    }
-
     function _getSnapshotID(
         bytes32 _actionId
     ) internal view virtual returns (uint256) {
@@ -446,120 +427,5 @@ contract CorporateActionsStorageWrapper is
         }
 
         return snapshotId;
-    }
-
-    function _getCorporateAction(
-        bytes32 _corporateActionId
-    ) internal view virtual returns (bytes32 actionType_, bytes memory data_) {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        actionType_ = corporateActions_
-            .actionsData[_corporateActionId]
-            .actionType;
-        data_ = corporateActions_.actionsData[_corporateActionId].data;
-    }
-
-    function _getCorporateActionCount()
-        internal
-        view
-        virtual
-        returns (uint256 corporateActionCount_)
-    {
-        return _corporateActionsStorage().actions.length();
-    }
-
-    function _getCorporateActionIds(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function _getCorporateActionCountByType(
-        bytes32 _actionType
-    ) internal view virtual returns (uint256 corporateActionCount_) {
-        return _corporateActionsStorage().actionsByType[_actionType].length();
-    }
-
-    function _getCorporateActionIdsByType(
-        bytes32 _actionType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage()
-            .actionsByType[_actionType]
-            .getFromSet(_pageIndex, _pageLength);
-    }
-
-    function _updateCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId,
-        bytes memory newResult
-    ) internal virtual {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        bytes[] memory results = corporateActions_
-            .actionsData[actionId]
-            .results;
-
-        if (results.length > resultId) {
-            corporateActions_.actionsData[actionId].results[
-                resultId
-            ] = newResult;
-            return;
-        }
-
-        for (uint256 i = results.length; i < resultId; i++) {
-            corporateActions_.actionsData[actionId].results.push('');
-        }
-
-        corporateActions_.actionsData[actionId].results.push(newResult);
-    }
-
-    function _getResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
-        bytes memory result;
-
-        if (_getCorporateActionResultCount(actionId) > resultId)
-            result = _getCorporateActionResult(actionId, resultId);
-
-        return result;
-    }
-
-    function _getCorporateActionResultCount(
-        bytes32 actionId
-    ) internal view virtual returns (uint256) {
-        return _corporateActionsStorage().actionsData[actionId].results.length;
-    }
-
-    /**
-     * @dev returns a corporate action result.
-     *
-     * @param actionId The corporate action Id
-     */
-    function _getCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
-        return
-            _corporateActionsStorage().actionsData[actionId].results[resultId];
-    }
-
-    function _corporateActionsStorage()
-        internal
-        pure
-        virtual
-        returns (CorporateActionDataStorage storage corporateActions_)
-    {
-        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            corporateActions_.slot := position
-        }
     }
 }

@@ -207,8 +207,8 @@
 pragma solidity 0.8.18;
 
 import {
-    CorporateActionsStorageWrapperRead
-} from '../corporateActions/CorporateActionsStorageWrapperRead.sol';
+    CorporateActionsStorageWrapper_1
+} from '../corporateActions/CorporateActionsStorageWrapper_1.sol';
 import {
     ArraysUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
@@ -223,7 +223,7 @@ import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 // solhint-disable no-unused-vars, custom-errors
 abstract contract SnapshotsStorageWrapperRead is
     ISnapshotsStorageWrapper,
-    CorporateActionsStorageWrapperRead
+    CorporateActionsStorageWrapper_1
 {
     using ArraysUpgradeable for uint256[];
     using CountersUpgradeable for CountersUpgradeable.Counter;

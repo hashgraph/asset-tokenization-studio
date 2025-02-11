@@ -263,49 +263,14 @@ abstract contract LockStorageWrapperRead is CapStorageWrapperRead {
         _;
     }
 
-    function _getLockedAmountFor(
+    function _getLockedAmountForByPartition(
+        bytes32 _partition,
         address _tokenHolder
     ) internal view returns (uint256) {
-        return _getLockedAmountForAdjustedAt(_tokenHolder, _blockTimestamp());
-    }
-
-    function _getLockedAmountForAdjustedAt(
-        address tokenHolder,
-        uint256 timestamp
-    ) internal view returns (uint256) {
-        uint256 factor = _calculateFactorForLockedAmountByTokenHolderAdjustedAt(
-            tokenHolder,
-            timestamp
-        );
-        return _lockStorage().totalLockedAmountByAccount[tokenHolder] * factor;
-    }
-
-    function _getLockedAmountForByPartition(
-        bytes32 partition,
-        address tokenHolder
-    ) internal view returns (uint256) {
         return
-            _getLockedAmountForByPartitionAdjustedAt(
-                partition,
-                tokenHolder,
-                _blockTimestamp()
-            );
-    }
-
-    function _getLockedAmountForByPartitionAdjustedAt(
-        bytes32 partition,
-        address tokenHolder,
-        uint256 timestamp
-    ) internal view returns (uint256) {
-        return
-            _lockStorage().totalLockedAmountByAccountAndPartition[tokenHolder][
-                partition
-            ] *
-            _calculateFactorForLockedAmountByTokenHolderAndPartitionAdjustedAt(
-                tokenHolder,
-                partition,
-                timestamp
-            );
+            _lockStorage().totalLockedAmountByAccountAndPartition[_tokenHolder][
+                _partition
+            ];
     }
 
     function _getLockCountForByPartition(
