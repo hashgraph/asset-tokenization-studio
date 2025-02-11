@@ -206,13 +206,13 @@
 pragma solidity 0.8.18;
 
 import {
-    AdjustBalancesStorageWrapperRead
-} from '../adjustBalances/AdjustBalancesStorageWrapperRead.sol';
+    AdjustBalancesStorageWrapper_1
+} from '../adjustBalances/AdjustBalancesStorageWrapper_1.sol';
 import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 // solhint-disable no-unused-vars, custom-errors
-contract CapStorageWrapperRead is AdjustBalancesStorageWrapperRead {
+contract CapStorageWrapperRead is AdjustBalancesStorageWrapper_1 {
     struct CapDataStorage {
         uint256 maxSupply;
         mapping(bytes32 => uint256) maxSupplyByPartition;

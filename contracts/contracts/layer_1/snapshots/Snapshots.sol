@@ -209,16 +209,10 @@ pragma solidity 0.8.18;
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410SnapshotStorageWrapper.sol';
 import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
+import {Common} from '../common/Common.sol';
 
-abstract contract Snapshots is
-    IStaticFunctionSelectors,
-    ISnapshots,
-    ERC1410SnapshotStorageWrapper
-{
+abstract contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
     function balanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder

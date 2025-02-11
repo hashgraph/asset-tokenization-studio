@@ -206,170 +206,219 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1644} from '../../interfaces/ERC1400/IERC1644.sol';
-import {_DEFAULT_ADMIN_ROLE, _CONTROLLER_ROLE} from '../../constants/roles.sol';
+import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
+import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_ERC1644_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {Common} from '../../common/Common.sol';
+    IERC20StorageWrapper
+} from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';
+import {
+    ERC1410StandardStorageWrapper
+} from '../ERC1410/ERC1410StandardStorageWrapper.sol';
 
-contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1644(
-        bool _controllable
-    )
-        external
-        virtual
-        override
-        onlyUninitialized(_getErc1644Storage().initialized)
-    {
-        _getErc1644Storage().isControllable = _controllable;
-        _getErc1644Storage().initialized = true;
-    }
-
-    // solhint-disable no-unused-vars
+abstract contract ERC20StorageWrapper is
+    IERC20StorageWrapper,
+    ERC1410StandardStorageWrapper
+{
     /**
-     * @notice This function allows an authorised address to transfer tokens between any two token holders.
-     * The transfer must still respect the balances of the token holders (so the transfer must be for at most
-     * `balanceOf(_from)` tokens) and potentially also need to respect other transfer restrictions.
-     * @dev This function can only be executed by the `controller` address.
-     * @param _from Address The address which you want to send tokens from
-     * @param _to Address The address which you want to transfer to
-     * @param _value uint256 the amount of tokens to be transferred
-     * @param _data data to validate the transfer. (It is not used in this reference implementation
-     * because use of `_data` parameter is implementation specific).
-     * @param _operatorData data attached to the transfer by controller to emit in event. (It is more like a reason
-     * string for calling this function (aka force transfer) which provides the transparency on-chain).
+     * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
+     * Beware that changing an allowance with this method brings the risk that someone may use both the old
+     * and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
+     * race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     * @param spender The address which will spend the funds.
+     * @param value The amount of tokens to be spent.
      */
-    function controllerTransfer(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    )
-        external
-        virtual
-        override
-        onlyRole(_CONTROLLER_ROLE)
-        onlyUnpaused
-        //onlyWithoutMultiPartition
-        onlyControllable
-    {
-        _controllerTransfer(_from, _to, _value, _data, _operatorData);
+    function _approve(
+        address spender,
+        uint256 value
+    ) internal virtual returns (bool) {
+        if (spender == address(0)) {
+            revert SpenderWithZeroAddress();
+        }
+
+        _getErc20Storage().allowed[_msgSender()][spender] = value;
+        emit Approval(_msgSender(), spender, value);
+        return true;
     }
 
     /**
-     * @notice This function allows an authorised address to redeem tokens for any token holder.
-     * The redemption must still respect the balances of the token holder (so the redemption must be for at most
-     * `balanceOf(_tokenHolder)` tokens) and potentially also need to respect other transfer restrictions.
-     * @dev This function can only be executed by the `controller` address.
-     * @param _tokenHolder The account whose tokens will be redeemed.
-     * @param _value uint256 the amount of tokens need to be redeemed.
-     * @param _data data to validate the transfer. (It is not used in this reference implementation
-     * because use of `_data` parameter is implementation specific).
-     * @param _operatorData data attached to the transfer by controller to emit in event. (It is more like a reason
-     * string for calling this function (aka force transfer) which provides the transparency on-chain).
+     * @dev Increase the amount of tokens that an owner allowed to a spender.
+     * approve should be called when allowed_[_spender] == 0. To increment
+     * allowed value is better to use this function to avoid 2 calls (and wait until
+     * the first transaction is mined)
+     * From MonolithDAO Token.sol
+     * @param spender The address which will spend the funds.
+     * @param addedValue The amount of tokens to increase the allowance by.
      */
-    function controllerRedeem(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    )
-        external
-        virtual
-        override
-        onlyRole(_CONTROLLER_ROLE)
-        onlyUnpaused
-        //onlyWithoutMultiPartition
-        onlyControllable
-    {
-        _controllerRedeem(_tokenHolder, _value, _data, _operatorData);
-    }
+    function _increaseAllowance(
+        address spender,
+        uint256 addedValue
+    ) internal virtual returns (bool) {
+        if (spender == address(0)) {
+            revert SpenderWithZeroAddress();
+        }
+        _beforeAllowanceUpdate(_msgSender(), spender, addedValue, true);
 
-    // solhint-disable no-empty-blocks
-    function _beforeTokenTransfer(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value
-    ) internal virtual override {}
-
-    // solhint-enable no-empty-blocks
-    // solhint-enable no-unused-vars
-
-    /**
-     * @notice In order to provide transparency over whether `controllerTransfer` / `controllerRedeem` are useable
-     * or not `isControllable` function will be used.
-     * @dev If `isControllable` returns `false` then it always return `false` and
-     * `controllerTransfer` / `controllerRedeem` will always revert.
-     * @return bool `true` when controller address is non-zero otherwise return `false`.
-     */
-    function isControllable() external view virtual override returns (bool) {
-        return _isControllable();
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _ERC1644_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        staticFunctionSelectors_ = new bytes4[](5);
-        uint256 selectorsIndex;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .initialize_ERC1644
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .isControllable
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .controllerTransfer
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .controllerRedeem
-            .selector;
-        staticFunctionSelectors_[selectorsIndex++] = this
-            .finalizeControllable
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IERC1644).interfaceId;
+        _getErc20Storage().allowed[_msgSender()][spender] += addedValue;
+        emit Approval(
+            _msgSender(),
+            spender,
+            _getErc20Storage().allowed[_msgSender()][spender]
+        );
+        return true;
     }
 
     /**
-     * @notice It is used to end the controller feature from the token
-     * @dev It only be called by the `owner/issuer` of the token
+     * @dev Decrease the amount of tokens that an owner allowed to a spender.
+     * approve should be called when allowed_[_spender] == 0. To decrement
+     * allowed value is better to use this function to avoid 2 calls (and wait until
+     * the first transaction is mined)
+     * From MonolithDAO Token.sol
+     * @param spender The address which will spend the funds.
+     * @param subtractedValue The amount of tokens to decrease the allowance by.
      */
-    function finalizeControllable()
-        external
+    function _decreaseAllowance(
+        address spender,
+        uint256 subtractedValue
+    ) internal virtual returns (bool) {
+        if (spender == address(0)) {
+            revert SpenderWithZeroAddress();
+        }
+        _decreaseAllowedBalance(_msgSender(), spender, subtractedValue);
+        emit Approval(
+            _msgSender(),
+            spender,
+            _getErc20Storage().allowed[_msgSender()][spender]
+        );
+        return true;
+    }
+
+    /**
+     * @dev Function to check the amount of tokens that an owner allowed to a spender.
+     * @param owner address The address which owns the funds.
+     * @param spender address The address which will spend the funds.
+     * @return A uint256 specifying the amount of tokens still available for the spender.
+     */
+    function _allowance(
+        address owner,
+        address spender
+    ) internal view virtual returns (uint256) {
+        return _getErc20Storage().allowed[owner][spender];
+    }
+
+    function _transferFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual returns (bool) {
+        _decreaseAllowedBalance(from, spender, value);
+        bytes memory data;
+        _transferByPartition(
+            from,
+            to,
+            value,
+            _DEFAULT_PARTITION,
+            data,
+            spender,
+            ''
+        );
+        return _emitTransferEvent(from, to, value);
+    }
+
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual returns (bool) {
+        _transferByPartition(
+            from,
+            to,
+            value,
+            _DEFAULT_PARTITION,
+            '',
+            address(0),
+            ''
+        );
+        return _emitTransferEvent(from, to, value);
+    }
+
+    function _mint(address to, uint256 value) internal virtual {
+        bytes memory _data;
+        _issueByPartition(_DEFAULT_PARTITION, to, value, _data);
+        _emitTransferEvent(address(0), to, value);
+    }
+
+    function _burn(address from, uint256 value) internal virtual {
+        bytes memory _data;
+        _redeemByPartition(
+            _DEFAULT_PARTITION,
+            from,
+            address(0),
+            value,
+            _data,
+            _data
+        );
+        _emitTransferEvent(from, address(0), value);
+    }
+
+    function _burnFrom(address account, uint256 value) internal virtual {
+        _decreaseAllowedBalance(account, _msgSender(), value);
+        _burn(account, value);
+    }
+
+    function _decreaseAllowedBalance(
+        address from,
+        address spender,
+        uint256 value
+    ) internal {
+        _beforeAllowanceUpdate(from, spender, value, false);
+
+        ERC20Storage storage erc20Storage = _getErc20Storage();
+
+        if (value > erc20Storage.allowed[from][spender]) {
+            revert InsufficientAllowance(spender, from);
+        }
+
+        erc20Storage.allowed[from][spender] -= value;
+    }
+
+    // solhint-disable no-unused-vars, custom-errors
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
+        uint256 _amount,
+        bool _isIncrease
+    ) internal virtual {
+        revert('Should not reach this function');
+    }
+    // solhint-enable no-unused-vars, custom-errors
+
+    function _emitTransferEvent(
+        address from,
+        address to,
+        uint256 value
+    ) private returns (bool) {
+        emit Transfer(from, to, value);
+        return true;
+    }
+
+    function _getERC20Metadata()
+        internal
+        view
         virtual
-        override
-        onlyRole(_DEFAULT_ADMIN_ROLE)
-        onlyControllable
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
     {
-        _finalizeControllable();
+        ERC20Storage storage erc20Storage = _getErc20Storage();
+        IERC20.ERC20MetadataInfo memory erc20Info = IERC20.ERC20MetadataInfo({
+            name: erc20Storage.name,
+            symbol: erc20Storage.symbol,
+            isin: erc20Storage.isin,
+            decimals: erc20Storage.decimals
+        });
+        erc20Metadata_ = IERC20.ERC20Metadata({
+            info: erc20Info,
+            securityType: erc20Storage.securityType
+        });
     }
 }

@@ -207,24 +207,12 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    ScheduledTasksCommon
-} from '../../layer_0/scheduledTasks/ScheduledTasksCommon.sol';
-import {
-    ControlListStorageWrapper
-} from '../controlList/ControlListStorageWrapper.sol';
-import {
-    ProtectedPartitionsStorageWrapper
-} from '../../layer_1/protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
-import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
+    CorporateActionsStorageWrapper_2
+} from '../../layer_0/corporateActions/CorporateActionsStorageWrapper_2.sol';
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
 
 // solhint-disable no-empty-blocks
-abstract contract Common is
-    PauseStorageWrapper,
-    ControlListStorageWrapper,
-    ProtectedPartitionsStorageWrapper,
-    ScheduledTasksCommon
-{
+abstract contract Common is CorporateActionsStorageWrapper_2 {
     error AlreadyInitialized();
     error OnlyDelegateAllowed();
 

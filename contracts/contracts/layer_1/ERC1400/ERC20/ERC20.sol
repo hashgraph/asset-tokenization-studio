@@ -207,17 +207,13 @@
 // Contract copy-pasted form OZ and extended
 pragma solidity 0.8.18;
 
-import {ERC20StorageWrapper} from './ERC20StorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
 import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
-abstract contract ERC20 is
-    IERC20,
-    IStaticFunctionSelectors,
-    ERC20StorageWrapper
-{
+abstract contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(
         ERC20Metadata calldata erc20Metadata

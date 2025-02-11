@@ -206,9 +206,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    ERC20StorageWrapperRead
-} from '../../layer_0/ERC1400/ERC20/ERC20StorageWrapperRead.sol';
 import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     ISnapshotsStorageWrapper
@@ -219,11 +216,12 @@ import {
 import {
     CountersUpgradeable
 } from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
+import {ERC20StorageWrapper} from '../ERC1400/ERC20/ERC20StorageWrapper.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 abstract contract SnapshotsStorageWrapper is
     ISnapshotsStorageWrapper,
-    ERC20StorageWrapperRead
+    ERC20StorageWrapper
 {
     function _balanceOfAtSnapshot(
         uint256 _snapshotID,
@@ -298,6 +296,22 @@ abstract contract SnapshotsStorageWrapper is
                 partition
             ],
             _getLockedAmountForByPartition(partition, account)
+        );
+    }
+
+    function _updateAccountHeldBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual {
+        _updateSnapshot(
+            _snapshotStorage().accountHeldBalanceSnapshots[account],
+            _getHeldAmountFor(account)
+        );
+        _updateSnapshot(
+            _snapshotStorage().accountPartitionHeldBalanceSnapshots[account][
+                partition
+            ],
+            _getHeldAmountForByPartition(partition, account)
         );
     }
 

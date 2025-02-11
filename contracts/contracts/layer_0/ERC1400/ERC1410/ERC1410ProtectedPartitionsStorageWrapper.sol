@@ -203,74 +203,85 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {Common} from '../../layer_1/common/Common.sol';
 import {
-    IAdjustBalancesStorageWrapper
-} from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+    ERC1410SnapshotStorageWrapper
+} from './ERC1410SnapshotStorageWrapper.sol';
 import {
-    _ADJUST_BALANCES_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
+    checkNounceAndDeadline
+} from '../../../layer_1/protectedPartitions/signatureVerification.sol';
 
-contract AdjustBalancesStorageWrapper is IAdjustBalancesStorageWrapper, Common {
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
-        _;
-    }
-
-    function _adjustBalances(uint256 _factor, uint8 _decimals) internal {
-        _beforeBalanceAdjustment();
-        _adjustTotalSupply(_factor);
-        _adjustDecimals(_decimals);
-        _adjustMaxSupply(_factor);
-        _updateAbaf(_factor);
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
-    }
-
-    // solhint-disable no-unused-vars
-    function _beforeBalanceAdjustment() internal virtual {
-        // TODO: Verify correctness
-        _updateDecimalsSnapshot(_decimals());
-        _updateAbafSnapshot(_getAbaf());
-        _updateAssetTotalSupplySnapshot(_totalSupply());
-    }
-
-    function _getHoldLabafByPartition(
+abstract contract ERC1410ProtectedPartitionsStorageWrapper is
+    ERC1410SnapshotStorageWrapper
+{
+    function _protectedTransferFromByPartition(
         bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) internal view returns (uint256) {
-        // TODO: Add with holds impl.
-        //        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
-        //        if (holdIndex == 0) return 0;
-        //        return _getHoldLabafByIndex(_partition, _tokenHolder, holdIndex);
-        return 0;
+        address _from,
+        address _to,
+        uint256 _amount,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal virtual {
+        checkNounceAndDeadline(
+            _nounce,
+            _from,
+            _getNounceFor(_from),
+            _deadline,
+            _blockTimestamp()
+        );
+
+        _checkTransferSignature(
+            _partition,
+            _from,
+            _to,
+            _amount,
+            _deadline,
+            _nounce,
+            _signature
+        );
+
+        _setNounce(_nounce, _from);
+
+        _transferByPartition(
+            _from,
+            _to,
+            _amount,
+            _partition,
+            '',
+            _msgSender(),
+            ''
+        );
     }
 
-    function _getLockLabafByPartition(
+    function _protectedRedeemFromByPartition(
         bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) internal view returns (uint256) {
-        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
-        if (lockIndex == 0) return 0;
-        return _getLockLabafByIndex(_partition, _tokenHolder, lockIndex);
-    }
+        address _from,
+        uint256 _amount,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal virtual {
+        checkNounceAndDeadline(
+            _nounce,
+            _from,
+            _getNounceFor(_from),
+            _deadline,
+            _blockTimestamp()
+        );
 
-    function _getLabafByUserAndPartition(
-        bytes32 _partition,
-        address _account
-    ) internal view returns (uint256) {
-        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
-            _account
-        ][_partition];
+        _checkRedeemSignature(
+            _partition,
+            _from,
+            _amount,
+            _deadline,
+            _nounce,
+            _signature
+        );
+        _setNounce(_nounce, _from);
 
-        if (partitionsIndex == 0) return 0;
-        return
-            _getAdjustBalancesStorage().labafUserPartition[_account][
-                partitionsIndex - 1
-            ];
+        _redeemByPartition(_partition, _from, _msgSender(), _amount, '', '');
     }
 }

@@ -203,45 +203,71 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {CD_Lib} from '../../../layer_0/common/CD_Lib.sol';
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-library ERC1410Basic_CD_Lib {
-    function totalSupply() internal view returns (uint256) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('totalSupply()')
-        );
-        return abi.decode(data, (uint256));
+import {MappingLib} from '../common/MappingLib.sol';
+import {
+    _ADJUST_BALANCES_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {ScheduledTasksCommon} from '../scheduledTasks/ScheduledTasksCommon.sol';
+import {
+    IAdjustBalancesStorageWrapper
+} from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+
+contract AdjustBalancesStorageWrapper_2 is
+    IAdjustBalancesStorageWrapper,
+    ScheduledTasksCommon
+{
+    // solhint-disable no-unused-vars
+    function _adjustBalances(uint256 _factor, uint8 _decimals) internal {
+        _beforeBalanceAdjustment();
+        _adjustTotalSupply(_factor);
+        _adjustDecimals(_decimals);
+        _adjustMaxSupply(_factor);
+        _updateAbaf(_factor);
+        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
     }
 
-    function totalSupplyByPartition(
-        bytes32 _partition
-    ) internal view returns (uint256) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature(
-                'totalSupplyByPartition(bytes32)',
-                _partition
-            )
-        );
-        return abi.decode(data, (uint256));
+    // solhint-disable no-unused-vars
+    function _beforeBalanceAdjustment() internal virtual {
+        _updateDecimalsSnapshot(_decimals());
+        _updateAbafSnapshot(_getAbaf());
+        _updateAssetTotalSupplySnapshot(_totalSupply());
     }
 
-    function partitionsOf(
+    function _getHoldLabafByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
         address _tokenHolder
-    ) internal view returns (bytes32[] memory) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('partitionsOf(address)', _tokenHolder)
-        );
-        return abi.decode(data, (bytes32[]));
+    ) internal view returns (uint256) {
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+        if (holdIndex == 0) return 0;
+        return _getHoldLabafByIndex(_partition, _tokenHolder, holdIndex);
     }
 
-    function balanceOf(address _tokenHolder) internal view returns (uint256) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('balanceOf(address)', _tokenHolder)
-        );
-        return abi.decode(data, (uint256));
+    function _getLockLabafByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) internal view returns (uint256) {
+        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
+        if (lockIndex == 0) return 0;
+        return _getLockLabafByIndex(_partition, _tokenHolder, lockIndex);
+    }
+
+    function _getLabafByUserAndPartition(
+        bytes32 _partition,
+        address _account
+    ) internal view returns (uint256) {
+        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
+            _account
+        ][_partition];
+
+        if (partitionsIndex == 0) return 0;
+        return
+            _getAdjustBalancesStorage().labafUserPartition[_account][
+                partitionsIndex - 1
+            ];
     }
 }

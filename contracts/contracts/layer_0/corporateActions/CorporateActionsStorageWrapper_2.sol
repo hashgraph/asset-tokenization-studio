@@ -206,300 +206,225 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {MappingLib} from '../common/MappingLib.sol';
 import {
-    _ADJUST_BALANCES_STORAGE_POSITION
+    ICorporateActionsStorageWrapper,
+    CorporateActionDataStorage
+} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
+import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    _CORPORATE_ACTION_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
+import {LocalContext} from '../context/LocalContext.sol';
 import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+    DIVIDEND_CORPORATE_ACTION_TYPE,
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+    COUPON_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+    SNAPSHOT_TASK_TYPE,
+    BALANCE_ADJUSTMENT_TASK_TYPE,
+    SNAPSHOT_RESULT_ID
+} from '../constants/values.sol';
 import {
-    IAdjustBalancesStorageWrapper
-} from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+    AdjustBalancesStorageWrapper_2
+} from '../adjustBalances/AdjustBalancesStorageWrapper_2.sol';
 
-contract AdjustBalancesStorageWrapperRead is
-    IAdjustBalancesStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper
+contract CorporateActionsStorageWrapper_2 is
+    ICorporateActionsStorageWrapper,
+    AdjustBalancesStorageWrapper_2
 {
-    struct AdjustBalancesStorage {
-        // Mapping from investor to their partitions labaf
-        mapping(address => uint256[]) labafUserPartition;
-        // Aggregated Balance Adjustment
-        uint256 abaf;
-        // Last Aggregated Balance Adjustment per account
-        mapping(address => uint256) labaf;
-        // Last Aggregated Balance Adjustment per partition
-        mapping(bytes32 => uint256) labafByPartition;
-        // Last Aggregated Balance Adjustment per allowance
-        mapping(address => mapping(address => uint256)) labafsAllowances;
-        // Locks
-        mapping(address => uint256) labafLockedAmountByAccount;
-        mapping(address => mapping(bytes32 => uint256)) labafLockedAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => uint256[])) labafLockedAmountByAccountPartitionAndIndex;
-        // Holds
-        mapping(address => uint256) labafsTotalHeld;
-        mapping(address => mapping(bytes32 => uint256)) labafsTotalHeldByPartition;
-        mapping(address => mapping(bytes32 => uint256[])) labafHolds;
+    using LibCommon for EnumerableSet.Bytes32Set;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    modifier checkIndexForCorporateActionByType(
+        bytes32 actionType,
+        uint256 index
+    ) {
+        if (_getCorporateActionCountByType(actionType) <= index) {
+            revert WrongIndexForAction(index, actionType);
+        }
+        _;
     }
 
-    // solhint-disable no-unused-vars
-
-    function _updateAbaf(uint256 factor) internal {
-        _getAdjustBalancesStorage().abaf = calculateNewAbaf(_getAbaf(), factor);
+    modifier checkDates(uint256 firstDate, uint256 secondDate) {
+        if (secondDate < firstDate) {
+            revert WrongDates(firstDate, secondDate);
+        }
+        _;
     }
 
-    function _updateLabafByPartition(bytes32 partition) internal {
-        AdjustBalancesStorage
-            storage adjustBalancesStorage = _getAdjustBalancesStorage();
-        adjustBalancesStorage.labafByPartition[
-            partition
-        ] = adjustBalancesStorage.abaf;
-    }
-
-    function _updateLabafByTokenHolder(
-        uint256 labaf,
-        address tokenHolder
-    ) internal {
-        _getAdjustBalancesStorage().labaf[tokenHolder] = labaf;
-    }
-
-    function _pushLabafUserPartition(address _tokenHolder) internal {
-        AdjustBalancesStorage
-            storage balancesStorage = _getAdjustBalancesStorage();
-        balancesStorage.labafUserPartition[_tokenHolder].push(
-            balancesStorage.abaf
-        );
-    }
-
-    function _updateLabafByTokenHolderAndPartitionIndex(
-        uint256 labaf,
-        address tokenHolder,
-        uint256 partitionIndex
-    ) internal {
-        _getAdjustBalancesStorage().labafUserPartition[tokenHolder][
-            partitionIndex - 1
-        ] = labaf;
-    }
-
-    function _calculateFactorByTokenHolder(
-        uint256 abaf,
-        address tokenHolder
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            abaf,
-            _getAdjustBalancesStorage().labaf[tokenHolder]
-        );
-    }
-
-    function _calculateFactorByAbafAndTokenHolder(
-        uint256 abaf,
-        address tokenHolder
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            abaf,
-            _getAdjustBalancesStorage().labaf[tokenHolder]
-        );
-    }
-
-    function _calculateFactorByPartitionAdjustedAt(
-        bytes32 partition,
-        uint256 timestamp
-    ) internal view returns (uint256) {
-        return
-            calculateFactor(
-                _getAbafAdjustedAt(timestamp),
-                _getAdjustBalancesStorage().labafByPartition[partition]
-            );
-    }
-
-    function _calculateFactorLockedAmountForByPartitionAdjustedAt(
-        bytes32 partition,
-        address tokenHolder,
-        uint256 lockId,
-        uint256 timestamp
-    ) internal view returns (uint256) {
-        return
-            calculateFactor(
-                _getAbafAdjustedAt(timestamp),
-                _getAdjustBalancesStorage()
-                    .labafLockedAmountByAccountPartitionAndIndex[tokenHolder][
-                        partition
-                    ][lockId]
-            );
-    }
-
-    function _calculateFactorByTokenHolderAndPartitionIndex(
-        uint256 abaf,
-        address tokenHolder,
-        uint256 partitionIndex
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            abaf,
-            _getAdjustBalancesStorage().labafUserPartition[tokenHolder][
-                partitionIndex - 1
-            ]
-        );
-    }
-
-    function _calculateFactorForLockedAmountByTokenHolderAdjustedAt(
-        address tokenHolder,
-        uint256 timestamp
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage().labafLockedAmountByAccount[tokenHolder]
-        );
-    }
-
-    function _calculateFactorForLockedAmountByTokenHolderAndPartitionAdjustedAt(
-        address tokenHolder,
-        bytes32 partition,
-        uint256 timestamp
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage().labafLockedAmountByAccountAndPartition[
-                tokenHolder
-            ][partition]
-        );
-    }
-
-    function _calculateFactorForLockedAmountByTokenHolderPartitionAndLockIndexAdjustedAt(
-        address tokenHolder,
-        bytes32 partition,
-        uint256 lockIndex,
-        uint256 timestamp
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage()
-                .labafLockedAmountByAccountPartitionAndIndex[tokenHolder][
-                    partition
-                ][lockIndex - 1]
-        );
-    }
-
-    function calculateNewAbaf(
-        uint256 abaf,
-        uint256 factor
-    ) private returns (uint256) {
-        return abaf == 0 ? factor : abaf * factor;
-    }
-
-    function calculateFactor(
-        uint256 _abaf,
-        uint256 _labaf
-    ) private pure returns (uint256 factor_) {
-        if (_abaf == 0) return 1;
-        if (_labaf == 0) return _abaf;
-        factor_ = _abaf / _labaf;
-    }
-
-    function _getAbaf() internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().abaf;
-    }
-
-    function _getAbafAdjusted() internal view virtual returns (uint256) {
-        return _getAbafAdjustedAt(_blockTimestamp());
-    }
-
-    function _getAbafAdjustedAt(
-        uint256 _timestamp
-    ) internal view virtual returns (uint256) {
-        uint256 abaf = _getAbaf();
-        if (abaf == 0) abaf = 1;
-        (uint256 pendingAbaf, ) = _getPendingScheduledBalanceAdjustmentsAt(
-            _timestamp
-        );
-        return abaf * pendingAbaf;
-    }
-
-    function _getLabafByUser(
-        address _account
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().labaf[_account];
-    }
-
-    function _getLabafByPartition(
-        bytes32 _partition
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().labafByPartition[_partition];
-    }
-
-    function _getAllowanceLabaf(
-        address _owner,
-        address _spender
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().labafsAllowances[_owner][_spender];
-    }
-
-    function _getTotalLockLabaf(
-        address _tokenHolder
-    ) internal view virtual returns (uint256 labaf_) {
-        return
-            _getAdjustBalancesStorage().labafLockedAmountByAccount[
-                _tokenHolder
-            ];
-    }
-
-    function _getTotalLockLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 labaf_) {
-        return
-            _getAdjustBalancesStorage().labafLockedAmountByAccountAndPartition[
-                _tokenHolder
-            ][_partition];
-    }
-
-    function _getLockLabafByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockIndex
-    ) internal view virtual returns (uint256) {
-        return
-            _getAdjustBalancesStorage()
-                .labafLockedAmountByAccountPartitionAndIndex[_tokenHolder][
-                    _partition
-                ][_lockIndex - 1];
-    }
-
-    function _getTotalHeldLabaf(
-        address _tokenHolder
-    ) internal view virtual returns (uint256 labaf_) {
-        return _getAdjustBalancesStorage().labafsTotalHeld[_tokenHolder];
-    }
-
-    function _getTotalHeldLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 labaf_) {
-        return
-            _getAdjustBalancesStorage().labafsTotalHeldByPartition[
-                _tokenHolder
-            ][_partition];
-    }
-
-    function _getHoldLabafByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdIndex
-    ) internal view virtual returns (uint256) {
-        return
-            _getAdjustBalancesStorage().labafHolds[_tokenHolder][_partition][
-                _holdIndex - 1
-            ];
-    }
-
-    function _getAdjustBalancesStorage()
+    // Internal
+    function _addCorporateAction(
+        bytes32 _actionType,
+        bytes memory _data
+    )
         internal
-        pure
-        returns (AdjustBalancesStorage storage adjustBalancesStorage_)
+        virtual
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 corporateActionIndexByType_
+        )
     {
-        bytes32 position = _ADJUST_BALANCES_STORAGE_POSITION;
+        CorporateActionDataStorage
+            storage corporateActions_ = _corporateActionsStorage();
+        corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
+        // TODO: Review when it can return false.
+        success_ =
+            corporateActions_.actions.add(corporateActionId_) &&
+            corporateActions_.actionsByType[_actionType].add(
+                corporateActionId_
+            );
+        corporateActions_
+            .actionsData[corporateActionId_]
+            .actionType = _actionType;
+        corporateActions_.actionsData[corporateActionId_].data = _data;
+        corporateActionIndexByType_ = _getCorporateActionCountByType(
+            _actionType
+        );
+
+        if (_actionType == DIVIDEND_CORPORATE_ACTION_TYPE) {
+            _initDividend(success_, corporateActionId_, _data);
+        } else if (_actionType == VOTING_RIGHTS_CORPORATE_ACTION_TYPE) {
+            _initVotingRights(success_, corporateActionId_, _data);
+        } else if (_actionType == COUPON_CORPORATE_ACTION_TYPE) {
+            _initCoupon(success_, corporateActionId_, _data);
+        } else if (_actionType == BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE) {
+            _initBalanceAdjustment(success_, corporateActionId_, _data);
+        }
+    }
+
+    function _initDividend(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        // TODO
+        /*if (!_success) {
+            revert DividendCreationFailed();
+        }
+
+        IEquity.Dividend memory newDividend = abi.decode(
+            _data,
+            (IEquity.Dividend)
+        );
+
+        _addScheduledTask(
+            newDividend.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
+        _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));*/
+    }
+
+    function _initVotingRights(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        // TODO
+        /*if (!_success) {
+            revert VotingRightsCreationFailed();
+        }
+
+        IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
+
+        _addScheduledTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
+        _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));*/
+    }
+
+    function _initCoupon(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        // TODO
+        /*if (!_success) {
+            revert CouponCreationFailed();
+        }
+
+        IBond.Coupon memory newCoupon = abi.decode(_data, (IBond.Coupon));
+
+        _addScheduledTask(newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
+        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));*/
+    }
+
+    function _initBalanceAdjustment(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        // TODO
+        /*
+        if (!_success) {
+            revert BalanceAdjustmentCreationFailed();
+        }
+
+        IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
+            .decode(_data, (IEquity.ScheduledBalanceAdjustment));
+
+        _addScheduledTask(
+            newBalanceAdjustment.executionDate,
+            abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
+        );
+        _addScheduledBalanceAdjustment(
+            newBalanceAdjustment.executionDate,
+            abi.encode(_actionId)
+        );*/
+    }
+
+    function _onScheduledTaskTriggered(bytes memory _data) internal virtual {
+        // TODO
+        /*if (_data.length > 0) {
+            bytes32 taskType = abi.decode(_data, (bytes32));
+            if (taskType == SNAPSHOT_TASK_TYPE) {
+                _triggerScheduledSnapshots(1);
+            } else if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
+                _triggerScheduledBalanceAdjustments(1);
+            }
+        }*/
+    }
+
+    function _onScheduledBalanceAdjustmentTriggered(
+        bytes memory _data
+    ) internal virtual {
+        if (_data.length > 0) {
+            bytes32 actionId = abi.decode(_data, (bytes32));
+            (, bytes memory balanceAdjustmentData) = _getCorporateAction(
+                actionId
+            );
+
+            if (balanceAdjustmentData.length > 0) {
+                /* IEquity.ScheduledBalanceAdjustment
+                    memory balanceAdjustment = abi.decode(
+                        balanceAdjustmentData,
+                        (IEquity.ScheduledBalanceAdjustment)
+                    );*/
+                /* _adjustBalances(
+                    balanceAdjustment.factor,
+                    balanceAdjustment.decimals
+                );*/
+            }
+        }
+    }
+
+    function _getSnapshotID(
+        bytes32 _actionId
+    ) internal view virtual returns (uint256) {
+        bytes memory data = _getResult(_actionId, SNAPSHOT_RESULT_ID);
+
+        uint256 bytesLength = data.length;
+
+        if (bytesLength < 32) return 0;
+
+        uint256 snapshotId;
+
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            adjustBalancesStorage_.slot := position
+            snapshotId := mload(add(data, 0x20))
         }
+
+        return snapshotId;
     }
 }

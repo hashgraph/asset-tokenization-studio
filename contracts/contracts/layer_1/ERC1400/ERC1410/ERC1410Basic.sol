@@ -207,9 +207,9 @@
 pragma solidity 0.8.18;
 
 import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
-import {ERC1410BasicStorageWrapper} from './ERC1410BasicStorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
 
-abstract contract ERC1410Basic is IERC1410Basic, ERC1410BasicStorageWrapper {
+abstract contract ERC1410Basic is IERC1410Basic, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410_Basic(
         bool _multiPartition
