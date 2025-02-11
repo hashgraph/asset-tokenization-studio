@@ -221,7 +221,6 @@ import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
 import { Terminal3VC } from '../../../../../../../domain/context/kyc/terminal3.js';
 import { verifyVc } from '@terminal3/verify_vc';
 import { SignedCredential } from '@terminal3/vc_core';
-import { MaxUint256 } from '@ethersproject/constants';
 
 @CommandHandler(GrantKYCCommand)
 export class GrantKYCCommandHandler
@@ -243,22 +242,13 @@ export class GrantKYCCommandHandler
   async execute(command: GrantKYCCommand): Promise<GrantKYCCommandResponse> {
     const { securityId, targetId, vcBase64 } = command;
 
-    const signedCredential: SignedCredential =
-      Terminal3VC.vcFromBase64(vcBase64);
+    const signedCredential: SignedCredential = Terminal3VC.vcFromBase64(vcBase64);
     const verificationResult = await verifyVc(signedCredential);
     if (!verificationResult.isValid) {
       throw new Error('Invalid VC');
     }
 
-    const issuer: string = signedCredential.issuer.split(':').pop()!;
-
-    signedCredential.validFrom = !signedCredential.validFrom
-      ? Date.parse(new Date().toString()).toString()
-      : Date.parse(signedCredential.validFrom).toString();
-
-    signedCredential.validUntil = !signedCredential.validUntil
-      ? MaxUint256.toString()
-      : Date.parse(signedCredential.validUntil).toString();
+    const { normalizedSignedCredential, issuer } = Terminal3VC.normalizeCredentialFields(signedCredential);
 
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
@@ -275,10 +265,7 @@ export class GrantKYCCommandHandler
         : issuer.toString(),
     );
 
-    await this.validationService.validateIssuer(
-      securityEvmAddress,
-      issuerEvmAddress,
-    );
+    await this.validationService.validateIssuer(securityId, issuer);
 
     if (await this.queryAdapter.isPaused(securityEvmAddress)) {
       throw new SecurityPaused();
@@ -299,20 +286,12 @@ export class GrantKYCCommandHandler
       ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
       : new EvmAddress(targetId);
 
-    if (
-      BigDecimal.fromString(signedCredential.validFrom).isGreaterThan(
-        BigDecimal.fromString(signedCredential.validUntil),
-      )
-    ) {
-      throw new Error('validTo must be later than validFrom.');
-    }
-
     const res = await handler.grantKYC(
       securityEvmAddress,
       targetEvmAddress,
-      signedCredential.id,
-      BigDecimal.fromString(signedCredential.validFrom),
-      BigDecimal.fromString(signedCredential.validUntil),
+      normalizedSignedCredential.id,
+      BigDecimal.fromString(normalizedSignedCredential.validFrom as string),
+      BigDecimal.fromString(normalizedSignedCredential.validUntil as string),
       issuerEvmAddress,
     );
 

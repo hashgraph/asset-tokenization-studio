@@ -204,6 +204,13 @@
 */
 
 import { SignedCredential } from '@terminal3/vc_core';
+import { MaxUint256 } from '@ethersproject/constants';
+import BigDecimal from '../shared/BigDecimal.js';
+
+interface NormalizedCredential {
+  normalizedSignedCredential: SignedCredential;
+  issuer: string;
+}
 
 export class Terminal3VC {
   public static vcFromBase64(base64: string): SignedCredential {
@@ -222,5 +229,30 @@ export class Terminal3VC {
         `Failed to decode Base64 VC: ${(error as Error).message}`,
       );
     }
+  }
+
+  public static normalizeCredentialFields(
+    signedCredential: SignedCredential,
+  ): NormalizedCredential {
+    signedCredential.validFrom = signedCredential.validFrom
+      ? Date.parse(signedCredential.validFrom).toString()
+      : Date.now().toString();
+
+    signedCredential.validUntil = signedCredential.validUntil
+      ? Date.parse(signedCredential.validUntil).toString()
+      : MaxUint256.toString();
+
+    if (
+      BigDecimal.fromString(signedCredential.validFrom).isGreaterThan(
+        BigDecimal.fromString(signedCredential.validUntil),
+      )
+    ) {
+      throw new Error('validUntil must be later than validFrom.');
+    }
+
+    const issuer = signedCredential.issuer.split(':').pop();
+    if (!issuer) throw new Error('VC must include a valid issuer.');
+
+    return { normalizedSignedCredential: signedCredential, issuer };
   }
 }

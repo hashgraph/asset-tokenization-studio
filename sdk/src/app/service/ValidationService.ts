@@ -203,30 +203,27 @@
 
 */
 
-import { lazyInject } from '../../core/decorator/LazyInjectDecorator.js';
-import EvmAddress from '../../domain/context/contract/EvmAddress.js';
-import { RPCQueryAdapter } from '../../port/out/rpc/RPCQueryAdapter.js';
+import Injectable from '../../core/Injectable.js';
+import { QueryBus } from '../../core/query/QueryBus.js';
 import { UnlistedIssuer } from '../usecase/command/security/error/UnlistedIssuer.js';
 import Service from './Service.js';
 import { singleton } from 'tsyringe';
 import { SecurityRole } from '../../domain/context/security/SecurityRole.js';
 import { NotGrantedRole } from '../usecase/command/security/error/NotGrantedRole.js';
+import { IsIssuerQuery } from '../usecase/query/ssi/isIssuer/IsIssuerQuery.js';
+import { GetKYCForQuery } from '../usecase/query/security/kyc/getKycFor/GetKYCForQuery.js';
 
 @singleton()
 export default class ValidationService extends Service {
   constructor(
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
+    public readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
   ) {
     super();
   }
 
-  async validateIssuer(
-    securityEvmAddress: EvmAddress,
-    issuerEvmAddress: EvmAddress,
-  ): Promise<boolean> {
+  async validateIssuer(sercurityId: string, issuer: string): Promise<boolean> {
     if (
-      !(await this.queryAdapter.isIssuer(securityEvmAddress, issuerEvmAddress))
+      !(await this.queryBus.execute(new IsIssuerQuery(sercurityId, issuer)))
     ) {
       throw new UnlistedIssuer();
     } else {
@@ -235,17 +232,16 @@ export default class ValidationService extends Service {
   }
 
   async validateKycAddresses(
-    securityEvmAddress: EvmAddress,
-    addresses: EvmAddress[],
-  ): Promise<void> {
+    securityId: string,
+    addresses: string[],
+  ): Promise<boolean> {
     for (const address of addresses) {
-      const isKycValid = await this.queryAdapter.getKYCFor(
-        securityEvmAddress,
-        address,
-      );
-      if (!isKycValid) {
+      if (
+        !(await this.queryBus.execute(new GetKYCForQuery(securityId, address)))
+      ) {
         throw new NotGrantedRole(SecurityRole._KYC_ROLE);
       }
     }
+    return true;
   }
 }
