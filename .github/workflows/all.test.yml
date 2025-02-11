@@ -85,9 +85,6 @@ jobs:
         working-directory: web
         run: npm run test
 
-      - name: Clean npm cache 🧹
-        run: npm cache clean --force
-
       - name: Test sdk
         working-directory: sdk
         run: npm run test
