@@ -299,6 +299,22 @@ abstract contract SnapshotsStorageWrapper is
         );
     }
 
+    function _updateAccountHeldBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual {
+        _updateSnapshot(
+            _snapshotStorage().accountHeldBalanceSnapshots[account],
+            _getHeldAmountFor(account)
+        );
+        _updateSnapshot(
+            _snapshotStorage().accountPartitionHeldBalanceSnapshots[account][
+                partition
+            ],
+            _getHeldAmountForByPartition(partition, account)
+        );
+    }
+
     function _updateTotalSupplySnapshot(bytes32 partition) internal {
         _updateSnapshot(
             _snapshotStorage().totalSupplySnapshots,

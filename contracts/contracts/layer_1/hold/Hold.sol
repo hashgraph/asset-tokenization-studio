@@ -209,20 +209,12 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
-import {HoldStorageWrapper} from './HoldStorageWrapper.sol';
-import {
-    ERC1410ControllerStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ControllerStorageWrapper.sol';
+import {Common} from '../common/Common.sol';
 import {_CONTROLLER_ROLE} from '../constants/roles.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract Hold is
-    IHold,
-    IStaticFunctionSelectors,
-    HoldStorageWrapper,
-    ERC1410ControllerStorageWrapper
-{
+abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
     function createHoldByPartition(
         bytes32 _partition,
         Hold calldata _hold

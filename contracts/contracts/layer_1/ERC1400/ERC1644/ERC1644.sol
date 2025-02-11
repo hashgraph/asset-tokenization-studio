@@ -212,9 +212,9 @@ import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC1644_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {ERC1644StorageWrapper} from './ERC1644StorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
 
-contract ERC1644 is IERC1644, IStaticFunctionSelectors, ERC1644StorageWrapper {
+contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1644(
         bool _controllable

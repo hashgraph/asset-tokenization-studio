@@ -209,22 +209,10 @@ pragma solidity 0.8.18;
 import {
     CorporateActionsStorageWrapper_2
 } from '../../layer_0/corporateActions/CorporateActionsStorageWrapper_2.sol';
-import {
-    ControlListStorageWrapper
-} from '../controlList/ControlListStorageWrapper.sol';
-import {
-    ProtectedPartitionsStorageWrapper
-} from '../../layer_1/protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
-import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
 
 // solhint-disable no-empty-blocks
-abstract contract Common is
-    PauseStorageWrapper,
-    ControlListStorageWrapper,
-    ProtectedPartitionsStorageWrapper,
-    CorporateActionsStorageWrapper_2
-{
+abstract contract Common is CorporateActionsStorageWrapper_2 {
     error AlreadyInitialized();
     error OnlyDelegateAllowed();
 

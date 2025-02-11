@@ -260,6 +260,8 @@ abstract contract SnapshotsStorageWrapperRead is
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
         // Snapshots for the total supply by partition
         mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
+        mapping(address => Snapshots) accountHeldBalanceSnapshots;
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionHeldBalanceSnapshots;
         Snapshots abafSnapshots;
         Snapshots decimals;
     }
