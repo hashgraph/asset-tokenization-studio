@@ -203,148 +203,104 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {LibCommon} from '../../common/LibCommon.sol';
 import {
-    ERC1410OperatorStorageWrapper
-} from './ERC1410OperatorStorageWrapper.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS
-} from '../../constants/values.sol';
-import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
-import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
+    IControlListStorageWrapper
+} from '../../../layer_1/interfaces/controlList/IControlListStorageWrapper.sol';
+import {LocalContext} from '../../context/LocalContext.sol';
+import {
+    _CONTROL_LIST_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
+import {
+    ProtectedPartitionsStorageWrapper
+} from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
 
-abstract contract ERC1410StandardStorageWrapper is
-    CapStorageWrapper,
-    ERC1410OperatorStorageWrapper
+abstract contract ControlListStorageWrapper is
+    IControlListStorageWrapper,
+    ProtectedPartitionsStorageWrapper
 {
-    function _issueByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes memory _data
-    ) internal virtual {
-        _validateParams(_partition, _value);
+    using LibCommon for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
-        _beforeTokenTransfer(_partition, address(0), _tokenHolder, _value);
-
-        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
-            _addPartitionTo(_value, _tokenHolder, _partition);
-        } else {
-            _increaseBalanceByPartition(_tokenHolder, _value, _partition);
-        }
-
-        _increaseTotalSupplyByPartition(_partition, _value);
-
-        emit IssuedByPartition(
-            _partition,
-            _msgSender(),
-            _tokenHolder,
-            _value,
-            _data
-        );
+    struct ControlListStorage {
+        // true : control list is whitelist.
+        // false : control list is blacklist.
+        bool isWhiteList;
+        // true : isWhiteList was set.
+        // false : isWhiteList was not set.
+        bool initialized;
+        EnumerableSet.AddressSet list;
     }
 
-    function _redeemByPartition(
-        bytes32 _partition,
-        address _from,
-        address _operator,
-        uint256 _value,
-        bytes memory _data,
-        bytes memory _operatorData
-    ) internal virtual {
-        _beforeTokenTransfer(_partition, _from, address(0), _value);
-
-        _reduceBalanceByPartition(_from, _value, _partition);
-
-        _reduceTotalSupplyByPartition(_partition, _value);
-
-        emit RedeemedByPartition(
-            _partition,
-            _operator,
-            _from,
-            _value,
-            _data,
-            _operatorData
-        );
+    // modifiers
+    modifier checkControlList(address account) {
+        if (!_checkControlList(account)) {
+            revert AccountIsBlocked(account);
+        }
+        _;
     }
 
-    function _reduceTotalSupplyByPartition(
-        bytes32 _partition,
-        uint256 _value
-    ) internal virtual {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-
-        erc1410Storage.totalSupply -= _value;
-        erc1410Storage.totalSupplyByPartition[_partition] -= _value;
+    // Internal
+    function _addToControlList(
+        address _account
+    ) internal virtual returns (bool success_) {
+        success_ = _controlListStorage().list.add(_account);
     }
 
-    function _increaseTotalSupplyByPartition(
-        bytes32 _partition,
-        uint256 _value
-    ) internal virtual {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-
-        erc1410Storage.totalSupply += _value;
-        erc1410Storage.totalSupplyByPartition[_partition] += _value;
+    function _removeFromControlList(
+        address _account
+    ) internal virtual returns (bool success_) {
+        success_ = _controlListStorage().list.remove(_account);
     }
 
-    function _validateParams(
-        bytes32 _partition,
-        uint256 _value
-    ) internal pure virtual {
-        if (_value == uint256(0)) {
-            revert ZeroValue();
-        }
-        if (_partition == bytes32(0)) {
-            revert ZeroPartition();
-        }
+    function _getControlListType() internal view virtual returns (bool) {
+        return _controlListStorage().isWhiteList;
     }
 
-    function _canRedeemByPartition(
-        address _from,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data, // solhint-disable-line no-unused-vars
-        bytes calldata _operatorData // solhint-disable-line no-unused-vars
-    ) internal view virtual returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_validPartition(_partition, _from)) {
-            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
-        }
+    function _getControlListCount()
+        internal
+        view
+        virtual
+        returns (uint256 controlListCount_)
+    {
+        controlListCount_ = _controlListStorage().list.length();
+    }
 
-        uint256 balance = _balanceOfByPartition(_partition, _from);
+    function _getControlListMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (address[] memory members_) {
+        return _controlListStorage().list.getFromSet(_pageIndex, _pageLength);
+    }
 
-        if (balance < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (
-            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
-        ) {
-            if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-            }
-        }
+    function _isInControlList(
+        address _account
+    ) internal view virtual returns (bool) {
+        return _controlListStorage().list.contains(_account);
+    }
 
-        return (true, _SUCCESS, bytes32(0));
+    function _checkControlList(
+        address account
+    ) internal view virtual returns (bool) {
+        return _getControlListType() == _isInControlList(account);
+    }
+
+    function _controlListStorage()
+        internal
+        pure
+        virtual
+        returns (ControlListStorage storage controlList_)
+    {
+        bytes32 position = _CONTROL_LIST_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            controlList_.slot := position
+        }
     }
 }

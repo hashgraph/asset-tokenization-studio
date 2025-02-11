@@ -207,15 +207,11 @@
 pragma solidity 0.8.18;
 
 import {IERC1410Standard} from '../../interfaces/ERC1400/IERC1410Standard.sol';
-import {
-    ERC1410StandardStorageWrapper
-} from './ERC1410StandardStorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
+
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
 
-abstract contract ERC1410Standard is
-    IERC1410Standard,
-    ERC1410StandardStorageWrapper
-{
+abstract contract ERC1410Standard is IERC1410Standard, Common {
     /// @notice Increases totalSupply and the corresponding amount of the specified owners partition
     /// @param _partition The partition to allocate the increase in balance
     /// @param _tokenHolder The token holder whose balance should be increased

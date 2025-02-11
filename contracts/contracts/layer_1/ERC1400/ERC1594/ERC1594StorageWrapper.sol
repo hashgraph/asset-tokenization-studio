@@ -221,12 +221,9 @@ import {
     _ALLOWANCE_REACHED_ERROR_ID,
     _SUCCESS
 } from '../../constants/values.sol';
-import {ERC20StorageWrapper} from '../ERC20/ERC20StorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
 
-abstract contract ERC1594StorageWrapper is
-    ERC20StorageWrapper,
-    IERC1594StorageWrapper
-{
+abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
     struct ERC1594Storage {
         bool issuance;
         bool initialized;

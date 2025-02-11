@@ -212,12 +212,8 @@ import {
     ERC1410BasicStorageWrapperRead
 } from '../../layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
-import {
-    AccessControlStorageWrapper
-} from '../accessControl/AccessControlStorageWrapper.sol';
 import {_LOCKER_ROLE} from '../constants/roles.sol';
 import {ILock} from '../interfaces/lock/ILock.sol';
-import {PauseStorageWrapper} from '../pause/PauseStorageWrapper.sol';
 import {LockStorageWrapper} from './LockStorageWrapper.sol';
 import {_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 

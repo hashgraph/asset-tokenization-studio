@@ -209,13 +209,11 @@ pragma solidity 0.8.18;
 import {
     IERC1410ProtectedPartitions
 } from '../../interfaces/ERC1400/IERC1410ProtectedPartitions.sol';
-import {
-    ERC1410ProtectedPartitionsStorageWrapper
-} from './ERC1410ProtectedPartitionsStorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
 
 abstract contract ERC1410ProtectedPartitions is
     IERC1410ProtectedPartitions,
-    ERC1410ProtectedPartitionsStorageWrapper
+    Common
 {
     function protectedTransferFromByPartition(
         bytes32 _partition,

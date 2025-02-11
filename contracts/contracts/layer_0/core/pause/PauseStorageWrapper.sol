@@ -203,85 +203,63 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {LocalContext} from '../../context/LocalContext.sol';
 import {
-    ERC1410ControllerStorageWrapper
-} from './ERC1410ControllerStorageWrapper.sol';
+    IPauseStorageWrapper
+} from '../../../layer_1/interfaces/pause/IPauseStorageWrapper.sol';
+import {_PAUSE_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {
-    checkNounceAndDeadline
-} from '../../protectedPartitions/signatureVerification.sol';
+    ControlListStorageWrapper
+} from '../controlList/ControlListStorageWrapper.sol';
 
-abstract contract ERC1410ProtectedPartitionsStorageWrapper is
-    ERC1410ControllerStorageWrapper
+abstract contract PauseStorageWrapper is
+    IPauseStorageWrapper,
+    ControlListStorageWrapper
 {
-    function _protectedTransferFromByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal virtual {
-        checkNounceAndDeadline(
-            _nounce,
-            _from,
-            _getNounceFor(_from),
-            _deadline,
-            _blockTimestamp()
-        );
-
-        _checkTransferSignature(
-            _partition,
-            _from,
-            _to,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
-
-        _setNounce(_nounce, _from);
-
-        _transferByPartition(
-            _from,
-            _to,
-            _amount,
-            _partition,
-            '',
-            _msgSender(),
-            ''
-        );
+    struct PauseDataStorage {
+        bool paused;
     }
 
-    function _protectedRedeemFromByPartition(
-        bytes32 _partition,
-        address _from,
-        uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal virtual {
-        checkNounceAndDeadline(
-            _nounce,
-            _from,
-            _getNounceFor(_from),
-            _deadline,
-            _blockTimestamp()
-        );
+    // modifiers
+    modifier onlyPaused() {
+        if (!_isPaused()) {
+            revert TokenIsUnpaused();
+        }
+        _;
+    }
 
-        _checkRedeemSignature(
-            _partition,
-            _from,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
-        _setNounce(_nounce, _from);
+    modifier onlyUnpaused() {
+        if (_isPaused()) {
+            revert TokenIsPaused();
+        }
+        _;
+    }
 
-        _redeemByPartition(_partition, _from, _msgSender(), _amount, '', '');
+    // Internal
+    function _setPause(bool _paused) internal virtual {
+        _pauseStorage().paused = _paused;
+        if (_paused) emit TokenPaused(_msgSender());
+        else emit TokenUnpaused(_msgSender());
+    }
+
+    function _isPaused() internal view virtual returns (bool) {
+        bool isPaused = _pauseStorage().paused;
+        return isPaused;
+    }
+
+    function _pauseStorage()
+        internal
+        pure
+        virtual
+        returns (PauseDataStorage storage pause_)
+    {
+        bytes32 position = _PAUSE_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            pause_.slot := position
+        }
     }
 }

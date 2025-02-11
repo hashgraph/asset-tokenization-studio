@@ -206,42 +206,40 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {
-    IERC1410StorageWrapper
-} from '../../interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {Common} from '../../common/Common.sol';
+    IERC1644StorageWrapper
+} from '../../../layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol';
 import {
-    ERC1410BasicStorageWrapperRead
-} from '../../../layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+    SnapshotsStorageWrapper
+} from '../../snapshots/SnapshotsStorageWrapper.sol';
 
-abstract contract ERC1410BasicStorageWrapper is
-    IERC1410StorageWrapper,
-    ERC1410BasicStorageWrapperRead,
-    Common
+abstract contract ERC1644StorageWrapper is
+    IERC1644StorageWrapper,
+    SnapshotsStorageWrapper
 {
-    function _transferByPartition(
+    struct ERC1644Storage {
+        bool isControllable;
+        bool initialized;
+    }
+
+    modifier onlyControllable() {
+        if (!_isControllable()) {
+            revert TokenIsNotControllable();
+        }
+        _;
+    }
+
+    function _controllerTransfer(
         address _from,
         address _to,
         uint256 _value,
-        bytes32 _partition,
-        bytes memory _data,
-        address _operator,
-        bytes memory _operatorData
-    ) internal virtual {
-        _beforeTokenTransfer(_partition, _from, _to, _value);
-
-        _reduceBalanceByPartition(_from, _value, _partition);
-
-        if (!_validPartitionForReceiver(_partition, _to)) {
-            _addPartitionTo(_value, _to, _partition);
-        } else {
-            _increaseBalanceByPartition(_to, _value, _partition);
-        }
-
-        // Emit transfer event.
-        emit TransferByPartition(
-            _partition,
-            _operator,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) internal {
+        _transfer(_from, _to, _value);
+        emit ControllerTransfer(
+            msg.sender,
             _from,
             _to,
             _value,
@@ -250,10 +248,51 @@ abstract contract ERC1410BasicStorageWrapper is
         );
     }
 
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual;
+    function _controllerRedeem(
+        address _tokenHolder,
+        uint256 _value,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) internal {
+        _burn(_tokenHolder, _value);
+        emit ControllerRedemption(
+            msg.sender,
+            _tokenHolder,
+            _value,
+            _data,
+            _operatorData
+        );
+    }
+
+    /**
+     * @notice It is used to end the controller feature from the token
+     * @dev It only be called by the `owner/issuer` of the token
+     */
+    function _finalizeControllable() internal {
+        if (!_getErc1644Storage().isControllable) return;
+
+        _getErc1644Storage().isControllable = false;
+        emit FinalizedControllerFeature(_msgSender());
+    }
+
+    /**
+     * @notice Internal function to know whether the controller functionality
+     * allowed or not.
+     * @return bool `true` when controller address is non-zero otherwise return `false`.
+     */
+    function _isControllable() internal view returns (bool) {
+        return _getErc1644Storage().isControllable;
+    }
+
+    function _getErc1644Storage()
+        internal
+        pure
+        returns (ERC1644Storage storage erc1644Storage_)
+    {
+        bytes32 position = _ERC1644_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc1644Storage_.slot := position
+        }
+    }
 }

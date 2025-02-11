@@ -206,223 +206,171 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
-import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
-import {
-    IERC20StorageWrapper
-} from '../../interfaces/ERC1400/IERC20StorageWrapper.sol';
-import {
-    ERC1410StandardStorageWrapper
-} from '../ERC1410/ERC1410StandardStorageWrapper.sol';
+import '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-abstract contract ERC20StorageWrapper is
-    IERC20StorageWrapper,
-    ERC1410StandardStorageWrapper
-{
-    /**
-     * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
-     * Beware that changing an allowance with this method brings the risk that someone may use both the old
-     * and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
-     * race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:
-     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-     * @param spender The address which will spend the funds.
-     * @param value The amount of tokens to be spent.
-     */
-    function _approve(
-        address spender,
-        uint256 value
-    ) internal virtual returns (bool) {
-        if (spender == address(0)) {
-            revert SpenderWithZeroAddress();
-        }
+interface IHold {
+    event HeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
 
-        _getErc20Storage().allowed[_msgSender()][spender] = value;
-        emit Approval(_msgSender(), spender, value);
-        return true;
+    event HoldByPartitionExecuted(
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount,
+        address to
+    );
+
+    event HoldByPartitionReleased(
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount
+    );
+
+    event HoldByPartitionReclaimed(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount
+    );
+
+    error HoldExpirationNotReached();
+    error WrongHoldId();
+    error InvalidDestinationAddress(address holdDestination, address to);
+    error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
+    error HoldExpirationReached();
+    error IsNotEscrow();
+
+    struct Hold {
+        uint256 amount;
+        uint256 expirationTimestamp;
+        address escrow;
+        address to;
+        bytes data;
     }
 
-    /**
-     * @dev Increase the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed_[_spender] == 0. To increment
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * @param spender The address which will spend the funds.
-     * @param addedValue The amount of tokens to increase the allowance by.
-     */
-    function _increaseAllowance(
-        address spender,
-        uint256 addedValue
-    ) internal virtual returns (bool) {
-        if (spender == address(0)) {
-            revert SpenderWithZeroAddress();
-        }
-        _beforeAllowanceUpdate(_msgSender(), spender, addedValue, true);
-
-        _getErc20Storage().allowed[_msgSender()][spender] += addedValue;
-        emit Approval(
-            _msgSender(),
-            spender,
-            _getErc20Storage().allowed[_msgSender()][spender]
-        );
-        return true;
+    struct ProtectedHold {
+        Hold hold;
+        uint256 deadline;
+        uint256 nonce;
     }
 
-    /**
-     * @dev Decrease the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed_[_spender] == 0. To decrement
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * @param spender The address which will spend the funds.
-     * @param subtractedValue The amount of tokens to decrease the allowance by.
-     */
-    function _decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    ) internal virtual returns (bool) {
-        if (spender == address(0)) {
-            revert SpenderWithZeroAddress();
-        }
-        _decreaseAllowedBalance(_msgSender(), spender, subtractedValue);
-        emit Approval(
-            _msgSender(),
-            spender,
-            _getErc20Storage().allowed[_msgSender()][spender]
-        );
-        return true;
+    struct HoldData {
+        uint256 id;
+        Hold hold;
+        bytes operatorData;
     }
 
-    /**
-     * @dev Function to check the amount of tokens that an owner allowed to a spender.
-     * @param owner address The address which owns the funds.
-     * @param spender address The address which will spend the funds.
-     * @return A uint256 specifying the amount of tokens still available for the spender.
-     */
-    function _allowance(
-        address owner,
-        address spender
-    ) internal view virtual returns (uint256) {
-        return _getErc20Storage().allowed[owner][spender];
+    struct HoldDataStorage {
+        mapping(address => uint256) totalHeldAmount;
+        mapping(address => mapping(bytes32 => uint256)) heldAmountByPartition;
+        mapping(address => mapping(bytes32 => HoldData[])) holds;
+        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIds;
+        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) holdsIndex;
+        mapping(address => mapping(bytes32 => uint256)) holdNextId;
     }
 
-    function _transferFrom(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) internal virtual returns (bool) {
-        _decreaseAllowedBalance(from, spender, value);
-        bytes memory data;
-        _transferByPartition(
-            from,
-            to,
-            value,
-            _DEFAULT_PARTITION,
-            data,
-            spender,
-            ''
-        );
-        return _emitTransferEvent(from, to, value);
+    enum OperationType {
+        Execute,
+        Release,
+        Reclaim
     }
 
-    function _transfer(
-        address from,
-        address to,
-        uint256 value
-    ) internal virtual returns (bool) {
-        _transferByPartition(
-            from,
-            to,
-            value,
-            _DEFAULT_PARTITION,
-            '',
-            address(0),
-            ''
-        );
-        return _emitTransferEvent(from, to, value);
-    }
+    function createHoldByPartition(
+        bytes32 _partition,
+        Hold calldata _hold
+    ) external returns (bool success_, uint256 holdId_);
 
-    function _mint(address to, uint256 value) internal virtual {
-        bytes memory _data;
-        _issueByPartition(_DEFAULT_PARTITION, to, value, _data);
-        _emitTransferEvent(address(0), to, value);
-    }
+    function createHoldFromByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    ) external returns (bool success_, uint256 holdId_);
 
-    function _burn(address from, uint256 value) internal virtual {
-        bytes memory _data;
-        _redeemByPartition(
-            _DEFAULT_PARTITION,
-            from,
-            address(0),
-            value,
-            _data,
-            _data
-        );
-        _emitTransferEvent(from, address(0), value);
-    }
+    function operatorCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    ) external returns (bool success_, uint256 holdId_);
 
-    function _burnFrom(address account, uint256 value) internal virtual {
-        _decreaseAllowedBalance(account, _msgSender(), value);
-        _burn(account, value);
-    }
+    function controllerCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    ) external returns (bool success_, uint256 holdId_);
 
-    function _decreaseAllowedBalance(
-        address from,
-        address spender,
-        uint256 value
-    ) private {
-        _beforeAllowanceUpdate(from, spender, value, false);
+    function protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        ProtectedHold memory _protectedHold,
+        bytes calldata _signature
+    ) external returns (bool success_, uint256 holdId_);
 
-        ERC20Storage storage erc20Storage = _getErc20Storage();
+    function executeHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to,
+        uint256 _amount
+    ) external returns (bool success_);
 
-        if (value > erc20Storage.allowed[from][spender]) {
-            revert InsufficientAllowance(spender, from);
-        }
+    function releaseHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        uint256 _amount
+    ) external returns (bool success_);
 
-        erc20Storage.allowed[from][spender] -= value;
-    }
+    function reclaimHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) external returns (bool success_);
 
-    // solhint-disable no-unused-vars, custom-errors
-    function _beforeAllowanceUpdate(
-        address _owner,
-        address _spender,
-        uint256 _amount,
-        bool _isIncrease
-    ) internal virtual {
-        revert('Should not reach this function');
-    }
-    // solhint-enable no-unused-vars, custom-errors
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view returns (uint256 amount_);
 
-    function _emitTransferEvent(
-        address from,
-        address to,
-        uint256 value
-    ) private returns (bool) {
-        emit Transfer(from, to, value);
-        return true;
-    }
+    function getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 amount_);
 
-    function _decimals() internal view virtual returns (uint8) {
-        return _getERC20Metadata().info.decimals;
-    }
+    function getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 holdCount_);
 
-    function _getERC20Metadata()
-        internal
+    function getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (uint256[] memory holdsId_);
+
+    function getHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        external
         view
-        virtual
-        returns (IERC20.ERC20Metadata memory erc20Metadata_)
-    {
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-        IERC20.ERC20MetadataInfo memory erc20Info = IERC20.ERC20MetadataInfo({
-            name: erc20Storage.name,
-            symbol: erc20Storage.symbol,
-            isin: erc20Storage.isin,
-            decimals: erc20Storage.decimals
-        });
-        erc20Metadata_ = IERC20.ERC20Metadata({
-            info: erc20Info,
-            securityType: erc20Storage.securityType
-        });
-    }
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        );
 }

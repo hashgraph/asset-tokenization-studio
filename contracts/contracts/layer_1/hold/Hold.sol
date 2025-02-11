@@ -203,94 +203,331 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {
-    IERC1644StorageWrapper
-} from '../../interfaces/ERC1400/IERC1644StorageWrapper.sol';
-import {ERC20StorageWrapper} from '../ERC20/ERC20StorageWrapper.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
+import {Common} from '../common/Common.sol';
+import {_CONTROLLER_ROLE} from '../constants/roles.sol';
 
-abstract contract ERC1644StorageWrapper is
-    IERC1644StorageWrapper,
-    ERC20StorageWrapper
-{
-    struct ERC1644Storage {
-        bool isControllable;
-        bool initialized;
-    }
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-    modifier onlyControllable() {
-        if (!_isControllable()) {
-            revert TokenIsNotControllable();
-        }
-        _;
-    }
-
-    function _controllerTransfer(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) internal {
-        _transfer(_from, _to, _value);
-        emit ControllerTransfer(
-            msg.sender,
-            _from,
-            _to,
-            _value,
-            _data,
-            _operatorData
-        );
-    }
-
-    function _controllerRedeem(
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
-    ) internal {
-        _burn(_tokenHolder, _value);
-        emit ControllerRedemption(
-            msg.sender,
-            _tokenHolder,
-            _value,
-            _data,
-            _operatorData
-        );
-    }
-
-    /**
-     * @notice It is used to end the controller feature from the token
-     * @dev It only be called by the `owner/issuer` of the token
-     */
-    function _finalizeControllable() internal {
-        if (!_getErc1644Storage().isControllable) return;
-
-        _getErc1644Storage().isControllable = false;
-        emit FinalizedControllerFeature(_msgSender());
-    }
-
-    /**
-     * @notice Internal function to know whether the controller functionality
-     * allowed or not.
-     * @return bool `true` when controller address is non-zero otherwise return `false`.
-     */
-    function _isControllable() internal view returns (bool) {
-        return _getErc1644Storage().isControllable;
-    }
-
-    function _getErc1644Storage()
-        internal
-        pure
-        returns (ERC1644Storage storage erc1644Storage_)
+abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
+    function createHoldByPartition(
+        bytes32 _partition,
+        Hold calldata _hold
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyValidAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 holdId_)
     {
-        bytes32 position = _ERC1644_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc1644Storage_.slot := position
-        }
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _msgSender(),
+            _hold,
+            ''
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _msgSender(),
+            _partition,
+            holdId_,
+            _hold,
+            ''
+        );
+    }
+
+    function createHoldFromByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyValidAddress(_from)
+        onlyValidAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 holdId_)
+    {
+        (success_, holdId_) = _createHoldFromByPartition(
+            _partition,
+            _from,
+            _hold,
+            _operatorData
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _from,
+            _partition,
+            holdId_,
+            _hold,
+            _operatorData
+        );
+    }
+
+    function operatorCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyValidAddress(_from)
+        onlyValidAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyOperator(_partition, _from)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 holdId_)
+    {
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _from,
+            _hold,
+            _operatorData
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _from,
+            _partition,
+            holdId_,
+            _hold,
+            _operatorData
+        );
+    }
+
+    function controllerCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyValidAddress(_from)
+        onlyValidAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyRole(_CONTROLLER_ROLE)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyControllable
+        returns (bool success_, uint256 holdId_)
+    {
+        (success_, holdId_) = _createHoldByPartition(
+            _partition,
+            _from,
+            _hold,
+            _operatorData
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _from,
+            _partition,
+            holdId_,
+            _hold,
+            _operatorData
+        );
+    }
+
+    function protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        ProtectedHold memory _protectedHold,
+        bytes calldata _signature
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyValidAddress(_from)
+        onlyValidAddress(_protectedHold.hold.escrow)
+        onlyRole(_protectedPartitionsRole(_partition))
+        onlyWithValidExpirationTimestamp(
+            _protectedHold.hold.expirationTimestamp
+        )
+        onlyProtectedPartitions
+        returns (bool success_, uint256 holdId_)
+    {
+        (success_, holdId_) = _protectedCreateHoldByPartition(
+            _partition,
+            _from,
+            _protectedHold,
+            _signature
+        );
+
+        emit HeldByPartition(
+            _msgSender(),
+            _from,
+            _partition,
+            holdId_,
+            _protectedHold.hold,
+            ''
+        );
+    }
+
+    function executeHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to,
+        uint256 _amount
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
+        checkControlList(_to)
+        returns (bool success_)
+    {
+        success_ = _executeHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId,
+            _to,
+            _amount
+        );
+
+        emit HoldByPartitionExecuted(
+            _tokenHolder,
+            _partition,
+            _holdId,
+            _amount,
+            _to
+        );
+    }
+
+    function releaseHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        uint256 _amount
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
+        returns (bool success_)
+    {
+        success_ = _releaseHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId,
+            _amount
+        );
+        emit HoldByPartitionReleased(
+            _tokenHolder,
+            _partition,
+            _holdId,
+            _amount
+        );
+    }
+
+    function reclaimHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidHoldId(_partition, _tokenHolder, _holdId)
+        returns (bool success_)
+    {
+        uint256 amount_;
+        (success_, amount_) = _reclaimHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+        emit HoldByPartitionReclaimed(
+            _msgSender(),
+            _tokenHolder,
+            _partition,
+            _holdId,
+            amount_
+        );
+    }
+
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 amount_) {
+        return _getHeldAmountFor(_tokenHolder);
+    }
+
+    function getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 amount_) {
+        return _getHeldAmountForByPartition(_partition, _tokenHolder);
+    }
+
+    function getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 holdCount_) {
+        return _getHoldCountForByPartition(_partition, _tokenHolder);
+    }
+
+    function getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view virtual override returns (uint256[] memory holdsId_) {
+        return
+            _getHoldsIdForByPartition(
+                _partition,
+                _tokenHolder,
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function getHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        external
+        view
+        virtual
+        override
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        )
+    {
+        return _getHoldForByPartition(_partition, _tokenHolder, _holdId);
     }
 }

@@ -206,35 +206,143 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {CD_Lib} from '../../layer_0/common/CD_Lib.sol';
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-library Snapshots_CD_Lib {
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (uint256 balance_) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature(
-                'balanceOfAtSnapshot(uint256,address)',
-                _snapshotID,
-                _tokenHolder
-            )
+import {
+    ERC1410OperatorStorageWrapper
+} from './ERC1410OperatorStorageWrapper.sol';
+import {
+    _IS_PAUSED_ERROR_ID,
+    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
+    _FROM_ACCOUNT_NULL_ERROR_ID,
+    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
+    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+    _IS_NOT_OPERATOR_ERROR_ID,
+    _WRONG_PARTITION_ERROR_ID,
+    _SUCCESS
+} from '../../constants/values.sol';
+import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
+
+abstract contract ERC1410StandardStorageWrapper is
+    ERC1410OperatorStorageWrapper
+{
+    function _issueByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _value,
+        bytes memory _data
+    ) internal virtual {
+        _validateParams(_partition, _value);
+
+        _beforeTokenTransfer(_partition, address(0), _tokenHolder, _value);
+
+        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
+            _addPartitionTo(_value, _tokenHolder, _partition);
+        } else {
+            _increaseBalanceByPartition(_tokenHolder, _value, _partition);
+        }
+
+        _increaseTotalSupplyByPartition(_partition, _value);
+
+        emit IssuedByPartition(
+            _partition,
+            _msgSender(),
+            _tokenHolder,
+            _value,
+            _data
         );
-        return abi.decode(data, (uint256));
     }
 
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (uint256 balance_) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature(
-                'lockedBalanceOfAtSnapshot(uint256,address)',
-                _snapshotID,
-                _tokenHolder
-            )
+    function _redeemByPartition(
+        bytes32 _partition,
+        address _from,
+        address _operator,
+        uint256 _value,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) internal virtual {
+        _beforeTokenTransfer(_partition, _from, address(0), _value);
+
+        _reduceBalanceByPartition(_from, _value, _partition);
+
+        _reduceTotalSupplyByPartition(_partition, _value);
+
+        emit RedeemedByPartition(
+            _partition,
+            _operator,
+            _from,
+            _value,
+            _data,
+            _operatorData
         );
-        return abi.decode(data, (uint256));
+    }
+
+    function _reduceTotalSupplyByPartition(
+        bytes32 _partition,
+        uint256 _value
+    ) internal virtual {
+        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+
+        erc1410Storage.totalSupply -= _value;
+        erc1410Storage.totalSupplyByPartition[_partition] -= _value;
+    }
+
+    function _increaseTotalSupplyByPartition(
+        bytes32 _partition,
+        uint256 _value
+    ) internal virtual {
+        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+
+        erc1410Storage.totalSupply += _value;
+        erc1410Storage.totalSupplyByPartition[_partition] += _value;
+    }
+
+    function _validateParams(
+        bytes32 _partition,
+        uint256 _value
+    ) internal pure virtual {
+        if (_value == uint256(0)) {
+            revert ZeroValue();
+        }
+        if (_partition == bytes32(0)) {
+            revert ZeroPartition();
+        }
+    }
+
+    function _canRedeemByPartition(
+        address _from,
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data, // solhint-disable-line no-unused-vars
+        bytes calldata _operatorData // solhint-disable-line no-unused-vars
+    ) internal view virtual returns (bool, bytes1, bytes32) {
+        if (_isPaused()) {
+            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+        }
+        if (_from == address(0)) {
+            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_msgSender())) {
+            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_from)) {
+            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_validPartition(_partition, _from)) {
+            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
+        }
+
+        uint256 balance = _balanceOfByPartition(_partition, _from);
+
+        if (balance < _value) {
+            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (
+            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
+        ) {
+            if (!_isAuthorized(_partition, _msgSender(), _from)) {
+                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
+            }
+        }
+
+        return (true, _SUCCESS, bytes32(0));
     }
 }

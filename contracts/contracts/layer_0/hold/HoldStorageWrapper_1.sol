@@ -203,72 +203,155 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {LibCommon} from '../common/LibCommon.sol';
+import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {
-    ERC1410StandardStorageWrapper
-} from './ERC1410StandardStorageWrapper.sol';
-import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
-import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS
-} from '../../constants/values.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-abstract contract ERC1410ControllerStorageWrapper is
-    ERC1410StandardStorageWrapper,
-    ERC1644StorageWrapper
-{
-    function _canTransferByPartition(
-        address _from,
-        address _to,
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+abstract contract HoldStorageWrapper_1 is PauseStorageWrapper {
+    using LibCommon for EnumerableSet.UintSet;
+
+    modifier onlyWithValidHoldId(
         bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data, // solhint-disable-line no-unused-vars
-        bytes calldata _operatorData // solhint-disable-line no-unused-vars
-    ) internal view virtual returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_validPartition(_partition, _from)) {
-            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfByPartition(_partition, _from) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        // TODO: Better to check all in one boolean expression defined in a different pure function.
-        if (
-            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
-        ) {
-            if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-            }
-        }
+        address _tokenHolder,
+        uint256 _holdId
+    ) {
+        if (!_isHoldIdValid(_partition, _tokenHolder, _holdId))
+            revert IHold.WrongHoldId();
+        _;
+    }
 
-        return (true, _SUCCESS, bytes32(0));
+    function _isHoldIdValid(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (bool) {
+        if (_getHold(_partition, _tokenHolder, _holdId).id == 0) return false;
+        return true;
+    }
+
+    function _getHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (IHold.HoldData memory) {
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+
+        return _getHoldByIndex(_partition, _tokenHolder, holdIndex);
+    }
+
+    function _getHoldIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (uint256) {
+        return _holdStorage().holdsIndex[_tokenHolder][_partition][_holdId];
+    }
+
+    function _getHoldByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex
+    ) internal view returns (IHold.HoldData memory) {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        if (_holdIndex == 0)
+            return
+                IHold.HoldData(
+                    0,
+                    IHold.Hold(0, 0, address(0), address(0), ''),
+                    ''
+                );
+
+        _holdIndex--;
+
+        assert(_holdIndex < holdStorage.holds[_tokenHolder][_partition].length);
+
+        return holdStorage.holds[_tokenHolder][_partition][_holdIndex];
+    }
+
+    function _getHeldAmountFor(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _holdStorage().totalHeldAmount[_tokenHolder];
+    }
+
+    function _getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _holdStorage().heldAmountByPartition[_tokenHolder][_partition];
+    }
+
+    function _getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (uint256[] memory holdsId_) {
+        return
+            _holdStorage().holdIds[_tokenHolder][_partition].getFromSet(
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _getHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        internal
+        view
+        virtual
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        )
+    {
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+        return (
+            holdData.hold.amount,
+            holdData.hold.expirationTimestamp,
+            holdData.hold.escrow,
+            holdData.hold.to,
+            holdData.hold.data,
+            holdData.operatorData
+        );
+    }
+
+    function _holdStorage()
+        internal
+        pure
+        virtual
+        returns (IHold.HoldDataStorage storage hold_)
+    {
+        bytes32 position = _HOLD_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            hold_.slot := position
+        }
+    }
+
+    function _getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        return _holdStorage().holds[_tokenHolder][_partition].length;
     }
 }

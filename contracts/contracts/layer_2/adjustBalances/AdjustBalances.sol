@@ -214,13 +214,8 @@ import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {AdjustBalancesStorageWrapper} from './AdjustBalancesStorageWrapper.sol';
 
-contract AdjustBalances is
-    IAdjustBalances,
-    IStaticFunctionSelectors,
-    AdjustBalancesStorageWrapper
-{
+contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
     function adjustBalances(
         uint256 factor,
         uint8 decimals

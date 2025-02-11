@@ -206,18 +206,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    ERC1410ControllerStorageWrapper
-} from './ERC1410ControllerStorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
+
 import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
 import {
     IERC1410Controller
 } from '../../interfaces/ERC1400/IERC1410Controller.sol';
 
-abstract contract ERC1410Controller is
-    IERC1410Controller,
-    ERC1410ControllerStorageWrapper
-{
+abstract contract ERC1410Controller is IERC1410Controller, Common {
     function controllerTransferByPartition(
         bytes32 _partition,
         address _from,

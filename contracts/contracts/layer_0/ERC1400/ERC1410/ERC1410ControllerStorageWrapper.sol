@@ -203,127 +203,66 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
+import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
 import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {LibCommon} from '../../layer_0/common/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    _CORPORATE_ACTION_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
-import {
-    SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE
-} from '../constants/values.sol';
+    _IS_PAUSED_ERROR_ID,
+    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
+    _FROM_ACCOUNT_NULL_ERROR_ID,
+    _TO_ACCOUNT_NULL_ERROR_ID,
+    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
+    _TO_ACCOUNT_BLOCKED_ERROR_ID,
+    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+    _IS_NOT_OPERATOR_ERROR_ID,
+    _WRONG_PARTITION_ERROR_ID,
+    _SUCCESS
+} from '../../constants/values.sol';
 
-contract CorporateActionsStorageWrapperRead is LocalContext {
-    using LibCommon for EnumerableSet.Bytes32Set;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    function _getCorporateAction(
-        bytes32 _corporateActionId
-    ) internal view virtual returns (bytes32 actionType_, bytes memory data_) {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        actionType_ = corporateActions_
-            .actionsData[_corporateActionId]
-            .actionType;
-        data_ = corporateActions_.actionsData[_corporateActionId].data;
-    }
-
-    function _getCorporateActionCount()
-        internal
-        view
-        virtual
-        returns (uint256 corporateActionCount_)
-    {
-        return _corporateActionsStorage().actions.length();
-    }
-
-    function _getCorporateActionIds(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function _getCorporateActionCountByType(
-        bytes32 _actionType
-    ) internal view virtual returns (uint256 corporateActionCount_) {
-        return _corporateActionsStorage().actionsByType[_actionType].length();
-    }
-
-    function _getCorporateActionIdsByType(
-        bytes32 _actionType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage()
-            .actionsByType[_actionType]
-            .getFromSet(_pageIndex, _pageLength);
-    }
-
-    function _getResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
-        bytes memory result;
-
-        if (_getCorporateActionResultCount(actionId) > resultId)
-            result = _getCorporateActionResult(actionId, resultId);
-
-        return result;
-    }
-
-    function _getCorporateActionResultCount(
-        bytes32 actionId
-    ) internal view virtual returns (uint256) {
-        return _corporateActionsStorage().actionsData[actionId].results.length;
-    }
-
-    /**
-     * @dev returns a corporate action result.
-     *
-     * @param actionId The corporate action Id
-     */
-    function _getCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
-        return
-            _corporateActionsStorage().actionsData[actionId].results[resultId];
-    }
-
-    function _isSnapshotTaskType(bytes memory data) internal returns (bool) {
-        return abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE;
-    }
-
-    function _isBalanceAdjustmentTaskType(
-        bytes memory data
-    ) internal returns (bool) {
-        return abi.decode(data, (bytes32)) == BALANCE_ADJUSTMENT_TASK_TYPE;
-    }
-
-    function _corporateActionsStorage()
-        internal
-        pure
-        virtual
-        returns (CorporateActionDataStorage storage corporateActions_)
-    {
-        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            corporateActions_.slot := position
+abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
+    function _canTransferByPartition(
+        address _from,
+        address _to,
+        bytes32 _partition,
+        uint256 _value,
+        bytes calldata _data, // solhint-disable-line no-unused-vars
+        bytes calldata _operatorData // solhint-disable-line no-unused-vars
+    ) internal view virtual returns (bool, bytes1, bytes32) {
+        if (_isPaused()) {
+            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
+        if (_from == address(0)) {
+            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (_to == address(0)) {
+            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_msgSender())) {
+            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_from)) {
+            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_to)) {
+            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_validPartition(_partition, _from)) {
+            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
+        }
+        if (_balanceOfByPartition(_partition, _from) < _value) {
+            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        // TODO: Better to check all in one boolean expression defined in a different pure function.
+        if (
+            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
+        ) {
+            if (!_isAuthorized(_partition, _msgSender(), _from)) {
+                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
+            }
+        }
+
+        return (true, _SUCCESS, bytes32(0));
     }
 }

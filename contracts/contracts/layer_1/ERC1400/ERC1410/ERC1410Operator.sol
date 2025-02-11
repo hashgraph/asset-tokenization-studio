@@ -207,14 +207,9 @@
 pragma solidity 0.8.18;
 
 import {IERC1410Operator} from '../../interfaces/ERC1400/IERC1410Operator.sol';
-import {
-    ERC1410OperatorStorageWrapper
-} from './ERC1410OperatorStorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
 
-abstract contract ERC1410Operator is
-    IERC1410Operator,
-    ERC1410OperatorStorageWrapper
-{
+abstract contract ERC1410Operator is IERC1410Operator, Common {
     ///////////////////////
     /// Operator Management
     ///////////////////////
