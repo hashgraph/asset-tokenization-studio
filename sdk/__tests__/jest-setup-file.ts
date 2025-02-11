@@ -293,6 +293,7 @@ const lastLockIds = new Map<string, number>();
 const lastHoldIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
 const nonces = new Map<string, number>();
+let kycAccountsList: string[] = [];
 
 let controlList: string[] = [];
 let issuerList: string[] = [];
@@ -1015,6 +1016,30 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     async (address: EvmAddress, target: EvmAddress) => {
       const account = '0x' + target.toString().toUpperCase().substring(2);
       return nonces.get(account) ?? 0;
+    },
+  );
+
+  singletonInstance.getKYCFor = jest.fn(
+    async (address: EvmAddress, target: EvmAddress) => {
+      const account = '0x' + target.toString().toUpperCase().substring(2);
+      return kycAccountsList.includes(account);
+    },
+  );
+
+  singletonInstance.getKYCAccountsCount = jest.fn(
+    async (address: EvmAddress, kycStatus: number) => {
+      return kycAccountsList.length;
+    },
+  );
+
+  singletonInstance.getKYCAccounts = jest.fn(
+    async (
+      address: EvmAddress,
+      kycStatus: number,
+      start: number,
+      end: number,
+    ) => {
+      return kycAccountsList.slice(start * end, start * end + end);
     },
   );
 
@@ -1812,6 +1837,49 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
       increaseLockedBalance(targetId, amount);
       decreaseBalance(sourceId, amount);
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.grantKYC = jest.fn(
+    async (
+      security: EvmAddress,
+      targetId: EvmAddress,
+      VCId: string,
+      validFrom: BigDecimal,
+      validTo: BigDecimal,
+      issuer: EvmAddress,
+    ) => {
+      const account = '0x' + targetId.toString().toUpperCase().substring(2);
+
+      const accountKycStatus = kycAccountsList.includes(account);
+
+      if (!accountKycStatus) {
+        kycAccountsList.push(account);
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.revokeKYC = jest.fn(
+    async (security: EvmAddress, targetId: EvmAddress) => {
+      const account = '0x' + targetId.toString().toUpperCase().substring(2);
+
+      const accountKycStatus = kycAccountsList.includes(account);
+
+      if (accountKycStatus) {
+        kycAccountsList = kycAccountsList.filter(
+          (kycAccount) => kycAccount != account,
+        );
+      }
 
       return {
         status: 'success',

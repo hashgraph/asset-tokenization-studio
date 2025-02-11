@@ -231,6 +231,7 @@ import {
   Snapshots_2__factory,
   SSIManagement__factory,
   TransferAndLock__factory,
+  KYC__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -282,6 +283,8 @@ import {
   UPDATE_MATURITY_DATE_GAS,
   UPDATE_RESOLVER_GAS,
   EXECUTE_HOLD_BY_PARTITION_GAS,
+  GRANT_KYC_GAS,
+  REVOKE_KYC_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -2215,6 +2218,72 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(REMOVE_ISSUER_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async grantKYC(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    vcBase64: string,
+    validFrom: BigDecimal,
+    validTo: BigDecimal,
+    issuer: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'grantKYC';
+    LogService.logTrace(
+      `Granting KYC from issuer ${issuer.toString()} to address ${targetId.toString()} with VC ${vcBase64}`,
+    );
+
+    const factoryInstance = new KYC__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [
+        targetId.toString(),
+        vcBase64,
+        validFrom.toBigNumber(),
+        validTo.toBigNumber(),
+        issuer.toString(),
+      ],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(GRANT_KYC_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async revokeKYC(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'revokeKYC';
+    LogService.logTrace(`Revoking KYC to address ${targetId.toString()}`);
+
+    const factoryInstance = new KYC__factory().attach(security.toString());
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(REVOKE_KYC_GAS)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

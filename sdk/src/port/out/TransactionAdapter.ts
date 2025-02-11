@@ -632,13 +632,31 @@ interface ISSIManagementTransactionAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface IKYCTransactionAdapter {
+  grantKYC(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    VCId: string,
+    validFrom: BigDecimal,
+    validTo: BigDecimal,
+    issuer: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  revokeKYC(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
     RoleTransactionAdapter,
     IManagementTransactionAdapter,
     IHoldTransactionAdapter,
-    ISSIManagementTransactionAdapter
+    ISSIManagementTransactionAdapter,
+    IKYCTransactionAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1158,6 +1176,24 @@ export default abstract class TransactionAdapter
     security: EvmAddress,
     issuer: EvmAddress,
     securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  grantKYC(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    VCId: string,
+    validFrom: BigDecimal,
+    validTo: BigDecimal,
+    issuer: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  revokeKYC(
+    security: EvmAddress,
+    targetId: EvmAddress,
+    securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }

@@ -298,6 +298,16 @@ import ReclaimHoldByPartitionRequest from './request/ReclaimHoldByPartitionReque
 import { ReclaimHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommand.js';
 import { ExecuteHoldByPartitionCommand } from '../../app/usecase/command/security/operations/executeHoldByPartition/ExecuteHoldByPartitionCommand.js';
 import ExecuteHoldByPartitionRequest from './request/ExecuteHoldByPartitionRequest.js';
+import { GrantKYCCommand } from '../../app/usecase/command/security/operations/kyc/grantKyc/GrantKYCCommand.js';
+import { RevokeKYCCommand } from '../../app/usecase/command/security/operations/kyc/revokeKyc/RevokeKYCCommand.js';
+import { GetKYCAccountsQuery } from '../../app/usecase/query/security/kyc/getKycAccounts/GetKYCAccountsQuery.js';
+import { GetKYCAccountsCountQuery } from '../../app/usecase/query/security/kyc/getKycAccountsCount/GetKYCAccountsCountQuery.js';
+import { GetKYCForQuery } from '../../app/usecase/query/security/kyc/getKycFor/GetKYCForQuery.js';
+import GrantKYCRequest from './request/GrantKYCRequest.js';
+import RevokeKYCRequest from './request/RevokeKYCRequest.js';
+import GetKYCAccountsRequest from './request/GetKYCAccountsRequest.js';
+import GetKYCAccountsCountRequest from './request/GetKYCAccountsCountRequest.js';
+import GetKYCForRequest from './request/GetKYCForRequest.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -390,6 +400,15 @@ interface ISecurityInPort {
   executeHoldByPartition(
     request: ExecuteHoldByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  grantKYC(
+    request: GrantKYCRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  revokeKYC(
+    request: RevokeKYCRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  getKYCAccounts(request: GetKYCAccountsRequest): Promise<string[]>;
+  getKYCAccountsCount(request: GetKYCAccountsCountRequest): Promise<number>;
+  getKYCFor(request: GetKYCForRequest): Promise<number>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -1151,6 +1170,78 @@ class SecurityInPort implements ISecurityInPort {
         partitionId,
       ),
     );
+  }
+
+  @LogError
+  async grantKYC(
+    request: GrantKYCRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('GrantKYCRequest', request);
+
+    return await this.commandBus.execute(
+      new GrantKYCCommand(
+        request.securityId,
+        request.targetId,
+        request.vcBase64,
+      ),
+    );
+  }
+
+  @LogError
+  async revokeKYC(
+    request: RevokeKYCRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('RevokeKYCRequest', request);
+
+    return await this.commandBus.execute(
+      new RevokeKYCCommand(request.securityId, request.targetId),
+    );
+  }
+
+  @LogError
+  async getKYCFor(request: GetKYCForRequest): Promise<number> {
+    handleValidation('GetKYCForRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetKYCForQuery(request.securityId, request.targetId),
+      )
+    ).payload;
+
+    return res;
+  }
+
+  @LogError
+  async getKYCAccountsCount(
+    request: GetKYCAccountsCountRequest,
+  ): Promise<number> {
+    handleValidation('GetKYCAccountsCountRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetKYCAccountsCountQuery(request.securityId, request.kycStatus),
+      )
+    ).payload;
+
+    return res;
+  }
+
+  @LogError
+  async getKYCAccounts(request: GetKYCAccountsRequest): Promise<string[]> {
+    handleValidation('GetKYCAccountsRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetKYCAccountsQuery(
+          request.securityId,
+          request.kycStatus,
+          request.start,
+          request.end,
+        ),
+      )
+    ).payload;
+
+    return res;
   }
 }
 

@@ -244,6 +244,7 @@ import {
   ProtectedPartitions__factory,
   Hold_2__factory,
   SSIManagement__factory,
+  KYC__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1312,5 +1313,47 @@ export class RPCQueryAdapter {
       SSIManagement__factory,
       address.toString(),
     ).isIssuer(issuer.toString());
+  }
+
+  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting KYC details for ${targetId}}`);
+
+    const { status } = await this.connect(
+      KYC__factory,
+      address.toString(),
+    ).getKYCFor(targetId.toString());
+
+    return status;
+  }
+
+  async getKYCAccounts(
+    address: EvmAddress,
+    kycStatus: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(`Getting accounts with KYC status ${kycStatus}`);
+
+    const kycAccounts = await this.connect(
+      KYC__factory,
+      address.toString(),
+    ).getKYCAccounts(kycStatus, start, end);
+
+    return kycAccounts;
+  }
+
+  async getKYCAccountsCount(
+    address: EvmAddress,
+    kycStatus: number,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting count of accounts with KYC status ${kycStatus}}`,
+    );
+    const kycAccountsCount = await this.connect(
+      KYC__factory,
+      address.toString(),
+    ).getKYCAccountsCount(kycStatus);
+
+    return kycAccountsCount.toNumber();
   }
 }

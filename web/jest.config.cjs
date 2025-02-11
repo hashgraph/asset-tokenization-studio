@@ -28,6 +28,6 @@ module.exports = {
     "!**/vendor/**",
   ],
   transformIgnorePatterns: [
-    "/node_modules/(?!@hashgraph/asset-tokenization-sdk|multiformats|fireblocks-sdk|did-jwt|uuid|uint8arrays).*/",
+    "/node_modules/(?!@hashgraph/asset-tokenization-sdk|multiformats|fireblocks-sdk|did-jwt|uuid|uint8arrays|@terminal3).*/",
   ],
 };
