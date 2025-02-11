@@ -385,7 +385,7 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     function getLockedAmountFor(
         address _tokenHolder
     ) external view virtual override returns (uint256 amount_) {
-        return _getLockedAmountFor(_DEFAULT_PARTITION, _tokenHolder);
+        return _getLockedAmountFor(_tokenHolder);
     }
 
     function getLockCountFor(
@@ -422,7 +422,8 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
             _getLockForByPartitionAdjustedAt(
                 _DEFAULT_PARTITION,
                 _tokenHolder,
-                _lockId
+                _lockId,
+                _blockTimestamp()
             );
     }
 

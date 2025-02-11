@@ -203,127 +203,46 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {_ERC20_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+    IERC20StorageWrapper
+} from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    _CORPORATE_ACTION_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
-import {
-    SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE
-} from '../constants/values.sol';
+    ERC1410BasicStorageWrapperRead
+} from '../ERC1410/ERC1410BasicStorageWrapperRead.sol';
 
-contract CorporateActionsStorageWrapperRead is LocalContext {
-    using LibCommon for EnumerableSet.Bytes32Set;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    function _getCorporateAction(
-        bytes32 _corporateActionId
-    ) internal view virtual returns (bytes32 actionType_, bytes memory data_) {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        actionType_ = corporateActions_
-            .actionsData[_corporateActionId]
-            .actionType;
-        data_ = corporateActions_.actionsData[_corporateActionId].data;
+abstract contract ERC20StorageWrapperRead is ERC1410BasicStorageWrapperRead {
+    struct ERC20Storage {
+        string name;
+        string symbol;
+        string isin;
+        uint8 decimals;
+        bool initialized;
+        mapping(address => mapping(address => uint256)) allowed;
+        IERC20StorageWrapper.SecurityType securityType;
     }
 
-    function _getCorporateActionCount()
+    function _adjustDecimals(uint8 decimals) internal {
+        _getErc20Storage().decimals += decimals;
+    }
+
+    function _decimals() internal view returns (uint8) {
+        return _getErc20Storage().decimals;
+    }
+
+    function _getErc20Storage()
         internal
         view
         virtual
-        returns (uint256 corporateActionCount_)
+        returns (ERC20Storage storage erc20Storage_)
     {
-        return _corporateActionsStorage().actions.length();
-    }
-
-    function _getCorporateActionIds(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
-            _pageIndex,
-            _pageLength
-        );
-    }
-
-    function _getCorporateActionCountByType(
-        bytes32 _actionType
-    ) internal view virtual returns (uint256 corporateActionCount_) {
-        return _corporateActionsStorage().actionsByType[_actionType].length();
-    }
-
-    function _getCorporateActionIdsByType(
-        bytes32 _actionType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage()
-            .actionsByType[_actionType]
-            .getFromSet(_pageIndex, _pageLength);
-    }
-
-    function _getResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
-        bytes memory result;
-
-        if (_getCorporateActionResultCount(actionId) > resultId)
-            result = _getCorporateActionResult(actionId, resultId);
-
-        return result;
-    }
-
-    function _getCorporateActionResultCount(
-        bytes32 actionId
-    ) internal view virtual returns (uint256) {
-        return _corporateActionsStorage().actionsData[actionId].results.length;
-    }
-
-    /**
-     * @dev returns a corporate action result.
-     *
-     * @param actionId The corporate action Id
-     */
-    function _getCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
-        return
-            _corporateActionsStorage().actionsData[actionId].results[resultId];
-    }
-
-    function _isSnapshotTaskType(bytes memory data) internal returns (bool) {
-        return abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE;
-    }
-
-    function _isBalanceAdjustmentTaskType(
-        bytes memory data
-    ) internal returns (bool) {
-        return abi.decode(data, (bytes32)) == BALANCE_ADJUSTMENT_TASK_TYPE;
-    }
-
-    function _corporateActionsStorage()
-        internal
-        pure
-        virtual
-        returns (CorporateActionDataStorage storage corporateActions_)
-    {
-        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
+        bytes32 position = _ERC20_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            corporateActions_.slot := position
+            erc20Storage_.slot := position
         }
     }
 }

@@ -269,7 +269,7 @@ contract ERC1410BasicStorageWrapperRead is
         address _from,
         uint256 _value,
         bytes32 _partition
-    ) internal virtual {
+    ) internal {
         if (!_validPartition(_partition, _from)) {
             revert IERC1410StorageWrapper.InvalidPartition(_from, _partition);
         }
@@ -302,7 +302,7 @@ contract ERC1410BasicStorageWrapperRead is
         address _holder,
         bytes32 _partition,
         uint256 index
-    ) internal virtual {
+    ) internal {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
         if (index != erc1410Storage.partitions[_holder].length - 1) {
             erc1410Storage.partitions[_holder][index] = erc1410Storage
@@ -321,7 +321,7 @@ contract ERC1410BasicStorageWrapperRead is
         address _from,
         uint256 _value,
         bytes32 _partition
-    ) internal virtual {
+    ) internal {
         if (!_validPartition(_partition, _from)) {
             revert IERC1410StorageWrapper.InvalidPartition(_from, _partition);
         }
@@ -439,14 +439,17 @@ contract ERC1410BasicStorageWrapperRead is
         return index != 0;
     }
 
+    function _adjustTotalSupply(uint256 factor) internal {
+        _getERC1410BasicStorage().totalSupply *= factor;
+    }
+
     function _adjustTotalAndMaxSupplyByPartition(bytes32 partition) internal {
         uint256 factor = _calculateFactorByPartitionAdjustedAt(
             partition,
             _blockTimestamp()
         );
         if (factor == 1) return;
-        ERC1410BasicStorage storage basicStorage = _getERC1410BasicStorage();
-        basicStorage.totalSupply *= factor;
+        _adjustTotalSupply(factor);
         _adjustMaxSupplyByPartition(partition, factor);
         _updateLabafByPartition(partition);
     }
@@ -458,7 +461,7 @@ contract ERC1410BasicStorageWrapperRead is
         uint256 abaf = _getAbaf();
         ERC1410BasicStorage storage basicStorage = _getERC1410BasicStorage();
         _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
-        _adjustTotalBalanceFor(basicStorage, abaf, account);
+        adjustTotalBalanceFor(basicStorage, abaf, account);
     }
 
     function _adjustPartitionBalanceFor(
@@ -484,7 +487,7 @@ contract ERC1410BasicStorageWrapperRead is
         );
     }
 
-    function _adjustTotalBalanceFor(
+    function adjustTotalBalanceFor(
         ERC1410BasicStorage storage basicStorage,
         uint256 abaf,
         address account
@@ -508,7 +511,6 @@ contract ERC1410BasicStorageWrapperRead is
     function _getERC1410BasicStorage()
         internal
         pure
-        virtual
         returns (ERC1410BasicStorage storage erc1410BasicStorage_)
     {
         bytes32 position = _ERC1410_BASIC_STORAGE_POSITION;
