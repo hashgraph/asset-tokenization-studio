@@ -224,6 +224,5 @@ abstract contract ERC1410Snapshot is
     ERC1410Operator,
     ERC1410Standard,
     ERC1410Controller,
-    ERC1410ProtectedPartitions,
-    Common
+    ERC1410ProtectedPartitions
 {}

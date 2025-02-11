@@ -243,7 +243,7 @@ contract AdjustBalancesStorageWrapper_2 is
     ) internal view returns (uint256) {
         uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
         if (holdIndex == 0) return 0;
-        return _getHoldLABAFByIndex(_partition, _tokenHolder, holdIndex);
+        return _getHoldLabafByIndex(_partition, _tokenHolder, holdIndex);
     }
 
     function _getLockLabafByPartition(

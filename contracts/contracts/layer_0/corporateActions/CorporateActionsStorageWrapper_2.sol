@@ -401,11 +401,10 @@ contract CorporateActionsStorageWrapper_2 is
                         balanceAdjustmentData,
                         (IEquity.ScheduledBalanceAdjustment)
                     );*/
-
-                _adjustBalances(
+                /* _adjustBalances(
                     balanceAdjustment.factor,
                     balanceAdjustment.decimals
-                );
+                );*/
             }
         }
     }
