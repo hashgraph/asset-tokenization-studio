@@ -226,7 +226,7 @@ export {
   Factory,
   Management,
   SSIManagement,
-  Kyc
+  Kyc,
 };
 
 export * from './request';

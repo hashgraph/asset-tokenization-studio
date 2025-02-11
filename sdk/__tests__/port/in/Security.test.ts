@@ -500,9 +500,7 @@ describe('🧪 Security tests', () => {
       new GrantKYCRequest({
         securityId: equity.evmDiamondAddress!,
         targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        vcBase64: await createVcT3(
-          CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        ),
+        vcBase64: await createVcT3(CLIENT_ACCOUNT_ECDSA.evmAddress!.toString()),
       }),
     );
   }, 900_000);

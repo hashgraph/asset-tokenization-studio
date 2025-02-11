@@ -206,10 +206,7 @@
 import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
 import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
 import AccountService from '../../../../../service/AccountService';
-import {
-  RevokeKYCCommand,
-  RevokeKYCCommandResponse,
-} from './RevokeKYCCommand';
+import { RevokeKYCCommand, RevokeKYCCommandResponse } from './RevokeKYCCommand';
 import TransactionService from '../../../../../service/TransactionService';
 import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
 import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
