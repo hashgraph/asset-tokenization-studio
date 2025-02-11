@@ -206,111 +206,25 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    ERC1410OperatorStorageWrapper
-} from './ERC1410OperatorStorageWrapper.sol';
+import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
+import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
 import {
     _IS_PAUSED_ERROR_ID,
     _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
     _FROM_ACCOUNT_NULL_ERROR_ID,
+    _TO_ACCOUNT_NULL_ERROR_ID,
     _FROM_ACCOUNT_BLOCKED_ERROR_ID,
+    _TO_ACCOUNT_BLOCKED_ERROR_ID,
     _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
     _IS_NOT_OPERATOR_ERROR_ID,
     _WRONG_PARTITION_ERROR_ID,
     _SUCCESS
 } from '../../constants/values.sol';
-import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
-import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
 
-abstract contract ERC1410StandardStorageWrapper is
-    CapStorageWrapper,
-    ERC1410OperatorStorageWrapper
-{
-    function _issueByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes memory _data
-    ) internal virtual {
-        _validateParams(_partition, _value);
-
-        _beforeTokenTransfer(_partition, address(0), _tokenHolder, _value);
-
-        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
-            _addPartitionTo(_value, _tokenHolder, _partition);
-        } else {
-            _increaseBalanceByPartition(_tokenHolder, _value, _partition);
-        }
-
-        _increaseTotalSupplyByPartition(_partition, _value);
-
-        emit IssuedByPartition(
-            _partition,
-            _msgSender(),
-            _tokenHolder,
-            _value,
-            _data
-        );
-    }
-
-    function _redeemByPartition(
-        bytes32 _partition,
+abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
+    function _canTransferByPartition(
         address _from,
-        address _operator,
-        uint256 _value,
-        bytes memory _data,
-        bytes memory _operatorData
-    ) internal virtual {
-        _beforeTokenTransfer(_partition, _from, address(0), _value);
-
-        _reduceBalanceByPartition(_from, _value, _partition);
-
-        _reduceTotalSupplyByPartition(_partition, _value);
-
-        emit RedeemedByPartition(
-            _partition,
-            _operator,
-            _from,
-            _value,
-            _data,
-            _operatorData
-        );
-    }
-
-    function _reduceTotalSupplyByPartition(
-        bytes32 _partition,
-        uint256 _value
-    ) internal virtual {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-
-        erc1410Storage.totalSupply -= _value;
-        erc1410Storage.totalSupplyByPartition[_partition] -= _value;
-    }
-
-    function _increaseTotalSupplyByPartition(
-        bytes32 _partition,
-        uint256 _value
-    ) internal virtual {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-
-        erc1410Storage.totalSupply += _value;
-        erc1410Storage.totalSupplyByPartition[_partition] += _value;
-    }
-
-    function _validateParams(
-        bytes32 _partition,
-        uint256 _value
-    ) internal pure virtual {
-        if (_value == uint256(0)) {
-            revert ZeroValue();
-        }
-        if (_partition == bytes32(0)) {
-            revert ZeroPartition();
-        }
-    }
-
-    function _canRedeemByPartition(
-        address _from,
+        address _to,
         bytes32 _partition,
         uint256 _value,
         bytes calldata _data, // solhint-disable-line no-unused-vars
@@ -322,21 +236,25 @@ abstract contract ERC1410StandardStorageWrapper is
         if (_from == address(0)) {
             return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
         }
+        if (_to == address(0)) {
+            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
         if (!_checkControlList(_msgSender())) {
             return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
         if (!_checkControlList(_from)) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
+        if (!_checkControlList(_to)) {
+            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
         if (!_validPartition(_partition, _from)) {
             return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
         }
-
-        uint256 balance = _balanceOfByPartition(_partition, _from);
-
-        if (balance < _value) {
+        if (_balanceOfByPartition(_partition, _from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
+        // TODO: Better to check all in one boolean expression defined in a different pure function.
         if (
             _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
         ) {

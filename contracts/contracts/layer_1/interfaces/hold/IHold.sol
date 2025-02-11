@@ -206,14 +206,171 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {CD_Lib} from '../../../layer_0/common/CD_Lib.sol';
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-library ERC20_CD_Lib {
-    function decimals() internal view returns (uint8) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('decimals()')
-        );
-        return abi.decode(data, (uint8));
+import '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+
+interface IHold {
+    event HeldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 holdId,
+        Hold hold,
+        bytes operatorData
+    );
+
+    event HoldByPartitionExecuted(
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount,
+        address to
+    );
+
+    event HoldByPartitionReleased(
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount
+    );
+
+    event HoldByPartitionReclaimed(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 holdId,
+        uint256 amount
+    );
+
+    error HoldExpirationNotReached();
+    error WrongHoldId();
+    error InvalidDestinationAddress(address holdDestination, address to);
+    error InsufficientHoldBalance(uint256 holdAmount, uint256 amount);
+    error HoldExpirationReached();
+    error IsNotEscrow();
+
+    struct Hold {
+        uint256 amount;
+        uint256 expirationTimestamp;
+        address escrow;
+        address to;
+        bytes data;
     }
+
+    struct ProtectedHold {
+        Hold hold;
+        uint256 deadline;
+        uint256 nonce;
+    }
+
+    struct HoldData {
+        uint256 id;
+        Hold hold;
+        bytes operatorData;
+    }
+
+    struct HoldDataStorage {
+        mapping(address => uint256) totalHeldAmount;
+        mapping(address => mapping(bytes32 => uint256)) heldAmountByPartition;
+        mapping(address => mapping(bytes32 => HoldData[])) holds;
+        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIds;
+        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) holdsIndex;
+        mapping(address => mapping(bytes32 => uint256)) holdNextId;
+    }
+
+    enum OperationType {
+        Execute,
+        Release,
+        Reclaim
+    }
+
+    function createHoldByPartition(
+        bytes32 _partition,
+        Hold calldata _hold
+    ) external returns (bool success_, uint256 holdId_);
+
+    function createHoldFromByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    ) external returns (bool success_, uint256 holdId_);
+
+    function operatorCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    ) external returns (bool success_, uint256 holdId_);
+
+    function controllerCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        Hold calldata _hold,
+        bytes calldata _operatorData
+    ) external returns (bool success_, uint256 holdId_);
+
+    function protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        ProtectedHold memory _protectedHold,
+        bytes calldata _signature
+    ) external returns (bool success_, uint256 holdId_);
+
+    function executeHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to,
+        uint256 _amount
+    ) external returns (bool success_);
+
+    function releaseHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        uint256 _amount
+    ) external returns (bool success_);
+
+    function reclaimHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) external returns (bool success_);
+
+    function getHeldAmountFor(
+        address _tokenHolder
+    ) external view returns (uint256 amount_);
+
+    function getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 amount_);
+
+    function getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 holdCount_);
+
+    function getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (uint256[] memory holdsId_);
+
+    function getHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        external
+        view
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        );
 }

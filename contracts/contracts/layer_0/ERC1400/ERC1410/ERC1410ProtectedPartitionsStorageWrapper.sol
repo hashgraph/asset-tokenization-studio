@@ -203,191 +203,85 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
-    ISnapshotsStorageWrapper
-} from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
+    ERC1410SnapshotStorageWrapper
+} from './ERC1410SnapshotStorageWrapper.sol';
 import {
-    ArraysUpgradeable
-} from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
-import {
-    CountersUpgradeable
-} from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
-import {ERC20StorageWrapper} from '../ERC1400/ERC20/ERC20StorageWrapper.sol';
+    checkNounceAndDeadline
+} from '../../../layer_1/protectedPartitions/signatureVerification.sol';
 
-// solhint-disable no-unused-vars, custom-errors
-abstract contract SnapshotsStorageWrapper is
-    ISnapshotsStorageWrapper,
-    ERC20StorageWrapper
+abstract contract ERC1410ProtectedPartitionsStorageWrapper is
+    ERC1410SnapshotStorageWrapper
 {
-    function _balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (uint256 balance_) {
-        return _balanceOfAt(_tokenHolder, _snapshotID);
-    }
-
-    function _balanceOfAtSnapshotByPartition(
+    function _protectedTransferFromByPartition(
         bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (uint256 balance_) {
-        return _balanceOfAtByPartition(_partition, _tokenHolder, _snapshotID);
-    }
-
-    function _partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (bytes32[] memory) {
-        PartitionSnapshots storage partitionSnapshots = _snapshotStorage()
-            .accountPartitionMetadata[_tokenHolder];
-
-        (bool found, uint256 index) = _indexFor(
-            _snapshotID,
-            partitionSnapshots.ids
+        address _from,
+        address _to,
+        uint256 _amount,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal virtual {
+        checkNounceAndDeadline(
+            _nounce,
+            _from,
+            _getNounceFor(_from),
+            _deadline,
+            _blockTimestamp()
         );
 
-        if (!found) {
-            return _partitionsOf(_tokenHolder);
-        }
-
-        return partitionSnapshots.values[index].partitions;
-    }
-
-    function _totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) internal view returns (uint256 totalSupply_) {
-        return _totalSupplyAt(_snapshotID);
-    }
-
-    // Update balance and/or total supply snapshots before the values are modified. This is implemented
-    // in the _beforeTokenTransfer hook, which is executed for _mint, _burn, and _transfer operations.
-    function _updateAccountSnapshot(
-        address account,
-        bytes32 partition
-    ) internal {
-        _updateSnapshot(
-            _snapshotStorage().accountBalanceSnapshots[account],
-            _balanceOf(account)
+        _checkTransferSignature(
+            _partition,
+            _from,
+            _to,
+            _amount,
+            _deadline,
+            _nounce,
+            _signature
         );
-        _updateSnapshotPartitions(
-            _snapshotStorage().accountPartitionBalanceSnapshots[account][
-                partition
-            ],
-            _snapshotStorage().accountPartitionMetadata[account],
-            _balanceOfByPartition(partition, account),
-            _partitionsOf(account)
+
+        _setNounce(_nounce, _from);
+
+        _transferByPartition(
+            _from,
+            _to,
+            _amount,
+            _partition,
+            '',
+            _msgSender(),
+            ''
         );
     }
 
-    function _updateAccountLockedBalancesSnapshot(
-        address account,
-        bytes32 partition
-    ) internal {
-        _updateSnapshot(
-            _snapshotStorage().accountLockedBalanceSnapshots[account],
-            _getLockedAmountFor(account)
-        );
-        _updateSnapshot(
-            _snapshotStorage().accountPartitionLockedBalanceSnapshots[account][
-                partition
-            ],
-            _getLockedAmountForByPartition(partition, account)
-        );
-    }
-
-    function _updateTotalSupplySnapshot(bytes32 partition) internal {
-        _updateSnapshot(
-            _snapshotStorage().totalSupplySnapshots,
-            _totalSupply()
-        );
-        _updateSnapshot(
-            _snapshotStorage().totalSupplyByPartitionSnapshots[partition],
-            _totalSupplyByPartition(partition)
-        );
-    }
-
-    function _balanceOfAt(
-        address account,
-        uint256 snapshotId
-    ) internal view returns (uint256) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            snapshotId,
-            _snapshotStorage().accountBalanceSnapshots[account]
-        );
-
-        return snapshotted ? value : _balanceOf(account);
-    }
-
-    function _balanceOfAtByPartition(
+    function _protectedRedeemFromByPartition(
         bytes32 _partition,
-        address account,
-        uint256 snapshotId
-    ) internal view returns (uint256) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            snapshotId,
-            _snapshotStorage().accountPartitionBalanceSnapshots[account][
-                _partition
-            ]
+        address _from,
+        uint256 _amount,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal virtual {
+        checkNounceAndDeadline(
+            _nounce,
+            _from,
+            _getNounceFor(_from),
+            _deadline,
+            _blockTimestamp()
         );
 
-        return snapshotted ? value : _balanceOfByPartition(_partition, account);
-    }
-
-    function _totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) internal view returns (uint256 totalSupply_) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            _snapshotID,
-            _snapshotStorage().totalSupplyByPartitionSnapshots[_partition]
+        _checkRedeemSignature(
+            _partition,
+            _from,
+            _amount,
+            _deadline,
+            _nounce,
+            _signature
         );
-        return snapshotted ? value : _totalSupplyByPartition(_partition);
-    }
+        _setNounce(_nounce, _from);
 
-    function _lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (uint256 balance_) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            _snapshotID,
-            _snapshotStorage().accountLockedBalanceSnapshots[_tokenHolder]
-        );
-        return snapshotted ? value : _balanceOf(_tokenHolder);
-    }
-
-    function _lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (uint256 balance_) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            _snapshotID,
-            _snapshotStorage().accountPartitionLockedBalanceSnapshots[
-                _tokenHolder
-            ][_partition]
-        );
-        return
-            snapshotted
-                ? value
-                : _getLockedAmountForByPartition(_partition, _tokenHolder);
-    }
-
-    /**
-     * @dev Retrieves the total supply at the time `snapshotId` was created.
-     */
-    function _totalSupplyAt(
-        uint256 snapshotId
-    ) internal view returns (uint256) {
-        (bool snapshotted, uint256 value) = _valueAt(
-            snapshotId,
-            _snapshotStorage().totalSupplySnapshots
-        );
-
-        return snapshotted ? value : _totalSupply();
+        _redeemByPartition(_partition, _from, _msgSender(), _amount, '', '');
     }
 }
-// solhint-enable no-unused-vars, custom-errors

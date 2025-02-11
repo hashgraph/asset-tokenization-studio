@@ -217,14 +217,14 @@ import {
 import {
     _CORPORATE_ACTION_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
+import {HoldStorageWrapper_1} from '../hold/HoldStorageWrapper_1.sol';
 import {
     SNAPSHOT_TASK_TYPE,
     BALANCE_ADJUSTMENT_TASK_TYPE,
     SNAPSHOT_RESULT_ID
 } from '../constants/values.sol';
 
-contract CorporateActionsStorageWrapper_1 is LocalContext {
+contract CorporateActionsStorageWrapper_1 is HoldStorageWrapper_1 {
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 

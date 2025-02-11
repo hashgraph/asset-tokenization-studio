@@ -206,69 +206,223 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
+import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
+import {
+    IERC20StorageWrapper
+} from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';
 import {
     ERC1410StandardStorageWrapper
-} from './ERC1410StandardStorageWrapper.sol';
-import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
-import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _IS_NOT_OPERATOR_ERROR_ID,
-    _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS
-} from '../../constants/values.sol';
+} from '../ERC1410/ERC1410StandardStorageWrapper.sol';
 
-abstract contract ERC1410ControllerStorageWrapper is
-    ERC1410StandardStorageWrapper,
-    ERC1644StorageWrapper
+abstract contract ERC20StorageWrapper is
+    IERC20StorageWrapper,
+    ERC1410StandardStorageWrapper
 {
-    function _canTransferByPartition(
-        address _from,
-        address _to,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data, // solhint-disable-line no-unused-vars
-        bytes calldata _operatorData // solhint-disable-line no-unused-vars
-    ) internal view virtual returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_validPartition(_partition, _from)) {
-            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfByPartition(_partition, _from) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        // TODO: Better to check all in one boolean expression defined in a different pure function.
-        if (
-            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
-        ) {
-            if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-            }
+    /**
+     * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
+     * Beware that changing an allowance with this method brings the risk that someone may use both the old
+     * and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
+     * race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     * @param spender The address which will spend the funds.
+     * @param value The amount of tokens to be spent.
+     */
+    function _approve(
+        address spender,
+        uint256 value
+    ) internal virtual returns (bool) {
+        if (spender == address(0)) {
+            revert SpenderWithZeroAddress();
         }
 
-        return (true, _SUCCESS, bytes32(0));
+        _getErc20Storage().allowed[_msgSender()][spender] = value;
+        emit Approval(_msgSender(), spender, value);
+        return true;
+    }
+
+    /**
+     * @dev Increase the amount of tokens that an owner allowed to a spender.
+     * approve should be called when allowed_[_spender] == 0. To increment
+     * allowed value is better to use this function to avoid 2 calls (and wait until
+     * the first transaction is mined)
+     * From MonolithDAO Token.sol
+     * @param spender The address which will spend the funds.
+     * @param addedValue The amount of tokens to increase the allowance by.
+     */
+    function _increaseAllowance(
+        address spender,
+        uint256 addedValue
+    ) internal virtual returns (bool) {
+        if (spender == address(0)) {
+            revert SpenderWithZeroAddress();
+        }
+        _beforeAllowanceUpdate(_msgSender(), spender, addedValue, true);
+
+        _getErc20Storage().allowed[_msgSender()][spender] += addedValue;
+        emit Approval(
+            _msgSender(),
+            spender,
+            _getErc20Storage().allowed[_msgSender()][spender]
+        );
+        return true;
+    }
+
+    /**
+     * @dev Decrease the amount of tokens that an owner allowed to a spender.
+     * approve should be called when allowed_[_spender] == 0. To decrement
+     * allowed value is better to use this function to avoid 2 calls (and wait until
+     * the first transaction is mined)
+     * From MonolithDAO Token.sol
+     * @param spender The address which will spend the funds.
+     * @param subtractedValue The amount of tokens to decrease the allowance by.
+     */
+    function _decreaseAllowance(
+        address spender,
+        uint256 subtractedValue
+    ) internal virtual returns (bool) {
+        if (spender == address(0)) {
+            revert SpenderWithZeroAddress();
+        }
+        _decreaseAllowedBalance(_msgSender(), spender, subtractedValue);
+        emit Approval(
+            _msgSender(),
+            spender,
+            _getErc20Storage().allowed[_msgSender()][spender]
+        );
+        return true;
+    }
+
+    /**
+     * @dev Function to check the amount of tokens that an owner allowed to a spender.
+     * @param owner address The address which owns the funds.
+     * @param spender address The address which will spend the funds.
+     * @return A uint256 specifying the amount of tokens still available for the spender.
+     */
+    function _allowance(
+        address owner,
+        address spender
+    ) internal view virtual returns (uint256) {
+        return _getErc20Storage().allowed[owner][spender];
+    }
+
+    function _transferFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual returns (bool) {
+        _decreaseAllowedBalance(from, spender, value);
+        bytes memory data;
+        _transferByPartition(
+            from,
+            to,
+            value,
+            _DEFAULT_PARTITION,
+            data,
+            spender,
+            ''
+        );
+        return _emitTransferEvent(from, to, value);
+    }
+
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual returns (bool) {
+        _transferByPartition(
+            from,
+            to,
+            value,
+            _DEFAULT_PARTITION,
+            '',
+            address(0),
+            ''
+        );
+        return _emitTransferEvent(from, to, value);
+    }
+
+    function _mint(address to, uint256 value) internal virtual {
+        bytes memory _data;
+        _issueByPartition(_DEFAULT_PARTITION, to, value, _data);
+        _emitTransferEvent(address(0), to, value);
+    }
+
+    function _burn(address from, uint256 value) internal virtual {
+        bytes memory _data;
+        _redeemByPartition(
+            _DEFAULT_PARTITION,
+            from,
+            address(0),
+            value,
+            _data,
+            _data
+        );
+        _emitTransferEvent(from, address(0), value);
+    }
+
+    function _burnFrom(address account, uint256 value) internal virtual {
+        _decreaseAllowedBalance(account, _msgSender(), value);
+        _burn(account, value);
+    }
+
+    function _decreaseAllowedBalance(
+        address from,
+        address spender,
+        uint256 value
+    ) internal {
+        _beforeAllowanceUpdate(from, spender, value, false);
+
+        ERC20Storage storage erc20Storage = _getErc20Storage();
+
+        if (value > erc20Storage.allowed[from][spender]) {
+            revert InsufficientAllowance(spender, from);
+        }
+
+        erc20Storage.allowed[from][spender] -= value;
+    }
+
+    // solhint-disable no-unused-vars, custom-errors
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
+        uint256 _amount,
+        bool _isIncrease
+    ) internal virtual {
+        revert('Should not reach this function');
+    }
+    // solhint-enable no-unused-vars, custom-errors
+
+    function _emitTransferEvent(
+        address from,
+        address to,
+        uint256 value
+    ) private returns (bool) {
+        emit Transfer(from, to, value);
+        return true;
+    }
+
+    function _decimals() internal view virtual returns (uint8) {
+        return _getERC20Metadata().info.decimals;
+    }
+
+    function _getERC20Metadata()
+        internal
+        view
+        virtual
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+    {
+        ERC20Storage storage erc20Storage = _getErc20Storage();
+        IERC20.ERC20MetadataInfo memory erc20Info = IERC20.ERC20MetadataInfo({
+            name: erc20Storage.name,
+            symbol: erc20Storage.symbol,
+            isin: erc20Storage.isin,
+            decimals: erc20Storage.decimals
+        });
+        erc20Metadata_ = IERC20.ERC20Metadata({
+            info: erc20Info,
+            securityType: erc20Storage.securityType
+        });
     }
 }

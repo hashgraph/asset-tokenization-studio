@@ -203,101 +203,96 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+import {_ERC1644_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    IERC1644StorageWrapper
+} from '../../../layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol';
 import {
-    IControlListStorageWrapper
-} from '../interfaces/controlList/IControlListStorageWrapper.sol';
-import {LocalContext} from '../../layer_0/context/LocalContext.sol';
-import {
-    _CONTROL_LIST_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
+    SnapshotsStorageWrapper
+} from '../../snapshots/SnapshotsStorageWrapper.sol';
 
-abstract contract ControlListStorageWrapper is
-    IControlListStorageWrapper,
-    LocalContext
+abstract contract ERC1644StorageWrapper is
+    IERC1644StorageWrapper,
+    SnapshotsStorageWrapper
 {
-    using LibCommon for EnumerableSet.AddressSet;
-    using EnumerableSet for EnumerableSet.AddressSet;
-
-    struct ControlListStorage {
-        // true : control list is whitelist.
-        // false : control list is blacklist.
-        bool isWhiteList;
-        // true : isWhiteList was set.
-        // false : isWhiteList was not set.
+    struct ERC1644Storage {
+        bool isControllable;
         bool initialized;
-        EnumerableSet.AddressSet list;
     }
 
-    // modifiers
-    modifier checkControlList(address account) {
-        if (!_checkControlList(account)) {
-            revert AccountIsBlocked(account);
+    modifier onlyControllable() {
+        if (!_isControllable()) {
+            revert TokenIsNotControllable();
         }
         _;
     }
 
-    // Internal
-    function _addToControlList(
-        address _account
-    ) internal virtual returns (bool success_) {
-        success_ = _controlListStorage().list.add(_account);
+    function _controllerTransfer(
+        address _from,
+        address _to,
+        uint256 _value,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) internal {
+        _transfer(_from, _to, _value);
+        emit ControllerTransfer(
+            msg.sender,
+            _from,
+            _to,
+            _value,
+            _data,
+            _operatorData
+        );
     }
 
-    function _removeFromControlList(
-        address _account
-    ) internal virtual returns (bool success_) {
-        success_ = _controlListStorage().list.remove(_account);
+    function _controllerRedeem(
+        address _tokenHolder,
+        uint256 _value,
+        bytes calldata _data,
+        bytes calldata _operatorData
+    ) internal {
+        _burn(_tokenHolder, _value);
+        emit ControllerRedemption(
+            msg.sender,
+            _tokenHolder,
+            _value,
+            _data,
+            _operatorData
+        );
     }
 
-    function _getControlListType() internal view virtual returns (bool) {
-        return _controlListStorage().isWhiteList;
+    /**
+     * @notice It is used to end the controller feature from the token
+     * @dev It only be called by the `owner/issuer` of the token
+     */
+    function _finalizeControllable() internal {
+        if (!_getErc1644Storage().isControllable) return;
+
+        _getErc1644Storage().isControllable = false;
+        emit FinalizedControllerFeature(_msgSender());
     }
 
-    function _getControlListCount()
-        internal
-        view
-        virtual
-        returns (uint256 controlListCount_)
-    {
-        controlListCount_ = _controlListStorage().list.length();
+    /**
+     * @notice Internal function to know whether the controller functionality
+     * allowed or not.
+     * @return bool `true` when controller address is non-zero otherwise return `false`.
+     */
+    function _isControllable() internal view returns (bool) {
+        return _getErc1644Storage().isControllable;
     }
 
-    function _getControlListMembers(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (address[] memory members_) {
-        return _controlListStorage().list.getFromSet(_pageIndex, _pageLength);
-    }
-
-    function _isInControlList(
-        address _account
-    ) internal view virtual returns (bool) {
-        return _controlListStorage().list.contains(_account);
-    }
-
-    function _checkControlList(
-        address account
-    ) internal view virtual returns (bool) {
-        return _getControlListType() == _isInControlList(account);
-    }
-
-    function _controlListStorage()
+    function _getErc1644Storage()
         internal
         pure
-        virtual
-        returns (ControlListStorage storage controlList_)
+        returns (ERC1644Storage storage erc1644Storage_)
     {
-        bytes32 position = _CONTROL_LIST_STORAGE_POSITION;
+        bytes32 position = _ERC1644_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            controlList_.slot := position
+            erc1644Storage_.slot := position
         }
     }
 }

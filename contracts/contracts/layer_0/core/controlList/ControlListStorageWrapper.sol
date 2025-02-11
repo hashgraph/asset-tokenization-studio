@@ -203,85 +203,104 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {LibCommon} from '../../common/LibCommon.sol';
 import {
-    ERC1410ControllerStorageWrapper
-} from './ERC1410ControllerStorageWrapper.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    checkNounceAndDeadline
-} from '../../protectedPartitions/signatureVerification.sol';
+    IControlListStorageWrapper
+} from '../../../layer_1/interfaces/controlList/IControlListStorageWrapper.sol';
+import {LocalContext} from '../../context/LocalContext.sol';
+import {
+    _CONTROL_LIST_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
+import {
+    ProtectedPartitionsStorageWrapper
+} from '../protectedPartitions/ProtectedPartitionsStorageWrapper.sol';
 
-abstract contract ERC1410ProtectedPartitionsStorageWrapper is
-    ERC1410ControllerStorageWrapper
+abstract contract ControlListStorageWrapper is
+    IControlListStorageWrapper,
+    ProtectedPartitionsStorageWrapper
 {
-    function _protectedTransferFromByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal virtual {
-        checkNounceAndDeadline(
-            _nounce,
-            _from,
-            _getNounceFor(_from),
-            _deadline,
-            _blockTimestamp()
-        );
+    using LibCommon for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
-        _checkTransferSignature(
-            _partition,
-            _from,
-            _to,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
-
-        _setNounce(_nounce, _from);
-
-        _transferByPartition(
-            _from,
-            _to,
-            _amount,
-            _partition,
-            '',
-            _msgSender(),
-            ''
-        );
+    struct ControlListStorage {
+        // true : control list is whitelist.
+        // false : control list is blacklist.
+        bool isWhiteList;
+        // true : isWhiteList was set.
+        // false : isWhiteList was not set.
+        bool initialized;
+        EnumerableSet.AddressSet list;
     }
 
-    function _protectedRedeemFromByPartition(
-        bytes32 _partition,
-        address _from,
-        uint256 _amount,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal virtual {
-        checkNounceAndDeadline(
-            _nounce,
-            _from,
-            _getNounceFor(_from),
-            _deadline,
-            _blockTimestamp()
-        );
+    // modifiers
+    modifier checkControlList(address account) {
+        if (!_checkControlList(account)) {
+            revert AccountIsBlocked(account);
+        }
+        _;
+    }
 
-        _checkRedeemSignature(
-            _partition,
-            _from,
-            _amount,
-            _deadline,
-            _nounce,
-            _signature
-        );
-        _setNounce(_nounce, _from);
+    // Internal
+    function _addToControlList(
+        address _account
+    ) internal virtual returns (bool success_) {
+        success_ = _controlListStorage().list.add(_account);
+    }
 
-        _redeemByPartition(_partition, _from, _msgSender(), _amount, '', '');
+    function _removeFromControlList(
+        address _account
+    ) internal virtual returns (bool success_) {
+        success_ = _controlListStorage().list.remove(_account);
+    }
+
+    function _getControlListType() internal view virtual returns (bool) {
+        return _controlListStorage().isWhiteList;
+    }
+
+    function _getControlListCount()
+        internal
+        view
+        virtual
+        returns (uint256 controlListCount_)
+    {
+        controlListCount_ = _controlListStorage().list.length();
+    }
+
+    function _getControlListMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (address[] memory members_) {
+        return _controlListStorage().list.getFromSet(_pageIndex, _pageLength);
+    }
+
+    function _isInControlList(
+        address _account
+    ) internal view virtual returns (bool) {
+        return _controlListStorage().list.contains(_account);
+    }
+
+    function _checkControlList(
+        address account
+    ) internal view virtual returns (bool) {
+        return _getControlListType() == _isInControlList(account);
+    }
+
+    function _controlListStorage()
+        internal
+        pure
+        virtual
+        returns (ControlListStorage storage controlList_)
+    {
+        bytes32 position = _CONTROL_LIST_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            controlList_.slot := position
+        }
     }
 }

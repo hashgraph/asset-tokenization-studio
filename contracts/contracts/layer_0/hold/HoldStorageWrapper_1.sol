@@ -203,226 +203,155 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
-import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
+import {LibCommon} from '../common/LibCommon.sol';
+import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {
-    IERC20StorageWrapper
-} from '../../interfaces/ERC1400/IERC20StorageWrapper.sol';
-import {
-    ERC1410StandardStorageWrapper
-} from '../ERC1410/ERC1410StandardStorageWrapper.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-abstract contract ERC20StorageWrapper is
-    IERC20StorageWrapper,
-    ERC1410StandardStorageWrapper
-{
-    /**
-     * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
-     * Beware that changing an allowance with this method brings the risk that someone may use both the old
-     * and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
-     * race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:
-     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-     * @param spender The address which will spend the funds.
-     * @param value The amount of tokens to be spent.
-     */
-    function _approve(
-        address spender,
-        uint256 value
-    ) internal virtual returns (bool) {
-        if (spender == address(0)) {
-            revert SpenderWithZeroAddress();
-        }
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-        _getErc20Storage().allowed[_msgSender()][spender] = value;
-        emit Approval(_msgSender(), spender, value);
+abstract contract HoldStorageWrapper_1 is PauseStorageWrapper {
+    using LibCommon for EnumerableSet.UintSet;
+
+    modifier onlyWithValidHoldId(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) {
+        if (!_isHoldIdValid(_partition, _tokenHolder, _holdId))
+            revert IHold.WrongHoldId();
+        _;
+    }
+
+    function _isHoldIdValid(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (bool) {
+        if (_getHold(_partition, _tokenHolder, _holdId).id == 0) return false;
         return true;
     }
 
-    /**
-     * @dev Increase the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed_[_spender] == 0. To increment
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * @param spender The address which will spend the funds.
-     * @param addedValue The amount of tokens to increase the allowance by.
-     */
-    function _increaseAllowance(
-        address spender,
-        uint256 addedValue
-    ) internal virtual returns (bool) {
-        if (spender == address(0)) {
-            revert SpenderWithZeroAddress();
-        }
-        _beforeAllowanceUpdate(_msgSender(), spender, addedValue, true);
+    function _getHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (IHold.HoldData memory) {
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
 
-        _getErc20Storage().allowed[_msgSender()][spender] += addedValue;
-        emit Approval(
-            _msgSender(),
-            spender,
-            _getErc20Storage().allowed[_msgSender()][spender]
-        );
-        return true;
+        return _getHoldByIndex(_partition, _tokenHolder, holdIndex);
     }
 
-    /**
-     * @dev Decrease the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed_[_spender] == 0. To decrement
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * @param spender The address which will spend the funds.
-     * @param subtractedValue The amount of tokens to decrease the allowance by.
-     */
-    function _decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    ) internal virtual returns (bool) {
-        if (spender == address(0)) {
-            revert SpenderWithZeroAddress();
-        }
-        _decreaseAllowedBalance(_msgSender(), spender, subtractedValue);
-        emit Approval(
-            _msgSender(),
-            spender,
-            _getErc20Storage().allowed[_msgSender()][spender]
-        );
-        return true;
+    function _getHoldIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (uint256) {
+        return _holdStorage().holdsIndex[_tokenHolder][_partition][_holdId];
     }
 
-    /**
-     * @dev Function to check the amount of tokens that an owner allowed to a spender.
-     * @param owner address The address which owns the funds.
-     * @param spender address The address which will spend the funds.
-     * @return A uint256 specifying the amount of tokens still available for the spender.
-     */
-    function _allowance(
-        address owner,
-        address spender
-    ) internal view virtual returns (uint256) {
-        return _getErc20Storage().allowed[owner][spender];
+    function _getHoldByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex
+    ) internal view returns (IHold.HoldData memory) {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        if (_holdIndex == 0)
+            return
+                IHold.HoldData(
+                    0,
+                    IHold.Hold(0, 0, address(0), address(0), ''),
+                    ''
+                );
+
+        _holdIndex--;
+
+        assert(_holdIndex < holdStorage.holds[_tokenHolder][_partition].length);
+
+        return holdStorage.holds[_tokenHolder][_partition][_holdIndex];
     }
 
-    function _transferFrom(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) internal virtual returns (bool) {
-        _decreaseAllowedBalance(from, spender, value);
-        bytes memory data;
-        _transferByPartition(
-            from,
-            to,
-            value,
-            _DEFAULT_PARTITION,
-            data,
-            spender,
-            ''
-        );
-        return _emitTransferEvent(from, to, value);
+    function _getHeldAmountFor(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _holdStorage().totalHeldAmount[_tokenHolder];
     }
 
-    function _transfer(
-        address from,
-        address to,
-        uint256 value
-    ) internal virtual returns (bool) {
-        _transferByPartition(
-            from,
-            to,
-            value,
-            _DEFAULT_PARTITION,
-            '',
-            address(0),
-            ''
-        );
-        return _emitTransferEvent(from, to, value);
+    function _getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _holdStorage().heldAmountByPartition[_tokenHolder][_partition];
     }
 
-    function _mint(address to, uint256 value) internal virtual {
-        bytes memory _data;
-        _issueByPartition(_DEFAULT_PARTITION, to, value, _data);
-        _emitTransferEvent(address(0), to, value);
+    function _getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (uint256[] memory holdsId_) {
+        return
+            _holdStorage().holdIds[_tokenHolder][_partition].getFromSet(
+                _pageIndex,
+                _pageLength
+            );
     }
 
-    function _burn(address from, uint256 value) internal virtual {
-        bytes memory _data;
-        _redeemByPartition(
-            _DEFAULT_PARTITION,
-            from,
-            address(0),
-            value,
-            _data,
-            _data
-        );
-        _emitTransferEvent(from, address(0), value);
-    }
-
-    function _burnFrom(address account, uint256 value) internal virtual {
-        _decreaseAllowedBalance(account, _msgSender(), value);
-        _burn(account, value);
-    }
-
-    function _decreaseAllowedBalance(
-        address from,
-        address spender,
-        uint256 value
-    ) private {
-        _beforeAllowanceUpdate(from, spender, value, false);
-
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-
-        if (value > erc20Storage.allowed[from][spender]) {
-            revert InsufficientAllowance(spender, from);
-        }
-
-        erc20Storage.allowed[from][spender] -= value;
-    }
-
-    // solhint-disable no-unused-vars, custom-errors
-    function _beforeAllowanceUpdate(
-        address _owner,
-        address _spender,
-        uint256 _amount,
-        bool _isIncrease
-    ) internal virtual {
-        revert('Should not reach this function');
-    }
-    // solhint-enable no-unused-vars, custom-errors
-
-    function _emitTransferEvent(
-        address from,
-        address to,
-        uint256 value
-    ) private returns (bool) {
-        emit Transfer(from, to, value);
-        return true;
-    }
-
-    function _decimals() internal view virtual returns (uint8) {
-        return _getERC20Metadata().info.decimals;
-    }
-
-    function _getERC20Metadata()
+    function _getHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
         internal
         view
         virtual
-        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        )
     {
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-        IERC20.ERC20MetadataInfo memory erc20Info = IERC20.ERC20MetadataInfo({
-            name: erc20Storage.name,
-            symbol: erc20Storage.symbol,
-            isin: erc20Storage.isin,
-            decimals: erc20Storage.decimals
-        });
-        erc20Metadata_ = IERC20.ERC20Metadata({
-            info: erc20Info,
-            securityType: erc20Storage.securityType
-        });
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+        return (
+            holdData.hold.amount,
+            holdData.hold.expirationTimestamp,
+            holdData.hold.escrow,
+            holdData.hold.to,
+            holdData.hold.data,
+            holdData.operatorData
+        );
+    }
+
+    function _holdStorage()
+        internal
+        pure
+        virtual
+        returns (IHold.HoldDataStorage storage hold_)
+    {
+        bytes32 position = _HOLD_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            hold_.slot := position
+        }
+    }
+
+    function _getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        return _holdStorage().holds[_tokenHolder][_partition].length;
     }
 }

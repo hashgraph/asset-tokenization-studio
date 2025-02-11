@@ -206,9 +206,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {
-    SnapshotsStorageWrapper
-} from '../snapshots/SnapshotsStorageWrapper.sol';
+import {HoldStorageWrapper_2} from '../hold/HoldStorageWrapper_2.sol';
 import {
     _SCHEDULED_TASKS_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
@@ -219,7 +217,7 @@ import {
 } from '../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 import {ScheduledTasksDataStorage} from './ScheduledTasksCommonRead.sol';
 
-abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper {
+abstract contract ScheduledTasksCommon is HoldStorageWrapper_2 {
     error WrongTimestamp(uint256 timeStamp);
     error NotAutocalling();
 

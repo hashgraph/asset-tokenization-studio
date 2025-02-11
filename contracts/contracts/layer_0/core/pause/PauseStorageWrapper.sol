@@ -203,57 +203,63 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {LocalContext} from '../../context/LocalContext.sol';
 import {
-    IERC1410StorageWrapper
-} from '../../interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {Common} from '../../common/Common.sol';
+    IPauseStorageWrapper
+} from '../../../layer_1/interfaces/pause/IPauseStorageWrapper.sol';
+import {_PAUSE_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {
-    ERC1410BasicStorageWrapperRead
-} from '../../../layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+    ControlListStorageWrapper
+} from '../controlList/ControlListStorageWrapper.sol';
 
-abstract contract ERC1410BasicStorageWrapper is
-    IERC1410StorageWrapper,
-    ERC1410BasicStorageWrapperRead,
-    Common
+abstract contract PauseStorageWrapper is
+    IPauseStorageWrapper,
+    ControlListStorageWrapper
 {
-    function _transferByPartition(
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes32 _partition,
-        bytes memory _data,
-        address _operator,
-        bytes memory _operatorData
-    ) internal virtual {
-        _beforeTokenTransfer(_partition, _from, _to, _value);
-
-        _reduceBalanceByPartition(_from, _value, _partition);
-
-        if (!_validPartitionForReceiver(_partition, _to)) {
-            _addPartitionTo(_value, _to, _partition);
-        } else {
-            _increaseBalanceByPartition(_to, _value, _partition);
-        }
-
-        // Emit transfer event.
-        emit TransferByPartition(
-            _partition,
-            _operator,
-            _from,
-            _to,
-            _value,
-            _data,
-            _operatorData
-        );
+    struct PauseDataStorage {
+        bool paused;
     }
 
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual;
+    // modifiers
+    modifier onlyPaused() {
+        if (!_isPaused()) {
+            revert TokenIsUnpaused();
+        }
+        _;
+    }
+
+    modifier onlyUnpaused() {
+        if (_isPaused()) {
+            revert TokenIsPaused();
+        }
+        _;
+    }
+
+    // Internal
+    function _setPause(bool _paused) internal virtual {
+        _pauseStorage().paused = _paused;
+        if (_paused) emit TokenPaused(_msgSender());
+        else emit TokenUnpaused(_msgSender());
+    }
+
+    function _isPaused() internal view virtual returns (bool) {
+        bool isPaused = _pauseStorage().paused;
+        return isPaused;
+    }
+
+    function _pauseStorage()
+        internal
+        pure
+        virtual
+        returns (PauseDataStorage storage pause_)
+    {
+        bytes32 position = _PAUSE_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            pause_.slot := position
+        }
+    }
 }

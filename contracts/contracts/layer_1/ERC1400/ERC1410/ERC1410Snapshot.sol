@@ -213,9 +213,8 @@ import {
 import {ERC1410Basic} from './ERC1410Basic.sol';
 import {ERC1410Controller} from './ERC1410Controller.sol';
 import {ERC1410Operator} from './ERC1410Operator.sol';
-import {
-    ERC1410SnapshotStorageWrapper
-} from './ERC1410SnapshotStorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
+
 import {ERC1410Standard} from './ERC1410Standard.sol';
 
 // solhint-disable-next-line
@@ -226,5 +225,5 @@ abstract contract ERC1410Snapshot is
     ERC1410Standard,
     ERC1410Controller,
     ERC1410ProtectedPartitions,
-    ERC1410SnapshotStorageWrapper
+    Common
 {}

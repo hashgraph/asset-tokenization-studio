@@ -6,16 +6,18 @@ import {
 } from '../accessControl/AccessControlStorageWrapper.sol';
 import {
     IProtectedPartitionsStorageWrapper
-} from '../interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol';
-import {_PROTECTED_PARTITIONS_PARTICIPANT_ROLE} from '../constants/roles.sol';
+} from '../../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol';
+import {
+    _PROTECTED_PARTITIONS_PARTICIPANT_ROLE
+} from '../../constants/roles.sol';
 import {
     _PROTECTED_PARTITIONS_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
+} from '../../constants/storagePositions.sol';
 import {
     getMessageHashTransfer,
     getMessageHashRedeem,
     verify
-} from './signatureVerification.sol';
+} from '../../../layer_1/protectedPartitions/signatureVerification.sol';
 
 abstract contract ProtectedPartitionsStorageWrapper is
     IProtectedPartitionsStorageWrapper,
