@@ -225,9 +225,9 @@ export default class GetKYCAccountsRequest extends ValidatedRequest<GetKYCAccoun
   }) {
     super({
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
-      kycStatus: Validation.checkNumber(),
-      start: Validation.checkNumber(),
-      end: Validation.checkNumber(),
+      kycStatus: Validation.checkNumber({ min: 0 }),
+      start: Validation.checkNumber({ min: 0 }),
+      end: Validation.checkNumber({ min: 0 }),
     });
 
     this.securityId = securityId;

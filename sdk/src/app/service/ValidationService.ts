@@ -222,9 +222,10 @@ export default class ValidationService extends Service {
   }
 
   async validateIssuer(sercurityId: string, issuer: string): Promise<boolean> {
-    if (
-      !(await this.queryBus.execute(new IsIssuerQuery(sercurityId, issuer)))
-    ) {
+    const res = await this.queryBus.execute(
+      new IsIssuerQuery(sercurityId, issuer),
+    );
+    if (!res.payload) {
       throw new UnlistedIssuer();
     } else {
       return true;
@@ -235,10 +236,12 @@ export default class ValidationService extends Service {
     securityId: string,
     addresses: string[],
   ): Promise<boolean> {
+    let res;
     for (const address of addresses) {
-      if (
-        !(await this.queryBus.execute(new GetKYCForQuery(securityId, address)))
-      ) {
+      res = await this.queryBus.execute(
+        new GetKYCForQuery(securityId, address),
+      );
+      if (res.payload != 1) {
         throw new NotGrantedRole(SecurityRole._KYC_ROLE);
       }
     }

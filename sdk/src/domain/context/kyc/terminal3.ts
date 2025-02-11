@@ -207,16 +207,10 @@ import { SignedCredential } from '@terminal3/vc_core';
 import { MaxUint256 } from '@ethersproject/constants';
 import BigDecimal from '../shared/BigDecimal.js';
 
-interface NormalizedCredential {
-  normalizedSignedCredential: SignedCredential;
-  issuer: string;
-}
-
 export class Terminal3VC {
   public static vcFromBase64(base64: string): SignedCredential {
     try {
       const jsonString = Buffer.from(base64, 'base64').toString('utf-8');
-
       const parsedData = JSON.parse(jsonString);
 
       if (!parsedData || typeof parsedData !== 'object') {
@@ -231,9 +225,21 @@ export class Terminal3VC {
     }
   }
 
-  public static normalizeCredentialFields(
+  public static extractIssuer(signedCredential: SignedCredential): string {
+    const issuer = signedCredential.issuer.split(':').pop();
+    if (!issuer) throw new Error('VC must include a valid issuer.');
+    return issuer;
+  }
+
+  public static checkValidDates(
     signedCredential: SignedCredential,
-  ): NormalizedCredential {
+  ): SignedCredential {
+    this.setDefaultDates(signedCredential);
+    this.validateDateOrder(signedCredential);
+    return signedCredential;
+  }
+
+  private static setDefaultDates(signedCredential: SignedCredential): void {
     signedCredential.validFrom = signedCredential.validFrom
       ? Date.parse(signedCredential.validFrom).toString()
       : Date.now().toString();
@@ -241,7 +247,11 @@ export class Terminal3VC {
     signedCredential.validUntil = signedCredential.validUntil
       ? Date.parse(signedCredential.validUntil).toString()
       : MaxUint256.toString();
+  }
 
+  private static validateDateOrder(signedCredential: SignedCredential): void {
+    if (!signedCredential.validFrom || !signedCredential.validUntil)
+      throw new Error(`Invalid validFrom or validUntil.`);
     if (
       BigDecimal.fromString(signedCredential.validFrom).isGreaterThan(
         BigDecimal.fromString(signedCredential.validUntil),
@@ -249,10 +259,5 @@ export class Terminal3VC {
     ) {
       throw new Error('validUntil must be later than validFrom.');
     }
-
-    const issuer = signedCredential.issuer.split(':').pop();
-    if (!issuer) throw new Error('VC must include a valid issuer.');
-
-    return { normalizedSignedCredential: signedCredential, issuer };
   }
 }

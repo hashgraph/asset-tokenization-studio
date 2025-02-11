@@ -242,13 +242,15 @@ export class GrantKYCCommandHandler
   async execute(command: GrantKYCCommand): Promise<GrantKYCCommandResponse> {
     const { securityId, targetId, vcBase64 } = command;
 
-    const signedCredential: SignedCredential = Terminal3VC.vcFromBase64(vcBase64);
+    let signedCredential: SignedCredential =
+      Terminal3VC.vcFromBase64(vcBase64);
     const verificationResult = await verifyVc(signedCredential);
     if (!verificationResult.isValid) {
       throw new Error('Invalid VC');
     }
 
-    const { normalizedSignedCredential, issuer } = Terminal3VC.normalizeCredentialFields(signedCredential);
+    const issuer = Terminal3VC.extractIssuer(signedCredential);
+    signedCredential = Terminal3VC.checkValidDates(signedCredential);
 
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
@@ -289,9 +291,9 @@ export class GrantKYCCommandHandler
     const res = await handler.grantKYC(
       securityEvmAddress,
       targetEvmAddress,
-      normalizedSignedCredential.id,
-      BigDecimal.fromString(normalizedSignedCredential.validFrom as string),
-      BigDecimal.fromString(normalizedSignedCredential.validUntil as string),
+      signedCredential.id,
+      BigDecimal.fromString(signedCredential.validFrom as string),
+      BigDecimal.fromString(signedCredential.validUntil as string),
       issuerEvmAddress,
     );
 
