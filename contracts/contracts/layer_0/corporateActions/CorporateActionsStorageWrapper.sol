@@ -206,179 +206,360 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-//import {
-//    ICorporateActionsStorageWrapper,
-//    CorporateActionDataStorage
-//} from '../interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-//import {LibCommon} from '../../layer_0/common/LibCommon.sol';
-//import {
-//    EnumerableSet
-//} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-//import {
-//    _CORPORATE_ACTION_STORAGE_POSITION
-//} from '../constants/storagePositions.sol';
-//import {LocalContext} from '../../layer_0/context/LocalContext.sol';
+import {
+    ICorporateActionsStorageWrapper,
+    CorporateActionDataStorage
+} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
+import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    _CORPORATE_ACTION_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {LocalContext} from '../context/LocalContext.sol';
+import {
+    DIVIDEND_CORPORATE_ACTION_TYPE,
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+    COUPON_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+    SNAPSHOT_TASK_TYPE,
+    BALANCE_ADJUSTMENT_TASK_TYPE,
+    SNAPSHOT_RESULT_ID
+} from '../constants/values.sol';
+import {
+    AdjustBalancesStorageWrapper_2
+} from '../adjustBalances/AdjustBalancesStorageWrapper_2.sol';
 
-//is
-//    ICorporateActionsStorageWrapper,
-//    LocalContext
-contract CorporateActionsStorageWrapper {
-    //    using LibCommon for EnumerableSet.Bytes32Set;
-    //    using EnumerableSet for EnumerableSet.Bytes32Set;
-    //
-    //    modifier checkIndexForCorporateActionByType(
-    //        bytes32 actionType,
-    //        uint256 index
-    //    ) {
-    //        if (_getCorporateActionCountByType(actionType) <= index) {
-    //            revert WrongIndexForAction(index, actionType);
-    //        }
-    //        _;
-    //    }
-    //
-    //    // Internal
-    //    function _addCorporateAction(
-    //        bytes32 _actionType,
-    //        bytes memory _data
-    //    )
-    //        internal
-    //        virtual
-    //        returns (
-    //            bool success_,
-    //            bytes32 corporateActionId_,
-    //            uint256 corporateActionIndexByType_
-    //        )
-    //    {
-    //        CorporateActionDataStorage
-    //            storage corporateActions_ = _corporateActionsStorage();
-    //        corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
-    //        // TODO: Review when it can return false.
-    //        success_ =
-    //            corporateActions_.actions.add(corporateActionId_) &&
-    //            corporateActions_.actionsByType[_actionType].add(
-    //                corporateActionId_
-    //            );
-    //        corporateActions_
-    //            .actionsData[corporateActionId_]
-    //            .actionType = _actionType;
-    //        corporateActions_.actionsData[corporateActionId_].data = _data;
-    //        corporateActionIndexByType_ = _getCorporateActionCountByType(
-    //            _actionType
-    //        );
-    //    }
-    //
-    //    function _getCorporateAction(
-    //        bytes32 _corporateActionId
-    //    ) internal view virtual returns (bytes32 actionType_, bytes memory data_) {
-    //        CorporateActionDataStorage
-    //            storage corporateActions_ = _corporateActionsStorage();
-    //        actionType_ = corporateActions_
-    //            .actionsData[_corporateActionId]
-    //            .actionType;
-    //        data_ = corporateActions_.actionsData[_corporateActionId].data;
-    //    }
-    //
-    //    function _getCorporateActionCount()
-    //        internal
-    //        view
-    //        virtual
-    //        returns (uint256 corporateActionCount_)
-    //    {
-    //        return _corporateActionsStorage().actions.length();
-    //    }
-    //
-    //    function _getCorporateActionIds(
-    //        uint256 _pageIndex,
-    //        uint256 _pageLength
-    //    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-    //        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
-    //            _pageIndex,
-    //            _pageLength
-    //        );
-    //    }
-    //
-    //    function _getCorporateActionCountByType(
-    //        bytes32 _actionType
-    //    ) internal view virtual returns (uint256 corporateActionCount_) {
-    //        return _corporateActionsStorage().actionsByType[_actionType].length();
-    //    }
-    //
-    //    function _getCorporateActionIdsByType(
-    //        bytes32 _actionType,
-    //        uint256 _pageIndex,
-    //        uint256 _pageLength
-    //    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-    //        corporateActionIds_ = _corporateActionsStorage()
-    //            .actionsByType[_actionType]
-    //            .getFromSet(_pageIndex, _pageLength);
-    //    }
-    //
-    //    function _updateCorporateActionResult(
-    //        bytes32 actionId,
-    //        uint256 resultId,
-    //        bytes memory newResult
-    //    ) internal virtual {
-    //        CorporateActionDataStorage
-    //            storage corporateActions_ = _corporateActionsStorage();
-    //        bytes[] memory results = corporateActions_
-    //            .actionsData[actionId]
-    //            .results;
-    //
-    //        if (results.length > resultId) {
-    //            corporateActions_.actionsData[actionId].results[
-    //                resultId
-    //            ] = newResult;
-    //            return;
-    //        }
-    //
-    //        for (uint256 i = results.length; i < resultId; i++) {
-    //            corporateActions_.actionsData[actionId].results.push('');
-    //        }
-    //
-    //        corporateActions_.actionsData[actionId].results.push(newResult);
-    //    }
-    //
-    //    function _getResult(
-    //        bytes32 actionId,
-    //        uint256 resultId
-    //    ) internal view virtual returns (bytes memory) {
-    //        bytes memory result;
-    //
-    //        if (_getCorporateActionResultCount(actionId) > resultId)
-    //            result = _getCorporateActionResult(actionId, resultId);
-    //
-    //        return result;
-    //    }
-    //
-    //    function _getCorporateActionResultCount(
-    //        bytes32 actionId
-    //    ) internal view virtual returns (uint256) {
-    //        return _corporateActionsStorage().actionsData[actionId].results.length;
-    //    }
-    //
-    //    /**
-    //     * @dev returns a corporate action result.
-    //     *
-    //     * @param actionId The corporate action Id
-    //     */
-    //    function _getCorporateActionResult(
-    //        bytes32 actionId,
-    //        uint256 resultId
-    //    ) internal view virtual returns (bytes memory) {
-    //        return
-    //            _corporateActionsStorage().actionsData[actionId].results[resultId];
-    //    }
-    //
-    //    function _corporateActionsStorage()
-    //        internal
-    //        pure
-    //        virtual
-    //        returns (CorporateActionDataStorage storage corporateActions_)
-    //    {
-    //        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
-    //        // solhint-disable-next-line no-inline-assembly
-    //        assembly {
-    //            corporateActions_.slot := position
-    //        }
-    //    }
+contract CorporateActionsStorageWrapper is
+    ICorporateActionsStorageWrapper,
+    AdjustBalancesStorageWrapper_2
+{
+    using LibCommon for EnumerableSet.Bytes32Set;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    modifier checkIndexForCorporateActionByType(
+        bytes32 actionType,
+        uint256 index
+    ) {
+        if (_getCorporateActionCountByType(actionType) <= index) {
+            revert WrongIndexForAction(index, actionType);
+        }
+        _;
+    }
+
+    modifier checkDates(uint256 firstDate, uint256 secondDate) {
+        if (secondDate < firstDate) {
+            revert WrongDates(firstDate, secondDate);
+        }
+        _;
+    }
+
+    // Internal
+    function _addCorporateAction(
+        bytes32 _actionType,
+        bytes memory _data
+    )
+        internal
+        virtual
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 corporateActionIndexByType_
+        )
+    {
+        CorporateActionDataStorage
+            storage corporateActions_ = _corporateActionsStorage();
+        corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
+        // TODO: Review when it can return false.
+        success_ =
+            corporateActions_.actions.add(corporateActionId_) &&
+            corporateActions_.actionsByType[_actionType].add(
+                corporateActionId_
+            );
+        corporateActions_
+            .actionsData[corporateActionId_]
+            .actionType = _actionType;
+        corporateActions_.actionsData[corporateActionId_].data = _data;
+        corporateActionIndexByType_ = _getCorporateActionCountByType(
+            _actionType
+        );
+
+        if (_actionType == DIVIDEND_CORPORATE_ACTION_TYPE) {
+            _initDividend(success_, corporateActionId_, _data);
+        } else if (_actionType == VOTING_RIGHTS_CORPORATE_ACTION_TYPE) {
+            _initVotingRights(success_, corporateActionId_, _data);
+        } else if (_actionType == COUPON_CORPORATE_ACTION_TYPE) {
+            _initCoupon(success_, corporateActionId_, _data);
+        } else if (_actionType == BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE) {
+            _initBalanceAdjustment(success_, corporateActionId_, _data);
+        }
+    }
+
+    function _initDividend(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        // TODO
+        /*if (!_success) {
+            revert DividendCreationFailed();
+        }
+
+        IEquity.Dividend memory newDividend = abi.decode(
+            _data,
+            (IEquity.Dividend)
+        );
+
+        _addScheduledTask(
+            newDividend.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
+        _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));*/
+    }
+
+    function _initVotingRights(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        // TODO
+        /*if (!_success) {
+            revert VotingRightsCreationFailed();
+        }
+
+        IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
+
+        _addScheduledTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
+        _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));*/
+    }
+
+    function _initCoupon(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        // TODO
+        /*if (!_success) {
+            revert CouponCreationFailed();
+        }
+
+        IBond.Coupon memory newCoupon = abi.decode(_data, (IBond.Coupon));
+
+        _addScheduledTask(newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
+        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));*/
+    }
+
+    function _initBalanceAdjustment(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        // TODO
+        /*
+        if (!_success) {
+            revert BalanceAdjustmentCreationFailed();
+        }
+
+        IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
+            .decode(_data, (IEquity.ScheduledBalanceAdjustment));
+
+        _addScheduledTask(
+            newBalanceAdjustment.executionDate,
+            abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
+        );
+        _addScheduledBalanceAdjustment(
+            newBalanceAdjustment.executionDate,
+            abi.encode(_actionId)
+        );*/
+    }
+
+    function _onScheduledTaskTriggered(bytes memory _data) internal virtual {
+        // TODO
+        /*if (_data.length > 0) {
+            bytes32 taskType = abi.decode(_data, (bytes32));
+            if (taskType == SNAPSHOT_TASK_TYPE) {
+                _triggerScheduledSnapshots(1);
+            } else if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
+                _triggerScheduledBalanceAdjustments(1);
+            }
+        }*/
+    }
+
+    function _onScheduledSnapshotTriggered(
+        uint256 _snapShotID,
+        bytes memory _data
+    ) internal virtual {
+        if (_data.length > 0) {
+            bytes32 actionId = abi.decode(_data, (bytes32));
+            _addSnapshotToAction(actionId, _snapShotID);
+        }
+    }
+
+    function _onScheduledBalanceAdjustmentTriggered(
+        bytes memory _data
+    ) internal virtual {
+        if (_data.length > 0) {
+            bytes32 actionId = abi.decode(_data, (bytes32));
+            (, bytes memory balanceAdjustmentData) = _getCorporateAction(
+                actionId
+            );
+
+            if (balanceAdjustmentData.length > 0) {
+                /* IEquity.ScheduledBalanceAdjustment
+                    memory balanceAdjustment = abi.decode(
+                        balanceAdjustmentData,
+                        (IEquity.ScheduledBalanceAdjustment)
+                    );*/
+
+                _adjustBalances(
+                    balanceAdjustment.factor,
+                    balanceAdjustment.decimals
+                );
+            }
+        }
+    }
+
+    function _addSnapshotToAction(
+        bytes32 _actionId,
+        uint256 _snapshotId
+    ) internal virtual {
+        bytes memory result = abi.encodePacked(_snapshotId);
+
+        _updateCorporateActionResult(_actionId, SNAPSHOT_RESULT_ID, result);
+    }
+
+    function _getSnapshotID(
+        bytes32 _actionId
+    ) internal view virtual returns (uint256) {
+        bytes memory data = _getResult(_actionId, SNAPSHOT_RESULT_ID);
+
+        uint256 bytesLength = data.length;
+
+        if (bytesLength < 32) return 0;
+
+        uint256 snapshotId;
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            snapshotId := mload(add(data, 0x20))
+        }
+
+        return snapshotId;
+    }
+
+    function _getCorporateAction(
+        bytes32 _corporateActionId
+    ) internal view virtual returns (bytes32 actionType_, bytes memory data_) {
+        CorporateActionDataStorage
+            storage corporateActions_ = _corporateActionsStorage();
+        actionType_ = corporateActions_
+            .actionsData[_corporateActionId]
+            .actionType;
+        data_ = corporateActions_.actionsData[_corporateActionId].data;
+    }
+
+    function _getCorporateActionCount()
+        internal
+        view
+        virtual
+        returns (uint256 corporateActionCount_)
+    {
+        return _corporateActionsStorage().actions.length();
+    }
+
+    function _getCorporateActionIds(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
+        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function _getCorporateActionCountByType(
+        bytes32 _actionType
+    ) internal view virtual returns (uint256 corporateActionCount_) {
+        return _corporateActionsStorage().actionsByType[_actionType].length();
+    }
+
+    function _getCorporateActionIdsByType(
+        bytes32 _actionType,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
+        corporateActionIds_ = _corporateActionsStorage()
+            .actionsByType[_actionType]
+            .getFromSet(_pageIndex, _pageLength);
+    }
+
+    function _updateCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId,
+        bytes memory newResult
+    ) internal virtual {
+        CorporateActionDataStorage
+            storage corporateActions_ = _corporateActionsStorage();
+        bytes[] memory results = corporateActions_
+            .actionsData[actionId]
+            .results;
+
+        if (results.length > resultId) {
+            corporateActions_.actionsData[actionId].results[
+                resultId
+            ] = newResult;
+            return;
+        }
+
+        for (uint256 i = results.length; i < resultId; i++) {
+            corporateActions_.actionsData[actionId].results.push('');
+        }
+
+        corporateActions_.actionsData[actionId].results.push(newResult);
+    }
+
+    function _getResult(
+        bytes32 actionId,
+        uint256 resultId
+    ) internal view virtual returns (bytes memory) {
+        bytes memory result;
+
+        if (_getCorporateActionResultCount(actionId) > resultId)
+            result = _getCorporateActionResult(actionId, resultId);
+
+        return result;
+    }
+
+    function _getCorporateActionResultCount(
+        bytes32 actionId
+    ) internal view virtual returns (uint256) {
+        return _corporateActionsStorage().actionsData[actionId].results.length;
+    }
+
+    /**
+     * @dev returns a corporate action result.
+     *
+     * @param actionId The corporate action Id
+     */
+    function _getCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId
+    ) internal view virtual returns (bytes memory) {
+        return
+            _corporateActionsStorage().actionsData[actionId].results[resultId];
+    }
+
+    function _corporateActionsStorage()
+        internal
+        pure
+        virtual
+        returns (CorporateActionDataStorage storage corporateActions_)
+    {
+        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            corporateActions_.slot := position
+        }
+    }
 }

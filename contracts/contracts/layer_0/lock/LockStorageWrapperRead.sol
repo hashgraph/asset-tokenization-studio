@@ -341,7 +341,13 @@ abstract contract LockStorageWrapperRead is CapStorageWrapperRead {
         virtual
         returns (uint256 amount, uint256 expirationTimestamp)
     {
-        return _getLockForByPartitionAdjustedAt(partition, tokenHolder, lockId, _blockTimestamp());
+        return
+            _getLockForByPartitionAdjustedAt(
+                partition,
+                tokenHolder,
+                lockId,
+                _blockTimestamp()
+            );
     }
 
     function _getLockForByPartitionAdjustedAt(

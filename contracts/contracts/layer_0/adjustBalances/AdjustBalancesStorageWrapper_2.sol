@@ -211,295 +211,65 @@ import {
     _ADJUST_BALANCES_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+    ERC20StorageWrapperRead
+} from '../ERC1400/ERC20/ERC20StorageWrapperRead.sol';
 import {
     IAdjustBalancesStorageWrapper
 } from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
 
-contract AdjustBalancesStorageWrapperRead is
+contract AdjustBalancesStorageWrapper_2 is
     IAdjustBalancesStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper
+    ERC20StorageWrapperRead
 {
-    struct AdjustBalancesStorage {
-        // Mapping from investor to their partitions labaf
-        mapping(address => uint256[]) labafUserPartition;
-        // Aggregated Balance Adjustment
-        uint256 abaf;
-        // Last Aggregated Balance Adjustment per account
-        mapping(address => uint256) labaf;
-        // Last Aggregated Balance Adjustment per partition
-        mapping(bytes32 => uint256) labafByPartition;
-        // Last Aggregated Balance Adjustment per allowance
-        mapping(address => mapping(address => uint256)) labafsAllowances;
-        // Locks
-        mapping(address => uint256) labafLockedAmountByAccount;
-        mapping(address => mapping(bytes32 => uint256)) labafLockedAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => uint256[])) labafLockedAmountByAccountPartitionAndIndex;
-        // Holds
-        mapping(address => uint256) labafsTotalHeld;
-        mapping(address => mapping(bytes32 => uint256)) labafsTotalHeldByPartition;
-        mapping(address => mapping(bytes32 => uint256[])) labafHolds;
+    // solhint-disable no-unused-vars
+    function _adjustBalances(uint256 _factor, uint8 _decimals) internal {
+        _beforeBalanceAdjustment();
+        _adjustTotalSupply(_factor);
+        _adjustDecimals(_decimals);
+        _adjustMaxSupply(_factor);
+        _updateAbaf(_factor);
+        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
     }
 
     // solhint-disable no-unused-vars
-
-    function _updateAbaf(uint256 factor) internal {
-        _getAdjustBalancesStorage().abaf = calculateNewAbaf(_getAbaf(), factor);
+    function _beforeBalanceAdjustment() internal virtual {
+        _updateDecimalsSnapshot(_decimals());
+        _updateAbafSnapshot(_getAbaf());
+        _updateAssetTotalSupplySnapshot(_totalSupply());
     }
 
-    function _updateLabafByPartition(bytes32 partition) internal {
-        AdjustBalancesStorage
-            storage adjustBalancesStorage = _getAdjustBalancesStorage();
-        adjustBalancesStorage.labafByPartition[
-            partition
-        ] = adjustBalancesStorage.abaf;
-    }
-
-    function _updateLabafByTokenHolder(
-        uint256 labaf,
-        address tokenHolder
-    ) internal {
-        _getAdjustBalancesStorage().labaf[tokenHolder] = labaf;
-    }
-
-    function _pushLabafUserPartition(address _tokenHolder) internal {
-        AdjustBalancesStorage
-            storage balancesStorage = _getAdjustBalancesStorage();
-        balancesStorage.labafUserPartition[_tokenHolder].push(
-            balancesStorage.abaf
-        );
-    }
-
-    function _updateLabafByTokenHolderAndPartitionIndex(
-        uint256 labaf,
-        address tokenHolder,
-        uint256 partitionIndex
-    ) internal {
-        _getAdjustBalancesStorage().labafUserPartition[tokenHolder][
-            partitionIndex - 1
-        ] = labaf;
-    }
-
-    function _calculateFactorByTokenHolder(
-        uint256 abaf,
-        address tokenHolder
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            abaf,
-            _getAdjustBalancesStorage().labaf[tokenHolder]
-        );
-    }
-
-    function _calculateFactorByAbafAndTokenHolder(
-        uint256 abaf,
-        address tokenHolder
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            abaf,
-            _getAdjustBalancesStorage().labaf[tokenHolder]
-        );
-    }
-
-    function _calculateFactorByPartitionAdjustedAt(
-        bytes32 partition,
-        uint256 timestamp
+    function _getHoldLabafByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder
     ) internal view returns (uint256) {
-        return
-            calculateFactor(
-                _getAbafAdjustedAt(timestamp),
-                _getAdjustBalancesStorage().labafByPartition[partition]
-            );
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+        if (holdIndex == 0) return 0;
+        return _getHoldLABAFByIndex(_partition, _tokenHolder, holdIndex);
     }
 
-    function _calculateFactorLockedAmountForByPartitionAdjustedAt(
-        bytes32 partition,
-        address tokenHolder,
-        uint256 lockId,
-        uint256 timestamp
+    function _getLockLabafByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
     ) internal view returns (uint256) {
-        return
-            calculateFactor(
-                _getAbafAdjustedAt(timestamp),
-                _getAdjustBalancesStorage()
-                    .labafLockedAmountByAccountPartitionAndIndex[tokenHolder][
-                        partition
-                    ][lockId]
-            );
+        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
+        if (lockIndex == 0) return 0;
+        return _getLockLabafByIndex(_partition, _tokenHolder, lockIndex);
     }
 
-    function _calculateFactorByTokenHolderAndPartitionIndex(
-        uint256 abaf,
-        address tokenHolder,
-        uint256 partitionIndex
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            abaf,
-            _getAdjustBalancesStorage().labafUserPartition[tokenHolder][
-                partitionIndex - 1
-            ]
-        );
-    }
-
-    function _calculateFactorForLockedAmountByTokenHolderAdjustedAt(
-        address tokenHolder,
-        uint256 timestamp
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage().labafLockedAmountByAccount[tokenHolder]
-        );
-    }
-
-    function _calculateFactorForLockedAmountByTokenHolderAndPartitionAdjustedAt(
-        address tokenHolder,
-        bytes32 partition,
-        uint256 timestamp
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage().labafLockedAmountByAccountAndPartition[
-                tokenHolder
-            ][partition]
-        );
-    }
-
-    function _calculateFactorForLockedAmountByTokenHolderPartitionAndLockIndexAdjustedAt(
-        address tokenHolder,
-        bytes32 partition,
-        uint256 lockIndex,
-        uint256 timestamp
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage()
-                .labafLockedAmountByAccountPartitionAndIndex[tokenHolder][
-                    partition
-                ][lockIndex - 1]
-        );
-    }
-
-    function calculateNewAbaf(
-        uint256 abaf,
-        uint256 factor
-    ) private returns (uint256) {
-        return abaf == 0 ? factor : abaf * factor;
-    }
-
-    function calculateFactor(
-        uint256 _abaf,
-        uint256 _labaf
-    ) private pure returns (uint256 factor_) {
-        if (_abaf == 0) return 1;
-        if (_labaf == 0) return _abaf;
-        factor_ = _abaf / _labaf;
-    }
-
-    function _getAbaf() internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().abaf;
-    }
-
-    function _getAbafAdjusted() internal view virtual returns (uint256) {
-        return _getAbafAdjustedAt(_blockTimestamp());
-    }
-
-    function _getAbafAdjustedAt(
-        uint256 _timestamp
-    ) internal view virtual returns (uint256) {
-        uint256 abaf = _getAbaf();
-        if (abaf == 0) abaf = 1;
-        (uint256 pendingAbaf, ) = _getPendingScheduledBalanceAdjustmentsAt(
-            _timestamp
-        );
-        return abaf * pendingAbaf;
-    }
-
-    function _getLabafByUser(
+    function _getLabafByUserAndPartition(
+        bytes32 _partition,
         address _account
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().labaf[_account];
-    }
+    ) internal view returns (uint256) {
+        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
+            _account
+        ][_partition];
 
-    function _getLabafByPartition(
-        bytes32 _partition
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().labafByPartition[_partition];
-    }
-
-    function _getAllowanceLabaf(
-        address _owner,
-        address _spender
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().labafsAllowances[_owner][_spender];
-    }
-
-    function _getTotalLockLabaf(
-        address _tokenHolder
-    ) internal view virtual returns (uint256 labaf_) {
+        if (partitionsIndex == 0) return 0;
         return
-            _getAdjustBalancesStorage().labafLockedAmountByAccount[
-                _tokenHolder
+            _getAdjustBalancesStorage().labafUserPartition[_account][
+                partitionsIndex - 1
             ];
-    }
-
-    function _getTotalLockLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 labaf_) {
-        return
-            _getAdjustBalancesStorage().labafLockedAmountByAccountAndPartition[
-                _tokenHolder
-            ][_partition];
-    }
-
-    function _getLockLabafByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockIndex
-    ) internal view virtual returns (uint256) {
-        return
-            _getAdjustBalancesStorage()
-                .labafLockedAmountByAccountPartitionAndIndex[_tokenHolder][
-                    _partition
-                ][_lockIndex - 1];
-    }
-
-    function _getTotalHeldLabaf(
-        address _tokenHolder
-    ) internal view virtual returns (uint256 labaf_) {
-        return _getAdjustBalancesStorage().labafsTotalHeld[_tokenHolder];
-    }
-
-    function _getTotalHeldLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 labaf_) {
-        return
-            _getAdjustBalancesStorage().labafsTotalHeldByPartition[
-                _tokenHolder
-            ][_partition];
-    }
-
-    function _getHoldLabafByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdIndex
-    ) internal view virtual returns (uint256) {
-        return
-            _getAdjustBalancesStorage().labafHolds[_tokenHolder][_partition][
-                _holdIndex - 1
-            ];
-    }
-
-    function _getAdjustBalancesStorage()
-        internal
-        pure
-        returns (AdjustBalancesStorage storage adjustBalancesStorage_)
-    {
-        bytes32 position = _ADJUST_BALANCES_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            adjustBalancesStorage_.slot := position
-        }
     }
 }
