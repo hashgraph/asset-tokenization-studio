@@ -212,6 +212,8 @@ import {
   GetRevocationRegistryAddressRequest,
   LoggerTransports,
   RemoveIssuerRequest,
+  Role,
+  RoleRequest,
   SDK,
   SetRevocationRegistryAddressRequest,
 } from '../../../src';
@@ -238,6 +240,7 @@ import Injectable from '../../../src/core/Injectable';
 import Account from '../../../src/domain/context/account/Account';
 import { ethers, Wallet } from 'ethers';
 import SSIManagement from '../../../src/port/in/SSIManagement';
+import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -354,6 +357,14 @@ describe('🧪 SSI Management tests', () => {
     } catch (error) {
       console.error('Error in beforeAll setup:', error);
     }
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._SSI_MANAGER_ROLE,
+      }),
+    );
   }, 900_000);
 
   it('Set and Get revocation registry successfully', async () => {

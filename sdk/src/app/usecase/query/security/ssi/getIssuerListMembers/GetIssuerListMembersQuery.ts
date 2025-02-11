@@ -203,44 +203,19 @@
 
 */
 
-import Account from './Account.js';
-import Role from './Role.js';
-import Security from './Security.js';
-import Equity from './Equity.js';
-import Bond from './Bond.js';
-import Event from './Event.js';
-import Network from './Network.js';
-import Factory from './Factory.js';
-import Management from './Management.js';
-import SSIManagement from './SSIManagement.js';
-import Kyc from './Kyc.js';
+import { Query } from '../../../../../../core/query/Query';
+import { QueryResponse } from '../../../../../../core/query/QueryResponse';
 
-export {
-  Security,
-  Equity,
-  Bond,
-  Account,
-  Role,
-  Event,
-  Network,
-  Factory,
-  Management,
-  SSIManagement,
-  Kyc
-};
+export class GetIssuerListMembersQueryResponse implements QueryResponse {
+  constructor(public readonly payload: string[]) {}
+}
 
-export * from './request';
-export * from './response';
-
-export * from './Security.js';
-export * from './Equity.js';
-export * from './Bond.js';
-export * from './Account.js';
-export * from './Role.js';
-export * from './Event.js';
-export * from './Common.js';
-export * from './Network.js';
-export * from './Factory.js';
-export * from './Management.js';
-export * from './Kyc.js';
-export * from './SSIManagement.js';
+export class GetIssuerListMembersQuery extends Query<GetIssuerListMembersQueryResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly start: number,
+    public readonly end: number,
+  ) {
+    super();
+  }
+}

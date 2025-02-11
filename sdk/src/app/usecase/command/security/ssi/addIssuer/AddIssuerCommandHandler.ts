@@ -203,44 +203,83 @@
 
 */
 
-import Account from './Account.js';
-import Role from './Role.js';
-import Security from './Security.js';
-import Equity from './Equity.js';
-import Bond from './Bond.js';
-import Event from './Event.js';
-import Network from './Network.js';
-import Factory from './Factory.js';
-import Management from './Management.js';
-import SSIManagement from './SSIManagement.js';
-import Kyc from './Kyc.js';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
+import { AddIssuerCommand, AddIssuerCommandResponse } from './AddIssuerCommand';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
+import TransactionService from '../../../../../service/TransactionService';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
+import { SecurityPaused } from '../../../security/error/SecurityPaused';
+import { AccountIsAlreadyAnIssuer } from '../../error/AccountAlreadyIsAnIssuer';
+import AccountService from '../../../../../service/AccountService';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
+import { NotGrantedRole } from '../../error/NotGrantedRole';
 
-export {
-  Security,
-  Equity,
-  Bond,
-  Account,
-  Role,
-  Event,
-  Network,
-  Factory,
-  Management,
-  SSIManagement,
-  Kyc
-};
+@CommandHandler(AddIssuerCommand)
+export class AddIssuerCommandHandler
+  implements ICommandHandler<AddIssuerCommand>
+{
+  constructor(
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+  ) {}
 
-export * from './request';
-export * from './response';
+  async execute(command: AddIssuerCommand): Promise<AddIssuerCommandResponse> {
+    const { securityId, issuerId } = command;
+    const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
 
-export * from './Security.js';
-export * from './Equity.js';
-export * from './Bond.js';
-export * from './Account.js';
-export * from './Role.js';
-export * from './Event.js';
-export * from './Common.js';
-export * from './Network.js';
-export * from './Factory.js';
-export * from './Management.js';
-export * from './Kyc.js';
-export * from './SSIManagement.js';
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
+
+    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
+      throw new SecurityPaused();
+    }
+
+    if (
+      account.evmAddress &&
+      !(await this.queryAdapter.hasRole(
+        securityEvmAddress,
+        new EvmAddress(account.evmAddress!),
+        SecurityRole._SSI_MANAGER_ROLE,
+      ))
+    ) {
+      throw new NotGrantedRole(SecurityRole._SSI_MANAGER_ROLE);
+    }
+
+    const issuerEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.test(issuerId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(issuerId)
+      : new EvmAddress(issuerId);
+
+    const isIssuer = await this.queryAdapter.isIssuer(
+      securityEvmAddress,
+      issuerEvmAddress,
+    );
+
+    if (isIssuer) {
+      throw new AccountIsAlreadyAnIssuer(issuerId);
+    }
+
+    const res = await handler.addIssuer(
+      securityEvmAddress,
+      issuerEvmAddress,
+      securityId,
+    );
+
+    return Promise.resolve(
+      new AddIssuerCommandResponse(res.error === undefined, res.id!),
+    );
+  }
+}

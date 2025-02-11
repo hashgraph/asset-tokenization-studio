@@ -203,44 +203,102 @@
 
 */
 
-import Account from './Account.js';
-import Role from './Role.js';
-import Security from './Security.js';
-import Equity from './Equity.js';
-import Bond from './Bond.js';
-import Event from './Event.js';
-import Network from './Network.js';
-import Factory from './Factory.js';
-import Management from './Management.js';
-import SSIManagement from './SSIManagement.js';
-import Kyc from './Kyc.js';
+import { ICommandHandler } from '../../../../../../core/command/CommandHandler';
+import { CommandHandler } from '../../../../../../core/decorator/CommandHandlerDecorator';
+import AccountService from '../../../../../service/AccountService';
+import ValidationService from '../../../../../service/ValidationService';
+import { GrantKYCCommand, GrantKYCCommandResponse } from './GrantKYCCommand';
+import TransactionService from '../../../../../service/TransactionService';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
+import BigDecimal from '../../../../../../domain/context/shared/BigDecimal';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
+import { SecurityPaused } from '../../error/SecurityPaused';
+import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
+import { NotGrantedRole } from '../../error/NotGrantedRole';
+import { Terminal3VC } from '../../../../../../domain/context/kyc/terminal3';
+import { verifyVc } from '@terminal3/verify_vc';
+import { SignedCredential } from '@terminal3/vc_core';
 
-export {
-  Security,
-  Equity,
-  Bond,
-  Account,
-  Role,
-  Event,
-  Network,
-  Factory,
-  Management,
-  SSIManagement,
-  Kyc
-};
+@CommandHandler(GrantKYCCommand)
+export class GrantKYCCommandHandler
+  implements ICommandHandler<GrantKYCCommand>
+{
+  constructor(
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
+  ) {}
 
-export * from './request';
-export * from './response';
+  async execute(command: GrantKYCCommand): Promise<GrantKYCCommandResponse> {
+    const { securityId, targetId, vcBase64 } = command;
 
-export * from './Security.js';
-export * from './Equity.js';
-export * from './Bond.js';
-export * from './Account.js';
-export * from './Role.js';
-export * from './Event.js';
-export * from './Common.js';
-export * from './Network.js';
-export * from './Factory.js';
-export * from './Management.js';
-export * from './Kyc.js';
-export * from './SSIManagement.js';
+    let signedCredential: SignedCredential =
+      Terminal3VC.vcFromBase64(vcBase64);
+    const verificationResult = await verifyVc(signedCredential);
+    if (!verificationResult.isValid) {
+      throw new Error('Invalid VC');
+    }
+
+    const issuer = Terminal3VC.extractIssuer(signedCredential);
+    signedCredential = Terminal3VC.checkValidDates(signedCredential);
+
+    const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
+
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
+
+    const issuerEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(issuer)
+        ? (await this.mirrorNodeAdapter.getContractInfo(issuer)).evmAddress
+        : issuer.toString(),
+    );
+
+    await this.validationService.validateIssuer(securityId, issuer);
+
+    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
+      throw new SecurityPaused();
+    }
+
+    if (
+      account.evmAddress &&
+      !(await this.queryAdapter.hasRole(
+        securityEvmAddress,
+        new EvmAddress(account.evmAddress!),
+        SecurityRole._KYC_ROLE,
+      ))
+    ) {
+      throw new NotGrantedRole(SecurityRole._KYC_ROLE);
+    }
+
+    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
+      : new EvmAddress(targetId);
+
+    const res = await handler.grantKYC(
+      securityEvmAddress,
+      targetEvmAddress,
+      signedCredential.id,
+      BigDecimal.fromString(signedCredential.validFrom as string),
+      BigDecimal.fromString(signedCredential.validUntil as string),
+      issuerEvmAddress,
+    );
+
+    return Promise.resolve(
+      new GrantKYCCommandResponse(res.error === undefined, res.id!),
+    );
+  }
+}

@@ -203,44 +203,306 @@
 
 */
 
-import Account from './Account.js';
-import Role from './Role.js';
-import Security from './Security.js';
-import Equity from './Equity.js';
-import Bond from './Bond.js';
-import Event from './Event.js';
-import Network from './Network.js';
-import Factory from './Factory.js';
-import Management from './Management.js';
-import SSIManagement from './SSIManagement.js';
-import Kyc from './Kyc.js';
-
-export {
-  Security,
+import {
+  AddIssuerRequest,
+  CreateEquityRequest,
   Equity,
-  Bond,
-  Account,
+  GetKYCAccountsCountRequest,
+  GetKYCAccountsRequest,
+  GetKYCForRequest,
+  GrantKYCRequest,
+  Kyc,
+  LoggerTransports,
+  RemoveIssuerRequest,
+  RevokeKYCRequest,
   Role,
-  Event,
-  Network,
-  Factory,
-  Management,
-  SSIManagement,
-  Kyc
+  RoleRequest,
+  SDK,
+} from '../../../src';
+import {
+  CastRegulationSubType,
+  CastRegulationType,
+  RegulationSubType,
+  RegulationType,
+} from '../../../src/domain/context/factory/RegulationType';
+import { MirrorNode } from '../../../src/domain/context/network/MirrorNode';
+import { JsonRpcRelay } from '../../../src/domain/context/network/JsonRpcRelay';
+import { RPCTransactionAdapter } from '../../../src/port/out/rpc/RPCTransactionAdapter';
+import { MirrorNodeAdapter } from '../../../src/port/out/mirror/MirrorNodeAdapter';
+import NetworkService from '../../../src/app/service/NetworkService';
+import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter';
+import SecurityViewModel from '../../../src/port/in/response/SecurityViewModel';
+import {
+  CLIENT_ACCOUNT_ECDSA,
+  CLIENT_ACCOUNT_ECDSA_A,
+  CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT,
+  FACTORY_ADDRESS,
+  RESOLVER_ADDRESS,
+} from '../../config';
+import Injectable from '../../../src/core/Injectable';
+import Account from '../../../src/domain/context/account/Account';
+import { ethers, Wallet } from 'ethers';
+import SSIManagement from '../../../src/port/in/SSIManagement';
+import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
+import createVcT3 from '../../utils/verifiableCredentials';
+
+SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
+
+const decimals = 0;
+const name = 'TEST_SECURITY_TOKEN';
+const symbol = 'TEST';
+const isin = 'ABCDE123456Z';
+const votingRight = true;
+const informationRight = false;
+const liquidationRight = true;
+const subscriptionRight = false;
+const conversionRight = true;
+const redemptionRight = false;
+const putRight = true;
+const dividendRight = 1;
+const currency = '0x345678';
+const numberOfShares = 0;
+const nominalValue = 1000;
+const regulationType = RegulationType.REG_D;
+const regulationSubType = RegulationSubType.B_506;
+const countries = 'AF,HG,BN';
+const info = 'Anything';
+const configId =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
+const configVersion = 1;
+
+const mirrorNode: MirrorNode = {
+  name: 'testmirrorNode',
+  baseUrl: 'https://testnet.mirrornode.hedera.com/api/v1/',
 };
 
-export * from './request';
-export * from './response';
+const rpcNode: JsonRpcRelay = {
+  name: 'testrpcNode',
+  baseUrl: 'http://127.0.0.1:7546/api',
+};
 
-export * from './Security.js';
-export * from './Equity.js';
-export * from './Bond.js';
-export * from './Account.js';
-export * from './Role.js';
-export * from './Event.js';
-export * from './Common.js';
-export * from './Network.js';
-export * from './Factory.js';
-export * from './Management.js';
-export * from './Kyc.js';
-export * from './SSIManagement.js';
+let th: RPCTransactionAdapter;
+let mirrorNodeAdapter: MirrorNodeAdapter;
+
+describe('🧪 Kyc tests', () => {
+  let ns: NetworkService;
+  let rpcQueryAdapter: RPCQueryAdapter;
+  let equity: SecurityViewModel;
+
+  const url = 'http://127.0.0.1:7546';
+  const customHttpProvider = new ethers.providers.JsonRpcProvider(url);
+
+  const wallet = new Wallet(
+    CLIENT_ACCOUNT_ECDSA.privateKey?.key ?? '',
+    customHttpProvider,
+  );
+
+  beforeAll(async () => {
+    try {
+      mirrorNodeAdapter = Injectable.resolve(MirrorNodeAdapter);
+      mirrorNodeAdapter.set(mirrorNode);
+
+      th = Injectable.resolve(RPCTransactionAdapter);
+      ns = Injectable.resolve(NetworkService);
+      rpcQueryAdapter = Injectable.resolve(RPCQueryAdapter);
+
+      rpcQueryAdapter.init();
+      ns.environment = 'testnet';
+      ns.configuration = {
+        factoryAddress: FACTORY_ADDRESS,
+        resolverAddress: RESOLVER_ADDRESS,
+      };
+      ns.mirrorNode = mirrorNode;
+      ns.rpcNode = rpcNode;
+
+      await th.init(true);
+      const account = new Account({
+        id: CLIENT_ACCOUNT_ECDSA.id.toString(),
+        evmAddress: CLIENT_ACCOUNT_ECDSA.evmAddress,
+        alias: CLIENT_ACCOUNT_ECDSA.alias,
+        privateKey: CLIENT_ACCOUNT_ECDSA.privateKey,
+        publicKey: CLIENT_ACCOUNT_ECDSA.publicKey,
+      });
+      await th.register(account, true);
+
+      th.signerOrProvider = wallet;
+
+      const requestST = new CreateEquityRequest({
+        name,
+        symbol,
+        isin,
+        decimals,
+        isWhiteList: false,
+        isControllable: true,
+        arePartitionsProtected: false,
+        isMultiPartition: false,
+        diamondOwnerAccount: CLIENT_ACCOUNT_ECDSA.id.toString(),
+        votingRight,
+        informationRight,
+        liquidationRight,
+        subscriptionRight,
+        conversionRight,
+        redemptionRight,
+        putRight,
+        dividendRight,
+        currency,
+        numberOfShares: numberOfShares.toString(),
+        nominalValue: nominalValue.toString(),
+        regulationType: CastRegulationType.toNumber(regulationType),
+        regulationSubType: CastRegulationSubType.toNumber(regulationSubType),
+        isCountryControlListWhiteList: true,
+        countries,
+        info,
+        configId,
+        configVersion,
+      });
+
+      equity = (await Equity.create(requestST)).security;
+    } catch (error) {
+      console.error('Error in beforeAll setup:', error);
+    }
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._SSI_MANAGER_ROLE,
+      }),
+    );
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._KYC_ROLE,
+      }),
+    );
+    await SSIManagement.addIssuer(
+      new AddIssuerRequest({
+        securityId: equity.evmDiamondAddress!,
+        issuerId: CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT as string,
+      }),
+    );
+  }, 900_000);
+
+  it('Grant and revoke KYC', async () => {
+    const vcBase64 = await createVcT3(
+      CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+    );
+
+    expect(
+      (
+        await Kyc.grantKYC(
+          new GrantKYCRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+            vcBase64: vcBase64,
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    expect(
+      await Kyc.getKYCAccounts(
+        new GetKYCAccountsRequest({
+          securityId: equity.evmDiamondAddress!,
+          kycStatus: 1,
+          start: 0,
+          end: 1,
+        }),
+      ),
+    ).toEqual([CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString()]);
+
+    expect(
+      await Kyc.getKYCAccountsCount(
+        new GetKYCAccountsCountRequest({
+          securityId: equity.evmDiamondAddress!,
+          kycStatus: 1,
+        }),
+      ),
+    ).toEqual(1);
+
+    expect(
+      await Kyc.getKYCFor(
+        new GetKYCForRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        }),
+      ),
+    ).toEqual(true);
+
+    expect(
+      (
+        await Kyc.revokeKYC(
+          new RevokeKYCRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+
+    expect(
+      await Kyc.getKYCAccounts(
+        new GetKYCAccountsRequest({
+          securityId: equity.evmDiamondAddress!,
+          kycStatus: 1,
+          start: 0,
+          end: 1,
+        }),
+      ),
+    ).toEqual([]);
+
+    expect(
+      await Kyc.getKYCAccountsCount(
+        new GetKYCAccountsCountRequest({
+          securityId: equity.evmDiamondAddress!,
+          kycStatus: 1,
+        }),
+      ),
+    ).toEqual(0);
+
+    expect(
+      await Kyc.getKYCFor(
+        new GetKYCForRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        }),
+      ),
+    ).toEqual(false);
+
+    expect(
+      (
+        await SSIManagement.removeIssuer(
+          new RemoveIssuerRequest({
+            securityId: equity.evmDiamondAddress!,
+            issuerId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          }),
+        )
+      ).payload,
+    ).toBe(true);
+  }, 600_000);
+
+  it('Cannot grant KYC with invalid VC', async () => {
+    const targetId = CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString();
+    const vcBase64 = await createVcT3(targetId);
+    const decodedVC = Buffer.from(vcBase64, 'base64').toString('utf-8');
+    const vcJson = JSON.parse(decodedVC);
+    const oneSecondBeforeNow = new Date(Date.now() - 1000).toISOString();
+    vcJson.validUntil = oneSecondBeforeNow;
+    const corruptedVcJson = JSON.stringify(vcJson);
+    const wrongVcBase64 = Buffer.from(corruptedVcJson).toString('base64');
+
+    await expect(
+      async () =>
+        (
+          await Kyc.grantKYC(
+            new GrantKYCRequest({
+              securityId: equity.evmDiamondAddress!,
+              targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+              vcBase64: wrongVcBase64,
+            }),
+          )
+        ).payload,
+    ).rejects.toThrow('Invalid VC');
+  }, 600_000);
+});

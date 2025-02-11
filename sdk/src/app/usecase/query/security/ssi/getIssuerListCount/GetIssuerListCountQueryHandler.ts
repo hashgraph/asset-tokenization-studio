@@ -203,44 +203,47 @@
 
 */
 
-import Account from './Account.js';
-import Role from './Role.js';
-import Security from './Security.js';
-import Equity from './Equity.js';
-import Bond from './Bond.js';
-import Event from './Event.js';
-import Network from './Network.js';
-import Factory from './Factory.js';
-import Management from './Management.js';
-import SSIManagement from './SSIManagement.js';
-import Kyc from './Kyc.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator';
+import SecurityService from '../../../../../service/SecurityService';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
+import {
+  GetIssuerListCountQuery,
+  GetIssuerListCountQueryResponse,
+} from './GetIssuerListCountQuery';
 
-export {
-  Security,
-  Equity,
-  Bond,
-  Account,
-  Role,
-  Event,
-  Network,
-  Factory,
-  Management,
-  SSIManagement,
-  Kyc
-};
+@QueryHandler(GetIssuerListCountQuery)
+export class GetIssuerListCountQueryHandler
+  implements IQueryHandler<GetIssuerListCountQuery>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(MirrorNodeAdapter)
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+  ) {}
 
-export * from './request';
-export * from './response';
+  async execute(
+    query: GetIssuerListCountQuery,
+  ): Promise<GetIssuerListCountQueryResponse> {
+    const { securityId } = query;
+    const security = await this.securityService.get(securityId);
+    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
-export * from './Security.js';
-export * from './Equity.js';
-export * from './Bond.js';
-export * from './Account.js';
-export * from './Role.js';
-export * from './Event.js';
-export * from './Common.js';
-export * from './Network.js';
-export * from './Factory.js';
-export * from './Management.js';
-export * from './Kyc.js';
-export * from './SSIManagement.js';
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.exec(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
+
+    const res = await this.queryAdapter.getIssuerListCount(securityEvmAddress);
+
+    return new GetIssuerListCountQueryResponse(res);
+  }
+}

@@ -210,7 +210,7 @@ import Service from './Service.js';
 import { singleton } from 'tsyringe';
 import { SecurityRole } from '../../domain/context/security/SecurityRole.js';
 import { NotGrantedRole } from '../usecase/command/security/error/NotGrantedRole.js';
-import { IsIssuerQuery } from '../usecase/query/ssi/isIssuer/IsIssuerQuery.js';
+import { IsIssuerQuery } from '../usecase/query/security/ssi/isIssuer/IsIssuerQuery.js';
 import { GetKYCForQuery } from '../usecase/query/security/kyc/getKycFor/GetKYCForQuery.js';
 
 @singleton()
