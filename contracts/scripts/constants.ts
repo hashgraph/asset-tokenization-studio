@@ -499,10 +499,10 @@ export const REGEX = {
 
 // * Gas
 export const GAS_LIMIT = {
+    max: 15_000_000,
     default: 3_000_000,
     low: 1_000_000,
     high: 10_000_000,
-    max: 30_000_000,
     initilize: {
         businessLogicResolver: 8_000_000,
     },
