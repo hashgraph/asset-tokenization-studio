@@ -278,6 +278,7 @@ task(
             scheduledTasks,
             corporateActionsSecurity,
             lock,
+            hold,
             transferAndLock,
             adjustBalances,
         } = await deployAtsFullInfrastructure(
@@ -317,6 +318,7 @@ task(
             'Scheduled Tasks': scheduledTasks.address,
             'Corporate Actions': corporateActionsSecurity.address,
             Lock: lock.address,
+            Hold: hold.address,
             'Transfer and Lock': transferAndLock.address,
             'Adjust Balances': adjustBalances.address,
         }
@@ -326,13 +328,10 @@ task(
             if (!address) {
                 continue
             }
-            let contractId = ''
-            if (network !== 'hardhat') {
-                contractId = await addresstoHederaId({
-                    address,
-                    network,
-                })
-            }
+            const contractId = await addresstoHederaId({
+                address,
+                network,
+            })
             console.log(`   --> ${key}: ${address} (${contractId})`)
         }
     })
