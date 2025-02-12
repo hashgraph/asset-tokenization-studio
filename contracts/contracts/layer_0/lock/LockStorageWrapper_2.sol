@@ -227,11 +227,7 @@ abstract contract LockStorageWrapper_2 is CorporateActionsStorageWrapper_2 {
     ) internal virtual returns (bool success_, uint256 lockId_) {
         _triggerAndSyncAll(_partition, _tokenHolder, address(0));
 
-        uint256 abaf = _updateTotalLock(
-            _partition,
-            _tokenHolder,
-            adjustBalancesStorage
-        );
+        uint256 abaf = _updateTotalLock(_partition, _tokenHolder);
 
         _pushLabafLocks(_partition, _tokenHolder, abaf);
 
@@ -276,11 +272,7 @@ abstract contract LockStorageWrapper_2 is CorporateActionsStorageWrapper_2 {
     ) internal virtual returns (bool success_) {
         _triggerAndSyncAll(_partition, address(0), _tokenHolder);
 
-        uint256 abaf = _updateTotalLock(
-            _partition,
-            _tokenHolder,
-            adjustBalancesStorage
-        );
+        uint256 abaf = _updateTotalLock(_partition, _tokenHolder);
 
         _updateLockByIndex(_partition, _lockId, _tokenHolder, abaf);
 
@@ -325,6 +317,111 @@ abstract contract LockStorageWrapper_2 is CorporateActionsStorageWrapper_2 {
         success_ = true;
         _popLabafLock(_partition, _tokenHolder);
     }
+
+    function _updateTotalLock(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal returns (uint256 ABAF_) {
+        ABAF_ = _getAbaf();
+
+        uint256 labaf = _getTotalLockLabaf(_tokenHolder);
+        uint256 LABAFByPartition = _getTotalLockLabafByPartition(
+            _partition,
+            _tokenHolder
+        );
+
+        if (ABAF_ != labaf) {
+            uint256 factor = _calculateFactor(ABAF_, labaf);
+
+            _updateTotalLockedAmountAndLabaf(_tokenHolder, factor, ABAF_);
+        }
+
+        if (ABAF_ != LABAFByPartition) {
+            uint256 factorByPartition = _calculateFactor(
+                ABAF_,
+                LABAFByPartition
+            );
+
+            _updateTotalLockedAmountAndLabafByPartition(
+                _partition,
+                _tokenHolder,
+                factorByPartition,
+                ABAF_
+            );
+        }
+    }
+
+    function _updateLockByIndex(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder,
+        uint256 _abaf
+    ) internal virtual {
+        uint256 lock_LABAF = _getLockLabafByPartition(
+            _partition,
+            _lockId,
+            _tokenHolder
+        );
+
+        if (_abaf != lock_LABAF) {
+            uint256 factor_lock = _calculateFactor(_abaf, lock_LABAF);
+
+            uint256 lockIndex = _getLockIndex(
+                _partition,
+                _tokenHolder,
+                _lockId
+            );
+
+            _updateLockAmountByIndex(
+                _partition,
+                lockIndex,
+                _tokenHolder,
+                factor_lock
+            );
+        }
+    }
+
+    function _updateLockAmountByIndex(
+        bytes32 _partition,
+        uint256 _lockIndex,
+        address _tokenHolder,
+        uint256 _factor
+    ) internal virtual {
+        if (_factor == 1) return;
+        LockDataStorage storage lockStorage = _lockStorage();
+
+        lockStorage
+        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
+            .amount *= _factor;
+    }
+
+    function _updateTotalLockedAmountAndLabaf(
+        address _tokenHolder,
+        uint256 _factor,
+        uint256 _abaf
+    ) internal virtual {
+        if (_factor == 1) return;
+        LockDataStorage storage lockStorage = _lockStorage();
+
+        lockStorage.totalLockedAmountByAccount[_tokenHolder] *= _factor;
+        _setTotalLockLabaf(_tokenHolder, _abaf);
+    }
+
+    function _updateTotalLockedAmountAndLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _factor,
+        uint256 _abaf
+    ) internal virtual {
+        if (_factor == 1) return;
+        LockDataStorage storage lockStorage = _lockStorage();
+
+        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
+            _partition
+        ] *= _factor;
+        _setTotalLockLabafByPartition(_partition, _tokenHolder, _abaf);
+    }
+
     // solhint-disable no-unused-vars
     function _updateLockedBalancesBeforeLock(
         bytes32 _partition,
