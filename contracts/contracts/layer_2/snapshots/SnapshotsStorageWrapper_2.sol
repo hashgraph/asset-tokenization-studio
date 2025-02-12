@@ -219,6 +219,8 @@ import {
     ERC1410ScheduledTasks_CD_Lib
 } from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
 import {Lock_2_CD_Lib} from '../lock/Lock_2_CD_Lib.sol';
+import {Hold_2_CD_Lib} from '../hold/Hold_2_CD_Lib.sol';
+
 // TODO: Remove those errors of solhint
 // solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
 contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
@@ -376,6 +378,36 @@ contract SnapshotsStorageWrapper_2 is SnapshotsStorageWrapper {
                     _tokenHolder
                 ][_partition],
                 Lock_2_CD_Lib.getLockedAmountForByPartitionAdjusted(
+                    _partition,
+                    _tokenHolder
+                )
+            );
+    }
+
+    function _heldBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 balance_) {
+        return
+            _balanceOfAt_Adjusted(
+                _snapshotID,
+                _snapshotStorage().accountHeldBalanceSnapshots[_tokenHolder],
+                Hold_2_CD_Lib.getHeldAmountForAdjusted(_tokenHolder)
+            );
+    }
+
+    function _heldBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 balance_) {
+        return
+            _balanceOfAt_Adjusted(
+                _snapshotID,
+                _snapshotStorage().accountPartitionHeldBalanceSnapshots[
+                    _tokenHolder
+                ][_partition],
+                Hold_2_CD_Lib.getHeldAmountForByPartitionAdjusted(
                     _partition,
                     _tokenHolder
                 )

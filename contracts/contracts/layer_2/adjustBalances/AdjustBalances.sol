@@ -315,6 +315,35 @@ contract AdjustBalances is
         return _getLockLABAFByPartition(_partition, _lockId, _tokenHolder);
     }
 
+    function getTotalHeldLABAF(
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getTotalHeldLABAF(_tokenHolder);
+    }
+
+    function getTotalHeldLABAFByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getTotalHeldLABAFByPartition(_partition, _tokenHolder);
+    }
+
+    function getHoldLABAFByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex
+    ) external view virtual override returns (uint256) {
+        return _getHoldLABAFByIndex(_partition, _tokenHolder, _holdIndex);
+    }
+
+    function getHoldLABAFByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 labaf_) {
+        return _getHoldLABAFByPartition(_partition, _holdId, _tokenHolder);
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -333,7 +362,7 @@ contract AdjustBalances is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
+        staticFunctionSelectors_ = new bytes4[](16);
         staticFunctionSelectors_[selectorIndex++] = this
             .adjustBalances
             .selector;
@@ -367,6 +396,18 @@ contract AdjustBalances is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getLockLABAFByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalHeldLABAF
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalHeldLABAFByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldLABAFByIndex
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldLABAFByPartition
             .selector;
     }
 

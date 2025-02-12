@@ -236,14 +236,17 @@ const config: HardhatUserConfig = {
         previewnet: {
             url: Configuration.endpoints.previewnet.jsonRpc,
             accounts: Configuration.privateKeys.previewnet,
+            timeout: 3000000,
         },
         testnet: {
             url: Configuration.endpoints.testnet.jsonRpc,
             accounts: Configuration.privateKeys.testnet,
+            timeout: 3000000,
         },
         mainnet: {
             url: Configuration.endpoints.mainnet.jsonRpc,
             accounts: Configuration.privateKeys.mainnet,
+            timeout: 3000000,
         },
     },
     contractSizer: {

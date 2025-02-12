@@ -245,6 +245,7 @@ export const CONTRACT_NAMES = [
     'CorporateActionsSecurity',
     'TransferAndLock',
     'Lock',
+    'Hold',
     'AdjustBalances',
     'ProtectedPartitions',
     'TimeTravel',
