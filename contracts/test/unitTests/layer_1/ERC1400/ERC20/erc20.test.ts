@@ -214,7 +214,6 @@ import {
     type Pause,
     type ControlList,
     type ERC1594,
-    ERC20_2,
     BusinessLogicResolver,
     IFactory,
 } from '@typechain'
@@ -250,7 +249,7 @@ describe('ERC20 Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc20Facet: ERC20_2
+    let erc20Facet: ERC20
     let erc20FacetBlackList: ERC20
     let pauseFacet: Pause
     let controlListFacet: ControlList
@@ -329,7 +328,7 @@ describe('ERC20 Tests', () => {
                 businessLogicResolver: businessLogicResolver.address,
             })
 
-            erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
+            erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
             erc20FacetBlackList = await ethers.getContractAt(
                 'ERC20',
                 diamond.address,
@@ -546,7 +545,7 @@ describe('ERC20 Tests', () => {
                 businessLogicResolver: businessLogicResolver.address,
             })
 
-            erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
+            erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
             erc20SignerC = await ethers.getContractAt(
                 'ERC20',
                 diamond.address,

@@ -209,11 +209,11 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Snapshots_2,
+    type Snapshots,
     type Pause,
     type ERC1410ScheduledTasks,
     type AccessControl,
-    type Lock_2,
+    type Lock,
     IFactory,
     BusinessLogicResolver,
 } from '@typechain'
@@ -255,10 +255,10 @@ describe('Snapshots Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
-    let snapshotFacet: Snapshots_2
+    let snapshotFacet: Snapshots
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let lockFacet: Lock_2
+    let lockFacet: Lock
 
     before(async () => {
         // mute | mock console.log
@@ -334,14 +334,11 @@ describe('Snapshots Tests', () => {
             diamond.address
         )
 
-        snapshotFacet = await ethers.getContractAt(
-            'Snapshots_2',
-            diamond.address
-        )
+        snapshotFacet = await ethers.getContractAt('Snapshots', diamond.address)
 
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
-        lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
+        lockFacet = await ethers.getContractAt('Lock', diamond.address)
     })
 
     it('GIVEN an account without snapshot role WHEN takeSnapshot THEN transaction fails with AccountHasNoRole', async () => {

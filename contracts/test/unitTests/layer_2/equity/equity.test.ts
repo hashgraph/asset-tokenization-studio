@@ -212,14 +212,14 @@ import {
     type Equity,
     type Pause,
     type AccessControl,
-    Lock_2,
+    Lock,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
     Equity__factory,
     Pause__factory,
-    Lock_2__factory,
+    Lock__factory,
     ERC1410ScheduledTasks__factory,
 } from '@typechain'
 import {
@@ -285,7 +285,7 @@ describe('Equity Tests', () => {
     let equityFacet: Equity
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let lockFacet: Lock_2
+    let lockFacet: Lock
     let erc1410Facet: ERC1410ScheduledTasks
 
     before(async () => {
@@ -354,7 +354,7 @@ describe('Equity Tests', () => {
         )
         equityFacet = Equity__factory.connect(diamond.address, signer_A)
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A

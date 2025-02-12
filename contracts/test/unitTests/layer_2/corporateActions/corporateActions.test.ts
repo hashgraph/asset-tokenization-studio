@@ -209,13 +209,13 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type CorporateActionsSecurity,
+    type CorporateActions,
     type Pause,
     type AccessControl,
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
-    CorporateActionsSecurity__factory,
+    CorporateActions__factory,
     Pause__factory,
 } from '@typechain'
 import {
@@ -249,7 +249,7 @@ describe('Corporate Actions Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let corporateActionsFacet: CorporateActionsSecurity
+    let corporateActionsFacet: CorporateActions
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
@@ -317,7 +317,7 @@ describe('Corporate Actions Tests', () => {
             diamond.address,
             signer_A
         )
-        corporateActionsFacet = CorporateActionsSecurity__factory.connect(
+        corporateActionsFacet = CorporateActions__factory.connect(
             diamond.address,
             signer_A
         )

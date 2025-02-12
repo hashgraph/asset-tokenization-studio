@@ -215,11 +215,11 @@ import {
     type AccessControl,
     type Equity,
     type ControlList,
-    ERC20_2,
-    ERC1594_2,
-    ERC1644_2,
+    ERC20,
+    ERC1594,
+    ERC1644,
     AdjustBalances,
-    Cap_2,
+    Cap,
     IERC20,
     IFactory,
     BusinessLogicResolver,
@@ -316,10 +316,10 @@ describe('ERC1400 Tests', () => {
     let pauseFacet: Pause
     let equityFacet: Equity
     let controlList: ControlList
-    let capFacet: Cap_2
-    let erc20Facet: ERC20_2
-    let erc1594Facet: ERC1594_2
-    let erc1644Facet: ERC1644_2
+    let capFacet: Cap
+    let erc20Facet: ERC20
+    let erc1594Facet: ERC1594
+    let erc1644Facet: ERC1644
     let adjustBalancesFacet: AdjustBalances
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
@@ -656,13 +656,13 @@ describe('ERC1400 Tests', () => {
 
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
-        capFacet = await ethers.getContractAt('Cap_2', diamond.address)
+        capFacet = await ethers.getContractAt('Cap', diamond.address)
 
-        erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
+        erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
 
-        erc1594Facet = await ethers.getContractAt('ERC1594_2', diamond.address)
+        erc1594Facet = await ethers.getContractAt('ERC1594', diamond.address)
 
-        erc1644Facet = await ethers.getContractAt('ERC1644_2', diamond.address)
+        erc1644Facet = await ethers.getContractAt('ERC1644', diamond.address)
 
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
     }
@@ -1706,7 +1706,7 @@ describe('ERC1400 Tests', () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CAP_ROLE, account_A)
             erc1410Facet = erc1410Facet.connect(signer_A)
-            capFacet = await ethers.getContractAt('Cap_2', diamond.address)
+            capFacet = await ethers.getContractAt('Cap', diamond.address)
             capFacet = capFacet.connect(signer_A)
             await capFacet.setMaxSupply(
                 balanceOf_C_Original + balanceOf_E_Original + 2 * amount
@@ -1810,7 +1810,7 @@ describe('ERC1400 Tests', () => {
             // Set Max supplies to test
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CAP_ROLE, account_A)
-            capFacet = await ethers.getContractAt('Cap_2', diamond.address)
+            capFacet = await ethers.getContractAt('Cap', diamond.address)
             capFacet = capFacet.connect(signer_A)
             await capFacet.setMaxSupply(
                 balanceOf_C_Original + balanceOf_E_Original + 100 * amount
@@ -3629,7 +3629,7 @@ describe('ERC1400 Tests', () => {
                 )
 
                 const LABAF_Before =
-                    await adjustBalancesFacet.getAllowanceLABAF(
+                    await adjustBalancesFacet.getAllowanceLabaf(
                         account_A,
                         account_B
                     )
@@ -3648,7 +3648,7 @@ describe('ERC1400 Tests', () => {
                     account_B
                 )
 
-                const LABAF_After = await adjustBalancesFacet.getAllowanceLABAF(
+                const LABAF_After = await adjustBalancesFacet.getAllowanceLabaf(
                     account_A,
                     account_B
                 )
@@ -3680,7 +3680,7 @@ describe('ERC1400 Tests', () => {
                     account_B
                 )
                 const LABAF_Before =
-                    await adjustBalancesFacet.getAllowanceLABAF(
+                    await adjustBalancesFacet.getAllowanceLabaf(
                         account_A,
                         account_B
                     )
@@ -3701,7 +3701,7 @@ describe('ERC1400 Tests', () => {
                     account_A,
                     account_B
                 )
-                const LABAF_After = await adjustBalancesFacet.getAllowanceLABAF(
+                const LABAF_After = await adjustBalancesFacet.getAllowanceLabaf(
                     account_A,
                     account_B
                 )

@@ -211,15 +211,15 @@ import {
     AccessControl,
     AccessControl__factory,
     BusinessLogicResolver,
-    type Cap_2,
-    Cap_2__factory,
+    type Cap,
+    Cap__factory,
     Equity,
     Equity__factory,
     ERC1410ScheduledTasks,
     ERC1410ScheduledTasks__factory,
     IFactory,
-    Snapshots_2,
-    Snapshots_2__factory,
+    Snapshots,
+    Snapshots__factory,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -248,10 +248,10 @@ describe('CAP Layer 2 Tests', () => {
     let factory: IFactory,
         businessLogicResolver: BusinessLogicResolver,
         diamond: Equity,
-        capFacet: Cap_2,
+        capFacet: Cap,
         accessControlFacet: AccessControl,
         equityFacet: Equity,
-        snapshotFacet: Snapshots_2,
+        snapshotFacet: Snapshots,
         erc1410Facet: ERC1410ScheduledTasks
     let signer_A: SignerWithAddress,
         signer_B: SignerWithAddress,
@@ -300,13 +300,13 @@ describe('CAP Layer 2 Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        capFacet = Cap_2__factory.connect(diamond.address, signer_A)
+        capFacet = Cap__factory.connect(diamond.address, signer_A)
         accessControlFacet = AccessControl__factory.connect(
             diamond.address,
             signer_A
         )
         equityFacet = Equity__factory.connect(diamond.address, signer_A)
-        snapshotFacet = Snapshots_2__factory.connect(diamond.address, signer_A)
+        snapshotFacet = Snapshots__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A

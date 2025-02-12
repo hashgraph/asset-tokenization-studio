@@ -213,12 +213,12 @@ import {
     Bond,
     AccessControl,
     Pause,
-    Lock_2,
+    Lock,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
     ERC1410ScheduledTasks__factory,
-    Lock_2__factory,
+    Lock__factory,
     Pause__factory,
     AccessControl__factory,
     Bond__factory,
@@ -278,7 +278,7 @@ describe('Bond Tests', () => {
     let bondFacet: Bond
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let lockFacet: Lock_2
+    let lockFacet: Lock
     let erc1410Facet: ERC1410ScheduledTasks
 
     before(async () => {
@@ -358,7 +358,7 @@ describe('Bond Tests', () => {
             signer_A
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A

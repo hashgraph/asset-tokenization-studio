@@ -211,7 +211,7 @@ import {
     BondUSA,
     Cap,
     ControlList,
-    CorporateActionsSecurity,
+    CorporateActions,
     DiamondFacet,
     EquityUSA,
     ERC1410ScheduledTasks,
@@ -248,7 +248,7 @@ export interface DeployAtsContractsResultParams {
     scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
     snapshots: DeployContractWithFactoryResult<Snapshots>
-    corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActionsSecurity>
+    corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActions>
     transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     lock: DeployContractWithFactoryResult<Lock>
     adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
@@ -274,7 +274,7 @@ export default class DeployAtsContractsResult {
     public readonly scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     public readonly scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
     public readonly snapshots: DeployContractWithFactoryResult<Snapshots>
-    public readonly corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActionsSecurity>
+    public readonly corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActions>
     public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     public readonly lock: DeployContractWithFactoryResult<Lock>
     public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>

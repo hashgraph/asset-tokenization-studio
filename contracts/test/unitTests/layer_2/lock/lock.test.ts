@@ -214,16 +214,16 @@ import {
     type AdjustBalances,
     type ERC1410ScheduledTasks,
     type AccessControl,
-    Lock_2,
+    Lock,
     Equity,
-    Cap_2,
+    Cap,
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
     ERC1410ScheduledTasks__factory,
     AdjustBalances__factory,
-    Cap_2__factory,
-    Lock_2__factory,
+    Cap__factory,
+    Lock__factory,
     Equity__factory,
 } from '@typechain'
 import {
@@ -273,9 +273,9 @@ describe('Locks Layer 2 Tests', () => {
     let erc1410Facet: ERC1410ScheduledTasks
     let adjustBalancesFacet: AdjustBalances
     let accessControlFacet: AccessControl
-    let capFacet: Cap_2
+    let capFacet: Cap
     let equityFacet: Equity
-    let lockFacet: Lock_2
+    let lockFacet: Lock
 
     async function deployAsset(multiPartition: boolean) {
         const init_rbacs: Rbac[] = set_initRbacs()
@@ -333,8 +333,8 @@ describe('Locks Layer 2 Tests', () => {
             diamond.address,
             defaultSigner
         )
-        capFacet = Cap_2__factory.connect(diamond.address, defaultSigner)
-        lockFacet = Lock_2__factory.connect(diamond.address, defaultSigner)
+        capFacet = Cap__factory.connect(diamond.address, defaultSigner)
+        lockFacet = Lock__factory.connect(diamond.address, defaultSigner)
         equityFacet = Equity__factory.connect(diamond.address, defaultSigner)
     }
 
@@ -689,7 +689,7 @@ describe('Locks Layer 2 Tests', () => {
             currentTimestamp + ONE_SECOND
         )
         const TotalLockLABAF_Before =
-            await adjustBalancesFacet.getTotalLockLABAFByPartition(
+            await adjustBalancesFacet.getTotalLockLabafByPartition(
                 _PARTITION_ID_1,
                 account_A
             )
@@ -706,7 +706,7 @@ describe('Locks Layer 2 Tests', () => {
         )
 
         const LockLABAF_Before =
-            await adjustBalancesFacet.getLockLABAFByPartition(
+            await adjustBalancesFacet.getLockLabafByPartition(
                 _PARTITION_ID_1,
                 2,
                 account_A
@@ -720,12 +720,12 @@ describe('Locks Layer 2 Tests', () => {
         await lockFacet.releaseByPartition(_PARTITION_ID_1, 1, account_A)
 
         const TotalLockLABAF_After =
-            await adjustBalancesFacet.getTotalLockLABAFByPartition(
+            await adjustBalancesFacet.getTotalLockLabafByPartition(
                 _PARTITION_ID_1,
                 account_A
             )
         const LockLABAF_After =
-            await adjustBalancesFacet.getLockLABAFByPartition(
+            await adjustBalancesFacet.getLockLabafByPartition(
                 _PARTITION_ID_1,
                 2,
                 account_A
