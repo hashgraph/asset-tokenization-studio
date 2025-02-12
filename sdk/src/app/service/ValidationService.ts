@@ -215,13 +215,13 @@ import { GetKYCForQuery } from '../usecase/query/security/kyc/getKycFor/GetKYCFo
 
 @singleton()
 export default class ValidationService extends Service {
-  constructor(
-    public readonly queryBus: QueryBus = Injectable.resolve(QueryBus),
-  ) {
+  queryBus: QueryBus;
+  constructor() {
     super();
   }
 
   async validateIssuer(sercurityId: string, issuer: string): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     const res = await this.queryBus.execute(
       new IsIssuerQuery(sercurityId, issuer),
     );
@@ -236,6 +236,7 @@ export default class ValidationService extends Service {
     securityId: string,
     addresses: string[],
   ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
     let res;
     for (const address of addresses) {
       res = await this.queryBus.execute(
