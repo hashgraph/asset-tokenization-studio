@@ -207,184 +207,246 @@
 pragma solidity 0.8.18;
 
 import {
-    _SNAPSHOTS_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
-import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
-import {Common} from '../common/Common.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
+import {_CORPORATE_ACTION_ROLE} from '../../layer_1/constants/roles.sol';
+import {
+    DIVIDEND_CORPORATE_ACTION_TYPE,
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
+} from '../constants/values.sol';
+import {IEquity} from '../interfaces/equity/IEquity.sol';
+import {EquityStorageWrapper} from './EquityStorageWrapper.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
-    function takeSnapshot()
+abstract contract Equity is
+    IEquity,
+    IStaticFunctionSelectors,
+    EquityStorageWrapper
+{
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    // solhint-disable func-name-mixedcase
+    // solhint-disable-next-line private-vars-leading-underscore
+    function _initializeEquity(
+        EquityDetailsData calldata _equityDetailsData
+    ) internal {
+        EquityDataStorage storage equityStorage = _equityStorage();
+        equityStorage.initialized = true;
+        _storeEquityDetails(_equityDetailsData);
+    }
+
+    function getEquityDetails()
+        external
+        view
+        override
+        returns (EquityDetailsData memory equityDetailsData_)
+    {
+        return _getEquityDetails();
+    }
+
+    function setDividends(
+        Dividend calldata _newDividend
+    )
         external
         virtual
         override
         onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID)
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        checkDates(_newDividend.recordDate, _newDividend.executionDate)
+        checkTimestamp(_newDividend.recordDate)
+        returns (bool success_, uint256 dividendID_)
     {
-        _triggerScheduledTasks(0);
-        return _takeSnapshot();
+        bytes32 corporateActionID;
+        (success_, corporateActionID, dividendID_) = _setDividends(
+            _newDividend
+        );
+        emit DividendSet(
+            corporateActionID,
+            dividendID_,
+            _msgSender(),
+            _newDividend.recordDate,
+            _newDividend.executionDate,
+            _newDividend.amount
+        );
     }
 
-    function AbafAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 ABAF_) {
-        return _AbafAtSnapshot(_snapshotID);
-    }
-
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual returns (uint8 decimals_) {
-        return _decimalsAtSnapshot(_snapshotID);
-    }
-
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function balanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _balanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (bytes32[] memory) {
-        return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshot(_snapshotID);
-    }
-
-    function totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
-    }
-
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _lockedBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return
-            _heldBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function getStaticResolverKey()
+    /**
+     * @dev returns the properties and related snapshots (if any) of a dividend.
+     *
+     * @param _dividendID The dividend Id
+     */
+    function getDividends(
+        uint256 _dividendID
+    )
         external
-        pure
+        view
         virtual
         override
-        returns (bytes32 staticResolverKey_)
+        checkIndexForCorporateActionByType(
+            DIVIDEND_CORPORATE_ACTION_TYPE,
+            _dividendID - 1
+        )
+        returns (RegisteredDividend memory registeredDividend_)
     {
-        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
+        return _getDividends(_dividendID);
     }
 
-    function getStaticFunctionSelectors()
+    /**
+     * @dev returns the dividends for an account.
+     *
+     * @param _dividendID The dividend Id
+     * @param _account The account
+     */
+    function getDividendsFor(
+        uint256 _dividendID,
+        address _account
+    )
         external
-        pure
+        view
         virtual
         override
-        returns (bytes4[] memory staticFunctionSelectors_)
+        checkIndexForCorporateActionByType(
+            DIVIDEND_CORPORATE_ACTION_TYPE,
+            _dividendID - 1
+        )
+        returns (DividendFor memory dividendFor_)
     {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
-        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .partitionsOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .AbafAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .decimalsAtSnapshot
-            .selector;
+        return _getDividendsFor(_dividendID, _account);
     }
 
-    function getStaticInterfaceIds()
+    /**
+     * @dev returns the dividends count.
+     *
+     */
+    function getDividendsCount()
         external
-        pure
+        view
         virtual
         override
-        returns (bytes4[] memory staticInterfaceIds_)
+        returns (uint256 dividendCount_)
     {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
+        return _getDividendsCount();
+    }
+
+    function setVoting(
+        Voting calldata _newVoting
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        checkTimestamp(_newVoting.recordDate)
+        returns (bool success_, uint256 voteID_)
+    {
+        bytes32 corporateActionID;
+        (success_, corporateActionID, voteID_) = _setVoting(_newVoting);
+        emit VotingSet(
+            corporateActionID,
+            voteID_,
+            _msgSender(),
+            _newVoting.recordDate,
+            _newVoting.data
+        );
+    }
+
+    function getVoting(
+        uint256 _voteID
+    )
+        external
+        view
+        virtual
+        override
+        checkIndexForCorporateActionByType(
+            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+            _voteID - 1
+        )
+        returns (RegisteredVoting memory registeredVoting_)
+    {
+        return _getVoting(_voteID);
+    }
+
+    function getVotingFor(
+        uint256 _voteID,
+        address _account
+    )
+        external
+        view
+        virtual
+        override
+        checkIndexForCorporateActionByType(
+            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+            _voteID - 1
+        )
+        returns (VotingFor memory votingFor_)
+    {
+        return _getVotingFor(_voteID, _account);
+    }
+
+    function getVotingCount()
+        external
+        view
+        virtual
+        override
+        returns (uint256 votingCount_)
+    {
+        return _getVotingCount();
+    }
+
+    function setScheduledBalanceAdjustment(
+        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    )
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        checkTimestamp(_newBalanceAdjustment.executionDate)
+        checkFactor(_newBalanceAdjustment.factor)
+        returns (bool success_, uint256 balanceAdjustmentID_)
+    {
+        bytes32 corporateActionID;
+        (
+            success_,
+            corporateActionID,
+            balanceAdjustmentID_
+        ) = _setScheduledBalanceAdjustment(_newBalanceAdjustment);
+        emit ScheduledBalanceAdjustmentSet(
+            corporateActionID,
+            balanceAdjustmentID_,
+            _msgSender(),
+            _newBalanceAdjustment.executionDate,
+            _newBalanceAdjustment.factor,
+            _newBalanceAdjustment.decimals
+        );
+    }
+
+    function getScheduledBalanceAdjustment(
+        uint256 _balanceAdjustmentID
+    )
+        external
+        view
+        virtual
+        override
+        checkIndexForCorporateActionByType(
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            _balanceAdjustmentID - 1
+        )
+        returns (ScheduledBalanceAdjustment memory balanceAdjustment_)
+    {
+        return _getScheduledBalanceAdjusment(_balanceAdjustmentID);
+    }
+
+    function getScheduledBalanceAdjustmentCount()
+        external
+        view
+        virtual
+        override
+        returns (uint256 balanceAdjustmentCount_)
+    {
+        return _getScheduledBalanceAdjustmentsCount();
     }
 }

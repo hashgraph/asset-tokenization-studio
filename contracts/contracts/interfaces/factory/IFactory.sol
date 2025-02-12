@@ -209,14 +209,14 @@ pragma solidity 0.8.18;
 import {IResolverProxy} from '../resolver/resolverProxy/IResolverProxy.sol';
 import {IBusinessLogicResolver} from '../resolver/IBusinessLogicResolver.sol';
 import {ERC20} from '../../layer_1/ERC1400/ERC20/ERC20.sol';
-//import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
-//import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
-//import {
-//    FactoryRegulationData,
-//    RegulationData,
-//    RegulationType,
-//    RegulationSubType
-//} from '../../layer_3/constants/regulation.sol';
+import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
+import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
+import {
+    FactoryRegulationData,
+    RegulationData,
+    RegulationType,
+    RegulationSubType
+} from '../../layer_3/constants/regulation.sol';
 
 interface IFactory {
     enum SecurityType {
@@ -242,46 +242,46 @@ interface IFactory {
         ERC20.ERC20MetadataInfo erc20MetadataInfo;
     }
 
-    //    struct EquityData {
-    //        SecurityData security;
-    //        IEquity.EquityDetailsData equityDetails;
-    //    }
-    //
-    //    struct BondData {
-    //        SecurityData security;
-    //        IBond.BondDetailsData bondDetails;
-    //        IBond.CouponDetailsData couponDetails;
-    //    }
-    //
-    //    event EquityDeployed(
-    //        address indexed deployer,
-    //        address equityAddress,
-    //        EquityData equityData,
-    //        FactoryRegulationData regulationData
-    //    );
-    //
-    //    event BondDeployed(
-    //        address indexed deployer,
-    //        address bondAddress,
-    //        BondData bondData,
-    //        FactoryRegulationData regulationData
-    //    );
-    //
-    //    error EmptyResolver(IBusinessLogicResolver resolver);
-    //    error NoInitialAdmins();
-    //
-    //    function deployEquity(
-    //        EquityData calldata _equityData,
-    //        FactoryRegulationData calldata _factoryRegulationData
-    //    ) external returns (address equityAddress_);
-    //
-    //    function deployBond(
-    //        BondData calldata _bondData,
-    //        FactoryRegulationData calldata _factoryRegulationData
-    //    ) external returns (address bondAddress_);
-    //
-    //    function getAppliedRegulationData(
-    //        RegulationType _regulationType,
-    //        RegulationSubType _regulationSubType
-    //    ) external pure returns (RegulationData memory regulationData_);
+    struct EquityData {
+        SecurityData security;
+        IEquity.EquityDetailsData equityDetails;
+    }
+
+    struct BondData {
+        SecurityData security;
+        IBond.BondDetailsData bondDetails;
+        IBond.CouponDetailsData couponDetails;
+    }
+
+    event EquityDeployed(
+        address indexed deployer,
+        address equityAddress,
+        EquityData equityData,
+        FactoryRegulationData regulationData
+    );
+
+    event BondDeployed(
+        address indexed deployer,
+        address bondAddress,
+        BondData bondData,
+        FactoryRegulationData regulationData
+    );
+
+    error EmptyResolver(IBusinessLogicResolver resolver);
+    error NoInitialAdmins();
+
+    function deployEquity(
+        EquityData calldata _equityData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address equityAddress_);
+
+    function deployBond(
+        BondData calldata _bondData,
+        FactoryRegulationData calldata _factoryRegulationData
+    ) external returns (address bondAddress_);
+
+    function getAppliedRegulationData(
+        RegulationType _regulationType,
+        RegulationSubType _regulationSubType
+    ) external pure returns (RegulationData memory regulationData_);
 }

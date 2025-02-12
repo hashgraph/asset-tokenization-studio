@@ -203,188 +203,129 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
 import {
-    _SNAPSHOTS_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
+    AdjustBalancesStorageWrapper_1
+} from '../adjustBalances/AdjustBalancesStorageWrapper_1.sol';
+import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
-import {Common} from '../common/Common.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
+    ICapStorageWrapper
+} from '../../layer_1/interfaces/cap/ICapStorageWrapper.sol';
 
-contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
-    function takeSnapshot()
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID)
-    {
-        _triggerScheduledTasks(0);
-        return _takeSnapshot();
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+// solhint-disable no-unused-vars, custom-errors
+contract CapStorageWrapper_1 is AdjustBalancesStorageWrapper_1 {
+    struct CapDataStorage {
+        uint256 maxSupply;
+        mapping(bytes32 => uint256) maxSupplyByPartition;
+        bool initialized;
     }
 
-    function AbafAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 ABAF_) {
-        return _AbafAtSnapshot(_snapshotID);
+    function _adjustMaxSupply(uint256 factor) internal {
+        CapDataStorage storage capStorage = _capStorage();
+        if (
+            capStorage.maxSupply ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        ) return;
+        capStorage.maxSupply *= factor;
     }
 
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual returns (uint8 decimals_) {
-        return _decimalsAtSnapshot(_snapshotID);
+    function _adjustMaxSupplyByPartition(
+        bytes32 partition,
+        uint256 factor
+    ) internal {
+        CapDataStorage storage capStorage = _capStorage();
+        if (
+            capStorage.maxSupplyByPartition[partition] ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        ) return;
+        capStorage.maxSupplyByPartition[partition] *= factor;
     }
 
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
+    function _getMaxSupply() internal view returns (uint256) {
+        return _getMaxSupplyAdjustedAt(_blockTimestamp());
     }
 
-    function balanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
+    function _getMaxSupplyByPartition(
+        bytes32 partition
+    ) internal view returns (uint256) {
+        CapDataStorage storage capStorage = _capStorage();
+        if (
+            capStorage.maxSupplyByPartition[partition] ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        )
+            return
+                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
         return
-            _balanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
+            capStorage.maxSupplyByPartition[partition] *
+            _getMaxSupplyByPartitionAdjustedAt(partition, _blockTimestamp());
     }
 
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (bytes32[] memory) {
-        return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
+    function _getMaxSupplyAdjusted()
+        internal
+        view
+        virtual
+        returns (uint256 maxSupply_)
+    {
+        return _getMaxSupplyAdjustedAt(_blockTimestamp());
     }
 
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshot(_snapshotID);
+    function _getMaxSupplyAdjustedAt(
+        uint256 timestamp
+    ) internal view returns (uint256) {
+        CapDataStorage storage capStorage = _capStorage();
+        if (
+            capStorage.maxSupply ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        )
+            return
+                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+        (uint256 pendingABF, ) = _getPendingScheduledBalanceAdjustmentsAt(
+            timestamp
+        );
+        return capStorage.maxSupply * pendingABF;
     }
 
-    function totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
-    }
-
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
+    function _getMaxSupplyByPartitionAdjusted(
+        bytes32 _partition
+    ) internal view virtual returns (uint256 maxSupply_) {
         return
-            _lockedBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
+            _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
     }
 
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
+    function _getMaxSupplyByPartitionAdjustedAt(
+        bytes32 partition,
+        uint256 timestamp
+    ) internal view returns (uint256) {
+        CapDataStorage storage capStorage = _capStorage();
+        if (
+            capStorage.maxSupplyByPartition[partition] ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        )
+            return
+                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
         return
-            _heldBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
+            capStorage.maxSupplyByPartition[partition] *
+            _calculateFactorByPartitionAdjustedAt(partition, _blockTimestamp());
     }
 
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
+    function _checkMaxSupply(
+        uint256 _amount,
+        uint256 _maxSupply
+    ) internal pure returns (bool) {
+        if (_maxSupply == 0) return true;
+        if (_amount <= _maxSupply) return true;
+        return false;
     }
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
-        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .partitionsOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .AbafAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .decimalsAtSnapshot
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
+    function _capStorage() internal pure returns (CapDataStorage storage cap_) {
+        bytes32 position = _CAP_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            cap_.slot := position
+        }
     }
 }
+// solhint-enable no-unused-vars, custom-errors

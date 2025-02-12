@@ -203,117 +203,45 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
 import {
-    AdjustBalancesStorageWrapper_1
-} from '../adjustBalances/AdjustBalancesStorageWrapper_1.sol';
-import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
+    RegulationData,
+    AdditionalSecurityData
+} from '../constants/regulation.sol';
+import {_SECURITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {ISecurity} from '../interfaces/ISecurity.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-// solhint-disable no-unused-vars, custom-errors
-contract CapStorageWrapperRead is AdjustBalancesStorageWrapper_1 {
-    struct CapDataStorage {
-        uint256 maxSupply;
-        mapping(bytes32 => uint256) maxSupplyByPartition;
-        bool initialized;
-    }
-
-    function _adjustMaxSupply(uint256 factor) internal {
-        CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        capStorage.maxSupply *= factor;
-    }
-
-    function _adjustMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 factor
+contract SecurityStorageWrapper {
+    function _storeRegulationData(
+        RegulationData memory _regulationData,
+        AdditionalSecurityData calldata _additionalSecurityData
     ) internal {
-        CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupplyByPartition[partition] ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        capStorage.maxSupplyByPartition[partition] *= factor;
+        ISecurity.SecurityRegulationData storage data = _securityStorage();
+        data.regulationData = _regulationData;
+        data.additionalSecurityData = _additionalSecurityData;
     }
 
-    function _getMaxSupply() internal view returns (uint256) {
-        return _getMaxSupplyAdjustedAt(_blockTimestamp());
-    }
-
-    function _getMaxSupplyByPartition(
-        bytes32 partition
-    ) internal view returns (uint256) {
-        CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupplyByPartition[partition] ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        )
-            return
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-        return
-            capStorage.maxSupplyByPartition[partition] *
-            _getMaxSupplyByPartitionAdjustedAt(partition, _blockTimestamp());
-    }
-
-    function _getMaxSupplyAdjusted()
+    function _getSecurityRegulationData()
         internal
         view
-        virtual
-        returns (uint256 maxSupply_)
+        returns (
+            ISecurity.SecurityRegulationData memory securityRegulationData_
+        )
     {
-        return _getMaxSupplyAdjustedAt(_blockTimestamp());
+        securityRegulationData_ = _securityStorage();
     }
 
-    function _getMaxSupplyAdjustedAt(
-        uint256 timestamp
-    ) internal view returns (uint256) {
-        CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        )
-            return
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-        (uint256 pendingABF, ) = _getPendingScheduledBalanceAdjustmentsAt(
-            timestamp
-        );
-        return capStorage.maxSupply * pendingABF;
-    }
-
-    function _getMaxSupplyByPartitionAdjusted(
-        bytes32 _partition
-    ) internal view virtual returns (uint256 maxSupply_) {
-        return
-            _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
-    }
-
-    function _getMaxSupplyByPartitionAdjustedAt(
-        bytes32 partition,
-        uint256 timestamp
-    ) internal view returns (uint256) {
-        CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupplyByPartition[partition] ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        )
-            return
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-        return
-            capStorage.maxSupplyByPartition[partition] *
-            _calculateFactorByPartitionAdjustedAt(partition, _blockTimestamp());
-    }
-
-    function _capStorage() internal pure returns (CapDataStorage storage cap_) {
-        bytes32 position = _CAP_STORAGE_POSITION;
+    function _securityStorage()
+        internal
+        view
+        returns (ISecurity.SecurityRegulationData storage securityStorage_)
+    {
+        bytes32 position = _SECURITY_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            cap_.slot := position
+            securityStorage_.slot := position
         }
     }
 }
-// solhint-enable no-unused-vars, custom-errors

@@ -211,10 +211,10 @@ import {LocalContext} from '../context/LocalContext.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {CapStorageWrapperRead} from '../cap/CapStorageWrapperRead.sol';
+import {CapStorageWrapper_1} from '../cap/CapStorageWrapper_1.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract LockStorageWrapper_1 is CapStorageWrapperRead {
+abstract contract LockStorageWrapper_1 is CapStorageWrapper_1 {
     // TODO: Create interface to the errors or carry to layer 1
     error WrongLockId();
     error WrongExpirationTimestamp();
