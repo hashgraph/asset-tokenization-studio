@@ -205,16 +205,17 @@
 
 import { Query } from '../../../../../../core/query/Query.js';
 import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import KYCViewModel from '../../../../../../port/in/response/KYCViewModel.js'
 
-export class GetKYCForQueryResponse implements QueryResponse {
-  constructor(public readonly payload: KYCViewModel) {}
+export class GetKYCAccountsDataQueryResponse implements QueryResponse {
+  constructor(public readonly payload: string[]) {}
 }
 
-export class GetKYCForQuery extends Query<GetKYCForQueryResponse> {
+export class GetKYCAccountsDataQuery extends Query<GetKYCAccountsDataQueryResponse> {
   constructor(
     public readonly securityId: string,
-    public readonly targetId: string,
+    public readonly kycStatus: number,
+    public readonly start: number,
+    public readonly end: number,
   ) {
     super();
   }

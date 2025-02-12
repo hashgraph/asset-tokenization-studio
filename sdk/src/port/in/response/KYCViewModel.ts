@@ -203,19 +203,12 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import KYCViewModel from '../../../../../../port/in/response/KYCViewModel.js'
+import { QueryResponse } from 'core/query/QueryResponse';
 
-export class GetKYCForQueryResponse implements QueryResponse {
-  constructor(public readonly payload: KYCViewModel) {}
-}
-
-export class GetKYCForQuery extends Query<GetKYCForQueryResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly targetId: string,
-  ) {
-    super();
-  }
+export default interface KYCViewModel extends QueryResponse {
+   validFrom: string;
+   validTo: string;
+   VCid: string;
+   address: string;
+   kycStatus: number;
 }

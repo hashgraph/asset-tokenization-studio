@@ -203,19 +203,36 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import KYCViewModel from '../../../../../../port/in/response/KYCViewModel.js'
+import ValidatedRequest from './validation/ValidatedRequest.js';
+import Validation from './validation/Validation.js';
 
-export class GetKYCForQueryResponse implements QueryResponse {
-  constructor(public readonly payload: KYCViewModel) {}
-}
+export default class GetKYCAccountsDataRequest extends ValidatedRequest<GetKYCAccountsDataRequest> {
+  securityId: string;
+  kycStatus: number;
+  start: number;
+  end: number;
 
-export class GetKYCForQuery extends Query<GetKYCForQueryResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly targetId: string,
-  ) {
-    super();
+  constructor({
+    securityId,
+    kycStatus,
+    start,
+    end
+  }: {
+    securityId: string;
+    kycStatus: number;
+    start: number;
+    end: number;
+  }) {
+    super({
+      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      kycStatus: Validation.checkNumber({ min: 0 }),
+      start: Validation.checkNumber({min: 0}),
+      end: Validation.checkNumber({min: 0}),
+    });
+
+    this.securityId = securityId;
+    this.kycStatus = kycStatus;
+    this.start= start;
+    this.end = end;
   }
 }

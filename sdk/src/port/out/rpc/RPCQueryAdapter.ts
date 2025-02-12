@@ -266,6 +266,7 @@ import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/Sched
 import { DividendFor } from '../../../domain/context/equity/DividendFor';
 import { VotingFor } from '../../../domain/context/equity/VotingFor';
 import { HoldDetails } from '../../../domain/context/security/HoldDetails.js';
+import { KYCDetails } from '../../../domain/context/kyc/KYCDetails.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -1315,15 +1316,21 @@ export class RPCQueryAdapter {
     ).isIssuer(issuer.toString());
   }
 
-  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<number> {
+  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<KYCDetails> {
     LogService.logTrace(`Getting KYC details for ${targetId}}`);
 
-    const { status } = await this.connect(
+    const  kycData = await this.connect(
       KYC__factory,
       address.toString(),
     ).getKYCFor(targetId.toString());
 
-    return status;
+    return new KYCDetails(
+      kycData.validFrom.toString(),
+      kycData.validTo.toString(),
+      kycData.VCid,
+      kycData.issuer,
+      kycData.status,
+    );
   }
 
   async getKYCAccounts(
