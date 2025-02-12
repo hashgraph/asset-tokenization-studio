@@ -331,6 +331,8 @@ import { RevokeKYCCommandHandler } from '../app/usecase/command/security/kyc/rev
 import { AddIssuerCommandHandler } from '../app/usecase/command/security/ssi/addIssuer/AddIssuerCommandHandler.js';
 import { RemoveIssuerCommandHandler } from '../app/usecase/command/security/ssi/removeIssuer/RemoveIssuerCommandHandler.js';
 import { SetRevocationRegistryAddressCommandHandler } from '../app/usecase/command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommandHandler.js';
+import { GetKYCStatusForQueryHandler } from '../app/usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQueryHandler.js';
+import { GetKYCAccountsDataQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsData/GetKYCAccountsDataQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -762,6 +764,14 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetKYCAccountsQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCAccountsDataQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCStatusForQueryHandler,
   },
 ];
 
