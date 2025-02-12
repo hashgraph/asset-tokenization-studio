@@ -207,62 +207,181 @@
 pragma solidity 0.8.18;
 
 import {
-    SnapshotsStorageWrapperRead
-} from '../snapshots/SnapshotsStorageWrapperRead.sol';
+    CorporateActionsStorageWrapper_1
+} from '../corporateActions/CorporateActionsStorageWrapper_1.sol';
 import {
-    _SCHEDULED_TASKS_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {LibCommon} from '../common/LibCommon.sol';
-import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
+    ArraysUpgradeable
+} from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
 import {
-    ScheduledTask
-} from '../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
+    CountersUpgradeable
+} from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
+import {
+    ISnapshotsStorageWrapper
+} from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
+import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 
-struct ScheduledTasksDataStorage {
-    mapping(uint256 => ScheduledTask) scheduledTasks;
-    uint256 scheduledTaskCount;
-    bool autoCalling;
-}
+// solhint-disable no-unused-vars, custom-errors
+abstract contract SnapshotsStorageWrapper_1 is
+    ISnapshotsStorageWrapper,
+    CorporateActionsStorageWrapper_1
+{
+    using ArraysUpgradeable for uint256[];
+    using CountersUpgradeable for CountersUpgradeable.Counter;
 
-abstract contract ScheduledTasksCommonRead is SnapshotsStorageWrapperRead {
-    function _getScheduledTaskCount() internal view returns (uint256) {
-        return _scheduledTaskStorage().scheduledTaskCount;
+    // Snapshotted values have arrays of ids and the value corresponding to that id. These could be an array of a
+    // Snapshot struct, but that would impede usage of functions that work on an array.
+    struct Snapshots {
+        uint256[] ids;
+        uint256[] values;
     }
 
-    function _getScheduledTasksByIndex(
-        uint256 _index
-    ) internal view returns (ScheduledTask memory) {
-        return _scheduledTaskStorage().scheduledTasks[_index];
+    struct ListOfPartitions {
+        bytes32[] partitions;
+    }
+    struct PartitionSnapshots {
+        uint256[] ids;
+        ListOfPartitions[] values;
     }
 
-    function _getScheduledTasks(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (ScheduledTask[] memory scheduledTask_) {
-        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
-            _pageIndex,
-            _pageLength
-        );
+    struct SnapshotStorage {
+        // Snapshots for total balances per account
+        mapping(address => Snapshots) accountBalanceSnapshots;
+        // Snapshots for balances per account and partition
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionBalanceSnapshots;
+        // Metadata for partitions associated with each account
+        mapping(address => PartitionSnapshots) accountPartitionMetadata;
+        Snapshots totalSupplySnapshots; // Snapshots for the total supply
+        // Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
+        // Unique ID for the current snapshot
+        CountersUpgradeable.Counter currentSnapshotId;
+        // Snapshots for locked balances per account
+        mapping(address => Snapshots) accountLockedBalanceSnapshots;
+        // Snapshots for locked balances per account and partition
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
+        // Snapshots for the total supply by partition
+        mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
+        mapping(address => Snapshots) accountHeldBalanceSnapshots;
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionHeldBalanceSnapshots;
+        Snapshots abafSnapshots;
+        Snapshots decimals;
+    }
 
-        scheduledTask_ = new ScheduledTask[](
-            LibCommon.getSize(start, end, _getScheduledTaskCount())
-        );
+    event SnapshotTriggered(address indexed operator, uint256 snapshotId);
 
-        for (uint256 i = 0; i < scheduledTask_.length; i++) {
-            scheduledTask_[i] = _getScheduledTasksByIndex(start + i);
+    function _takeSnapshot() internal returns (uint256 snapshotID_) {
+        snapshotID_ = _snapshot();
+        emit SnapshotTaken(_msgSender(), snapshotID_);
+    }
+
+    function _updateDecimalsSnapshot(uint8 decimals) internal {
+        _updateSnapshot(_snapshotStorage().decimals, decimals);
+    }
+
+    function _updateAbafSnapshot(uint256 abaf) internal {
+        _updateSnapshot(_snapshotStorage().abafSnapshots, abaf);
+    }
+
+    function _updateAssetTotalSupplySnapshot(uint256 totalSupply) internal {
+        _updateSnapshot(_snapshotStorage().totalSupplySnapshots, totalSupply);
+    }
+
+    function _snapshot() internal returns (uint256) {
+        _snapshotStorage().currentSnapshotId.increment();
+
+        uint256 currentId = _getCurrentSnapshotId();
+
+        emit SnapshotTriggered(_msgSender(), currentId);
+
+        return currentId;
+    }
+
+    function _getCurrentSnapshotId() internal view returns (uint256) {
+        return _snapshotStorage().currentSnapshotId.current();
+    }
+
+    function _updateSnapshot(
+        Snapshots storage snapshots,
+        uint256 currentValue
+    ) internal {
+        uint256 currentId = _getCurrentSnapshotId();
+        if (_lastSnapshotId(snapshots.ids) < currentId) {
+            snapshots.ids.push(currentId);
+            snapshots.values.push(currentValue);
         }
     }
 
-    function _scheduledTaskStorage()
+    function _updateSnapshotPartitions(
+        Snapshots storage snapshots,
+        PartitionSnapshots storage partitionSnapshots,
+        uint256 currentValueForPartition,
+        // There is a limitation in the number of partitions an account can have, if it has to many the snapshot
+        // transaction will run out of gas
+        bytes32[] memory partitionIds
+    ) internal {
+        uint256 currentId = _getCurrentSnapshotId();
+        if (_lastSnapshotId(snapshots.ids) < currentId) {
+            snapshots.ids.push(currentId);
+            snapshots.values.push(currentValueForPartition);
+        }
+        if (_lastSnapshotId(partitionSnapshots.ids) < currentId) {
+            partitionSnapshots.ids.push(currentId);
+            ListOfPartitions memory listOfPartitions = ListOfPartitions(
+                partitionIds
+            );
+            partitionSnapshots.values.push(listOfPartitions);
+        }
+    }
+
+    function _valueAt(
+        uint256 snapshotId,
+        Snapshots storage snapshots
+    ) internal view returns (bool, uint256) {
+        (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
+
+        return (found, found ? snapshots.values[index] : 0);
+    }
+
+    function _indexFor(
+        uint256 snapshotId,
+        uint256[] storage ids
+    ) internal view returns (bool, uint256) {
+        if (snapshotId == 0) {
+            revert SnapshotIdNull();
+        }
+        if (snapshotId > _getCurrentSnapshotId()) {
+            revert SnapshotIdDoesNotExists(snapshotId);
+        }
+
+        uint256 index = ids.findUpperBound(snapshotId);
+
+        if (index == ids.length) {
+            return (false, 0);
+        } else {
+            return (true, index);
+        }
+    }
+
+    function _lastSnapshotId(
+        uint256[] storage ids
+    ) internal view returns (uint256) {
+        if (ids.length == 0) {
+            return 0;
+        } else {
+            return ids[ids.length - 1];
+        }
+    }
+
+    function _snapshotStorage()
         internal
         pure
         virtual
-        returns (ScheduledTasksDataStorage storage scheduledTasks_)
+        returns (SnapshotStorage storage snapshotStorage_)
     {
-        bytes32 position = _SCHEDULED_TASKS_STORAGE_POSITION;
+        bytes32 position = _SNAPSHOT_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            scheduledTasks_.slot := position
+            snapshotStorage_.slot := position
         }
     }
 }
+// solhint-enable no-unused-vars, custom-errors

@@ -203,143 +203,352 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
+import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {Common} from '../common/Common.sol';
-import {ILockStorageWrapper} from '../interfaces/lock/ILockStorageWrapper.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+    ISnapshotsStorageWrapper
+} from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
+import {
+    ArraysUpgradeable
+} from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
+import {
+    CountersUpgradeable
+} from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
+import {
+    ERC20StorageWrapper_2
+} from '../ERC1400/ERC20/ERC20StorageWrapper_2.sol';
 
-abstract contract LockStorageWrapper is ILockStorageWrapper, Common {
-    using EnumerableSet for EnumerableSet.UintSet;
-
-    function _lockByPartition(
-        bytes32 _partition,
-        uint256 _amount,
-        address _tokenHolder,
-        uint256 _expirationTimestamp
-    ) internal virtual returns (bool success_, uint256 lockId_) {
-        _updateLockedBalancesBeforeLock(
-            _partition,
-            _amount,
-            _tokenHolder,
-            _expirationTimestamp
-        );
-        _reduceBalanceByPartition(_tokenHolder, _amount, _partition);
-
-        LockDataStorage storage lockStorage = _lockStorage();
-
-        lockId_ = ++lockStorage.nextLockIdByAccountAndPartition[_tokenHolder][
-            _partition
-        ];
-
-        LockData memory lock = LockData(lockId_, _amount, _expirationTimestamp);
-
-        lockStorage.locksByAccountAndPartition[_tokenHolder][_partition].push(
-            lock
-        );
-        lockStorage.lockIdsByAccountAndPartition[_tokenHolder][_partition].add(
-            lockId_
-        );
-        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
-            lockId_
-        ] = lockStorage
-        .locksByAccountAndPartition[_tokenHolder][_partition].length;
-        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
-            _partition
-        ] += _amount;
-        lockStorage.totalLockedAmountByAccount[_tokenHolder] += _amount;
-
-        success_ = true;
+// solhint-disable no-unused-vars, custom-errors
+abstract contract SnapshotsStorageWrapper_2 is
+    ISnapshotsStorageWrapper,
+    ERC20StorageWrapper_2
+{
+    function _updateABAFSnapshot() internal virtual {
+        _updateSnapshot(_snapshotStorage().abafSnapshots, _getAbaf());
     }
 
-    function _releaseByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) internal virtual returns (bool success_) {
-        _updateLockedBalancesBeforeRelease(_partition, _lockId, _tokenHolder);
-        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
+    function _updateDecimalsSnapshot() internal virtual {
+        _updateSnapshot(_snapshotStorage().decimals, _decimals());
+    }
 
-        LockDataStorage storage lockStorage = _lockStorage();
-        LockData memory lock = lockStorage.locksByAccountAndPartition[
-            _tokenHolder
-        ][_partition][lockIndex - 1];
+    function _updateAssetTotalSupplySnapshot() internal virtual {
+        _updateSnapshot(
+            _snapshotStorage().totalSupplySnapshots,
+            _totalSupply()
+        );
+    }
 
-        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
-            _partition
-        ] -= lock.amount;
-        lockStorage.totalLockedAmountByAccount[_tokenHolder] -= lock.amount;
-        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
-            lock.id
-        ] = 0;
-        lockStorage
-        .lockIdsByAccountAndPartition[_tokenHolder][_partition].remove(lock.id);
+    // Update balance and/or total supply snapshots before the values are modified. This is implemented
+    // in the _beforeTokenTransfer hook, which is executed for _mint, _burn, and _transfer operations.
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    ) internal override {
+        uint256 currentSnapshotId = _getCurrentSnapshotId();
 
-        uint256 lastIndex = _getLockCountForByPartition(
-            _partition,
-            _tokenHolder
+        if (currentSnapshotId == 0) return;
+
+        uint256 ABAFAtCurrentSnapshot = _AbafAtSnapshot(currentSnapshotId);
+        uint256 abaf = _getAbafAdjusted();
+
+        if (abaf == ABAFAtCurrentSnapshot) {
+            _updateAccountSnapshot(
+                _snapshotStorage().accountBalanceSnapshots[account],
+                _balanceOf(account),
+                _snapshotStorage().accountPartitionBalanceSnapshots[account][
+                    partition
+                ],
+                _snapshotStorage().accountPartitionMetadata[account],
+                _balanceOfByPartition(partition, account),
+                _partitionsOf(account)
+            );
+            return;
+        }
+        if (ABAFAtCurrentSnapshot == 0) ABAFAtCurrentSnapshot = 1;
+
+        uint256 balance = _balanceOfAdjusted(account);
+        uint256 balanceForPartition = _balanceOfByPartitionAdjusted(
+            partition,
+            account
+        );
+        uint256 factor = abaf / ABAFAtCurrentSnapshot;
+
+        balance /= factor;
+        balanceForPartition /= factor;
+
+        _updateAccountSnapshot(
+            _snapshotStorage().accountBalanceSnapshots[account],
+            balance,
+            _snapshotStorage().accountPartitionBalanceSnapshots[account][
+                partition
+            ],
+            _snapshotStorage().accountPartitionMetadata[account],
+            balanceForPartition,
+            _partitionsOf(account)
+        );
+    }
+
+    function _updateAccountSnapshot(
+        Snapshots storage balanceSnapshots,
+        uint256 currentValue,
+        Snapshots storage partitionBalanceSnapshots,
+        PartitionSnapshots storage partitionSnapshots,
+        uint256 currentValueForPartition,
+        bytes32[] memory partitionIds
+    ) internal {
+        _updateSnapshot(balanceSnapshots, currentValue);
+        _updateSnapshotPartitions(
+            partitionBalanceSnapshots,
+            partitionSnapshots,
+            currentValueForPartition,
+            partitionIds
+        );
+    }
+
+    function _updateAccountLockedBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal {
+        _updateSnapshot(
+            _snapshotStorage().accountLockedBalanceSnapshots[account],
+            _getLockedAmountFor(account)
+        );
+        _updateSnapshot(
+            _snapshotStorage().accountPartitionLockedBalanceSnapshots[account][
+                partition
+            ],
+            _getLockedAmountForByPartition(partition, account)
+        );
+    }
+
+    function _updateAccountHeldBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual {
+        _updateSnapshot(
+            _snapshotStorage().accountHeldBalanceSnapshots[account],
+            _getHeldAmountFor(account)
+        );
+        _updateSnapshot(
+            _snapshotStorage().accountPartitionHeldBalanceSnapshots[account][
+                partition
+            ],
+            _getHeldAmountForByPartition(partition, account)
+        );
+    }
+
+    function _updateTotalSupplySnapshot(bytes32 partition) internal override {
+        _updateSnapshot(
+            _snapshotStorage().totalSupplySnapshots,
+            _totalSupply()
+        );
+        _updateSnapshot(
+            _snapshotStorage().totalSupplyByPartitionSnapshots[partition],
+            _totalSupplyByPartition(partition)
+        );
+    }
+
+    function _AbafAtSnapshot(
+        uint256 _snapshotID
+    ) internal view returns (uint256 ABAF_) {
+        (bool snapshotted, uint256 value) = _valueAt(
+            _snapshotID,
+            _snapshotStorage().abafSnapshots
         );
 
-        if (lockIndex < lastIndex) {
-            LockData memory lastLock = lockStorage.locksByAccountAndPartition[
-                _tokenHolder
-            ][_partition][lastIndex - 1];
-            _setLockAtIndex(_partition, _tokenHolder, lockIndex, lastLock);
+        return snapshotted ? value : _getAbaf();
+    }
+
+    function _decimalsAtSnapshot(
+        uint256 _snapshotID
+    ) internal view returns (uint8 decimals_) {
+        (bool snapshotted, uint256 value) = _valueAt(
+            _snapshotID,
+            _snapshotStorage().decimals
+        );
+
+        return snapshotted ? uint8(value) : _decimalsAdjusted();
+    }
+
+    function _balanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return _balanceOfAt(_tokenHolder, _snapshotID);
+    }
+
+    function _balanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return _balanceOfAtByPartition(_partition, _tokenHolder, _snapshotID);
+    }
+
+    function _partitionsOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (bytes32[] memory) {
+        PartitionSnapshots storage partitionSnapshots = _snapshotStorage()
+            .accountPartitionMetadata[_tokenHolder];
+
+        (bool found, uint256 index) = _indexFor(
+            _snapshotID,
+            partitionSnapshots.ids
+        );
+
+        if (!found) {
+            return _partitionsOf(_tokenHolder);
         }
 
-        lockStorage.locksByAccountAndPartition[_tokenHolder][_partition].pop();
-
-        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
-            _addPartitionTo(lock.amount, _tokenHolder, _partition);
-        } else {
-            _increaseBalanceByPartition(_tokenHolder, lock.amount, _partition);
-        }
-
-        //_increaseBalanceByPartition(_tokenHolder, lock.amount, _partition);
-
-        success_ = true;
-    }
-    // solhint-disable no-unused-vars
-    function _updateLockedBalancesBeforeLock(
-        bytes32 _partition,
-        uint256 _amount,
-        address _tokenHolder,
-        uint256 _expirationTimestamp
-    ) internal virtual {
-        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
+        return partitionSnapshots.values[index].partitions;
     }
 
-    function _updateLockedBalancesBeforeRelease(
+    function _totalSupplyAtSnapshot(
+        uint256 _snapshotID
+    ) internal view returns (uint256 totalSupply_) {
+        return _totalSupplyAt(_snapshotID);
+    }
+
+    function _balanceOfAt(
+        address account,
+        uint256 snapshotId
+    ) internal view returns (uint256) {
+        return
+            _balanceOfAt_Adjusted(
+                snapshotId,
+                _snapshotStorage().accountBalanceSnapshots[account],
+                _balanceOfAdjusted(account)
+            );
+    }
+
+    function _balanceOfAtByPartition(
         bytes32 _partition,
-        uint256 _lockId,
+        address account,
+        uint256 snapshotId
+    ) internal view returns (uint256) {
+        return
+            _balanceOfAt_Adjusted(
+                snapshotId,
+                _snapshotStorage().accountPartitionBalanceSnapshots[account][
+                    _partition
+                ],
+                _balanceOfByPartitionAdjusted(_partition, account)
+            );
+    }
+
+    function _totalSupplyAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID
+    ) internal view returns (uint256 totalSupply_) {
+        return
+            _balanceOfAt_Adjusted(
+                _snapshotID,
+                _snapshotStorage().totalSupplyByPartitionSnapshots[_partition],
+                _totalSupplyByPartitionAdjusted(_partition)
+            );
+    }
+
+    function _lockedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
         address _tokenHolder
-    ) internal virtual {
-        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
+    ) internal view returns (uint256 balance_) {
+        return
+            _balanceOfAt_Adjusted(
+                _snapshotID,
+                _snapshotStorage().accountLockedBalanceSnapshots[_tokenHolder],
+                _getLockedAmountForAdjustedAt(_tokenHolder, _blockTimestamp())
+            );
     }
-    // solhint-enable no-unused-vars
-    function _setLockAtIndex(
+
+    function _lockedBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockIndex,
-        LockData memory lock
-    ) internal virtual {
-        LockDataStorage storage lockStorage = _lockStorage();
-
-        lockStorage
-        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
-            .id = lock.id;
-        lockStorage
-        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
-            .amount = lock.amount;
-        lockStorage
-        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
-            .expirationTimestamp = lock.expirationTimestamp;
-
-        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
-            lock.id
-        ] = _lockIndex;
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            _balanceOfAt_Adjusted(
+                _snapshotID,
+                _snapshotStorage().accountPartitionLockedBalanceSnapshots[
+                    _tokenHolder
+                ][_partition],
+                _getLockedAmountForByPartitionAdjustedAt(
+                    _partition,
+                    _tokenHolder,
+                    _blockTimestamp()
+                )
+            );
     }
+
+    function _heldBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_) {
+        return
+            _balanceOfAt_Adjusted(
+                _snapshotID,
+                _snapshotStorage().accountHeldBalanceSnapshots[_tokenHolder],
+                _getHeldAmountForAdjusted(_tokenHolder)
+            );
+    }
+
+    function _heldBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 balance_) {
+        return
+            _balanceOfAt_Adjusted(
+                _snapshotID,
+                _snapshotStorage().accountPartitionHeldBalanceSnapshots[
+                    _tokenHolder
+                ][_partition],
+                _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder)
+            );
+    }
+
+    function _balanceOfAt_Adjusted(
+        uint256 _snapshotId,
+        Snapshots storage _snapshots,
+        uint256 _currentBalanceAdjusted
+    ) internal view virtual returns (uint256) {
+        (bool snapshotted, uint256 value) = _valueAt(_snapshotId, _snapshots);
+        if (snapshotted) return value;
+
+        uint256 ABAFAtSnapshot = _AbafAtSnapshot(_snapshotId);
+        uint256 abaf = _getAbaf();
+
+        if (ABAFAtSnapshot == abaf) return _currentBalanceAdjusted;
+        if (ABAFAtSnapshot == 0) ABAFAtSnapshot = 1;
+
+        uint256 factor = abaf / ABAFAtSnapshot;
+
+        return _currentBalanceAdjusted / factor;
+    }
+
+    /**
+     * @dev Retrieves the total supply at the time `snapshotId` was created.
+     */
+    function _totalSupplyAt(
+        uint256 snapshotId
+    ) internal view returns (uint256) {
+        (bool snapshotted, uint256 value) = _valueAt(
+            snapshotId,
+            _snapshotStorage().totalSupplySnapshots
+        );
+
+        return snapshotted ? value : _totalSupply();
+    }
+
+    function _getHeldAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_);
+
+    function _getHeldAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_);
 }
+// solhint-enable no-unused-vars, custom-errors

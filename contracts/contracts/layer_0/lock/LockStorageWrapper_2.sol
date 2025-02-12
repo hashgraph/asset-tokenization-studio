@@ -204,70 +204,165 @@
 */
 
 pragma solidity 0.8.18;
+
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    ILockStorageWrapper
+} from '../../layer_1/interfaces/lock/ILockStorageWrapper.sol';
+import {
+    CorporateActionsStorageWrapper_2
+} from '../corporateActions/CorporateActionsStorageWrapper_2.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {MappingLib} from '../common/MappingLib.sol';
-import {
-    _ADJUST_BALANCES_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {HoldStorageWrapper_2} from '../hold/HoldStorageWrapper_2.sol';
-import {
-    IAdjustBalancesStorageWrapper
-} from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+abstract contract LockStorageWrapper_2 is CorporateActionsStorageWrapper_2 {
+    using EnumerableSet for EnumerableSet.UintSet;
 
-abstract contract AdjustBalancesStorageWrapper_2 is
-    IAdjustBalancesStorageWrapper,
-    HoldStorageWrapper_2
-{
-    // solhint-disable no-unused-vars
-    function _adjustBalances(uint256 _factor, uint8 _decimals) internal {
-        _beforeBalanceAdjustment();
-        _adjustTotalSupply(_factor);
-        _adjustDecimals(_decimals);
-        _adjustMaxSupply(_factor);
-        _updateAbaf(_factor);
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
-    }
-
-    // solhint-disable no-unused-vars
-    function _beforeBalanceAdjustment() internal virtual {
-        _updateDecimalsSnapshot(_decimals());
-        _updateAbafSnapshot(_getAbaf());
-        _updateAssetTotalSupplySnapshot(_totalSupply());
-    }
-
-    function _getHoldLabafByPartition(
+    function _lockByPartition(
         bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) internal view override returns (uint256) {
-        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
-        if (holdIndex == 0) return 0;
-        return _getHoldLabafByIndex(_partition, _tokenHolder, holdIndex);
+        uint256 _amount,
+        address _tokenHolder,
+        uint256 _expirationTimestamp
+    ) internal virtual returns (bool success_, uint256 lockId_) {
+        _triggerAndSyncAll(_partition, _tokenHolder, address(0));
+
+        uint256 abaf = _updateTotalLock(
+            _partition,
+            _tokenHolder,
+            adjustBalancesStorage
+        );
+
+        _pushLabafLocks(_partition, _tokenHolder, abaf);
+
+        _updateLockedBalancesBeforeLock(
+            _partition,
+            _amount,
+            _tokenHolder,
+            _expirationTimestamp
+        );
+        _reduceBalanceByPartition(_tokenHolder, _amount, _partition);
+
+        LockDataStorage storage lockStorage = _lockStorage();
+
+        lockId_ = ++lockStorage.nextLockIdByAccountAndPartition[_tokenHolder][
+            _partition
+        ];
+
+        LockData memory lock = LockData(lockId_, _amount, _expirationTimestamp);
+
+        lockStorage.locksByAccountAndPartition[_tokenHolder][_partition].push(
+            lock
+        );
+        lockStorage.lockIdsByAccountAndPartition[_tokenHolder][_partition].add(
+            lockId_
+        );
+        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
+            lockId_
+        ] = lockStorage
+        .locksByAccountAndPartition[_tokenHolder][_partition].length;
+        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
+            _partition
+        ] += _amount;
+        lockStorage.totalLockedAmountByAccount[_tokenHolder] += _amount;
+
+        success_ = true;
     }
 
-    function _getLockLabafByPartition(
+    function _releaseByPartition(
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) internal view returns (uint256) {
+    ) internal virtual returns (bool success_) {
+        _triggerAndSyncAll(_partition, address(0), _tokenHolder);
+
+        uint256 abaf = _updateTotalLock(
+            _partition,
+            _tokenHolder,
+            adjustBalancesStorage
+        );
+
+        _updateLockByIndex(_partition, _lockId, _tokenHolder, abaf);
+
+        _updateLockedBalancesBeforeRelease(_partition, _lockId, _tokenHolder);
         uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
-        if (lockIndex == 0) return 0;
-        return _getLockLabafByIndex(_partition, _tokenHolder, lockIndex);
+
+        LockDataStorage storage lockStorage = _lockStorage();
+        LockData memory lock = lockStorage.locksByAccountAndPartition[
+            _tokenHolder
+        ][_partition][lockIndex - 1];
+
+        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
+            _partition
+        ] -= lock.amount;
+        lockStorage.totalLockedAmountByAccount[_tokenHolder] -= lock.amount;
+        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
+            lock.id
+        ] = 0;
+        lockStorage
+        .lockIdsByAccountAndPartition[_tokenHolder][_partition].remove(lock.id);
+
+        uint256 lastIndex = _getLockCountForByPartition(
+            _partition,
+            _tokenHolder
+        );
+
+        if (lockIndex < lastIndex) {
+            LockData memory lastLock = lockStorage.locksByAccountAndPartition[
+                _tokenHolder
+            ][_partition][lastIndex - 1];
+            _setLockAtIndex(_partition, _tokenHolder, lockIndex, lastLock);
+        }
+
+        lockStorage.locksByAccountAndPartition[_tokenHolder][_partition].pop();
+
+        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
+            _addPartitionTo(lock.amount, _tokenHolder, _partition);
+        } else {
+            _increaseBalanceByPartition(_tokenHolder, lock.amount, _partition);
+        }
+
+        success_ = true;
+        _popLabafLock(_partition, _tokenHolder);
+    }
+    // solhint-disable no-unused-vars
+    function _updateLockedBalancesBeforeLock(
+        bytes32 _partition,
+        uint256 _amount,
+        address _tokenHolder,
+        uint256 _expirationTimestamp
+    ) internal virtual {
+        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }
 
-    function _getLabafByUserAndPartition(
+    function _updateLockedBalancesBeforeRelease(
         bytes32 _partition,
-        address _account
-    ) internal view override returns (uint256) {
-        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
-            _account
-        ][_partition];
+        uint256 _lockId,
+        address _tokenHolder
+    ) internal virtual {
+        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
+    }
+    // solhint-enable no-unused-vars
+    function _setLockAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex,
+        LockData memory lock
+    ) internal virtual {
+        LockDataStorage storage lockStorage = _lockStorage();
 
-        if (partitionsIndex == 0) return 0;
-        return
-            _getAdjustBalancesStorage().labafUserPartition[_account][
-                partitionsIndex - 1
-            ];
+        lockStorage
+        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
+            .id = lock.id;
+        lockStorage
+        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
+            .amount = lock.amount;
+        lockStorage
+        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
+            .expirationTimestamp = lock.expirationTimestamp;
+
+        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
+            lock.id
+        ] = _lockIndex;
     }
 }

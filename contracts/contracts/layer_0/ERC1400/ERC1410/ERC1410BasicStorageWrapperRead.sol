@@ -214,11 +214,11 @@ import {
     _ERC1410_BASIC_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {_DEFAULT_PARTITION} from '../../constants/values.sol';
-import {LockStorageWrapperRead} from '../../lock/LockStorageWrapperRead.sol';
+import {LockStorageWrapper_1} from '../../lock/LockStorageWrapper_1.sol';
 
 contract ERC1410BasicStorageWrapperRead is
     IERC1410StorageWrapper,
-    LockStorageWrapperRead
+    LockStorageWrapper_1
 {
     // Represents a fungible set of tokens.
     struct Partition {
@@ -332,22 +332,6 @@ contract ERC1410BasicStorageWrapperRead is
 
         erc1410Storage.partitions[_from][index].amount += _value;
         erc1410Storage.balances[_from] += _value;
-    }
-
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    ) internal {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
-
-        erc1410Storage.partitions[_account].push(Partition(_value, _partition));
-        erc1410Storage.partitionToIndex[_account][
-            _partition
-        ] = _getERC1410BasicStorage().partitions[_account].length;
-
-        if (_value != 0) erc1410Storage.balances[_account] += _value;
-        _pushLabafUserPartition(_account);
     }
 
     function _totalSupply() internal view returns (uint256) {

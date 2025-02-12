@@ -206,124 +206,116 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-//import {
-//    IStaticFunctionSelectors
-//} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-//import {Common} from '../../../layer_1/common/Common.sol';
-//import {_SCHEDULED_TASKS_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-//import {
-//    CorporateActionsStorageWrapperSecurity
-//} from '../../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
-//import {
-//    IScheduledTasks
-//} from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
-//import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-//import {
-//    EnumerableSet
-//} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-//
-//contract ScheduledTasks is
-//    IStaticFunctionSelectors,
-//    IScheduledTasks,
-//    Common,
-//    CorporateActionsStorageWrapperSecurity
-//{
-//    using EnumerableSet for EnumerableSet.Bytes32Set;
-//
-//    // solhint-disable no-unused-vars
-//    function onScheduledTaskTriggered(
-//        uint256 _pos,
-//        uint256 _scheduledTasksLength,
-//        bytes memory _data
-//    ) external virtual override onlyAutoCalling(_scheduledTaskStorage()) {
-//        _onScheduledTaskTriggered(_data);
-//    } // solhint-enable no-unused-vars
-//
-//    function triggerPendingScheduledTasks()
-//        external
-//        virtual
-//        override
-//        onlyUnpaused
-//        returns (uint256)
-//    {
-//        return _triggerScheduledTasks(0);
-//    }
-//
-//    function triggerScheduledTasks(
-//        uint256 _max
-//    ) external virtual override onlyUnpaused returns (uint256) {
-//        return _triggerScheduledTasks(_max);
-//    }
-//
-//    function scheduledTaskCount()
-//        external
-//        view
-//        virtual
-//        override
-//        returns (uint256)
-//    {
-//        return _getScheduledTaskCount();
-//    }
-//
-//    function getScheduledTasks(
-//        uint256 _pageIndex,
-//        uint256 _pageLength
-//    )
-//        external
-//        view
-//        virtual
-//        override
-//        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
-//    {
-//        scheduledTask_ = _getScheduledTasks(_pageIndex, _pageLength);
-//    }
-//
-//    function getStaticResolverKey()
-//        external
-//        pure
-//        virtual
-//        override
-//        returns (bytes32 staticResolverKey_)
-//    {
-//        staticResolverKey_ = _SCHEDULED_TASKS_RESOLVER_KEY;
-//    }
-//
-//    function getStaticFunctionSelectors()
-//        external
-//        pure
-//        virtual
-//        override
-//        returns (bytes4[] memory staticFunctionSelectors_)
-//    {
-//        uint256 selectorIndex;
-//        staticFunctionSelectors_ = new bytes4[](5);
-//        staticFunctionSelectors_[selectorIndex++] = this
-//            .triggerPendingScheduledTasks
-//            .selector;
-//        staticFunctionSelectors_[selectorIndex++] = this
-//            .triggerScheduledTasks
-//            .selector;
-//        staticFunctionSelectors_[selectorIndex++] = this
-//            .scheduledTaskCount
-//            .selector;
-//        staticFunctionSelectors_[selectorIndex++] = this
-//            .getScheduledTasks
-//            .selector;
-//        staticFunctionSelectors_[selectorIndex++] = this
-//            .onScheduledTaskTriggered
-//            .selector;
-//    }
-//
-//    function getStaticInterfaceIds()
-//        external
-//        pure
-//        virtual
-//        override
-//        returns (bytes4[] memory staticInterfaceIds_)
-//    {
-//        staticInterfaceIds_ = new bytes4[](1);
-//        uint256 selectorsIndex;
-//        staticInterfaceIds_[selectorsIndex++] = type(IScheduledTasks)
-//            .interfaceId;
-//    }
-//}
+import {
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
+import {_SCHEDULED_TASKS_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
+import {
+    IScheduledTasks
+} from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
+import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+
+contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    // solhint-disable no-unused-vars
+    function onScheduledTaskTriggered(
+        uint256 _pos,
+        uint256 _scheduledTasksLength,
+        bytes memory _data
+    ) external virtual override onlyAutoCalling(_scheduledTaskStorage()) {
+        _onScheduledTaskTriggered(_data);
+    } // solhint-enable no-unused-vars
+
+    function triggerPendingScheduledTasks()
+        external
+        virtual
+        override
+        onlyUnpaused
+        returns (uint256)
+    {
+        return _triggerScheduledTasks(0);
+    }
+
+    function triggerScheduledTasks(
+        uint256 _max
+    ) external virtual override onlyUnpaused returns (uint256) {
+        return _triggerScheduledTasks(_max);
+    }
+
+    function scheduledTaskCount()
+        external
+        view
+        virtual
+        override
+        returns (uint256)
+    {
+        return _getScheduledTaskCount();
+    }
+
+    function getScheduledTasks(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        external
+        view
+        virtual
+        override
+        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
+    {
+        scheduledTask_ = _getScheduledTasks(_pageIndex, _pageLength);
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _SCHEDULED_TASKS_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .triggerPendingScheduledTasks
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .triggerScheduledTasks
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .scheduledTaskCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getScheduledTasks
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .onScheduledTaskTriggered
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IScheduledTasks)
+            .interfaceId;
+    }
+}

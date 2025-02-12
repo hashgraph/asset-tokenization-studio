@@ -206,43 +206,193 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {_ERC20_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
+import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {
     IERC20StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';
 import {
-    ERC1410BasicStorageWrapperRead
-} from '../ERC1410/ERC1410BasicStorageWrapperRead.sol';
+    ERC1410StandardStorageWrapper
+} from '../ERC1410/ERC1410StandardStorageWrapper.sol';
 
-abstract contract ERC20StorageWrapperRead is ERC1410BasicStorageWrapperRead {
-    struct ERC20Storage {
-        string name;
-        string symbol;
-        string isin;
-        uint8 decimals;
-        bool initialized;
-        mapping(address => mapping(address => uint256)) allowed;
-        IERC20StorageWrapper.SecurityType securityType;
+abstract contract ERC20StorageWrapper_2 is
+    IERC20StorageWrapper,
+    ERC1410StandardStorageWrapper
+{
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
+        uint256 _amount,
+        bool _isIncrease
+    ) internal virtual {
+        _triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
+
+        _updateAllowanceAndLabaf(_owner, _spender);
     }
 
-    function _adjustDecimals(uint8 decimals) internal {
-        _getErc20Storage().decimals += decimals;
+    function _updateAllowanceAndLabaf(
+        address _owner,
+        address _spender
+    ) internal virtual {
+        uint256 abaf = _getAbaf();
+        uint256 labaf = _getAllowanceLabaf(_owner, _spender);
+
+        if (abaf == labaf) return;
+
+        uint256 factor = _calculateFactor(abaf, labaf);
+
+        _getErc20Storage().allowed[_owner][_spender] *= factor;
+        _updateAllowanceLabaf(_owner, _spender, abaf);
     }
 
-    function _decimals() internal view returns (uint8) {
-        return _getErc20Storage().decimals;
-    }
-
-    function _getErc20Storage()
-        internal
-        view
-        virtual
-        returns (ERC20Storage storage erc20Storage_)
-    {
-        bytes32 position = _ERC20_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            erc20Storage_.slot := position
+    function _approve(
+        address spender,
+        uint256 value
+    ) internal virtual returns (bool) {
+        if (spender == address(0)) {
+            revert SpenderWithZeroAddress();
         }
+
+        _getErc20Storage().allowed[_msgSender()][spender] = value;
+        emit Approval(_msgSender(), spender, value);
+        return true;
+    }
+
+    /**
+     * @dev Increase the amount of tokens that an owner allowed to a spender.
+     * approve should be called when allowed_[_spender] == 0. To increment
+     * allowed value is better to use this function to avoid 2 calls (and wait until
+     * the first transaction is mined)
+     * From MonolithDAO Token.sol
+     * @param spender The address which will spend the funds.
+     * @param addedValue The amount of tokens to increase the allowance by.
+     */
+    function _increaseAllowance(
+        address spender,
+        uint256 addedValue
+    ) internal virtual returns (bool) {
+        if (spender == address(0)) {
+            revert SpenderWithZeroAddress();
+        }
+        _beforeAllowanceUpdate(_msgSender(), spender, addedValue, true);
+
+        _getErc20Storage().allowed[_msgSender()][spender] += addedValue;
+        emit Approval(
+            _msgSender(),
+            spender,
+            _getErc20Storage().allowed[_msgSender()][spender]
+        );
+        return true;
+    }
+
+    /**
+     * @dev Decrease the amount of tokens that an owner allowed to a spender.
+     * approve should be called when allowed_[_spender] == 0. To decrement
+     * allowed value is better to use this function to avoid 2 calls (and wait until
+     * the first transaction is mined)
+     * From MonolithDAO Token.sol
+     * @param spender The address which will spend the funds.
+     * @param subtractedValue The amount of tokens to decrease the allowance by.
+     */
+    function _decreaseAllowance(
+        address spender,
+        uint256 subtractedValue
+    ) internal virtual returns (bool) {
+        if (spender == address(0)) {
+            revert SpenderWithZeroAddress();
+        }
+        _decreaseAllowedBalance(_msgSender(), spender, subtractedValue);
+        emit Approval(
+            _msgSender(),
+            spender,
+            _getErc20Storage().allowed[_msgSender()][spender]
+        );
+        return true;
+    }
+
+    function _transferFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual returns (bool) {
+        _decreaseAllowedBalance(from, spender, value);
+        bytes memory data;
+        _transferByPartition(
+            from,
+            to,
+            value,
+            _DEFAULT_PARTITION,
+            data,
+            spender,
+            ''
+        );
+        return _emitTransferEvent(from, to, value);
+    }
+
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual returns (bool) {
+        _transferByPartition(
+            from,
+            to,
+            value,
+            _DEFAULT_PARTITION,
+            '',
+            address(0),
+            ''
+        );
+        return _emitTransferEvent(from, to, value);
+    }
+
+    function _mint(address to, uint256 value) internal virtual {
+        bytes memory _data;
+        _issueByPartition(_DEFAULT_PARTITION, to, value, _data);
+        _emitTransferEvent(address(0), to, value);
+    }
+
+    function _burn(address from, uint256 value) internal virtual {
+        bytes memory _data;
+        _redeemByPartition(
+            _DEFAULT_PARTITION,
+            from,
+            address(0),
+            value,
+            _data,
+            _data
+        );
+        _emitTransferEvent(from, address(0), value);
+    }
+
+    function _burnFrom(address account, uint256 value) internal virtual {
+        _decreaseAllowedBalance(account, _msgSender(), value);
+        _burn(account, value);
+    }
+
+    function _decreaseAllowedBalance(
+        address from,
+        address spender,
+        uint256 value
+    ) internal {
+        _beforeAllowanceUpdate(from, spender, value, false);
+
+        ERC20Storage storage erc20Storage = _getErc20Storage();
+
+        if (value > erc20Storage.allowed[from][spender]) {
+            revert InsufficientAllowance(spender, from);
+        }
+
+        erc20Storage.allowed[from][spender] -= value;
+    }
+
+    function _emitTransferEvent(
+        address from,
+        address to,
+        uint256 value
+    ) private returns (bool) {
+        emit Transfer(from, to, value);
+        return true;
     }
 }

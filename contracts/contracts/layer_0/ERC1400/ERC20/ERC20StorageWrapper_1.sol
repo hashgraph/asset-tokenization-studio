@@ -203,71 +203,126 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {MappingLib} from '../common/MappingLib.sol';
+import {_ERC20_STORAGE_POSITION} from '../../constants/storagePositions.sol';
 import {
-    _ADJUST_BALANCES_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {HoldStorageWrapper_2} from '../hold/HoldStorageWrapper_2.sol';
+    IERC20StorageWrapper
+} from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';
+import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {
-    IAdjustBalancesStorageWrapper
-} from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+    ERC1410BasicStorageWrapperRead
+} from '../ERC1410/ERC1410BasicStorageWrapperRead.sol';
 
-abstract contract AdjustBalancesStorageWrapper_2 is
-    IAdjustBalancesStorageWrapper,
-    HoldStorageWrapper_2
-{
-    // solhint-disable no-unused-vars
-    function _adjustBalances(uint256 _factor, uint8 _decimals) internal {
-        _beforeBalanceAdjustment();
-        _adjustTotalSupply(_factor);
-        _adjustDecimals(_decimals);
-        _adjustMaxSupply(_factor);
-        _updateAbaf(_factor);
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
+abstract contract ERC20StorageWrapper_1 is ERC1410BasicStorageWrapperRead {
+    struct ERC20Storage {
+        string name;
+        string symbol;
+        string isin;
+        uint8 decimals;
+        bool initialized;
+        mapping(address => mapping(address => uint256)) allowed;
+        IERC20StorageWrapper.SecurityType securityType;
     }
 
-    // solhint-disable no-unused-vars
-    function _beforeBalanceAdjustment() internal virtual {
-        _updateDecimalsSnapshot(_decimals());
-        _updateAbafSnapshot(_getAbaf());
-        _updateAssetTotalSupplySnapshot(_totalSupply());
+    function _adjustDecimals(uint8 decimals) internal {
+        _getErc20Storage().decimals += decimals;
     }
 
-    function _getHoldLabafByPartition(
-        bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) internal view override returns (uint256) {
-        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
-        if (holdIndex == 0) return 0;
-        return _getHoldLabafByIndex(_partition, _tokenHolder, holdIndex);
+    function _decimalsAdjusted() internal view virtual returns (uint8) {
+        return _decimalsAdjustedAt(_blockTimestamp());
     }
 
-    function _getLockLabafByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) internal view returns (uint256) {
-        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
-        if (lockIndex == 0) return 0;
-        return _getLockLabafByIndex(_partition, _tokenHolder, lockIndex);
+    function _allowanceAdjusted(
+        address _owner,
+        address _spender
+    ) internal view virtual returns (uint256) {
+        return _allowanceAdjustedAt(_owner, _spender, _blockTimestamp());
     }
 
-    function _getLabafByUserAndPartition(
-        bytes32 _partition,
-        address _account
-    ) internal view override returns (uint256) {
-        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
-            _account
-        ][_partition];
+    function _allowance(
+        address owner,
+        address spender
+    ) internal view virtual returns (uint256) {
+        return _getErc20Storage().allowed[owner][spender];
+    }
 
-        if (partitionsIndex == 0) return 0;
-        return
-            _getAdjustBalancesStorage().labafUserPartition[_account][
-                partitionsIndex - 1
-            ];
+    function _decimalsAdjustedAt(
+        uint256 _timestamp
+    ) internal view virtual returns (uint8) {
+        return _getERC20MetadataAdjustedAt(_timestamp).info.decimals;
+    }
+
+    function _allowanceAdjustedAt(
+        address _owner,
+        address _spender,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
+        uint256 factor = _calculateFactor(
+            _getAbafAdjustedAt(_timestamp),
+            _getAllowanceLabaf(_owner, _spender)
+        );
+        return _allowance(_owner, _spender) * factor;
+    }
+
+    function _getERC20MetadataAdjusted()
+        internal
+        view
+        virtual
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+    {
+        erc20Metadata_ = _getERC20MetadataAdjustedAt(_blockTimestamp());
+    }
+
+    function _getERC20MetadataAdjustedAt(
+        uint256 _timestamp
+    )
+        internal
+        view
+        virtual
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+    {
+        (, uint8 pendingDecimals) = _getPendingScheduledBalanceAdjustmentsAt(
+            _timestamp
+        );
+        erc20Metadata_ = _getERC20Metadata();
+        erc20Metadata_.info.decimals += pendingDecimals;
+    }
+
+    function _getERC20Metadata()
+        internal
+        view
+        virtual
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+    {
+        ERC20Storage storage erc20Storage = _getErc20Storage();
+        IERC20.ERC20MetadataInfo memory erc20Info = IERC20.ERC20MetadataInfo({
+            name: erc20Storage.name,
+            symbol: erc20Storage.symbol,
+            isin: erc20Storage.isin,
+            decimals: erc20Storage.decimals
+        });
+        erc20Metadata_ = IERC20.ERC20Metadata({
+            info: erc20Info,
+            securityType: erc20Storage.securityType
+        });
+    }
+
+    function _decimals() internal view returns (uint8) {
+        return _getErc20Storage().decimals;
+    }
+
+    function _getErc20Storage()
+        internal
+        view
+        virtual
+        returns (ERC20Storage storage erc20Storage_)
+    {
+        bytes32 position = _ERC20_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            erc20Storage_.slot := position
+        }
     }
 }

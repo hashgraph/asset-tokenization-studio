@@ -203,38 +203,69 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-// TODO: Remove _ in contract name
-// solhint-disable contract-name-camelcase, avoid-low-level-calls, no-inline-assembly
-library CD_Lib {
-    function delegateCall(
-        bytes memory encodedCallData
-    ) internal returns (bytes memory) {
-        (bool success, bytes memory data) = address(this).delegatecall(
-            encodedCallData
-        );
-        checkSuccess(success, data);
-        return data;
+
+interface IBond {
+    struct BondDetailsData {
+        bytes3 currency;
+        uint256 nominalValue;
+        uint256 startingDate;
+        uint256 maturityDate;
     }
 
-    function staticCall(
-        bytes memory encodedCallData
-    ) internal view returns (bytes memory) {
-        (bool success, bytes memory data) = address(this).staticcall(
-            encodedCallData
-        );
-        checkSuccess(success, data);
-        return data;
+    struct CouponDetailsData {
+        uint256 couponFrequency;
+        uint256 couponRate;
+        uint256 firstCouponDate;
     }
 
-    function checkSuccess(bool success, bytes memory data) internal pure {
-        if (!success) {
-            assembly {
-                let returndata_size := mload(data)
-                revert(add(32, data), returndata_size)
-            }
-        }
+    struct Coupon {
+        uint256 recordDate;
+        uint256 executionDate;
+        uint256 rate;
     }
+
+    struct RegisteredCoupon {
+        Coupon coupon;
+        uint256 snapshotId;
+    }
+
+    struct CouponFor {
+        uint256 tokenBalance;
+        uint256 rate;
+        uint256 recordDate;
+        uint256 executionDate;
+        uint8 decimals;
+        bool recordDateReached;
+    }
+
+    function getBondDetails()
+        external
+        view
+        returns (BondDetailsData memory bondDetailsData_);
+
+    function setCoupon(
+        Coupon calldata _newCoupon
+    ) external returns (bool success_, uint256 couponID_);
+
+    function updateMaturityDate(
+        uint256 _maturityDate
+    ) external returns (bool success_);
+
+    function getCouponDetails()
+        external
+        view
+        returns (CouponDetailsData memory couponDetails_);
+
+    function getCoupon(
+        uint256 _couponID
+    ) external view returns (RegisteredCoupon memory registeredCoupon_);
+
+    function getCouponFor(
+        uint256 _couponID,
+        address _account
+    ) external view returns (CouponFor memory couponFor_);
+
+    function getCouponCount() external view returns (uint256 couponCount_);
 }
-// solhint-enable contract-name-camelcase, avoid-low-level-calls, no-inline-assembly

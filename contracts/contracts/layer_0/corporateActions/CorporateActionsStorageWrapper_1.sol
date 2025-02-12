@@ -210,6 +210,10 @@ import {
     ICorporateActionsStorageWrapper,
     CorporateActionDataStorage
 } from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
+import {
+    ICorporateActionsStorageWrapper,
+    CorporateActionDataStorage
+} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
 import {LibCommon} from '../../layer_0/common/LibCommon.sol';
 import {
     EnumerableSet
@@ -227,6 +231,16 @@ import {
 contract CorporateActionsStorageWrapper_1 is HoldStorageWrapper_1 {
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    modifier checkDates(uint256 firstDate, uint256 secondDate) {
+        if (secondDate < firstDate) {
+            revert ICorporateActionsStorageWrapper.WrongDates(
+                firstDate,
+                secondDate
+            );
+        }
+        _;
+    }
 
     function _onScheduledSnapshotTriggered(
         uint256 _snapShotID,

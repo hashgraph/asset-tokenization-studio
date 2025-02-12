@@ -211,8 +211,33 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
 import {Common} from '../common/Common.sol';
+import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
 
 abstract contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
+    function takeSnapshot()
+        external
+        virtual
+        override
+        onlyUnpaused
+        onlyRole(_SNAPSHOT_ROLE)
+        returns (uint256 snapshotID)
+    {
+        ScheduledTasks_CD_Lib.triggerScheduledTasks(0);
+        return _takeSnapshot();
+    }
+
+    function ABAFAtSnapshot(
+        uint256 _snapshotID
+    ) external view returns (uint256 ABAF_) {
+        return _ABAFAtSnapshot(_snapshotID);
+    }
+
+    function decimalsAtSnapshot(
+        uint256 _snapshotID
+    ) external view virtual override returns (uint8 decimals_) {
+        return _decimalsAtSnapshot(_snapshotID);
+    }
+
     function balanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
@@ -267,6 +292,26 @@ abstract contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
     ) external view virtual override returns (uint256 balance_) {
         return
             _lockedBalanceOfAtSnapshotByPartition(
+                _partition,
+                _snapshotID,
+                _tokenHolder
+            );
+    }
+
+    function heldBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 balance_) {
+        return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
+    }
+
+    function heldBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view virtual override returns (uint256 balance_) {
+        return
+            _heldBalanceOfAtSnapshotByPartition(
                 _partition,
                 _snapshotID,
                 _tokenHolder
