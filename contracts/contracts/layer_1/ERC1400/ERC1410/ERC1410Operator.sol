@@ -210,6 +210,7 @@ import {IERC1410Operator} from '../../interfaces/ERC1400/IERC1410Operator.sol';
 import {
     ERC1410OperatorStorageWrapper
 } from './ERC1410OperatorStorageWrapper.sol';
+import {IKYC} from '../../interfaces/kyc/IKYC.sol';
 
 abstract contract ERC1410Operator is
     IERC1410Operator,
@@ -278,45 +279,28 @@ abstract contract ERC1410Operator is
     }
 
     /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
-    /// @param _partition The partition from which to transfer tokens
-    /// @param _from The address from which to transfer tokens from
-    /// @param _to The address to which to transfer tokens to
-    /// @param _value The amount of tokens to transfer from `_partition`
-    /// @param _data Additional data attached to the transfer of tokens
-    /// @param _operatorData Additional data attached to the transfer of tokens by the operator
-    /// @return The partition to which the transferred tokens were allocated for the _to address
+    /// @param _operatorTransferData contains all the information about the operator transfer
     function operatorTransferByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
+        OperatorTransferData calldata _operatorTransferData
     )
         external
         virtual
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
         checkControlList(_msgSender())
-        checkControlList(_from)
-        checkControlList(_to)
-        onlyOperator(_partition, _from)
+        checkControlList(_operatorTransferData.from)
+        checkControlList(_operatorTransferData.to)
+        onlyOperator(
+            _operatorTransferData.partition,
+            _operatorTransferData.from
+        )
         onlyUnProtectedPartitionsOrWildCardRole
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _operatorTransferData.from)
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _operatorTransferData.to)
         returns (bytes32)
     {
-        {
-            _checkValidAddress(_to);
-        }
-        return
-            _operatorTransferByPartition(
-                _partition,
-                _from,
-                _to,
-                _value,
-                _data,
-                _operatorData
-            );
+        return _operatorTransferByPartition(_operatorTransferData);
     }
 
     /// @notice Determines whether `_operator` is an operator for all partitions of `_tokenHolder`

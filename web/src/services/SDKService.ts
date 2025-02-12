@@ -284,6 +284,27 @@ import {
   GetLocksIdRequest,
   GetLockRequest,
   LockViewModel,
+  HoldViewModel,
+  CreateHoldFromByPartitionRequest,
+  GetHoldsIdForByPartitionRequest,
+  GetHoldForByPartitionRequest,
+  CreateHoldByPartitionRequest,
+  ReclaimHoldByPartitionRequest,
+  ReleaseHoldByPartitionRequest,
+  ExecuteHoldByPartitionRequest,
+  GetHeldAmountForRequest,
+  SSIManagement,
+  GetRevocationRegistryAddressRequest,
+  SetRevocationRegistryAddressRequest,
+  GetIssuerListCountRequest,
+  GetIssuerListMembersRequest,
+  AddIssuerRequest,
+  RemoveIssuerRequest,
+  IsIssuerRequest,
+  GetKYCAccountsRequest,
+  GetKYCForRequest,
+  GrantKYCRequest,
+  RevokeKYCRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -720,6 +741,67 @@ export class SDKService {
     return await Security.getLock(req);
   }
 
+  public static async getHoldsId(
+    req: GetHoldsIdForByPartitionRequest,
+  ): Promise<number[]> {
+    return await Security.getHoldsIdForByPartition(req);
+  }
+
+  public static async getHoldDetails(
+    req: GetHoldForByPartitionRequest,
+  ): Promise<HoldViewModel> {
+    return await Security.getHoldForByPartition(req);
+  }
+
+  public static async createHoldFromByPartition(
+    req: CreateHoldFromByPartitionRequest,
+  ): Promise<number> {
+    const response = await Security.createHoldFromByPartition(req);
+    return response.payload;
+  }
+
+  public static async controllerCreateHoldByPartition(
+    req: CreateHoldFromByPartitionRequest,
+  ): Promise<number> {
+    const response = await Security.controllerCreateHoldByPartition(req);
+    return response.payload;
+  }
+
+  public static async createHoldByPartition(
+    req: CreateHoldByPartitionRequest,
+  ): Promise<number> {
+    const response = await Security.createHoldByPartition(req);
+    return response.payload;
+  }
+
+  public static async reclaimHoldByPartition(
+    req: ReclaimHoldByPartitionRequest,
+  ): Promise<boolean> {
+    const response = await Security.reclaimHoldByPartition(req);
+    return response.payload;
+  }
+
+  public static async releaseHoldByPartition(
+    req: ReleaseHoldByPartitionRequest,
+  ): Promise<boolean> {
+    const response = await Security.releaseHoldByPartition(req);
+    return response.payload;
+  }
+
+  public static async executeHoldByPartition(
+    req: ExecuteHoldByPartitionRequest,
+  ): Promise<boolean> {
+    const response = await Security.executeHoldByPartition(req);
+    return response.payload;
+  }
+
+  public static async getHeldAmountFor(
+    req: GetHeldAmountForRequest,
+  ): Promise<number> {
+    const response = await Security.getHeldAmountFor(req);
+    return response;
+  }
+
   // MANAGEMENT ////////////////////////////////////////////
   public static async getConfigInfo(
     req: GetConfigInfoRequest,
@@ -745,6 +827,67 @@ export class SDKService {
     req: UpdateResolverRequest,
   ): Promise<boolean> {
     const response = await Management.updateResolver(req);
+    return response.payload;
+  }
+
+  // DID MANAGEMENT ////////////////////////////////////////////
+  public static async getRevocationRegistryAddress(
+    req: GetRevocationRegistryAddressRequest,
+  ): Promise<string> {
+    return await SSIManagement.getRevocationRegistryAddress(req);
+  }
+
+  public static async setRevocationRegistryAddress(
+    req: SetRevocationRegistryAddressRequest,
+  ): Promise<boolean> {
+    const response = await SSIManagement.setRevocationRegistryAddress(req);
+    return response.payload;
+  }
+
+  public static async getIssuerListCount(
+    req: GetIssuerListCountRequest,
+  ): Promise<number> {
+    return await SSIManagement.getIssuerListCount(req);
+  }
+
+  public static async getIssuerListMembers(
+    req: GetIssuerListMembersRequest,
+  ): Promise<string[]> {
+    return await SSIManagement.getIssuerListMembers(req);
+  }
+
+  public static async addIssuer(req: AddIssuerRequest): Promise<boolean> {
+    const response = await SSIManagement.addIssuer(req);
+    return response.payload;
+  }
+
+  public static async removeIssuer(req: RemoveIssuerRequest): Promise<boolean> {
+    const response = await SSIManagement.removeIssuer(req);
+    return response.payload;
+  }
+
+  public static async isIssuer(req: IsIssuerRequest): Promise<boolean> {
+    return await SSIManagement.isIssuer(req);
+  }
+
+  // KYC ////////////////////////////////////////////
+  public static async getKYCAccounts(
+    req: GetKYCAccountsRequest,
+  ): Promise<string[]> {
+    return await Security.getKYCAccounts(req);
+  }
+
+  public static async getKYCFor(req: GetKYCForRequest): Promise<number> {
+    return await Security.getKYCFor(req);
+  }
+
+  public static async grantKYC(req: GrantKYCRequest): Promise<boolean> {
+    const response = await Security.grantKYC(req);
+    return response.payload;
+  }
+
+  public static async revokeKYC(req: RevokeKYCRequest): Promise<boolean> {
+    const response = await Security.revokeKYC(req);
     return response.payload;
   }
 }

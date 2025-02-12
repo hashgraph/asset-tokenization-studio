@@ -225,11 +225,12 @@ import { PartitionsUnProtected } from '../../../error/PartitionsUnprotected.js';
 import {
   getProtectedPartitionRole,
   SecurityRole,
-} from 'domain/context/security/SecurityRole.js';
+} from '../../../../../../../domain/context/security/SecurityRole.js';
 import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
 import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
 import { BigNumber } from 'ethers';
 import { NounceAlreadyUsed } from '../../../error/NounceAlreadyUsed.js';
+import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
 
 @CommandHandler(ProtectedCreateHoldByPartitionCommand)
 export class ProtectedCreateHoldByPartitionCommandHandler
@@ -308,9 +309,12 @@ export class ProtectedCreateHoldByPartitionCommandHandler
       ? await this.mirrorNodeAdapter.accountToEvmAddress(escrow)
       : new EvmAddress(escrow);
 
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
+    const targetEvmAddress: EvmAddress =
+      targetId === '0.0.0'
+        ? new EvmAddress(EVM_ZERO_ADDRESS)
+        : HEDERA_FORMAT_ID_REGEX.exec(targetId)
+          ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
+          : new EvmAddress(targetId);
 
     const amountBd = BigDecimal.fromString(amount, security.decimals);
 

@@ -234,7 +234,7 @@ abstract contract KYCStorageWrapperRead is SSIManagementStorageWrapper {
     }
 
     modifier checkKYCStatus(IKYC.KYCStatus _kycStatus, address _account) {
-        if (_getKYCStatusFor(_account) != _kycStatus)
+        if (!_checkKYCStatus(_kycStatus, _account))
             revert IKYC.InvalidKYCStatus();
         _;
     }
@@ -254,8 +254,12 @@ abstract contract KYCStorageWrapperRead is SSIManagementStorageWrapper {
         if (kycFor.validFrom > _blockTimestamp())
             return IKYC.KYCStatus.NOT_GRANTED;
         if (!_isIssuer(kycFor.issuer)) return IKYC.KYCStatus.NOT_GRANTED;
+
+        address revocationListAddress = _getRevocationRegistryAddress();
+
         if (
-            IRevocationList(_getRevocationRegistryAddress()).revoked(
+            revocationListAddress != address(0) &&
+            IRevocationList(revocationListAddress).revoked(
                 kycFor.issuer,
                 kycFor.VCid
             )
@@ -287,6 +291,14 @@ abstract contract KYCStorageWrapperRead is SSIManagementStorageWrapper {
             _pageIndex,
             _pageLength
         );
+    }
+
+    function _checkKYCStatus(
+        IKYC.KYCStatus _kycStatus,
+        address _account
+    ) internal view virtual returns (bool) {
+        if (_getKYCStatusFor(_account) != _kycStatus) return false;
+        return true;
     }
 
     function _KYCStorage() internal pure returns (KYCStorage storage kyc_) {

@@ -226,6 +226,8 @@ import {
     AccessControl__factory,
     BondUSATimeTravel__factory,
     TimeTravel__factory,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -233,6 +235,8 @@ import {
     BOND_MANAGER_ROLE,
     LOCKER_ROLE,
     ISSUER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     DEFAULT_PARTITION,
     Rbac,
     deployBondFromFactory,
@@ -285,6 +289,8 @@ describe('Bond Tests', () => {
     let holdFacet: Hold_2
     let erc1410Facet: ERC1410ScheduledTasks
     let timeTravelFacet: TimeTravel
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     before(async () => {
         // mute | mock console.log
@@ -326,7 +332,15 @@ describe('Bond Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        const init_rbacs: Rbac[] = [rbacPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
 
         diamond = await deployBondFromFactory({
             adminAccount: account_A,
@@ -372,6 +386,15 @@ describe('Bond Tests', () => {
             signer_A
         )
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_A
+        )
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
     })
 
     afterEach(async () => {
