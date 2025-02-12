@@ -203,85 +203,49 @@
 
 */
 
-import { SecurityRole } from "../../../../utils/SecurityRole";
-
-export type TSecurityType = "BOND" | "EQUITY";
-
-export type TRole = {
-  label: string;
-  value: SecurityRole;
-  allowedSecurities: TSecurityType[];
+export default {
+  revocation: {
+    title: "Revocation Registry Address",
+    change: "Change",
+    form: {
+      account: {
+        label: "Account ID",
+        placeholder: "0.0.1234567",
+      },
+    },
+  },
+  list: {
+    title: "Issuers",
+    add: "Add",
+  },
+  table: {
+    fields: {
+      accountId: "Account ID",
+      actions: "Actions",
+      remove: "Remove",
+    },
+  },
+  create: {
+    title: "Add Issuer",
+    description: "",
+    form: {
+      account: {
+        label: "Account ID",
+        placeholder: "0.0.1234567",
+      },
+    },
+  },
+  removePopUp: {
+    title: "Remove Issuer",
+    description: "Are you sure you want to remove this issuer?",
+    confirmText: "Remove",
+    cancelText: "Cancel",
+  },
+  messages: {
+    success: "Success: ",
+    descriptionSuccess:
+      "The SSI Manager operation has been executed successfully",
+    error: "Error: ",
+    descriptionFailed: "The SSI Manager operation has failed",
+  },
 };
-
-export const rolesList: TRole[] = [
-  {
-    label: "admin",
-    value: SecurityRole._DEFAULT_ADMIN_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-  {
-    label: "minter",
-    value: SecurityRole._ISSUER_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-  {
-    label: "controller",
-    value: SecurityRole._CONTROLLER_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-  {
-    label: "pause",
-    value: SecurityRole._PAUSER_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-  {
-    label: "controlList",
-    value: SecurityRole._CONTROLLIST_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-  {
-    label: "corporateActions",
-    value: SecurityRole._CORPORATEACTIONS_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-  {
-    label: "document",
-    value: SecurityRole._DOCUMENTER_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-  {
-    label: "snapshot",
-    value: SecurityRole._SNAPSHOT_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-  {
-    label: "bondManager",
-    value: SecurityRole._BOND_MANAGER_ROLE,
-    allowedSecurities: ["BOND"],
-  },
-  {
-    label: "adjustmentBalance",
-    value: SecurityRole._ADJUSTMENT_BALANCE_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-  {
-    label: "locker",
-    value: SecurityRole._LOCKER_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-  {
-    label: "cap",
-    value: SecurityRole._CAP_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-  {
-    label: "kyc",
-    value: SecurityRole._KYC_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-  {
-    label: "ssiManager",
-    value: SecurityRole._SSI_MANAGER_ROLE,
-    allowedSecurities: ["BOND", "EQUITY"],
-  },
-];
