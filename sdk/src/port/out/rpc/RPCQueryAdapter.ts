@@ -1316,10 +1316,7 @@ export class RPCQueryAdapter {
     ).isIssuer(issuer.toString());
   }
 
-  async getKYCFor(
-    address: EvmAddress,
-    targetId: EvmAddress,
-  ): Promise<KYC> {
+  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<KYC> {
     LogService.logTrace(`Getting KYC details for ${targetId}}`);
 
     const kycData = await this.connect(

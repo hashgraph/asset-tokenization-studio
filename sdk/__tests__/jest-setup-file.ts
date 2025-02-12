@@ -822,7 +822,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
   });
 
   singletonInstance.getAccountSecurityRelationship = jest.fn(
-    async (address: EvmAddress, target: EvmAddress) => { },
+    async (address: EvmAddress, target: EvmAddress) => {},
   );
 
   singletonInstance.isPaused = jest.fn(async (address: EvmAddress) => {

@@ -227,7 +227,7 @@ const config: HardhatUserConfig = {
     networks: {
         hardhat: {
             chainId: 1337,
-            blockGasLimit: 15_000_000,
+            blockGasLimit: 30_000_000,
             hardfork: 'london',
         },
         local: {

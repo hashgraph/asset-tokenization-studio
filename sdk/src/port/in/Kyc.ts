@@ -283,6 +283,14 @@ class KycInPort implements IKycInPort {
       )
     ).payload;
 
+    const kyc: KYCViewModel = {
+      validFrom: res.validFrom,
+      validTo: res.validTo,
+      VCid: res.VCid,
+      issuer: res.issuer,
+      status: res.status,
+    };
+
     return res;
   }
 
@@ -336,7 +344,15 @@ class KycInPort implements IKycInPort {
       )
     ).payload;
 
-    return res;
+    const kyc: KYCViewModel[] = res.map((kycAccountData) => ({
+      validFrom: kycAccountData.validFrom,
+      validTo: kycAccountData.validTo,
+      VCid: kycAccountData.VCid,
+      issuer: kycAccountData.issuer,
+      status: kycAccountData.status,
+    }));
+
+    return kyc;
   }
 
   @LogError
