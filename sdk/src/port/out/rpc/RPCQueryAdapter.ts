@@ -1336,6 +1336,20 @@ export class RPCQueryAdapter {
     );
   }
 
+  async getKYCStatusFor(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(`Getting KYC status for ${targetId}}`);
+
+    const kycData = await this.connect(
+      KYC__factory,
+      address.toString(),
+    ).getKYCStatusFor(targetId.toString());
+
+    return kycData;
+  }
+
   async getKYCAccounts(
     address: EvmAddress,
     kycStatus: number,
@@ -1350,6 +1364,31 @@ export class RPCQueryAdapter {
     ).getKYCAccounts(kycStatus, start, end);
 
     return kycAccounts;
+  }
+
+  async getKYCAccountsData(
+    address: EvmAddress,
+    kycStatus: number,
+    start: number,
+    end: number,
+  ): Promise<KYCDetails[]> {
+    LogService.logTrace(`Getting accounts data with KYC status ${kycStatus}`);
+
+    const kycAccountsData = await this.connect(
+      KYC__factory,
+      address.toString(),
+    ).getKYCAccountsData(kycStatus, start, end);
+
+    return kycAccountsData.map(
+      (data) =>
+        new KYCDetails(
+          data.validFrom.toString(),
+          data.validTo.toString(),
+          data.VCid,
+          data.issuer,
+          data.status,
+        ),
+    );
   }
 
   async getKYCAccountsCount(

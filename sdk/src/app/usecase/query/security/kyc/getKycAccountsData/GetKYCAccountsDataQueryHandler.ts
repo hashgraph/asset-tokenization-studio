@@ -212,13 +212,13 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js'
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import {
-  GetKYCAccountsQuery,
-  GetKYCAccountsQueryResponse,
-} from './GetKYCAccountsQuery.js';
+  GetKYCAccountsDataQuery,
+  GetKYCAccountsDataQueryResponse,
+} from './GetKYCAccountsDataQuery.js';
 
-@QueryHandler(GetKYCAccountsQuery)
-export class GetKYCAccountsQueryHandler
-  implements IQueryHandler<GetKYCAccountsQuery>
+@QueryHandler(GetKYCAccountsDataQuery)
+export class GetKYCAccountsDataQueryHandler
+  implements IQueryHandler<GetKYCAccountsDataQuery>
 {
   constructor(
     @lazyInject(TransactionService)
@@ -230,8 +230,8 @@ export class GetKYCAccountsQueryHandler
   ) {}
 
   async execute(
-    query: GetKYCAccountsQuery,
-  ): Promise<GetKYCAccountsQueryResponse> {
+    query: GetKYCAccountsDataQuery,
+  ): Promise<GetKYCAccountsDataQueryResponse> {
     const { securityId, kycStatus, start, end } = query;
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
@@ -240,13 +240,13 @@ export class GetKYCAccountsQueryHandler
         : securityId.toString(),
     );
 
-    const res = await this.queryAdapter.getKYCAccounts(
+    const res = await this.queryAdapter.getKYCAccountsData(
       securityEvmAddress,
       kycStatus,
       start,
       end,
     );
 
-    return new GetKYCAccountsQueryResponse(res);
+    return new GetKYCAccountsDataQueryResponse(res);
   }
 }

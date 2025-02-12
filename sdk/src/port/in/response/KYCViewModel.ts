@@ -209,6 +209,6 @@ export default interface KYCViewModel extends QueryResponse {
   validFrom: string;
   validTo: string;
   VCid: string;
-  address: string;
-  kycStatus: number;
+  issuer: string;
+  status: number;
 }
