@@ -657,6 +657,29 @@ describe('Hold Tests', () => {
             })
         })
 
+        describe('KYC', () => {
+            it('Given a non kyc account WHEN executeHoldByPartition THEN transaction fails with InvalidKYCStatus', async () => {
+                await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+                await kycFacet.revokeKYC(account_A)
+                await expect(
+                    holdFacet
+                        .connect(signer_A)
+                        .executeHoldByPartition(holdIdentifier, account_B, 1)
+                ).to.be.revertedWithCustomError(
+                    kycFacet,
+                    'InvalidKYCStatus'
+                )
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .executeHoldByPartition(holdIdentifier, account_A, 1)
+                ).to.be.revertedWithCustomError(
+                    kycFacet,
+                    'InvalidKYCStatus'
+                )
+            })
+        })
+
         describe('Create with wrong input arguments', () => {
             it('GIVEN a Token WHEN creating hold with amount bigger than balance THEN transaction fails with InsufficientBalance', async () => {
                 let AmountLargerThanBalance = 1000 * _AMOUNT
