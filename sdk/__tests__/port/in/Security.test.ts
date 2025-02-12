@@ -236,13 +236,10 @@ import {
   SDK,
   Security,
   TransferAndLockRequest,
-  GetKYCAccountsRequest,
-  GetKYCAccountsCountRequest,
-  GetKYCForRequest,
   GrantKYCRequest,
-  RevokeKYCRequest,
   AddIssuerRequest,
   SSIManagement,
+  Kyc,
 } from '../../../src/index.js';
 import TransferRequest from '../../../src/port/in/request/TransferRequest.js';
 import RedeemRequest from '../../../src/port/in/request/RedeemRequest.js';
@@ -273,9 +270,7 @@ import {
 import Account from '../../../src/domain/context/account/Account.js';
 import { keccak256 } from 'js-sha3';
 import { _PARTITION_ID_1 } from '../../../src/core/Constants.js';
-import { createEcdsaCredential, EthrDID } from '@terminal3/ecdsa_vc';
-import { DID, type VerificationOptions } from '@terminal3/vc_core';
-import PrivateKey from '../../../src/domain/context/account/PrivateKey.js';
+import createVcT3 from '../../utils/verifiableCredentials.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -314,45 +309,6 @@ const rpcNode: JsonRpcRelay = {
 
 let th: RPCTransactionAdapter;
 let mirrorNodeAdapter: MirrorNodeAdapter;
-
-async function createVcT3(): Promise<string> {
-  const issuerPrivateKey = CLIENT_ACCOUNT_ECDSA.privateKey as PrivateKey;
-  const issuer = new EthrDID(issuerPrivateKey.key as string, 'polygon');
-  const holderDid = new DID(
-    'ethr',
-    CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-  );
-
-  // Creating a credential with BBS+ signature
-  const claims = { kyc: 'passed' };
-  const revocationRegistryAddress =
-    '0x77Fb69B24e4C659CE03fB129c19Ad591374C349e';
-  const didRegistryAddress = '0x312C15922c22B60f5557bAa1A85F2CdA4891C39a';
-  const provider = new ethers.providers.JsonRpcProvider(
-    'https://testnet.hashio.io/api',
-  );
-  const options = {
-    revocationRegistryAddress,
-    provider,
-    didRegistryAddress,
-  } as unknown as VerificationOptions;
-
-  const vc = await createEcdsaCredential(
-    issuer,
-    holderDid,
-    claims,
-    ['KycCredential'],
-    undefined,
-    undefined,
-    options,
-  );
-
-  const vcString = JSON.stringify(vc);
-  const vcBase64 = Buffer.from(vcString).toString('base64');
-
-  return vcBase64;
-}
-
 describe('🧪 Security tests', () => {
   let ns: NetworkService;
   let rpcQueryAdapter: RPCQueryAdapter;
@@ -506,7 +462,57 @@ describe('🧪 Security tests', () => {
         role: SecurityRole._PROTECTED_PARTITION_ROLE,
       }),
     );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._SSI_MANAGER_ROLE,
+      }),
+    );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._KYC_ROLE,
+      }),
+    );
+
+    await SSIManagement.addIssuer(
+      new AddIssuerRequest({
+        securityId: equity.evmDiamondAddress!,
+        issuerId: CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT as string,
+      }),
+    );
+
+    await Kyc.grantKYC(
+      new GrantKYCRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        vcBase64: await createVcT3(
+          CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        ),
+      }),
+    );
+
+    await Kyc.grantKYC(
+      new GrantKYCRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        vcBase64: await createVcT3(CLIENT_ACCOUNT_ECDSA.evmAddress!.toString()),
+      }),
+    );
   }, 900_000);
+
+  afterAll(async () => {
+    await SSIManagement.removeIssuer(
+      new AddIssuerRequest({
+        securityId: equity.evmDiamondAddress!,
+        issuerId: CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT as string,
+      }),
+    );
+  });
 
   it('Get security', async () => {
     const equityInfo = await Security.getInfo(
@@ -1360,134 +1366,5 @@ describe('🧪 Security tests', () => {
         ).value,
       ),
     ).toEqual(balanceECDSA + protectedHoldAmount);
-  }, 600_000);
-
-  it('Grant and revoke KYC', async () => {
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._ISSUER_ROLE,
-      }),
-    );
-    await SSIManagement.addIssuer(
-      new AddIssuerRequest({
-        securityId: equity.evmDiamondAddress!,
-        issuerId: CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT as string,
-      }),
-    );
-    await Role.grantRole(
-      new RoleRequest({
-        securityId: equity.evmDiamondAddress!,
-        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
-        role: SecurityRole._KYC_ROLE,
-      }),
-    );
-
-    const vcBase64 = await createVcT3();
-
-    expect(
-      (
-        await Security.grantKYC(
-          new GrantKYCRequest({
-            securityId: equity.evmDiamondAddress!,
-            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-            vcBase64: vcBase64,
-          }),
-        )
-      ).payload,
-    ).toBe(true);
-
-    expect(
-      await Security.getKYCAccounts(
-        new GetKYCAccountsRequest({
-          securityId: equity.evmDiamondAddress!,
-          kycStatus: 1,
-          start: 0,
-          end: 1,
-        }),
-      ),
-    ).toEqual([CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString()]);
-
-    expect(
-      await Security.getKYCAccountsCount(
-        new GetKYCAccountsCountRequest({
-          securityId: equity.evmDiamondAddress!,
-          kycStatus: 1,
-        }),
-      ),
-    ).toEqual(1);
-
-    expect(
-      await Security.getKYCFor(
-        new GetKYCForRequest({
-          securityId: equity.evmDiamondAddress!,
-          targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-        }),
-      ),
-    ).toEqual(true);
-
-    expect(
-      (
-        await Security.revokeKYC(
-          new RevokeKYCRequest({
-            securityId: equity.evmDiamondAddress!,
-            targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-          }),
-        )
-      ).payload,
-    ).toBe(true);
-
-    expect(
-      await Security.getKYCAccounts(
-        new GetKYCAccountsRequest({
-          securityId: equity.evmDiamondAddress!,
-          kycStatus: 1,
-          start: 0,
-          end: 1,
-        }),
-      ),
-    ).toEqual([]);
-
-    expect(
-      await Security.getKYCAccountsCount(
-        new GetKYCAccountsCountRequest({
-          securityId: equity.evmDiamondAddress!,
-          kycStatus: 1,
-        }),
-      ),
-    ).toEqual(0);
-
-    expect(
-      await Security.getKYCFor(
-        new GetKYCForRequest({
-          securityId: equity.evmDiamondAddress!,
-          targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-        }),
-      ),
-    ).toEqual(false);
-  }, 600_000);
-
-  it('Cannot grant KYC with invalid VC', async () => {
-    const vcBase64 = await createVcT3();
-    const decodedVC = Buffer.from(vcBase64, 'base64').toString('utf-8');
-    const vcJson = JSON.parse(decodedVC);
-    const oneSecondBeforeNow = new Date(Date.now() - 1000).toISOString();
-    vcJson.validUntil = oneSecondBeforeNow;
-    const corruptedVcJson = JSON.stringify(vcJson);
-    const wrongVcBase64 = Buffer.from(corruptedVcJson).toString('base64');
-
-    await expect(
-      async () =>
-        (
-          await Security.grantKYC(
-            new GrantKYCRequest({
-              securityId: equity.evmDiamondAddress!,
-              targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-              vcBase64: wrongVcBase64,
-            }),
-          )
-        ).payload,
-    ).rejects.toThrow('Invalid VC');
   }, 600_000);
 });

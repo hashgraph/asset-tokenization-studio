@@ -213,6 +213,7 @@ import Network from './Network.js';
 import Factory from './Factory.js';
 import Management from './Management.js';
 import SSIManagement from './SSIManagement.js';
+import Kyc from './Kyc.js';
 
 export {
   Security,
@@ -225,6 +226,7 @@ export {
   Factory,
   Management,
   SSIManagement,
+  Kyc,
 };
 
 export * from './request';
@@ -240,3 +242,5 @@ export * from './Common.js';
 export * from './Network.js';
 export * from './Factory.js';
 export * from './Management.js';
+export * from './Kyc.js';
+export * from './SSIManagement.js';
