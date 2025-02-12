@@ -266,6 +266,7 @@ import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/Sched
 import { DividendFor } from '../../../domain/context/equity/DividendFor';
 import { VotingFor } from '../../../domain/context/equity/VotingFor';
 import { HoldDetails } from '../../../domain/context/security/HoldDetails.js';
+import { KYC } from '../../../domain/context/kyc/KYC.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -1315,15 +1316,35 @@ export class RPCQueryAdapter {
     ).isIssuer(issuer.toString());
   }
 
-  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<number> {
+  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<KYC> {
     LogService.logTrace(`Getting KYC details for ${targetId}}`);
 
-    const { status } = await this.connect(
+    const kycData = await this.connect(
       KYC__factory,
       address.toString(),
     ).getKYCFor(targetId.toString());
 
-    return status;
+    return new KYC(
+      kycData.validFrom.toString(),
+      kycData.validTo.toString(),
+      kycData.VCid,
+      kycData.issuer,
+      kycData.status,
+    );
+  }
+
+  async getKYCStatusFor(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(`Getting KYC status for ${targetId}}`);
+
+    const kycData = await this.connect(
+      KYC__factory,
+      address.toString(),
+    ).getKYCStatusFor(targetId.toString());
+
+    return kycData;
   }
 
   async getKYCAccounts(
@@ -1340,6 +1361,31 @@ export class RPCQueryAdapter {
     ).getKYCAccounts(kycStatus, start, end);
 
     return kycAccounts;
+  }
+
+  async getKYCAccountsData(
+    address: EvmAddress,
+    kycStatus: number,
+    start: number,
+    end: number,
+  ): Promise<KYC[]> {
+    LogService.logTrace(`Getting accounts data with KYC status ${kycStatus}`);
+
+    const kycAccountsData = await this.connect(
+      KYC__factory,
+      address.toString(),
+    ).getKYCAccountsData(kycStatus, start, end);
+
+    return kycAccountsData.map(
+      (data) =>
+        new KYC(
+          data.validFrom.toString(),
+          data.validTo.toString(),
+          data.VCid,
+          data.issuer,
+          data.status,
+        ),
+    );
   }
 
   async getKYCAccountsCount(

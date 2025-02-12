@@ -239,6 +239,7 @@ import { DividendFor } from '../src/domain/context/equity/DividendFor';
 import { VotingFor } from '../src/domain/context/equity/VotingFor';
 import DfnsSettings from '../src/domain/context/custodialWalletSettings/DfnsSettings.js';
 import { HoldDetails } from '../src/domain/context/security/HoldDetails.js';
+import { KYC } from '../src/domain/context/kyc/KYC.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -294,6 +295,7 @@ const lastHoldIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
 const nonces = new Map<string, number>();
 let kycAccountsList: string[] = [];
+const kycAccountsData = new Map<string, KYC>();
 
 let controlList: string[] = [];
 let issuerList: string[] = [];
@@ -1019,10 +1021,30 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     },
   );
 
+  singletonInstance.getKYCStatusFor = jest.fn(
+    async (address: EvmAddress, target: EvmAddress) => {
+      const account = '0x' + target.toString().toUpperCase().substring(2);
+      return kycAccountsList.includes(account) ? 1 : 0;
+    },
+  );
+
+  singletonInstance.getKYCAccountsData = jest.fn(
+    async (address: EvmAddress, target: EvmAddress) => {
+      const account = '0x' + target.toString().toUpperCase().substring(2);
+      const kycDataArray: KYC[] = [];
+
+      for (const [key, value] of kycAccountsData) {
+        kycDataArray.push(value);
+      }
+
+      return kycDataArray;
+    },
+  );
+
   singletonInstance.getKYCFor = jest.fn(
     async (address: EvmAddress, target: EvmAddress) => {
       const account = '0x' + target.toString().toUpperCase().substring(2);
-      return kycAccountsList.includes(account);
+      return kycAccountsData.get(account);
     },
   );
 
@@ -1860,6 +1882,16 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
 
       if (!accountKycStatus) {
         kycAccountsList.push(account);
+        kycAccountsData.set(
+          account,
+          new KYC(
+            validFrom.toString(),
+            validTo.toString(),
+            VCId,
+            issuer.toString(),
+            1,
+          ),
+        );
       }
 
       return {
@@ -1879,6 +1911,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
         kycAccountsList = kycAccountsList.filter(
           (kycAccount) => kycAccount != account,
         );
+        kycAccountsData.delete(account);
       }
 
       return {

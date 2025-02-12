@@ -279,6 +279,14 @@ contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper {
         accounts_ = _getKYCAccounts(_kycStatus, _pageIndex, _pageLength);
     }
 
+    function getKYCAccountsData(
+        KYCStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view virtual override returns (KYCData[] memory kycData_) {
+        kycData_ = _getKYCAccountsData(_kycStatus, _pageIndex, _pageLength);
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -296,7 +304,7 @@ contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](6);
+        staticFunctionSelectors_ = new bytes4[](7);
         staticFunctionSelectors_[selectorIndex++] = this.grantKYC.selector;
         staticFunctionSelectors_[selectorIndex++] = this.revokeKYC.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getKYCFor.selector;
@@ -308,6 +316,9 @@ contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getKYCAccounts
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getKYCAccountsData
             .selector;
     }
 

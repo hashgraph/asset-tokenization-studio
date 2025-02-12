@@ -211,6 +211,8 @@ import {
   GetKYCAccountsRequest,
   GetKYCForRequest,
   GrantKYCRequest,
+  GetKYCAccountsDataRequest,
+  GetKYCStatusForRequest,
   Kyc,
   LoggerTransports,
   RemoveIssuerRequest,
@@ -245,6 +247,7 @@ import { ethers, Wallet } from 'ethers';
 import SSIManagement from '../../../src/port/in/SSIManagement';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
 import createVcT3 from '../../utils/verifiableCredentials';
+import { Terminal3VC } from '../../../src/domain/context/kyc/terminal3.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -412,6 +415,29 @@ describe('🧪 Kyc tests', () => {
       ),
     ).toEqual([CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString()]);
 
+    let vcDecoded = Terminal3VC.vcFromBase64(vcBase64);
+    const issuer = Terminal3VC.extractIssuer(vcDecoded);
+    vcDecoded = Terminal3VC.checkValidDates(vcDecoded);
+
+    expect(
+      await Kyc.getKYCAccountsData(
+        new GetKYCAccountsDataRequest({
+          securityId: equity.evmDiamondAddress!,
+          kycStatus: 1,
+          start: 0,
+          end: 1,
+        }),
+      ),
+    ).toEqual([
+      {
+        validFrom: vcDecoded.validFrom,
+        validTo: vcDecoded.validUntil,
+        VCid: vcDecoded.id,
+        issuer: issuer,
+        status: 1,
+      },
+    ]);
+
     expect(
       await Kyc.getKYCAccountsCount(
         new GetKYCAccountsCountRequest({
@@ -428,7 +454,22 @@ describe('🧪 Kyc tests', () => {
           targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
         }),
       ),
-    ).toEqual(true);
+    ).toEqual({
+      validFrom: vcDecoded.validFrom,
+      validTo: vcDecoded.validUntil,
+      VCid: vcDecoded.id,
+      issuer: issuer,
+      status: 1,
+    });
+
+    expect(
+      await Kyc.getKYCStatusFor(
+        new GetKYCStatusForRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        }),
+      ),
+    ).toEqual(1);
 
     expect(
       (
@@ -440,6 +481,26 @@ describe('🧪 Kyc tests', () => {
         )
       ).payload,
     ).toBe(true);
+
+    expect(
+      await Kyc.getKYCStatusFor(
+        new GetKYCStatusForRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        }),
+      ),
+    ).toEqual(0);
+
+    expect(
+      await Kyc.getKYCAccountsData(
+        new GetKYCAccountsDataRequest({
+          securityId: equity.evmDiamondAddress!,
+          kycStatus: 1,
+          start: 0,
+          end: 1,
+        }),
+      ),
+    ).toEqual([]);
 
     expect(
       await Kyc.getKYCAccounts(
@@ -468,7 +529,7 @@ describe('🧪 Kyc tests', () => {
           targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
         }),
       ),
-    ).toEqual(false);
+    ).toEqual(undefined);
 
     expect(
       (

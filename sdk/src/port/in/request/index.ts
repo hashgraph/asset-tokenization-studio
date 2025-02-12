@@ -294,6 +294,8 @@ import GetKYCAccountsCountRequest from './GetKYCAccountsCountRequest.js';
 import GetKYCForRequest from './GetKYCForRequest.js';
 import RevokeKYCRequest from './RevokeKYCRequest.js';
 import GrantKYCRequest from './GrantKYCRequest.js';
+import GetKYCAccountsDataRequest from './GetKYCAccountsDataRequest.js';
+import GetKYCStatusForRequest from './GetKYCStatusForRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -387,4 +389,6 @@ export {
   GetKYCForRequest,
   RevokeKYCRequest,
   GrantKYCRequest,
+  GetKYCAccountsDataRequest,
+  GetKYCStatusForRequest,
 };
