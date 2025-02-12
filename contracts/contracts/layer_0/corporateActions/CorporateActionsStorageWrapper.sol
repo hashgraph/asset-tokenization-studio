@@ -204,154 +204,219 @@
 */
 
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LibCommon} from '../common/LibCommon.sol';
-import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
+import {
+    ICorporateActionsStorageWrapper,
+    CorporateActionDataStorage
+} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
+import {LibCommon} from '../../layer_0/common/LibCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    DIVIDEND_CORPORATE_ACTION_TYPE,
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+    COUPON_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+    SNAPSHOT_RESULT_ID
+} from '../constants/values.sol';
+import {
+    AdjustBalancesStorageWrapper
+} from '../adjustBalances/AdjustBalancesStorageWrapper.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+contract CorporateActionsStorageWrapper is
+    ICorporateActionsStorageWrapper,
+    AdjustBalancesStorageWrapper
+{
+    using LibCommon for EnumerableSet.Bytes32Set;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
-abstract contract HoldStorageWrapper_1 is PauseStorageWrapper {
-    using LibCommon for EnumerableSet.UintSet;
-
-    modifier onlyWithValidHoldId(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+    modifier checkIndexForCorporateActionByType(
+        bytes32 actionType,
+        uint256 index
     ) {
-        if (!_isHoldIdValid(_partition, _tokenHolder, _holdId))
-            revert IHold.WrongHoldId();
+        if (_getCorporateActionCountByType(actionType) <= index) {
+            revert WrongIndexForAction(index, actionType);
+        }
         _;
     }
 
-    function _isHoldIdValid(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    ) internal view returns (bool) {
-        if (_getHold(_partition, _tokenHolder, _holdId).id == 0) return false;
-        return true;
+    modifier checkDates(uint256 firstDate, uint256 secondDate) {
+        if (secondDate < firstDate) {
+            revert WrongDates(firstDate, secondDate);
+        }
+        _;
     }
 
-    function _getHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    ) internal view returns (IHold.HoldData memory) {
-        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
-
-        return _getHoldByIndex(_partition, _tokenHolder, holdIndex);
-    }
-
-    function _getHoldIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    ) internal view returns (uint256) {
-        return _holdStorage().holdsIndex[_tokenHolder][_partition][_holdId];
-    }
-
-    function _getHoldByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdIndex
-    ) internal view returns (IHold.HoldData memory) {
-        IHold.HoldDataStorage storage holdStorage = _holdStorage();
-
-        if (_holdIndex == 0)
-            return
-                IHold.HoldData(
-                    0,
-                    IHold.Hold(0, 0, address(0), address(0), ''),
-                    ''
-                );
-
-        _holdIndex--;
-
-        assert(_holdIndex < holdStorage.holds[_tokenHolder][_partition].length);
-
-        return holdStorage.holds[_tokenHolder][_partition][_holdIndex];
-    }
-
-    function _getHeldAmountFor(
-        address _tokenHolder
-    ) internal view virtual returns (uint256 amount_) {
-        return _holdStorage().totalHeldAmount[_tokenHolder];
-    }
-
-    function _getHeldAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 amount_) {
-        return _holdStorage().heldAmountByPartition[_tokenHolder][_partition];
-    }
-
-    function _getHoldsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (uint256[] memory holdsId_) {
-        return
-            _holdStorage().holdIds[_tokenHolder][_partition].getFromSet(
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function _getHoldForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+    // Internal
+    function _addCorporateAction(
+        bytes32 _actionType,
+        bytes memory _data
     )
         internal
-        view
         virtual
         returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 corporateActionIndexByType_
         )
     {
-        IHold.HoldData memory holdData = _getHold(
-            _partition,
-            _tokenHolder,
-            _holdId
+        CorporateActionDataStorage
+            storage corporateActions_ = _corporateActionsStorage();
+        corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
+        // TODO: Review when it can return false.
+        success_ =
+            corporateActions_.actions.add(corporateActionId_) &&
+            corporateActions_.actionsByType[_actionType].add(
+                corporateActionId_
+            );
+        corporateActions_
+            .actionsData[corporateActionId_]
+            .actionType = _actionType;
+        corporateActions_.actionsData[corporateActionId_].data = _data;
+        corporateActionIndexByType_ = _getCorporateActionCountByType(
+            _actionType
         );
-        return (
-            holdData.hold.amount,
-            holdData.hold.expirationTimestamp,
-            holdData.hold.escrow,
-            holdData.hold.to,
-            holdData.hold.data,
-            holdData.operatorData
-        );
-    }
 
-    function _holdStorage()
-        internal
-        pure
-        virtual
-        returns (IHold.HoldDataStorage storage hold_)
-    {
-        bytes32 position = _HOLD_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            hold_.slot := position
+        if (_actionType == DIVIDEND_CORPORATE_ACTION_TYPE) {
+            _initDividend(success_, corporateActionId_, _data);
+        } else if (_actionType == VOTING_RIGHTS_CORPORATE_ACTION_TYPE) {
+            _initVotingRights(success_, corporateActionId_, _data);
+        } else if (_actionType == COUPON_CORPORATE_ACTION_TYPE) {
+            _initCoupon(success_, corporateActionId_, _data);
+        } else if (_actionType == BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE) {
+            _initBalanceAdjustment(success_, corporateActionId_, _data);
         }
     }
 
-    function _getHoldCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
-        return _holdStorage().holds[_tokenHolder][_partition].length;
+    function _initDividend(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        // TODO
+        /*if (!_success) {
+            revert DividendCreationFailed();
+        }
+
+        IEquity.Dividend memory newDividend = abi.decode(
+            _data,
+            (IEquity.Dividend)
+        );
+
+        _addScheduledTask(
+            newDividend.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
+        _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));*/
+    }
+
+    function _initVotingRights(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        // TODO
+        /*if (!_success) {
+            revert VotingRightsCreationFailed();
+        }
+
+        IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
+
+        _addScheduledTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
+        _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));*/
+    }
+
+    function _initCoupon(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        // TODO
+        /*if (!_success) {
+            revert CouponCreationFailed();
+        }
+
+        IBond.Coupon memory newCoupon = abi.decode(_data, (IBond.Coupon));
+
+        _addScheduledTask(newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
+        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));*/
+    }
+
+    function _initBalanceAdjustment(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        // TODO
+        /*
+        if (!_success) {
+            revert BalanceAdjustmentCreationFailed();
+        }
+
+        IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
+            .decode(_data, (IEquity.ScheduledBalanceAdjustment));
+
+        _addScheduledTask(
+            newBalanceAdjustment.executionDate,
+            abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
+        );
+        _addScheduledBalanceAdjustment(
+            newBalanceAdjustment.executionDate,
+            abi.encode(_actionId)
+        );*/
+    }
+
+    function _onScheduledTaskTriggered(bytes memory _data) internal {
+        // TODO
+        /*if (_data.length > 0) {
+            bytes32 taskType = abi.decode(_data, (bytes32));
+            if (taskType == SNAPSHOT_TASK_TYPE) {
+                _triggerScheduledSnapshots(1);
+            } else if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
+                _triggerScheduledBalanceAdjustments(1);
+            }
+        }*/
+    }
+
+    function _onScheduledBalanceAdjustmentTriggered(
+        bytes memory _data
+    ) internal {
+        if (_data.length > 0) {
+            bytes32 actionId = abi.decode(_data, (bytes32));
+            (, bytes memory balanceAdjustmentData) = _getCorporateAction(
+                actionId
+            );
+
+            if (balanceAdjustmentData.length > 0) {
+                /* IEquity.ScheduledBalanceAdjustment
+                    memory balanceAdjustment = abi.decode(
+                        balanceAdjustmentData,
+                        (IEquity.ScheduledBalanceAdjustment)
+                    );*/
+                /* _adjustBalances(
+                    balanceAdjustment.factor,
+                    balanceAdjustment.decimals
+                );*/
+            }
+        }
+    }
+
+    function _getSnapshotID(bytes32 _actionId) internal view returns (uint256) {
+        bytes memory data = _getResult(_actionId, SNAPSHOT_RESULT_ID);
+
+        uint256 bytesLength = data.length;
+
+        if (bytesLength < 32) return 0;
+
+        uint256 snapshotId;
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            snapshotId := mload(add(data, 0x20))
+        }
+
+        return snapshotId;
     }
 }

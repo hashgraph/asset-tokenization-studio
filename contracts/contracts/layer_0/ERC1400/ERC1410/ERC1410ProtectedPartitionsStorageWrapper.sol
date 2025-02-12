@@ -224,7 +224,7 @@ abstract contract ERC1410ProtectedPartitionsStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal virtual {
+    ) internal {
         checkNounceAndDeadline(
             _nounce,
             _from,
@@ -263,7 +263,7 @@ abstract contract ERC1410ProtectedPartitionsStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal virtual {
+    ) internal {
         checkNounceAndDeadline(
             _nounce,
             _from,

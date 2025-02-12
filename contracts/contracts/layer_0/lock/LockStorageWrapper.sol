@@ -204,58 +204,149 @@
 */
 
 pragma solidity 0.8.18;
+
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    CorporateActionsStorageWrapper
+} from '../corporateActions/CorporateActionsStorageWrapper.sol';
+import {
+    ILockStorageWrapper
+} from '../../layer_1/interfaces/lock/ILockStorageWrapper.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-uint256 constant _ISIN_LENGTH = 12;
-uint256 constant _CHECKSUM_POSITION_IN_ISIN = 11;
-uint8 constant _TEN = 10;
-uint8 constant _UINT_WITH_ONE_DIGIT = 9;
-uint8 constant _ASCII_9 = 57;
-uint8 constant _ASCII_7 = 55;
-uint8 constant _ASCII_0 = 48;
+abstract contract LockStorageWrapper is
+    ILockStorageWrapper,
+    CorporateActionsStorageWrapper
+{
+    using EnumerableSet for EnumerableSet.UintSet;
 
-bytes1 constant _IS_PAUSED_ERROR_ID = 0x40;
-bytes1 constant _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
-bytes1 constant _FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
-bytes1 constant _TO_ACCOUNT_BLOCKED_ERROR_ID = 0x43;
-bytes1 constant _FROM_ACCOUNT_NULL_ERROR_ID = 0x44;
-bytes1 constant _TO_ACCOUNT_NULL_ERROR_ID = 0x45;
-bytes1 constant _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = 0x46;
-bytes1 constant _IS_NOT_OPERATOR_ERROR_ID = 0x47;
-bytes1 constant _WRONG_PARTITION_ERROR_ID = 0x48;
-bytes1 constant _ALLOWANCE_REACHED_ERROR_ID = 0x49;
+    function _lockByPartition(
+        bytes32 _partition,
+        uint256 _amount,
+        address _tokenHolder,
+        uint256 _expirationTimestamp
+    ) internal returns (bool success_, uint256 lockId_) {
+        _updateLockedBalancesBeforeLock(
+            _partition,
+            _amount,
+            _tokenHolder,
+            _expirationTimestamp
+        );
+        _reduceBalanceByPartition(_tokenHolder, _amount, _partition);
 
-bytes1 constant _SUCCESS = 0x00;
+        LockDataStorage storage lockStorage = _lockStorage();
 
-// solhint-disable max-line-length
-//keccak256(
-//    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
-//);
-bytes32 constant _DOMAIN_TYPE_HASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
-string constant _SALT = '\x19\x01';
-string constant _CONTRACT_NAME = 'ASSET_TOKENIZATION';
-string constant _CONTRACT_VERSION = '1.0.0';
-//keccak256(
-//    'protectedTransferFromByPartition(bytes32 _partition,address _from,address _to,uint256 _amount,uint256 _deadline,uint256 _nounce)'
-//);
-bytes32 constant _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH = 0x2d745a289deb1f3b76a62c3c841fc26cbf0bc208da63068e1eec99f929bbdc9e;
-//keccak256(
-//    'protectedRedeemFromByPartition(bytes32 _partition,address _from,uint256 _amount,uint256 _deadline,uint256 _nounce)'
-//);
-bytes32 constant _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH = 0x5075effccf2d386f2a3f230b6a45274e523d872e1b1b33a0cf97bef34dfa14e7;
+        lockId_ = ++lockStorage.nextLockIdByAccountAndPartition[_tokenHolder][
+            _partition
+        ];
 
-//keccak256(
-//'protectedCreateHoldByPartition(bytes32 _partition,address _from,ProtectedHold _protectedHold)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)'
-//);
-bytes32 constant _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH = 0xfd0d74766e5201a669a9197ba674709a23bc9c94c38a9ed40649836def3747eb;
+        LockData memory lock = LockData(lockId_, _amount, _expirationTimestamp);
 
-//keccak256(
-//'Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'
-//);
-bytes32 constant _HOLD_TYPEHASH = 0x638791043a42aa7472ccb18a7ede86b9baf01fb2d2128a743cf5dc473057d7bc;
+        lockStorage.locksByAccountAndPartition[_tokenHolder][_partition].push(
+            lock
+        );
+        lockStorage.lockIdsByAccountAndPartition[_tokenHolder][_partition].add(
+            lockId_
+        );
+        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
+            lockId_
+        ] = lockStorage
+        .locksByAccountAndPartition[_tokenHolder][_partition].length;
+        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
+            _partition
+        ] += _amount;
+        lockStorage.totalLockedAmountByAccount[_tokenHolder] += _amount;
 
-//keccak256(
-//'ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'
-//);
-bytes32 constant _PROTECTED_HOLD_TYPEHASH = 0x432ede4c9f6d06cc57be0d75da5dce179cd5f56db988520d5b77795a69b0dc2e;
-// solhint-enable max-line-length
+        success_ = true;
+    }
+
+    function _releaseByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) internal returns (bool success_) {
+        _updateLockedBalancesBeforeRelease(_partition, _lockId, _tokenHolder);
+        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
+
+        LockDataStorage storage lockStorage = _lockStorage();
+        LockData memory lock = lockStorage.locksByAccountAndPartition[
+            _tokenHolder
+        ][_partition][lockIndex - 1];
+
+        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
+            _partition
+        ] -= lock.amount;
+        lockStorage.totalLockedAmountByAccount[_tokenHolder] -= lock.amount;
+        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
+            lock.id
+        ] = 0;
+        lockStorage
+        .lockIdsByAccountAndPartition[_tokenHolder][_partition].remove(lock.id);
+
+        uint256 lastIndex = _getLockCountForByPartition(
+            _partition,
+            _tokenHolder
+        );
+
+        if (lockIndex < lastIndex) {
+            LockData memory lastLock = lockStorage.locksByAccountAndPartition[
+                _tokenHolder
+            ][_partition][lastIndex - 1];
+            _setLockAtIndex(_partition, _tokenHolder, lockIndex, lastLock);
+        }
+
+        lockStorage.locksByAccountAndPartition[_tokenHolder][_partition].pop();
+
+        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
+            _addPartitionTo(lock.amount, _tokenHolder, _partition);
+        } else {
+            _increaseBalanceByPartition(_tokenHolder, lock.amount, _partition);
+        }
+
+        //_increaseBalanceByPartition(_tokenHolder, lock.amount, _partition);
+
+        success_ = true;
+    }
+    // solhint-disable no-unused-vars
+    function _updateLockedBalancesBeforeLock(
+        bytes32 _partition,
+        uint256 _amount,
+        address _tokenHolder,
+        uint256 _expirationTimestamp
+    ) internal {
+        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
+    }
+
+    function _updateLockedBalancesBeforeRelease(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) internal {
+        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
+    }
+    // solhint-enable no-unused-vars
+    function _setLockAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex,
+        LockData memory lock
+    ) internal {
+        LockDataStorage storage lockStorage = _lockStorage();
+
+        lockStorage
+        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
+            .id = lock.id;
+        lockStorage
+        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
+            .amount = lock.amount;
+        lockStorage
+        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
+            .expirationTimestamp = lock.expirationTimestamp;
+
+        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
+            lock.id
+        ] = _lockIndex;
+    }
+}

@@ -206,56 +206,170 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-uint256 constant _ISIN_LENGTH = 12;
-uint256 constant _CHECKSUM_POSITION_IN_ISIN = 11;
-uint8 constant _TEN = 10;
-uint8 constant _UINT_WITH_ONE_DIGIT = 9;
-uint8 constant _ASCII_9 = 57;
-uint8 constant _ASCII_7 = 55;
-uint8 constant _ASCII_0 = 48;
+import {
+    CorporateActionDataStorage
+} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
+import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    _CORPORATE_ACTION_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {HoldStorageWrapperBase} from '../hold/HoldStorageWrapperBase.sol';
+import {
+    SNAPSHOT_TASK_TYPE,
+    BALANCE_ADJUSTMENT_TASK_TYPE,
+    SNAPSHOT_RESULT_ID
+} from '../constants/values.sol';
 
-bytes1 constant _IS_PAUSED_ERROR_ID = 0x40;
-bytes1 constant _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
-bytes1 constant _FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
-bytes1 constant _TO_ACCOUNT_BLOCKED_ERROR_ID = 0x43;
-bytes1 constant _FROM_ACCOUNT_NULL_ERROR_ID = 0x44;
-bytes1 constant _TO_ACCOUNT_NULL_ERROR_ID = 0x45;
-bytes1 constant _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = 0x46;
-bytes1 constant _IS_NOT_OPERATOR_ERROR_ID = 0x47;
-bytes1 constant _WRONG_PARTITION_ERROR_ID = 0x48;
-bytes1 constant _ALLOWANCE_REACHED_ERROR_ID = 0x49;
+contract CorporateActionsStorageWrapperBase is HoldStorageWrapperBase {
+    using LibCommon for EnumerableSet.Bytes32Set;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
-bytes1 constant _SUCCESS = 0x00;
+    function _onScheduledSnapshotTriggered(
+        uint256 _snapShotID,
+        bytes memory _data
+    ) internal {
+        if (_data.length > 0) {
+            bytes32 actionId = abi.decode(_data, (bytes32));
+            _addSnapshotToAction(actionId, _snapShotID);
+        }
+    }
 
-// solhint-disable max-line-length
-//keccak256(
-//    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
-//);
-bytes32 constant _DOMAIN_TYPE_HASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
-string constant _SALT = '\x19\x01';
-string constant _CONTRACT_NAME = 'ASSET_TOKENIZATION';
-string constant _CONTRACT_VERSION = '1.0.0';
-//keccak256(
-//    'protectedTransferFromByPartition(bytes32 _partition,address _from,address _to,uint256 _amount,uint256 _deadline,uint256 _nounce)'
-//);
-bytes32 constant _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH = 0x2d745a289deb1f3b76a62c3c841fc26cbf0bc208da63068e1eec99f929bbdc9e;
-//keccak256(
-//    'protectedRedeemFromByPartition(bytes32 _partition,address _from,uint256 _amount,uint256 _deadline,uint256 _nounce)'
-//);
-bytes32 constant _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH = 0x5075effccf2d386f2a3f230b6a45274e523d872e1b1b33a0cf97bef34dfa14e7;
+    function _addSnapshotToAction(
+        bytes32 _actionId,
+        uint256 _snapshotId
+    ) internal {
+        bytes memory result = abi.encodePacked(_snapshotId);
 
-//keccak256(
-//'protectedCreateHoldByPartition(bytes32 _partition,address _from,ProtectedHold _protectedHold)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)'
-//);
-bytes32 constant _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH = 0xfd0d74766e5201a669a9197ba674709a23bc9c94c38a9ed40649836def3747eb;
+        _updateCorporateActionResult(_actionId, SNAPSHOT_RESULT_ID, result);
+    }
 
-//keccak256(
-//'Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'
-//);
-bytes32 constant _HOLD_TYPEHASH = 0x638791043a42aa7472ccb18a7ede86b9baf01fb2d2128a743cf5dc473057d7bc;
+    function _updateCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId,
+        bytes memory newResult
+    ) internal {
+        CorporateActionDataStorage
+            storage corporateActions_ = _corporateActionsStorage();
+        bytes[] memory results = corporateActions_
+            .actionsData[actionId]
+            .results;
 
-//keccak256(
-//'ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'
-//);
-bytes32 constant _PROTECTED_HOLD_TYPEHASH = 0x432ede4c9f6d06cc57be0d75da5dce179cd5f56db988520d5b77795a69b0dc2e;
-// solhint-enable max-line-length
+        if (results.length > resultId) {
+            corporateActions_.actionsData[actionId].results[
+                resultId
+            ] = newResult;
+            return;
+        }
+
+        for (uint256 i = results.length; i < resultId; i++) {
+            corporateActions_.actionsData[actionId].results.push('');
+        }
+
+        corporateActions_.actionsData[actionId].results.push(newResult);
+    }
+
+    function _getCorporateAction(
+        bytes32 _corporateActionId
+    ) internal view returns (bytes32 actionType_, bytes memory data_) {
+        CorporateActionDataStorage
+            storage corporateActions_ = _corporateActionsStorage();
+        actionType_ = corporateActions_
+            .actionsData[_corporateActionId]
+            .actionType;
+        data_ = corporateActions_.actionsData[_corporateActionId].data;
+    }
+
+    function _getCorporateActionCount()
+        internal
+        view
+        virtual
+        returns (uint256 corporateActionCount_)
+    {
+        return _corporateActionsStorage().actions.length();
+    }
+
+    function _getCorporateActionIds(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (bytes32[] memory corporateActionIds_) {
+        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function _getCorporateActionCountByType(
+        bytes32 _actionType
+    ) internal view returns (uint256 corporateActionCount_) {
+        return _corporateActionsStorage().actionsByType[_actionType].length();
+    }
+
+    function _getCorporateActionIdsByType(
+        bytes32 _actionType,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (bytes32[] memory corporateActionIds_) {
+        corporateActionIds_ = _corporateActionsStorage()
+            .actionsByType[_actionType]
+            .getFromSet(_pageIndex, _pageLength);
+    }
+
+    function _getResult(
+        bytes32 actionId,
+        uint256 resultId
+    ) internal view returns (bytes memory) {
+        bytes memory result;
+
+        if (_getCorporateActionResultCount(actionId) > resultId)
+            result = _getCorporateActionResult(actionId, resultId);
+
+        return result;
+    }
+
+    function _getCorporateActionResultCount(
+        bytes32 actionId
+    ) internal view returns (uint256) {
+        return _corporateActionsStorage().actionsData[actionId].results.length;
+    }
+
+    /**
+     * @dev returns a corporate action result.
+     *
+     * @param actionId The corporate action Id
+     */
+    function _getCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId
+    ) internal view returns (bytes memory) {
+        return
+            _corporateActionsStorage().actionsData[actionId].results[resultId];
+    }
+
+    function _isSnapshotTaskType(
+        bytes memory data
+    ) internal pure returns (bool) {
+        return abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE;
+    }
+
+    function _isBalanceAdjustmentTaskType(
+        bytes memory data
+    ) internal pure returns (bool) {
+        return abi.decode(data, (bytes32)) == BALANCE_ADJUSTMENT_TASK_TYPE;
+    }
+
+    function _corporateActionsStorage()
+        internal
+        pure
+        virtual
+        returns (CorporateActionDataStorage storage corporateActions_)
+    {
+        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            corporateActions_.slot := position
+        }
+    }
+}

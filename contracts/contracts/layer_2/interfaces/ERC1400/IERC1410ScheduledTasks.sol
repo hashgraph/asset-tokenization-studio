@@ -209,6 +209,7 @@
 pragma solidity 0.8.18;
 
 interface IERC1410ScheduledTasks {
+    // TODO: It his necessary right now with this interface?
     function triggerAndSyncAll(
         bytes32 _partition,
         address _from,

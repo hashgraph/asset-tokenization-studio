@@ -203,228 +203,201 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
 import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    _CORPORATE_ACTION_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
-import {
-    DIVIDEND_CORPORATE_ACTION_TYPE,
-    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-    COUPON_CORPORATE_ACTION_TYPE,
-    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-    SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE,
-    SNAPSHOT_RESULT_ID
-} from '../constants/values.sol';
-import {
-    AdjustBalancesStorageWrapper_2
-} from '../adjustBalances/AdjustBalancesStorageWrapper_2.sol';
+    TransferAndLockStorageWrapper
+} from './TransferAndLockStorageWrapper.sol';
 
-contract CorporateActionsStorageWrapper_2 is
-    ICorporateActionsStorageWrapper,
-    AdjustBalancesStorageWrapper_2
+contract TransferAndLock is
+    IStaticFunctionSelectors,
+    TransferAndLockStorageWrapper
 {
-    using LibCommon for EnumerableSet.Bytes32Set;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    modifier checkIndexForCorporateActionByType(
-        bytes32 actionType,
-        uint256 index
-    ) {
-        if (_getCorporateActionCountByType(actionType) <= index) {
-            revert WrongIndexForAction(index, actionType);
-        }
-        _;
-    }
-
-    modifier checkDates(uint256 firstDate, uint256 secondDate) {
-        if (secondDate < firstDate) {
-            revert WrongDates(firstDate, secondDate);
-        }
-        _;
-    }
-
-    // Internal
-    function _addCorporateAction(
-        bytes32 _actionType,
-        bytes memory _data
+    function transferAndLockByPartition(
+        bytes32 _partition,
+        address _to,
+        uint256 _amount,
+        bytes calldata _data,
+        uint256 _expirationTimestamp
     )
-        internal
+        external
         virtual
-        returns (
-            bool success_,
-            bytes32 corporateActionId_,
-            uint256 corporateActionIndexByType_
-        )
+        override
+        onlyRole(_LOCKER_ROLE)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 lockId_)
     {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
-        // TODO: Review when it can return false.
-        success_ =
-            corporateActions_.actions.add(corporateActionId_) &&
-            corporateActions_.actionsByType[_actionType].add(
-                corporateActionId_
-            );
-        corporateActions_
-            .actionsData[corporateActionId_]
-            .actionType = _actionType;
-        corporateActions_.actionsData[corporateActionId_].data = _data;
-        corporateActionIndexByType_ = _getCorporateActionCountByType(
-            _actionType
-        );
-
-        if (_actionType == DIVIDEND_CORPORATE_ACTION_TYPE) {
-            _initDividend(success_, corporateActionId_, _data);
-        } else if (_actionType == VOTING_RIGHTS_CORPORATE_ACTION_TYPE) {
-            _initVotingRights(success_, corporateActionId_, _data);
-        } else if (_actionType == COUPON_CORPORATE_ACTION_TYPE) {
-            _initCoupon(success_, corporateActionId_, _data);
-        } else if (_actionType == BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE) {
-            _initBalanceAdjustment(success_, corporateActionId_, _data);
-        }
-    }
-
-    function _initDividend(
-        bool _success,
-        bytes32 _actionId,
-        bytes memory _data
-    ) private {
-        // TODO
-        /*if (!_success) {
-            revert DividendCreationFailed();
-        }
-
-        IEquity.Dividend memory newDividend = abi.decode(
+        _transferByPartition(
+            _msgSender(),
+            _to,
+            _amount,
+            _partition,
             _data,
-            (IEquity.Dividend)
+            _msgSender(),
+            ''
         );
-
-        _addScheduledTask(
-            newDividend.recordDate,
-            abi.encode(SNAPSHOT_TASK_TYPE)
+        (success_, lockId_) = _lockByPartition(
+            _partition,
+            _amount,
+            _to,
+            _expirationTimestamp
         );
-        _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));*/
-    }
-
-    function _initVotingRights(
-        bool _success,
-        bytes32 _actionId,
-        bytes memory _data
-    ) private {
-        // TODO
-        /*if (!_success) {
-            revert VotingRightsCreationFailed();
-        }
-
-        IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
-
-        _addScheduledTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
-        _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));*/
-    }
-
-    function _initCoupon(
-        bool _success,
-        bytes32 _actionId,
-        bytes memory _data
-    ) private {
-        // TODO
-        /*if (!_success) {
-            revert CouponCreationFailed();
-        }
-
-        IBond.Coupon memory newCoupon = abi.decode(_data, (IBond.Coupon));
-
-        _addScheduledTask(newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
-        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));*/
-    }
-
-    function _initBalanceAdjustment(
-        bool _success,
-        bytes32 _actionId,
-        bytes memory _data
-    ) private {
-        // TODO
-        /*
-        if (!_success) {
-            revert BalanceAdjustmentCreationFailed();
-        }
-
-        IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
-            .decode(_data, (IEquity.ScheduledBalanceAdjustment));
-
-        _addScheduledTask(
-            newBalanceAdjustment.executionDate,
-            abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
+        emit PartitionTransferredAndLocked(
+            _partition,
+            _msgSender(),
+            _to,
+            _amount,
+            _data,
+            _expirationTimestamp,
+            lockId_
         );
-        _addScheduledBalanceAdjustment(
-            newBalanceAdjustment.executionDate,
-            abi.encode(_actionId)
-        );*/
     }
 
-    function _onScheduledTaskTriggered(bytes memory _data) internal virtual {
-        // TODO
-        /*if (_data.length > 0) {
-            bytes32 taskType = abi.decode(_data, (bytes32));
-            if (taskType == SNAPSHOT_TASK_TYPE) {
-                _triggerScheduledSnapshots(1);
-            } else if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
-                _triggerScheduledBalanceAdjustments(1);
-            }
-        }*/
+    function transferAndLock(
+        address _to,
+        uint256 _amount,
+        bytes calldata _data,
+        uint256 _expirationTimestamp
+    )
+        external
+        virtual
+        override
+        onlyRole(_LOCKER_ROLE)
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyWithValidExpirationTimestamp(_expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 lockId_)
+    {
+        _transferByPartition(
+            _msgSender(),
+            _to,
+            _amount,
+            _DEFAULT_PARTITION,
+            _data,
+            _msgSender(),
+            ''
+        );
+        (success_, lockId_) = _lockByPartition(
+            _DEFAULT_PARTITION,
+            _amount,
+            _to,
+            _expirationTimestamp
+        );
+        emit PartitionTransferredAndLocked(
+            _DEFAULT_PARTITION,
+            _msgSender(),
+            _to,
+            _amount,
+            _data,
+            _expirationTimestamp,
+            lockId_
+        );
     }
 
-    function _onScheduledBalanceAdjustmentTriggered(
-        bytes memory _data
-    ) internal virtual {
-        if (_data.length > 0) {
-            bytes32 actionId = abi.decode(_data, (bytes32));
-            (, bytes memory balanceAdjustmentData) = _getCorporateAction(
-                actionId
-            );
-
-            if (balanceAdjustmentData.length > 0) {
-                /* IEquity.ScheduledBalanceAdjustment
-                    memory balanceAdjustment = abi.decode(
-                        balanceAdjustmentData,
-                        (IEquity.ScheduledBalanceAdjustment)
-                    );*/
-                /* _adjustBalances(
-                    balanceAdjustment.factor,
-                    balanceAdjustment.decimals
-                );*/
-            }
-        }
+    function protectedTransferAndLockByPartition(
+        bytes32 _partition,
+        TransferAndLockStruct calldata _transferAndLockData,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    )
+        external
+        virtual
+        override
+        onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
+        onlyRole(_protectedPartitionsRole(_partition))
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(
+            _transferAndLockData.expirationTimestamp
+        )
+        onlyProtectedPartitions
+        returns (bool success_, uint256 lockId_)
+    {
+        _protectedTransferAndLockByPartition(
+            _partition,
+            _transferAndLockData,
+            _deadline,
+            _nounce,
+            _signature
+        );
     }
 
-    function _getSnapshotID(
-        bytes32 _actionId
-    ) internal view virtual returns (uint256) {
-        bytes memory data = _getResult(_actionId, SNAPSHOT_RESULT_ID);
+    function protectedTransferAndLock(
+        TransferAndLockStruct calldata _transferAndLockData,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    )
+        external
+        virtual
+        override
+        onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
+        onlyRole(_protectedPartitionsRole(_DEFAULT_PARTITION))
+        onlyUnpaused
+        onlyWithoutMultiPartition
+        onlyWithValidExpirationTimestamp(
+            _transferAndLockData.expirationTimestamp
+        )
+        onlyProtectedPartitions
+        returns (bool success_, uint256 lockId_)
+    {
+        _protectedTransferAndLock(
+            _transferAndLockData,
+            _deadline,
+            _nounce,
+            _signature
+        );
+    }
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _TRANSFER_AND_LOCK_RESOLVER_KEY;
+    }
 
-        uint256 bytesLength = data.length;
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](2);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .transferAndLockByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .transferAndLock
+            .selector;
+    }
 
-        if (bytesLength < 32) return 0;
-
-        uint256 snapshotId;
-
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            snapshotId := mload(add(data, 0x20))
-        }
-
-        return snapshotId;
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(ITransferAndLock)
+            .interfaceId;
     }
 }
