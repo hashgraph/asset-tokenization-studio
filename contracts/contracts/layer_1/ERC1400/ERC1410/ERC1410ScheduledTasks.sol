@@ -203,122 +203,70 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
+
 pragma solidity 0.8.18;
 
 import {
-    _SNAPSHOTS_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
+    IERC1410ScheduledTasks
+} from '../../interfaces/ERC1400/IERC1410ScheduledTasks.sol';
+import {ERC1410Snapshot} from './ERC1410Snapshot.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
-import {Common} from '../common/Common.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
+    _ERC1410_RESOLVER_KEY
+} from '../../../layer_1/constants/resolverKeys.sol';
+import {IERC1410} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 
-contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
-    function takeSnapshot()
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID)
-    {
-        _triggerScheduledTasks(0);
-        return _takeSnapshot();
-    }
-
-    function AbafAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 ABAF_) {
-        return _AbafAtSnapshot(_snapshotID);
-    }
-
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual returns (uint8 decimals_) {
-        return _decimalsAtSnapshot(_snapshotID);
-    }
-
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function balanceOfAtSnapshotByPartition(
+contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
+    function triggerAndSyncAll(
         bytes32 _partition,
-        uint256 _snapshotID,
+        address _from,
+        address _to
+    ) external virtual onlyUnpaused {
+        _triggerAndSyncAll(_partition, _from, _to);
+    }
+
+    function totalSupplyAdjusted() external view virtual returns (uint256) {
+        return _totalSupplyAdjusted();
+    }
+
+    function totalSupplyByPartitionAdjusted(
+        bytes32 _partition
+    ) external view virtual returns (uint256) {
+        return _totalSupplyByPartitionAdjusted(_partition);
+    }
+
+    function balanceOfAdjusted(
         address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _balanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
+    ) external view virtual returns (uint256) {
+        return _balanceOfAdjusted(_tokenHolder);
     }
 
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (bytes32[] memory) {
-        return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
+    function balanceOfAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) external view virtual returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, _timestamp);
     }
 
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshot(_snapshotID);
-    }
-
-    function totalSupplyAtSnapshotByPartition(
+    function balanceOfByPartitionAdjusted(
         bytes32 _partition,
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
-    }
-
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
         address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
+    ) external view virtual returns (uint256) {
+        return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
     }
 
-    function lockedBalanceOfAtSnapshotByPartition(
+    function balanceOf(
+        address _tokenHolder
+    ) external view virtual override returns (uint256) {
+        return _balanceOfAdjusted(_tokenHolder);
+    }
+
+    function balanceOfByPartition(
         bytes32 _partition,
-        uint256 _snapshotID,
         address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _lockedBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return
-            _heldBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
+    ) external view virtual override returns (uint256) {
+        return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function getStaticResolverKey()
@@ -328,7 +276,7 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         override
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
+        staticResolverKey_ = _ERC1410_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
@@ -338,41 +286,89 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
-        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
+        staticFunctionSelectors_ = new bytes4[](30);
+        uint256 selectorIndex = 0;
         staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshot
+            .balanceOfAdjusted
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshot
+            .balanceOfAdjustedAt
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshotByPartition
+            .balanceOfByPartitionAdjusted
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .partitionsOfAtSnapshot
+            .initialize_ERC1410_Basic
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshotByPartition
+            .transferByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshot
+            .isMultiPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.balanceOf.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.partitionsOf.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.totalSupply.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshotByPartition
+            .totalSupplyByPartitionAdjusted
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshot
+            .operatorTransferByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshotByPartition
+            .authorizeOperator
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .AbafAtSnapshot
+            .revokeOperator
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .decimalsAtSnapshot
+            .authorizeOperatorByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .revokeOperatorByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isOperator.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .isOperatorForPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .redeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .issueByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .canTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .canRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .triggerAndSyncAll
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedTransferFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedRedeemFromByPartition
             .selector;
     }
 
@@ -385,6 +381,6 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
     {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC1410).interfaceId;
     }
 }

@@ -206,185 +206,145 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
+import {IBond} from '../interfaces/bond/IBond.sol';
+import {BondStorageWrapper} from './BondStorageWrapper.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
 import {
-    _SNAPSHOTS_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
+    _CORPORATE_ACTION_ROLE,
+    _BOND_MANAGER_ROLE
+} from '../../layer_1/constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
-import {Common} from '../common/Common.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
 
-contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
-    function takeSnapshot()
+abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
+    // solhint-disable func-name-mixedcase
+    // solhint-disable-next-line private-vars-leading-underscore
+    function _initialize_bond(
+        BondDetailsData calldata _bondDetailsData,
+        CouponDetailsData calldata _couponDetailsData
+    )
+        internal
+        checkDates(_bondDetailsData.startingDate, _bondDetailsData.maturityDate)
+        checkTimestamp(_bondDetailsData.startingDate)
+    {
+        BondDataStorage storage bondStorage = _bondStorage();
+        bondStorage.initialized = true;
+        _storeBondDetails(_bondDetailsData);
+        _storeCouponDetails(
+            _couponDetailsData,
+            _bondDetailsData.startingDate,
+            _bondDetailsData.maturityDate
+        );
+    }
+
+    function getBondDetails()
+        external
+        view
+        override
+        returns (BondDetailsData memory bondDetailsData_)
+    {
+        return _getBondDetails();
+    }
+
+    function setCoupon(
+        Coupon calldata _newCoupon
+    )
         external
         virtual
         override
         onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID)
+        onlyRole(_CORPORATE_ACTION_ROLE)
+        checkDates(_newCoupon.recordDate, _newCoupon.executionDate)
+        checkTimestamp(_newCoupon.recordDate)
+        returns (bool success_, uint256 couponID_)
     {
-        _triggerScheduledTasks(0);
-        return _takeSnapshot();
+        bytes32 corporateActionID;
+        (success_, corporateActionID, couponID_) = _setCoupon(_newCoupon);
+        emit CouponSet(
+            corporateActionID,
+            couponID_,
+            _msgSender(),
+            _newCoupon.recordDate,
+            _newCoupon.executionDate,
+            _newCoupon.rate
+        );
     }
 
-    function AbafAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 ABAF_) {
-        return _AbafAtSnapshot(_snapshotID);
-    }
-
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual returns (uint8 decimals_) {
-        return _decimalsAtSnapshot(_snapshotID);
-    }
-
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function balanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _balanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (bytes32[] memory) {
-        return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshot(_snapshotID);
-    }
-
-    function totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
-    }
-
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _lockedBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return
-            _heldBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function getStaticResolverKey()
+    /**
+     * @dev Updates the maturity date of the bond.
+     * @param _newMaturityDate The new maturity date to be set.
+     */
+    function updateMaturityDate(
+        uint256 _newMaturityDate
+    )
         external
-        pure
         virtual
         override
-        returns (bytes32 staticResolverKey_)
+        onlyUnpaused
+        onlyRole(_BOND_MANAGER_ROLE)
+        onlyAfterCurrentMaturityDate(_newMaturityDate)
+        returns (bool success_)
     {
-        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
+        emit MaturityDateUpdated(
+            address(this),
+            _newMaturityDate,
+            _getMaturityDate()
+        );
+        success_ = _setMaturityDate(_newMaturityDate);
+        return success_;
     }
 
-    function getStaticFunctionSelectors()
+    function getCouponDetails()
         external
-        pure
-        virtual
+        view
         override
-        returns (bytes4[] memory staticFunctionSelectors_)
+        returns (CouponDetailsData memory couponDetails_)
     {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
-        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .partitionsOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .AbafAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .decimalsAtSnapshot
-            .selector;
+        return _getCouponDetails();
     }
 
-    function getStaticInterfaceIds()
+    function getCoupon(
+        uint256 _couponID
+    )
         external
-        pure
+        view
         virtual
         override
-        returns (bytes4[] memory staticInterfaceIds_)
+        checkIndexForCorporateActionByType(
+            COUPON_CORPORATE_ACTION_TYPE,
+            _couponID - 1
+        )
+        returns (RegisteredCoupon memory registeredCoupon_)
     {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
+        return _getCoupon(_couponID);
+    }
+
+    function getCouponFor(
+        uint256 _couponID,
+        address _account
+    )
+        external
+        view
+        virtual
+        override
+        checkIndexForCorporateActionByType(
+            COUPON_CORPORATE_ACTION_TYPE,
+            _couponID - 1
+        )
+        returns (CouponFor memory couponFor_)
+    {
+        return _getCouponFor(_couponID, _account);
+    }
+
+    function getCouponCount()
+        external
+        view
+        virtual
+        override
+        returns (uint256 couponCount_)
+    {
+        return _getCouponCount();
     }
 }

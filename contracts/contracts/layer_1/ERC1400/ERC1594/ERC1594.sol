@@ -213,7 +213,6 @@ import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {ERC1594StorageWrapper} from './ERC1594StorageWrapper.sol';
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
-import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
 
 contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
@@ -249,7 +248,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(_to)
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
         // Add a function to validate the `_data` parameter
@@ -282,7 +281,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         checkControlList(_msgSender())
         checkControlList(_to)
         checkControlList(_from)
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
         // Add a function to validate the `_data` parameter
@@ -306,11 +305,11 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         virtual
         override
-        //        onlyValidMaxSupply(_value)
+        checkMaxSupply(_value)
         onlyUnpaused
         onlyRole(_ISSUER_ROLE)
         checkControlList(_tokenHolder)
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyIssuable
     {
         _issue(_tokenHolder, _value, _data);
@@ -332,7 +331,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         override
         onlyUnpaused
         checkControlList(_msgSender())
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
         _redeem(_value, _data);
@@ -358,7 +357,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(_tokenHolder)
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
         _redeemFrom(_tokenHolder, _value, _data);
@@ -395,12 +394,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         view
         virtual
         override
-        returns (
-            //onlyWithoutMultiPartition
-            bool,
-            bytes1,
-            bytes32
-        )
+        onlyWithoutMultiPartition
+        returns (bool, bytes1, bytes32)
     {
         return _canTransfer(_to, _value, _data);
     }
@@ -427,12 +422,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         view
         virtual
         override
-        returns (
-            //onlyWithoutMultiPartition
-            bool,
-            bytes1,
-            bytes32
-        )
+        onlyWithoutMultiPartition
+        returns (bool, bytes1, bytes32)
     {
         return _canTransferFrom(_from, _to, _value, _data);
     }

@@ -206,185 +206,205 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
+import {_BOND_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
+import {IBond} from '../interfaces/bond/IBond.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {IBondStorageWrapper} from '../interfaces/bond/IBondStorageWrapper.sol';
 import {
-    _SNAPSHOTS_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
-import {Common} from '../common/Common.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
-    function takeSnapshot()
-        external
+abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    struct BondDataStorage {
+        IBond.BondDetailsData bondDetail;
+        IBond.CouponDetailsData couponDetail;
+        bool initialized;
+    }
+
+    /**
+     * @dev Modifier to ensure that the function is called only after the current maturity date.
+     * @param _maturityDate The maturity date to be checked against the current maturity date.
+     * Reverts with `BondMaturityDateWrong` if the provided maturity date is less than or equal
+     * to the current maturity date.
+     */
+    modifier onlyAfterCurrentMaturityDate(uint256 _maturityDate) {
+        if (_maturityDate <= _getMaturityDate()) revert BondMaturityDateWrong();
+        _;
+    }
+
+    function _storeBondDetails(
+        IBond.BondDetailsData memory _bondDetails
+    ) internal {
+        _bondStorage().bondDetail = _bondDetails;
+    }
+
+    function _storeCouponDetails(
+        IBond.CouponDetailsData memory _couponDetails,
+        uint256 _startingDate,
+        uint256 _maturityDate
+    ) internal {
+        _bondStorage().couponDetail = _couponDetails;
+        if (_couponDetails.firstCouponDate == 0) return;
+        if (
+            _couponDetails.firstCouponDate < _startingDate ||
+            _couponDetails.firstCouponDate > _maturityDate
+        ) revert CouponFirstDateWrong();
+        if (_couponDetails.couponFrequency == 0) revert CouponFrequencyWrong();
+
+        _setFixedCoupons(
+            _couponDetails.firstCouponDate,
+            _couponDetails.couponFrequency,
+            _maturityDate,
+            _couponDetails.couponRate
+        );
+    }
+
+    function _setFixedCoupons(
+        uint256 _firstCouponDate,
+        uint256 _couponFrequency,
+        uint256 _maturityDate,
+        uint256 _rate
+    ) private returns (bool) {
+        uint256 numberOfSubsequentCoupons = (_maturityDate - _firstCouponDate) /
+            _couponFrequency;
+        bool success;
+        for (uint256 i = 0; i <= numberOfSubsequentCoupons; i++) {
+            uint256 runDate = _firstCouponDate + i * _couponFrequency;
+
+            IBond.Coupon memory _newCoupon;
+            _newCoupon.recordDate = runDate;
+            _newCoupon.executionDate = runDate;
+            _newCoupon.rate = _rate;
+
+            (success, , ) = _setCoupon(_newCoupon);
+
+            if (!success) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function _setCoupon(
+        IBond.Coupon memory _newCoupon
+    )
+        internal
         virtual
-        override
-        onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID)
+        returns (bool success_, bytes32 corporateActionId_, uint256 couponID_)
     {
-        _triggerScheduledTasks(0);
-        return _takeSnapshot();
+        (success_, corporateActionId_, couponID_) = _addCorporateAction(
+            COUPON_CORPORATE_ACTION_TYPE,
+            abi.encode(_newCoupon)
+        );
     }
 
-    function AbafAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 ABAF_) {
-        return _AbafAtSnapshot(_snapshotID);
+    /**
+     * @dev Internal function to set the maturity date of the bond.
+     * @param _maturityDate The new maturity date to be set.
+     * @return success_ True if the maturity date was set successfully.
+     */
+    function _setMaturityDate(
+        uint256 _maturityDate
+    ) internal returns (bool success_) {
+        _bondStorage().bondDetail.maturityDate = _maturityDate;
+        return true;
     }
 
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual returns (uint8 decimals_) {
-        return _decimalsAtSnapshot(_snapshotID);
+    function _getBondDetails()
+        internal
+        view
+        returns (IBond.BondDetailsData memory bondDetails_)
+    {
+        bondDetails_ = _bondStorage().bondDetail;
     }
 
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
+    function _getCouponDetails()
+        internal
+        view
+        returns (IBond.CouponDetailsData memory couponDetails_)
+    {
+        couponDetails_ = _bondStorage().couponDetail;
     }
 
-    function balanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _balanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
+    function _getMaturityDate() internal view returns (uint256 maturityDate_) {
+        return _bondStorage().bondDetail.maturityDate;
     }
 
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (bytes32[] memory) {
-        return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
+    function _getCoupon(
+        uint256 _couponID
+    )
+        internal
+        view
+        virtual
+        returns (IBond.RegisteredCoupon memory registeredCoupon_)
+    {
+        bytes32 actionId = _corporateActionsStorage()
+            .actionsByType[COUPON_CORPORATE_ACTION_TYPE]
+            .at(_couponID - 1);
+
+        (, bytes memory data) = _getCorporateAction(actionId);
+
+        if (data.length > 0) {
+            (registeredCoupon_.coupon) = abi.decode(data, (IBond.Coupon));
+        }
+
+        registeredCoupon_.snapshotId = _getSnapshotID(actionId);
     }
 
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshot(_snapshotID);
+    function _getCouponFor(
+        uint256 _couponID,
+        address _account
+    ) internal view virtual returns (IBond.CouponFor memory couponFor_) {
+        IBond.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
+
+        couponFor_.rate = registeredCoupon.coupon.rate;
+        couponFor_.recordDate = registeredCoupon.coupon.recordDate;
+        couponFor_.executionDate = registeredCoupon.coupon.executionDate;
+
+        if (registeredCoupon.coupon.recordDate < _blockTimestamp()) {
+            couponFor_.recordDateReached = true;
+
+            couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
+                ? (_balanceOfAtSnapshot(registeredCoupon.snapshotId, _account) +
+                    _lockedBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
+                    ) +
+                    _heldBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
+                    ))
+                : (_balanceOf(_account) +
+                    _getLockedAmountFor(_account) +
+                    _getHeldAmountFor(_account));
+
+            couponFor_.decimals = _decimalsAdjusted();
+        }
     }
 
-    function totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
+    function _getCouponCount()
+        internal
+        view
+        virtual
+        returns (uint256 couponCount_)
+    {
+        return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
     }
 
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _lockedBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return
-            _heldBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function getStaticResolverKey()
-        external
+    function _bondStorage()
+        internal
         pure
         virtual
-        override
-        returns (bytes32 staticResolverKey_)
+        returns (BondDataStorage storage bondData_)
     {
-        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
-        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .partitionsOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .AbafAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .decimalsAtSnapshot
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
+        bytes32 position = _BOND_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            bondData_.slot := position
+        }
     }
 }

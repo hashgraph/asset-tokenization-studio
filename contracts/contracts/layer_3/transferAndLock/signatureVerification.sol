@@ -203,188 +203,60 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
 import {
-    _SNAPSHOTS_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
-import {Common} from '../common/Common.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
+    _PROTECTED_TRANSFER_AND_LOCK_FROM_PARTITION_TYPEHASH,
+    _PROTECTED_TRANSFER_AND_LOCK_BY_PARTITION_FROM_PARTITION_TYPEHASH
+} from '../constants/values.sol';
 
-contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
-    function takeSnapshot()
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID)
-    {
-        _triggerScheduledTasks(0);
-        return _takeSnapshot();
-    }
+function getMessageHashTransferAndLock(
+    address _from,
+    address _to,
+    uint256 _amount,
+    bytes calldata _data,
+    uint256 _expirationTimestamp,
+    uint256 _deadline,
+    uint256 _nounce
+) pure returns (bytes32) {
+    return
+        keccak256(
+            abi.encode(
+                _PROTECTED_TRANSFER_AND_LOCK_FROM_PARTITION_TYPEHASH,
+                _from,
+                _to,
+                _amount,
+                _data,
+                _expirationTimestamp,
+                _deadline,
+                _nounce
+            )
+        );
+}
 
-    function AbafAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 ABAF_) {
-        return _AbafAtSnapshot(_snapshotID);
-    }
-
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual returns (uint8 decimals_) {
-        return _decimalsAtSnapshot(_snapshotID);
-    }
-
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function balanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _balanceOfAtSnapshotByPartition(
+function getMessageHashTransferAndLockByPartition(
+    bytes32 _partition,
+    address _from,
+    address _to,
+    uint256 _amount,
+    bytes calldata _data,
+    uint256 _expirationTimestamp,
+    uint256 _deadline,
+    uint256 _nounce
+) pure returns (bytes32) {
+    return
+        keccak256(
+            abi.encode(
+                _PROTECTED_TRANSFER_AND_LOCK_BY_PARTITION_FROM_PARTITION_TYPEHASH,
                 _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (bytes32[] memory) {
-        return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshot(_snapshotID);
-    }
-
-    function totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
-    }
-
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _lockedBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return
-            _heldBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
-        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .partitionsOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .AbafAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .decimalsAtSnapshot
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
-    }
+                _from,
+                _to,
+                _amount,
+                _data,
+                _expirationTimestamp,
+                _deadline,
+                _nounce
+            )
+        );
 }

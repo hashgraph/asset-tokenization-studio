@@ -203,188 +203,247 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    _SNAPSHOTS_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
-import {Common} from '../common/Common.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
+enum RegulationType {
+    NONE,
+    REG_S,
+    REG_D
+}
 
-contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
-    function takeSnapshot()
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID)
-    {
-        _triggerScheduledTasks(0);
-        return _takeSnapshot();
-    }
+enum RegulationSubType {
+    NONE,
+    REG_D_506_B,
+    REG_D_506_C
+}
 
-    function AbafAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 ABAF_) {
-        return _AbafAtSnapshot(_snapshotID);
-    }
+enum AccreditedInvestors {
+    NONE,
+    ACCREDITATION_REQUIRED
+}
 
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual returns (uint8 decimals_) {
-        return _decimalsAtSnapshot(_snapshotID);
-    }
+enum ManualInvestorVerification {
+    NOTHING_TO_VERIFY,
+    VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED
+}
 
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
+enum InternationalInvestors {
+    NOT_ALLOWED,
+    ALLOWED
+}
 
-    function balanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _balanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
+enum ResaleHoldPeriod {
+    NOT_APPLICABLE,
+    APPLICABLE_FROM_6_MOTHS_TO_1_YEAR
+}
 
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (bytes32[] memory) {
-        return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
+error RegulationTypeAndSubTypeForbidden(
+    RegulationType regulationType,
+    RegulationSubType regulationSubType
+);
 
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshot(_snapshotID);
-    }
+struct AdditionalSecurityData {
+    bool countriesControlListType;
+    string listOfCountries;
+    string info;
+}
 
-    function totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
-    }
+struct FactoryRegulationData {
+    RegulationType regulationType;
+    RegulationSubType regulationSubType;
+    AdditionalSecurityData additionalSecurityData;
+}
 
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
+struct RegulationData {
+    RegulationType regulationType;
+    RegulationSubType regulationSubType;
+    uint256 dealSize;
+    AccreditedInvestors accreditedInvestors;
+    uint256 maxNonAccreditedInvestors;
+    ManualInvestorVerification manualInvestorVerification;
+    InternationalInvestors internationalInvestors;
+    ResaleHoldPeriod resaleHoldPeriod;
+}
 
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _lockedBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
+uint256 constant _REGS_DEAL_SIZE = 0;
+AccreditedInvestors constant _REGS_ACCREDITED_INVESTORS = AccreditedInvestors
+    .ACCREDITATION_REQUIRED;
+uint256 constant _REGS_MAX_NON_ACCREDITED_INVESTORS = 0;
+ManualInvestorVerification constant _REGS_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
+    .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
+InternationalInvestors constant _REGS_INTERNATIONAL_INVESTORS = InternationalInvestors
+    .ALLOWED;
+ResaleHoldPeriod constant _REGS_RESALE_HOLD_PERIOD = ResaleHoldPeriod
+    .NOT_APPLICABLE;
 
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
+uint256 constant _REGD_506_B_DEAL_SIZE = 0;
+AccreditedInvestors constant _REGD_506_B_ACCREDITED_INVESTORS = AccreditedInvestors
+    .ACCREDITATION_REQUIRED;
+uint256 constant _REGD_506_B_MAX_NON_ACCREDITED_INVESTORS = 35;
+ManualInvestorVerification constant _REGD_506_B_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
+    .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
+InternationalInvestors constant _REGD_506_B_INTERNATIONAL_INVESTORS = InternationalInvestors
+    .NOT_ALLOWED;
+ResaleHoldPeriod constant _REGD_506_B_RESALE_HOLD_PERIOD = ResaleHoldPeriod
+    .APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
 
-    function heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return
-            _heldBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
+uint256 constant _REGD_506_C_DEAL_SIZE = 0;
+AccreditedInvestors constant _REGD_506_C_ACCREDITED_INVESTORS = AccreditedInvestors
+    .ACCREDITATION_REQUIRED;
+uint256 constant _REGD_506_C_MAX_NON_ACCREDITED_INVESTORS = 0;
+ManualInvestorVerification constant _REGD_506_C_MANUAL_INVESTOR_VERIFICATION = ManualInvestorVerification
+    .VERIFICATION_INVESTORS_FINANCIAL_DOCUMENTS_REQUIRED;
+InternationalInvestors constant _REGD_506_C_INTERNATIONAL_INVESTORS = InternationalInvestors
+    .NOT_ALLOWED;
+ResaleHoldPeriod constant _REGD_506_C_RESALE_HOLD_PERIOD = ResaleHoldPeriod
+    .APPLICABLE_FROM_6_MOTHS_TO_1_YEAR;
 
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
-    }
+function buildRegulationData(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (RegulationData memory regulationData_) {
+    regulationData_ = RegulationData({
+        regulationType: _regulationType,
+        regulationSubType: _regulationSubType,
+        dealSize: buildDealSize(_regulationType, _regulationSubType),
+        accreditedInvestors: buildAccreditedInvestors(
+            _regulationType,
+            _regulationSubType
+        ),
+        maxNonAccreditedInvestors: buildMaxNonAccreditedInvestors(
+            _regulationType,
+            _regulationSubType
+        ),
+        manualInvestorVerification: buildManualInvestorVerification(
+            _regulationType,
+            _regulationSubType
+        ),
+        internationalInvestors: buildInternationalInvestors(
+            _regulationType,
+            _regulationSubType
+        ),
+        resaleHoldPeriod: buildResaleHoldPeriod(
+            _regulationType,
+            _regulationSubType
+        )
+    });
+}
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
-        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .partitionsOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .AbafAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .decimalsAtSnapshot
-            .selector;
+function buildDealSize(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (uint256 dealSize_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_DEAL_SIZE;
     }
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_DEAL_SIZE;
+    }
+    dealSize_ = _REGD_506_C_DEAL_SIZE;
+}
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
+function buildAccreditedInvestors(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (AccreditedInvestors accreditedInvestors_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_ACCREDITED_INVESTORS;
     }
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_ACCREDITED_INVESTORS;
+    }
+    accreditedInvestors_ = _REGD_506_C_ACCREDITED_INVESTORS;
+}
+
+function buildMaxNonAccreditedInvestors(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (uint256 maxNonAccreditedInvestors_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_MAX_NON_ACCREDITED_INVESTORS;
+    }
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_MAX_NON_ACCREDITED_INVESTORS;
+    }
+    maxNonAccreditedInvestors_ = _REGD_506_C_MAX_NON_ACCREDITED_INVESTORS;
+}
+
+function buildManualInvestorVerification(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (ManualInvestorVerification manualInvestorVerification_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_MANUAL_INVESTOR_VERIFICATION;
+    }
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_MANUAL_INVESTOR_VERIFICATION;
+    }
+    manualInvestorVerification_ = _REGD_506_C_MANUAL_INVESTOR_VERIFICATION;
+}
+
+function buildInternationalInvestors(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (InternationalInvestors internationalInvestors_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_INTERNATIONAL_INVESTORS;
+    }
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_INTERNATIONAL_INVESTORS;
+    }
+    internationalInvestors_ = _REGD_506_C_INTERNATIONAL_INVESTORS;
+}
+
+function buildResaleHoldPeriod(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (ResaleHoldPeriod resaleHoldPeriod_) {
+    if (_regulationType == RegulationType.REG_S) {
+        return _REGS_RESALE_HOLD_PERIOD;
+    }
+    if (_regulationSubType == RegulationSubType.REG_D_506_B) {
+        return _REGD_506_B_RESALE_HOLD_PERIOD;
+    }
+    resaleHoldPeriod_ = _REGD_506_C_RESALE_HOLD_PERIOD;
+}
+
+function checkRegulationTypeAndSubType(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure {
+    if (isValidTypeAndSubType(_regulationType, _regulationSubType)) {
+        return;
+    }
+    revert RegulationTypeAndSubTypeForbidden(
+        _regulationType,
+        _regulationSubType
+    );
+}
+
+function isValidTypeAndSubType(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (bool isValid_) {
+    isValid_ =
+        isValidTypeAndSubTypeForRegS(_regulationType, _regulationSubType) ||
+        isValidTypeAndSubTypeForRegD(_regulationType, _regulationSubType);
+}
+
+function isValidTypeAndSubTypeForRegS(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (bool isValid_) {
+    isValid_ =
+        _regulationType == RegulationType.REG_S &&
+        _regulationSubType == RegulationSubType.NONE;
+}
+
+function isValidTypeAndSubTypeForRegD(
+    RegulationType _regulationType,
+    RegulationSubType _regulationSubType
+) pure returns (bool isValid_) {
+    isValid_ =
+        _regulationType == RegulationType.REG_D &&
+        _regulationSubType != RegulationSubType.NONE;
 }

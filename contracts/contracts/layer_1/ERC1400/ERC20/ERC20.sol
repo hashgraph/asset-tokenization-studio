@@ -212,8 +212,9 @@ import {IERC20} from '../../interfaces/ERC1400/IERC20.sol';
 import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_ERC20_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 
-abstract contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
+contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(
         ERC20Metadata calldata erc20Metadata
@@ -232,6 +233,23 @@ abstract contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         erc20Storage.initialized = true;
     }
 
+    function allowance(
+        address owner,
+        address spender
+    ) external view virtual override returns (uint256) {
+        return _allowanceAdjusted(owner, spender);
+    }
+
+    function decimalsAdjusted() external view virtual returns (uint8) {
+        return _decimalsAdjusted();
+    }
+
+    function decimalsAdjustedAt(
+        uint256 _timestamp
+    ) external view virtual returns (uint8) {
+        return _decimalsAdjustedAt(_timestamp);
+    }
+
     // solhint-disable no-unused-vars
     function approve(
         address spender,
@@ -243,10 +261,8 @@ abstract contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(spender)
-        returns (
-            //onlyWithoutMultiPartition
-            bool
-        )
+        onlyWithoutMultiPartition
+        returns (bool)
     {
         return _approve(spender, value);
     }
@@ -261,7 +277,7 @@ abstract contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(to)
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool)
     {
@@ -280,7 +296,7 @@ abstract contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         checkControlList(_msgSender())
         checkControlList(from)
         checkControlList(to)
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool)
     {
@@ -296,10 +312,8 @@ abstract contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(spender)
-        returns (
-            //onlyWithoutMultiPartition
-            bool
-        )
+        onlyWithoutMultiPartition
+        returns (bool)
     {
         return _increaseAllowance(spender, addedValue);
     }
@@ -313,19 +327,10 @@ abstract contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(spender)
-        returns (
-            //onlyWithoutMultiPartition
-            bool
-        )
+        onlyWithoutMultiPartition
+        returns (bool)
     {
         return _decreaseAllowance(spender, subtractedValue);
-    }
-
-    function allowance(
-        address owner,
-        address spender
-    ) external view virtual override returns (uint256) {
-        return _allowance(owner, spender);
     }
 
     function name() external view returns (string memory) {
@@ -347,5 +352,66 @@ abstract contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         view
         virtual
-        returns (ERC20Metadata memory);
+        returns (ERC20Metadata memory)
+    {
+        return _getERC20MetadataAdjusted();
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _ERC20_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](13);
+        uint256 selectorsIndex;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .initialize_ERC20
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.approve.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.transfer.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.transferFrom.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .increaseAllowance
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .decreaseAllowance
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.allowance.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .getERC20Metadata
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.name.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.symbol.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this.decimals.selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .decimalsAdjustedAt
+            .selector;
+        staticFunctionSelectors_[selectorsIndex++] = this
+            .decimalsAdjusted
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC20).interfaceId;
+    }
 }

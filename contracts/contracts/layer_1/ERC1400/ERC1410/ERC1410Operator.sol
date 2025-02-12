@@ -248,7 +248,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         virtual
         override
         onlyUnpaused
-        //onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         checkControlList(_msgSender())
         checkControlList(_operator)
     {
@@ -266,7 +266,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         virtual
         override
         onlyUnpaused
-        //onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         checkControlList(_msgSender())
     {
         _revokeOperatorByPartition(_partition, _operator);
@@ -292,7 +292,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         virtual
         override
         onlyUnpaused
-        //onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         checkControlList(_msgSender())
         checkControlList(_from)
         checkControlList(_to)

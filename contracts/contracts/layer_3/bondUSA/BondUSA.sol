@@ -203,122 +203,31 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {Bond} from '../../layer_2/bond/Bond.sol';
+import {Security} from '../security/Security.sol';
+import {IBondUSA} from '../interfaces/IBondUSA.sol';
 import {
-    _SNAPSHOTS_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
-import {Common} from '../common/Common.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
+    RegulationData,
+    AdditionalSecurityData
+} from '../constants/regulation.sol';
+import {_BOND_RESOLVER_KEY} from '../../layer_2/constants/resolverKeys.sol';
+import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
+import {ISecurity} from '../interfaces/ISecurity.sol';
 
-contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
-    function takeSnapshot()
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID)
-    {
-        _triggerScheduledTasks(0);
-        return _takeSnapshot();
-    }
-
-    function AbafAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 ABAF_) {
-        return _AbafAtSnapshot(_snapshotID);
-    }
-
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual returns (uint8 decimals_) {
-        return _decimalsAtSnapshot(_snapshotID);
-    }
-
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function balanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _balanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (bytes32[] memory) {
-        return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshot(_snapshotID);
-    }
-
-    function totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
-    }
-
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _lockedBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return
-            _heldBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
+contract BondUSA is IBondUSA, Bond, Security {
+    // solhint-disable func-name-mixedcase
+    // solhint-disable-next-line private-vars-leading-underscore
+    function _initialize_bondUSA(
+        BondDetailsData calldata _bondDetailsData,
+        CouponDetailsData calldata _couponDetailsData,
+        RegulationData memory _regulationData,
+        AdditionalSecurityData calldata _additionalSecurityData
+    ) external override onlyUninitialized(_bondStorage().initialized) {
+        _initialize_bond(_bondDetailsData, _couponDetailsData);
+        _initializeSecurity(_regulationData, _additionalSecurityData);
     }
 
     function getStaticResolverKey()
@@ -328,7 +237,7 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         override
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
+        staticResolverKey_ = _BOND_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
@@ -339,40 +248,27 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
-        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
+        staticFunctionSelectors_ = new bytes4[](9);
         staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshot
+            ._initialize_bondUSA
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.setCoupon.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .updateMaturityDate
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshot
+            .getBondDetails
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshotByPartition
+            .getCouponDetails
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCoupon.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getCouponFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getCouponCount
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .partitionsOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .AbafAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .decimalsAtSnapshot
+            .getSecurityRegulationData
             .selector;
     }
 
@@ -383,8 +279,10 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {
-        staticInterfaceIds_ = new bytes4[](1);
+        staticInterfaceIds_ = new bytes4[](3);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IBond).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(ISecurity).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IBondUSA).interfaceId;
     }
 }

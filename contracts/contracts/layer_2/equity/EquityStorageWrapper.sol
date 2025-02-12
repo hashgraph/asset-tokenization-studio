@@ -206,185 +206,288 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
+import {Common} from '../../layer_1/common/Common.sol';
+import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
-    _SNAPSHOTS_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
+    DIVIDEND_CORPORATE_ACTION_TYPE,
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
+} from '../constants/values.sol';
+import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
-import {Common} from '../common/Common.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    IEquityStorageWrapper
+} from '../interfaces/equity/IEquityStorageWrapper.sol';
 
-contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
-    function takeSnapshot()
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID)
+abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    struct EquityDataStorage {
+        IEquity.EquityDetailsData equityDetailsData;
+        bool initialized;
+    }
+
+    function _storeEquityDetails(
+        IEquity.EquityDetailsData memory _equityDetailsData
+    ) internal {
+        _equityStorage().equityDetailsData = _equityDetailsData;
+    }
+
+    function _getEquityDetails()
+        internal
+        view
+        returns (IEquity.EquityDetailsData memory equityDetails_)
     {
-        _triggerScheduledTasks(0);
-        return _takeSnapshot();
+        equityDetails_ = _equityStorage().equityDetailsData;
     }
 
-    function AbafAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 ABAF_) {
-        return _AbafAtSnapshot(_snapshotID);
+    function _setDividends(
+        IEquity.Dividend calldata _newDividend
+    )
+        internal
+        virtual
+        returns (bool success_, bytes32 corporateActionId_, uint256 dividendId_)
+    {
+        (success_, corporateActionId_, dividendId_) = _addCorporateAction(
+            DIVIDEND_CORPORATE_ACTION_TYPE,
+            abi.encode(_newDividend)
+        );
     }
 
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual returns (uint8 decimals_) {
-        return _decimalsAtSnapshot(_snapshotID);
+    /**
+     * @dev returns the properties and related snapshots (if any) of a dividend.
+     *
+     * @param _dividendID The dividend Id
+     * @param _dividendID The dividend Id
+     */
+    function _getDividends(
+        uint256 _dividendID
+    )
+        internal
+        view
+        virtual
+        returns (IEquity.RegisteredDividend memory registeredDividend_)
+    {
+        bytes32 actionId = _corporateActionsStorage()
+            .actionsByType[DIVIDEND_CORPORATE_ACTION_TYPE]
+            .at(_dividendID - 1);
+
+        (, bytes memory data) = _getCorporateAction(actionId);
+
+        if (data.length > 0) {
+            (registeredDividend_.dividend) = abi.decode(
+                data,
+                (IEquity.Dividend)
+            );
+        }
+
+        registeredDividend_.snapshotId = _getSnapshotID(actionId);
     }
 
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
+    /**
+     * @dev returns the properties and related snapshots (if any) of a dividend.
+     *
+     * @param _dividendID The dividend Id
+     * @param _account The account
+
+     */
+    function _getDividendsFor(
+        uint256 _dividendID,
+        address _account
+    ) internal view virtual returns (IEquity.DividendFor memory dividendFor_) {
+        IEquity.RegisteredDividend memory registeredDividend = _getDividends(
+            _dividendID
+        );
+
+        dividendFor_.amount = registeredDividend.dividend.amount;
+        dividendFor_.recordDate = registeredDividend.dividend.recordDate;
+        dividendFor_.executionDate = registeredDividend.dividend.executionDate;
+
+        (
+            dividendFor_.tokenBalance,
+            dividendFor_.decimals,
+            dividendFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredDividend.dividend.recordDate,
+            registeredDividend.snapshotId,
+            _account
+        );
     }
 
-    function balanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
+    function _getDividendsCount()
+        internal
+        view
+        virtual
+        returns (uint256 dividendCount_)
+    {
+        return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
+    }
+
+    function _setVoting(
+        IEquity.Voting calldata _newVoting
+    )
+        internal
+        virtual
+        returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
+    {
+        (success_, corporateActionId_, voteID_) = _addCorporateAction(
+            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+            abi.encode(_newVoting)
+        );
+    }
+
+    function _getVoting(
+        uint256 _voteID
+    )
+        internal
+        view
+        virtual
+        returns (IEquity.RegisteredVoting memory registeredVoting_)
+    {
+        bytes32 actionId = _corporateActionsStorage()
+            .actionsByType[VOTING_RIGHTS_CORPORATE_ACTION_TYPE]
+            .at(_voteID - 1);
+
+        (, bytes memory data) = _getCorporateAction(actionId);
+
+        if (data.length > 0) {
+            (registeredVoting_.voting) = abi.decode(data, (IEquity.Voting));
+        }
+
+        registeredVoting_.snapshotId = _getSnapshotID(actionId);
+    }
+
+    /**
+     * @dev returns the properties and related snapshots (if any) of a voting.
+     *
+     * @param _voteID The dividend Id
+     * @param _account The account
+
+     */
+    function _getVotingFor(
+        uint256 _voteID,
+        address _account
+    ) internal view virtual returns (IEquity.VotingFor memory votingFor_) {
+        IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
+
+        votingFor_.recordDate = registeredVoting.voting.recordDate;
+        votingFor_.data = registeredVoting.voting.data;
+
+        (
+            votingFor_.tokenBalance,
+            votingFor_.decimals,
+            votingFor_.recordDateReached
+        ) = _getSnapshotBalanceForIfDateReached(
+            registeredVoting.voting.recordDate,
+            registeredVoting.snapshotId,
+            _account
+        );
+    }
+
+    function _getVotingCount()
+        internal
+        view
+        virtual
+        returns (uint256 votingCount_)
+    {
         return
-            _balanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
+            _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
+    }
+
+    function _setScheduledBalanceAdjustment(
+        IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    )
+        internal
+        virtual
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 balanceAdjustmentID_
+        )
+    {
+        (
+            success_,
+            corporateActionId_,
+            balanceAdjustmentID_
+        ) = _addCorporateAction(
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            abi.encode(_newBalanceAdjustment)
+        );
+    }
+
+    function _getScheduledBalanceAdjusment(
+        uint256 _balanceAdjustmentID
+    )
+        internal
+        view
+        virtual
+        returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_)
+    {
+        bytes32 actionId = _corporateActionsStorage()
+            .actionsByType[BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE]
+            .at(_balanceAdjustmentID - 1);
+
+        (, bytes memory data) = _getCorporateAction(actionId);
+
+        if (data.length > 0) {
+            (balanceAdjustment_) = abi.decode(
+                data,
+                (IEquity.ScheduledBalanceAdjustment)
+            );
+        }
+    }
+
+    function _getScheduledBalanceAdjustmentsCount()
+        internal
+        view
+        virtual
+        returns (uint256 balanceAdjustmentCount_)
+    {
+        return
+            _getCorporateActionCountByType(
+                BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
             );
     }
 
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (bytes32[] memory) {
-        return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
+    function _getSnapshotBalanceForIfDateReached(
+        uint256 _date,
+        uint256 _snapshotId,
+        address _account
+    )
+        internal
+        view
+        virtual
+        returns (uint256 balance_, uint8 decimals_, bool dateReached_)
+    {
+        if (_date < _blockTimestamp()) {
+            dateReached_ = true;
+
+            balance_ = (_snapshotId != 0)
+                ? (_balanceOfAtSnapshot(_snapshotId, _account) +
+                    _lockedBalanceOfAtSnapshot(_snapshotId, _account) +
+                    _heldBalanceOfAtSnapshot(_snapshotId, _account))
+                : (_balanceOfAdjustedAt(_account, _date) +
+                    _getLockedAmountForAdjustedAt(_account, _blockTimestamp()) +
+                    _getHeldAmountForAdjusted(_account));
+
+            decimals_ = (_snapshotId != 0)
+                ? _decimalsAtSnapshot(_snapshotId)
+                : _decimalsAdjustedAt(_date);
+        }
     }
 
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshot(_snapshotID);
-    }
-
-    function totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
-    }
-
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _lockedBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return
-            _heldBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function getStaticResolverKey()
-        external
+    function _equityStorage()
+        internal
         pure
         virtual
-        override
-        returns (bytes32 staticResolverKey_)
+        returns (EquityDataStorage storage equityData_)
     {
-        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
-        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .partitionsOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .AbafAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .decimalsAtSnapshot
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
+        bytes32 position = _EQUITY_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            equityData_.slot := position
+        }
     }
 }

@@ -212,9 +212,9 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {CapStorageWrapper} from './CapStorageWrapper.sol';
+import {Common} from '../common/Common.sol';
 
-contract Cap is ICap, IStaticFunctionSelectors, CapStorageWrapper {
+contract Cap is ICap, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(
         uint256 maxSupply,
@@ -224,7 +224,7 @@ contract Cap is ICap, IStaticFunctionSelectors, CapStorageWrapper {
         virtual
         override
         onlyUninitialized(_capStorage().initialized)
-        onlyValidNewMaxSupply(maxSupply)
+        checkNewMaxSupply(maxSupply)
     {
         CapDataStorage storage capStorage = _capStorage();
 
@@ -247,7 +247,7 @@ contract Cap is ICap, IStaticFunctionSelectors, CapStorageWrapper {
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
-        onlyValidNewMaxSupply(_maxSupply)
+        checkNewMaxSupply(_maxSupply)
         onlyWithoutMultiPartition
         returns (bool success_)
     {
@@ -264,7 +264,7 @@ contract Cap is ICap, IStaticFunctionSelectors, CapStorageWrapper {
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
-        onlyValidNewMaxSupplyByPartition(_partition, _maxSupply)
+        checkNewMaxSupplyForPartition(_partition, _maxSupply)
         onlyWithoutMultiPartition
         returns (bool success_)
     {

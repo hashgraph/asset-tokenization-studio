@@ -214,6 +214,7 @@ import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {
     ERC1410BasicStorageWrapperRead
 } from '../ERC1410/ERC1410BasicStorageWrapperRead.sol';
+import {IFactory} from '../../../interfaces/factory/IFactory.sol';
 
 abstract contract ERC20StorageWrapper_1 is ERC1410BasicStorageWrapperRead {
     struct ERC20Storage {
@@ -223,7 +224,7 @@ abstract contract ERC20StorageWrapper_1 is ERC1410BasicStorageWrapperRead {
         uint8 decimals;
         bool initialized;
         mapping(address => mapping(address => uint256)) allowed;
-        IERC20StorageWrapper.SecurityType securityType;
+        IFactory.SecurityType securityType;
     }
 
     function _adjustDecimals(uint8 decimals) internal {

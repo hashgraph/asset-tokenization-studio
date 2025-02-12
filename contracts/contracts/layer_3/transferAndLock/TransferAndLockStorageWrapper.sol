@@ -203,188 +203,210 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
+import {Common} from '../../layer_1/common/Common.sol';
 import {
-    _SNAPSHOTS_RESOLVER_KEY
-} from '../../layer_1/constants/resolverKeys.sol';
+    checkNounceAndDeadline,
+    verify
+} from '../../layer_1/protectedPartitions/signatureVerification.sol';
+import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {ISnapshots} from '../interfaces/snapshots/ISnapshots.sol';
-import {Common} from '../common/Common.sol';
-import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
+    getMessageHashTransferAndLockByPartition,
+    getMessageHashTransferAndLock
+} from './signatureVerification.sol';
 
-contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
-    function takeSnapshot()
-        external
-        virtual
-        override
-        onlyUnpaused
-        onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID)
-    {
-        _triggerScheduledTasks(0);
-        return _takeSnapshot();
-    }
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-    function AbafAtSnapshot(
-        uint256 _snapshotID
-    ) external view returns (uint256 ABAF_) {
-        return _AbafAtSnapshot(_snapshotID);
-    }
-
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual returns (uint8 decimals_) {
-        return _decimalsAtSnapshot(_snapshotID);
-    }
-
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function balanceOfAtSnapshotByPartition(
+abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
+    function _protectedTransferAndLockByPartition(
         bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _balanceOfAtSnapshotByPartition(
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 lockId_) {
+        checkNounceAndDeadline(
+            _nounce,
+            _transferAndLock.from,
+            _getNounceFor(_transferAndLock.from),
+            _deadline,
+            _blockTimestamp()
+        );
+
+        _checkTransferAndLockByPartitionSignature(
+            _partition,
+            _transferAndLock,
+            _deadline,
+            _nounce,
+            _signature
+        );
+
+        _setNounce(_nounce, _transferAndLock.from);
+
+        _transferByPartition(
+            _msgSender(),
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _partition,
+            _transferAndLock.data,
+            _msgSender(),
+            ''
+        );
+        (success_, lockId_) = _lockByPartition(
+            _partition,
+            _transferAndLock.amount,
+            _transferAndLock.to,
+            _transferAndLock.expirationTimestamp
+        );
+        emit PartitionTransferredAndLocked(
+            _partition,
+            _msgSender(),
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
+            lockId_
+        );
+    }
+
+    function _protectedTransferAndLock(
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 lockId_) {
+        checkNounceAndDeadline(
+            _nounce,
+            _transferAndLock.from,
+            _getNounceFor(_transferAndLock.from),
+            _deadline,
+            _blockTimestamp()
+        );
+
+        _checkTransferAndLockSignature(
+            _transferAndLock,
+            _deadline,
+            _nounce,
+            _signature
+        );
+
+        _setNounce(_nounce, _transferAndLock.from);
+
+        _transferByPartition(
+            _msgSender(),
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _DEFAULT_PARTITION,
+            _transferAndLock.data,
+            _msgSender(),
+            ''
+        );
+        (success_, lockId_) = _lockByPartition(
+            _DEFAULT_PARTITION,
+            _transferAndLock.amount,
+            _transferAndLock.to,
+            _transferAndLock.expirationTimestamp
+        );
+        emit PartitionTransferredAndLocked(
+            _DEFAULT_PARTITION,
+            _msgSender(),
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
+            lockId_
+        );
+    }
+
+    function _checkTransferAndLockByPartitionSignature(
+        bytes32 _partition,
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view virtual {
+        if (
+            !_isTransferAndLockByPartitionSignatureValid(
                 _partition,
-                _snapshotID,
-                _tokenHolder
+                _transferAndLock,
+                _deadline,
+                _nounce,
+                _signature
+            )
+        ) revert WrongSignature();
+    }
+
+    function _isTransferAndLockByPartitionSignatureValid(
+        bytes32 _partition,
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view virtual returns (bool) {
+        bytes32 functionHash = getMessageHashTransferAndLockByPartition(
+            _partition,
+            _transferAndLock.from,
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
+            _deadline,
+            _nounce
+        );
+        return
+            verify(
+                _transferAndLock.from,
+                functionHash,
+                _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
             );
     }
 
-    function partitionsOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (bytes32[] memory) {
-        return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
+    function _checkTransferAndLockSignature(
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view virtual {
+        if (
+            !_isTransferAndLockSignatureValid(
+                _transferAndLock,
+                _deadline,
+                _nounce,
+                _signature
+            )
+        ) revert WrongSignature();
     }
 
-    function totalSupplyAtSnapshot(
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshot(_snapshotID);
-    }
-
-    function totalSupplyAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
-    }
-
-    function lockedBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function lockedBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
+    function _isTransferAndLockSignatureValid(
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view virtual returns (bool) {
+        bytes32 functionHash = getMessageHashTransferAndLock(
+            _transferAndLock.from,
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
+            _deadline,
+            _nounce
+        );
         return
-            _lockedBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
+            verify(
+                _transferAndLock.from,
+                functionHash,
+                _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
             );
-    }
-
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
-    }
-
-    function heldBalanceOfAtSnapshotByPartition(
-        bytes32 _partition,
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return
-            _heldBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _SNAPSHOTS_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
-        staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .partitionsOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .lockedBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .heldBalanceOfAtSnapshotByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .AbafAtSnapshot
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .decimalsAtSnapshot
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISnapshots).interfaceId;
     }
 }
