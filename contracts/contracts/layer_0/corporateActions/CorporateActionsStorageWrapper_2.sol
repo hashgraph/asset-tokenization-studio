@@ -239,7 +239,9 @@ import {
     IBondStorageWrapper
 } from '../../layer_2/interfaces/bond/IBondStorageWrapper.sol';
 
-contract CorporateActionsStorageWrapper_2 is AdjustBalancesStorageWrapper_2 {
+abstract contract CorporateActionsStorageWrapper_2 is
+    AdjustBalancesStorageWrapper_2
+{
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 

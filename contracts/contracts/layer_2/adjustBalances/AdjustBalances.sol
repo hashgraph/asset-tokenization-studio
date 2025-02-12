@@ -228,7 +228,7 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         checkFactor(factor)
         returns (bool success_)
     {
-        _triggerScheduledTasks(0, _blockTimestamp());
+        _triggerScheduledTasks(0);
         _adjustBalances(factor, decimals);
         success_ = true;
     }

@@ -334,6 +334,13 @@ contract ERC1410BasicStorageWrapperRead is
         erc1410Storage.balances[_from] += _value;
     }
 
+    function _adjustTotalSupplyByPartition(
+        bytes32 _partition,
+        uint256 _factor
+    ) internal returns (uint256) {
+        _getERC1410BasicStorage().totalSupplyByPartition[_partition] *= _factor;
+    }
+
     function _totalSupply() internal view returns (uint256) {
         return _getERC1410BasicStorage().totalSupply;
     }
@@ -479,17 +486,6 @@ contract ERC1410BasicStorageWrapperRead is
         uint256 factor = _calculateFactorByAbafAndTokenHolder(abaf, account);
         basicStorage.balances[account] *= factor;
         _updateLabafByTokenHolder(abaf, account);
-    }
-
-    function _getTotalSupplyByPartition(
-        bytes32 partition
-    ) internal returns (uint256) {
-        return
-            _getERC1410BasicStorage()
-                .totalSupply *= _calculateFactorByPartitionAdjustedAt(
-                partition,
-                _blockTimestamp()
-            );
     }
 
     function _getERC1410BasicStorage()

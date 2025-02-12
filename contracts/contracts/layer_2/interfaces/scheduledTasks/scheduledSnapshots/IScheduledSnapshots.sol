@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {ScheduledTask} from '../scheduledTasks/IScheduledTasks.sol';
+import {ScheduledTasksLib} from '../../../scheduledTasks/ScheduledTasksLib.sol';
 
 interface IScheduledSnapshots {
     function scheduledSnapshotCount() external view returns (uint256);
@@ -214,5 +214,8 @@ interface IScheduledSnapshots {
     function getScheduledSnapshots(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view returns (ScheduledTask[] memory scheduledSnapshot_);
+    )
+        external
+        view
+        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_);
 }

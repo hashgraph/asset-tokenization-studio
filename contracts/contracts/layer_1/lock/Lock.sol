@@ -433,7 +433,12 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
         bytes32 _partition,
         address _tokenHolder
     ) external view virtual returns (uint256 amount_) {
-        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+        return
+            _getLockedAmountForByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                _blockTimestamp()
+            );
     }
 
     function getStaticResolverKey()
