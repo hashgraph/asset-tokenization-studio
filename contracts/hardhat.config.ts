@@ -220,33 +220,35 @@ const config: HardhatUserConfig = {
                 enabled: true,
                 runs: 200,
             },
-            evmVersion: 'istanbul',
+            evmVersion: 'london',
         },
     },
     defaultNetwork: 'hardhat',
     networks: {
         hardhat: {
             chainId: 1337,
-            blockGasLimit: 30_000_000,
+            blockGasLimit: 15_000_000,
+            hardfork: 'london',
         },
         local: {
             url: Configuration.endpoints.local.jsonRpc,
             accounts: Configuration.privateKeys.local,
+            timeout: 60_000,
         },
         previewnet: {
             url: Configuration.endpoints.previewnet.jsonRpc,
             accounts: Configuration.privateKeys.previewnet,
-            timeout: 3000000,
+            timeout: 120_000,
         },
         testnet: {
             url: Configuration.endpoints.testnet.jsonRpc,
             accounts: Configuration.privateKeys.testnet,
-            timeout: 3000000,
+            timeout: 120_000,
         },
         mainnet: {
             url: Configuration.endpoints.mainnet.jsonRpc,
             accounts: Configuration.privateKeys.mainnet,
-            timeout: 3000000,
+            timeout: 120_000,
         },
     },
     contractSizer: {
@@ -260,7 +262,7 @@ const config: HardhatUserConfig = {
         target: 'ethers-v5',
     },
     mocha: {
-        timeout: 3000000,
+        timeout: 3_000_000,
     },
 }
 
