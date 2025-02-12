@@ -209,20 +209,20 @@ import { handleValidation } from './Common';
 import { QueryBus } from '../../core/query/QueryBus';
 import Injectable from '../../core/Injectable';
 import { CommandBus } from '../../core/command/CommandBus';
-import SetRevocationRegistryAddressRequest from './request/SetRevocationRegistryAddressRequest';
-import AddIssuerRequest from './request/AddIssuerRequest';
-import RemoveIssuerRequest from './request/RemoveIssuerRequest';
-import { SetRevocationRegistryAddressCommand } from '../../app/usecase/command/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand.js';
-import { AddIssuerCommand } from '../../app/usecase/command/ssi/addIssuer/AddIssuerCommand.js';
-import { RemoveIssuerCommand } from '../../app/usecase/command/ssi/removeIssuer/RemoveIssuerCommand.js';
+import IsIssuerRequest from './request/IsIssuerRequest.js';
+import { IsIssuerQuery } from '../../app/usecase/query/security/ssi/isIssuer/IsIssuerQuery.js';
+import { AddIssuerCommand } from '../../app/usecase/command/security/ssi/addIssuer/AddIssuerCommand.js';
+import { SetRevocationRegistryAddressCommand } from '../../app/usecase/command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommand.js';
+import { RemoveIssuerCommand } from '../../app/usecase/command/security/ssi/removeIssuer/RemoveIssuerCommand.js';
+import SetRevocationRegistryAddressRequest from './request/SetRevocationRegistryAddressRequest.js';
+import AddIssuerRequest from './request/AddIssuerRequest.js';
+import RemoveIssuerRequest from './request/RemoveIssuerRequest.js';
 import GetRevocationRegistryAddressRequest from './request/GetRevocationRegistryAddressRequest.js';
 import GetIssuerListCountRequest from './request/GetIssuerListCountRequest.js';
 import GetIssuerListMembersRequest from './request/GetIssuerListMembersRequest.js';
-import { GetRevocationRegistryAddressQuery } from '../../app/usecase/query/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery.js';
-import { GetIssuerListCountQuery } from '../../app/usecase/query/ssi/getIssuerListCount/GetIssuerListCountQuery.js';
-import { GetIssuerListMembersQuery } from '../../app/usecase/query/ssi/getIssuerListMembers/GetIssuerListMembersQuery.js';
-import IsIssuerRequest from './request/IsIssuerRequest.js';
-import { IsIssuerQuery } from '../../app/usecase/query/ssi/isIssuer/IsIssuerQuery.js';
+import { GetRevocationRegistryAddressQuery } from '../../app/usecase/query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQuery.js';
+import { GetIssuerListCountQuery } from '../../app/usecase/query/security/ssi/getIssuerListCount/GetIssuerListCountQuery.js';
+import { GetIssuerListMembersQuery } from '../../app/usecase/query/security/ssi/getIssuerListMembers/GetIssuerListMembersQuery.js';
 
 interface ISSIManagementInPort {
   setRevocationRegistryAddress(

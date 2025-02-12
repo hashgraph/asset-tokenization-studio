@@ -405,7 +405,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-   
+
    */
 
 // * General
@@ -499,10 +499,10 @@ export const REGEX = {
 
 // * Gas
 export const GAS_LIMIT = {
-    max: 15_000_000,
     default: 3_000_000,
     low: 1_000_000,
     high: 10_000_000,
+    max: 30_000_000,
     initilize: {
         businessLogicResolver: 8_000_000,
     },
@@ -512,7 +512,7 @@ export const GAS_LIMIT = {
     businessLogicResolver: {
         getStaticResolverKey: 60_000,
         registerBusinessLogics: 7_800_000,
-        createConfiguration: 16_000_000,
+        createConfiguration: 20_000_000,
     },
 }
 

@@ -319,18 +319,18 @@ import { GetHoldsIdForByPartitionQueryHandler } from '../app/usecase/query/secur
 import { GetHoldForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQueryHandler.js';
 import { ReleaseHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommandHandler.js';
 import { ReclaimHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommandHandler.js';
-import { AddIssuerCommandHandler } from '../app/usecase/command/ssi/addIssuer/AddIssuerCommandHandler.js';
-import { RemoveIssuerCommandHandler } from '../app/usecase/command/ssi/removeIssuer/RemoveIssuerCommandHandler.js';
-import { SetRevocationRegistryAddressCommandHandler } from '../app/usecase/command/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommandHandler.js';
-import { GetIssuerListCountQueryHandler } from '../app/usecase/query/ssi/getIssuerListCount/GetIssuerListCountQueryHandler.js';
-import { GetIssuerListMembersQueryHandler } from '../app/usecase/query/ssi/getIssuerListMembers/GetIssuerListMembersQueryHandler.js';
-import { GetRevocationRegistryAddressQueryHandler } from '../app/usecase/query/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQueryHandler.js';
-import { IsIssuerQueryHandler } from '../app/usecase/query/ssi/isIssuer/IsIssuerQueryHandler.js';
+import { GetIssuerListCountQueryHandler } from '../app/usecase/query/security/ssi/getIssuerListCount/GetIssuerListCountQueryHandler.js';
+import { GetIssuerListMembersQueryHandler } from '../app/usecase/query/security/ssi/getIssuerListMembers/GetIssuerListMembersQueryHandler.js';
+import { GetRevocationRegistryAddressQueryHandler } from '../app/usecase/query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQueryHandler.js';
+import { IsIssuerQueryHandler } from '../app/usecase/query/security/ssi/isIssuer/IsIssuerQueryHandler.js';
 import { GetKYCForQueryHandler } from '../app/usecase/query/security/kyc/getKycFor/GetKYCForQueryHandler.js';
 import { GetKYCAccountsCountQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsCount/GetKYCAccountsCountQueryHandler.js';
 import { GetKYCAccountsQueryHandler } from '../app/usecase/query/security/kyc/getKycAccounts/GetKYCAccountsQueryHandler.js';
-import { GrantKYCCommandHandler } from '../app/usecase/command/security/operations/kyc/grantKyc/GrantKYCCommandHandler.js';
-import { RevokeKYCCommandHandler } from '../app/usecase/command/security/operations/kyc/revokeKyc/RevokeKYCCommandHandler.js';
+import { GrantKYCCommandHandler } from '../app/usecase/command/security/kyc/grantKyc/GrantKYCCommandHandler.js';
+import { RevokeKYCCommandHandler } from '../app/usecase/command/security/kyc/revokeKyc/RevokeKYCCommandHandler.js';
+import { AddIssuerCommandHandler } from '../app/usecase/command/security/ssi/addIssuer/AddIssuerCommandHandler.js';
+import { RemoveIssuerCommandHandler } from '../app/usecase/command/security/ssi/removeIssuer/RemoveIssuerCommandHandler.js';
+import { SetRevocationRegistryAddressCommandHandler } from '../app/usecase/command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
