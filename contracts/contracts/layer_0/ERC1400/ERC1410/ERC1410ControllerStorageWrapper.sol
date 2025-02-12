@@ -229,7 +229,7 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
         uint256 _value,
         bytes calldata _data, // solhint-disable-line no-unused-vars
         bytes calldata _operatorData // solhint-disable-line no-unused-vars
-    ) internal view virtual returns (bool, bytes1, bytes32) {
+    ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }

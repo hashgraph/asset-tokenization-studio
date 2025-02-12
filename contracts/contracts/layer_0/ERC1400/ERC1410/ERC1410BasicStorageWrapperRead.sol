@@ -461,7 +461,7 @@ contract ERC1410BasicStorageWrapperRead is
         uint256 abaf = _getAbaf();
         ERC1410BasicStorage storage basicStorage = _getERC1410BasicStorage();
         _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
-        adjustTotalBalanceFor(basicStorage, abaf, account);
+        _adjustTotalBalanceFor(basicStorage, abaf, account);
     }
 
     function _adjustPartitionBalanceFor(
@@ -487,7 +487,7 @@ contract ERC1410BasicStorageWrapperRead is
         );
     }
 
-    function adjustTotalBalanceFor(
+    function _adjustTotalBalanceFor(
         ERC1410BasicStorage storage basicStorage,
         uint256 abaf,
         address account

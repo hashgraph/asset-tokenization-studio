@@ -229,7 +229,7 @@ abstract contract ERC1410StandardStorageWrapper is
         address _tokenHolder,
         uint256 _value,
         bytes memory _data
-    ) internal virtual {
+    ) internal {
         _validateParams(_partition, _value);
 
         _beforeTokenTransfer(_partition, address(0), _tokenHolder, _value);
@@ -258,7 +258,7 @@ abstract contract ERC1410StandardStorageWrapper is
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData
-    ) internal virtual {
+    ) internal {
         _beforeTokenTransfer(_partition, _from, address(0), _value);
 
         _reduceBalanceByPartition(_from, _value, _partition);
@@ -278,7 +278,7 @@ abstract contract ERC1410StandardStorageWrapper is
     function _reduceTotalSupplyByPartition(
         bytes32 _partition,
         uint256 _value
-    ) internal virtual {
+    ) internal {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
 
         erc1410Storage.totalSupply -= _value;
@@ -288,17 +288,14 @@ abstract contract ERC1410StandardStorageWrapper is
     function _increaseTotalSupplyByPartition(
         bytes32 _partition,
         uint256 _value
-    ) internal virtual {
+    ) internal {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
 
         erc1410Storage.totalSupply += _value;
         erc1410Storage.totalSupplyByPartition[_partition] += _value;
     }
 
-    function _validateParams(
-        bytes32 _partition,
-        uint256 _value
-    ) internal pure virtual {
+    function _validateParams(bytes32 _partition, uint256 _value) internal pure {
         if (_value == uint256(0)) {
             revert ZeroValue();
         }
@@ -313,7 +310,7 @@ abstract contract ERC1410StandardStorageWrapper is
         uint256 _value,
         bytes calldata _data, // solhint-disable-line no-unused-vars
         bytes calldata _operatorData // solhint-disable-line no-unused-vars
-    ) internal view virtual returns (bool, bytes1, bytes32) {
+    ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }

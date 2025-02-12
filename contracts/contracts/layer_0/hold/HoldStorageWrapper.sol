@@ -202,60 +202,350 @@
    limitations under the License.
 
 */
-
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-uint256 constant _ISIN_LENGTH = 12;
-uint256 constant _CHECKSUM_POSITION_IN_ISIN = 11;
-uint8 constant _TEN = 10;
-uint8 constant _UINT_WITH_ONE_DIGIT = 9;
-uint8 constant _ASCII_9 = 57;
-uint8 constant _ASCII_7 = 55;
-uint8 constant _ASCII_0 = 48;
+pragma solidity 0.8.18;
 
-bytes1 constant _IS_PAUSED_ERROR_ID = 0x40;
-bytes1 constant _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
-bytes1 constant _FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
-bytes1 constant _TO_ACCOUNT_BLOCKED_ERROR_ID = 0x43;
-bytes1 constant _FROM_ACCOUNT_NULL_ERROR_ID = 0x44;
-bytes1 constant _TO_ACCOUNT_NULL_ERROR_ID = 0x45;
-bytes1 constant _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = 0x46;
-bytes1 constant _IS_NOT_OPERATOR_ERROR_ID = 0x47;
-bytes1 constant _WRONG_PARTITION_ERROR_ID = 0x48;
-bytes1 constant _ALLOWANCE_REACHED_ERROR_ID = 0x49;
+import {
+    ERC1410ProtectedPartitionsStorageWrapper
+} from '../ERC1400/ERC1410/ERC1410ProtectedPartitionsStorageWrapper.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
+import {
+    checkNounceAndDeadline
+} from '../../layer_1/protectedPartitions/signatureVerification.sol';
 
-bytes1 constant _SUCCESS = 0x00;
+abstract contract HoldStorageWrapper is
+    ERC1410ProtectedPartitionsStorageWrapper
+{
+    using EnumerableSet for EnumerableSet.UintSet;
 
-// solhint-disable max-line-length
-//keccak256(
-//    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
-//);
-bytes32 constant _DOMAIN_TYPE_HASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
-string constant _SALT = '\x19\x01';
-string constant _CONTRACT_NAME = 'ASSET_TOKENIZATION';
-string constant _CONTRACT_VERSION = '1.0.0';
-//keccak256(
-//    'protectedTransferFromByPartition(bytes32 _partition,address _from,address _to,uint256 _amount,uint256 _deadline,uint256 _nounce)'
-//);
-bytes32 constant _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH = 0x2d745a289deb1f3b76a62c3c841fc26cbf0bc208da63068e1eec99f929bbdc9e;
-//keccak256(
-//    'protectedRedeemFromByPartition(bytes32 _partition,address _from,uint256 _amount,uint256 _deadline,uint256 _nounce)'
-//);
-bytes32 constant _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH = 0x5075effccf2d386f2a3f230b6a45274e523d872e1b1b33a0cf97bef34dfa14e7;
+    function _createHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        IHold.Hold memory _hold,
+        bytes memory _operatorData
+    ) internal returns (bool success_, uint256 holdId_) {
+        _beforeHold(_partition, _from, _hold);
+        _reduceBalanceByPartition(_from, _hold.amount, _partition);
 
-//keccak256(
-//'protectedCreateHoldByPartition(bytes32 _partition,address _from,ProtectedHold _protectedHold)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)'
-//);
-bytes32 constant _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH = 0xfd0d74766e5201a669a9197ba674709a23bc9c94c38a9ed40649836def3747eb;
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
-//keccak256(
-//'Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'
-//);
-bytes32 constant _HOLD_TYPEHASH = 0x638791043a42aa7472ccb18a7ede86b9baf01fb2d2128a743cf5dc473057d7bc;
+        holdId_ = ++holdStorage.holdNextId[_from][_partition];
 
-//keccak256(
-//'ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'
-//);
-bytes32 constant _PROTECTED_HOLD_TYPEHASH = 0x432ede4c9f6d06cc57be0d75da5dce179cd5f56db988520d5b77795a69b0dc2e;
-// solhint-enable max-line-length
+        IHold.HoldData memory hold = IHold.HoldData(
+            holdId_,
+            _hold,
+            _operatorData
+        );
+
+        holdStorage.holds[_from][_partition].push(hold);
+        holdStorage.holdIds[_from][_partition].add(holdId_);
+        holdStorage.holdsIndex[_from][_partition][holdId_] = holdStorage
+        .holds[_from][_partition].length;
+        holdStorage.heldAmountByPartition[_from][_partition] += _hold.amount;
+        holdStorage.totalHeldAmount[_from] += _hold.amount;
+
+        success_ = true;
+    }
+
+    function _createHoldFromByPartition(
+        bytes32 _partition,
+        address _from,
+        IHold.Hold memory _hold,
+        bytes memory _operatorData
+    ) internal returns (bool success_, uint256 holdId_) {
+        _decreaseAllowedBalance(_from, _msgSender(), _hold.amount);
+
+        return _createHoldByPartition(_partition, _from, _hold, _operatorData);
+    }
+
+    function _protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold,
+        bytes calldata _signature
+    ) internal returns (bool success_, uint256 holdId_) {
+        checkNounceAndDeadline(
+            _protectedHold.nonce,
+            _from,
+            _getNounceFor(_from),
+            _protectedHold.deadline,
+            _blockTimestamp()
+        );
+
+        _checkCreateHoldSignature(
+            _partition,
+            _from,
+            _protectedHold,
+            _signature
+        );
+
+        _setNounce(_protectedHold.nonce, _from);
+
+        return
+            _createHoldByPartition(
+                _partition,
+                _from,
+                _protectedHold.hold,
+                '0x'
+            );
+    }
+
+    function _executeHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to,
+        uint256 _amount
+    ) internal returns (bool success_) {
+        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _to);
+
+        return
+            _operateHoldByPartition(
+                _partition,
+                _tokenHolder,
+                _holdId,
+                _to,
+                _amount,
+                IHold.OperationType.Execute
+            );
+    }
+
+    function _releaseHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        uint256 _amount
+    ) internal returns (bool success_) {
+        _beforeReleaseHold(_partition, _tokenHolder, _holdId);
+
+        return
+            _operateHoldByPartition(
+                _partition,
+                _tokenHolder,
+                _holdId,
+                _tokenHolder,
+                _amount,
+                IHold.OperationType.Release
+            );
+    }
+
+    function _reclaimHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal returns (bool success_, uint256 amount_) {
+        _beforeReclaimHold(_partition, _tokenHolder, _holdId);
+
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+        amount_ = holdData.hold.amount;
+
+        success_ = _operateHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId,
+            _tokenHolder,
+            amount_,
+            IHold.OperationType.Reclaim
+        );
+    }
+
+    function _operateHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to,
+        uint256 _amount,
+        IHold.OperationType _operation
+    ) internal returns (bool success_) {
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+
+        if (_operation == IHold.OperationType.Execute) {
+            if (!_checkControlList(_tokenHolder)) {
+                revert AccountIsBlocked(_tokenHolder);
+            }
+
+            if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
+                revert IHold.InvalidDestinationAddress(holdData.hold.to, _to);
+            }
+        }
+        if (_operation != IHold.OperationType.Reclaim) {
+            if (_isHoldExpired(holdData.hold))
+                revert IHold.HoldExpirationReached();
+            if (!_isEscrow(holdData.hold, _msgSender()))
+                revert IHold.IsNotEscrow();
+        } else if (
+            _operation == IHold.OperationType.Reclaim &&
+            !_isHoldExpired(holdData.hold)
+        ) {
+            revert IHold.HoldExpirationNotReached();
+        }
+
+        _checkHoldAmount(_amount, holdData);
+
+        _transferHold(_partition, _tokenHolder, _holdId, _to, _amount);
+
+        success_ = true;
+    }
+
+    function _transferHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to,
+        uint256 _amount
+    ) internal {
+        if (
+            _decreaseHeldAmount(_partition, _tokenHolder, _amount, _holdId) == 0
+        ) {
+            _removeHold(_partition, _tokenHolder, _holdId);
+        }
+
+        if (!_validPartitionForReceiver(_partition, _to)) {
+            _addPartitionTo(_amount, _to, _partition);
+        } else {
+            _increaseBalanceByPartition(_to, _amount, _partition);
+        }
+    }
+
+    function _decreaseHeldAmount(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _amount,
+        uint256 _holdId
+    ) internal returns (uint256 newHoldBalance_) {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+
+        holdStorage.totalHeldAmount[_tokenHolder] -= _amount;
+        holdStorage.heldAmountByPartition[_tokenHolder][_partition] -= _amount;
+        holdStorage
+        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount -= _amount;
+
+        newHoldBalance_ = holdStorage
+        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount;
+    }
+
+    function _removeHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        // Remove Hold
+        uint256 holdIndex = holdStorage.holdsIndex[_tokenHolder][_partition][
+            _holdId
+        ];
+        holdStorage.holdsIndex[_tokenHolder][_partition][_holdId] = 0;
+        holdStorage.holdIds[_tokenHolder][_partition].remove(_holdId);
+
+        uint256 holdLastIndex = _getHoldCountForByPartition(
+            _partition,
+            _tokenHolder
+        );
+        if (holdIndex < holdLastIndex) {
+            IHold.HoldData memory lastHold = _getHoldByIndex(
+                _partition,
+                _tokenHolder,
+                holdLastIndex
+            );
+            _setHoldAtIndex(_partition, _tokenHolder, holdIndex, lastHold);
+        }
+
+        holdStorage.holds[_tokenHolder][_partition].pop();
+    }
+
+    function _setHoldAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex,
+        IHold.HoldData memory _holdData
+    ) internal {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1].id = _holdData.id;
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1].hold = _holdData.hold;
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1]
+            .operatorData = _holdData.operatorData;
+        holdStorage.holdsIndex[_tokenHolder][_partition][
+            _holdData.id
+        ] = _holdIndex;
+    }
+
+    // TODO: Review _hold is not used!
+    function _beforeHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        IHold.Hold memory _hold
+    ) internal {
+        _updateAccountSnapshot(_tokenHolder, _partition);
+        _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
+    }
+
+    // TODO: Review _holdId is not used!
+    function _beforeExecuteHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to
+    ) internal {
+        _updateAccountSnapshot(_to, _partition);
+        _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
+    }
+
+    function _beforeReleaseHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal {
+        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _tokenHolder);
+    }
+
+    function _beforeReclaimHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal {
+        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _tokenHolder);
+    }
+
+    function _checkHoldAmount(
+        uint256 _amount,
+        IHold.HoldData memory holdData
+    ) internal pure {
+        if (_amount > holdData.hold.amount) {
+            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
+        }
+    }
+
+    function _isHoldExpired(
+        IHold.Hold memory _hold
+    ) internal view returns (bool) {
+        if (_blockTimestamp() > _hold.expirationTimestamp) return true;
+        return false;
+    }
+
+    function _isEscrow(
+        IHold.Hold memory _hold,
+        address _escrow
+    ) internal pure returns (bool) {
+        if (_escrow == _hold.escrow) return true;
+        return false;
+    }
+}

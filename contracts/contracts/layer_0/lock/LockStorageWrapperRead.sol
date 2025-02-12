@@ -207,7 +207,6 @@ pragma solidity 0.8.18;
 
 import {LibCommon} from '..//common/LibCommon.sol';
 import {_LOCK_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';

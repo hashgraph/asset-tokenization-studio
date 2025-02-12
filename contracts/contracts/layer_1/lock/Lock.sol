@@ -208,13 +208,10 @@ pragma solidity 0.8.18;
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {_LOCKER_ROLE} from '../constants/roles.sol';
 import {ILock} from '../interfaces/lock/ILock.sol';
-import {LockStorageWrapper} from './LockStorageWrapper.sol';
+import {LockStorageWrapper} from '../../layer_0/lock/LockStorageWrapper.sol';
 import {_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution

@@ -202,349 +202,188 @@
    limitations under the License.
 
 */
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+// SPDX-License-Identifier: MIT
+// Contract copy-pasted form OZ and extended
 
 pragma solidity 0.8.18;
 
 import {
-    ERC1410ProtectedPartitionsStorageWrapper
-} from '../ERC1400/ERC1410/ERC1410ProtectedPartitionsStorageWrapper.sol';
+    ERC1410Snapshot
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410Snapshot.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
+    _ERC1410_RESOLVER_KEY
+} from '../../../layer_1/constants/resolverKeys.sol';
+import {IERC1410} from '../../../layer_1/interfaces/ERC1400/IERC1410.sol';
 import {
-    checkNounceAndDeadline,
-    verify
-} from '../../layer_1/protectedPartitions/signatureVerification.sol';
+    IERC1410ScheduledTasks
+} from '../../interfaces/ERC1400/IERC1410ScheduledTasks.sol';
 
-abstract contract HoldStorageWrapper_2 is
-    ERC1410ProtectedPartitionsStorageWrapper
-{
-    using EnumerableSet for EnumerableSet.UintSet;
-
-    function _createHoldByPartition(
+contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
+    // TODO: It his necessary right now with this interface?
+    function triggerAndSyncAll(
         bytes32 _partition,
         address _from,
-        IHold.Hold memory _hold,
-        bytes memory _operatorData
-    ) internal virtual returns (bool success_, uint256 holdId_) {
-        _beforeHold(_partition, _from, _hold);
-        _reduceBalanceByPartition(_from, _hold.amount, _partition);
-
-        IHold.HoldDataStorage storage holdStorage = _holdStorage();
-
-        holdId_ = ++holdStorage.holdNextId[_from][_partition];
-
-        IHold.HoldData memory hold = IHold.HoldData(
-            holdId_,
-            _hold,
-            _operatorData
-        );
-
-        holdStorage.holds[_from][_partition].push(hold);
-        holdStorage.holdIds[_from][_partition].add(holdId_);
-        holdStorage.holdsIndex[_from][_partition][holdId_] = holdStorage
-        .holds[_from][_partition].length;
-        holdStorage.heldAmountByPartition[_from][_partition] += _hold.amount;
-        holdStorage.totalHeldAmount[_from] += _hold.amount;
-
-        success_ = true;
-    }
-
-    function _createHoldFromByPartition(
-        bytes32 _partition,
-        address _from,
-        IHold.Hold memory _hold,
-        bytes memory _operatorData
-    ) internal virtual returns (bool success_, uint256 holdId_) {
-        _decreaseAllowedBalance(_from, _msgSender(), _hold.amount);
-
-        return _createHoldByPartition(_partition, _from, _hold, _operatorData);
-    }
-
-    function _protectedCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        IHold.ProtectedHold memory _protectedHold,
-        bytes calldata _signature
-    ) internal virtual returns (bool success_, uint256 holdId_) {
-        checkNounceAndDeadline(
-            _protectedHold.nonce,
-            _from,
-            _getNounceFor(_from),
-            _protectedHold.deadline,
-            _blockTimestamp()
-        );
-
-        _checkCreateHoldSignature(
-            _partition,
-            _from,
-            _protectedHold,
-            _signature
-        );
-
-        _setNounce(_protectedHold.nonce, _from);
-
-        return
-            _createHoldByPartition(
-                _partition,
-                _from,
-                _protectedHold.hold,
-                '0x'
-            );
-    }
-
-    function _executeHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
-        address _to,
-        uint256 _amount
-    ) internal virtual returns (bool success_) {
-        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _to);
-
-        return
-            _operateHoldByPartition(
-                _partition,
-                _tokenHolder,
-                _holdId,
-                _to,
-                _amount,
-                IHold.OperationType.Execute
-            );
-    }
-
-    function _releaseHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
-        uint256 _amount
-    ) internal virtual returns (bool success_) {
-        _beforeReleaseHold(_partition, _tokenHolder, _holdId);
-
-        return
-            _operateHoldByPartition(
-                _partition,
-                _tokenHolder,
-                _holdId,
-                _tokenHolder,
-                _amount,
-                IHold.OperationType.Release
-            );
-    }
-
-    function _reclaimHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    ) internal virtual returns (bool success_, uint256 amount_) {
-        _beforeReclaimHold(_partition, _tokenHolder, _holdId);
-
-        IHold.HoldData memory holdData = _getHold(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
-        amount_ = holdData.hold.amount;
-
-        success_ = _operateHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId,
-            _tokenHolder,
-            amount_,
-            IHold.OperationType.Reclaim
-        );
-    }
-
-    function _operateHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
-        address _to,
-        uint256 _amount,
-        IHold.OperationType _operation
-    ) internal virtual returns (bool success_) {
-        IHold.HoldData memory holdData = _getHold(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
-
-        if (_operation == IHold.OperationType.Execute) {
-            if (!_checkControlList(_tokenHolder)) {
-                revert AccountIsBlocked(_tokenHolder);
-            }
-
-            if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
-                revert IHold.InvalidDestinationAddress(holdData.hold.to, _to);
-            }
-        }
-        if (_operation != IHold.OperationType.Reclaim) {
-            if (_isHoldExpired(holdData.hold))
-                revert IHold.HoldExpirationReached();
-            if (!_isEscrow(holdData.hold, _msgSender()))
-                revert IHold.IsNotEscrow();
-        } else if (
-            _operation == IHold.OperationType.Reclaim &&
-            !_isHoldExpired(holdData.hold)
-        ) {
-            revert IHold.HoldExpirationNotReached();
-        }
-
-        _checkHoldAmount(_amount, holdData);
-
-        _transferHold(_partition, _tokenHolder, _holdId, _to, _amount);
-
-        success_ = true;
-    }
-
-    function _transferHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
-        address _to,
-        uint256 _amount
-    ) internal {
-        if (
-            _decreaseHeldAmount(_partition, _tokenHolder, _amount, _holdId) == 0
-        ) {
-            _removeHold(_partition, _tokenHolder, _holdId);
-        }
-
-        if (!_validPartitionForReceiver(_partition, _to)) {
-            _addPartitionTo(_amount, _to, _partition);
-        } else {
-            _increaseBalanceByPartition(_to, _amount, _partition);
-        }
-    }
-
-    function _decreaseHeldAmount(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _amount,
-        uint256 _holdId
-    ) internal returns (uint256 newHoldBalance_) {
-        IHold.HoldDataStorage storage holdStorage = _holdStorage();
-
-        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
-
-        holdStorage.totalHeldAmount[_tokenHolder] -= _amount;
-        holdStorage.heldAmountByPartition[_tokenHolder][_partition] -= _amount;
-        holdStorage
-        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount -= _amount;
-
-        newHoldBalance_ = holdStorage
-        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount;
-    }
-
-    function _removeHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    ) internal {
-        IHold.HoldDataStorage storage holdStorage = _holdStorage();
-
-        // Remove Hold
-        uint256 holdIndex = holdStorage.holdsIndex[_tokenHolder][_partition][
-            _holdId
-        ];
-        holdStorage.holdsIndex[_tokenHolder][_partition][_holdId] = 0;
-        holdStorage.holdIds[_tokenHolder][_partition].remove(_holdId);
-
-        uint256 holdLastIndex = _getHoldCountForByPartition(
-            _partition,
-            _tokenHolder
-        );
-        if (holdIndex < holdLastIndex) {
-            IHold.HoldData memory lastHold = _getHoldByIndex(
-                _partition,
-                _tokenHolder,
-                holdLastIndex
-            );
-            _setHoldAtIndex(_partition, _tokenHolder, holdIndex, lastHold);
-        }
-
-        holdStorage.holds[_tokenHolder][_partition].pop();
-    }
-
-    function _setHoldAtIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdIndex,
-        IHold.HoldData memory _holdData
-    ) internal virtual {
-        IHold.HoldDataStorage storage holdStorage = _holdStorage();
-
-        holdStorage
-        .holds[_tokenHolder][_partition][_holdIndex - 1].id = _holdData.id;
-        holdStorage
-        .holds[_tokenHolder][_partition][_holdIndex - 1].hold = _holdData.hold;
-        holdStorage
-        .holds[_tokenHolder][_partition][_holdIndex - 1]
-            .operatorData = _holdData.operatorData;
-        holdStorage.holdsIndex[_tokenHolder][_partition][
-            _holdData.id
-        ] = _holdIndex;
-    }
-
-    function _beforeHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        IHold.Hold memory _hold
-    ) internal virtual {
-        _updateAccountSnapshot(_tokenHolder, _partition);
-        _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
-    }
-
-    function _beforeExecuteHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
         address _to
-    ) internal virtual {
-        _updateAccountSnapshot(_to, _partition);
-        _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
+    ) external onlyUnpaused {
+        _triggerScheduledTasks(_getScheduledTaskCount(), _blockTimestamp());
     }
 
-    function _beforeReleaseHold(
-        bytes32 _partition,
+    function totalSupplyAdjusted() external view returns (uint256) {
+        return _totalSupply();
+    }
+
+    function totalSupplyByPartitionAdjusted(
+        bytes32 _partition
+    ) external view returns (uint256) {
+        return _totalSupplyByPartition(_partition);
+    }
+
+    function balanceOfAdjusted(
+        address _tokenHolder
+    ) external view returns (uint256) {
+        return _balanceOf(_tokenHolder);
+    }
+
+    function balanceOfAdjustedAt(
         address _tokenHolder,
-        uint256 _holdId
-    ) internal virtual {
-        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _tokenHolder);
+        uint256 _timestamp
+    ) external view returns (uint256) {
+        return _balanceOfAt(_tokenHolder, _timestamp);
     }
 
-    function _beforeReclaimHold(
+    function balanceOfByPartitionAdjusted(
         bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    ) internal virtual {
-        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _tokenHolder);
+        address _tokenHolder
+    ) external view returns (uint256) {
+        return _balanceOfByPartition(_partition, _tokenHolder);
     }
 
-    function _checkHoldAmount(
-        uint256 _amount,
-        IHold.HoldData memory holdData
-    ) internal pure {
-        if (_amount > holdData.hold.amount) {
-            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
-        }
+    function balanceOf(
+        address _tokenHolder
+    ) external view override returns (uint256) {
+        return _balanceOf(_tokenHolder);
     }
 
-    function _isHoldExpired(
-        IHold.Hold memory _hold
-    ) internal view returns (bool) {
-        if (_blockTimestamp() > _hold.expirationTimestamp) return true;
-        return false;
+    function balanceOfByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view override returns (uint256) {
+        return _balanceOfByPartition(_partition, _tokenHolder);
     }
 
-    function _isEscrow(
-        IHold.Hold memory _hold,
-        address _escrow
-    ) internal pure returns (bool) {
-        if (_escrow == _hold.escrow) return true;
-        return false;
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _ERC1410_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        staticFunctionSelectors_ = new bytes4[](30);
+        uint256 selectorIndex = 0;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfAdjustedAt
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfByPartitionAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .initialize_ERC1410_Basic
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .transferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .isMultiPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.balanceOf.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .balanceOfByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.partitionsOf.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.totalSupply.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyByPartitionAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .authorizeOperator
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .revokeOperator
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .authorizeOperatorByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .revokeOperatorByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isOperator.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .isOperatorForPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .redeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .issueByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .canTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .canRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .triggerAndSyncAll
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .totalSupplyAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedTransferFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedRedeemFromByPartition
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IERC1410).interfaceId;
     }
 }

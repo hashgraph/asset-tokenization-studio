@@ -206,13 +206,11 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    CorporateActionsStorageWrapper_2
-} from '../../layer_0/corporateActions/CorporateActionsStorageWrapper_2.sol';
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
+import {LockStorageWrapper} from '../../layer_0/lock/LockStorageWrapper.sol';
 
 // solhint-disable no-empty-blocks
-abstract contract Common is CorporateActionsStorageWrapper_2 {
+abstract contract Common is LockStorageWrapper {
     error AlreadyInitialized();
     error OnlyDelegateAllowed();
 

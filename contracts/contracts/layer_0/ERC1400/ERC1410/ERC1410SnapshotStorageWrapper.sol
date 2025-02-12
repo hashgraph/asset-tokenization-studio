@@ -218,7 +218,7 @@ abstract contract ERC1410SnapshotStorageWrapper is
         address from,
         address to,
         uint256 amount // solhint-disable-line no-unused-vars
-    ) internal virtual override {
+    ) internal override {
         if (from == address(0)) {
             // mint
             _updateAccountSnapshot(to, partition);

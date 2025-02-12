@@ -213,7 +213,6 @@ import {
     _SCHEDULED_TASKS_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 import {LibCommon} from '../common/LibCommon.sol';
-import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
 import {
     ScheduledTask
 } from '../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';

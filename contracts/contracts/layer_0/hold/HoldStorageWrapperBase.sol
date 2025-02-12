@@ -204,58 +204,154 @@
 */
 
 pragma solidity 0.8.18;
+
+import {LibCommon} from '../common/LibCommon.sol';
+import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-uint256 constant _ISIN_LENGTH = 12;
-uint256 constant _CHECKSUM_POSITION_IN_ISIN = 11;
-uint8 constant _TEN = 10;
-uint8 constant _UINT_WITH_ONE_DIGIT = 9;
-uint8 constant _ASCII_9 = 57;
-uint8 constant _ASCII_7 = 55;
-uint8 constant _ASCII_0 = 48;
+abstract contract HoldStorageWrapperBase is PauseStorageWrapper {
+    using LibCommon for EnumerableSet.UintSet;
 
-bytes1 constant _IS_PAUSED_ERROR_ID = 0x40;
-bytes1 constant _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
-bytes1 constant _FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
-bytes1 constant _TO_ACCOUNT_BLOCKED_ERROR_ID = 0x43;
-bytes1 constant _FROM_ACCOUNT_NULL_ERROR_ID = 0x44;
-bytes1 constant _TO_ACCOUNT_NULL_ERROR_ID = 0x45;
-bytes1 constant _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = 0x46;
-bytes1 constant _IS_NOT_OPERATOR_ERROR_ID = 0x47;
-bytes1 constant _WRONG_PARTITION_ERROR_ID = 0x48;
-bytes1 constant _ALLOWANCE_REACHED_ERROR_ID = 0x49;
+    modifier onlyWithValidHoldId(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) {
+        if (!_isHoldIdValid(_partition, _tokenHolder, _holdId))
+            revert IHold.WrongHoldId();
+        _;
+    }
 
-bytes1 constant _SUCCESS = 0x00;
+    function _isHoldIdValid(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (bool) {
+        if (_getHold(_partition, _tokenHolder, _holdId).id == 0) return false;
+        return true;
+    }
 
-// solhint-disable max-line-length
-//keccak256(
-//    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
-//);
-bytes32 constant _DOMAIN_TYPE_HASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
-string constant _SALT = '\x19\x01';
-string constant _CONTRACT_NAME = 'ASSET_TOKENIZATION';
-string constant _CONTRACT_VERSION = '1.0.0';
-//keccak256(
-//    'protectedTransferFromByPartition(bytes32 _partition,address _from,address _to,uint256 _amount,uint256 _deadline,uint256 _nounce)'
-//);
-bytes32 constant _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH = 0x2d745a289deb1f3b76a62c3c841fc26cbf0bc208da63068e1eec99f929bbdc9e;
-//keccak256(
-//    'protectedRedeemFromByPartition(bytes32 _partition,address _from,uint256 _amount,uint256 _deadline,uint256 _nounce)'
-//);
-bytes32 constant _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH = 0x5075effccf2d386f2a3f230b6a45274e523d872e1b1b33a0cf97bef34dfa14e7;
+    function _getHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (IHold.HoldData memory) {
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
 
-//keccak256(
-//'protectedCreateHoldByPartition(bytes32 _partition,address _from,ProtectedHold _protectedHold)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)'
-//);
-bytes32 constant _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH = 0xfd0d74766e5201a669a9197ba674709a23bc9c94c38a9ed40649836def3747eb;
+        return _getHoldByIndex(_partition, _tokenHolder, holdIndex);
+    }
 
-//keccak256(
-//'Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'
-//);
-bytes32 constant _HOLD_TYPEHASH = 0x638791043a42aa7472ccb18a7ede86b9baf01fb2d2128a743cf5dc473057d7bc;
+    function _getHoldIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (uint256) {
+        return _holdStorage().holdsIndex[_tokenHolder][_partition][_holdId];
+    }
 
-//keccak256(
-//'ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'
-//);
-bytes32 constant _PROTECTED_HOLD_TYPEHASH = 0x432ede4c9f6d06cc57be0d75da5dce179cd5f56db988520d5b77795a69b0dc2e;
-// solhint-enable max-line-length
+    function _getHoldByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex
+    ) internal view returns (IHold.HoldData memory) {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        if (_holdIndex == 0)
+            return
+                IHold.HoldData(
+                    0,
+                    IHold.Hold(0, 0, address(0), address(0), ''),
+                    ''
+                );
+
+        _holdIndex--;
+
+        assert(_holdIndex < holdStorage.holds[_tokenHolder][_partition].length);
+
+        return holdStorage.holds[_tokenHolder][_partition][_holdIndex];
+    }
+
+    function _getHeldAmountFor(
+        address _tokenHolder
+    ) internal view returns (uint256 amount_) {
+        return _holdStorage().totalHeldAmount[_tokenHolder];
+    }
+
+    function _getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view returns (uint256 amount_) {
+        return _holdStorage().heldAmountByPartition[_tokenHolder][_partition];
+    }
+
+    function _getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (uint256[] memory holdsId_) {
+        return
+            _holdStorage().holdIds[_tokenHolder][_partition].getFromSet(
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _getHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        internal
+        view
+        virtual
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        )
+    {
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+        return (
+            holdData.hold.amount,
+            holdData.hold.expirationTimestamp,
+            holdData.hold.escrow,
+            holdData.hold.to,
+            holdData.hold.data,
+            holdData.operatorData
+        );
+    }
+
+    function _holdStorage()
+        internal
+        pure
+        virtual
+        returns (IHold.HoldDataStorage storage hold_)
+    {
+        bytes32 position = _HOLD_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            hold_.slot := position
+        }
+    }
+
+    function _getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view returns (uint256) {
+        return _holdStorage().holds[_tokenHolder][_partition].length;
+    }
+}
