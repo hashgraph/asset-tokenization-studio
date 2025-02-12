@@ -288,16 +288,6 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     {
         _controllerRedeem(_tokenHolder, _value, _data, _operatorData);
     }
-
-    // solhint-disable no-empty-blocks
-    function _beforeTokenTransfer(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value
-    ) internal virtual override {}
-
-    // solhint-enable no-empty-blocks
     // solhint-enable no-unused-vars
 
     /**

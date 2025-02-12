@@ -204,305 +204,209 @@
 */
 
 pragma solidity 0.8.18;
+
+import {
+    checkNounceAndDeadline,
+    verify
+} from '../../layer_1/protectedPartitions/signatureVerification.sol';
+import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
+import {
+    getMessageHashTransferAndLockByPartition,
+    getMessageHashTransferAndLock
+} from './signatureVerification.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {MappingLib} from '../common/MappingLib.sol';
-import {
-    _ADJUST_BALANCES_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
-import {
-    IAdjustBalancesStorageWrapper
-} from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
+    function _protectedTransferAndLockByPartition(
+        bytes32 _partition,
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal returns (bool success_, uint256 lockId_) {
+        checkNounceAndDeadline(
+            _nounce,
+            _transferAndLock.from,
+            _getNounceFor(_transferAndLock.from),
+            _deadline,
+            _blockTimestamp()
+        );
 
-contract AdjustBalancesStorageWrapper_1 is
-    IAdjustBalancesStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper
-{
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
-        _;
-    }
+        _checkTransferAndLockByPartitionSignature(
+            _partition,
+            _transferAndLock,
+            _deadline,
+            _nounce,
+            _signature
+        );
 
-    struct AdjustBalancesStorage {
-        // Mapping from investor to their partitions labaf
-        mapping(address => uint256[]) labafUserPartition;
-        // Aggregated Balance Adjustment
-        uint256 abaf;
-        // Last Aggregated Balance Adjustment per account
-        mapping(address => uint256) labaf;
-        // Last Aggregated Balance Adjustment per partition
-        mapping(bytes32 => uint256) labafByPartition;
-        // Last Aggregated Balance Adjustment per allowance
-        mapping(address => mapping(address => uint256)) labafsAllowances;
-        // Locks
-        mapping(address => uint256) labafLockedAmountByAccount;
-        mapping(address => mapping(bytes32 => uint256)) labafLockedAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => uint256[])) labafLockedAmountByAccountPartitionAndIndex;
-        // Holds
-        mapping(address => uint256) labafsTotalHeld;
-        mapping(address => mapping(bytes32 => uint256)) labafsTotalHeldByPartition;
-        mapping(address => mapping(bytes32 => uint256[])) labafHolds;
-    }
+        _setNounce(_nounce, _transferAndLock.from);
 
-    function _updateAbaf(uint256 factor) internal {
-        _getAdjustBalancesStorage().abaf = calculateNewAbaf(_getAbaf(), factor);
-    }
-
-    function _updateLabafByPartition(bytes32 partition) internal {
-        AdjustBalancesStorage
-            storage adjustBalancesStorage = _getAdjustBalancesStorage();
-        adjustBalancesStorage.labafByPartition[
-            partition
-        ] = adjustBalancesStorage.abaf;
-    }
-
-    function _updateLabafByTokenHolder(
-        uint256 labaf,
-        address tokenHolder
-    ) internal {
-        _getAdjustBalancesStorage().labaf[tokenHolder] = labaf;
-    }
-
-    function _pushLabafUserPartition(address _tokenHolder) internal {
-        AdjustBalancesStorage
-            storage balancesStorage = _getAdjustBalancesStorage();
-        balancesStorage.labafUserPartition[_tokenHolder].push(
-            balancesStorage.abaf
+        _transferByPartition(
+            _msgSender(),
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _partition,
+            _transferAndLock.data,
+            _msgSender(),
+            ''
+        );
+        (success_, lockId_) = _lockByPartition(
+            _partition,
+            _transferAndLock.amount,
+            _transferAndLock.to,
+            _transferAndLock.expirationTimestamp
+        );
+        emit PartitionTransferredAndLocked(
+            _partition,
+            _msgSender(),
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
+            lockId_
         );
     }
 
-    function _updateLabafByTokenHolderAndPartitionIndex(
-        uint256 labaf,
-        address tokenHolder,
-        uint256 partitionIndex
-    ) internal {
-        _getAdjustBalancesStorage().labafUserPartition[tokenHolder][
-            partitionIndex - 1
-        ] = labaf;
-    }
+    function _protectedTransferAndLock(
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal returns (bool success_, uint256 lockId_) {
+        checkNounceAndDeadline(
+            _nounce,
+            _transferAndLock.from,
+            _getNounceFor(_transferAndLock.from),
+            _deadline,
+            _blockTimestamp()
+        );
 
-    function _calculateFactorByTokenHolder(
-        uint256 abaf,
-        address tokenHolder
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            abaf,
-            _getAdjustBalancesStorage().labaf[tokenHolder]
+        _checkTransferAndLockSignature(
+            _transferAndLock,
+            _deadline,
+            _nounce,
+            _signature
+        );
+
+        _setNounce(_nounce, _transferAndLock.from);
+
+        _transferByPartition(
+            _msgSender(),
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _DEFAULT_PARTITION,
+            _transferAndLock.data,
+            _msgSender(),
+            ''
+        );
+        (success_, lockId_) = _lockByPartition(
+            _DEFAULT_PARTITION,
+            _transferAndLock.amount,
+            _transferAndLock.to,
+            _transferAndLock.expirationTimestamp
+        );
+        emit PartitionTransferredAndLocked(
+            _DEFAULT_PARTITION,
+            _msgSender(),
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
+            lockId_
         );
     }
 
-    function _calculateFactorByAbafAndTokenHolder(
-        uint256 abaf,
-        address tokenHolder
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            abaf,
-            _getAdjustBalancesStorage().labaf[tokenHolder]
-        );
+    function _checkTransferAndLockByPartitionSignature(
+        bytes32 _partition,
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view {
+        if (
+            !_isTransferAndLockByPartitionSignatureValid(
+                _partition,
+                _transferAndLock,
+                _deadline,
+                _nounce,
+                _signature
+            )
+        ) revert WrongSignature();
     }
 
-    function _calculateFactorByPartitionAdjustedAt(
-        bytes32 partition,
-        uint256 timestamp
-    ) internal view returns (uint256) {
+    function _isTransferAndLockByPartitionSignatureValid(
+        bytes32 _partition,
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view returns (bool) {
+        bytes32 functionHash = getMessageHashTransferAndLockByPartition(
+            _partition,
+            _transferAndLock.from,
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
+            _deadline,
+            _nounce
+        );
         return
-            calculateFactor(
-                _getAbafAdjustedAt(timestamp),
-                _getAdjustBalancesStorage().labafByPartition[partition]
+            verify(
+                _transferAndLock.from,
+                functionHash,
+                _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
             );
     }
 
-    function _calculateFactorLockedAmountForByPartitionAdjustedAt(
-        bytes32 partition,
-        address tokenHolder,
-        uint256 lockId,
-        uint256 timestamp
-    ) internal view returns (uint256) {
+    function _checkTransferAndLockSignature(
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view {
+        if (
+            !_isTransferAndLockSignatureValid(
+                _transferAndLock,
+                _deadline,
+                _nounce,
+                _signature
+            )
+        ) revert WrongSignature();
+    }
+
+    function _isTransferAndLockSignatureValid(
+        TransferAndLockStruct calldata _transferAndLock,
+        uint256 _deadline,
+        uint256 _nounce,
+        bytes calldata _signature
+    ) internal view returns (bool) {
+        bytes32 functionHash = getMessageHashTransferAndLock(
+            _transferAndLock.from,
+            _transferAndLock.to,
+            _transferAndLock.amount,
+            _transferAndLock.data,
+            _transferAndLock.expirationTimestamp,
+            _deadline,
+            _nounce
+        );
         return
-            calculateFactor(
-                _getAbafAdjustedAt(timestamp),
-                _getAdjustBalancesStorage()
-                    .labafLockedAmountByAccountPartitionAndIndex[tokenHolder][
-                        partition
-                    ][lockId]
+            verify(
+                _transferAndLock.from,
+                functionHash,
+                _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
             );
-    }
-
-    function _calculateFactorByTokenHolderAndPartitionIndex(
-        uint256 abaf,
-        address tokenHolder,
-        uint256 partitionIndex
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            abaf,
-            _getAdjustBalancesStorage().labafUserPartition[tokenHolder][
-                partitionIndex - 1
-            ]
-        );
-    }
-
-    function _calculateFactorForLockedAmountByTokenHolderAdjustedAt(
-        address tokenHolder,
-        uint256 timestamp
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage().labafLockedAmountByAccount[tokenHolder]
-        );
-    }
-
-    function _calculateFactorForLockedAmountByTokenHolderAndPartitionAdjustedAt(
-        address tokenHolder,
-        bytes32 partition,
-        uint256 timestamp
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage().labafLockedAmountByAccountAndPartition[
-                tokenHolder
-            ][partition]
-        );
-    }
-
-    function _calculateFactorForLockedAmountByTokenHolderPartitionAndLockIndexAdjustedAt(
-        address tokenHolder,
-        bytes32 partition,
-        uint256 lockIndex,
-        uint256 timestamp
-    ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
-            _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage()
-                .labafLockedAmountByAccountPartitionAndIndex[tokenHolder][
-                    partition
-                ][lockIndex - 1]
-        );
-    }
-
-    function calculateNewAbaf(
-        uint256 abaf,
-        uint256 factor
-    ) private returns (uint256) {
-        return abaf == 0 ? factor : abaf * factor;
-    }
-
-    function calculateFactor(
-        uint256 _abaf,
-        uint256 _labaf
-    ) private pure returns (uint256 factor_) {
-        if (_abaf == 0) return 1;
-        if (_labaf == 0) return _abaf;
-        factor_ = _abaf / _labaf;
-    }
-
-    function _getAbaf() internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().abaf;
-    }
-
-    function _getAbafAdjusted() internal view virtual returns (uint256) {
-        return _getAbafAdjustedAt(_blockTimestamp());
-    }
-
-    function _getAbafAdjustedAt(
-        uint256 _timestamp
-    ) internal view virtual returns (uint256) {
-        uint256 abaf = _getAbaf();
-        if (abaf == 0) abaf = 1;
-        (uint256 pendingAbaf, ) = _getPendingScheduledBalanceAdjustmentsAt(
-            _timestamp
-        );
-        return abaf * pendingAbaf;
-    }
-
-    function _getLabafByUser(
-        address _account
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().labaf[_account];
-    }
-
-    function _getLabafByPartition(
-        bytes32 _partition
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().labafByPartition[_partition];
-    }
-
-    function _getAllowanceLabaf(
-        address _owner,
-        address _spender
-    ) internal view virtual returns (uint256) {
-        return _getAdjustBalancesStorage().labafsAllowances[_owner][_spender];
-    }
-
-    function _getTotalLockLabaf(
-        address _tokenHolder
-    ) internal view virtual returns (uint256 labaf_) {
-        return
-            _getAdjustBalancesStorage().labafLockedAmountByAccount[
-                _tokenHolder
-            ];
-    }
-
-    function _getTotalLockLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 labaf_) {
-        return
-            _getAdjustBalancesStorage().labafLockedAmountByAccountAndPartition[
-                _tokenHolder
-            ][_partition];
-    }
-
-    function _getLockLabafByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockIndex
-    ) internal view virtual returns (uint256) {
-        return
-            _getAdjustBalancesStorage()
-                .labafLockedAmountByAccountPartitionAndIndex[_tokenHolder][
-                    _partition
-                ][_lockIndex - 1];
-    }
-
-    function _getTotalHeldLabaf(
-        address _tokenHolder
-    ) internal view virtual returns (uint256 labaf_) {
-        return _getAdjustBalancesStorage().labafsTotalHeld[_tokenHolder];
-    }
-
-    function _getTotalHeldLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 labaf_) {
-        return
-            _getAdjustBalancesStorage().labafsTotalHeldByPartition[
-                _tokenHolder
-            ][_partition];
-    }
-
-    function _getHoldLabafByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdIndex
-    ) internal view virtual returns (uint256) {
-        return
-            _getAdjustBalancesStorage().labafHolds[_tokenHolder][_partition][
-                _holdIndex - 1
-            ];
-    }
-
-    function _getAdjustBalancesStorage()
-        internal
-        pure
-        returns (AdjustBalancesStorage storage adjustBalancesStorage_)
-    {
-        bytes32 position = _ADJUST_BALANCES_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            adjustBalancesStorage_.slot := position
-        }
     }
 }

@@ -206,56 +206,7 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-uint256 constant _ISIN_LENGTH = 12;
-uint256 constant _CHECKSUM_POSITION_IN_ISIN = 11;
-uint8 constant _TEN = 10;
-uint8 constant _UINT_WITH_ONE_DIGIT = 9;
-uint8 constant _ASCII_9 = 57;
-uint8 constant _ASCII_7 = 55;
-uint8 constant _ASCII_0 = 48;
-
-bytes1 constant _IS_PAUSED_ERROR_ID = 0x40;
-bytes1 constant _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
-bytes1 constant _FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
-bytes1 constant _TO_ACCOUNT_BLOCKED_ERROR_ID = 0x43;
-bytes1 constant _FROM_ACCOUNT_NULL_ERROR_ID = 0x44;
-bytes1 constant _TO_ACCOUNT_NULL_ERROR_ID = 0x45;
-bytes1 constant _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = 0x46;
-bytes1 constant _IS_NOT_OPERATOR_ERROR_ID = 0x47;
-bytes1 constant _WRONG_PARTITION_ERROR_ID = 0x48;
-bytes1 constant _ALLOWANCE_REACHED_ERROR_ID = 0x49;
-
-bytes1 constant _SUCCESS = 0x00;
-
 // solhint-disable max-line-length
-//keccak256(
-//    'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
-//);
-bytes32 constant _DOMAIN_TYPE_HASH = 0x8b73c3c69bb8fe3d512ecc4cf759cc79239f7b179b0ffacaa9a75d522b39400f;
-string constant _SALT = '\x19\x01';
-string constant _CONTRACT_NAME = 'ASSET_TOKENIZATION';
-string constant _CONTRACT_VERSION = '1.0.0';
-//keccak256(
-//    'protectedTransferFromByPartition(bytes32 _partition,address _from,address _to,uint256 _amount,uint256 _deadline,uint256 _nounce)'
-//);
-bytes32 constant _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH = 0x2d745a289deb1f3b76a62c3c841fc26cbf0bc208da63068e1eec99f929bbdc9e;
-//keccak256(
-//    'protectedRedeemFromByPartition(bytes32 _partition,address _from,uint256 _amount,uint256 _deadline,uint256 _nounce)'
-//);
-bytes32 constant _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH = 0x5075effccf2d386f2a3f230b6a45274e523d872e1b1b33a0cf97bef34dfa14e7;
 
-//keccak256(
-//'protectedCreateHoldByPartition(bytes32 _partition,address _from,ProtectedHold _protectedHold)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)'
-//);
-bytes32 constant _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH = 0xfd0d74766e5201a669a9197ba674709a23bc9c94c38a9ed40649836def3747eb;
-
-//keccak256(
-//'Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'
-//);
-bytes32 constant _HOLD_TYPEHASH = 0x638791043a42aa7472ccb18a7ede86b9baf01fb2d2128a743cf5dc473057d7bc;
-
-//keccak256(
-//'ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'
-//);
-bytes32 constant _PROTECTED_HOLD_TYPEHASH = 0x432ede4c9f6d06cc57be0d75da5dce179cd5f56db988520d5b77795a69b0dc2e;
-// solhint-enable max-line-length
+// keccak256("security.token.standard.transferAndLock.resolverKey")
+bytes32 constant _TRANSFER_AND_LOCK_RESOLVER_KEY = 0xd9b300e6bf7a143b8fd8cf1d4ab050e691c862bf0f57a7d49cc08c60efe68d08;

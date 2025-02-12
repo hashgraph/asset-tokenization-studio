@@ -213,7 +213,6 @@ import {
 import {
     IControlListStorageWrapper
 } from '../../../layer_1/interfaces/controlList/IControlListStorageWrapper.sol';
-import {LocalContext} from '../../context/LocalContext.sol';
 import {
     _CONTROL_LIST_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
@@ -249,17 +248,17 @@ abstract contract ControlListStorageWrapper is
     // Internal
     function _addToControlList(
         address _account
-    ) internal virtual returns (bool success_) {
+    ) internal returns (bool success_) {
         success_ = _controlListStorage().list.add(_account);
     }
 
     function _removeFromControlList(
         address _account
-    ) internal virtual returns (bool success_) {
+    ) internal returns (bool success_) {
         success_ = _controlListStorage().list.remove(_account);
     }
 
-    function _getControlListType() internal view virtual returns (bool) {
+    function _getControlListType() internal view returns (bool) {
         return _controlListStorage().isWhiteList;
     }
 
@@ -275,19 +274,15 @@ abstract contract ControlListStorageWrapper is
     function _getControlListMembers(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view virtual returns (address[] memory members_) {
+    ) internal view returns (address[] memory members_) {
         return _controlListStorage().list.getFromSet(_pageIndex, _pageLength);
     }
 
-    function _isInControlList(
-        address _account
-    ) internal view virtual returns (bool) {
+    function _isInControlList(address _account) internal view returns (bool) {
         return _controlListStorage().list.contains(_account);
     }
 
-    function _checkControlList(
-        address account
-    ) internal view virtual returns (bool) {
+    function _checkControlList(address account) internal view returns (bool) {
         return _getControlListType() == _isInControlList(account);
     }
 

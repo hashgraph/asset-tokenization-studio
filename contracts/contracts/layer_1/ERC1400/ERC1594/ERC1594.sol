@@ -213,7 +213,6 @@ import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {ERC1594StorageWrapper} from './ERC1594StorageWrapper.sol';
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
-import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
 
 contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
@@ -436,16 +435,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     {
         return _canTransferFrom(_from, _to, _value, _data);
     }
-
-    // solhint-disable no-empty-blocks
-    function _beforeTokenTransfer(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value
-    ) internal virtual override {}
-
-    // solhint-enable no-empty-blocks
     // solhint-enable no-unused-vars
 
     function getStaticResolverKey()

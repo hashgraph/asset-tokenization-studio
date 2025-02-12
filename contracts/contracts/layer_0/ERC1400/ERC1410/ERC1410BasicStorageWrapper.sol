@@ -209,9 +209,6 @@ pragma solidity 0.8.18;
 import {
     IERC1410StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from './ERC1410BasicStorageWrapperRead.sol';
 import {ERC20StorageWrapperRead} from '../ERC20/ERC20StorageWrapperRead.sol';
 
 abstract contract ERC1410BasicStorageWrapper is
@@ -226,7 +223,7 @@ abstract contract ERC1410BasicStorageWrapper is
         bytes memory _data,
         address _operator,
         bytes memory _operatorData
-    ) internal virtual {
+    ) internal {
         _beforeTokenTransfer(_partition, _from, _to, _value);
 
         _reduceBalanceByPartition(_from, _value, _partition);

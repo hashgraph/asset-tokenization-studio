@@ -206,18 +206,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {HoldStorageWrapper_2} from '../hold/HoldStorageWrapper_2.sol';
-import {
-    _SCHEDULED_TASKS_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {LibCommon} from '../common/LibCommon.sol';
-import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
+import {HoldStorageWrapper} from '../hold/HoldStorageWrapper.sol';
 import {
     ScheduledTask
 } from '../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 import {ScheduledTasksDataStorage} from './ScheduledTasksCommonRead.sol';
 
-abstract contract ScheduledTasksCommon is HoldStorageWrapper_2 {
+abstract contract ScheduledTasksCommon is HoldStorageWrapper {
     error WrongTimestamp(uint256 timeStamp);
     error NotAutocalling();
 
@@ -257,17 +252,17 @@ abstract contract ScheduledTasksCommon is HoldStorageWrapper_2 {
                         .scheduledTasks[scheduledTaskPosition]
                         .scheduledTimestamp < _newScheduledTimestamp
                 ) {
-                    slideScheduledTasks(scheduledTaskPosition);
+                    _slideScheduledTasks(scheduledTaskPosition);
                 } else {
                     newScheduledTaskId = scheduledTaskPosition + 1;
-                    insertScheduledTask(newScheduledTaskId, newScheduledTask);
+                    _insertScheduledTask(newScheduledTaskId, newScheduledTask);
                     added = true;
                     break;
                 }
             }
         }
         if (!added) {
-            insertScheduledTask(0, newScheduledTask);
+            _insertScheduledTask(0, newScheduledTask);
         }
     }
 
@@ -295,15 +290,15 @@ abstract contract ScheduledTasksCommon is HoldStorageWrapper_2 {
                 memory currentScheduledTask = _getScheduledTasksByIndex(pos);
 
             if (currentScheduledTask.scheduledTimestamp < _timestamp) {
-                popScheduledTask();
+                _popScheduledTask();
 
                 scheduledTasks.autoCalling = true;
 
                 if (_isSnapshotTaskType(currentScheduledTask.data)) {
-                    triggerSnapshotTaskType();
+                    _triggerSnapshotTaskType();
                 }
                 if (_isBalanceAdjustmentTaskType(currentScheduledTask.data)) {
-                    triggerBalanceAdjustmentTaskType();
+                    _triggerBalanceAdjustmentTaskType();
                 }
 
                 scheduledTasks.autoCalling = false;
@@ -315,15 +310,15 @@ abstract contract ScheduledTasksCommon is HoldStorageWrapper_2 {
         return newTaskID;
     }
 
-    function triggerSnapshotTaskType() private {
+    function _triggerSnapshotTaskType() private {
         // TODO: Implement it
     }
 
-    function triggerBalanceAdjustmentTaskType() private {
+    function _triggerBalanceAdjustmentTaskType() private {
         // TODO: Implement it
     }
 
-    function slideScheduledTasks(uint256 _pos) private {
+    function _slideScheduledTasks(uint256 _pos) private {
         ScheduledTasksDataStorage
             storage scheduledTasks = _scheduledTaskStorage();
         scheduledTasks
@@ -336,7 +331,7 @@ abstract contract ScheduledTasksCommon is HoldStorageWrapper_2 {
             .data;
     }
 
-    function insertScheduledTask(
+    function _insertScheduledTask(
         uint256 _pos,
         ScheduledTask memory scheduledTaskToInsert
     ) private {
@@ -349,7 +344,7 @@ abstract contract ScheduledTasksCommon is HoldStorageWrapper_2 {
         scheduledTasks.scheduledTaskCount++;
     }
 
-    function popScheduledTask() private {
+    function _popScheduledTask() private {
         uint256 scheduledTasksLength = _getScheduledTaskCount();
         if (scheduledTasksLength == 0) {
             return;

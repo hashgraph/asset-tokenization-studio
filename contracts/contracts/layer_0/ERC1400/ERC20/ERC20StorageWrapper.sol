@@ -228,10 +228,7 @@ abstract contract ERC20StorageWrapper is
      * @param spender The address which will spend the funds.
      * @param value The amount of tokens to be spent.
      */
-    function _approve(
-        address spender,
-        uint256 value
-    ) internal virtual returns (bool) {
+    function _approve(address spender, uint256 value) internal returns (bool) {
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
@@ -253,7 +250,7 @@ abstract contract ERC20StorageWrapper is
     function _increaseAllowance(
         address spender,
         uint256 addedValue
-    ) internal virtual returns (bool) {
+    ) internal returns (bool) {
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
@@ -280,7 +277,7 @@ abstract contract ERC20StorageWrapper is
     function _decreaseAllowance(
         address spender,
         uint256 subtractedValue
-    ) internal virtual returns (bool) {
+    ) internal returns (bool) {
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
@@ -302,7 +299,7 @@ abstract contract ERC20StorageWrapper is
     function _allowance(
         address owner,
         address spender
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         return _getErc20Storage().allowed[owner][spender];
     }
 
@@ -311,7 +308,7 @@ abstract contract ERC20StorageWrapper is
         address from,
         address to,
         uint256 value
-    ) internal virtual returns (bool) {
+    ) internal returns (bool) {
         _decreaseAllowedBalance(from, spender, value);
         bytes memory data;
         _transferByPartition(
@@ -330,7 +327,7 @@ abstract contract ERC20StorageWrapper is
         address from,
         address to,
         uint256 value
-    ) internal virtual returns (bool) {
+    ) internal returns (bool) {
         _transferByPartition(
             from,
             to,
@@ -343,13 +340,13 @@ abstract contract ERC20StorageWrapper is
         return _emitTransferEvent(from, to, value);
     }
 
-    function _mint(address to, uint256 value) internal virtual {
+    function _mint(address to, uint256 value) internal {
         bytes memory _data;
         _issueByPartition(_DEFAULT_PARTITION, to, value, _data);
         _emitTransferEvent(address(0), to, value);
     }
 
-    function _burn(address from, uint256 value) internal virtual {
+    function _burn(address from, uint256 value) internal {
         bytes memory _data;
         _redeemByPartition(
             _DEFAULT_PARTITION,
