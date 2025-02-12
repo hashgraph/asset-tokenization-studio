@@ -291,7 +291,7 @@ class KycInPort implements IKycInPort {
       status: res.status,
     };
 
-    return res;
+    return kyc;
   }
 
   @LogError
