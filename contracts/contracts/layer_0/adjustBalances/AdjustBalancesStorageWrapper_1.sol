@@ -217,7 +217,7 @@ import {
     IAdjustBalancesStorageWrapper
 } from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
 
-contract AdjustBalancesStorageWrapper_1 is
+abstract contract AdjustBalancesStorageWrapper_1 is
     IAdjustBalancesStorageWrapper,
     ScheduledBalanceAdjustmentsStorageWrapper
 {
@@ -266,12 +266,71 @@ contract AdjustBalancesStorageWrapper_1 is
         _getAdjustBalancesStorage().labaf[tokenHolder] = labaf;
     }
 
-    function _pushLabafUserPartition(address _tokenHolder) internal {
-        AdjustBalancesStorage
-            storage balancesStorage = _getAdjustBalancesStorage();
-        balancesStorage.labafUserPartition[_tokenHolder].push(
-            balancesStorage.abaf
+    function _pushLabafUserPartition(
+        address _tokenHolder,
+        uint256 _labaf
+    ) internal {
+        _getAdjustBalancesStorage().labafUserPartition[_tokenHolder].push(
+            _labaf
         );
+    }
+
+    function _popLabafHold(bytes32 _partition, address _tokenHolder) internal {
+        _getAdjustBalancesStorage().labafHolds[_tokenHolder][_partition].pop();
+    }
+
+    function _popLabafLock(bytes32 _partition, address _tokenHolder) internal {
+        _getAdjustBalancesStorage()
+        .labafLockedAmountByAccountPartitionAndIndex[_tokenHolder][_partition]
+            .pop();
+    }
+
+    function _pushLabafLocks(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _labaf
+    ) internal {
+        _getAdjustBalancesStorage()
+        .labafLockedAmountByAccountPartitionAndIndex[_tokenHolder][_partition]
+            .push(_labaf);
+    }
+
+    function _pushLabafHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _labaf
+    ) internal {
+        _getAdjustBalancesStorage().labafHolds[_tokenHolder][_partition].push(
+            _labaf
+        );
+    }
+
+    function _updateLabafHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _labaf,
+        uint256 _holdIndex
+    ) internal {
+        _getAdjustBalancesStorage().labafHolds[_tokenHolder][_partition][
+            _holdIndex - 1
+        ] = _labaf;
+    }
+
+    function _updateLabafTotalHeld(
+        address _tokenHolder,
+        uint256 _labaf
+    ) internal {
+        _getAdjustBalancesStorage().labafsTotalHeld[_tokenHolder] = _labaf;
+    }
+
+    function _updateLabafTotalHeldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _labaf
+    ) internal {
+        _getAdjustBalancesStorage().labafsTotalHeldByPartition[_tokenHolder][
+            _partition
+        ] = _labaf;
     }
 
     function _updateLabafByTokenHolderAndPartitionIndex(
@@ -284,11 +343,19 @@ contract AdjustBalancesStorageWrapper_1 is
         ] = labaf;
     }
 
+    function _updateAllowanceLabaf(
+        address _owner,
+        address _spender,
+        uint256 _labaf
+    ) internal view virtual returns (uint256) {
+        _getAdjustBalancesStorage().labafsAllowances[_owner][_spender] = _labaf;
+    }
+
     function _calculateFactorByTokenHolder(
         uint256 abaf,
         address tokenHolder
     ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
+        factor = _calculateFactor(
             abaf,
             _getAdjustBalancesStorage().labaf[tokenHolder]
         );
@@ -298,7 +365,7 @@ contract AdjustBalancesStorageWrapper_1 is
         uint256 abaf,
         address tokenHolder
     ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
+        factor = _calculateFactor(
             abaf,
             _getAdjustBalancesStorage().labaf[tokenHolder]
         );
@@ -309,7 +376,7 @@ contract AdjustBalancesStorageWrapper_1 is
         uint256 timestamp
     ) internal view returns (uint256) {
         return
-            calculateFactor(
+            _calculateFactor(
                 _getAbafAdjustedAt(timestamp),
                 _getAdjustBalancesStorage().labafByPartition[partition]
             );
@@ -322,7 +389,7 @@ contract AdjustBalancesStorageWrapper_1 is
         uint256 timestamp
     ) internal view returns (uint256) {
         return
-            calculateFactor(
+            _calculateFactor(
                 _getAbafAdjustedAt(timestamp),
                 _getAdjustBalancesStorage()
                     .labafLockedAmountByAccountPartitionAndIndex[tokenHolder][
@@ -336,7 +403,7 @@ contract AdjustBalancesStorageWrapper_1 is
         address tokenHolder,
         uint256 partitionIndex
     ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
+        factor = _calculateFactor(
             abaf,
             _getAdjustBalancesStorage().labafUserPartition[tokenHolder][
                 partitionIndex - 1
@@ -348,7 +415,7 @@ contract AdjustBalancesStorageWrapper_1 is
         address tokenHolder,
         uint256 timestamp
     ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
+        factor = _calculateFactor(
             _getAbafAdjustedAt(timestamp),
             _getAdjustBalancesStorage().labafLockedAmountByAccount[tokenHolder]
         );
@@ -359,7 +426,7 @@ contract AdjustBalancesStorageWrapper_1 is
         bytes32 partition,
         uint256 timestamp
     ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
+        factor = _calculateFactor(
             _getAbafAdjustedAt(timestamp),
             _getAdjustBalancesStorage().labafLockedAmountByAccountAndPartition[
                 tokenHolder
@@ -373,7 +440,7 @@ contract AdjustBalancesStorageWrapper_1 is
         uint256 lockIndex,
         uint256 timestamp
     ) internal view returns (uint256 factor) {
-        factor = calculateFactor(
+        factor = _calculateFactor(
             _getAbafAdjustedAt(timestamp),
             _getAdjustBalancesStorage()
                 .labafLockedAmountByAccountPartitionAndIndex[tokenHolder][
@@ -389,10 +456,10 @@ contract AdjustBalancesStorageWrapper_1 is
         return abaf == 0 ? factor : abaf * factor;
     }
 
-    function calculateFactor(
+    function _calculateFactor(
         uint256 _abaf,
         uint256 _labaf
-    ) private pure returns (uint256 factor_) {
+    ) internal pure returns (uint256 factor_) {
         if (_abaf == 0) return 1;
         if (_labaf == 0) return _abaf;
         factor_ = _abaf / _labaf;

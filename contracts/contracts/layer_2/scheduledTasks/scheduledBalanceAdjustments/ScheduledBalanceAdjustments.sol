@@ -203,263 +203,115 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {LibCommon} from '..//common/LibCommon.sol';
-import {_LOCK_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
+import {
+    _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY
+} from '../../constants/resolverKeys.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
+import {
+    IScheduledBalanceAdjustments
+} from '../../interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol';
+import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {CapStorageWrapperRead} from '../cap/CapStorageWrapperRead.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract LockStorageWrapperRead is CapStorageWrapperRead {
-    // TODO: Create interface to the errors or carry to layer 1
-    error WrongLockId();
-    error WrongExpirationTimestamp();
-    error LockExpirationNotReached();
+contract ScheduledBalanceAdjustments is
+    IStaticFunctionSelectors,
+    IScheduledBalanceAdjustments,
+    Common
+{
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    using LibCommon for EnumerableSet.UintSet;
+    // solhint-disable no-unused-vars
+    function onScheduledBalanceAdjustmentTriggered(
+        uint256 _pos,
+        uint256 _scheduledTasksLength,
+        bytes memory _data
+    )
+        external
+        virtual
+        override
+        onlyAutoCalling(_scheduledBalanceAdjustmentStorage())
+    {
+        _onScheduledBalanceAdjustmentTriggered(_data);
+    } // solhint-enable no-unused-vars
 
-    struct LockData {
-        uint256 id;
-        uint256 amount;
-        uint256 expirationTimestamp;
+    function scheduledBalanceAdjustmentCount()
+        external
+        view
+        virtual
+        override
+        returns (uint256)
+    {
+        return _getScheduledBalanceAdjustmentCount();
     }
 
-    struct LockDataStorage {
-        mapping(address => uint256) totalLockedAmountByAccount;
-        mapping(address => mapping(bytes32 => uint256)) totalLockedAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => LockData[])) locksByAccountAndPartition;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) lockIdsByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) lockIndexByAccountPartitionAndId;
-        mapping(address => mapping(bytes32 => uint256)) nextLockIdByAccountAndPartition;
-    }
-
-    modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp) {
-        if (_expirationTimestamp < _blockTimestamp())
-            revert WrongExpirationTimestamp();
-        _;
-    }
-
-    modifier onlyWithValidLockId(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId
-    ) {
-        if (!_isLockIdInvalid(_getLockIndex(_partition, _tokenHolder, _lockId)))
-            revert WrongLockId();
-        _;
-    }
-
-    modifier onlyWithLockedExpirationTimestamp(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId
-    ) {
-        if (!_isLockedExpirationTimestamp(_partition, _tokenHolder, _lockId))
-            revert LockExpirationNotReached();
-        _;
-    }
-
-    function _getLockedAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256) {
-        return
-            _lockStorage().totalLockedAmountByAccountAndPartition[_tokenHolder][
-                _partition
-            ];
-    }
-
-    function _getLockCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256 lockCount_) {
-        return
-            _lockStorage()
-            .locksByAccountAndPartition[_tokenHolder][_partition].length;
-    }
-
-    function _getLocksIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
+    function getScheduledBalanceAdjustments(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (uint256[] memory locksId_) {
-        return
-            _lockStorage()
-            .lockIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(
-                    _pageIndex,
-                    _pageLength
-                );
-    }
-
-    function _getLockForByPartition(
-        bytes32 partition,
-        address tokenHolder,
-        uint256 lockId
     )
-        internal
+        external
         view
         virtual
-        returns (uint256 amount, uint256 expirationTimestamp)
+        override
+        returns (
+            ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
+        )
     {
-        return
-            _getLockForByPartitionAdjustedAt(
-                partition,
-                tokenHolder,
-                lockId,
-                _blockTimestamp()
-            );
-    }
-
-    function _getLockForByPartitionAdjustedAt(
-        bytes32 partition,
-        address tokenHolder,
-        uint256 lockId,
-        uint256 timestamp
-    )
-        internal
-        view
-        virtual
-        returns (uint256 amount, uint256 expirationTimestamp)
-    {
-        LockData memory lock = _getLockByIndexAdjustedAt(
-            partition,
-            tokenHolder,
-            lockId,
-            timestamp
-        );
-        amount = lock.amount;
-        expirationTimestamp = lock.expirationTimestamp;
-    }
-
-    function _getLockedAmountFor(
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return _getLockedAmountForAdjustedAt(_tokenHolder, _blockTimestamp());
-    }
-
-    //note: previous was _getLockedAmountForAdjusted
-    function _getLockedAmountForAdjustedAt(
-        address tokenHolder,
-        uint256 timestamp
-    ) internal view returns (uint256 amount_) {
-        uint256 factor = _calculateFactorForLockedAmountByTokenHolderAdjustedAt(
-            tokenHolder,
-            timestamp
-        );
-        return _getLockedAmountFor(tokenHolder) * factor;
-    }
-
-    function _getLockedAmountForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return
-            _getLockedAmountForByPartitionAdjustedAt(
-                _partition,
-                _tokenHolder,
-                _blockTimestamp()
-            );
-    }
-
-    function _getLockedAmountForByPartitionAdjustedAt(
-        bytes32 partition,
-        address tokenHolder,
-        uint256 timestamp
-    ) internal view returns (uint256 amount_) {
-        return
-            _getLockedAmountForByPartition(partition, tokenHolder) *
-            _calculateFactorForLockedAmountByTokenHolderAndPartitionAdjustedAt(
-                tokenHolder,
-                partition,
-                timestamp
-            );
-    }
-
-    function _getLock(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId
-    ) internal view returns (LockData memory) {
-        return
-            _getLockByIndexAdjustedAt(
-                _partition,
-                _tokenHolder,
-                _getLockIndex(_partition, _tokenHolder, _lockId),
-                _blockTimestamp()
-            );
-    }
-
-    function _getLockByIndexAdjustedAt(
-        bytes32 partition,
-        address tokenHolder,
-        uint256 lockIndex,
-        uint256 timestamp
-    ) internal view returns (LockData memory lock) {
-        LockDataStorage storage lockStorage = _lockStorage();
-        if (_isLockIdInvalid(lockIndex)) {
-            return lock;
-        } else {
-            revert WrongLockId();
-        }
-        assert(
-            lockIndex - 1 <
-                lockStorage
-                .locksByAccountAndPartition[tokenHolder][partition].length
-        );
-        lock = lockStorage.locksByAccountAndPartition[tokenHolder][partition][
-            lockIndex - 1
-        ];
-        lock
-            .amount *= _calculateFactorForLockedAmountByTokenHolderPartitionAndLockIndexAdjustedAt(
-            tokenHolder,
-            partition,
-            lockIndex,
-            timestamp
+        scheduledBalanceAdjustment_ = _getScheduledBalanceAdjustments(
+            _pageIndex,
+            _pageLength
         );
     }
 
-    function _lockStorage()
-        internal
+    function getStaticResolverKey()
+        external
         pure
         virtual
-        returns (LockDataStorage storage lock_)
+        override
+        returns (bytes32 staticResolverKey_)
     {
-        bytes32 position = _LOCK_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            lock_.slot := position
-        }
+        staticResolverKey_ = _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY;
     }
 
-    function _isLockedExpirationTimestamp(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId
-    ) internal view returns (bool) {
-        LockData memory lock = _getLock(_partition, _tokenHolder, _lockId);
-
-        if (lock.expirationTimestamp > _blockTimestamp()) return false;
-
-        return true;
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .scheduledBalanceAdjustmentCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getScheduledBalanceAdjustments
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .onScheduledBalanceAdjustmentTriggered
+            .selector;
     }
 
-    function _isLockIdInvalid(uint256 lockIndex) internal pure returns (bool) {
-        return lockIndex == 0;
-    }
-
-    function _getLockIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId
-    ) internal view returns (uint256) {
-        return
-            _lockStorage().lockIndexByAccountPartitionAndId[_tokenHolder][
-                _partition
-            ][_lockId];
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(
+            IScheduledBalanceAdjustments
+        ).interfaceId;
     }
 }

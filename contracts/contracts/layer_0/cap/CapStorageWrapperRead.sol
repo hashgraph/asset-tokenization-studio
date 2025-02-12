@@ -209,6 +209,7 @@ import {
     AdjustBalancesStorageWrapper_1
 } from '../adjustBalances/AdjustBalancesStorageWrapper_1.sol';
 import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 // solhint-disable no-unused-vars, custom-errors
@@ -259,6 +260,15 @@ contract CapStorageWrapperRead is AdjustBalancesStorageWrapper_1 {
             _getMaxSupplyByPartitionAdjustedAt(partition, _blockTimestamp());
     }
 
+    function _getMaxSupplyAdjusted()
+        internal
+        view
+        virtual
+        returns (uint256 maxSupply_)
+    {
+        return _getMaxSupplyAdjustedAt(_blockTimestamp());
+    }
+
     function _getMaxSupplyAdjustedAt(
         uint256 timestamp
     ) internal view returns (uint256) {
@@ -273,6 +283,13 @@ contract CapStorageWrapperRead is AdjustBalancesStorageWrapper_1 {
             timestamp
         );
         return capStorage.maxSupply * pendingABF;
+    }
+
+    function _getMaxSupplyByPartitionAdjusted(
+        bytes32 _partition
+    ) internal view virtual returns (uint256 maxSupply_) {
+        return
+            _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
     }
 
     function _getMaxSupplyByPartitionAdjustedAt(

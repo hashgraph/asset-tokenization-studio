@@ -437,14 +437,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         return _canTransferFrom(_from, _to, _value, _data);
     }
 
-    // solhint-disable no-empty-blocks
-    function _beforeTokenTransfer(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value
-    ) internal virtual override {}
-
     // solhint-enable no-empty-blocks
     // solhint-enable no-unused-vars
 

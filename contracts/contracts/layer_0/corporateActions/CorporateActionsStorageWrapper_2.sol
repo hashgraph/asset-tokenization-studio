@@ -206,10 +206,6 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
 import {LibCommon} from '../../layer_0/common/LibCommon.sol';
 import {
     EnumerableSet
@@ -230,11 +226,20 @@ import {
 import {
     AdjustBalancesStorageWrapper_2
 } from '../adjustBalances/AdjustBalancesStorageWrapper_2.sol';
-
-contract CorporateActionsStorageWrapper_2 is
+import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
+import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
+import {
     ICorporateActionsStorageWrapper,
-    AdjustBalancesStorageWrapper_2
-{
+    CorporateActionDataStorage
+} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
+import {
+    IEquityStorageWrapper
+} from '../../layer_2/interfaces/equity/IEquityStorageWrapper.sol';
+import {
+    IBondStorageWrapper
+} from '../../layer_2/interfaces/bond/IBondStorageWrapper.sol';
+
+contract CorporateActionsStorageWrapper_2 is AdjustBalancesStorageWrapper_2 {
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -243,14 +248,10 @@ contract CorporateActionsStorageWrapper_2 is
         uint256 index
     ) {
         if (_getCorporateActionCountByType(actionType) <= index) {
-            revert WrongIndexForAction(index, actionType);
-        }
-        _;
-    }
-
-    modifier checkDates(uint256 firstDate, uint256 secondDate) {
-        if (secondDate < firstDate) {
-            revert WrongDates(firstDate, secondDate);
+            revert ICorporateActionsStorageWrapper.WrongIndexForAction(
+                index,
+                actionType
+            );
         }
         _;
     }
@@ -301,9 +302,8 @@ contract CorporateActionsStorageWrapper_2 is
         bytes32 _actionId,
         bytes memory _data
     ) private {
-        // TODO
-        /*if (!_success) {
-            revert DividendCreationFailed();
+        if (!_success) {
+            revert IEquityStorageWrapper.DividendCreationFailed();
         }
 
         IEquity.Dividend memory newDividend = abi.decode(
@@ -315,7 +315,7 @@ contract CorporateActionsStorageWrapper_2 is
             newDividend.recordDate,
             abi.encode(SNAPSHOT_TASK_TYPE)
         );
-        _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));*/
+        _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));
     }
 
     function _initVotingRights(
@@ -323,15 +323,14 @@ contract CorporateActionsStorageWrapper_2 is
         bytes32 _actionId,
         bytes memory _data
     ) private {
-        // TODO
-        /*if (!_success) {
-            revert VotingRightsCreationFailed();
+        if (!_success) {
+            revert IEquityStorageWrapper.VotingRightsCreationFailed();
         }
 
         IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
 
         _addScheduledTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
-        _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));*/
+        _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));
     }
 
     function _initCoupon(
@@ -339,15 +338,14 @@ contract CorporateActionsStorageWrapper_2 is
         bytes32 _actionId,
         bytes memory _data
     ) private {
-        // TODO
-        /*if (!_success) {
-            revert CouponCreationFailed();
+        if (!_success) {
+            revert IBondStorageWrapper.CouponCreationFailed();
         }
 
         IBond.Coupon memory newCoupon = abi.decode(_data, (IBond.Coupon));
 
         _addScheduledTask(newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
-        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));*/
+        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
     }
 
     function _initBalanceAdjustment(
@@ -355,10 +353,8 @@ contract CorporateActionsStorageWrapper_2 is
         bytes32 _actionId,
         bytes memory _data
     ) private {
-        // TODO
-        /*
         if (!_success) {
-            revert BalanceAdjustmentCreationFailed();
+            revert IEquityStorageWrapper.BalanceAdjustmentCreationFailed();
         }
 
         IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
@@ -371,19 +367,18 @@ contract CorporateActionsStorageWrapper_2 is
         _addScheduledBalanceAdjustment(
             newBalanceAdjustment.executionDate,
             abi.encode(_actionId)
-        );*/
+        );
     }
 
     function _onScheduledTaskTriggered(bytes memory _data) internal virtual {
-        // TODO
-        /*if (_data.length > 0) {
+        if (_data.length > 0) {
             bytes32 taskType = abi.decode(_data, (bytes32));
             if (taskType == SNAPSHOT_TASK_TYPE) {
                 _triggerScheduledSnapshots(1);
             } else if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
                 _triggerScheduledBalanceAdjustments(1);
             }
-        }*/
+        }
     }
 
     function _onScheduledBalanceAdjustmentTriggered(
@@ -396,15 +391,15 @@ contract CorporateActionsStorageWrapper_2 is
             );
 
             if (balanceAdjustmentData.length > 0) {
-                /* IEquity.ScheduledBalanceAdjustment
+                IEquity.ScheduledBalanceAdjustment
                     memory balanceAdjustment = abi.decode(
                         balanceAdjustmentData,
                         (IEquity.ScheduledBalanceAdjustment)
-                    );*/
-                /* _adjustBalances(
+                    );
+                _adjustBalances(
                     balanceAdjustment.factor,
                     balanceAdjustment.decimals
-                );*/
+                );
             }
         }
     }

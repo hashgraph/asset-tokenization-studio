@@ -214,11 +214,11 @@ import {
 import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {_LOCKER_ROLE} from '../constants/roles.sol';
 import {ILock} from '../interfaces/lock/ILock.sol';
-import {LockStorageWrapper} from './LockStorageWrapper.sol';
+import {Common} from '../common/Common.sol';
 import {_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
+contract Lock is ILock, IStaticFunctionSelectors, Common {
     // Functions
     function lockByPartition(
         bytes32 _partition,

@@ -340,14 +340,6 @@ abstract contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         return _decimals();
     }
 
-    // solhint-disable no-empty-blocks
-    function _beforeTokenTransfer(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value
-    ) internal virtual override {}
-
     // solhint-enable no-empty-blocks
     // solhint-enable no-unused-vars
 

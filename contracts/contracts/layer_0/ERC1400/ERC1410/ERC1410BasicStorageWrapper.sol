@@ -212,11 +212,11 @@ import {
 import {
     ERC1410BasicStorageWrapperRead
 } from './ERC1410BasicStorageWrapperRead.sol';
-import {ERC20StorageWrapperRead} from '../ERC20/ERC20StorageWrapperRead.sol';
+import {ERC20StorageWrapper_1} from '../ERC20/ERC20StorageWrapper_1.sol';
 
 abstract contract ERC1410BasicStorageWrapper is
     IERC1410StorageWrapper,
-    ERC20StorageWrapperRead
+    ERC20StorageWrapper_1
 {
     function _transferByPartition(
         address _from,
@@ -254,5 +254,11 @@ abstract contract ERC1410BasicStorageWrapper is
         address from,
         address to,
         uint256 amount
+    ) internal virtual;
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
     ) internal virtual;
 }

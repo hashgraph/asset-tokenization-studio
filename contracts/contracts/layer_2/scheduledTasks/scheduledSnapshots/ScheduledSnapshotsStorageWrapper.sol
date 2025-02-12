@@ -205,91 +205,79 @@
 
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
-//
-//import {
-//    _SCHEDULED_SNAPSHOTS_STORAGE_POSITION
-//} from '../../constants/storagePositions.sol';
-//import {
-//    ScheduledTasksCommon
-//} from '../../../layer_0/scheduledTasks/ScheduledTasksCommon.sol';
-//import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-//
-//abstract contract ScheduledSnapshotsStorageWrapper is ScheduledTasksCommon {
-//    // TODO: Remove the method
-//    // solhint-disable no-unused-vars, custom-errors
-//    function onScheduledSnapshotTriggered(
-//        uint256 _pos,
-//        uint256 _scheduledTasksLength,
-//        bytes memory _data
-//    ) external virtual {
-//        revert('This method should never be executed, it should be overriden');
-//    } // solhint-enable no-unused-vars, custom-errors
-//
-//    function _addScheduledSnapshot(
-//        uint256 _newScheduledTimestamp,
-//        bytes memory _newData
-//    ) internal virtual {
-//        ScheduledTasksLib.addScheduledTask(
-//            _scheduledSnapshotStorage(),
-//            _newScheduledTimestamp,
-//            _newData
-//        );
-//    }
-//
-//    function _triggerScheduledSnapshots(
-//        uint256 _max
-//    ) internal virtual returns (uint256) {
-//        return
-//            ScheduledTasksLib.triggerScheduledTasks(
-//                _scheduledSnapshotStorage(),
-//                this.onScheduledSnapshotTriggered.selector,
-//                _max,
-//                _blockTimestamp()
-//            );
-//    }
-//
-//    function _getScheduledSnapshotCount()
-//        internal
-//        view
-//        virtual
-//        returns (uint256)
-//    {
-//        return
-//            ScheduledTasksLib.getScheduledTaskCount(
-//                _scheduledSnapshotStorage()
-//            );
-//    }
-//
-//    function _getScheduledSnapshots(
-//        uint256 _pageIndex,
-//        uint256 _pageLength
-//    )
-//        internal
-//        view
-//        virtual
-//        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_)
-//    {
-//        return
-//            ScheduledTasksLib.getScheduledTasks(
-//                _scheduledSnapshotStorage(),
-//                _pageIndex,
-//                _pageLength
-//            );
-//    }
-//
-//    function _scheduledSnapshotStorage()
-//        internal
-//        pure
-//        virtual
-//        returns (
-//            ScheduledTasksLib.ScheduledTasksDataStorage
-//                storage scheduledSnapshots_
-//        )
-//    {
-//        bytes32 position = _SCHEDULED_SNAPSHOTS_STORAGE_POSITION;
-//        // solhint-disable-next-line no-inline-assembly
-//        assembly {
-//            scheduledSnapshots_.slot := position
-//        }
-//    }
-//}
+
+import {
+    _SCHEDULED_SNAPSHOTS_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
+import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
+
+abstract contract ScheduledSnapshotsStorageWrapper is Common {
+    function _addScheduledSnapshot(
+        uint256 _newScheduledTimestamp,
+        bytes memory _newData
+    ) internal virtual {
+        ScheduledTasksLib.addScheduledTask(
+            _scheduledSnapshotStorage(),
+            _newScheduledTimestamp,
+            _newData
+        );
+    }
+
+    function _triggerScheduledSnapshots(
+        uint256 _max
+    ) internal virtual returns (uint256) {
+        return
+            ScheduledTasksLib.triggerScheduledTasks(
+                _scheduledSnapshotStorage(),
+                this.onScheduledSnapshotTriggered.selector,
+                _max,
+                _blockTimestamp()
+            );
+    }
+
+    function _getScheduledSnapshotCount()
+        internal
+        view
+        virtual
+        returns (uint256)
+    {
+        return
+            ScheduledTasksLib.getScheduledTaskCount(
+                _scheduledSnapshotStorage()
+            );
+    }
+
+    function _getScheduledSnapshots(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        internal
+        view
+        virtual
+        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_)
+    {
+        return
+            ScheduledTasksLib.getScheduledTasks(
+                _scheduledSnapshotStorage(),
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _scheduledSnapshotStorage()
+        internal
+        pure
+        virtual
+        returns (
+            ScheduledTasksLib.ScheduledTasksDataStorage
+                storage scheduledSnapshots_
+        )
+    {
+        bytes32 position = _SCHEDULED_SNAPSHOTS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            scheduledSnapshots_.slot := position
+        }
+    }
+}

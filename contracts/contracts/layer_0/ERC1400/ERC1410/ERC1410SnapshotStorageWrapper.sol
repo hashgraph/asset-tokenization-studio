@@ -212,25 +212,4 @@ import {
 
 abstract contract ERC1410SnapshotStorageWrapper is
     ERC1410ControllerStorageWrapper
-{
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount // solhint-disable-line no-unused-vars
-    ) internal virtual override {
-        if (from == address(0)) {
-            // mint
-            _updateAccountSnapshot(to, partition);
-            _updateTotalSupplySnapshot(partition);
-        } else if (to == address(0)) {
-            // burn
-            _updateAccountSnapshot(from, partition);
-            _updateTotalSupplySnapshot(partition);
-        } else {
-            // transfer
-            _updateAccountSnapshot(from, partition);
-            _updateAccountSnapshot(to, partition);
-        }
-    }
-}
+{}

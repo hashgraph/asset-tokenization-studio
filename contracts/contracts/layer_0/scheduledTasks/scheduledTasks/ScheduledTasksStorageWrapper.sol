@@ -206,66 +206,85 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-//import {
-//    _SCHEDULED_TASKS_STORAGE_POSITION
-//} from '../../constants/storagePositions.sol';
-//import {
-//    ScheduledTasksCommon
-//} from '../../../layer_0/scheduledTasks/ScheduledTasksCommon.sol';
-//import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
-//
-//abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
-//    // TODO: Remove the method
-//    // solhint-disable no-unused-vars, custom-errors
-//    function onScheduledTaskTriggered(
-//        uint256 _pos,
-//        uint256 _scheduledTasksLength,
-//        bytes memory _data
-//    ) external virtual {
-//        revert('This method should never be executed, it should be overriden');
-//    } // solhint-enable no-unused-vars, custom-errors
-//
-//    function _addScheduledTask(
-//        uint256 _newScheduledTimestamp,
-//        bytes memory _newData
-//    ) internal virtual {
-//        ScheduledTasksLib.addScheduledTask(
-//            _scheduledTaskStorage(),
-//            _newScheduledTimestamp,
-//            _newData
-//        );
-//    }
-//
-//    function _triggerScheduledTasks(
-//        uint256 _max
-//    ) internal virtual returns (uint256) {
-//        return
-//            ScheduledTasksLib.triggerScheduledTasks(
-//                _scheduledTaskStorage(),
-//                this.onScheduledTaskTriggered.selector,
-//                _max,
-//                _blockTimestamp()
-//            );
-//    }
-//
-//    function _getScheduledTaskCount() internal view virtual returns (uint256) {
-//        return ScheduledTasksLib.getScheduledTaskCount(_scheduledTaskStorage());
-//    }
-//
-//    function _getScheduledTasks(
-//        uint256 _pageIndex,
-//        uint256 _pageLength
-//    )
-//        internal
-//        view
-//        virtual
-//        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
-//    {
-//        return
-//            ScheduledTasksLib.getScheduledTasks(
-//                _scheduledTaskStorage(),
-//                _pageIndex,
-//                _pageLength
-//            );
-//    }
-//}
+import {
+    _SCHEDULED_TASKS_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
+import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+import {
+    ScheduledTask
+} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
+import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+import {
+    ScheduledTasksLib
+} from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
+
+abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
+    // TODO: Remove the method
+    // solhint-disable no-unused-vars, custom-errors
+    function onScheduledTaskTriggered(
+        uint256 _pos,
+        uint256 _scheduledTasksLength,
+        bytes memory _data
+    ) external virtual {
+        revert('This method should never be executed, it should be overriden');
+    } // solhint-enable no-unused-vars, custom-errors
+
+    function _addScheduledTask(
+        uint256 _newScheduledTimestamp,
+        bytes memory _newData
+    ) internal virtual {
+        ScheduledTasksLib.addScheduledTask(
+            _scheduledTaskStorage(),
+            _newScheduledTimestamp,
+            _newData
+        );
+    }
+
+    function _triggerScheduledTasks(
+        uint256 _max
+    ) internal virtual returns (uint256) {
+        return
+            ScheduledTasksLib.triggerScheduledTasks(
+                _scheduledTaskStorage(),
+                this.onScheduledTaskTriggered.selector,
+                _max,
+                _blockTimestamp()
+            );
+    }
+
+    function _getScheduledTaskCount() internal view virtual returns (uint256) {
+        return ScheduledTasksLib.getScheduledTaskCount(_scheduledTaskStorage());
+    }
+
+    function _getScheduledTasks(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    )
+        internal
+        view
+        virtual
+        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
+    {
+        return
+            ScheduledTasksLib.getScheduledTasks(
+                _scheduledTaskStorage(),
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _scheduledTaskStorage()
+        internal
+        pure
+        virtual
+        returns (
+            ScheduledTasksLib.ScheduledTasksDataStorage storage scheduledTasks_
+        )
+    {
+        bytes32 position = _SCHEDULED_TASKS_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            scheduledTasks_.slot := position
+        }
+    }
+}

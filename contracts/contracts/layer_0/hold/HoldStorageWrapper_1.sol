@@ -335,6 +335,37 @@ abstract contract HoldStorageWrapper_1 is PauseStorageWrapper {
         );
     }
 
+    function _getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        return _holdStorage().holds[_tokenHolder][_partition].length;
+    }
+
+    function _isHoldExpired(
+        IHold.Hold memory _hold
+    ) internal view returns (bool) {
+        if (_blockTimestamp() > _hold.expirationTimestamp) return true;
+        return false;
+    }
+
+    function _isEscrow(
+        IHold.Hold memory _hold,
+        address _escrow
+    ) internal pure returns (bool) {
+        if (_escrow == _hold.escrow) return true;
+        return false;
+    }
+
+    function _checkHoldAmount(
+        uint256 _amount,
+        IHold.HoldData memory holdData
+    ) internal pure {
+        if (_amount > holdData.hold.amount) {
+            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
+        }
+    }
+
     function _holdStorage()
         internal
         pure
@@ -346,12 +377,5 @@ abstract contract HoldStorageWrapper_1 is PauseStorageWrapper {
         assembly {
             hold_.slot := position
         }
-    }
-
-    function _getHoldCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
-        return _holdStorage().holds[_tokenHolder][_partition].length;
     }
 }
