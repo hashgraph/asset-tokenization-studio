@@ -203,49 +203,24 @@
 
 */
 
-import Injectable from '../../core/Injectable.js';
-import { QueryBus } from '../../core/query/QueryBus.js';
-import { UnlistedIssuer } from '../usecase/command/security/error/UnlistedIssuer.js';
-import Service from './Service.js';
-import { singleton } from 'tsyringe';
-import { SecurityRole } from '../../domain/context/security/SecurityRole.js';
-import { NotGrantedRole } from '../usecase/command/security/error/NotGrantedRole.js';
-import { IsIssuerQuery } from '../usecase/query/security/ssi/isIssuer/IsIssuerQuery.js';
-import { GetKYCStatusForQuery } from '../usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQuery.js';
+export class KYC {
+  validFrom: string;
+  validTo: string;
+  VCid: string;
+  issuer: string;
+  status: number;
 
-@singleton()
-export default class ValidationService extends Service {
-  queryBus: QueryBus;
-  constructor() {
-    super();
-  }
-
-  async validateIssuer(securityId: string, issuer: string): Promise<boolean> {
-    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
-    const res = await this.queryBus.execute(
-      new IsIssuerQuery(securityId, issuer),
-    );
-    if (!res.payload) {
-      throw new UnlistedIssuer();
-    } else {
-      return true;
-    }
-  }
-
-  async validateKycAddresses(
-    securityId: string,
-    addresses: string[],
-  ): Promise<boolean> {
-    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
-    let res;
-    for (const address of addresses) {
-      res = await this.queryBus.execute(
-        new GetKYCStatusForQuery(securityId, address),
-      );
-      if (res.payload != 1) {
-        throw new NotGrantedRole(SecurityRole._KYC_ROLE);
-      }
-    }
-    return true;
+  constructor(
+    validFrom: string,
+    validTo: string,
+    VCid: string,
+    issuer: string,
+    status: number,
+  ) {
+    this.validFrom = validFrom;
+    this.validTo = validTo;
+    this.VCid = VCid;
+    this.issuer = issuer;
+    this.status = status;
   }
 }

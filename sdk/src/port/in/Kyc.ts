@@ -219,6 +219,11 @@ import { RevokeKYCCommand } from '../../app/usecase/command/security/kyc/revokeK
 import { GetKYCForQuery } from '../../app/usecase/query/security/kyc/getKycFor/GetKYCForQuery.js';
 import { GetKYCAccountsCountQuery } from '../../app/usecase/query/security/kyc/getKycAccountsCount/GetKYCAccountsCountQuery.js';
 import { GetKYCAccountsQuery } from '../../app/usecase/query/security/kyc/getKycAccounts/GetKYCAccountsQuery.js';
+import { GetKYCAccountsDataQuery } from '../../app/usecase/query/security/kyc/getKycAccountsData/GetKYCAccountsDataQuery.js';
+import KYCViewModel from './response/KYCViewModel.js';
+import GetKYCAccountsDataRequest from './request/GetKYCAccountsDataRequest.js';
+import GetKYCStatusForRequest from './request/GetKYCStatusForRequest.js';
+import { GetKYCStatusForQuery } from '../../app/usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQuery.js';
 
 interface IKycInPort {
   grantKYC(
@@ -229,7 +234,11 @@ interface IKycInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   getKYCAccounts(request: GetKYCAccountsRequest): Promise<string[]>;
   getKYCAccountsCount(request: GetKYCAccountsCountRequest): Promise<number>;
-  getKYCFor(request: GetKYCForRequest): Promise<number>;
+  getKYCFor(request: GetKYCForRequest): Promise<KYCViewModel>;
+  getKYCAccountsData(
+    request: GetKYCAccountsDataRequest,
+  ): Promise<KYCViewModel[]>;
+  getKYCStatusFor(request: GetKYCStatusForRequest): Promise<number>;
 }
 
 class KycInPort implements IKycInPort {
@@ -265,7 +274,7 @@ class KycInPort implements IKycInPort {
   }
 
   @LogError
-  async getKYCFor(request: GetKYCForRequest): Promise<number> {
+  async getKYCFor(request: GetKYCForRequest): Promise<KYCViewModel> {
     handleValidation('GetKYCForRequest', request);
 
     const res = (
@@ -274,7 +283,15 @@ class KycInPort implements IKycInPort {
       )
     ).payload;
 
-    return res;
+    const kyc: KYCViewModel = {
+      validFrom: res.validFrom,
+      validTo: res.validTo,
+      VCid: res.VCid,
+      issuer: res.issuer,
+      status: res.status,
+    };
+
+    return kyc;
   }
 
   @LogError
@@ -304,6 +321,47 @@ class KycInPort implements IKycInPort {
           request.start,
           request.end,
         ),
+      )
+    ).payload;
+
+    return res;
+  }
+
+  @LogError
+  async getKYCAccountsData(
+    request: GetKYCAccountsDataRequest,
+  ): Promise<KYCViewModel[]> {
+    handleValidation('GetKYCAccountsData', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetKYCAccountsDataQuery(
+          request.securityId,
+          request.kycStatus,
+          request.start,
+          request.end,
+        ),
+      )
+    ).payload;
+
+    const kyc: KYCViewModel[] = res.map((kycAccountData) => ({
+      validFrom: kycAccountData.validFrom,
+      validTo: kycAccountData.validTo,
+      VCid: kycAccountData.VCid,
+      issuer: kycAccountData.issuer,
+      status: kycAccountData.status,
+    }));
+
+    return kyc;
+  }
+
+  @LogError
+  async getKYCStatusFor(request: GetKYCStatusForRequest): Promise<number> {
+    handleValidation('GetKYCStatusForRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetKYCStatusForQuery(request.securityId, request.targetId),
       )
     ).payload;
 
