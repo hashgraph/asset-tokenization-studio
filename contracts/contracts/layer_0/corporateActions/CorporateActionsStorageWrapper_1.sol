@@ -363,6 +363,12 @@ contract CorporateActionsStorageWrapper_1 is HoldStorageWrapper_1 {
             _corporateActionsStorage().actionsData[actionId].results[resultId];
     }
 
+    function _getCorporateActionData(
+        bytes32 actionId
+    ) internal view virtual returns (bytes memory) {
+        return _corporateActionsStorage().actionsData[actionId].data;
+    }
+
     function _isSnapshotTaskType(
         bytes memory data
     ) internal pure returns (bool) {

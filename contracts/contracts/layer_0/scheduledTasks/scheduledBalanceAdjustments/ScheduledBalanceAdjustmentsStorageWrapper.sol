@@ -215,6 +215,7 @@ import {
 import {
     ScheduledSnapshotsStorageWrapperRead
 } from '../scheduledSnapshots/ScheduledSnapshotsStorageWrapperRead.sol';
+import {IEquity} from '../../../layer_2/interfaces/equity/IEquity.sol';
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
     ScheduledSnapshotsStorageWrapperRead
@@ -281,6 +282,47 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
                 _pageIndex,
                 _pageLength
             );
+    }
+
+    function _getPendingScheduledBalanceAdjustmentsAt(
+        uint256 _timestamp
+    ) internal view returns (uint256 pendingABAF_, uint8 pendingDecimals_) {
+        // * Initialization
+        pendingABAF_ = 1;
+        pendingDecimals_ = 0;
+
+        ScheduledTasksLib.ScheduledTasksDataStorage
+            storage scheduledBalanceAdjustments = _scheduledBalanceAdjustmentStorage();
+
+        uint256 scheduledTaskCount = ScheduledTasksLib.getScheduledTaskCount(
+            scheduledBalanceAdjustments
+        );
+
+        for (uint256 i = 1; i <= scheduledTaskCount; i++) {
+            uint256 pos = scheduledTaskCount - i;
+
+            ScheduledTasksLib.ScheduledTask
+                memory scheduledTask = ScheduledTasksLib
+                    .getScheduledTasksByIndex(scheduledBalanceAdjustments, pos);
+
+            if (scheduledTask.scheduledTimestamp < _timestamp) {
+                bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
+
+                bytes memory balanceAdjustmentData = _getCorporateActionData(
+                    actionId
+                );
+
+                IEquity.ScheduledBalanceAdjustment
+                    memory balanceAdjustment = abi.decode(
+                        balanceAdjustmentData,
+                        (IEquity.ScheduledBalanceAdjustment)
+                    );
+                pendingABAF_ *= balanceAdjustment.factor;
+                pendingDecimals_ += balanceAdjustment.decimals;
+            } else {
+                break;
+            }
+        }
     }
 
     function _scheduledBalanceAdjustmentStorage()

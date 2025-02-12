@@ -207,77 +207,103 @@
 pragma solidity 0.8.18;
 
 import {
-    _SCHEDULED_SNAPSHOTS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+    IStaticFunctionSelectors
+} from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {Common} from '../../../layer_1/common/Common.sol';
+import {
+    _SCHEDULED_SNAPSHOTS_RESOLVER_KEY
+} from '../../constants/resolverKeys.sol';
+import {
+    IScheduledSnapshots
+} from '../../interfaces/scheduledTasks/scheduledSnapshots/IScheduledSnapshots.sol';
+import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-abstract contract ScheduledSnapshotsStorageWrapper is Common {
-    function _addScheduledSnapshot(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal virtual {
-        ScheduledTasksLib.addScheduledTask(
-            _scheduledSnapshotStorage(),
-            _newScheduledTimestamp,
-            _newData
-        );
+contract ScheduledSnapshots is
+    IStaticFunctionSelectors,
+    IScheduledSnapshots,
+    Common
+{
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    function onScheduledSnapshotTriggered(
+        uint256 _pos,
+        uint256 _scheduledTasksLength,
+        bytes memory _data
+    ) external virtual override onlyAutoCalling(_scheduledSnapshotStorage()) {
+        uint256 newSnapShotID;
+        if (_pos == _scheduledTasksLength - 1) {
+            newSnapShotID = _snapshot();
+        } else newSnapShotID = _getCurrentSnapshotId();
+
+        _onScheduledSnapshotTriggered(newSnapShotID, _data);
     }
 
-    function _triggerScheduledSnapshots(
-        uint256 _max
-    ) internal virtual returns (uint256) {
-        return
-            ScheduledTasksLib.triggerScheduledTasks(
-                _scheduledSnapshotStorage(),
-                this.onScheduledSnapshotTriggered.selector,
-                _max,
-                _blockTimestamp()
-            );
-    }
-
-    function _getScheduledSnapshotCount()
-        internal
+    function scheduledSnapshotCount()
+        external
         view
         virtual
+        override
         returns (uint256)
     {
-        return
-            ScheduledTasksLib.getScheduledTaskCount(
-                _scheduledSnapshotStorage()
-            );
+        return _getScheduledSnapshotCount();
     }
 
-    function _getScheduledSnapshots(
+    function getScheduledSnapshots(
         uint256 _pageIndex,
         uint256 _pageLength
     )
-        internal
+        external
         view
         virtual
+        override
         returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_)
     {
-        return
-            ScheduledTasksLib.getScheduledTasks(
-                _scheduledSnapshotStorage(),
-                _pageIndex,
-                _pageLength
-            );
+        scheduledSnapshot_ = _getScheduledSnapshots(_pageIndex, _pageLength);
     }
 
-    function _scheduledSnapshotStorage()
-        internal
+    function getStaticResolverKey()
+        external
         pure
         virtual
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage
-                storage scheduledSnapshots_
-        )
+        override
+        returns (bytes32 staticResolverKey_)
     {
-        bytes32 position = _SCHEDULED_SNAPSHOTS_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            scheduledSnapshots_.slot := position
-        }
+        staticResolverKey_ = _SCHEDULED_SNAPSHOTS_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .scheduledSnapshotCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getScheduledSnapshots
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .onScheduledSnapshotTriggered
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IScheduledSnapshots)
+            .interfaceId;
     }
 }

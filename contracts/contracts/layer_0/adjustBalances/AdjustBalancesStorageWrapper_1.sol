@@ -347,8 +347,27 @@ abstract contract AdjustBalancesStorageWrapper_1 is
         address _owner,
         address _spender,
         uint256 _labaf
-    ) internal view virtual returns (uint256) {
+    ) internal virtual {
         _getAdjustBalancesStorage().labafsAllowances[_owner][_spender] = _labaf;
+    }
+
+    function _setTotalLockLabaf(
+        address _tokenHolder,
+        uint256 _labaf
+    ) internal virtual {
+        _getAdjustBalancesStorage().labafLockedAmountByAccount[
+            _tokenHolder
+        ] = _labaf;
+    }
+
+    function _setTotalLockLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _labaf
+    ) internal virtual {
+        _getAdjustBalancesStorage().labafLockedAmountByAccountAndPartition[
+            _tokenHolder
+        ][_partition] = _labaf;
     }
 
     function _calculateFactorByTokenHolder(
