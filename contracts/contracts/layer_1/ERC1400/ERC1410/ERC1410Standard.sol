@@ -234,7 +234,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_ISSUER_ROLE)
     {
-        //_issueByPartition(_partition, _tokenHolder, _value, _data);
+        _issueByPartition(_partition, _tokenHolder, _value, _data);
     }
 
     /// @notice Decreases totalSupply and the corresponding amount of the specified partition of _msgSender()
