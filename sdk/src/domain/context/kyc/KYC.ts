@@ -203,7 +203,7 @@
 
 */
 
-export class KYCDetails {
+export class KYC {
   validFrom: string;
   validTo: string;
   VCid: string;

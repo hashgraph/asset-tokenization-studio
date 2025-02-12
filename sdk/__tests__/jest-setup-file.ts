@@ -239,7 +239,7 @@ import { DividendFor } from '../src/domain/context/equity/DividendFor';
 import { VotingFor } from '../src/domain/context/equity/VotingFor';
 import DfnsSettings from '../src/domain/context/custodialWalletSettings/DfnsSettings.js';
 import { HoldDetails } from '../src/domain/context/security/HoldDetails.js';
-import { KYCDetails } from '../src/domain/context/kyc/KYCDetails.js';
+import { KYC } from '../src/domain/context/kyc/KYC.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -295,7 +295,7 @@ const lastHoldIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
 const nonces = new Map<string, number>();
 let kycAccountsList: string[] = [];
-const kycAccountsData = new Map<string, KYCDetails>();
+const kycAccountsData = new Map<string, KYC>();
 
 let controlList: string[] = [];
 let issuerList: string[] = [];
@@ -822,7 +822,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
   });
 
   singletonInstance.getAccountSecurityRelationship = jest.fn(
-    async (address: EvmAddress, target: EvmAddress) => {},
+    async (address: EvmAddress, target: EvmAddress) => { },
   );
 
   singletonInstance.isPaused = jest.fn(async (address: EvmAddress) => {
@@ -1031,7 +1031,7 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
   singletonInstance.getKYCAccountsData = jest.fn(
     async (address: EvmAddress, target: EvmAddress) => {
       const account = '0x' + target.toString().toUpperCase().substring(2);
-      const kycDataArray: KYCDetails[] = [];
+      const kycDataArray: KYC[] = [];
 
       for (const [key, value] of kycAccountsData) {
         kycDataArray.push(value);
@@ -1884,7 +1884,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
         kycAccountsList.push(account);
         kycAccountsData.set(
           account,
-          new KYCDetails(
+          new KYC(
             validFrom.toString(),
             validTo.toString(),
             VCId,

@@ -266,7 +266,7 @@ import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/Sched
 import { DividendFor } from '../../../domain/context/equity/DividendFor';
 import { VotingFor } from '../../../domain/context/equity/VotingFor';
 import { HoldDetails } from '../../../domain/context/security/HoldDetails.js';
-import { KYCDetails } from '../../../domain/context/kyc/KYCDetails.js';
+import { KYC } from '../../../domain/context/kyc/KYC.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -1319,7 +1319,7 @@ export class RPCQueryAdapter {
   async getKYCFor(
     address: EvmAddress,
     targetId: EvmAddress,
-  ): Promise<KYCDetails> {
+  ): Promise<KYC> {
     LogService.logTrace(`Getting KYC details for ${targetId}}`);
 
     const kycData = await this.connect(
@@ -1327,7 +1327,7 @@ export class RPCQueryAdapter {
       address.toString(),
     ).getKYCFor(targetId.toString());
 
-    return new KYCDetails(
+    return new KYC(
       kycData.validFrom.toString(),
       kycData.validTo.toString(),
       kycData.VCid,
@@ -1371,7 +1371,7 @@ export class RPCQueryAdapter {
     kycStatus: number,
     start: number,
     end: number,
-  ): Promise<KYCDetails[]> {
+  ): Promise<KYC[]> {
     LogService.logTrace(`Getting accounts data with KYC status ${kycStatus}`);
 
     const kycAccountsData = await this.connect(
@@ -1381,7 +1381,7 @@ export class RPCQueryAdapter {
 
     return kycAccountsData.map(
       (data) =>
-        new KYCDetails(
+        new KYC(
           data.validFrom.toString(),
           data.validTo.toString(),
           data.VCid,
