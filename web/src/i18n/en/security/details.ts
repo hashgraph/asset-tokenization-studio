@@ -213,6 +213,8 @@ import balanceAdjustment from "./balanceAdjustment";
 import locker from "./locker";
 import cap from "./cap";
 import hold from "./hold";
+import kyc from "./kyc";
+import ssiManager from "./ssiManager";
 
 export default {
   header: {
@@ -232,6 +234,8 @@ export default {
     locker: "Locker",
     cap: "Cap",
     hold: "Hold",
+    kyc: "KYC",
+    ssiManager: "SSI Manager",
   },
   actions: {
     redeem: "Redeem",
@@ -273,6 +277,8 @@ export default {
   locker,
   cap,
   hold,
+  kyc,
+  ssiManager,
   benefits: {
     dividends: "Dividends",
     balanceAdjustments: "Balance Adjustments",

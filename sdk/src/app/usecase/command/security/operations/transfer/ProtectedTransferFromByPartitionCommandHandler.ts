@@ -233,6 +233,7 @@ import { AccountNotInWhiteList } from '../../error/AccountNotInWhiteList.js';
 import { BigNumber } from 'ethers';
 import { NounceAlreadyUsed } from '../../error/NounceAlreadyUsed.js';
 import { PartitionsUnProtected } from '../../error/PartitionsUnprotected';
+import ValidationService from '../../../../../../app/service/ValidationService.js';
 
 @CommandHandler(ProtectedTransferFromByPartitionCommand)
 export class ProtectedTransferFromByPartitionCommandHandler
@@ -249,6 +250,8 @@ export class ProtectedTransferFromByPartitionCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
 
   async execute(
@@ -264,6 +267,12 @@ export class ProtectedTransferFromByPartitionCommandHandler
       nounce,
       signature,
     } = command;
+
+    await this.validationService.validateKycAddresses(securityId, [
+      sourceId,
+      targetId,
+    ]);
+
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);

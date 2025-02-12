@@ -282,6 +282,18 @@ import GetHoldsIdForByPartitionRequest from './GetHoldsIdForByPartitionRequest.j
 import GetHoldForByPartitionRequest from './GetHoldForByPartitionRequest.js';
 import ReleaseHoldByPartitionRequest from './ReleaseHoldByPartitionRequest.js';
 import ReclaimHoldByPartitionRequest from './ReclaimHoldByPartitionRequest.js';
+import AddIssuerRequest from './AddIssuerRequest.js';
+import SetRevocationRegistryAddressRequest from './SetRevocationRegistryAddressRequest.js';
+import RemoveIssuerRequest from './RemoveIssuerRequest.js';
+import GetRevocationRegistryAddressRequest from './GetRevocationRegistryAddressRequest.js';
+import GetIssuerListCountRequest from './GetIssuerListCountRequest.js';
+import GetIssuerListMembersRequest from './GetIssuerListMembersRequest.js';
+import IsIssuerRequest from './IsIssuerRequest.js';
+import GetKYCAccountsRequest from './GetKYCAccountsRequest.js';
+import GetKYCAccountsCountRequest from './GetKYCAccountsCountRequest.js';
+import GetKYCForRequest from './GetKYCForRequest.js';
+import RevokeKYCRequest from './RevokeKYCRequest.js';
+import GrantKYCRequest from './GrantKYCRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -363,4 +375,16 @@ export {
   ReleaseHoldByPartitionRequest,
   ReclaimHoldByPartitionRequest,
   ExecuteHoldByPartitionRequest,
+  AddIssuerRequest,
+  SetRevocationRegistryAddressRequest,
+  RemoveIssuerRequest,
+  GetRevocationRegistryAddressRequest,
+  GetIssuerListCountRequest,
+  GetIssuerListMembersRequest,
+  IsIssuerRequest,
+  GetKYCAccountsRequest,
+  GetKYCAccountsCountRequest,
+  GetKYCForRequest,
+  RevokeKYCRequest,
+  GrantKYCRequest,
 };
