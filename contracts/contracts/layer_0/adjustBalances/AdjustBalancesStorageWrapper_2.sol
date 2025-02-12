@@ -229,6 +229,23 @@ abstract contract AdjustBalancesStorageWrapper_2 is
         emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
     }
 
+    function _adjustTotalAndMaxSupplyForPartition(
+        bytes32 _partition
+    ) internal override {
+        uint256 abaf = _getAbaf();
+        uint256 labaf = _getLabafByPartition(_partition);
+
+        if (abaf == labaf) return;
+
+        uint256 factor = _calculateFactor(abaf, labaf);
+
+        _adjustTotalSupplyByPartition(_partition, factor);
+
+        _adjustMaxSupplyByPartition(_partition, factor);
+
+        _updateLabafByPartition(_partition);
+    }
+
     // solhint-disable no-unused-vars
     function _beforeBalanceAdjustment() internal virtual {
         _updateDecimalsSnapshot(_decimals());

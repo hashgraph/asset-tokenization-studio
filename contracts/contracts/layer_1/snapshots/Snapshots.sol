@@ -222,19 +222,19 @@ abstract contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         onlyRole(_SNAPSHOT_ROLE)
         returns (uint256 snapshotID)
     {
-        ScheduledTasks_CD_Lib.triggerScheduledTasks(0);
+        _triggerScheduledTasks(0);
         return _takeSnapshot();
     }
 
     function ABAFAtSnapshot(
         uint256 _snapshotID
     ) external view returns (uint256 ABAF_) {
-        return _ABAFAtSnapshot(_snapshotID);
+        return _AbafAtSnapshot(_snapshotID);
     }
 
     function decimalsAtSnapshot(
         uint256 _snapshotID
-    ) external view virtual override returns (uint8 decimals_) {
+    ) external view virtual returns (uint8 decimals_) {
         return _decimalsAtSnapshot(_snapshotID);
     }
 
@@ -301,7 +301,7 @@ abstract contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
     function heldBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
+    ) external view virtual returns (uint256 balance_) {
         return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
@@ -309,7 +309,7 @@ abstract contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         bytes32 _partition,
         uint256 _snapshotID,
         address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
+    ) external view virtual returns (uint256 balance_) {
         return
             _heldBalanceOfAtSnapshotByPartition(
                 _partition,

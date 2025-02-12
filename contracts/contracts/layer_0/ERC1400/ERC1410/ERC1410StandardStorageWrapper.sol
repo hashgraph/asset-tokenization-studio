@@ -254,7 +254,7 @@ abstract contract ERC1410StandardStorageWrapper is
         address _from,
         address _to
     ) internal virtual {
-        _triggerScheduledTasks(0, _blockTimestamp());
+        _triggerScheduledTasks(0);
         _syncBalanceAdjustments(_partition, _from, _to);
     }
 
@@ -437,50 +437,6 @@ abstract contract ERC1410StandardStorageWrapper is
         return _totalSupplyByPartition(_partition) * factor;
     }
 
-    function _canTransferByPartition(
-        address _from,
-        address _to,
-        bytes32 _partition,
-        uint256 _value,
-        bytes calldata _data, // solhint-disable-line no-unused-vars
-        bytes calldata _operatorData // solhint-disable-line no-unused-vars
-    ) internal view virtual returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_from == address(0)) {
-            return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_msgSender())) {
-            return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_from)) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_validPartition(_partition, _from)) {
-            return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfByPartitionAdjusted(_partition, _from) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        // TODO: Better to check all in one boolean expression defined in a different pure function.
-        if (
-            _from != _msgSender() && !_hasRole(_CONTROLLER_ROLE, _msgSender())
-        ) {
-            if (!_isAuthorized(_partition, _msgSender(), _from)) {
-                return (false, _IS_NOT_OPERATOR_ERROR_ID, bytes32(0));
-            }
-        }
-
-        return (true, _SUCCESS, bytes32(0));
-    }
-
     function _balanceOfAdjusted(
         address _tokenHolder
     ) internal view virtual returns (uint256) {
@@ -536,5 +492,5 @@ abstract contract ERC1410StandardStorageWrapper is
 
     function _adjustTotalAndMaxSupplyForPartition(
         bytes32 _partition
-    ) internal virtual returns (uint256);
+    ) internal virtual;
 }

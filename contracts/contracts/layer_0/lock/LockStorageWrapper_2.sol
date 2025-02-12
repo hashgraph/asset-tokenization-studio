@@ -209,9 +209,6 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    ILockStorageWrapper
-} from '../../layer_1/interfaces/lock/ILockStorageWrapper.sol';
-import {
     CorporateActionsStorageWrapper_2
 } from '../corporateActions/CorporateActionsStorageWrapper_2.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
