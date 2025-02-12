@@ -212,12 +212,12 @@ import {
     type AccessControl,
     type Pause,
     type ControlList,
-    type ERC20_2,
+    type ERC20,
     type ERC1410ScheduledTasks,
     type Equity,
     type Snapshots,
     type ScheduledSnapshots,
-    type Cap_2,
+    type Cap,
 } from '@typechain'
 import {
     DEFAULT_ADMIN_ROLE,
@@ -729,10 +729,7 @@ DiamondResume:
             diamond.address
         )
 
-        const capFacet: Cap_2 = await ethers.getContractAt(
-            'Cap_2',
-            diamond.address
-        )
+        const capFacet: Cap = await ethers.getContractAt('Cap', diamond.address)
 
         let pauseFacet: Pause = await ethers.getContractAt(
             'Pause',
@@ -744,8 +741,8 @@ DiamondResume:
             diamond.address
         )
 
-        const erc20Facet: ERC20_2 = await ethers.getContractAt(
-            'ERC20_2',
+        const erc20Facet: ERC20 = await ethers.getContractAt(
+            'ERC20',
             diamond.address
         )
 

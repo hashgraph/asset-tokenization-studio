@@ -213,9 +213,9 @@ import {
     AccessControl,
     ProtectedPartitions,
     ERC1410ScheduledTasks,
-    ERC1594_2,
+    ERC1594,
     TransferAndLock,
-    ERC20_2,
+    ERC20,
     ControlList,
     IFactory,
     BusinessLogicResolver,
@@ -294,8 +294,8 @@ describe('ProtectedPartitions Tests', () => {
     let protectedPartitionsFacet: ProtectedPartitions
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
-    let erc1594Facet: ERC1594_2
-    let erc20Facet: ERC20_2
+    let erc1594Facet: ERC1594
+    let erc20Facet: ERC20
     let transferAndLockFacet: TransferAndLock
     let controlListFacet: ControlList
     let accessControlFacet: AccessControl
@@ -329,8 +329,8 @@ describe('ProtectedPartitions Tests', () => {
             'ERC1410ScheduledTasks',
             address
         )
-        erc1594Facet = await ethers.getContractAt('ERC1594_2', address)
-        erc20Facet = await ethers.getContractAt('ERC20_2', address)
+        erc1594Facet = await ethers.getContractAt('ERC1594', address)
+        erc20Facet = await ethers.getContractAt('ERC20', address)
         transferAndLockFacet = await ethers.getContractAt(
             'TransferAndLock',
             address

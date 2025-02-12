@@ -209,13 +209,13 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Cap_2,
+    type Cap,
     AccessControl,
     Pause,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
-    Cap_2__factory,
+    Cap__factory,
     AccessControl__factory,
     ERC1410ScheduledTasks__factory,
     Pause__factory,
@@ -249,7 +249,7 @@ describe('CAP Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let capFacet: Cap_2
+    let capFacet: Cap
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
@@ -314,7 +314,7 @@ describe('CAP Tests', () => {
             factory: factory,
         })
 
-        capFacet = Cap_2__factory.connect(diamond.address, signer_A)
+        capFacet = Cap__factory.connect(diamond.address, signer_A)
         accessControlFacet = AccessControl__factory.connect(
             diamond.address,
             signer_A
