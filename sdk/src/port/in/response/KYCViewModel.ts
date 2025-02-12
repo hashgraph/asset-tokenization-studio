@@ -206,9 +206,9 @@
 import { QueryResponse } from 'core/query/QueryResponse';
 
 export default interface KYCViewModel extends QueryResponse {
-   validFrom: string;
-   validTo: string;
-   VCid: string;
-   address: string;
-   kycStatus: number;
+  validFrom: string;
+  validTo: string;
+  VCid: string;
+  address: string;
+  kycStatus: number;
 }

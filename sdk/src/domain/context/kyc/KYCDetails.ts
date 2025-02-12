@@ -204,12 +204,12 @@
 */
 
 export class KYCDetails {
-    validFrom: string;
-    validTo: string;
-    VCid: string;
-    issuer: string;
-    status: number;
- 
+  validFrom: string;
+  validTo: string;
+  VCid: string;
+  issuer: string;
+  status: number;
+
   constructor(
     validFrom: string,
     validTo: string,

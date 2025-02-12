@@ -242,8 +242,7 @@ export class GrantKYCCommandHandler
   async execute(command: GrantKYCCommand): Promise<GrantKYCCommandResponse> {
     const { securityId, targetId, vcBase64 } = command;
 
-    let signedCredential: SignedCredential =
-      Terminal3VC.vcFromBase64(vcBase64);
+    let signedCredential: SignedCredential = Terminal3VC.vcFromBase64(vcBase64);
     const verificationResult = await verifyVc(signedCredential);
     if (!verificationResult.isValid) {
       throw new Error('Invalid VC');

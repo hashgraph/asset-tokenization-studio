@@ -216,7 +216,7 @@ export default class GetKYCAccountsDataRequest extends ValidatedRequest<GetKYCAc
     securityId,
     kycStatus,
     start,
-    end
+    end,
   }: {
     securityId: string;
     kycStatus: number;
@@ -226,13 +226,13 @@ export default class GetKYCAccountsDataRequest extends ValidatedRequest<GetKYCAc
     super({
       securityId: Validation.checkHederaIdFormatOrEvmAddress(),
       kycStatus: Validation.checkNumber({ min: 0 }),
-      start: Validation.checkNumber({min: 0}),
-      end: Validation.checkNumber({min: 0}),
+      start: Validation.checkNumber({ min: 0 }),
+      end: Validation.checkNumber({ min: 0 }),
     });
 
     this.securityId = securityId;
     this.kycStatus = kycStatus;
-    this.start= start;
+    this.start = start;
     this.end = end;
   }
 }
