@@ -279,6 +279,14 @@ contract KYC is IKYC, IStaticFunctionSelectors, KYCStorageWrapper {
         accounts_ = _getKYCAccounts(_kycStatus, _pageIndex, _pageLength);
     }
 
+    function getKYCAccountsData(
+        KYCStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view virtual override returns (KYCData[] memory kycData_) {
+        kycData_ = _getKYCAccountsData(_kycStatus, _pageIndex, _pageLength);
+    }
+
     function getStaticResolverKey()
         external
         pure
