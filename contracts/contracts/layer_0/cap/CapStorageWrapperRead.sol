@@ -209,6 +209,7 @@ import {
     AdjustBalancesStorageWrapperBase
 } from '../adjustBalances/AdjustBalancesStorageWrapperBase.sol';
 import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {_MAX_UINT256} from '../constants/values.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 // solhint-disable no-unused-vars, custom-errors
@@ -221,10 +222,7 @@ contract CapStorageWrapperRead is AdjustBalancesStorageWrapperBase {
 
     function _adjustMaxSupply(uint256 factor) internal {
         CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
+        if (capStorage.maxSupply == _MAX_UINT256) return;
         capStorage.maxSupply *= factor;
     }
 
@@ -233,10 +231,7 @@ contract CapStorageWrapperRead is AdjustBalancesStorageWrapperBase {
         uint256 factor
     ) internal {
         CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupplyByPartition[partition] ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
+        if (capStorage.maxSupplyByPartition[partition] == _MAX_UINT256) return;
         capStorage.maxSupplyByPartition[partition] *= factor;
     }
 
@@ -248,12 +243,8 @@ contract CapStorageWrapperRead is AdjustBalancesStorageWrapperBase {
         bytes32 partition
     ) internal view returns (uint256) {
         CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupplyByPartition[partition] ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        )
-            return
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+        if (capStorage.maxSupplyByPartition[partition] == _MAX_UINT256)
+            return _MAX_UINT256;
         return
             capStorage.maxSupplyByPartition[partition] *
             _getMaxSupplyByPartitionAdjustedAt(partition, _blockTimestamp());
@@ -263,12 +254,7 @@ contract CapStorageWrapperRead is AdjustBalancesStorageWrapperBase {
         uint256 timestamp
     ) internal view returns (uint256) {
         CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        )
-            return
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+        if (capStorage.maxSupply == _MAX_UINT256) return _MAX_UINT256;
         (uint256 pendingABF, ) = _getPendingScheduledBalanceAdjustmentsAt(
             timestamp
         );
@@ -280,12 +266,8 @@ contract CapStorageWrapperRead is AdjustBalancesStorageWrapperBase {
         uint256 timestamp
     ) internal view returns (uint256) {
         CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupplyByPartition[partition] ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        )
-            return
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+        if (capStorage.maxSupplyByPartition[partition] == _MAX_UINT256)
+            return _MAX_UINT256;
         return
             capStorage.maxSupplyByPartition[partition] *
             _calculateFactorByPartitionAdjustedAt(partition, _blockTimestamp());
