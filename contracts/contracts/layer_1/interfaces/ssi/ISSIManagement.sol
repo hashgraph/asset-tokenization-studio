@@ -212,6 +212,17 @@ interface ISSIManagement {
     error AccountIsNotIssuer(address issuer);
 
     /**
+     * @dev Emitted when the revocation registry address is updated
+     *
+     * @param oldRegistryAddress previous revocation list address
+     * @param newRegistryAddress new revocation list address
+     */
+    event RevocationRegistryUpdated(
+        address indexed oldRegistryAddress,
+        address indexed newRegistryAddress
+    );
+
+    /**
      * @dev Emitted when an issuer is added to the issuerlist
      *
      * @param issuer The issuer that was added to the issuerlist
