@@ -722,7 +722,7 @@ describe('ERC1400 Tests', () => {
     describe('Multi partition ', () => {
         before(async () => {
             // mute | mock console.log
-            //console.log = () => {}
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
@@ -2503,7 +2503,7 @@ describe('ERC1400 Tests', () => {
     describe('Single partition ', () => {
         before(async () => {
             // mute | mock console.log
-            //console.log = () => {}
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
@@ -2746,7 +2746,7 @@ describe('ERC1400 Tests', () => {
     describe('Adjust balances', () => {
         before(async () => {
             // mute | mock console.log
-            //console.log = () => {}
+            console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
             account_A = signer_A.address

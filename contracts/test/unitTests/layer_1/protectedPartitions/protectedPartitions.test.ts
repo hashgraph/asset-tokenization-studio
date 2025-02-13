@@ -660,6 +660,39 @@ describe('ProtectedPartitions Tests', () => {
                 'AccountIsBlocked'
             )
         })
+
+        it('GIVEN a non kyc account WHEN performing a protected transfer from or to THEN transaction fails with AccountIsBlocked', async () => {
+            await setProtected()
+
+            kycFacet = kycFacet.connect(signer_B)
+            await kycFacet.revokeKYC(account_A)
+
+            erc1410Facet = erc1410Facet.connect(signer_B)
+
+            await expect(
+                erc1410Facet.protectedTransferFromByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    account_B,
+                    amount,
+                    9999999999999,
+                    1,
+                    '0x1234'
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKYCStatus')
+
+            await expect(
+                erc1410Facet.protectedTransferFromByPartition(
+                    DEFAULT_PARTITION,
+                    account_B,
+                    account_A,
+                    amount,
+                    9999999999999,
+                    1,
+                    '0x1234'
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKYCStatus')
+        })
     })
 
     describe('Generic Redeem check Tests', () => {
@@ -714,6 +747,24 @@ describe('ProtectedPartitions Tests', () => {
                     '0x1234'
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
+        })
+
+        it('GIVEN a non kyc account WHEN performing a protected redeem from THEN transaction fails with InvalidKYCStatus', async () => {
+            await setProtected()
+            await kycFacet.connect(signer_B).revokeKYC(account_A)
+
+            erc1410Facet = erc1410Facet.connect(signer_B)
+
+            await expect(
+                erc1410Facet.protectedRedeemFromByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    amount,
+                    9999999999999,
+                    1,
+                    '0x1234'
+                )
+            ).to.be.rejectedWith('InvalidKYCStatus')
         })
     })
 
