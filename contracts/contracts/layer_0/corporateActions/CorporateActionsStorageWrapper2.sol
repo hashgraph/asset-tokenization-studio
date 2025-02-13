@@ -204,128 +204,224 @@
 */
 
 pragma solidity 0.8.18;
-
-import {
-    AdjustBalancesStorageWrapper_1
-} from '../adjustBalances/AdjustBalancesStorageWrapper_1.sol';
-import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {
-    ICapStorageWrapper
-} from '../../layer_1/interfaces/cap/ICapStorageWrapper.sol';
-
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable no-unused-vars, custom-errors
-contract CapStorageWrapper_1 is AdjustBalancesStorageWrapper_1 {
-    struct CapDataStorage {
-        uint256 maxSupply;
-        mapping(bytes32 => uint256) maxSupplyByPartition;
-        bool initialized;
+import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    _CORPORATE_ACTION_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {LocalContext} from '../context/LocalContext.sol';
+import {
+    DIVIDEND_CORPORATE_ACTION_TYPE,
+    VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+    COUPON_CORPORATE_ACTION_TYPE,
+    BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+    SNAPSHOT_TASK_TYPE,
+    BALANCE_ADJUSTMENT_TASK_TYPE,
+    SNAPSHOT_RESULT_ID
+} from '../constants/values.sol';
+import {
+    AdjustBalancesStorageWrapper2
+} from '../adjustBalances/AdjustBalancesStorageWrapper2.sol';
+import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
+import {IBond} from '../../layer_2/interfaces/bond/IBond.sol';
+import {
+    ICorporateActionsStorageWrapper,
+    CorporateActionDataStorage
+} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
+import {
+    IEquityStorageWrapper
+} from '../../layer_2/interfaces/equity/IEquityStorageWrapper.sol';
+import {
+    IBondStorageWrapper
+} from '../../layer_2/interfaces/bond/IBondStorageWrapper.sol';
+
+abstract contract CorporateActionsStorageWrapper2 is
+    AdjustBalancesStorageWrapper2
+{
+    using LibCommon for EnumerableSet.Bytes32Set;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
+
+    modifier checkIndexForCorporateActionByType(
+        bytes32 actionType,
+        uint256 index
+    ) {
+        if (_getCorporateActionCountByType(actionType) <= index) {
+            revert ICorporateActionsStorageWrapper.WrongIndexForAction(
+                index,
+                actionType
+            );
+        }
+        _;
     }
 
-    function _adjustMaxSupply(uint256 factor) internal {
-        CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        capStorage.maxSupply *= factor;
-    }
-
-    function _adjustMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 factor
-    ) internal {
-        CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupplyByPartition[partition] ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        capStorage.maxSupplyByPartition[partition] *= factor;
-    }
-
-    function _getMaxSupply() internal view returns (uint256) {
-        return _getMaxSupplyAdjustedAt(_blockTimestamp());
-    }
-
-    function _getMaxSupplyByPartition(
-        bytes32 partition
-    ) internal view returns (uint256) {
-        CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupplyByPartition[partition] ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        )
-            return
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-        return
-            capStorage.maxSupplyByPartition[partition] *
-            _getMaxSupplyByPartitionAdjustedAt(partition, _blockTimestamp());
-    }
-
-    function _getMaxSupplyAdjusted()
+    // Internal
+    function _addCorporateAction(
+        bytes32 _actionType,
+        bytes memory _data
+    )
         internal
-        view
         virtual
-        returns (uint256 maxSupply_)
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 corporateActionIndexByType_
+        )
     {
-        return _getMaxSupplyAdjustedAt(_blockTimestamp());
-    }
-
-    function _getMaxSupplyAdjustedAt(
-        uint256 timestamp
-    ) internal view returns (uint256) {
-        CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        )
-            return
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-        (uint256 pendingABF, ) = _getPendingScheduledBalanceAdjustmentsAt(
-            timestamp
+        CorporateActionDataStorage
+            storage corporateActions_ = _corporateActionsStorage();
+        corporateActionId_ = bytes32(corporateActions_.actions.length() + 1);
+        // TODO: Review when it can return false.
+        success_ =
+            corporateActions_.actions.add(corporateActionId_) &&
+            corporateActions_.actionsByType[_actionType].add(
+                corporateActionId_
+            );
+        corporateActions_
+            .actionsData[corporateActionId_]
+            .actionType = _actionType;
+        corporateActions_.actionsData[corporateActionId_].data = _data;
+        corporateActionIndexByType_ = _getCorporateActionCountByType(
+            _actionType
         );
-        return capStorage.maxSupply * pendingABF;
-    }
 
-    function _getMaxSupplyByPartitionAdjusted(
-        bytes32 _partition
-    ) internal view virtual returns (uint256 maxSupply_) {
-        return
-            _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
-    }
-
-    function _getMaxSupplyByPartitionAdjustedAt(
-        bytes32 partition,
-        uint256 timestamp
-    ) internal view returns (uint256) {
-        CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupplyByPartition[partition] ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        )
-            return
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-        return
-            capStorage.maxSupplyByPartition[partition] *
-            _calculateFactorByPartitionAdjustedAt(partition, _blockTimestamp());
-    }
-
-    function _checkMaxSupply(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
-        if (_maxSupply == 0) return true;
-        if (_amount <= _maxSupply) return true;
-        return false;
-    }
-
-    function _capStorage() internal pure returns (CapDataStorage storage cap_) {
-        bytes32 position = _CAP_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            cap_.slot := position
+        if (_actionType == DIVIDEND_CORPORATE_ACTION_TYPE) {
+            _initDividend(success_, corporateActionId_, _data);
+        } else if (_actionType == VOTING_RIGHTS_CORPORATE_ACTION_TYPE) {
+            _initVotingRights(success_, corporateActionId_, _data);
+        } else if (_actionType == COUPON_CORPORATE_ACTION_TYPE) {
+            _initCoupon(success_, corporateActionId_, _data);
+        } else if (_actionType == BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE) {
+            _initBalanceAdjustment(success_, corporateActionId_, _data);
         }
     }
+
+    function _initDividend(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        if (!_success) {
+            revert IEquityStorageWrapper.DividendCreationFailed();
+        }
+
+        IEquity.Dividend memory newDividend = abi.decode(
+            _data,
+            (IEquity.Dividend)
+        );
+
+        _addScheduledTask(
+            newDividend.recordDate,
+            abi.encode(SNAPSHOT_TASK_TYPE)
+        );
+        _addScheduledSnapshot(newDividend.recordDate, abi.encode(_actionId));
+    }
+
+    function _initVotingRights(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        if (!_success) {
+            revert IEquityStorageWrapper.VotingRightsCreationFailed();
+        }
+
+        IEquity.Voting memory newVoting = abi.decode(_data, (IEquity.Voting));
+
+        _addScheduledTask(newVoting.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
+        _addScheduledSnapshot(newVoting.recordDate, abi.encode(_actionId));
+    }
+
+    function _initCoupon(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        if (!_success) {
+            revert IBondStorageWrapper.CouponCreationFailed();
+        }
+
+        IBond.Coupon memory newCoupon = abi.decode(_data, (IBond.Coupon));
+
+        _addScheduledTask(newCoupon.recordDate, abi.encode(SNAPSHOT_TASK_TYPE));
+        _addScheduledSnapshot(newCoupon.recordDate, abi.encode(_actionId));
+    }
+
+    function _initBalanceAdjustment(
+        bool _success,
+        bytes32 _actionId,
+        bytes memory _data
+    ) private {
+        if (!_success) {
+            revert IEquityStorageWrapper.BalanceAdjustmentCreationFailed();
+        }
+
+        IEquity.ScheduledBalanceAdjustment memory newBalanceAdjustment = abi
+            .decode(_data, (IEquity.ScheduledBalanceAdjustment));
+
+        _addScheduledTask(
+            newBalanceAdjustment.executionDate,
+            abi.encode(BALANCE_ADJUSTMENT_TASK_TYPE)
+        );
+        _addScheduledBalanceAdjustment(
+            newBalanceAdjustment.executionDate,
+            abi.encode(_actionId)
+        );
+    }
+
+    function _onScheduledTaskTriggered(bytes memory _data) internal virtual {
+        if (_data.length > 0) {
+            bytes32 taskType = abi.decode(_data, (bytes32));
+            if (taskType == SNAPSHOT_TASK_TYPE) {
+                _triggerScheduledSnapshots(1);
+            } else if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
+                _triggerScheduledBalanceAdjustments(1);
+            }
+        }
+    }
+
+    function _onScheduledBalanceAdjustmentTriggered(
+        bytes memory _data
+    ) internal virtual {
+        if (_data.length > 0) {
+            bytes32 actionId = abi.decode(_data, (bytes32));
+            (, bytes memory balanceAdjustmentData) = _getCorporateAction(
+                actionId
+            );
+
+            if (balanceAdjustmentData.length > 0) {
+                IEquity.ScheduledBalanceAdjustment
+                    memory balanceAdjustment = abi.decode(
+                        balanceAdjustmentData,
+                        (IEquity.ScheduledBalanceAdjustment)
+                    );
+                _adjustBalances(
+                    balanceAdjustment.factor,
+                    balanceAdjustment.decimals
+                );
+            }
+        }
+    }
+
+    function _getSnapshotID(
+        bytes32 _actionId
+    ) internal view virtual returns (uint256) {
+        bytes memory data = _getResult(_actionId, SNAPSHOT_RESULT_ID);
+
+        uint256 bytesLength = data.length;
+
+        if (bytesLength < 32) return 0;
+
+        uint256 snapshotId;
+
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            snapshotId := mload(add(data, 0x20))
+        }
+
+        return snapshotId;
+    }
 }
-// solhint-enable no-unused-vars, custom-errors

@@ -214,11 +214,11 @@ import {
     _ERC1410_BASIC_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {_DEFAULT_PARTITION} from '../../constants/values.sol';
-import {LockStorageWrapper_1} from '../../lock/LockStorageWrapper_1.sol';
+import {LockStorageWrapper1} from '../../lock/LockStorageWrapper1.sol';
 
 contract ERC1410BasicStorageWrapperRead is
     IERC1410StorageWrapper,
-    LockStorageWrapper_1
+    LockStorageWrapper1
 {
     // Represents a fungible set of tokens.
     struct Partition {

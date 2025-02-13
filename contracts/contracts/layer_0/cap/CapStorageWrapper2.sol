@@ -203,185 +203,191 @@
 
 */
 
-// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
 import {
-    CorporateActionsStorageWrapper_1
-} from '../corporateActions/CorporateActionsStorageWrapper_1.sol';
-import {
-    ArraysUpgradeable
-} from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
-import {
-    CountersUpgradeable
-} from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
-import {
-    ISnapshotsStorageWrapper
-} from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
-import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
+    ICapStorageWrapper
+} from '../../layer_1/interfaces/cap/ICapStorageWrapper.sol';
+import {LockStorageWrapper2} from '../lock/LockStorageWrapper2.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 // solhint-disable no-unused-vars, custom-errors
-abstract contract SnapshotsStorageWrapper_1 is
-    ISnapshotsStorageWrapper,
-    CorporateActionsStorageWrapper_1
+abstract contract CapStorageWrapper2 is
+    ICapStorageWrapper,
+    LockStorageWrapper2
 {
-    using ArraysUpgradeable for uint256[];
-    using CountersUpgradeable for CountersUpgradeable.Counter;
+    // modifiers
+    modifier checkMaxSupply(uint256 _amount) {
+        uint256 newTotalSupply = _totalSupply() + _amount;
+        uint256 maxSupply = _getMaxSupply();
 
-    // Snapshotted values have arrays of ids and the value corresponding to that id. These could be an array of a
-    // Snapshot struct, but that would impede usage of functions that work on an array.
-    struct Snapshots {
-        uint256[] ids;
-        uint256[] values;
-    }
-
-    struct ListOfPartitions {
-        bytes32[] partitions;
-    }
-    struct PartitionSnapshots {
-        uint256[] ids;
-        ListOfPartitions[] values;
-    }
-
-    struct SnapshotStorage {
-        // Snapshots for total balances per account
-        mapping(address => Snapshots) accountBalanceSnapshots;
-        // Snapshots for balances per account and partition
-        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionBalanceSnapshots;
-        // Metadata for partitions associated with each account
-        mapping(address => PartitionSnapshots) accountPartitionMetadata;
-        Snapshots totalSupplySnapshots; // Snapshots for the total supply
-        // Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
-        // Unique ID for the current snapshot
-        CountersUpgradeable.Counter currentSnapshotId;
-        // Snapshots for locked balances per account
-        mapping(address => Snapshots) accountLockedBalanceSnapshots;
-        // Snapshots for locked balances per account and partition
-        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
-        // Snapshots for the total supply by partition
-        mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
-        mapping(address => Snapshots) accountHeldBalanceSnapshots;
-        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionHeldBalanceSnapshots;
-        Snapshots abafSnapshots;
-        Snapshots decimals;
-    }
-
-    event SnapshotTriggered(address indexed operator, uint256 snapshotId);
-
-    function _takeSnapshot() internal returns (uint256 snapshotID_) {
-        snapshotID_ = _snapshot();
-        emit SnapshotTaken(_msgSender(), snapshotID_);
-    }
-
-    function _updateDecimalsSnapshot(uint8 decimals) internal {
-        _updateSnapshot(_snapshotStorage().decimals, decimals);
-    }
-
-    function _updateAbafSnapshot(uint256 abaf) internal {
-        _updateSnapshot(_snapshotStorage().abafSnapshots, abaf);
-    }
-
-    function _updateAssetTotalSupplySnapshot(uint256 totalSupply) internal {
-        _updateSnapshot(_snapshotStorage().totalSupplySnapshots, totalSupply);
-    }
-
-    function _snapshot() internal returns (uint256) {
-        _snapshotStorage().currentSnapshotId.increment();
-
-        uint256 currentId = _getCurrentSnapshotId();
-
-        emit SnapshotTriggered(_msgSender(), currentId);
-
-        return currentId;
-    }
-
-    function _getCurrentSnapshotId() internal view returns (uint256) {
-        return _snapshotStorage().currentSnapshotId.current();
-    }
-
-    function _updateSnapshot(
-        Snapshots storage snapshots,
-        uint256 currentValue
-    ) internal {
-        uint256 currentId = _getCurrentSnapshotId();
-        if (_lastSnapshotId(snapshots.ids) < currentId) {
-            snapshots.ids.push(currentId);
-            snapshots.values.push(currentValue);
+        if (!_checkMaxSupply(newTotalSupply, maxSupply)) {
+            revert ICapStorageWrapper.MaxSupplyReached(maxSupply);
         }
+        _;
     }
 
-    function _updateSnapshotPartitions(
-        Snapshots storage snapshots,
-        PartitionSnapshots storage partitionSnapshots,
-        uint256 currentValueForPartition,
-        // There is a limitation in the number of partitions an account can have, if it has to many the snapshot
-        // transaction will run out of gas
-        bytes32[] memory partitionIds
-    ) internal {
-        uint256 currentId = _getCurrentSnapshotId();
-        if (_lastSnapshotId(snapshots.ids) < currentId) {
-            snapshots.ids.push(currentId);
-            snapshots.values.push(currentValueForPartition);
-        }
-        if (_lastSnapshotId(partitionSnapshots.ids) < currentId) {
-            partitionSnapshots.ids.push(currentId);
-            ListOfPartitions memory listOfPartitions = ListOfPartitions(
-                partitionIds
+    modifier checkMaxSupplyForPartition(bytes32 _partition, uint256 _amount) {
+        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
+            _partition
+        ) + _amount;
+        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(_partition);
+
+        if (
+            !_checkMaxSupply(newTotalSupplyForPartition, maxSupplyForPartition)
+        ) {
+            revert ICapStorageWrapper.MaxSupplyReachedForPartition(
+                _partition,
+                maxSupplyForPartition
             );
-            partitionSnapshots.values.push(listOfPartitions);
+        }
+        _;
+    }
+
+    modifier checkNewMaxSupply(uint256 _newMaxSupply) {
+        _checkNewMaxSupply(_newMaxSupply);
+        _;
+    }
+
+    modifier checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    ) {
+        _checkNewMaxSupplyForPartition(_partition, _newMaxSupply);
+        _;
+    }
+
+    function _checkNewMaxSupply(uint256 _newMaxSupply) internal virtual {
+        if (_newMaxSupply == 0) {
+            revert NewMaxSupplyCannotBeZero();
+        }
+        uint256 totalSupply = _totalSupplyAdjusted();
+        if (totalSupply > _newMaxSupply) {
+            revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
         }
     }
 
-    function _valueAt(
-        uint256 snapshotId,
-        Snapshots storage snapshots
-    ) internal view returns (bool, uint256) {
-        (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
-
-        return (found, found ? snapshots.values[index] : 0);
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    ) internal view virtual returns (bool) {
+        if (_newMaxSupply == 0) return true;
+        uint256 totalSupplyForPartition = _totalSupplyByPartitionAdjusted(
+            _partition
+        );
+        if (totalSupplyForPartition > _newMaxSupply) {
+            revert NewMaxSupplyForPartitionTooLow(
+                _partition,
+                _newMaxSupply,
+                totalSupplyForPartition
+            );
+        }
+        uint256 maxSupplyOverall = _getMaxSupplyAdjusted();
+        if (_newMaxSupply > maxSupplyOverall) {
+            revert NewMaxSupplyByPartitionTooHigh(
+                _partition,
+                _newMaxSupply,
+                maxSupplyOverall
+            );
+        }
+        return true;
     }
 
-    function _indexFor(
-        uint256 snapshotId,
-        uint256[] storage ids
-    ) internal view returns (bool, uint256) {
-        if (snapshotId == 0) {
-            revert SnapshotIdNull();
-        }
-        if (snapshotId > _getCurrentSnapshotId()) {
-            revert SnapshotIdDoesNotExists(snapshotId);
-        }
-
-        uint256 index = ids.findUpperBound(snapshotId);
-
-        if (index == ids.length) {
-            return (false, 0);
-        } else {
-            return (true, index);
-        }
-    }
-
-    function _lastSnapshotId(
-        uint256[] storage ids
-    ) internal view returns (uint256) {
-        if (ids.length == 0) {
-            return 0;
-        } else {
-            return ids[ids.length - 1];
+    function _checkNewTotalSupply(uint256 _amount) internal virtual {
+        uint256 newTotalSupply = _totalSupplyAdjusted() + _amount;
+        if (!_checkMaxSupply(newTotalSupply)) {
+            revert MaxSupplyReached(_getMaxSupplyAdjusted());
         }
     }
 
-    function _snapshotStorage()
-        internal
-        pure
-        virtual
-        returns (SnapshotStorage storage snapshotStorage_)
-    {
-        bytes32 position = _SNAPSHOT_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            snapshotStorage_.slot := position
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual {
+        uint256 newTotalSupply = _totalSupplyByPartitionAdjusted(_partition) +
+            _amount;
+        if (!_checkMaxSupplyForPartition(_partition, newTotalSupply)) {
+            revert MaxSupplyReachedForPartition(
+                _partition,
+                _getMaxSupplyByPartitionAdjusted(_partition)
+            );
         }
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    ) internal view virtual returns (bool) {
+        return _checkMaxSupplyCommon(_amount, _getMaxSupplyAdjusted());
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal view virtual returns (bool) {
+        return
+            _checkMaxSupplyCommon(
+                _amount,
+                _getMaxSupplyByPartitionAdjusted(_partition)
+            );
+    }
+
+    // Internal
+    function _setMaxSupply(uint256 _maxSupply) internal {
+        uint256 previousMaxSupply = _getMaxSupply();
+        _capStorage().maxSupply = _maxSupply;
+        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
+    }
+
+    function _setMaxSupplyByPartition(
+        bytes32 _partition,
+        uint256 _maxSupply
+    ) internal {
+        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
+            _partition
+        );
+        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
+        emit MaxSupplyByPartitionSet(
+            _msgSender(),
+            _partition,
+            _maxSupply,
+            previousMaxSupplyByPartition
+        );
+    }
+
+    function _checkNewMaxSupplyByPartition(
+        bytes32 partition,
+        uint256 newMaxSupply
+    ) internal view {
+        if (
+            newMaxSupply ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        ) return;
+        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
+            partition
+        ) + newMaxSupply;
+        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(partition);
+
+        if (
+            !_checkMaxSupplyCommon(
+                newTotalSupplyForPartition,
+                maxSupplyForPartition
+            )
+        ) {
+            revert MaxSupplyReachedForPartition(
+                partition,
+                maxSupplyForPartition
+            );
+        }
+    }
+
+    function _checkMaxSupplyCommon(
+        uint256 _amount,
+        uint256 _maxSupply
+    ) internal pure returns (bool) {
+        return
+            _maxSupply ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ||
+            _amount <= _maxSupply;
     }
 }
 // solhint-enable no-unused-vars, custom-errors

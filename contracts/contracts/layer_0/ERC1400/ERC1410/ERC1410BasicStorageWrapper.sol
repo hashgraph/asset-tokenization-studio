@@ -212,11 +212,11 @@ import {
 import {
     ERC1410BasicStorageWrapperRead
 } from './ERC1410BasicStorageWrapperRead.sol';
-import {ERC20StorageWrapper_1} from '../ERC20/ERC20StorageWrapper_1.sol';
+import {ERC20StorageWrapper1} from '../ERC20/ERC20StorageWrapper1.sol';
 
 abstract contract ERC1410BasicStorageWrapper is
     IERC1410StorageWrapper,
-    ERC20StorageWrapper_1
+    ERC20StorageWrapper1
 {
     function _transferByPartition(
         address _from,

@@ -203,196 +203,194 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
-import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {
-    IERC20StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';
+    ICorporateActionsStorageWrapper,
+    CorporateActionDataStorage
+} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
 import {
-    ERC1410StandardStorageWrapper
-} from '../ERC1410/ERC1410StandardStorageWrapper.sol';
+    ICorporateActionsStorageWrapper,
+    CorporateActionDataStorage
+} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
+import {LibCommon} from '../../layer_0/common/LibCommon.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    _CORPORATE_ACTION_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {HoldStorageWrapper1} from '../hold/HoldStorageWrapper1.sol';
+import {
+    SNAPSHOT_TASK_TYPE,
+    BALANCE_ADJUSTMENT_TASK_TYPE,
+    SNAPSHOT_RESULT_ID
+} from '../constants/values.sol';
 
-abstract contract ERC20StorageWrapper_2 is
-    IERC20StorageWrapper,
-    ERC1410StandardStorageWrapper
-{
-    function _beforeAllowanceUpdate(
-        address _owner,
-        address _spender,
-        uint256 _amount,
-        bool _isIncrease
-    ) internal virtual {
-        _triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
+contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
+    using LibCommon for EnumerableSet.Bytes32Set;
+    using EnumerableSet for EnumerableSet.Bytes32Set;
 
-        _updateAllowanceAndLabaf(_owner, _spender);
+    modifier checkDates(uint256 firstDate, uint256 secondDate) {
+        if (secondDate < firstDate) {
+            revert ICorporateActionsStorageWrapper.WrongDates(
+                firstDate,
+                secondDate
+            );
+        }
+        _;
     }
 
-    function _updateAllowanceAndLabaf(
-        address _owner,
-        address _spender
+    function _onScheduledSnapshotTriggered(
+        uint256 _snapShotID,
+        bytes memory _data
     ) internal virtual {
-        uint256 abaf = _getAbaf();
-        uint256 labaf = _getAllowanceLabaf(_owner, _spender);
-
-        if (abaf == labaf) return;
-
-        uint256 factor = _calculateFactor(abaf, labaf);
-
-        _getErc20Storage().allowed[_owner][_spender] *= factor;
-        _updateAllowanceLabaf(_owner, _spender, abaf);
+        if (_data.length > 0) {
+            bytes32 actionId = abi.decode(_data, (bytes32));
+            _addSnapshotToAction(actionId, _snapShotID);
+        }
     }
 
-    function _approve(
-        address spender,
-        uint256 value
-    ) internal virtual returns (bool) {
-        if (spender == address(0)) {
-            revert SpenderWithZeroAddress();
+    function _addSnapshotToAction(
+        bytes32 _actionId,
+        uint256 _snapshotId
+    ) internal virtual {
+        bytes memory result = abi.encodePacked(_snapshotId);
+
+        _updateCorporateActionResult(_actionId, SNAPSHOT_RESULT_ID, result);
+    }
+
+    function _updateCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId,
+        bytes memory newResult
+    ) internal virtual {
+        CorporateActionDataStorage
+            storage corporateActions_ = _corporateActionsStorage();
+        bytes[] memory results = corporateActions_
+            .actionsData[actionId]
+            .results;
+
+        if (results.length > resultId) {
+            corporateActions_.actionsData[actionId].results[
+                resultId
+            ] = newResult;
+            return;
         }
 
-        _getErc20Storage().allowed[_msgSender()][spender] = value;
-        emit Approval(_msgSender(), spender, value);
-        return true;
+        for (uint256 i = results.length; i < resultId; i++) {
+            corporateActions_.actionsData[actionId].results.push('');
+        }
+
+        corporateActions_.actionsData[actionId].results.push(newResult);
+    }
+
+    function _getCorporateAction(
+        bytes32 _corporateActionId
+    ) internal view virtual returns (bytes32 actionType_, bytes memory data_) {
+        CorporateActionDataStorage
+            storage corporateActions_ = _corporateActionsStorage();
+        actionType_ = corporateActions_
+            .actionsData[_corporateActionId]
+            .actionType;
+        data_ = corporateActions_.actionsData[_corporateActionId].data;
+    }
+
+    function _getCorporateActionCount()
+        internal
+        view
+        virtual
+        returns (uint256 corporateActionCount_)
+    {
+        return _corporateActionsStorage().actions.length();
+    }
+
+    function _getCorporateActionIds(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
+        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function _getCorporateActionCountByType(
+        bytes32 _actionType
+    ) internal view virtual returns (uint256 corporateActionCount_) {
+        return _corporateActionsStorage().actionsByType[_actionType].length();
+    }
+
+    function _getCorporateActionIdsByType(
+        bytes32 _actionType,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
+        corporateActionIds_ = _corporateActionsStorage()
+            .actionsByType[_actionType]
+            .getFromSet(_pageIndex, _pageLength);
+    }
+
+    function _getResult(
+        bytes32 actionId,
+        uint256 resultId
+    ) internal view virtual returns (bytes memory) {
+        bytes memory result;
+
+        if (_getCorporateActionResultCount(actionId) > resultId)
+            result = _getCorporateActionResult(actionId, resultId);
+
+        return result;
+    }
+
+    function _getCorporateActionResultCount(
+        bytes32 actionId
+    ) internal view virtual returns (uint256) {
+        return _corporateActionsStorage().actionsData[actionId].results.length;
     }
 
     /**
-     * @dev Increase the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed_[_spender] == 0. To increment
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * @param spender The address which will spend the funds.
-     * @param addedValue The amount of tokens to increase the allowance by.
+     * @dev returns a corporate action result.
+     *
+     * @param actionId The corporate action Id
      */
-    function _increaseAllowance(
-        address spender,
-        uint256 addedValue
-    ) internal virtual returns (bool) {
-        if (spender == address(0)) {
-            revert SpenderWithZeroAddress();
+    function _getCorporateActionResult(
+        bytes32 actionId,
+        uint256 resultId
+    ) internal view virtual returns (bytes memory) {
+        return
+            _corporateActionsStorage().actionsData[actionId].results[resultId];
+    }
+
+    function _getCorporateActionData(
+        bytes32 actionId
+    ) internal view virtual returns (bytes memory) {
+        return _corporateActionsStorage().actionsData[actionId].data;
+    }
+
+    function _isSnapshotTaskType(
+        bytes memory data
+    ) internal pure returns (bool) {
+        return abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE;
+    }
+
+    function _isBalanceAdjustmentTaskType(
+        bytes memory data
+    ) internal pure returns (bool) {
+        return abi.decode(data, (bytes32)) == BALANCE_ADJUSTMENT_TASK_TYPE;
+    }
+
+    function _corporateActionsStorage()
+        internal
+        pure
+        virtual
+        returns (CorporateActionDataStorage storage corporateActions_)
+    {
+        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            corporateActions_.slot := position
         }
-        _beforeAllowanceUpdate(_msgSender(), spender, addedValue, true);
-
-        _getErc20Storage().allowed[_msgSender()][spender] += addedValue;
-        emit Approval(
-            _msgSender(),
-            spender,
-            _getErc20Storage().allowed[_msgSender()][spender]
-        );
-        return true;
-    }
-
-    /**
-     * @dev Decrease the amount of tokens that an owner allowed to a spender.
-     * approve should be called when allowed_[_spender] == 0. To decrement
-     * allowed value is better to use this function to avoid 2 calls (and wait until
-     * the first transaction is mined)
-     * From MonolithDAO Token.sol
-     * @param spender The address which will spend the funds.
-     * @param subtractedValue The amount of tokens to decrease the allowance by.
-     */
-    function _decreaseAllowance(
-        address spender,
-        uint256 subtractedValue
-    ) internal virtual returns (bool) {
-        if (spender == address(0)) {
-            revert SpenderWithZeroAddress();
-        }
-        _decreaseAllowedBalance(_msgSender(), spender, subtractedValue);
-        emit Approval(
-            _msgSender(),
-            spender,
-            _getErc20Storage().allowed[_msgSender()][spender]
-        );
-        return true;
-    }
-
-    function _transferFrom(
-        address spender,
-        address from,
-        address to,
-        uint256 value
-    ) internal virtual returns (bool) {
-        _decreaseAllowedBalance(from, spender, value);
-        bytes memory data;
-        _transferByPartition(
-            from,
-            to,
-            value,
-            _DEFAULT_PARTITION,
-            data,
-            spender,
-            ''
-        );
-        return _emitTransferEvent(from, to, value);
-    }
-
-    function _transfer(
-        address from,
-        address to,
-        uint256 value
-    ) internal virtual returns (bool) {
-        _transferByPartition(
-            from,
-            to,
-            value,
-            _DEFAULT_PARTITION,
-            '',
-            address(0),
-            ''
-        );
-        return _emitTransferEvent(from, to, value);
-    }
-
-    function _mint(address to, uint256 value) internal virtual {
-        bytes memory _data;
-        _issueByPartition(_DEFAULT_PARTITION, to, value, _data);
-        _emitTransferEvent(address(0), to, value);
-    }
-
-    function _burn(address from, uint256 value) internal virtual {
-        bytes memory _data;
-        _redeemByPartition(
-            _DEFAULT_PARTITION,
-            from,
-            address(0),
-            value,
-            _data,
-            _data
-        );
-        _emitTransferEvent(from, address(0), value);
-    }
-
-    function _burnFrom(address account, uint256 value) internal virtual {
-        _decreaseAllowedBalance(account, _msgSender(), value);
-        _burn(account, value);
-    }
-
-    function _decreaseAllowedBalance(
-        address from,
-        address spender,
-        uint256 value
-    ) internal {
-        _beforeAllowanceUpdate(from, spender, value, false);
-
-        ERC20Storage storage erc20Storage = _getErc20Storage();
-
-        if (value > erc20Storage.allowed[from][spender]) {
-            revert InsufficientAllowance(spender, from);
-        }
-
-        erc20Storage.allowed[from][spender] -= value;
-    }
-
-    function _emitTransferEvent(
-        address from,
-        address to,
-        uint256 value
-    ) private returns (bool) {
-        emit Transfer(from, to, value);
-        return true;
     }
 }

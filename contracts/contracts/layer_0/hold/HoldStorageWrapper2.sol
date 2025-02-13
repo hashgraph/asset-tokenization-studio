@@ -218,7 +218,7 @@ import {
     verify
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
 
-abstract contract HoldStorageWrapper_2 is
+abstract contract HoldStorageWrapper2 is
     ERC1410ProtectedPartitionsStorageWrapper
 {
     using EnumerableSet for EnumerableSet.UintSet;

@@ -205,189 +205,177 @@
 
 pragma solidity 0.8.18;
 
+import {LibCommon} from '../common/LibCommon.sol';
+import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {
-    ICapStorageWrapper
-} from '../../layer_1/interfaces/cap/ICapStorageWrapper.sol';
-import {LockStorageWrapper_2} from '../lock/LockStorageWrapper_2.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-// solhint-disable no-unused-vars, custom-errors
-abstract contract CapStorageWrapper_2 is
-    ICapStorageWrapper,
-    LockStorageWrapper_2
-{
-    // modifiers
-    modifier checkMaxSupply(uint256 _amount) {
-        uint256 newTotalSupply = _totalSupply() + _amount;
-        uint256 maxSupply = _getMaxSupply();
+abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
+    using LibCommon for EnumerableSet.UintSet;
 
-        if (!_checkMaxSupply(newTotalSupply, maxSupply)) {
-            revert ICapStorageWrapper.MaxSupplyReached(maxSupply);
-        }
-        _;
-    }
-
-    modifier checkMaxSupplyForPartition(bytes32 _partition, uint256 _amount) {
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            _partition
-        ) + _amount;
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(_partition);
-
-        if (
-            !_checkMaxSupply(newTotalSupplyForPartition, maxSupplyForPartition)
-        ) {
-            revert ICapStorageWrapper.MaxSupplyReachedForPartition(
-                _partition,
-                maxSupplyForPartition
-            );
-        }
-        _;
-    }
-
-    modifier checkNewMaxSupply(uint256 _newMaxSupply) {
-        _checkNewMaxSupply(_newMaxSupply);
-        _;
-    }
-
-    modifier checkNewMaxSupplyForPartition(
+    modifier onlyWithValidHoldId(
         bytes32 _partition,
-        uint256 _newMaxSupply
+        address _tokenHolder,
+        uint256 _holdId
     ) {
-        _checkNewMaxSupplyForPartition(_partition, _newMaxSupply);
+        if (!_isHoldIdValid(_partition, _tokenHolder, _holdId))
+            revert IHold.WrongHoldId();
         _;
     }
 
-    function _checkNewMaxSupply(uint256 _newMaxSupply) internal virtual {
-        if (_newMaxSupply == 0) {
-            revert NewMaxSupplyCannotBeZero();
-        }
-        uint256 totalSupply = _totalSupplyAdjusted();
-        if (totalSupply > _newMaxSupply) {
-            revert NewMaxSupplyTooLow(_newMaxSupply, totalSupply);
-        }
-    }
-
-    function _checkNewMaxSupplyForPartition(
+    function _isHoldIdValid(
         bytes32 _partition,
-        uint256 _newMaxSupply
-    ) internal view virtual returns (bool) {
-        if (_newMaxSupply == 0) return true;
-        uint256 totalSupplyForPartition = _totalSupplyByPartitionAdjusted(
-            _partition
-        );
-        if (totalSupplyForPartition > _newMaxSupply) {
-            revert NewMaxSupplyForPartitionTooLow(
-                _partition,
-                _newMaxSupply,
-                totalSupplyForPartition
-            );
-        }
-        uint256 maxSupplyOverall = _getMaxSupplyAdjusted();
-        if (_newMaxSupply > maxSupplyOverall) {
-            revert NewMaxSupplyByPartitionTooHigh(
-                _partition,
-                _newMaxSupply,
-                maxSupplyOverall
-            );
-        }
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (bool) {
+        if (_getHold(_partition, _tokenHolder, _holdId).id == 0) return false;
         return true;
     }
 
-    function _checkNewTotalSupply(uint256 _amount) internal virtual {
-        uint256 newTotalSupply = _totalSupplyAdjusted() + _amount;
-        if (!_checkMaxSupply(newTotalSupply)) {
-            revert MaxSupplyReached(_getMaxSupplyAdjusted());
-        }
-    }
-
-    function _checkNewTotalSupplyForPartition(
+    function _getHold(
         bytes32 _partition,
-        uint256 _amount
-    ) internal virtual {
-        uint256 newTotalSupply = _totalSupplyByPartitionAdjusted(_partition) +
-            _amount;
-        if (!_checkMaxSupplyForPartition(_partition, newTotalSupply)) {
-            revert MaxSupplyReachedForPartition(
-                _partition,
-                _getMaxSupplyByPartitionAdjusted(_partition)
-            );
-        }
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (IHold.HoldData memory) {
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+
+        return _getHoldByIndex(_partition, _tokenHolder, holdIndex);
     }
 
-    function _checkMaxSupply(
-        uint256 _amount
-    ) internal view virtual returns (bool) {
-        return _checkMaxSupplyCommon(_amount, _getMaxSupplyAdjusted());
-    }
-
-    function _checkMaxSupplyForPartition(
+    function _getHoldIndex(
         bytes32 _partition,
-        uint256 _amount
-    ) internal view virtual returns (bool) {
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal view returns (uint256) {
+        return _holdStorage().holdsIndex[_tokenHolder][_partition][_holdId];
+    }
+
+    function _getHoldByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex
+    ) internal view returns (IHold.HoldData memory) {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        if (_holdIndex == 0)
+            return
+                IHold.HoldData(
+                    0,
+                    IHold.Hold(0, 0, address(0), address(0), ''),
+                    ''
+                );
+
+        _holdIndex--;
+
+        assert(_holdIndex < holdStorage.holds[_tokenHolder][_partition].length);
+
+        return holdStorage.holds[_tokenHolder][_partition][_holdIndex];
+    }
+
+    function _getHeldAmountFor(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _holdStorage().totalHeldAmount[_tokenHolder];
+    }
+
+    function _getHeldAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        return _holdStorage().heldAmountByPartition[_tokenHolder][_partition];
+    }
+
+    function _getHoldsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (uint256[] memory holdsId_) {
         return
-            _checkMaxSupplyCommon(
-                _amount,
-                _getMaxSupplyByPartitionAdjusted(_partition)
+            _holdStorage().holdIds[_tokenHolder][_partition].getFromSet(
+                _pageIndex,
+                _pageLength
             );
     }
 
-    // Internal
-    function _setMaxSupply(uint256 _maxSupply) internal {
-        uint256 previousMaxSupply = _getMaxSupply();
-        _capStorage().maxSupply = _maxSupply;
-        emit MaxSupplySet(_msgSender(), _maxSupply, previousMaxSupply);
-    }
-
-    function _setMaxSupplyByPartition(
+    function _getHoldForByPartition(
         bytes32 _partition,
-        uint256 _maxSupply
-    ) internal {
-        uint256 previousMaxSupplyByPartition = _getMaxSupplyByPartition(
-            _partition
-        );
-        _capStorage().maxSupplyByPartition[_partition] = _maxSupply;
-        emit MaxSupplyByPartitionSet(
-            _msgSender(),
+        address _tokenHolder,
+        uint256 _holdId
+    )
+        internal
+        view
+        virtual
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        )
+    {
+        IHold.HoldData memory holdData = _getHold(
             _partition,
-            _maxSupply,
-            previousMaxSupplyByPartition
+            _tokenHolder,
+            _holdId
+        );
+        return (
+            holdData.hold.amount,
+            holdData.hold.expirationTimestamp,
+            holdData.hold.escrow,
+            holdData.hold.to,
+            holdData.hold.data,
+            holdData.operatorData
         );
     }
 
-    function _checkNewMaxSupplyByPartition(
-        bytes32 partition,
-        uint256 newMaxSupply
-    ) internal view {
-        if (
-            newMaxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            partition
-        ) + newMaxSupply;
-        uint256 maxSupplyForPartition = _getMaxSupplyByPartition(partition);
+    function _getHoldCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        return _holdStorage().holds[_tokenHolder][_partition].length;
+    }
 
-        if (
-            !_checkMaxSupplyCommon(
-                newTotalSupplyForPartition,
-                maxSupplyForPartition
-            )
-        ) {
-            revert MaxSupplyReachedForPartition(
-                partition,
-                maxSupplyForPartition
-            );
+    function _isHoldExpired(
+        IHold.Hold memory _hold
+    ) internal view returns (bool) {
+        if (_blockTimestamp() > _hold.expirationTimestamp) return true;
+        return false;
+    }
+
+    function _isEscrow(
+        IHold.Hold memory _hold,
+        address _escrow
+    ) internal pure returns (bool) {
+        if (_escrow == _hold.escrow) return true;
+        return false;
+    }
+
+    function _checkHoldAmount(
+        uint256 _amount,
+        IHold.HoldData memory holdData
+    ) internal pure {
+        if (_amount > holdData.hold.amount) {
+            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
         }
     }
 
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
-        return
-            _maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ||
-            _amount <= _maxSupply;
+    function _holdStorage()
+        internal
+        pure
+        virtual
+        returns (IHold.HoldDataStorage storage hold_)
+    {
+        bytes32 position = _HOLD_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            hold_.slot := position
+        }
     }
 }
-// solhint-enable no-unused-vars, custom-errors
