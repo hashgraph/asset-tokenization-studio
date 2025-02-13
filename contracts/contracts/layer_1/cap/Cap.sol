@@ -248,7 +248,6 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
         onlyUnpaused
         onlyRole(_CAP_ROLE)
         checkNewMaxSupply(_maxSupply)
-        onlyWithoutMultiPartition
         returns (bool success_)
     {
         _setMaxSupply(_maxSupply);
@@ -265,7 +264,6 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
         onlyUnpaused
         onlyRole(_CAP_ROLE)
         checkNewMaxSupplyForPartition(_partition, _maxSupply)
-        onlyWithoutMultiPartition
         returns (bool success_)
     {
         _setMaxSupplyByPartition(_partition, _maxSupply);
@@ -278,13 +276,13 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
         override
         returns (uint256 maxSupply_)
     {
-        return _getMaxSupply();
+        return _getMaxSupplyAdjusted();
     }
 
     function getMaxSupplyByPartition(
         bytes32 _partition
     ) external view override returns (uint256 maxSupply_) {
-        return _getMaxSupplyByPartition(_partition);
+        return _getMaxSupplyByPartitionAdjusted(_partition);
     }
 
     function getStaticResolverKey()

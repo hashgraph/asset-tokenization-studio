@@ -273,18 +273,6 @@ abstract contract SnapshotsStorageWrapper1 is
         emit SnapshotTaken(_msgSender(), snapshotID_);
     }
 
-    function _updateDecimalsSnapshot(uint8 decimals) internal {
-        _updateSnapshot(_snapshotStorage().decimals, decimals);
-    }
-
-    function _updateAbafSnapshot(uint256 abaf) internal {
-        _updateSnapshot(_snapshotStorage().abafSnapshots, abaf);
-    }
-
-    function _updateAssetTotalSupplySnapshot(uint256 totalSupply) internal {
-        _updateSnapshot(_snapshotStorage().totalSupplySnapshots, totalSupply);
-    }
-
     function _snapshot() internal returns (uint256) {
         _snapshotStorage().currentSnapshotId.increment();
 

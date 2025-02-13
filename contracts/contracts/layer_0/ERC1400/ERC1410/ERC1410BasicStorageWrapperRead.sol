@@ -352,18 +352,11 @@ contract ERC1410BasicStorageWrapperRead is
     function _totalSupplyByPartition(
         bytes32 _partition
     ) internal view returns (uint256) {
-        return
-            _getERC1410BasicStorage().totalSupplyByPartition[_partition] *
-            _calculateFactorByPartitionAdjustedAt(
-                _partition,
-                _blockTimestamp()
-            );
+        return _getERC1410BasicStorage().totalSupplyByPartition[_partition];
     }
 
     function _balanceOf(address _tokenHolder) internal view returns (uint256) {
-        return
-            _getERC1410BasicStorage().balances[_tokenHolder] *
-            _calculateFactorByAbafAndTokenHolder(_getAbaf(), _tokenHolder);
+        return _getERC1410BasicStorage().balances[_tokenHolder];
     }
 
     function _balanceOfByPartition(
@@ -373,17 +366,12 @@ contract ERC1410BasicStorageWrapperRead is
         if (_validPartition(_partition, _tokenHolder)) {
             ERC1410BasicStorage
                 storage erc1410Storage = _getERC1410BasicStorage();
-            uint256 partitionsIndex = erc1410Storage.partitionToIndex[
-                _tokenHolder
-            ][_partition];
             return
                 erc1410Storage
-                .partitions[_tokenHolder][partitionsIndex - 1].amount *
-                _calculateFactorByTokenHolderAndPartitionIndex(
-                    _getAbaf(),
-                    _tokenHolder,
-                    partitionsIndex
-                );
+                .partitions[_tokenHolder][
+                    erc1410Storage.partitionToIndex[_tokenHolder][_partition] -
+                        1
+                ].amount;
         } else {
             return 0;
         }

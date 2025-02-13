@@ -221,7 +221,7 @@ abstract contract AdjustBalancesStorageWrapper2 is
 {
     // solhint-disable no-unused-vars
     function _adjustBalances(uint256 _factor, uint8 _decimals) internal {
-        _beforeBalanceAdjustment();
+        _beforeBalanceAdjustment(_factor, _decimals);
         _adjustTotalSupply(_factor);
         _adjustDecimals(_decimals);
         _adjustMaxSupply(_factor);
@@ -247,10 +247,13 @@ abstract contract AdjustBalancesStorageWrapper2 is
     }
 
     // solhint-disable no-unused-vars
-    function _beforeBalanceAdjustment() internal virtual {
-        _updateDecimalsSnapshot(_decimals());
-        _updateAbafSnapshot(_getAbaf());
-        _updateAssetTotalSupplySnapshot(_totalSupply());
+    function _beforeBalanceAdjustment(
+        uint256 _factor,
+        uint8 _decimals
+    ) internal virtual {
+        _updateDecimalsSnapshot();
+        _updateAbafSnapshot();
+        _updateAssetTotalSupplySnapshot();
     }
 
     function _getHoldLabafByPartition(

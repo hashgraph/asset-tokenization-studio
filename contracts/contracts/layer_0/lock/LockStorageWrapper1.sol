@@ -339,7 +339,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     function _getLockedAmountFor(
         address _tokenHolder
     ) internal view returns (uint256 amount_) {
-        return _getLockedAmountForAdjustedAt(_tokenHolder, _blockTimestamp());
+        return _lockStorage().totalLockedAmountByAccount[_tokenHolder];
     }
 
     //note: previous was _getLockedAmountForAdjusted
