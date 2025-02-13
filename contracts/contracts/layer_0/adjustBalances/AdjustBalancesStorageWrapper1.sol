@@ -471,7 +471,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
     function calculateNewAbaf(
         uint256 abaf,
         uint256 factor
-    ) private returns (uint256) {
+    ) private pure returns (uint256) {
         return abaf == 0 ? factor : abaf * factor;
     }
 

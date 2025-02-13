@@ -223,7 +223,7 @@ abstract contract SnapshotsStorageWrapper2 is
     ISnapshotsStorageWrapper,
     ERC20StorageWrapper2
 {
-    function _updateABAFSnapshot() internal virtual {
+    function _updateAbafSnapshot() internal virtual {
         _updateSnapshot(_snapshotStorage().abafSnapshots, _getAbaf());
     }
 

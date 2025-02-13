@@ -333,7 +333,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (!_checkControlList(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (_balanceOf(_msgSender()) < _value) {
+        if (_balanceOfAdjusted(_msgSender()) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
 
@@ -376,10 +376,10 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (!_checkControlList(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (_allowance(_from, _msgSender()) < _value) {
+        if (_allowanceAdjusted(_from, _msgSender()) < _value) {
             return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
         }
-        if (_balanceOf(_from) < _value) {
+        if (_balanceOfAdjusted(_from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
 

@@ -317,7 +317,7 @@ abstract contract CapStorageWrapper2 is
     function _checkMaxSupply(
         uint256 _amount
     ) internal view virtual returns (bool) {
-        return _checkMaxSupplyCommon(_amount, _getMaxSupplyAdjusted());
+        return _checkMaxSupply(_amount, _getMaxSupplyAdjusted());
     }
 
     function _checkMaxSupplyForPartition(
@@ -325,7 +325,7 @@ abstract contract CapStorageWrapper2 is
         uint256 _amount
     ) internal view virtual returns (bool) {
         return
-            _checkMaxSupplyCommon(
+            _checkMaxSupply(
                 _amount,
                 _getMaxSupplyByPartitionAdjusted(_partition)
             );
@@ -368,26 +368,13 @@ abstract contract CapStorageWrapper2 is
         uint256 maxSupplyForPartition = _getMaxSupplyByPartition(partition);
 
         if (
-            !_checkMaxSupplyCommon(
-                newTotalSupplyForPartition,
-                maxSupplyForPartition
-            )
+            !_checkMaxSupply(newTotalSupplyForPartition, maxSupplyForPartition)
         ) {
             revert MaxSupplyReachedForPartition(
                 partition,
                 maxSupplyForPartition
             );
         }
-    }
-
-    function _checkMaxSupplyCommon(
-        uint256 _amount,
-        uint256 _maxSupply
-    ) internal pure returns (bool) {
-        return
-            _maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff ||
-            _amount <= _maxSupply;
     }
 }
 // solhint-enable no-unused-vars, custom-errors

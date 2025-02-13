@@ -212,6 +212,7 @@ import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     ICapStorageWrapper
 } from '../../layer_1/interfaces/cap/ICapStorageWrapper.sol';
+import {_MAX_UINT256} from '../constants/values.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -225,10 +226,7 @@ contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
 
     function _adjustMaxSupply(uint256 factor) internal {
         CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
+        if (capStorage.maxSupply == _MAX_UINT256) return;
         capStorage.maxSupply *= factor;
     }
 
@@ -237,30 +235,18 @@ contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         uint256 factor
     ) internal {
         CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupplyByPartition[partition] ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        ) return;
+        if (capStorage.maxSupplyByPartition[partition] == _MAX_UINT256) return;
         capStorage.maxSupplyByPartition[partition] *= factor;
     }
 
     function _getMaxSupply() internal view returns (uint256) {
-        return _getMaxSupplyAdjustedAt(_blockTimestamp());
+        return _capStorage().maxSupply;
     }
 
     function _getMaxSupplyByPartition(
         bytes32 partition
     ) internal view returns (uint256) {
-        CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupplyByPartition[partition] ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        )
-            return
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-        return
-            capStorage.maxSupplyByPartition[partition] *
-            _getMaxSupplyByPartitionAdjustedAt(partition, _blockTimestamp());
+        return _capStorage().maxSupplyByPartition[partition];
     }
 
     function _getMaxSupplyAdjusted()
