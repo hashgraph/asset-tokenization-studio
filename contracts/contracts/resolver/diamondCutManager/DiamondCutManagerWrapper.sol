@@ -320,14 +320,12 @@ abstract contract DiamondCutManagerWrapper is
         bytes32 configVersionHash = _buildHash(_configurationId, _version);
 
         uint256 facetsLength = _facetConfigurations.length;
-        _dcms.facetIds[configVersionHash] = new bytes32[](facetsLength);
-        _dcms.facetVersions[configVersionHash] = new uint256[](facetsLength);
 
         for (uint256 index; index < facetsLength; ) {
             bytes32 facetId = _facetConfigurations[index].id;
             uint256 facetVersion = _facetConfigurations[index].version;
-            _dcms.facetIds[configVersionHash][index] = facetId;
-            _dcms.facetVersions[configVersionHash][index] = facetVersion;
+            _dcms.facetIds[configVersionHash].push(facetId);
+            _dcms.facetVersions[configVersionHash].push(facetVersion);
             bytes32 configVersionFacetHash = _buildHash(
                 _configurationId,
                 _version,
