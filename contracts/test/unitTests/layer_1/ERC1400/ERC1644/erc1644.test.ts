@@ -451,14 +451,12 @@ describe('ERC1644 Tests', () => {
             beforeEach(async () => {
                 // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
                 // Granting Role to account C
-                await erc1410Facet
-                    .connect(signer_B)
-                    .issueByPartition(
-                        DEFAULT_PARTITION,
-                        account_D,
-                        amount * 2,
-                        data
-                    )
+                await erc1410Facet.connect(signer_B).issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_D,
+                    value: amount * 2,
+                    data: data,
+                })
             })
 
             it(

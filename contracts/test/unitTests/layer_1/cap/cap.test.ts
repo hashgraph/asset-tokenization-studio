@@ -447,12 +447,12 @@ describe('CAP Tests', () => {
             await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             erc1410Facet = erc1410Facet.connect(signer_C)
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_A,
-                maxSupply * 2,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_A,
+                value: maxSupply * 2,
+                data: '0x',
+            })
 
             // Using account C (non role)
             capFacet = capFacet.connect(signer_C)
@@ -469,12 +469,12 @@ describe('CAP Tests', () => {
             await accessControlFacet.grantRole(CAP_ROLE, account_C)
 
             erc1410Facet = erc1410Facet.connect(signer_C)
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_A,
-                maxSupply * 2,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_A,
+                value: maxSupply * 2,
+                data: '0x',
+            })
 
             // Using account C (non role)
             capFacet = capFacet.connect(signer_C)

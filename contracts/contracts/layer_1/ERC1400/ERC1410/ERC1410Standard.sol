@@ -212,29 +212,26 @@ import {Common} from '../../common/Common.sol';
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
 
 abstract contract ERC1410Standard is IERC1410Standard, Common {
-    /// @notice Increases totalSupply and the corresponding amount of the specified owners partition
-    /// @param _partition The partition to allocate the increase in balance
-    /// @param _tokenHolder The token holder whose balance should be increased
-    /// @param _value The amount by which to increase the balance
-    /// @param _data Additional data attached to the minting of tokens
     function issueByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data
+        IERC1410Standard.IssueData calldata _issueData
     )
         external
         virtual
         override
-        checkMaxSupply(_value)
-        checkMaxSupplyForPartition(_partition, _value)
-        onlyValidAddress(_tokenHolder)
-        checkControlList(_tokenHolder)
+        checkMaxSupply(_issueData.value)
+        checkMaxSupplyForPartition(_issueData.partition, _issueData.value)
+        onlyValidAddress(_issueData.tokenHolder)
+        checkControlList(_issueData.tokenHolder)
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_issueData.partition)
         onlyRole(_ISSUER_ROLE)
     {
-        _issueByPartition(_partition, _tokenHolder, _value, _data);
+        _issueByPartition(
+            _issueData.partition,
+            _issueData.tokenHolder,
+            _issueData.value,
+            _issueData.data
+        );
     }
 
     /// @notice Decreases totalSupply and the corresponding amount of the specified partition of _msgSender()

@@ -311,12 +311,12 @@ describe('ProtectedPartitions Tests', () => {
 
         erc1410Facet = erc1410Facet.connect(signer_B)
 
-        await erc1410Facet.issueByPartition(
-            issue_Partition,
-            issue_Account,
-            issue_Amount,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: issue_Partition,
+            tokenHolder: issue_Account,
+            value: issue_Amount,
+            data: '0x',
+        })
     }
 
     async function setFacets(address: string) {
@@ -1050,12 +1050,12 @@ describe('ProtectedPartitions Tests', () => {
                     message
                 )
 
-                await erc1410Facet.issueByPartition(
-                    DEFAULT_PARTITION,
-                    account_A,
-                    amount,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: amount,
+                    data: '0x',
+                })
 
                 await erc1410Facet.protectedTransferFromByPartition(
                     DEFAULT_PARTITION,
@@ -1201,12 +1201,12 @@ describe('ProtectedPartitions Tests', () => {
                     message
                 )
 
-                await erc1410Facet.issueByPartition(
-                    DEFAULT_PARTITION,
-                    account_A,
-                    amount,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: amount,
+                    data: '0x',
+                })
 
                 await erc1410Facet.protectedRedeemFromByPartition(
                     DEFAULT_PARTITION,

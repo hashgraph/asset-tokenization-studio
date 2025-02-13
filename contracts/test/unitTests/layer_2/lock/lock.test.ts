@@ -374,30 +374,30 @@ describe('Locks Layer 2 Tests', () => {
             maxSupply_Partition_2_Original
         )
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_A,
-            balanceOf_A_Original[0],
-            '0x'
-        )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_A,
-            balanceOf_A_Original[1],
-            '0x'
-        )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_B,
-            balanceOf_B_Original[0],
-            '0x'
-        )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_B,
-            balanceOf_B_Original[1],
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_A,
+            value: balanceOf_A_Original[0],
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_A,
+            value: balanceOf_A_Original[1],
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original[0],
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original[1],
+            data: '0x',
+        })
     }
 
     before(async () => {

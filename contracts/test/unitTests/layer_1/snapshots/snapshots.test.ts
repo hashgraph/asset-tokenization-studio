@@ -417,30 +417,30 @@ describe('Snapshots Tests', () => {
         erc1410Facet = erc1410Facet.connect(signer_A)
         lockFacet = lockFacet.connect(signer_B)
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_C,
-            balanceOf_C_Original,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_C,
+            value: balanceOf_C_Original,
+            data: '0x',
+        })
 
         // snapshot
         await expect(snapshotFacet.takeSnapshot())
             .to.emit(snapshotFacet, 'SnapshotTaken')
             .withArgs(account_C, 1)
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_A,
-            amount,
-            '0x'
-        )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_A,
-            amount,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_A,
+            value: amount,
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_A,
+            value: amount,
+            data: '0x',
+        })
         erc1410Facet = erc1410Facet.connect(signer_C)
         await erc1410Facet.transferByPartition(
             _PARTITION_ID_1,
