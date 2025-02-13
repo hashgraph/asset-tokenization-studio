@@ -1569,11 +1569,6 @@ describe('ERC1400 Tests', () => {
         it('GIVEN an account WHEN transfer from address 0 THEN transaction fails', async () => {
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
-            await erc1410Facet.redeemByPartition(
-                _PARTITION_ID_1,
-                balanceOf_C_Original,
-                '0x'
-            )
 
             const canTransfer = await erc1410Facet.canTransferByPartition(
                 ADDRESS_ZERO,
