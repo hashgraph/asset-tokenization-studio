@@ -1111,7 +1111,6 @@ describe('ERC1594 Tests', () => {
                     )
                 }
             )
-
         })
 
         it('GIVEN a zero address in to WHEN canTransfer and canTransferFrom THEN responds _TO_ACCOUNT_NULL_ERROR_ID', async () => {
@@ -1160,7 +1159,6 @@ describe('ERC1594 Tests', () => {
                 ethers.constants.HashZero,
             ])
         })
-
 
         it('GIVEN a non allowed WHEN canTransferFrom THEN responds _ALLOWANCE_REACHED_ERROR_ID', async () => {
             expect(

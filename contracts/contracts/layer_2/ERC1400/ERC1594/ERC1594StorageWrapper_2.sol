@@ -213,15 +213,8 @@ import {
     ERC1410ScheduledTasksStorageWrapper
 } from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
 import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
     _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
-    _ALLOWANCE_REACHED_ERROR_ID,
-    _SUCCESS
+    _ALLOWANCE_REACHED_ERROR_ID
 } from '../../../layer_1/constants/values.sol';
 import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
 import {

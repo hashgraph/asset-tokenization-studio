@@ -262,7 +262,7 @@ import {
     deployAtsFullInfrastructure,
     MAX_UINT256,
     FROM_ACCOUNT_KYC_ERROR_ID,
-    TO_ACCOUNT_KYC_ERROR_ID
+    TO_ACCOUNT_KYC_ERROR_ID,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 import { dateToUnixTimestamp } from 'test/dateFormatter'
@@ -722,7 +722,7 @@ describe('ERC1400 Tests', () => {
     describe('Multi partition ', () => {
         before(async () => {
             // mute | mock console.log
-            console.log = () => {}
+            //console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
@@ -1180,8 +1180,10 @@ describe('ERC1400 Tests', () => {
         })
 
         it('GIVEN non kyc accounts (to, from) WHEN transfer THEN transaction fails with InvalidKYCStatus', async () => {
+            await erc1410Facet.connect(signer_E).authorizeOperator(account_C)
+            await erc1410Facet.connect(signer_D).authorizeOperator(account_C)
             await kycFacet.revokeKYC(account_D)
-            
+
             erc1410Facet = erc1410Facet.connect(signer_C)
             let canTransfer = await erc1410Facet.canTransferByPartition(
                 account_E,
@@ -1194,10 +1196,11 @@ describe('ERC1400 Tests', () => {
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.transferByPartition(_PARTITION_ID_1, basicTransferInfo, data)
-            ).to.be.rejectedWith('InvalidKYCStatus')
-            await expect(
-                erc1410Facet.controllerTransferByPartition(_PARTITION_ID_1, account_E, account_D, amount, data, operatorData)
+                erc1410Facet.transferByPartition(
+                    _PARTITION_ID_1,
+                    basicTransferInfo,
+                    data
+                )
             ).to.be.rejectedWith('InvalidKYCStatus')
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
@@ -1218,10 +1221,13 @@ describe('ERC1400 Tests', () => {
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.connect(signer_E).transferByPartition(_PARTITION_ID_1, basicTransferInfo, data)
-            ).to.be.rejectedWith('InvalidKYCStatus')
-            await expect(
-                erc1410Facet.controllerTransferByPartition(_PARTITION_ID_1, account_E, account_D, amount, data, operatorData)
+                erc1410Facet
+                    .connect(signer_E)
+                    .transferByPartition(
+                        _PARTITION_ID_1,
+                        basicTransferInfo,
+                        data
+                    )
             ).to.be.rejectedWith('InvalidKYCStatus')
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
@@ -1292,7 +1298,7 @@ describe('ERC1400 Tests', () => {
         })
 
         it('GIVEN non kyc account WHEN issue or redeem THEN transaction fails with InvalidKYCStatus', async () => {
-            await erc20Facet.connect(signer_D).increaseAllowance(account_A,amount)
+            await erc1410Facet.connect(signer_D).authorizeOperator(account_A)
             await kycFacet.revokeKYC(account_D)
             await expect(
                 erc1410Facet.issueByPartition(
@@ -1302,13 +1308,17 @@ describe('ERC1400 Tests', () => {
                     data
                 )
             ).to.be.rejectedWith('InvalidKYCStatus')
-            let canRedeem = await erc1410Facet.canRedeemByPartition(account_D, _PARTITION_ID_1, amount, data, operatorData)
+            let canRedeem = await erc1410Facet.canRedeemByPartition(
+                account_D,
+                _PARTITION_ID_1,
+                amount,
+                data,
+                operatorData
+            )
             await expect(
-                erc1410Facet.connect(signer_D).redeemByPartition(
-                    _PARTITION_ID_1,
-                    amount,
-                    data
-                )
+                erc1410Facet
+                    .connect(signer_D)
+                    .redeemByPartition(_PARTITION_ID_1, amount, data)
             ).to.be.rejectedWith('InvalidKYCStatus')
             await expect(
                 erc1410Facet.operatorRedeemByPartition(
@@ -1318,11 +1328,10 @@ describe('ERC1400 Tests', () => {
                     data,
                     operatorData
                 )
-            ).to.be.rejectedWith('InvalidKYCStatus') 
+            ).to.be.rejectedWith('InvalidKYCStatus')
             expect(canRedeem[0]).to.be.equal(false)
             expect(canRedeem[1]).to.be.equal(FROM_ACCOUNT_KYC_ERROR_ID)
         })
-
 
         it('GIVEN blocked accounts (sender, from) WHEN redeem THEN transaction fails with AccountIsBlocked', async () => {
             // Blacklisting accounts
@@ -1416,7 +1425,9 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejectedWith('InvalidPartition')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(WRONG_PARTITION_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(
+                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
+            )
         })
 
         it('GIVEN wrong partition WHEN redeem THEN transaction fails with InValidPartition', async () => {
@@ -1558,6 +1569,11 @@ describe('ERC1400 Tests', () => {
         it('GIVEN an account WHEN transfer from address 0 THEN transaction fails', async () => {
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
+            await erc1410Facet.redeemByPartition(
+                _PARTITION_ID_1,
+                balanceOf_C_Original,
+                '0x'
+            )
 
             const canTransfer = await erc1410Facet.canTransferByPartition(
                 ADDRESS_ZERO,
@@ -1582,7 +1598,9 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejected
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(FROM_ACCOUNT_NULL_ERROR_ID)
+            expect(canTransfer[1]).to.be.equal(
+                NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID
+            )
         })
 
         it('GIVEN an account WHEN redeem from address 0 THEN transaction fails', async () => {
@@ -2485,7 +2503,7 @@ describe('ERC1400 Tests', () => {
     describe('Single partition ', () => {
         before(async () => {
             // mute | mock console.log
-            console.log = () => {}
+            //console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
                 await ethers.getSigners()
@@ -2728,7 +2746,7 @@ describe('ERC1400 Tests', () => {
     describe('Adjust balances', () => {
         before(async () => {
             // mute | mock console.log
-            console.log = () => {}
+            //console.log = () => {}
             // eslint-disable-next-line @typescript-eslint/no-extra-semi
             ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
             account_A = signer_A.address

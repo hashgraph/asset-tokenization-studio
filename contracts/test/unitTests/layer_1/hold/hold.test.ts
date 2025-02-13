@@ -665,18 +665,12 @@ describe('Hold Tests', () => {
                     holdFacet
                         .connect(signer_A)
                         .executeHoldByPartition(holdIdentifier, account_B, 1)
-                ).to.be.revertedWithCustomError(
-                    kycFacet,
-                    'InvalidKYCStatus'
-                )
+                ).to.be.revertedWithCustomError(kycFacet, 'InvalidKYCStatus')
                 await expect(
                     holdFacet
                         .connect(signer_B)
                         .executeHoldByPartition(holdIdentifier, account_A, 1)
-                ).to.be.revertedWithCustomError(
-                    kycFacet,
-                    'InvalidKYCStatus'
-                )
+                ).to.be.revertedWithCustomError(kycFacet, 'InvalidKYCStatus')
             })
         })
 

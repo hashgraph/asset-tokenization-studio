@@ -345,9 +345,6 @@ abstract contract ERC1594StorageWrapper is
         if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)) {
             return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
-        if (_balanceOf(_msgSender()) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
 
         return (true, _SUCCESS, bytes32(0));
     }
@@ -393,12 +390,6 @@ abstract contract ERC1594StorageWrapper is
         }
         if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)) {
             return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
-        }
-        if (_allowance(_from, _msgSender()) < _value) {
-            return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOf(_from) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
 
         return (true, _SUCCESS, bytes32(0));
