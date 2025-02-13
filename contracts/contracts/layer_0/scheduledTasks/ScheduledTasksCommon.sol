@@ -207,13 +207,13 @@
 pragma solidity 0.8.18;
 
 import {
-    SnapshotsStorageWrapper_1
-} from '../snapshots/SnapshotsStorageWrapper_1.sol';
+    SnapshotsStorageWrapper1
+} from '../snapshots/SnapshotsStorageWrapper1.sol';
 import {
     ScheduledTasksLib
 } from '../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
 
-abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper_1 {
+abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     error WrongTimestamp(uint256 timeStamp);
     error NotAutocalling();
 

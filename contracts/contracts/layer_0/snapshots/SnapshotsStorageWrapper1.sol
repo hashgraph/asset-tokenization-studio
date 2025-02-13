@@ -203,179 +203,185 @@
 
 */
 
+// SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {LibCommon} from '../common/LibCommon.sol';
-import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    CorporateActionsStorageWrapper1
+} from '../corporateActions/CorporateActionsStorageWrapper1.sol';
+import {
+    ArraysUpgradeable
+} from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
+import {
+    CountersUpgradeable
+} from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
+import {
+    ISnapshotsStorageWrapper
+} from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
+import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// solhint-disable no-unused-vars, custom-errors
+abstract contract SnapshotsStorageWrapper1 is
+    ISnapshotsStorageWrapper,
+    CorporateActionsStorageWrapper1
+{
+    using ArraysUpgradeable for uint256[];
+    using CountersUpgradeable for CountersUpgradeable.Counter;
 
-abstract contract HoldStorageWrapper_1 is PauseStorageWrapper {
-    using LibCommon for EnumerableSet.UintSet;
-
-    modifier onlyWithValidHoldId(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    ) {
-        if (!_isHoldIdValid(_partition, _tokenHolder, _holdId))
-            revert IHold.WrongHoldId();
-        _;
+    // Snapshotted values have arrays of ids and the value corresponding to that id. These could be an array of a
+    // Snapshot struct, but that would impede usage of functions that work on an array.
+    struct Snapshots {
+        uint256[] ids;
+        uint256[] values;
     }
 
-    function _isHoldIdValid(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    ) internal view returns (bool) {
-        if (_getHold(_partition, _tokenHolder, _holdId).id == 0) return false;
-        return true;
+    struct ListOfPartitions {
+        bytes32[] partitions;
+    }
+    struct PartitionSnapshots {
+        uint256[] ids;
+        ListOfPartitions[] values;
     }
 
-    function _getHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    ) internal view returns (IHold.HoldData memory) {
-        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
-
-        return _getHoldByIndex(_partition, _tokenHolder, holdIndex);
+    struct SnapshotStorage {
+        // Snapshots for total balances per account
+        mapping(address => Snapshots) accountBalanceSnapshots;
+        // Snapshots for balances per account and partition
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionBalanceSnapshots;
+        // Metadata for partitions associated with each account
+        mapping(address => PartitionSnapshots) accountPartitionMetadata;
+        Snapshots totalSupplySnapshots; // Snapshots for the total supply
+        // Snapshot ids increase monotonically, with the first value being 1. An id of 0 is invalid.
+        // Unique ID for the current snapshot
+        CountersUpgradeable.Counter currentSnapshotId;
+        // Snapshots for locked balances per account
+        mapping(address => Snapshots) accountLockedBalanceSnapshots;
+        // Snapshots for locked balances per account and partition
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionLockedBalanceSnapshots;
+        // Snapshots for the total supply by partition
+        mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
+        mapping(address => Snapshots) accountHeldBalanceSnapshots;
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionHeldBalanceSnapshots;
+        Snapshots abafSnapshots;
+        Snapshots decimals;
     }
 
-    function _getHoldIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    ) internal view returns (uint256) {
-        return _holdStorage().holdsIndex[_tokenHolder][_partition][_holdId];
+    event SnapshotTriggered(address indexed operator, uint256 snapshotId);
+
+    function _takeSnapshot() internal returns (uint256 snapshotID_) {
+        snapshotID_ = _snapshot();
+        emit SnapshotTaken(_msgSender(), snapshotID_);
     }
 
-    function _getHoldByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdIndex
-    ) internal view returns (IHold.HoldData memory) {
-        IHold.HoldDataStorage storage holdStorage = _holdStorage();
-
-        if (_holdIndex == 0)
-            return
-                IHold.HoldData(
-                    0,
-                    IHold.Hold(0, 0, address(0), address(0), ''),
-                    ''
-                );
-
-        _holdIndex--;
-
-        assert(_holdIndex < holdStorage.holds[_tokenHolder][_partition].length);
-
-        return holdStorage.holds[_tokenHolder][_partition][_holdIndex];
+    function _updateDecimalsSnapshot(uint8 decimals) internal {
+        _updateSnapshot(_snapshotStorage().decimals, decimals);
     }
 
-    function _getHeldAmountFor(
-        address _tokenHolder
-    ) internal view virtual returns (uint256 amount_) {
-        return _holdStorage().totalHeldAmount[_tokenHolder];
+    function _updateAbafSnapshot(uint256 abaf) internal {
+        _updateSnapshot(_snapshotStorage().abafSnapshots, abaf);
     }
 
-    function _getHeldAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256 amount_) {
-        return _holdStorage().heldAmountByPartition[_tokenHolder][_partition];
+    function _updateAssetTotalSupplySnapshot(uint256 totalSupply) internal {
+        _updateSnapshot(_snapshotStorage().totalSupplySnapshots, totalSupply);
     }
 
-    function _getHoldsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (uint256[] memory holdsId_) {
-        return
-            _holdStorage().holdIds[_tokenHolder][_partition].getFromSet(
-                _pageIndex,
-                _pageLength
-            );
+    function _snapshot() internal returns (uint256) {
+        _snapshotStorage().currentSnapshotId.increment();
+
+        uint256 currentId = _getCurrentSnapshotId();
+
+        emit SnapshotTriggered(_msgSender(), currentId);
+
+        return currentId;
     }
 
-    function _getHoldForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
-    )
-        internal
-        view
-        virtual
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
-        )
-    {
-        IHold.HoldData memory holdData = _getHold(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
-        return (
-            holdData.hold.amount,
-            holdData.hold.expirationTimestamp,
-            holdData.hold.escrow,
-            holdData.hold.to,
-            holdData.hold.data,
-            holdData.operatorData
-        );
+    function _getCurrentSnapshotId() internal view returns (uint256) {
+        return _snapshotStorage().currentSnapshotId.current();
     }
 
-    function _getHoldCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view virtual returns (uint256) {
-        return _holdStorage().holds[_tokenHolder][_partition].length;
-    }
-
-    function _isHoldExpired(
-        IHold.Hold memory _hold
-    ) internal view returns (bool) {
-        if (_blockTimestamp() > _hold.expirationTimestamp) return true;
-        return false;
-    }
-
-    function _isEscrow(
-        IHold.Hold memory _hold,
-        address _escrow
-    ) internal pure returns (bool) {
-        if (_escrow == _hold.escrow) return true;
-        return false;
-    }
-
-    function _checkHoldAmount(
-        uint256 _amount,
-        IHold.HoldData memory holdData
-    ) internal pure {
-        if (_amount > holdData.hold.amount) {
-            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
+    function _updateSnapshot(
+        Snapshots storage snapshots,
+        uint256 currentValue
+    ) internal {
+        uint256 currentId = _getCurrentSnapshotId();
+        if (_lastSnapshotId(snapshots.ids) < currentId) {
+            snapshots.ids.push(currentId);
+            snapshots.values.push(currentValue);
         }
     }
 
-    function _holdStorage()
+    function _updateSnapshotPartitions(
+        Snapshots storage snapshots,
+        PartitionSnapshots storage partitionSnapshots,
+        uint256 currentValueForPartition,
+        // There is a limitation in the number of partitions an account can have, if it has to many the snapshot
+        // transaction will run out of gas
+        bytes32[] memory partitionIds
+    ) internal {
+        uint256 currentId = _getCurrentSnapshotId();
+        if (_lastSnapshotId(snapshots.ids) < currentId) {
+            snapshots.ids.push(currentId);
+            snapshots.values.push(currentValueForPartition);
+        }
+        if (_lastSnapshotId(partitionSnapshots.ids) < currentId) {
+            partitionSnapshots.ids.push(currentId);
+            ListOfPartitions memory listOfPartitions = ListOfPartitions(
+                partitionIds
+            );
+            partitionSnapshots.values.push(listOfPartitions);
+        }
+    }
+
+    function _valueAt(
+        uint256 snapshotId,
+        Snapshots storage snapshots
+    ) internal view returns (bool, uint256) {
+        (bool found, uint256 index) = _indexFor(snapshotId, snapshots.ids);
+
+        return (found, found ? snapshots.values[index] : 0);
+    }
+
+    function _indexFor(
+        uint256 snapshotId,
+        uint256[] storage ids
+    ) internal view returns (bool, uint256) {
+        if (snapshotId == 0) {
+            revert SnapshotIdNull();
+        }
+        if (snapshotId > _getCurrentSnapshotId()) {
+            revert SnapshotIdDoesNotExists(snapshotId);
+        }
+
+        uint256 index = ids.findUpperBound(snapshotId);
+
+        if (index == ids.length) {
+            return (false, 0);
+        } else {
+            return (true, index);
+        }
+    }
+
+    function _lastSnapshotId(
+        uint256[] storage ids
+    ) internal view returns (uint256) {
+        if (ids.length == 0) {
+            return 0;
+        } else {
+            return ids[ids.length - 1];
+        }
+    }
+
+    function _snapshotStorage()
         internal
         pure
         virtual
-        returns (IHold.HoldDataStorage storage hold_)
+        returns (SnapshotStorage storage snapshotStorage_)
     {
-        bytes32 position = _HOLD_STORAGE_POSITION;
+        bytes32 position = _SNAPSHOT_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            hold_.slot := position
+            snapshotStorage_.slot := position
         }
     }
 }
+// solhint-enable no-unused-vars, custom-errors

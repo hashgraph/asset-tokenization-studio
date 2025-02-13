@@ -204,193 +204,128 @@
 */
 
 pragma solidity 0.8.18;
+
+import {
+    AdjustBalancesStorageWrapper1
+} from '../adjustBalances/AdjustBalancesStorageWrapper1.sol';
+import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {
+    ICapStorageWrapper
+} from '../../layer_1/interfaces/cap/ICapStorageWrapper.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {
-    ICorporateActionsStorageWrapper,
-    CorporateActionDataStorage
-} from '../../layer_1/interfaces/corporateActions/ICorporateActionsStorageWrapper.sol';
-import {LibCommon} from '../../layer_0/common/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {
-    _CORPORATE_ACTION_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {HoldStorageWrapper_1} from '../hold/HoldStorageWrapper_1.sol';
-import {
-    SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE,
-    SNAPSHOT_RESULT_ID
-} from '../constants/values.sol';
-
-contract CorporateActionsStorageWrapper_1 is HoldStorageWrapper_1 {
-    using LibCommon for EnumerableSet.Bytes32Set;
-    using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    modifier checkDates(uint256 firstDate, uint256 secondDate) {
-        if (secondDate < firstDate) {
-            revert ICorporateActionsStorageWrapper.WrongDates(
-                firstDate,
-                secondDate
-            );
-        }
-        _;
+// solhint-disable no-unused-vars, custom-errors
+contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
+    struct CapDataStorage {
+        uint256 maxSupply;
+        mapping(bytes32 => uint256) maxSupplyByPartition;
+        bool initialized;
     }
 
-    function _onScheduledSnapshotTriggered(
-        uint256 _snapShotID,
-        bytes memory _data
-    ) internal virtual {
-        if (_data.length > 0) {
-            bytes32 actionId = abi.decode(_data, (bytes32));
-            _addSnapshotToAction(actionId, _snapShotID);
-        }
+    function _adjustMaxSupply(uint256 factor) internal {
+        CapDataStorage storage capStorage = _capStorage();
+        if (
+            capStorage.maxSupply ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        ) return;
+        capStorage.maxSupply *= factor;
     }
 
-    function _addSnapshotToAction(
-        bytes32 _actionId,
-        uint256 _snapshotId
-    ) internal virtual {
-        bytes memory result = abi.encodePacked(_snapshotId);
-
-        _updateCorporateActionResult(_actionId, SNAPSHOT_RESULT_ID, result);
+    function _adjustMaxSupplyByPartition(
+        bytes32 partition,
+        uint256 factor
+    ) internal {
+        CapDataStorage storage capStorage = _capStorage();
+        if (
+            capStorage.maxSupplyByPartition[partition] ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        ) return;
+        capStorage.maxSupplyByPartition[partition] *= factor;
     }
 
-    function _updateCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId,
-        bytes memory newResult
-    ) internal virtual {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        bytes[] memory results = corporateActions_
-            .actionsData[actionId]
-            .results;
-
-        if (results.length > resultId) {
-            corporateActions_.actionsData[actionId].results[
-                resultId
-            ] = newResult;
-            return;
-        }
-
-        for (uint256 i = results.length; i < resultId; i++) {
-            corporateActions_.actionsData[actionId].results.push('');
-        }
-
-        corporateActions_.actionsData[actionId].results.push(newResult);
+    function _getMaxSupply() internal view returns (uint256) {
+        return _getMaxSupplyAdjustedAt(_blockTimestamp());
     }
 
-    function _getCorporateAction(
-        bytes32 _corporateActionId
-    ) internal view virtual returns (bytes32 actionType_, bytes memory data_) {
-        CorporateActionDataStorage
-            storage corporateActions_ = _corporateActionsStorage();
-        actionType_ = corporateActions_
-            .actionsData[_corporateActionId]
-            .actionType;
-        data_ = corporateActions_.actionsData[_corporateActionId].data;
+    function _getMaxSupplyByPartition(
+        bytes32 partition
+    ) internal view returns (uint256) {
+        CapDataStorage storage capStorage = _capStorage();
+        if (
+            capStorage.maxSupplyByPartition[partition] ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        )
+            return
+                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+        return
+            capStorage.maxSupplyByPartition[partition] *
+            _getMaxSupplyByPartitionAdjustedAt(partition, _blockTimestamp());
     }
 
-    function _getCorporateActionCount()
+    function _getMaxSupplyAdjusted()
         internal
         view
         virtual
-        returns (uint256 corporateActionCount_)
+        returns (uint256 maxSupply_)
     {
-        return _corporateActionsStorage().actions.length();
+        return _getMaxSupplyAdjustedAt(_blockTimestamp());
     }
 
-    function _getCorporateActionIds(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
-            _pageIndex,
-            _pageLength
+    function _getMaxSupplyAdjustedAt(
+        uint256 timestamp
+    ) internal view returns (uint256) {
+        CapDataStorage storage capStorage = _capStorage();
+        if (
+            capStorage.maxSupply ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        )
+            return
+                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+        (uint256 pendingABF, ) = _getPendingScheduledBalanceAdjustmentsAt(
+            timestamp
         );
+        return capStorage.maxSupply * pendingABF;
     }
 
-    function _getCorporateActionCountByType(
-        bytes32 _actionType
-    ) internal view virtual returns (uint256 corporateActionCount_) {
-        return _corporateActionsStorage().actionsByType[_actionType].length();
-    }
-
-    function _getCorporateActionIdsByType(
-        bytes32 _actionType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
-        corporateActionIds_ = _corporateActionsStorage()
-            .actionsByType[_actionType]
-            .getFromSet(_pageIndex, _pageLength);
-    }
-
-    function _getResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
-        bytes memory result;
-
-        if (_getCorporateActionResultCount(actionId) > resultId)
-            result = _getCorporateActionResult(actionId, resultId);
-
-        return result;
-    }
-
-    function _getCorporateActionResultCount(
-        bytes32 actionId
-    ) internal view virtual returns (uint256) {
-        return _corporateActionsStorage().actionsData[actionId].results.length;
-    }
-
-    /**
-     * @dev returns a corporate action result.
-     *
-     * @param actionId The corporate action Id
-     */
-    function _getCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId
-    ) internal view virtual returns (bytes memory) {
+    function _getMaxSupplyByPartitionAdjusted(
+        bytes32 _partition
+    ) internal view virtual returns (uint256 maxSupply_) {
         return
-            _corporateActionsStorage().actionsData[actionId].results[resultId];
+            _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
     }
 
-    function _getCorporateActionData(
-        bytes32 actionId
-    ) internal view virtual returns (bytes memory) {
-        return _corporateActionsStorage().actionsData[actionId].data;
+    function _getMaxSupplyByPartitionAdjustedAt(
+        bytes32 partition,
+        uint256 timestamp
+    ) internal view returns (uint256) {
+        CapDataStorage storage capStorage = _capStorage();
+        if (
+            capStorage.maxSupplyByPartition[partition] ==
+            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+        )
+            return
+                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+        return
+            capStorage.maxSupplyByPartition[partition] *
+            _calculateFactorByPartitionAdjustedAt(partition, _blockTimestamp());
     }
 
-    function _isSnapshotTaskType(
-        bytes memory data
+    function _checkMaxSupply(
+        uint256 _amount,
+        uint256 _maxSupply
     ) internal pure returns (bool) {
-        return abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE;
+        if (_maxSupply == 0) return true;
+        if (_amount <= _maxSupply) return true;
+        return false;
     }
 
-    function _isBalanceAdjustmentTaskType(
-        bytes memory data
-    ) internal pure returns (bool) {
-        return abi.decode(data, (bytes32)) == BALANCE_ADJUSTMENT_TASK_TYPE;
-    }
-
-    function _corporateActionsStorage()
-        internal
-        pure
-        virtual
-        returns (CorporateActionDataStorage storage corporateActions_)
-    {
-        bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;
+    function _capStorage() internal pure returns (CapDataStorage storage cap_) {
+        bytes32 position = _CAP_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {
-            corporateActions_.slot := position
+            cap_.slot := position
         }
     }
 }
+// solhint-enable no-unused-vars, custom-errors

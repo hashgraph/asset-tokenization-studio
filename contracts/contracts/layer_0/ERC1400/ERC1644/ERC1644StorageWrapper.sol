@@ -211,12 +211,12 @@ import {
     IERC1644StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC1644StorageWrapper.sol';
 import {
-    SnapshotsStorageWrapper_2
-} from '../../snapshots/SnapshotsStorageWrapper_2.sol';
+    SnapshotsStorageWrapper2
+} from '../../snapshots/SnapshotsStorageWrapper2.sol';
 
 abstract contract ERC1644StorageWrapper is
     IERC1644StorageWrapper,
-    SnapshotsStorageWrapper_2
+    SnapshotsStorageWrapper2
 {
     struct ERC1644Storage {
         bool isControllable;

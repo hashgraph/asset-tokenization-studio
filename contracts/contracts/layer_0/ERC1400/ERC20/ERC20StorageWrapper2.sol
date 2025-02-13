@@ -203,260 +203,196 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {_DEFAULT_PARTITION} from '../../../layer_0/constants/values.sol';
+import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    IERC20StorageWrapper
+} from '../../../layer_1/interfaces/ERC1400/IERC20StorageWrapper.sol';
 import {
-    CorporateActionsStorageWrapper_2
-} from '../corporateActions/CorporateActionsStorageWrapper_2.sol';
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+    ERC1410StandardStorageWrapper
+} from '../ERC1410/ERC1410StandardStorageWrapper.sol';
 
-abstract contract LockStorageWrapper_2 is CorporateActionsStorageWrapper_2 {
-    using EnumerableSet for EnumerableSet.UintSet;
-
-    function _lockByPartition(
-        bytes32 _partition,
+abstract contract ERC20StorageWrapper2 is
+    IERC20StorageWrapper,
+    ERC1410StandardStorageWrapper
+{
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
         uint256 _amount,
-        address _tokenHolder,
-        uint256 _expirationTimestamp
-    ) internal virtual returns (bool success_, uint256 lockId_) {
-        _triggerAndSyncAll(_partition, _tokenHolder, address(0));
+        bool _isIncrease
+    ) internal virtual {
+        _triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
 
-        uint256 abaf = _updateTotalLock(_partition, _tokenHolder);
-
-        _pushLabafLocks(_partition, _tokenHolder, abaf);
-
-        _updateLockedBalancesBeforeLock(
-            _partition,
-            _amount,
-            _tokenHolder,
-            _expirationTimestamp
-        );
-        _reduceBalanceByPartition(_tokenHolder, _amount, _partition);
-
-        LockDataStorage storage lockStorage = _lockStorage();
-
-        lockId_ = ++lockStorage.nextLockIdByAccountAndPartition[_tokenHolder][
-            _partition
-        ];
-
-        LockData memory lock = LockData(lockId_, _amount, _expirationTimestamp);
-
-        lockStorage.locksByAccountAndPartition[_tokenHolder][_partition].push(
-            lock
-        );
-        lockStorage.lockIdsByAccountAndPartition[_tokenHolder][_partition].add(
-            lockId_
-        );
-        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
-            lockId_
-        ] = lockStorage
-        .locksByAccountAndPartition[_tokenHolder][_partition].length;
-        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
-            _partition
-        ] += _amount;
-        lockStorage.totalLockedAmountByAccount[_tokenHolder] += _amount;
-
-        success_ = true;
+        _updateAllowanceAndLabaf(_owner, _spender);
     }
 
-    function _releaseByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) internal virtual returns (bool success_) {
-        _triggerAndSyncAll(_partition, address(0), _tokenHolder);
+    function _updateAllowanceAndLabaf(
+        address _owner,
+        address _spender
+    ) internal virtual {
+        uint256 abaf = _getAbaf();
+        uint256 labaf = _getAllowanceLabaf(_owner, _spender);
 
-        uint256 abaf = _updateTotalLock(_partition, _tokenHolder);
+        if (abaf == labaf) return;
 
-        _updateLockByIndex(_partition, _lockId, _tokenHolder, abaf);
+        uint256 factor = _calculateFactor(abaf, labaf);
 
-        _updateLockedBalancesBeforeRelease(_partition, _lockId, _tokenHolder);
-        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
+        _getErc20Storage().allowed[_owner][_spender] *= factor;
+        _updateAllowanceLabaf(_owner, _spender, abaf);
+    }
 
-        LockDataStorage storage lockStorage = _lockStorage();
-        LockData memory lock = lockStorage.locksByAccountAndPartition[
-            _tokenHolder
-        ][_partition][lockIndex - 1];
-
-        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
-            _partition
-        ] -= lock.amount;
-        lockStorage.totalLockedAmountByAccount[_tokenHolder] -= lock.amount;
-        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
-            lock.id
-        ] = 0;
-        lockStorage
-        .lockIdsByAccountAndPartition[_tokenHolder][_partition].remove(lock.id);
-
-        uint256 lastIndex = _getLockCountForByPartition(
-            _partition,
-            _tokenHolder
-        );
-
-        if (lockIndex < lastIndex) {
-            LockData memory lastLock = lockStorage.locksByAccountAndPartition[
-                _tokenHolder
-            ][_partition][lastIndex - 1];
-            _setLockAtIndex(_partition, _tokenHolder, lockIndex, lastLock);
+    function _approve(
+        address spender,
+        uint256 value
+    ) internal virtual returns (bool) {
+        if (spender == address(0)) {
+            revert SpenderWithZeroAddress();
         }
 
-        lockStorage.locksByAccountAndPartition[_tokenHolder][_partition].pop();
-
-        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
-            _addPartitionTo(lock.amount, _tokenHolder, _partition);
-        } else {
-            _increaseBalanceByPartition(_tokenHolder, lock.amount, _partition);
-        }
-
-        success_ = true;
-        _popLabafLock(_partition, _tokenHolder);
+        _getErc20Storage().allowed[_msgSender()][spender] = value;
+        emit Approval(_msgSender(), spender, value);
+        return true;
     }
 
-    function _updateTotalLock(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal returns (uint256 ABAF_) {
-        ABAF_ = _getAbaf();
+    /**
+     * @dev Increase the amount of tokens that an owner allowed to a spender.
+     * approve should be called when allowed_[_spender] == 0. To increment
+     * allowed value is better to use this function to avoid 2 calls (and wait until
+     * the first transaction is mined)
+     * From MonolithDAO Token.sol
+     * @param spender The address which will spend the funds.
+     * @param addedValue The amount of tokens to increase the allowance by.
+     */
+    function _increaseAllowance(
+        address spender,
+        uint256 addedValue
+    ) internal virtual returns (bool) {
+        if (spender == address(0)) {
+            revert SpenderWithZeroAddress();
+        }
+        _beforeAllowanceUpdate(_msgSender(), spender, addedValue, true);
 
-        uint256 labaf = _getTotalLockLabaf(_tokenHolder);
-        uint256 LABAFByPartition = _getTotalLockLabafByPartition(
-            _partition,
-            _tokenHolder
+        _getErc20Storage().allowed[_msgSender()][spender] += addedValue;
+        emit Approval(
+            _msgSender(),
+            spender,
+            _getErc20Storage().allowed[_msgSender()][spender]
         );
-
-        if (ABAF_ != labaf) {
-            uint256 factor = _calculateFactor(ABAF_, labaf);
-
-            _updateTotalLockedAmountAndLabaf(_tokenHolder, factor, ABAF_);
-        }
-
-        if (ABAF_ != LABAFByPartition) {
-            uint256 factorByPartition = _calculateFactor(
-                ABAF_,
-                LABAFByPartition
-            );
-
-            _updateTotalLockedAmountAndLabafByPartition(
-                _partition,
-                _tokenHolder,
-                factorByPartition,
-                ABAF_
-            );
-        }
+        return true;
     }
 
-    function _updateLockByIndex(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder,
-        uint256 _abaf
-    ) internal virtual {
-        uint256 lock_LABAF = _getLockLabafByPartition(
-            _partition,
-            _lockId,
-            _tokenHolder
+    /**
+     * @dev Decrease the amount of tokens that an owner allowed to a spender.
+     * approve should be called when allowed_[_spender] == 0. To decrement
+     * allowed value is better to use this function to avoid 2 calls (and wait until
+     * the first transaction is mined)
+     * From MonolithDAO Token.sol
+     * @param spender The address which will spend the funds.
+     * @param subtractedValue The amount of tokens to decrease the allowance by.
+     */
+    function _decreaseAllowance(
+        address spender,
+        uint256 subtractedValue
+    ) internal virtual returns (bool) {
+        if (spender == address(0)) {
+            revert SpenderWithZeroAddress();
+        }
+        _decreaseAllowedBalance(_msgSender(), spender, subtractedValue);
+        emit Approval(
+            _msgSender(),
+            spender,
+            _getErc20Storage().allowed[_msgSender()][spender]
         );
+        return true;
+    }
 
-        if (_abaf != lock_LABAF) {
-            uint256 factor_lock = _calculateFactor(_abaf, lock_LABAF);
+    function _transferFrom(
+        address spender,
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual returns (bool) {
+        _decreaseAllowedBalance(from, spender, value);
+        bytes memory data;
+        _transferByPartition(
+            from,
+            to,
+            value,
+            _DEFAULT_PARTITION,
+            data,
+            spender,
+            ''
+        );
+        return _emitTransferEvent(from, to, value);
+    }
 
-            uint256 lockIndex = _getLockIndex(
-                _partition,
-                _tokenHolder,
-                _lockId
-            );
+    function _transfer(
+        address from,
+        address to,
+        uint256 value
+    ) internal virtual returns (bool) {
+        _transferByPartition(
+            from,
+            to,
+            value,
+            _DEFAULT_PARTITION,
+            '',
+            address(0),
+            ''
+        );
+        return _emitTransferEvent(from, to, value);
+    }
 
-            _updateLockAmountByIndex(
-                _partition,
-                lockIndex,
-                _tokenHolder,
-                factor_lock
-            );
+    function _mint(address to, uint256 value) internal virtual {
+        bytes memory _data;
+        _issueByPartition(_DEFAULT_PARTITION, to, value, _data);
+        _emitTransferEvent(address(0), to, value);
+    }
+
+    function _burn(address from, uint256 value) internal virtual {
+        bytes memory _data;
+        _redeemByPartition(
+            _DEFAULT_PARTITION,
+            from,
+            address(0),
+            value,
+            _data,
+            _data
+        );
+        _emitTransferEvent(from, address(0), value);
+    }
+
+    function _burnFrom(address account, uint256 value) internal virtual {
+        _decreaseAllowedBalance(account, _msgSender(), value);
+        _burn(account, value);
+    }
+
+    function _decreaseAllowedBalance(
+        address from,
+        address spender,
+        uint256 value
+    ) internal {
+        _beforeAllowanceUpdate(from, spender, value, false);
+
+        ERC20Storage storage erc20Storage = _getErc20Storage();
+
+        if (value > erc20Storage.allowed[from][spender]) {
+            revert InsufficientAllowance(spender, from);
         }
+
+        erc20Storage.allowed[from][spender] -= value;
     }
 
-    function _updateLockAmountByIndex(
-        bytes32 _partition,
-        uint256 _lockIndex,
-        address _tokenHolder,
-        uint256 _factor
-    ) internal virtual {
-        if (_factor == 1) return;
-        LockDataStorage storage lockStorage = _lockStorage();
-
-        lockStorage
-        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
-            .amount *= _factor;
-    }
-
-    function _updateTotalLockedAmountAndLabaf(
-        address _tokenHolder,
-        uint256 _factor,
-        uint256 _abaf
-    ) internal virtual {
-        if (_factor == 1) return;
-        LockDataStorage storage lockStorage = _lockStorage();
-
-        lockStorage.totalLockedAmountByAccount[_tokenHolder] *= _factor;
-        _setTotalLockLabaf(_tokenHolder, _abaf);
-    }
-
-    function _updateTotalLockedAmountAndLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _factor,
-        uint256 _abaf
-    ) internal virtual {
-        if (_factor == 1) return;
-        LockDataStorage storage lockStorage = _lockStorage();
-
-        lockStorage.totalLockedAmountByAccountAndPartition[_tokenHolder][
-            _partition
-        ] *= _factor;
-        _setTotalLockLabafByPartition(_partition, _tokenHolder, _abaf);
-    }
-
-    // solhint-disable no-unused-vars
-    function _updateLockedBalancesBeforeLock(
-        bytes32 _partition,
-        uint256 _amount,
-        address _tokenHolder,
-        uint256 _expirationTimestamp
-    ) internal virtual {
-        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
-    }
-
-    function _updateLockedBalancesBeforeRelease(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) internal virtual {
-        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
-    }
-    // solhint-enable no-unused-vars
-    function _setLockAtIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockIndex,
-        LockData memory lock
-    ) internal virtual {
-        LockDataStorage storage lockStorage = _lockStorage();
-
-        lockStorage
-        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
-            .id = lock.id;
-        lockStorage
-        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
-            .amount = lock.amount;
-        lockStorage
-        .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
-            .expirationTimestamp = lock.expirationTimestamp;
-
-        lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
-            lock.id
-        ] = _lockIndex;
+    function _emitTransferEvent(
+        address from,
+        address to,
+        uint256 value
+    ) private returns (bool) {
+        emit Transfer(from, to, value);
+        return true;
     }
 }
