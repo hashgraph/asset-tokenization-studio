@@ -364,12 +364,12 @@ describe('Scheduled Tasks Tests', () => {
         await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
 
         erc1410Facet = erc1410Facet.connect(signer_B)
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_A,
-            INITIAL_AMOUNT,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_A,
+            value: INITIAL_AMOUNT,
+            data: '0x',
+        })
 
         // Using account C (with role)
         equityFacet = equityFacet.connect(signer_C)

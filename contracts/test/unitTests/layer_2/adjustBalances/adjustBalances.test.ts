@@ -424,12 +424,12 @@ describe('Adjust Balances Tests', () => {
         equityFacet = equityFacet.connect(signer_A)
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_B,
-            balanceOf_B_Original,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original,
+            data: '0x',
+        })
 
         // schedule tasks
         const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))

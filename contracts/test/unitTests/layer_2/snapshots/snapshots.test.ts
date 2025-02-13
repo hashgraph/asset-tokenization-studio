@@ -344,18 +344,18 @@ describe('Snapshots Layer 2 Tests', () => {
         erc1410Facet = erc1410Facet.connect(signer_A)
         equityFacet = equityFacet.connect(signer_A)
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_C,
-            balanceOf_C_Original,
-            '0x'
-        )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_B,
-            balanceOf_B_Original,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_C,
+            value: balanceOf_C_Original,
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original,
+            data: '0x',
+        })
 
         // schedule tasks
         const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))

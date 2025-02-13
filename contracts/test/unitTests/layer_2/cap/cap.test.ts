@@ -433,12 +433,12 @@ describe('CAP Layer 2 Tests', () => {
             maxSupplyByPartition
         )
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_C,
-            issueAmount,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_C,
+            value: issueAmount,
+            data: '0x',
+        })
 
         const currentTime = (await ethers.provider.getBlock('latest')).timestamp
         const adjustments = createAdjustmentData(
@@ -470,12 +470,12 @@ describe('CAP Layer 2 Tests', () => {
         snapshotFacet = snapshotFacet.connect(signer_A)
         erc1410Facet = erc1410Facet.connect(signer_C)
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_C,
-            issueAmount,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_C,
+            value: issueAmount,
+            data: '0x',
+        })
 
         await capFacet.setMaxSupply(maxSupply)
         await capFacet.setMaxSupplyByPartition(

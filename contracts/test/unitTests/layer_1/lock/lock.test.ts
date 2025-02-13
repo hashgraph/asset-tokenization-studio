@@ -477,12 +477,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid partition WHEN lockByPartition with insufficient balance THEN transaction fails with InsufficientBalance', async () => {
-                await erc1410Facet.issueByPartition(
-                    _NON_DEFAULT_PARTITION,
-                    account_A,
-                    _AMOUNT - 1,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _NON_DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: _AMOUNT - 1,
+                    data: '0x',
+                })
 
                 await expect(
                     lockFacet.lockByPartition(
@@ -505,12 +505,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid partition WHEN lockByPartition with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition(
-                    _NON_DEFAULT_PARTITION,
-                    account_A,
-                    _AMOUNT * 2,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _NON_DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: _AMOUNT - 1,
+                    data: '0x',
+                })
 
                 await expect(
                     lockFacet.lockByPartition(
@@ -595,12 +595,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid lockId but timestamp is not reached WHEN releaseByPartition THEN transaction fails with LockExpirationNotReached', async () => {
-                await erc1410Facet.issueByPartition(
-                    _NON_DEFAULT_PARTITION,
-                    account_A,
-                    _AMOUNT,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _NON_DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: _AMOUNT,
+                    data: '0x',
+                })
                 await lockFacet.lockByPartition(
                     _NON_DEFAULT_PARTITION,
                     _AMOUNT,
@@ -621,12 +621,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid lockId and timestamp is reached WHEN releaseByPartition THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition(
-                    _NON_DEFAULT_PARTITION,
-                    account_A,
-                    _AMOUNT,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _NON_DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: _AMOUNT,
+                    data: '0x',
+                })
                 await lockFacet.lockByPartition(
                     _NON_DEFAULT_PARTITION,
                     _AMOUNT,
@@ -798,12 +798,12 @@ describe('Lock Tests', () => {
 
         describe('lock', () => {
             it('GIVEN a valid partition WHEN lockByPartition with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition(
-                    _DEFAULT_PARTITION,
-                    account_A,
-                    _AMOUNT * 2,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: _AMOUNT * 2,
+                    data: '0x',
+                })
 
                 await expect(
                     lockFacet.lockByPartition(
@@ -890,12 +890,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid partition WHEN lock with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition(
-                    _DEFAULT_PARTITION,
-                    account_A,
-                    _AMOUNT * 2,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: _AMOUNT * 2,
+                    data: '0x',
+                })
 
                 await expect(
                     lockFacet.lock(_AMOUNT, account_A, expirationTimestamp)
@@ -966,12 +966,12 @@ describe('Lock Tests', () => {
 
         describe('release', () => {
             it('GIVEN a valid lockId and timestamp is reached WHEN releaseByPartition THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition(
-                    _DEFAULT_PARTITION,
-                    account_A,
-                    _AMOUNT,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: _AMOUNT,
+                    data: '0x',
+                })
                 await lockFacet.lockByPartition(
                     _DEFAULT_PARTITION,
                     _AMOUNT,
@@ -1049,12 +1049,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid lockId but timestamp is not reached WHEN release THEN transaction fails with LockExpirationNotReached', async () => {
-                await erc1410Facet.issueByPartition(
-                    _DEFAULT_PARTITION,
-                    account_A,
-                    _AMOUNT,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: _AMOUNT,
+                    data: '0x',
+                })
                 await lockFacet.lockByPartition(
                     _DEFAULT_PARTITION,
                     _AMOUNT,
@@ -1071,12 +1071,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid lockId and timestamp is reached WHEN releaseByPartition THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition(
-                    _DEFAULT_PARTITION,
-                    account_A,
-                    _AMOUNT,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: _AMOUNT,
+                    data: '0x',
+                })
                 await expect(
                     lockFacet.lock(_AMOUNT - 1, account_A, expirationTimestamp)
                 )
