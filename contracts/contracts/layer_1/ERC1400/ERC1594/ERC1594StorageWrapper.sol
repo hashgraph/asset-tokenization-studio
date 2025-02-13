@@ -219,7 +219,8 @@ import {
     _TO_ACCOUNT_NULL_ERROR_ID,
     _ALLOWANCE_REACHED_ERROR_ID,
     _FROM_ACCOUNT_KYC_ERROR_ID,
-    _TO_ACCOUNT_KYC_ERROR_ID
+    _TO_ACCOUNT_KYC_ERROR_ID,
+    _SUCCESS
 } from '../../constants/values.sol';
 import {ERC20StorageWrapper} from '../ERC20/ERC20StorageWrapper.sol';
 import {IKYC} from '../../interfaces/kyc/IKYC.sol';
