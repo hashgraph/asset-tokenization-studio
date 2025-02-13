@@ -3252,7 +3252,7 @@
   version "1.10.0"
   dependencies:
     "@ethersproject/contracts" "^5.7.0"
-    "@hashgraph/asset-tokenization-contracts" "file:../../../Library/Caches/Yarn/v6/npm-@hashgraph-asset-tokenization-sdk-1.10.0-b4c55340-bd32-4715-841a-ebaf96a80011-1739444176577/node_modules/@hashgraph/contracts"
+    "@hashgraph/asset-tokenization-contracts" "file:../../../Library/Caches/Yarn/v6/npm-@hashgraph-asset-tokenization-sdk-1.10.0-ee8d14ab-c170-4c88-8832-be23f94639c9-1739447846393/node_modules/@hashgraph/contracts"
     "@hashgraph/hedera-custodians-integration" "^1.4.1"
     "@hashgraph/hedera-wallet-connect" "1.3.1"
     "@hashgraph/sdk" "2.51.0"
