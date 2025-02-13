@@ -432,7 +432,7 @@ describe('Equity Tests', () => {
 
             await expect(
                 equityFacet.setDividends(wrongDividendData_1)
-            ).to.be.rejectedWith('WrongDates')
+            ).to.be.revertedWithCustomError(equityFacet, 'WrongDates')
 
             const wrongDividendData_2 = {
                 recordDate: (
@@ -444,7 +444,7 @@ describe('Equity Tests', () => {
 
             await expect(
                 equityFacet.setDividends(wrongDividendData_2)
-            ).to.be.rejectedWith('WrongTimestamp')
+            ).to.be.revertedWithCustomError(equityFacet, 'WrongTimestamp')
         })
 
         it('GIVEN an account with corporateActions role WHEN setDividends THEN transaction succeeds', async () => {
