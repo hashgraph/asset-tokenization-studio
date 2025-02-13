@@ -661,7 +661,7 @@ describe('ProtectedPartitions Tests', () => {
             )
         })
 
-        it('GIVEN a non kyc account WHEN performing a protected transfer from or to THEN transaction fails with AccountIsBlocked', async () => {
+        it('GIVEN a non kyc account WHEN performing a protected transfer from or to THEN transaction fails with InvalidKYCStatus', async () => {
             await setProtected()
 
             kycFacet = kycFacet.connect(signer_B)
