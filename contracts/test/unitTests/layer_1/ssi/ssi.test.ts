@@ -203,148 +203,281 @@
 
 */
 
-pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-import {Common} from '../common/Common.sol';
-import {_SSI_MANAGER_ROLE} from '../constants/roles.sol';
+import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { takeSnapshot } from '@nomicfoundation/hardhat-network-helpers'
+import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_SSI_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {SSIManagementStorageWrapper} from './SSIManagementStorageWrapper.sol';
-import {ISSIManagement} from '../interfaces/ssi/ISSIManagement.sol';
+    type ResolverProxy,
+    Pause,
+    IFactory,
+    BusinessLogicResolver,
+    SSIManagement,
+    T3RevocationRegistry,
+    T3RevocationRegistry__factory,
+} from '@typechain'
+import {
+    PAUSER_ROLE,
+    SSI_MANAGER_ROLE,
+    MAX_UINT256,
+    deployEquityFromFactory,
+    Rbac,
+    RegulationSubType,
+    RegulationType,
+    DeployAtsFullInfrastructureCommand,
+    deployAtsFullInfrastructure,
+    deployContractWithFactory,
+    DeployContractWithFactoryCommand,
+} from '@scripts'
 
-contract SSIManagement is
-    ISSIManagement,
-    IStaticFunctionSelectors,
-    SSIManagementStorageWrapper,
-    Common
-{
-    function setRevocationRegistryAddress(
-        address _revocationRegistryAddress
-    )
-        external
-        override
-        onlyRole(_SSI_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
-        address oldRevocationRegistryAddress = _getRevocationRegistryAddress();
-        success_ = _setRevocationRegistryAddress(_revocationRegistryAddress);
-        emit RevocationRegistryUpdated(
-            oldRevocationRegistryAddress,
-            _getRevocationRegistryAddress()
-        );
-    }
+describe('SSI Tests', () => {
+    let diamond: ResolverProxy
+    let signer_A: SignerWithAddress
+    let signer_B: SignerWithAddress
+    let signer_C: SignerWithAddress
 
-    function addIssuer(
-        address _issuer
-    )
-        external
-        override
-        onlyRole(_SSI_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
-        success_ = _addIssuer(_issuer);
-        if (!success_) {
-            revert ListedIssuer(_issuer);
+    let account_A: string
+    let account_B: string
+    let account_C: string
+
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
+    let pauseFacet: Pause
+    let ssiManagementFacet: SSIManagement
+    let revocationList: T3RevocationRegistry
+
+    let snapshot: SnapshotRestorer
+
+    before(async () => {
+        snapshot = await takeSnapshot()
+        // mute | mock console.log
+        console.log = () => {}
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+
+        let reovationListDeployed = await deployContractWithFactory(
+            new DeployContractWithFactoryCommand({
+                factory: new T3RevocationRegistry__factory(),
+                signer: signer_A,
+            })
+        )
+
+        revocationList = await ethers.getContractAt(
+            'T3RevocationRegistry',
+            reovationListDeployed.address,
+            signer_C
+        )
+    })
+
+    after(async () => {
+        await snapshot.restore()
+    })
+
+    beforeEach(async () => {
+        const rbacPausable: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_A],
         }
-        emit AddedToIssuerList(_msgSender(), _issuer);
-    }
-
-    function removeIssuer(
-        address _issuer
-    )
-        external
-        override
-        onlyRole(_SSI_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
-        success_ = _removeIssuer(_issuer);
-        if (!success_) {
-            revert UnlistedIssuer(_issuer);
+        const rbacSSIManager: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_C],
         }
-        emit RemovedFromIssuerList(_msgSender(), _issuer);
-    }
+        const init_rbacs: Rbac[] = [rbacPausable, rbacSSIManager]
 
-    function getRevocationRegistryAddress()
-        external
-        view
-        override
-        returns (address revocationRegistryAddress_)
-    {
-        return _getRevocationRegistryAddress();
-    }
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            isMultiPartition: false,
+            name: 'TEST_KYC',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
 
-    function isIssuer(address _issuer) external view override returns (bool) {
-        return _isIssuer(_issuer);
-    }
+        pauseFacet = await ethers.getContractAt(
+            'Pause',
+            diamond.address,
+            signer_A
+        )
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_C
+        )
+    })
 
-    function getIssuerListCount()
-        external
-        view
-        override
-        returns (uint256 issuerListCount_)
-    {
-        return _getIssuerListCount();
-    }
+    describe('Paused', () => {
+        beforeEach(async () => {
+            // Pausing the token
+            await pauseFacet.pause()
+        })
 
-    function getIssuerListMembers(
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (address[] memory members_) {
-        return _getIssuerListMembers(_pageIndex, _pageLength);
-    }
+        it('GIVEN a paused Token WHEN setRevocationRegistryAddress THEN transaction fails with TokenIsPaused', async () => {
+            await expect(
+                ssiManagementFacet.setRevocationRegistryAddress(
+                    revocationList.address
+                )
+            ).to.be.revertedWithCustomError(ssiManagementFacet, 'TokenIsPaused')
+        })
 
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _SSI_MANAGEMENT_RESOLVER_KEY;
-    }
+        it('GIVEN a paused Token WHEN addIssuer THEN transaction fails with TokenIsPaused', async () => {
+            await expect(
+                ssiManagementFacet.addIssuer(account_B)
+            ).to.be.revertedWithCustomError(ssiManagementFacet, 'TokenIsPaused')
+        })
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setRevocationRegistryAddress
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.addIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.removeIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getRevocationRegistryAddress
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getIssuerListCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getIssuerListMembers
-            .selector;
-    }
+        it('GIVEN a paused Token WHEN removeIssuer THEN transaction fails with TokenIsPaused', async () => {
+            await expect(
+                ssiManagementFacet.removeIssuer(account_B)
+            ).to.be.revertedWithCustomError(ssiManagementFacet, 'TokenIsPaused')
+        })
+    })
 
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISSIManagement)
-            .interfaceId;
-    }
-}
+    describe('Access Control', () => {
+        it('GIVEN a non SSIManager account WHEN setRevocationRegistryAddress THEN transaction fails with AccountHasNoRole', async () => {
+            await expect(
+                ssiManagementFacet
+                    .connect(signer_B)
+                    .setRevocationRegistryAddress(revocationList.address)
+            ).to.be.revertedWithCustomError(
+                ssiManagementFacet,
+                'AccountHasNoRole'
+            )
+        })
+
+        it('GIVEN a non SSIManager account WHEN addIssuer THEN transaction fails with AccountHasNoRole', async () => {
+            await expect(
+                ssiManagementFacet.connect(signer_B).addIssuer(account_B)
+            ).to.be.revertedWithCustomError(
+                ssiManagementFacet,
+                'AccountHasNoRole'
+            )
+        })
+
+        it('GIVEN a non SSIManager account WHEN removeIssuer THEN transaction fails with AccountHasNoRole', async () => {
+            await expect(
+                ssiManagementFacet.connect(signer_B).removeIssuer(account_B)
+            ).to.be.revertedWithCustomError(
+                ssiManagementFacet,
+                'AccountHasNoRole'
+            )
+        })
+    })
+
+    describe('SSIManagement Wrong input data', () => {
+        it('GIVEN listed issuer WHEN adding issuer THEN fails with ListedIssuer', async () => {
+            await ssiManagementFacet.addIssuer(account_B)
+
+            await expect(
+                ssiManagementFacet.addIssuer(account_B)
+            ).to.be.revertedWithCustomError(ssiManagementFacet, 'ListedIssuer')
+        })
+
+        it('GIVEN unlisted issuer WHEN removing issuer THEN fails with UnlistedIssuer', async () => {
+            await expect(
+                ssiManagementFacet.removeIssuer(account_B)
+            ).to.be.revertedWithCustomError(
+                ssiManagementFacet,
+                'UnlistedIssuer'
+            )
+        })
+    })
+
+    describe('SSIManagement OK', () => {
+        it('GIVEN a revocationList WHEN setRevocationRegistryAddress THEN transaction succeed', async () => {
+            expect(
+                await ssiManagementFacet.setRevocationRegistryAddress(
+                    revocationList.address
+                )
+            )
+                .to.emit(ssiManagementFacet, 'RevocationRegistryAddressSet')
+                .withArgs(ethers.constants.AddressZero, revocationList.address)
+
+            let revocationListAddress =
+                await ssiManagementFacet.getRevocationRegistryAddress()
+
+            expect(revocationListAddress).to.equal(revocationList.address)
+        })
+
+        it('GIVEN an unlisted issuer WHEN addIssuer THEN transaction succeed', async () => {
+            expect(await ssiManagementFacet.addIssuer(account_B)).to.emit(
+                ssiManagementFacet,
+                'AddedToIssuerList'
+            )
+
+            expect(await ssiManagementFacet.isIssuer(account_B)).to.equal(true)
+            expect(await ssiManagementFacet.getIssuerListCount()).to.equal(1)
+
+            const issuerList = await ssiManagementFacet.getIssuerListMembers(
+                0,
+                1
+            )
+
+            expect(issuerList).to.deep.equal([account_B])
+            expect(issuerList.length).to.equal(1)
+        })
+
+        it('GIVEN a listed issuer WHEN removeIssuer THEN transaction succeed', async () => {
+            await ssiManagementFacet.addIssuer(account_B)
+            let issuerStatusBefore = await ssiManagementFacet.isIssuer(
+                account_B
+            )
+            let issuerListBefore =
+                await ssiManagementFacet.getIssuerListMembers(0, 1)
+            let issuerListCountBefore =
+                await ssiManagementFacet.getIssuerListCount()
+
+            expect(await ssiManagementFacet.removeIssuer(account_B)).to.emit(
+                ssiManagementFacet,
+                'RemovedFromIssuerList'
+            )
+
+            expect(issuerStatusBefore).to.equal(true)
+            expect(await ssiManagementFacet.isIssuer(account_B)).to.equal(false)
+            expect(issuerListCountBefore).to.equal(1)
+            expect(await ssiManagementFacet.getIssuerListCount()).to.equal(0)
+            expect(issuerListBefore.length).to.equal(1)
+            expect(issuerListBefore).to.deep.equal([account_B])
+            expect(
+                await ssiManagementFacet.getIssuerListMembers(0, 1)
+            ).to.deep.equal([])
+        })
+    })
+})

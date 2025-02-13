@@ -737,7 +737,7 @@ describe('ERC1400 Tests', () => {
                     await DeployAtsFullInfrastructureCommand.newInstance({
                         signer: signer_A,
                         useDeployed: false,
-                        useEnvironment: true,
+                        useEnvironment: false,
                         timeTravelEnabled: true,
                     })
                 )
