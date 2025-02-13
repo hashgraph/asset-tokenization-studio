@@ -251,6 +251,14 @@ interface IDiamondCutManager {
         uint256 version
     );
 
+    /// @notice emited when createBatchConfiguration is executed
+    event DiamondBatchConfigurationCreated(
+        bytes32 configurationId,
+        FacetConfiguration[] facetConfigurations,
+        bool _isLastBatch,
+        uint256 version
+    );
+
     /// @notice Create a new configuration to the latest version of all facets.
     /// @param _configurationId unused identifier to the configuration.
     /// @param _facetConfigurations.id list of business logics to be registered.
@@ -258,6 +266,17 @@ interface IDiamondCutManager {
     function createConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
+    ) external;
+
+    /// @notice Create a new batch configuration to the latest version of all facets.
+    /// @param _configurationId unused identifier to the configuration.
+    /// @param _facetConfigurations.id list of business logics to be registered.
+    /// @param _facetConfigurations.version list of versions of each _facetIds.
+    /// @param _isLastBatch boolean to indicate if is the last batch iteration.
+    function createBatchConfiguration(
+        bytes32 _configurationId,
+        FacetConfiguration[] calldata _facetConfigurations,
+        bool _isLastBatch
     ) external;
 
     /// @notice Resolve the facet address knowing configuration, version and selector.

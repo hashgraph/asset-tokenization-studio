@@ -505,23 +505,89 @@ export async function createConfigurationsForDeployedContracts({
     )
     result.bondFacetVersionList = Array(result.bondFacetIdList.length).fill(1)
 
-    // Create configuration for equities
-    let equityTxResponse = await IDiamondCutManager__factory.connect(
+    // // Create configuration for equities
+    // let equityTxResponse = await IDiamondCutManager__factory.connect(
+    //     businessLogicResolverProxyAddress,
+    //     signer
+    // ).createConfiguration(
+    //     EQUITY_CONFIG_ID,
+    //     result.equityFacetIdList.map((id, index) => ({
+    //         id,
+    //         version: result.equityFacetVersionList[index],
+    //     })) as FacetConfiguration[],
+    //     {
+    //         gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
+    //     }
+    // )
+
+    // Calculate the midpoint to split the arrays
+    const midpoint = Math.ceil(result.equityFacetIdList.length / 2)
+
+    // Split the facet lists
+    const firstHalfFacetIds = result.equityFacetIdList.slice(0, midpoint)
+    const firstHalfFacetVersions = result.equityFacetVersionList.slice(
+        0,
+        midpoint
+    )
+
+    const secondHalfFacetIds = result.equityFacetIdList.slice(midpoint)
+    const secondHalfFacetVersions =
+        result.equityFacetVersionList.slice(midpoint)
+
+    // Prepare the first batch of configurations
+    const firstBatchConfiguration: FacetConfiguration[] = firstHalfFacetIds.map(
+        (id, index) => ({
+            id,
+            version: firstHalfFacetVersions[index],
+        })
+    )
+
+    // Prepare the second batch of configurations
+    const secondBatchConfiguration: FacetConfiguration[] =
+        secondHalfFacetIds.map((id, index) => ({
+            id,
+            version: secondHalfFacetVersions[index],
+        }))
+
+    // Send the first batch
+    let equityTxResponseFirstBatch = await IDiamondCutManager__factory.connect(
         businessLogicResolverProxyAddress,
         signer
-    ).createConfiguration(
+    ).createBatchConfiguration(
         EQUITY_CONFIG_ID,
-        result.equityFacetIdList.map((id, index) => ({
-            id,
-            version: result.equityFacetVersionList[index],
-        })) as FacetConfiguration[],
+        firstBatchConfiguration,
+        false,
         {
             gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
         }
     )
+
+    // Send the second batch
+    let equityTxResponseSecondBatch = await IDiamondCutManager__factory.connect(
+        businessLogicResolverProxyAddress,
+        signer
+    ).createBatchConfiguration(
+        EQUITY_CONFIG_ID,
+        secondBatchConfiguration,
+        true,
+        {
+            gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
+        }
+    )
+
     await validateTxResponse(
         new ValidateTxResponseCommand({
-            txResponse: equityTxResponse,
+            txResponse: equityTxResponseFirstBatch,
+            confirmationEvent:
+                EVENTS.businessLogicResolver.configurationCreated,
+            errorMessage:
+                MESSAGES.businessLogicResolver.error.creatingConfigurations,
+        })
+    )
+
+    await validateTxResponse(
+        new ValidateTxResponseCommand({
+            txResponse: equityTxResponseSecondBatch,
             confirmationEvent:
                 EVENTS.businessLogicResolver.configurationCreated,
             errorMessage:
@@ -530,22 +596,45 @@ export async function createConfigurationsForDeployedContracts({
     )
 
     // Create configuration for bonds
-    const bondTxResponse = await IDiamondCutManager__factory.connect(
+    const bondTxResponse1 = await IDiamondCutManager__factory.connect(
         businessLogicResolverProxyAddress,
         signer
-    ).createConfiguration(
+    ).createBatchConfiguration(
         BOND_CONFIG_ID,
-        result.bondFacetIdList.map((id, index) => ({
-            id,
-            version: result.bondFacetVersionList[index],
-        })),
+        firstBatchConfiguration,
+        false,
         {
             gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
         }
     )
+
+
+    const bondTxResponse2 = await IDiamondCutManager__factory.connect(
+        businessLogicResolverProxyAddress,
+        signer
+    ).createBatchConfiguration(
+        BOND_CONFIG_ID,
+        secondBatchConfiguration,
+        true,
+        {
+            gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
+        }
+    )
+
+
     await validateTxResponse(
         new ValidateTxResponseCommand({
-            txResponse: bondTxResponse,
+            txResponse: bondTxResponse1,
+            confirmationEvent:
+                EVENTS.businessLogicResolver.configurationCreated,
+            errorMessage:
+                MESSAGES.businessLogicResolver.error.creatingConfigurations,
+        })
+    )
+
+    await validateTxResponse(
+        new ValidateTxResponseCommand({
+            txResponse: bondTxResponse2,
             confirmationEvent:
                 EVENTS.businessLogicResolver.configurationCreated,
             errorMessage:
