@@ -492,12 +492,12 @@ describe('Transfer and lock Tests', () => {
             })
 
             it('GIVEN a valid partition WHEN transferAndLockByPartition with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition(
-                    _NON_DEFAULT_PARTITION,
-                    account_C,
-                    _AMOUNT * 2,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _NON_DEFAULT_PARTITION,
+                    tokenHolder: account_C,
+                    value: _AMOUNT * 2,
+                    data: '0x',
+                })
 
                 await expect(
                     transferAndLockFacet.transferAndLockByPartition(
@@ -709,12 +709,12 @@ describe('Transfer and lock Tests', () => {
 
         describe('transferAndLock', () => {
             it('GIVEN a valid partition WHEN transferAndLockByPartition with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition(
-                    _DEFAULT_PARTITION,
-                    account_C,
-                    _AMOUNT * 2,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _DEFAULT_PARTITION,
+                    tokenHolder: account_C,
+                    value: _AMOUNT * 2,
+                    data: '0x',
+                })
 
                 await expect(
                     transferAndLockFacet.transferAndLockByPartition(
@@ -762,12 +762,12 @@ describe('Transfer and lock Tests', () => {
             })
 
             it('GIVEN a valid partition WHEN transferAndLock with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition(
-                    _DEFAULT_PARTITION,
-                    account_C,
-                    _AMOUNT * 2,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _DEFAULT_PARTITION,
+                    tokenHolder: account_C,
+                    value: _AMOUNT * 2,
+                    data: '0x',
+                })
 
                 await expect(
                     transferAndLockFacet.transferAndLock(

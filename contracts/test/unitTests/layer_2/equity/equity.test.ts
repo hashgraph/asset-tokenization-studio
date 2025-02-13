@@ -556,12 +556,12 @@ describe('Equity Tests', () => {
             const TotalAmount = number_Of_Shares
             const LockedAmount = TotalAmount - 5n
 
-            await erc1410Facet.issueByPartition(
-                DEFAULT_PARTITION,
-                account_A,
-                TotalAmount,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
             await lockFacet.lock(LockedAmount, account_A, 99999999999)
 
             // set dividend
@@ -599,12 +599,12 @@ describe('Equity Tests', () => {
             const TotalAmount = number_Of_Shares
             const HeldAmount = TotalAmount - 5n
 
-            await erc1410Facet.issueByPartition(
-                DEFAULT_PARTITION,
-                account_A,
-                TotalAmount,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
 
             let hold = {
                 amount: HeldAmount,
@@ -721,13 +721,13 @@ describe('Equity Tests', () => {
             // issue and lock
             const TotalAmount = number_Of_Shares
             const LockedAmount = TotalAmount - 5n
+            await erc1410Facet.issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
 
-            await erc1410Facet.issueByPartition(
-                DEFAULT_PARTITION,
-                account_A,
-                TotalAmount,
-                '0x'
-            )
             await lockFacet.lock(LockedAmount, account_A, 99999999999)
 
             // set dividend
