@@ -207,9 +207,6 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {MappingLib} from '../common/MappingLib.sol';
-import {
-    _ADJUST_BALANCES_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
 import {HoldStorageWrapper2} from '../hold/HoldStorageWrapper2.sol';
 import {
     IAdjustBalancesStorageWrapper
@@ -270,7 +267,7 @@ abstract contract AdjustBalancesStorageWrapper2 is
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) internal view returns (uint256) {
+    ) internal view override returns (uint256) {
         uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
         if (lockIndex == 0) return 0;
         return _getLockLabafByIndex(_partition, _tokenHolder, lockIndex);

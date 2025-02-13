@@ -441,22 +441,35 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockIndex,
-        LockData memory lock
+        LockData memory _lock
     ) internal virtual {
+        uint256 lockIndex_lock = _getLockIndex(
+            _partition,
+            _tokenHolder,
+            _lock.id
+        );
+
+        uint256 labaf = _getLockLabafByIndex(
+            _partition,
+            _tokenHolder,
+            lockIndex_lock
+        );
+        _setLockLabafByIndex(_partition, _tokenHolder, _lockIndex, labaf);
+
         LockDataStorage storage lockStorage = _lockStorage();
 
         lockStorage
         .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
-            .id = lock.id;
+            .id = _lock.id;
         lockStorage
         .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
-            .amount = lock.amount;
+            .amount = _lock.amount;
         lockStorage
         .locksByAccountAndPartition[_tokenHolder][_partition][_lockIndex - 1]
-            .expirationTimestamp = lock.expirationTimestamp;
+            .expirationTimestamp = _lock.expirationTimestamp;
 
         lockStorage.lockIndexByAccountPartitionAndId[_tokenHolder][_partition][
-            lock.id
+            _lock.id
         ] = _lockIndex;
     }
 }

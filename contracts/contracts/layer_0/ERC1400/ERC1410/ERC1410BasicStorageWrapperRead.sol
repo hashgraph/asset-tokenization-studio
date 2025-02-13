@@ -216,7 +216,7 @@ import {
 import {_DEFAULT_PARTITION} from '../../constants/values.sol';
 import {LockStorageWrapper1} from '../../lock/LockStorageWrapper1.sol';
 
-contract ERC1410BasicStorageWrapperRead is
+abstract contract ERC1410BasicStorageWrapperRead is
     IERC1410StorageWrapper,
     LockStorageWrapper1
 {
@@ -337,7 +337,7 @@ contract ERC1410BasicStorageWrapperRead is
     function _adjustTotalSupplyByPartition(
         bytes32 _partition,
         uint256 _factor
-    ) internal returns (uint256) {
+    ) internal {
         _getERC1410BasicStorage().totalSupplyByPartition[_partition] *= _factor;
     }
 
@@ -440,7 +440,7 @@ contract ERC1410BasicStorageWrapperRead is
         uint256 abaf = _getAbaf();
         ERC1410BasicStorage storage basicStorage = _getERC1410BasicStorage();
         _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);
-        adjustTotalBalanceFor(basicStorage, abaf, account);
+        _adjustTotalBalanceFor(basicStorage, abaf, account);
     }
 
     function _adjustPartitionBalanceFor(
@@ -466,7 +466,7 @@ contract ERC1410BasicStorageWrapperRead is
         );
     }
 
-    function adjustTotalBalanceFor(
+    function _adjustTotalBalanceFor(
         ERC1410BasicStorage storage basicStorage,
         uint256 abaf,
         address account

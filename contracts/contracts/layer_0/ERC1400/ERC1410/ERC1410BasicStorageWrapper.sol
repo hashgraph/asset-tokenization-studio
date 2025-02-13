@@ -209,9 +209,6 @@ pragma solidity 0.8.18;
 import {
     IERC1410StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from './ERC1410BasicStorageWrapperRead.sol';
 import {ERC20StorageWrapper1} from '../ERC20/ERC20StorageWrapper1.sol';
 
 abstract contract ERC1410BasicStorageWrapper is

@@ -210,9 +210,6 @@ import {
     _SCHEDULED_SNAPSHOTS_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {
-    ScheduledTask
-} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
-import {
     ScheduledTasksStorageWrapper
 } from '../scheduledTasks/ScheduledTasksStorageWrapper.sol';
 import {

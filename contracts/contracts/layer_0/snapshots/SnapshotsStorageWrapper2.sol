@@ -206,16 +206,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {_SNAPSHOT_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     ISnapshotsStorageWrapper
 } from '../../layer_1/interfaces/snapshots/ISnapshotsStorageWrapper.sol';
-import {
-    ArraysUpgradeable
-} from '@openzeppelin/contracts-upgradeable/utils/ArraysUpgradeable.sol';
-import {
-    CountersUpgradeable
-} from '@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol';
 import {ERC20StorageWrapper2} from '../ERC1400/ERC20/ERC20StorageWrapper2.sol';
 
 // solhint-disable no-unused-vars, custom-errors
@@ -472,11 +465,7 @@ abstract contract SnapshotsStorageWrapper2 is
                 _snapshotStorage().accountPartitionLockedBalanceSnapshots[
                     _tokenHolder
                 ][_partition],
-                _getLockedAmountForByPartitionAdjustedAt(
-                    _partition,
-                    _tokenHolder,
-                    _blockTimestamp()
-                )
+                _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder)
             );
     }
 

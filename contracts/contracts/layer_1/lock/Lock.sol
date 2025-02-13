@@ -208,9 +208,6 @@ pragma solidity 0.8.18;
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {_LOCKER_ROLE} from '../constants/roles.sol';
 import {ILock} from '../interfaces/lock/ILock.sol';
@@ -278,7 +275,7 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
         bytes32 _partition,
         address _tokenHolder
     ) external view virtual override returns (uint256 amount_) {
-        return _getLockedAmountForByPartition(_partition, _tokenHolder);
+        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function getLockCountForByPartition(
@@ -314,7 +311,8 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
         override
         returns (uint256 amount_, uint256 expirationTimestamp_)
     {
-        return _getLockForByPartition(_partition, _tokenHolder, _lockId);
+        return
+            _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
     }
 
     // Uses default parititon in case Multipartition is not activated
@@ -381,7 +379,11 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
     function getLockedAmountFor(
         address _tokenHolder
     ) external view virtual override returns (uint256 amount_) {
-        return _getLockedAmountFor(_tokenHolder);
+        return
+            _getLockedAmountForByPartitionAdjusted(
+                _DEFAULT_PARTITION,
+                _tokenHolder
+            );
     }
 
     function getLockCountFor(
@@ -415,11 +417,10 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
         returns (uint256 amount_, uint256 expirationTimestamp_)
     {
         return
-            _getLockForByPartitionAdjustedAt(
+            _getLockForByPartitionAdjusted(
                 _DEFAULT_PARTITION,
                 _tokenHolder,
-                _lockId,
-                _blockTimestamp()
+                _lockId
             );
     }
 
@@ -433,12 +434,7 @@ contract Lock is ILock, IStaticFunctionSelectors, Common {
         bytes32 _partition,
         address _tokenHolder
     ) external view virtual returns (uint256 amount_) {
-        return
-            _getLockedAmountForByPartitionAdjustedAt(
-                _partition,
-                _tokenHolder,
-                _blockTimestamp()
-            );
+        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function getStaticResolverKey()

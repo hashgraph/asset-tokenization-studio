@@ -508,7 +508,7 @@ describe('Lock Tests', () => {
                 await erc1410Facet.issueByPartition({
                     partition: _NON_DEFAULT_PARTITION,
                     tokenHolder: account_A,
-                    value: _AMOUNT - 1,
+                    value: _AMOUNT * 2,
                     data: '0x',
                 })
 
