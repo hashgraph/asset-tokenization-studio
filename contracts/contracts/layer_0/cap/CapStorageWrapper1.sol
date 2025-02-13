@@ -209,9 +209,6 @@ import {
     AdjustBalancesStorageWrapper1
 } from '../adjustBalances/AdjustBalancesStorageWrapper1.sol';
 import {_CAP_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {
-    ICapStorageWrapper
-} from '../../layer_1/interfaces/cap/ICapStorageWrapper.sol';
 import {_MAX_UINT256} from '../constants/values.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
@@ -285,16 +282,11 @@ contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         bytes32 partition,
         uint256 timestamp
     ) internal view returns (uint256) {
-        CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupplyByPartition[partition] ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        )
-            return
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-        return
-            capStorage.maxSupplyByPartition[partition] *
-            _calculateFactorByPartitionAdjustedAt(partition, _blockTimestamp());
+        uint256 factor = _calculateFactor(
+            _getAbafAdjustedAt(timestamp),
+            _getLabafByPartition(partition)
+        );
+        return _getMaxSupplyByPartition(partition) * factor;
     }
 
     function _checkMaxSupply(

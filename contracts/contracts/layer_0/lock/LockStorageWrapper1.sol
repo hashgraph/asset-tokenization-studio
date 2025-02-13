@@ -207,7 +207,6 @@ pragma solidity 0.8.18;
 
 import {LibCommon} from '..//common/LibCommon.sol';
 import {_LOCK_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {LocalContext} from '../context/LocalContext.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
@@ -248,7 +247,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         address _tokenHolder,
         uint256 _lockId
     ) {
-        if (!_isLockIdInvalid(_getLockIndex(_partition, _tokenHolder, _lockId)))
+        if (!_isLockIdValid(_partition, _tokenHolder, _lockId))
             revert WrongLockId();
         _;
     }
@@ -306,34 +305,32 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         virtual
         returns (uint256 amount, uint256 expirationTimestamp)
     {
-        return
-            _getLockForByPartitionAdjustedAt(
-                partition,
-                tokenHolder,
-                lockId,
-                _blockTimestamp()
-            );
+        LockData memory lock = _getLock(partition, tokenHolder, lockId);
+        amount = lock.amount;
+        expirationTimestamp = lock.expirationTimestamp;
     }
 
-    function _getLockForByPartitionAdjustedAt(
-        bytes32 partition,
-        address tokenHolder,
-        uint256 lockId,
-        uint256 timestamp
+    function _getLockForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
     )
         internal
         view
         virtual
-        returns (uint256 amount, uint256 expirationTimestamp)
+        returns (uint256 amount_, uint256 expirationTimestamp_)
     {
-        LockData memory lock = _getLockByIndexAdjustedAt(
-            partition,
-            tokenHolder,
-            lockId,
-            timestamp
+        uint256 factor = _calculateFactor(
+            _getAbafAdjusted(),
+            _getLockLabafByPartition(_partition, _lockId, _tokenHolder)
         );
-        amount = lock.amount;
-        expirationTimestamp = lock.expirationTimestamp;
+
+        (amount_, expirationTimestamp_) = _getLockForByPartition(
+            _partition,
+            _tokenHolder,
+            _lockId
+        );
+        amount_ *= factor;
     }
 
     function _getLockedAmountFor(
@@ -354,18 +351,16 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         return _getLockedAmountFor(tokenHolder) * factor;
     }
 
-    function _getLockedAmountForByPartitionAdjustedAt(
-        bytes32 partition,
-        address tokenHolder,
-        uint256 timestamp
-    ) internal view returns (uint256 amount_) {
+    function _getLockedAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_) {
+        uint256 factor = _calculateFactor(
+            _getAbafAdjusted(),
+            _getTotalLockLabafByPartition(_partition, _tokenHolder)
+        );
         return
-            _getLockedAmountForByPartition(partition, tokenHolder) *
-            _calculateFactorForLockedAmountByTokenHolderAndPartitionAdjustedAt(
-                tokenHolder,
-                partition,
-                timestamp
-            );
+            _getLockedAmountForByPartition(_partition, _tokenHolder) * factor;
     }
 
     function _getLock(
@@ -373,42 +368,32 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         address _tokenHolder,
         uint256 _lockId
     ) internal view returns (LockData memory) {
-        return
-            _getLockByIndexAdjustedAt(
-                _partition,
-                _tokenHolder,
-                _getLockIndex(_partition, _tokenHolder, _lockId),
-                _blockTimestamp()
-            );
+        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
+
+        return _getLockByIndex(_partition, _tokenHolder, lockIndex);
     }
 
-    function _getLockByIndexAdjustedAt(
-        bytes32 partition,
-        address tokenHolder,
-        uint256 lockIndex,
-        uint256 timestamp
-    ) internal view returns (LockData memory lock) {
+    function _getLockByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex
+    ) internal view returns (LockData memory) {
         LockDataStorage storage lockStorage = _lockStorage();
-        if (_isLockIdInvalid(lockIndex)) {
-            return lock;
-        } else {
-            revert WrongLockId();
-        }
+
+        if (_lockIndex == 0) return LockData(0, 0, 0);
+
+        _lockIndex--;
+
         assert(
-            lockIndex - 1 <
+            _lockIndex <
                 lockStorage
-                .locksByAccountAndPartition[tokenHolder][partition].length
+                .locksByAccountAndPartition[_tokenHolder][_partition].length
         );
-        lock = lockStorage.locksByAccountAndPartition[tokenHolder][partition][
-            lockIndex - 1
-        ];
-        lock
-            .amount *= _calculateFactorForLockedAmountByTokenHolderPartitionAndLockIndexAdjustedAt(
-            tokenHolder,
-            partition,
-            lockIndex,
-            timestamp
-        );
+
+        return
+            lockStorage.locksByAccountAndPartition[_tokenHolder][_partition][
+                _lockIndex
+            ];
     }
 
     function _lockStorage()
@@ -436,8 +421,13 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         return true;
     }
 
-    function _isLockIdInvalid(uint256 lockIndex) internal pure returns (bool) {
-        return lockIndex == 0;
+    function _isLockIdValid(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) internal view returns (bool) {
+        if (_getLockIndex(_partition, _tokenHolder, _lockId) == 0) return false;
+        return true;
     }
 
     function _getLockIndex(
@@ -450,4 +440,10 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
                 _partition
             ][_lockId];
     }
+
+    function _getLockLabafByPartition(
+        bytes32 _partition,
+        uint256 _lockId,
+        address _tokenHolder
+    ) internal view virtual returns (uint256);
 }

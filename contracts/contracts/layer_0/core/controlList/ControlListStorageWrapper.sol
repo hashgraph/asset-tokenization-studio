@@ -213,7 +213,6 @@ import {
 import {
     IControlListStorageWrapper
 } from '../../../layer_1/interfaces/controlList/IControlListStorageWrapper.sol';
-import {LocalContext} from '../../context/LocalContext.sol';
 import {
     _CONTROL_LIST_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';

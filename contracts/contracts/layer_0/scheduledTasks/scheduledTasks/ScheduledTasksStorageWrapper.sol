@@ -210,9 +210,6 @@ import {
     _SCHEDULED_TASKS_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
-import {
-    ScheduledTask
-} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
 import {
     ScheduledTasksLib

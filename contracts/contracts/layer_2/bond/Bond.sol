@@ -208,7 +208,6 @@ pragma solidity 0.8.18;
 
 import {IBond} from '../interfaces/bond/IBond.sol';
 import {BondStorageWrapper} from './BondStorageWrapper.sol';
-import {Common} from '../../layer_1/common/Common.sol';
 import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
 import {
     _CORPORATE_ACTION_ROLE,

@@ -214,8 +214,7 @@ import {
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {
-    checkNounceAndDeadline,
-    verify
+    checkNounceAndDeadline
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
 
 abstract contract HoldStorageWrapper2 is

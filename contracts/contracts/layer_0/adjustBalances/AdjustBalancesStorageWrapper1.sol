@@ -248,7 +248,10 @@ abstract contract AdjustBalancesStorageWrapper1 is
     }
 
     function _updateAbaf(uint256 factor) internal {
-        _getAdjustBalancesStorage().abaf = calculateNewAbaf(_getAbaf(), factor);
+        _getAdjustBalancesStorage().abaf = _calculateNewAbaf(
+            _getAbaf(),
+            factor
+        );
     }
 
     function _updateLabafByPartition(bytes32 partition) internal {
@@ -293,6 +296,17 @@ abstract contract AdjustBalancesStorageWrapper1 is
         _getAdjustBalancesStorage()
         .labafLockedAmountByAccountPartitionAndIndex[_tokenHolder][_partition]
             .push(_labaf);
+    }
+
+    function _setLockLabafByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockIndex,
+        uint256 _labaf
+    ) internal {
+        _getAdjustBalancesStorage().labafLockedAmountByAccountPartitionAndIndex[
+            _tokenHolder
+        ][_partition][_lockIndex - 1] = _labaf;
     }
 
     function _pushLabafHold(
@@ -468,7 +482,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         );
     }
 
-    function calculateNewAbaf(
+    function _calculateNewAbaf(
         uint256 abaf,
         uint256 factor
     ) private pure returns (uint256) {
