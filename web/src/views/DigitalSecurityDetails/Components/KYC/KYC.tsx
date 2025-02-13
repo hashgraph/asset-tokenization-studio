@@ -7,6 +7,7 @@ import { Trash } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
 import { useGetKYCList } from "../../../../hooks/queries/useKYC";
 import {
+  KYCViewModel,
   GetKYCAccountsRequest,
   RevokeKYCRequest,
 } from "@hashgraph/asset-tokenization-sdk";
@@ -15,27 +16,22 @@ import { useRevokeKYC } from "../../../../hooks/mutations/useKYC";
 import { useRolesStore } from "../../../../store/rolesStore";
 import { SecurityRole } from "../../../../utils/SecurityRole";
 
-const MOCK_KYC = [
+const MOCK_KYC: KYCViewModel[] = [
   {
-    accountId: "0.0.49666568",
+    issuer: "0.0.49666568",
     validFrom: "",
     validTo: "",
-    vcId: "1",
+    VCid: "1",
+    status: 1,
   },
   {
-    accountId: "0.0.49666568",
+    issuer: "0.0.49666568",
     validFrom: "",
     validTo: "",
-    vcId: "2",
+    VCid: "2",
+    status: 1,
   },
 ];
-
-interface AllowedListFields {
-  accountId: string;
-  validFrom: string;
-  validTo: string;
-  vcId: string;
-}
 
 export const KYC = () => {
   const { id: securityId = "" } = useParams();
@@ -68,21 +64,11 @@ export const KYC = () => {
       securityId,
       kycStatus: 0,
       start: 0,
-      end: 10,
+      end: 100,
     }),
-    {
-      select(data) {
-        return data.map((accountId, index) => ({
-          accountId,
-          validFrom: new Date().toLocaleDateString(),
-          validTo: new Date().toLocaleDateString(),
-          vcId: String(index),
-        }));
-      },
-    },
   );
 
-  const columnsHelper = createColumnHelper<AllowedListFields>();
+  const columnsHelper = createColumnHelper<KYCViewModel>();
 
   const hasKYCRole = useMemo(
     () =>
@@ -91,7 +77,7 @@ export const KYC = () => {
   );
 
   const columns = [
-    columnsHelper.accessor("accountId", {
+    columnsHelper.accessor("issuer", {
       header: tTable("fields.accountId"),
       enableSorting: false,
     }),
@@ -111,7 +97,7 @@ export const KYC = () => {
         return <Box>{date.toLocaleDateString()}</Box>;
       },
     }),
-    columnsHelper.accessor("vcId", {
+    columnsHelper.accessor("VCid", {
       header: tTable("fields.vcId"),
       enableSorting: false,
     }),
@@ -125,7 +111,7 @@ export const KYC = () => {
             cell(props) {
               const {
                 row: {
-                  original: { accountId },
+                  original: { issuer },
                 },
               } = props;
 
@@ -133,7 +119,7 @@ export const KYC = () => {
                 <Button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setAccountToRemove(accountId);
+                    setAccountToRemove(issuer);
                     onOpenRevokeModal();
                   }}
                   variant="table"
