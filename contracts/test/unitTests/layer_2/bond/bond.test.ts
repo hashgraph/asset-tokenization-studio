@@ -577,7 +577,7 @@ describe('Bond Tests', () => {
             // Set maturity date
             await expect(
                 bondFacet.updateMaturityDate(yesterdayInSeconds)
-            ).to.be.rejectedWith('BondMaturityDateWrong')
+            ).to.be.revertedWithCustomError(bondFacet, 'BondMaturityDateWrong')
             // Ensure maturity date is not updated
             const maturityDateAfter = (await bondFacet.getBondDetails())
                 .maturityDate
