@@ -210,18 +210,24 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     ResolverProxy,
-    Bond,
+    BondUSA,
     AccessControl,
     Pause,
-    Lock,
+    Lock_2,
+    Hold_2,
+    TimeTravel,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
     ERC1410ScheduledTasks__factory,
-    Lock__factory,
+    Lock_2__factory,
+    Hold_2__factory,
     Pause__factory,
     AccessControl__factory,
-    Bond__factory,
+    BondUSATimeTravel__factory,
+    TimeTravel__factory,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -229,6 +235,8 @@ import {
     BOND_MANAGER_ROLE,
     LOCKER_ROLE,
     ISSUER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     DEFAULT_PARTITION,
     Rbac,
     deployBondFromFactory,
@@ -236,12 +244,12 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
+    ADDRESS_ZERO,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
-const TIME = 30000
 const numberOfUnits = 1000
-let currentTimeInSeconds = 0
 let startingDate = 0
 const numberOfCoupons = 50
 const frequency = 7
@@ -252,7 +260,6 @@ const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
 const info = 'info'
 
-const TIME_2 = 2 * TIME
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
 const couponRate = 5
@@ -275,11 +282,15 @@ describe('Bond Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let bondFacet: Bond
+    let bondFacet: BondUSA
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let lockFacet: Lock
+    let lockFacet: Lock_2
+    let holdFacet: Hold_2
     let erc1410Facet: ERC1410ScheduledTasks
+    let timeTravelFacet: TimeTravel
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     before(async () => {
         // mute | mock console.log
@@ -296,6 +307,7 @@ describe('Bond Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravelEnabled: true,
                 })
             )
 
@@ -304,14 +316,12 @@ describe('Bond Tests', () => {
     })
 
     beforeEach(async () => {
-        currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
-        startingDate = currentTimeInSeconds + TIME / 1000 + 5 // ! Had to add 5 seconds to avoid timestamp issues
+        startingDate = dateToUnixTimestamp(`2030-01-01T00:00:35Z`)
         maturityDate = startingDate + numberOfCoupons * frequency
         firstCouponDate = startingDate + 1
-        couponRecordDateInSeconds = currentTimeInSeconds + TIME_2 / 1000
+        couponRecordDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:01:00Z`)
         couponExecutionDateInSeconds =
-            currentTimeInSeconds + 10 * (TIME_2 / 1000)
+            dateToUnixTimestamp(`2030-01-01T00:10:00Z`)
         couponData = {
             recordDate: couponRecordDateInSeconds.toString(),
             executionDate: couponExecutionDateInSeconds.toString(),
@@ -322,7 +332,15 @@ describe('Bond Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        const init_rbacs: Rbac[] = [rbacPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
 
         diamond = await deployBondFromFactory({
             adminAccount: account_A,
@@ -352,17 +370,35 @@ describe('Bond Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        bondFacet = Bond__factory.connect(diamond.address, signer_A)
+        bondFacet = BondUSATimeTravel__factory.connect(
+            diamond.address,
+            signer_A
+        )
         accessControlFacet = AccessControl__factory.connect(
             diamond.address,
             signer_A
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        lockFacet = Lock__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
+        holdFacet = Hold_2__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
         )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_A
+        )
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
+    })
+
+    afterEach(async () => {
+        timeTravelFacet.resetSystemTimestamp()
     })
 
     describe('Coupons', () => {
@@ -489,12 +525,12 @@ describe('Bond Tests', () => {
             const TotalAmount = numberOfUnits
             const LockedAmount = TotalAmount - 5
 
-            await erc1410Facet.issueByPartition({
-                partition: DEFAULT_PARTITION,
-                tokenHolder: account_A,
-                value: TotalAmount,
-                data: '0x',
-            })
+            await erc1410Facet.issueByPartition(
+                DEFAULT_PARTITION,
+                account_A,
+                TotalAmount,
+                '0x'
+            )
             await lockFacet.lock(LockedAmount, account_A, 99999999999)
 
             // set coupon
@@ -510,7 +546,66 @@ describe('Bond Tests', () => {
                 )
 
             // check list members
-            await new Promise((f) => setTimeout(f, TIME_2 + 1))
+            await timeTravelFacet.changeSystemTimestamp(
+                couponRecordDateInSeconds + 1
+            )
+            await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
+
+            const couponFor = await bondFacet.getCouponFor(
+                numberOfCoupons + 1,
+                account_A
+            )
+
+            expect(couponFor.tokenBalance).to.equal(TotalAmount)
+            expect(couponFor.recordDateReached).to.equal(true)
+        })
+
+        it('GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds', async () => {
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            // Using account C (with role)
+            bondFacet = bondFacet.connect(signer_C)
+            erc1410Facet = erc1410Facet.connect(signer_C)
+
+            // issue and hold
+            const TotalAmount = numberOfUnits
+            const HeldAmount = TotalAmount - 5
+
+            await erc1410Facet.issueByPartition(
+                DEFAULT_PARTITION,
+                account_A,
+                TotalAmount,
+                '0x'
+            )
+
+            let hold = {
+                amount: HeldAmount,
+                expirationTimestamp: 999999999999999,
+                escrow: account_B,
+                to: ADDRESS_ZERO,
+                data: '0x',
+            }
+
+            await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)
+
+            // set coupon
+            await expect(bondFacet.setCoupon(couponData))
+                .to.emit(bondFacet, 'CouponSet')
+                .withArgs(
+                    '0x0000000000000000000000000000000000000000000000000000000000000033',
+                    numberOfCoupons + 1,
+                    account_C,
+                    couponRecordDateInSeconds,
+                    couponExecutionDateInSeconds,
+                    couponRate
+                )
+
+            // check list members
+            await timeTravelFacet.changeSystemTimestamp(
+                couponRecordDateInSeconds + 1
+            )
             await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
 
             const couponFor = await bondFacet.getCouponFor(
@@ -533,29 +628,27 @@ describe('Bond Tests', () => {
             const maturityDateBefore = (await bondFacet.getBondDetails())
                 .maturityDate
             // New maturity date
-            const tomorrowInSeconds = BigNumber.from(
-                Math.floor(Date.now() / 1000 + 86400)
+            const newMaturityDate = maturityDateBefore.add(
+                BigNumber.from(86400)
             )
 
             // * Act
             // Set maturity date
-            const receipt = await bondFacet.updateMaturityDate(
-                tomorrowInSeconds
-            )
+            const receipt = await bondFacet.updateMaturityDate(newMaturityDate)
 
             // * Assert
             await expect(receipt)
                 .to.emit(bondFacet, 'MaturityDateUpdated')
                 .withArgs(
                     bondFacet.address,
-                    tomorrowInSeconds,
+                    newMaturityDate,
                     maturityDateBefore
                 )
             // check date
             const maturityDateAfter = (await bondFacet.getBondDetails())
                 .maturityDate
             expect(maturityDateAfter).not.to.be.equal(maturityDateBefore)
-            expect(maturityDateAfter).to.be.equal(tomorrowInSeconds)
+            expect(maturityDateAfter).to.be.equal(newMaturityDate)
         })
 
         it('GIVEN an account with bondManager role WHEN setMaturityDate to earlier date THEN transaction fails', async () => {
@@ -569,14 +662,15 @@ describe('Bond Tests', () => {
             const maturityDateBefore = (await bondFacet.getBondDetails())
                 .maturityDate
             // New maturity date (earlier than current)
-            const yesterdayInSeconds = BigNumber.from(
-                Math.floor(Date.now() / 1000 - 86400)
+            // New maturity date (earlier than current)
+            const dayBeforeCurrentMaturity = maturityDateBefore.sub(
+                BigNumber.from(86400)
             )
 
             // * Act & Assert
             // Set maturity date
             await expect(
-                bondFacet.updateMaturityDate(yesterdayInSeconds)
+                bondFacet.updateMaturityDate(dayBeforeCurrentMaturity)
             ).to.be.rejectedWith('BondMaturityDateWrong')
             // Ensure maturity date is not updated
             const maturityDateAfter = (await bondFacet.getBondDetails())
@@ -592,14 +686,14 @@ describe('Bond Tests', () => {
             const maturityDateBefore = (await bondFacet.getBondDetails())
                 .maturityDate
             // New maturity date
-            const tomorrowInSeconds = BigNumber.from(
-                Math.floor(Date.now() / 1000 + 86400)
+            const newMaturityDate = maturityDateBefore.add(
+                BigNumber.from(86400)
             )
 
             // * Act & Assert
             // Set maturity date
             await expect(
-                bondFacet.updateMaturityDate(tomorrowInSeconds)
+                bondFacet.updateMaturityDate(newMaturityDate)
             ).to.be.rejectedWith('AccountHasNoRole')
             // Ensure maturity date is not updated
             const maturityDateAfter = (await bondFacet.getBondDetails())
@@ -624,14 +718,14 @@ describe('Bond Tests', () => {
             const maturityDateBefore = (await bondFacet.getBondDetails())
                 .maturityDate
             // New maturity date
-            const tomorrowInSeconds = BigNumber.from(
-                Math.floor(Date.now() / 1000 + 86400)
+            const newMaturityDate = maturityDateBefore.add(
+                BigNumber.from(86400)
             )
 
             // * Act & Assert
             // Set maturity date
             await expect(
-                bondFacet.updateMaturityDate(tomorrowInSeconds)
+                bondFacet.updateMaturityDate(newMaturityDate)
             ).to.be.rejectedWith('TokenIsPaused')
             // Ensure maturity date is not updated
             const maturityDateAfter = (await bondFacet.getBondDetails())

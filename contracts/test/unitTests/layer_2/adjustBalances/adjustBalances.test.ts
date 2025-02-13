@@ -216,11 +216,16 @@ import {
     ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
+    TimeTravel,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
     PAUSER_ROLE,
     ISSUER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     CORPORATE_ACTION_ROLE,
     deployEquityFromFactory,
     Rbac,
@@ -230,6 +235,7 @@ import {
     DeployAtsFullInfrastructureCommand,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const amount = 1
 const balanceOf_B_Original = [20 * amount, 200 * amount]
@@ -239,7 +245,6 @@ const adjustFactor = 253
 const adjustDecimals = 2
 const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
-const TIME = 6000
 
 describe('Adjust Balances Tests', () => {
     let diamond: ResolverProxy
@@ -259,6 +264,9 @@ describe('Adjust Balances Tests', () => {
     let pauseFacet: Pause
     let equityFacet: Equity
     let scheduledTasksFacet: ScheduledTasks
+    let timeTravelFacet: TimeTravel
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     async function deployAsset({
         multiPartition,
@@ -326,7 +334,18 @@ describe('Adjust Balances Tests', () => {
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
 
         scheduledTasksFacet = await ethers.getContractAt(
-            'ScheduledTasks',
+            'ScheduledTasksTimeTravel',
+            diamond.address
+        )
+
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
+            diamond.address
+        )
+
+        kycFacet = await ethers.getContractAt('KYC', diamond.address)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
             diamond.address
         )
     }
@@ -336,7 +355,15 @@ describe('Adjust Balances Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        return [rbacPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        return [rbacPause, rbacKYC, rbacSSI]
     }
 
     before(async () => {
@@ -354,11 +381,16 @@ describe('Adjust Balances Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravelEnabled: true,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     beforeEach(async () => {
@@ -420,25 +452,27 @@ describe('Adjust Balances Tests', () => {
         await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
 
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet
+            .connect(signer_B)
+            .grantKYC(account_B, '', 0, 9999999999, account_A)
+
         erc1410Facet = erc1410Facet.connect(signer_A)
         equityFacet = equityFacet.connect(signer_A)
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
 
-        await erc1410Facet.issueByPartition({
-            partition: _PARTITION_ID_2,
-            tokenHolder: account_B,
-            value: balanceOf_B_Original,
-            data: '0x',
-        })
+        await erc1410Facet.issueByPartition(
+            _PARTITION_ID_2,
+            account_B,
+            balanceOf_B_Original,
+            '0x'
+        )
 
         // schedule tasks
-        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
-
         const dividendsRecordDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000
+            dateToUnixTimestamp(`2030-01-01T00:00:06Z`)
         const dividendsExecutionDateInSeconds =
-            currentTimeInSeconds + (10 * TIME) / 1000
+            dateToUnixTimestamp(`2030-01-01T00:01:00Z`)
         const dividendsAmountPerEquity = 1
         const dividendData_1 = {
             recordDate: dividendsRecordDateInSeconds_1.toString(),
@@ -449,7 +483,7 @@ describe('Adjust Balances Tests', () => {
         await equityFacet.setDividends(dividendData_1)
 
         const balanceAdjustmentExecutionDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000 + 1
+            dateToUnixTimestamp(`2030-01-01T00:00:07Z`)
 
         const balanceAdjustmentData_1 = {
             executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
@@ -463,7 +497,9 @@ describe('Adjust Balances Tests', () => {
             await scheduledTasksFacet.scheduledTaskCount()
 
         //-------------------------
-        await new Promise((f) => setTimeout(f, TIME + 2))
+        await timeTravelFacet.changeSystemTimestamp(
+            balanceAdjustmentExecutionDateInSeconds_1 + 1
+        )
 
         // balance adjustment
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)

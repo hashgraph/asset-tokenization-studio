@@ -336,6 +336,7 @@ describe('Factory Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravelEnabled: true,
                 })
             )
 
@@ -661,7 +662,7 @@ describe('Factory Tests', () => {
             expect(equityMetadata.currency).to.equal(currency)
             expect(equityMetadata.nominalValue).to.equal(nominalValue)
 
-            const capFacet = await ethers.getContractAt('Cap', equityAddress)
+            const capFacet = await ethers.getContractAt('Cap_2', equityAddress)
 
             const maxSupply = await capFacet.getMaxSupply()
             expect(maxSupply).to.equal(numberOfShares)
@@ -1008,7 +1009,7 @@ describe('Factory Tests', () => {
             expect(metadata.info.isin).to.be.equal(isin)
             expect(metadata.securityType).to.be.equal(SecurityType.BOND)
 
-            const capFacet = await ethers.getContractAt('Cap', bondAddress)
+            const capFacet = await ethers.getContractAt('Cap_2', bondAddress)
             const maxSupply = await capFacet.getMaxSupply()
             expect(maxSupply).to.equal(numberOfUnits)
 
@@ -1200,7 +1201,7 @@ describe('Factory Tests', () => {
             expect(metadata.info.isin).to.be.equal(isin)
             expect(metadata.securityType).to.be.equal(SecurityType.BOND)
 
-            const capFacet = await ethers.getContractAt('Cap', bondAddress)
+            const capFacet = await ethers.getContractAt('Cap_2', bondAddress)
             const maxSupply = await capFacet.getMaxSupply()
             expect(maxSupply).to.equal(numberOfUnits)
 

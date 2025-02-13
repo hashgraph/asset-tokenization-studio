@@ -211,15 +211,19 @@ import {
     AccessControl,
     AccessControl__factory,
     BusinessLogicResolver,
-    type Cap,
-    Cap__factory,
+    type Cap_2,
+    TimeTravel,
+    Cap_2__factory,
     Equity,
     Equity__factory,
     ERC1410ScheduledTasks,
     ERC1410ScheduledTasks__factory,
     IFactory,
-    Snapshots,
-    Snapshots__factory,
+    Snapshots_2,
+    Snapshots_2__factory,
+    TimeTravel__factory,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -227,6 +231,8 @@ import {
     ISSUER_ROLE,
     PAUSER_ROLE,
     SNAPSHOT_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     deployEquityFromFactory,
     RegulationSubType,
     RegulationType,
@@ -234,6 +240,7 @@ import {
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
 } from '@scripts'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -248,11 +255,15 @@ describe('CAP Layer 2 Tests', () => {
     let factory: IFactory,
         businessLogicResolver: BusinessLogicResolver,
         diamond: Equity,
-        capFacet: Cap,
+        capFacet: Cap_2,
         accessControlFacet: AccessControl,
         equityFacet: Equity,
-        snapshotFacet: Snapshots,
-        erc1410Facet: ERC1410ScheduledTasks
+        snapshotFacet: Snapshots_2,
+        erc1410Facet: ERC1410ScheduledTasks,
+        timeTravelFacet: TimeTravel,
+        kycFacet: KYC,
+        ssiManagementFacet: SSIManagement
+
     let signer_A: SignerWithAddress,
         signer_B: SignerWithAddress,
         signer_C: SignerWithAddress
@@ -267,7 +278,15 @@ describe('CAP Layer 2 Tests', () => {
     const setupEnvironment = async () => {
         const rbacPause = { role: PAUSER_ROLE, members: [account_B] }
         const rbaCap = { role: CAP_ROLE, members: [account_B] }
-        const init_rbacs = [rbacPause, rbaCap]
+        const rbacKYC = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs = [rbacPause, rbaCap, rbacKYC, rbacSSI]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -300,17 +319,26 @@ describe('CAP Layer 2 Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        capFacet = Cap__factory.connect(diamond.address, signer_A)
+        capFacet = Cap_2__factory.connect(diamond.address, signer_A)
         accessControlFacet = AccessControl__factory.connect(
             diamond.address,
             signer_A
         )
         equityFacet = Equity__factory.connect(diamond.address, signer_A)
-        snapshotFacet = Snapshots__factory.connect(diamond.address, signer_A)
+        snapshotFacet = Snapshots_2__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
         )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_A
+        )
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
     }
 
     const setupScheduledBalanceAdjustments = async (
@@ -349,6 +377,7 @@ describe('CAP Layer 2 Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravelEnabled: true,
                 })
             )
 
@@ -360,6 +389,10 @@ describe('CAP Layer 2 Tests', () => {
         await setupEnvironment()
     })
 
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
+    })
+
     const testBalanceAdjustments = async (
         adjustments: Adjustment[],
         expectedFactors: number[]
@@ -368,7 +401,11 @@ describe('CAP Layer 2 Tests', () => {
 
         // Execute adjustments and verify
         for (let i = 0; i < adjustments.length; i++) {
-            await new Promise((resolve) => setTimeout(resolve, TIME + 1))
+            await timeTravelFacet.changeSystemTimestamp(
+                dateToUnixTimestamp(`2030-01-01T00:00:00Z`) +
+                    ((i + 1) * TIME) / 1000 +
+                    1
+            )
             await snapshotFacet.takeSnapshot()
         }
 
@@ -402,9 +439,8 @@ describe('CAP Layer 2 Tests', () => {
             maxSupplyByPartition
         )
 
-        const currentTime = (await ethers.provider.getBlock('latest')).timestamp
         const adjustments = createAdjustmentData(
-            currentTime,
+            dateToUnixTimestamp('2030-01-01T00:00:00Z'),
             [TIME / 1000, (2 * TIME) / 1000, (3 * TIME) / 1000],
             [5, 6, 7],
             [2, 0, 1]
@@ -433,14 +469,14 @@ describe('CAP Layer 2 Tests', () => {
             maxSupplyByPartition
         )
 
-        await erc1410Facet.issueByPartition({
-            partition: _PARTITION_ID_1,
-            tokenHolder: account_C,
-            value: issueAmount,
-            data: '0x',
-        })
+        await erc1410Facet.issueByPartition(
+            _PARTITION_ID_1,
+            account_C,
+            issueAmount,
+            '0x'
+        )
 
-        const currentTime = (await ethers.provider.getBlock('latest')).timestamp
+        const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`)
         const adjustments = createAdjustmentData(
             currentTime,
             [TIME / 1000],
@@ -451,7 +487,9 @@ describe('CAP Layer 2 Tests', () => {
         await setupScheduledBalanceAdjustments(adjustments)
 
         // Execute adjustments and verify reversion case
-        await new Promise((resolve) => setTimeout(resolve, TIME + 1))
+        await timeTravelFacet.changeSystemTimestamp(
+            adjustments[0].executionDate + 1
+        )
 
         await expect(
             capFacet.setMaxSupply(maxSupplyByPartition)
@@ -470,12 +508,12 @@ describe('CAP Layer 2 Tests', () => {
         snapshotFacet = snapshotFacet.connect(signer_A)
         erc1410Facet = erc1410Facet.connect(signer_C)
 
-        await erc1410Facet.issueByPartition({
-            partition: _PARTITION_ID_1,
-            tokenHolder: account_C,
-            value: issueAmount,
-            data: '0x',
-        })
+        await erc1410Facet.issueByPartition(
+            _PARTITION_ID_1,
+            account_C,
+            issueAmount,
+            '0x'
+        )
 
         await capFacet.setMaxSupply(maxSupply)
         await capFacet.setMaxSupplyByPartition(
@@ -484,7 +522,7 @@ describe('CAP Layer 2 Tests', () => {
         )
 
         // scheduled balance adjustments
-        const currentTime = (await ethers.provider.getBlock('latest')).timestamp
+        const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`)
         const adjustments = createAdjustmentData(
             currentTime,
             [TIME / 1000],
@@ -495,7 +533,9 @@ describe('CAP Layer 2 Tests', () => {
         await setupScheduledBalanceAdjustments(adjustments)
         //-------------------------
         // wait for first balance adjustment
-        await new Promise((f) => setTimeout(f, TIME + 1))
+        await timeTravelFacet.changeSystemTimestamp(
+            adjustments[0].executionDate + 1
+        )
 
         // Attempt to change the max supply by partition with the same value as before
         await expect(

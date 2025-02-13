@@ -216,11 +216,15 @@ import {
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     PAUSER_ROLE,
     LOCKER_ROLE,
     ISSUER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
@@ -253,6 +257,8 @@ describe('Lock Tests', () => {
     let lockFacet: Lock
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -306,7 +312,21 @@ describe('Lock Tests', () => {
                 role: PAUSER_ROLE,
                 members: [account_D],
             }
-            const init_rbacs: Rbac[] = [rbacIssuer, rbacLocker, rbacPausable]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [
+                rbacIssuer,
+                rbacLocker,
+                rbacPausable,
+                rbacKYC,
+                rbacSSI,
+            ]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -354,6 +374,21 @@ describe('Lock Tests', () => {
                 diamond.address,
                 signer_B
             )
+            kycFacet = await ethers.getContractAt(
+                'KYC',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SSIManagement',
+                diamond.address,
+                signer_A
+            )
+
+            await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+            await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
+            await kycFacet.grantKYC(account_B, '', 0, 9999999999, account_A)
+            await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
         })
 
         describe('Paused', () => {
@@ -477,12 +512,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid partition WHEN lockByPartition with insufficient balance THEN transaction fails with InsufficientBalance', async () => {
-                await erc1410Facet.issueByPartition({
-                    partition: _NON_DEFAULT_PARTITION,
-                    tokenHolder: account_A,
-                    value: _AMOUNT - 1,
-                    data: '0x',
-                })
+                await erc1410Facet.issueByPartition(
+                    _NON_DEFAULT_PARTITION,
+                    account_A,
+                    _AMOUNT - 1,
+                    '0x'
+                )
 
                 await expect(
                     lockFacet.lockByPartition(
@@ -505,12 +540,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid partition WHEN lockByPartition with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition({
-                    partition: _NON_DEFAULT_PARTITION,
-                    tokenHolder: account_A,
-                    value: _AMOUNT - 1,
-                    data: '0x',
-                })
+                await erc1410Facet.issueByPartition(
+                    _NON_DEFAULT_PARTITION,
+                    account_A,
+                    _AMOUNT * 2,
+                    '0x'
+                )
 
                 await expect(
                     lockFacet.lockByPartition(
@@ -595,12 +630,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid lockId but timestamp is not reached WHEN releaseByPartition THEN transaction fails with LockExpirationNotReached', async () => {
-                await erc1410Facet.issueByPartition({
-                    partition: _NON_DEFAULT_PARTITION,
-                    tokenHolder: account_A,
-                    value: _AMOUNT,
-                    data: '0x',
-                })
+                await erc1410Facet.issueByPartition(
+                    _NON_DEFAULT_PARTITION,
+                    account_A,
+                    _AMOUNT,
+                    '0x'
+                )
                 await lockFacet.lockByPartition(
                     _NON_DEFAULT_PARTITION,
                     _AMOUNT,
@@ -621,12 +656,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid lockId and timestamp is reached WHEN releaseByPartition THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition({
-                    partition: _NON_DEFAULT_PARTITION,
-                    tokenHolder: account_A,
-                    value: _AMOUNT,
-                    data: '0x',
-                })
+                await erc1410Facet.issueByPartition(
+                    _NON_DEFAULT_PARTITION,
+                    account_A,
+                    _AMOUNT,
+                    '0x'
+                )
                 await lockFacet.lockByPartition(
                     _NON_DEFAULT_PARTITION,
                     _AMOUNT,
@@ -713,7 +748,21 @@ describe('Lock Tests', () => {
                 role: PAUSER_ROLE,
                 members: [account_D],
             }
-            const init_rbacs: Rbac[] = [rbacIssuer, rbacLocker, rbacPausable]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [
+                rbacIssuer,
+                rbacLocker,
+                rbacPausable,
+                rbacKYC,
+                rbacSSI,
+            ]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -761,6 +810,21 @@ describe('Lock Tests', () => {
                 diamond.address,
                 signer_B
             )
+            kycFacet = await ethers.getContractAt(
+                'KYC',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SSIManagement',
+                diamond.address,
+                signer_A
+            )
+
+            await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+            await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
+            await kycFacet.grantKYC(account_B, '', 0, 9999999999, account_A)
+            await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
         })
 
         describe('multi-partition transactions arent enabled', () => {
@@ -798,12 +862,12 @@ describe('Lock Tests', () => {
 
         describe('lock', () => {
             it('GIVEN a valid partition WHEN lockByPartition with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition({
-                    partition: _DEFAULT_PARTITION,
-                    tokenHolder: account_A,
-                    value: _AMOUNT * 2,
-                    data: '0x',
-                })
+                await erc1410Facet.issueByPartition(
+                    _DEFAULT_PARTITION,
+                    account_A,
+                    _AMOUNT * 2,
+                    '0x'
+                )
 
                 await expect(
                     lockFacet.lockByPartition(
@@ -890,12 +954,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid partition WHEN lock with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition({
-                    partition: _DEFAULT_PARTITION,
-                    tokenHolder: account_A,
-                    value: _AMOUNT * 2,
-                    data: '0x',
-                })
+                await erc1410Facet.issueByPartition(
+                    _DEFAULT_PARTITION,
+                    account_A,
+                    _AMOUNT * 2,
+                    '0x'
+                )
 
                 await expect(
                     lockFacet.lock(_AMOUNT, account_A, expirationTimestamp)
@@ -966,12 +1030,12 @@ describe('Lock Tests', () => {
 
         describe('release', () => {
             it('GIVEN a valid lockId and timestamp is reached WHEN releaseByPartition THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition({
-                    partition: _DEFAULT_PARTITION,
-                    tokenHolder: account_A,
-                    value: _AMOUNT,
-                    data: '0x',
-                })
+                await erc1410Facet.issueByPartition(
+                    _DEFAULT_PARTITION,
+                    account_A,
+                    _AMOUNT,
+                    '0x'
+                )
                 await lockFacet.lockByPartition(
                     _DEFAULT_PARTITION,
                     _AMOUNT,
@@ -1049,12 +1113,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid lockId but timestamp is not reached WHEN release THEN transaction fails with LockExpirationNotReached', async () => {
-                await erc1410Facet.issueByPartition({
-                    partition: _DEFAULT_PARTITION,
-                    tokenHolder: account_A,
-                    value: _AMOUNT,
-                    data: '0x',
-                })
+                await erc1410Facet.issueByPartition(
+                    _DEFAULT_PARTITION,
+                    account_A,
+                    _AMOUNT,
+                    '0x'
+                )
                 await lockFacet.lockByPartition(
                     _DEFAULT_PARTITION,
                     _AMOUNT,
@@ -1071,12 +1135,12 @@ describe('Lock Tests', () => {
             })
 
             it('GIVEN a valid lockId and timestamp is reached WHEN releaseByPartition THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition({
-                    partition: _DEFAULT_PARTITION,
-                    tokenHolder: account_A,
-                    value: _AMOUNT,
-                    data: '0x',
-                })
+                await erc1410Facet.issueByPartition(
+                    _DEFAULT_PARTITION,
+                    account_A,
+                    _AMOUNT,
+                    '0x'
+                )
                 await expect(
                     lockFacet.lock(_AMOUNT - 1, account_A, expirationTimestamp)
                 )

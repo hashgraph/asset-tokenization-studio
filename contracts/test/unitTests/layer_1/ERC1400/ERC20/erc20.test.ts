@@ -214,6 +214,9 @@ import {
     type Pause,
     type ControlList,
     type ERC1594,
+    KYC,
+    SSIManagement,
+    ERC20_2,
     BusinessLogicResolver,
     IFactory,
 } from '@typechain'
@@ -221,6 +224,8 @@ import {
     CONTROL_LIST_ROLE,
     PAUSER_ROLE,
     ISSUER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     DEFAULT_PARTITION,
     MAX_UINT256,
     deployEquityFromFactory,
@@ -249,11 +254,13 @@ describe('ERC20 Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc20Facet: ERC20
+    let erc20Facet: ERC20_2
     let erc20FacetBlackList: ERC20
     let pauseFacet: Pause
     let controlListFacet: ControlList
     let erc1594Facet: ERC1594
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
@@ -278,6 +285,7 @@ describe('ERC20 Tests', () => {
                         signer: signer_A,
                         useDeployed: false,
                         useEnvironment: true,
+                        timeTravelEnabled: true,
                     })
                 )
 
@@ -328,7 +336,7 @@ describe('ERC20 Tests', () => {
                 businessLogicResolver: businessLogicResolver.address,
             })
 
-            erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
+            erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
             erc20FacetBlackList = await ethers.getContractAt(
                 'ERC20',
                 diamond.address,
@@ -512,7 +520,15 @@ describe('ERC20 Tests', () => {
                 role: ISSUER_ROLE,
                 members: [account_B],
             }
-            const init_rbacs: Rbac[] = [rbacIssuer]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [rbacIssuer, rbacKYC, rbacSSI]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -545,7 +561,7 @@ describe('ERC20 Tests', () => {
                 businessLogicResolver: businessLogicResolver.address,
             })
 
-            erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
+            erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
             erc20SignerC = await ethers.getContractAt(
                 'ERC20',
                 diamond.address,
@@ -565,6 +581,19 @@ describe('ERC20 Tests', () => {
                 diamond.address,
                 signer_B
             )
+            kycFacet = await ethers.getContractAt(
+                'KYC',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SSIManagement',
+                diamond.address,
+                signer_A
+            )
+            await ssiManagementFacet.addIssuer(account_E)
+            await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_E)
+            await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
             await erc1594Facet.issue(account_C, amount, '0x')
         })
 

@@ -206,96 +206,129 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { takeSnapshot, time } from '@nomicfoundation/hardhat-network-helpers'
+import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Cap_2,
-    AccessControl,
+    type KYC,
     Pause,
-    ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
-    Cap_2__factory,
-    AccessControl__factory,
-    ERC1410ScheduledTasks__factory,
-    Pause__factory,
-    KYC,
     SSIManagement,
+    TimeTravel,
+    T3RevocationRegistry,
+    T3RevocationRegistry__factory,
 } from '@typechain'
 import {
-    CAP_ROLE,
-    deployAtsFullInfrastructure,
-    DeployAtsFullInfrastructureCommand,
-    ISSUER_ROLE,
     PAUSER_ROLE,
-    KYC_ROLE,
     SSI_MANAGER_ROLE,
+    KYC_ROLE,
+    MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
+    DeployAtsFullInfrastructureCommand,
+    deployAtsFullInfrastructure,
+    ADDRESS_ZERO,
+    deployContractWithFactory,
+    DeployContractWithFactoryCommand,
 } from '@scripts'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
-const maxSupply = 1
-const maxSupplyByPartition = 1
-const _PARTITION_ID_1 =
-    '0x0000000000000000000000000000000000000000000000000000000000000001'
+const _VALID_FROM = 0
+const _VALID_TO = 99999999999999
+const _VC_ID = 'VC_24'
 
-describe('CAP Tests', () => {
+describe('KYC Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
     let signer_C: SignerWithAddress
+    let signer_D: SignerWithAddress
 
     let account_A: string
     let account_B: string
     let account_C: string
+    let account_D: string
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let capFacet: Cap_2
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
-    let erc1410Facet: ERC1410ScheduledTasks
     let kycFacet: KYC
+    let pauseFacet: Pause
     let ssiManagementFacet: SSIManagement
+    let timeTravelFacet: TimeTravel
+    let revocationList: T3RevocationRegistry
+
+    const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
+    let currentTimestamp = 0
+    let expirationTimestamp = 0
+
+    let snapshot: SnapshotRestorer
 
     before(async () => {
+        snapshot = await takeSnapshot()
         // mute | mock console.log
         console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
+        account_D = signer_D.address
 
         const { deployer, ...deployedContracts } =
             await deployAtsFullInfrastructure(
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
                     useDeployed: false,
-                    useEnvironment: true,
+                    timeTravelEnabled: true,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+
+        let reovationListDeployed = await deployContractWithFactory(
+            new DeployContractWithFactoryCommand({
+                factory: new T3RevocationRegistry__factory(),
+                signer: signer_A,
+            })
+        )
+
+        revocationList = await ethers.getContractAt(
+            'T3RevocationRegistry',
+            reovationListDeployed.address,
+            signer_C
+        )
+    })
+
+    after(async () => {
+        await snapshot.restore()
+    })
+
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     beforeEach(async () => {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
+        currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
+        expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
+
         const rbacKYC: Rbac = {
             role: KYC_ROLE,
-            members: [account_B],
-        }
-        const rbacSSI: Rbac = {
-            role: SSI_MANAGER_ROLE,
             members: [account_A],
         }
-        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
+        const rbacPausable: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_A],
+        }
+        const rbacSSIManager: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_C],
+        }
+        const init_rbacs: Rbac[] = [rbacKYC, rbacPausable, rbacSSIManager]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -303,7 +336,7 @@ describe('CAP Tests', () => {
             isControllable: true,
             arePartitionsProtected: false,
             isMultiPartition: false,
-            name: 'TEST_AccessControl',
+            name: 'TEST_KYC',
             symbol: 'TAC',
             decimals: 6,
             isin: isinGenerator(),
@@ -316,7 +349,7 @@ describe('CAP Tests', () => {
             putRight: false,
             dividendRight: 1,
             currency: '0x345678',
-            numberOfShares: BigInt(maxSupply * 2),
+            numberOfShares: MAX_UINT256,
             nominalValue: 100,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_B,
@@ -324,246 +357,253 @@ describe('CAP Tests', () => {
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
+            factory,
             businessLogicResolver: businessLogicResolver.address,
-            factory: factory,
         })
 
-        capFacet = Cap_2__factory.connect(diamond.address, signer_A)
-        accessControlFacet = AccessControl__factory.connect(
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_A)
+        pauseFacet = await ethers.getContractAt(
+            'Pause',
             diamond.address,
             signer_A
         )
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
             'SSIManagement',
             diamond.address,
+            signer_C
+        )
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
+            diamond.address,
             signer_A
         )
 
-        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
-    })
-
-    it('GIVEN setting 0 to max supply WHEN trying to initialize THEN transaction fails', async () => {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        const init_rbacs: Rbac[] = [rbacPause]
-        await expect(
-            deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                isMultiPartition: false,
-                name: 'TEST_AccessControl',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: 0n,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_B,
-                countriesControlListType: true,
-                listOfCountries: 'ES,FR,CH',
-                info: 'nothing',
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory: factory,
-            })
-        ).to.be.rejectedWith('NewMaxSupplyCannotBeZero')
-    })
-
-    it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {
-        await expect(capFacet.initialize_Cap(5, [])).to.be.rejectedWith(
-            'AlreadyInitialized'
+        await ssiManagementFacet.addIssuer(account_C)
+        await ssiManagementFacet.setRevocationRegistryAddress(
+            revocationList.address
         )
     })
 
     describe('Paused', () => {
         beforeEach(async () => {
             // Pausing the token
-            pauseFacet = pauseFacet.connect(signer_B)
             await pauseFacet.pause()
         })
 
-        it('GIVEN a paused Token WHEN setMaxSupply THEN transaction fails with TokenIsPaused', async () => {
-            // Using account C (with role)
-            capFacet = capFacet.connect(signer_C)
-
-            // transfer with data fails
-            await expect(capFacet.setMaxSupply(maxSupply)).to.be.rejectedWith(
-                'TokenIsPaused'
-            )
-        })
-
-        it('GIVEN a paused Token WHEN setMaxSupplyByPartition THEN transaction fails with TokenIsPaused', async () => {
-            // Using account C (with role)
-            capFacet = capFacet.connect(signer_C)
-
-            // transfer from with data fails
+        it('GIVEN a paused Token WHEN grantKYC THEN transaction fails with TokenIsPaused', async () => {
             await expect(
-                capFacet.setMaxSupplyByPartition(
-                    _PARTITION_ID_1,
-                    maxSupplyByPartition
+                kycFacet.grantKYC(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_C
                 )
-            ).to.be.rejectedWith('TokenIsPaused')
+            ).to.be.revertedWithCustomError(kycFacet, 'TokenIsPaused')
+        })
+
+        it('GIVEN a paused Token WHEN revokeKYC THEN transaction fails with TokenIsPaused', async () => {
+            await expect(
+                kycFacet.revokeKYC(account_B)
+            ).to.be.revertedWithCustomError(kycFacet, 'TokenIsPaused')
         })
     })
 
-    describe('AccessControl', () => {
-        it('GIVEN an account without cap role WHEN setMaxSupply THEN transaction fails with AccountHasNoRole', async () => {
-            // Using account C (non role)
-            capFacet = capFacet.connect(signer_C)
-
-            // add to list fails
-            await expect(capFacet.setMaxSupply(maxSupply)).to.be.rejectedWith(
-                Error
-            )
+    describe('Access Control', () => {
+        it('GIVEN a non KYC account WHEN grantKYC THEN transaction fails with AccountHasNoRole', async () => {
+            await expect(
+                kycFacet
+                    .connect(signer_C)
+                    .grantKYC(
+                        account_B,
+                        _VC_ID,
+                        _VALID_FROM,
+                        _VALID_TO,
+                        account_C
+                    )
+            ).to.be.revertedWithCustomError(kycFacet, 'AccountHasNoRole')
         })
 
-        it('GIVEN an account without cap role WHEN setMaxSupplyByPartition THEN transaction fails with AccountHasNoRole', async () => {
-            // Using account C (non role)
-            capFacet = capFacet.connect(signer_C)
-
-            // add to list fails
+        it('GIVEN a paused Token WHEN revokeKYC THEN transaction fails with AccountHasNoRole', async () => {
             await expect(
-                capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply)
-            ).to.be.revertedWithCustomError(capFacet, 'AccountHasNoRole')
-        })
-    })
-
-    describe('New Max Supply Too low or 0', () => {
-        it('GIVEN a token WHEN setMaxSupply to 0 THEN transaction fails with NewMaxSupplyCannotBeZero', async () => {
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CAP_ROLE, account_C)
-
-            // Using account C (non role)
-            capFacet = capFacet.connect(signer_C)
-
-            // add to list fails
-            await expect(
-                capFacet.setMaxSupply(0)
-            ).to.be.revertedWithCustomError(
-                capFacet,
-                'NewMaxSupplyCannotBeZero'
-            )
-        })
-        it('GIVEN a token WHEN setMaxSupply a value that is less than the current total supply THEN transaction fails with NewMaxSupplyTooLow', async () => {
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-            await accessControlFacet.grantRole(CAP_ROLE, account_C)
-
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_A,
-                maxSupply * 2,
-                '0x'
-            )
-
-            // Using account C (non role)
-            capFacet = capFacet.connect(signer_C)
-
-            // add to list fails
-            await expect(
-                capFacet.setMaxSupply(maxSupply)
-            ).to.be.revertedWithCustomError(capFacet, 'NewMaxSupplyTooLow')
-        })
-
-        it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyForPartitionTooLow', async () => {
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-            await accessControlFacet.grantRole(CAP_ROLE, account_C)
-
-            erc1410Facet = erc1410Facet.connect(signer_C)
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_A,
-                maxSupply * 2,
-                '0x'
-            )
-
-            // Using account C (non role)
-            capFacet = capFacet.connect(signer_C)
-
-            // add to list fails
-            await expect(
-                capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply)
-            ).to.be.revertedWithCustomError(
-                capFacet,
-                'NewMaxSupplyForPartitionTooLow'
-            )
+                kycFacet.connect(signer_C).revokeKYC(account_B)
+            ).to.be.rejectedWith('AccountHasNoRole')
         })
     })
 
-    describe('New Max Supply By Partition Too High', () => {
-        it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyByPartitionTooHigh', async () => {
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-            await accessControlFacet.grantRole(CAP_ROLE, account_C)
-
-            // Using account C (non role)
-            capFacet = capFacet.connect(signer_C)
-
-            // add to list fails
+    describe('KYC Wrong input data', () => {
+        it('GIVEN account ZERO WHEN grantKYC THEN transaction fails with InvalidZeroAddress', async () => {
             await expect(
-                capFacet.setMaxSupplyByPartition(
-                    _PARTITION_ID_1,
-                    maxSupply * 100
+                kycFacet.grantKYC(
+                    ADDRESS_ZERO,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_C
                 )
-            ).to.eventually.be.rejectedWith('NewMaxSupplyByPartitionTooHigh')
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidZeroAddress')
+        })
+
+        it('GIVEN account ZERO WHEN revokeKYC THEN transaction fails with InvalidZeroAddress', async () => {
+            await expect(
+                kycFacet.revokeKYC(ADDRESS_ZERO)
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidZeroAddress')
+        })
+
+        it('GIVEN wrong Valid From Date WHEN grantKYC THEN transaction fails with InvalidDates', async () => {
+            await expect(
+                kycFacet.grantKYC(
+                    account_B,
+                    _VC_ID,
+                    _VALID_TO + 1,
+                    _VALID_TO,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidDates')
+        })
+
+        it('GIVEN wrong Valid To Date WHEN grantKYC THEN transaction fails with InvalidDates', async () => {
+            await expect(
+                kycFacet.grantKYC(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    currentTimestamp - 1,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidDates')
+        })
+
+        it('GIVEN wrong issuer WHEN grantKYC THEN transaction fails with AccountIsNotIssuer', async () => {
+            await expect(
+                kycFacet.grantKYC(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_D
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'AccountIsNotIssuer')
         })
     })
 
-    describe('New Max Supply OK', () => {
-        it('GIVEN a token WHEN setMaxSupply THEN transaction succeeds', async () => {
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CAP_ROLE, account_C)
+    describe('KYC OK', () => {
+        it('GIVEN a VC WHEN grantKYC THEN transaction succeed', async () => {
+            let KYCStatusFor_B_Before = await kycFacet.getKYCStatusFor(
+                account_B
+            )
+            let KYC_Count_Before = await kycFacet.getKYCAccountsCount(1)
 
-            capFacet = capFacet.connect(signer_C)
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
 
-            await expect(capFacet.setMaxSupply(maxSupply * 4))
-                .to.emit(capFacet, 'MaxSupplySet')
-                .withArgs(account_C, maxSupply * 4, maxSupply * 2)
+            let KYCStatusFor_B_After = await kycFacet.getKYCStatusFor(account_B)
+            let KYC_Count_After = await kycFacet.getKYCAccountsCount(1)
+            let KYCAccounts = await kycFacet.getKYCAccounts(1, 0, 100)
+            let KYCSFor_B = await kycFacet.getKYCFor(account_B)
 
-            const currentMaxSupply = await capFacet.getMaxSupply()
-
-            expect(currentMaxSupply).to.equal(maxSupply * 4)
+            expect(KYCStatusFor_B_Before).to.equal(0)
+            expect(KYCStatusFor_B_After).to.equal(1)
+            expect(KYC_Count_Before).to.equal(0)
+            expect(KYC_Count_After).to.equal(1)
+            expect(KYCAccounts.length).to.equal(1)
+            expect(KYCAccounts[0]).to.equal(account_B)
+            expect(KYCSFor_B.validFrom).to.equal(_VALID_FROM)
+            expect(KYCSFor_B.validTo).to.equal(_VALID_TO)
+            expect(KYCSFor_B.issuer).to.equal(account_C)
+            expect(KYCSFor_B.VCid).to.equal(_VC_ID)
         })
 
-        it('GIVEN a token WHEN setMaxSupplyByPartition THEN transaction succeeds', async () => {
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CAP_ROLE, account_C)
-
-            capFacet = capFacet.connect(signer_C)
-
-            await expect(
-                capFacet.setMaxSupplyByPartition(_PARTITION_ID_1, maxSupply * 2)
-            )
-                .to.emit(capFacet, 'MaxSupplyByPartitionSet')
-                .withArgs(account_C, _PARTITION_ID_1, maxSupply * 2, 0)
-
-            const currentMaxSupply = await capFacet.getMaxSupplyByPartition(
-                _PARTITION_ID_1
+        it('GIVEN a VC WHEN revokeKYC THEN transaction succeed', async () => {
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
             )
 
-            expect(currentMaxSupply).to.equal(maxSupply * 2)
+            await kycFacet.revokeKYC(account_B)
+
+            let KYCStatusFor_B_After = await kycFacet.getKYCStatusFor(account_B)
+            let KYC_Count_After = await kycFacet.getKYCAccountsCount(1)
+            let KYCAccounts = await kycFacet.getKYCAccounts(1, 0, 100)
+
+            expect(KYCStatusFor_B_After).to.equal(0)
+            expect(KYC_Count_After).to.equal(0)
+            expect(KYCAccounts.length).to.equal(0)
+        })
+
+        it('Check KYC status after expiration', async () => {
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            let KYCStatusFor_B_After_Grant = await kycFacet.getKYCStatusFor(
+                account_B
+            )
+
+            await timeTravelFacet.changeSystemTimestamp(_VALID_TO + 1)
+
+            let KYCStatusFor_B_After_Expiration =
+                await kycFacet.getKYCStatusFor(account_B)
+
+            expect(KYCStatusFor_B_After_Grant).to.equal(1)
+            expect(KYCStatusFor_B_After_Expiration).to.equal(0)
+        })
+
+        it('Check KYC status after issuer removed', async () => {
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            let KYCStatusFor_B_After_Grant = await kycFacet.getKYCStatusFor(
+                account_B
+            )
+
+            await ssiManagementFacet.removeIssuer(account_C)
+
+            let KYCStatusFor_B_After_Cancelling_Issuer =
+                await kycFacet.getKYCStatusFor(account_B)
+
+            expect(KYCStatusFor_B_After_Grant).to.equal(1)
+            expect(KYCStatusFor_B_After_Cancelling_Issuer).to.equal(0)
+        })
+
+        it('Check KYC status after issuer revokes VC', async () => {
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            let KYCStatusFor_B_After_Grant = await kycFacet.getKYCStatusFor(
+                account_B
+            )
+
+            await revocationList.connect(signer_C).revoke(_VC_ID)
+
+            let KYCFor_B_After_Revoking_VC = await kycFacet.getKYCStatusFor(
+                account_B
+            )
+
+            expect(KYCStatusFor_B_After_Grant).to.equal(1)
+            expect(KYCFor_B_After_Revoking_VC).to.equal(0)
         })
     })
 })
