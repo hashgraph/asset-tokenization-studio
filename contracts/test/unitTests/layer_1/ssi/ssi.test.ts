@@ -232,7 +232,7 @@ import {
     DeployContractWithFactoryCommand,
 } from '@scripts'
 
-describe('KYC Tests', () => {
+describe('SSI Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
