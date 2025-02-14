@@ -213,7 +213,6 @@ import {
 import {ERC1410Basic} from './ERC1410Basic.sol';
 import {ERC1410Controller} from './ERC1410Controller.sol';
 import {ERC1410Operator} from './ERC1410Operator.sol';
-import {Common} from '../../common/Common.sol';
 
 import {ERC1410Standard} from './ERC1410Standard.sol';
 

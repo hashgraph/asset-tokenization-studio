@@ -213,13 +213,11 @@ import {_ERC1594_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {ERC1594StorageWrapper} from './ERC1594StorageWrapper.sol';
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
 import {IERC1594} from '../../interfaces/ERC1400/IERC1594.sol';
-import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
 
 contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594()
         external
-        virtual
         override
         onlyUninitialized(_getErc1594Storage().initialized)
     {
@@ -244,12 +242,11 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         bytes calldata _data // solhint-disable-line no-unused-vars
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(_to)
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
         // Add a function to validate the `_data` parameter
@@ -276,13 +273,12 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         bytes calldata _data // solhint-disable-line no-unused-vars
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(_to)
         checkControlList(_from)
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
         // Add a function to validate the `_data` parameter
@@ -304,13 +300,12 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         bytes calldata _data
     )
         external
-        virtual
         override
-        //        onlyValidMaxSupply(_value)
+        checkMaxSupply(_value)
         onlyUnpaused
         onlyRole(_ISSUER_ROLE)
         checkControlList(_tokenHolder)
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyIssuable
     {
         _issue(_tokenHolder, _value, _data);
@@ -328,11 +323,10 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         bytes calldata _data
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
         _redeem(_value, _data);
@@ -353,12 +347,11 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         bytes calldata _data
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(_tokenHolder)
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
     {
         _redeemFrom(_tokenHolder, _value, _data);
@@ -371,7 +364,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
      * If a token returns FALSE for `isIssuable()` then it MUST never allow additional tokens to be issued.
      * @return bool `true` signifies the minting is allowed. While `false` denotes the end of minting
      */
-    function isIssuable() external view virtual override returns (bool) {
+    function isIssuable() external view override returns (bool) {
         return _isIssuable();
     }
 
@@ -393,14 +386,9 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     )
         external
         view
-        virtual
         override
-        returns (
-            //onlyWithoutMultiPartition
-            bool,
-            bytes1,
-            bytes32
-        )
+        onlyWithoutMultiPartition
+        returns (bool, bytes1, bytes32)
     {
         return _canTransfer(_to, _value, _data);
     }
@@ -425,25 +413,12 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     )
         external
         view
-        virtual
         override
-        returns (
-            //onlyWithoutMultiPartition
-            bool,
-            bytes1,
-            bytes32
-        )
+        onlyWithoutMultiPartition
+        returns (bool, bytes1, bytes32)
     {
         return _canTransferFrom(_from, _to, _value, _data);
     }
-
-    // solhint-disable no-empty-blocks
-    function _beforeTokenTransfer(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value
-    ) internal virtual override {}
 
     // solhint-enable no-empty-blocks
     // solhint-enable no-unused-vars
@@ -451,7 +426,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -461,7 +435,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -489,7 +462,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

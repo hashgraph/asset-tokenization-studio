@@ -215,19 +215,19 @@ import {
     type AccessControl,
     type Equity,
     type ControlList,
-    ERC20_2,
-    ERC1594_2,
-    ERC1644_2,
+    ERC20,
+    ERC1594,
+    ERC1644,
     AdjustBalances,
-    Cap_2,
+    Cap,
     IERC20,
     IFactory,
     BusinessLogicResolver,
-    AccessControl__factory,
+    AccessControlFacet__factory,
     ControlList__factory,
     Equity__factory,
     ERC1410ScheduledTasks__factory,
-    Pause__factory,
+    PauseFacet__factory,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -316,10 +316,10 @@ describe('ERC1400 Tests', () => {
     let pauseFacet: Pause
     let equityFacet: Equity
     let controlList: ControlList
-    let capFacet: Cap_2
-    let erc20Facet: ERC20_2
-    let erc1594Facet: ERC1594_2
-    let erc1644Facet: ERC1644_2
+    let capFacet: Cap
+    let erc20Facet: ERC20
+    let erc1594Facet: ERC1594
+    let erc1644Facet: ERC1644
     let adjustBalancesFacet: AdjustBalances
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
@@ -359,33 +359,33 @@ describe('ERC1400 Tests', () => {
     }
 
     async function issueTokens(singlePartition?: boolean) {
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_A,
-            balanceOf_A_Original[0],
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_A,
+            value: balanceOf_A_Original[0],
+            data: '0x',
+        })
         if (!singlePartition) {
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_2,
-                account_A,
-                balanceOf_A_Original[1],
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_2,
+                tokenHolder: account_A,
+                value: balanceOf_A_Original[1],
+                data: '0x',
+            })
         }
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_B,
-            balanceOf_B_Original[0],
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original[0],
+            data: '0x',
+        })
         if (!singlePartition) {
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_2,
-                account_B,
-                balanceOf_B_Original[1],
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_2,
+                tokenHolder: account_B,
+                value: balanceOf_B_Original[1],
+                data: '0x',
+            })
         }
     }
 
@@ -656,13 +656,13 @@ describe('ERC1400 Tests', () => {
 
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
-        capFacet = await ethers.getContractAt('Cap_2', diamond.address)
+        capFacet = await ethers.getContractAt('Cap', diamond.address)
 
-        erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
+        erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
 
-        erc1594Facet = await ethers.getContractAt('ERC1594_2', diamond.address)
+        erc1594Facet = await ethers.getContractAt('ERC1594', diamond.address)
 
-        erc1644Facet = await ethers.getContractAt('ERC1644_2', diamond.address)
+        erc1644Facet = await ethers.getContractAt('ERC1644', diamond.address)
 
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
     }
@@ -744,7 +744,7 @@ describe('ERC1400 Tests', () => {
                 factory,
             })
 
-            accessControlFacet = AccessControl__factory.connect(
+            accessControlFacet = AccessControlFacet__factory.connect(
                 diamond.address,
                 signer_A
             )
@@ -753,7 +753,7 @@ describe('ERC1400 Tests', () => {
                 signer_A
             )
             equityFacet = Equity__factory.connect(diamond.address, signer_A)
-            pauseFacet = Pause__factory.connect(diamond.address, signer_B)
+            pauseFacet = PauseFacet__factory.connect(diamond.address, signer_B)
             controlList = ControlList__factory.connect(
                 diamond.address,
                 signer_A
@@ -761,27 +761,27 @@ describe('ERC1400 Tests', () => {
 
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
 
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_C,
-                balanceOf_C_Original,
-                '0x'
-            )
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_E,
-                balanceOf_E_Original,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_C,
+                value: balanceOf_C_Original,
+                data: '0x',
+            })
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_E,
+                value: balanceOf_E_Original,
+                data: '0x',
+            })
         })
 
         it('GIVEN an account WHEN authorizing and revoking operators THEN transaction succeeds', async () => {
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_2,
-                account_C,
-                balanceOf_C_Original,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_2,
+                tokenHolder: account_C,
+                value: balanceOf_C_Original,
+                data: '0x',
+            })
             // authorize
             erc1410Facet = erc1410Facet.connect(signer_C)
             await erc1410Facet.authorizeOperator(account_D)
@@ -914,12 +914,12 @@ describe('ERC1400 Tests', () => {
 
             // issue fails
             await expect(
-                erc1410Facet.issueByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    amount,
-                    data
-                )
+                erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_E,
+                    value: amount,
+                    data: data,
+                })
             ).to.be.revertedWithCustomError(erc1410Facet, 'TokenIsPaused')
         })
 
@@ -929,12 +929,13 @@ describe('ERC1400 Tests', () => {
 
             // issue fails
             await expect(
-                erc1410Facet.issueByPartition(
-                    '0x0000000000000000000000000000000000000000000000000000000000000000',
-                    account_E,
-                    amount,
-                    data
-                )
+                erc1410Facet.issueByPartition({
+                    partition:
+                        '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    tokenHolder: account_E,
+                    value: amount,
+                    data: data,
+                })
             ).to.be.rejectedWith('ZeroPartition')
         })
 
@@ -944,12 +945,12 @@ describe('ERC1400 Tests', () => {
 
             // issue fails
             await expect(
-                erc1410Facet.issueByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    0,
-                    data
-                )
+                erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_E,
+                    value: 0,
+                    data: data,
+                })
             ).to.be.rejectedWith('ZeroValue')
         })
 
@@ -1177,12 +1178,12 @@ describe('ERC1400 Tests', () => {
 
             // issue fails
             await expect(
-                erc1410Facet.issueByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    amount,
-                    data
-                )
+                erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_E,
+                    value: amount,
+                    data: data,
+                })
             ).to.be.rejectedWith('AccountIsBlocked')
         })
 
@@ -1307,12 +1308,12 @@ describe('ERC1400 Tests', () => {
 
             // add to list fails
             await expect(
-                erc1410Facet.issueByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    amount,
-                    data
-                )
+                erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_E,
+                    value: amount,
+                    data: data,
+                })
             ).to.be.rejectedWith('AccountHasNoRole')
         })
 
@@ -1706,7 +1707,7 @@ describe('ERC1400 Tests', () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CAP_ROLE, account_A)
             erc1410Facet = erc1410Facet.connect(signer_A)
-            capFacet = await ethers.getContractAt('Cap_2', diamond.address)
+            capFacet = await ethers.getContractAt('Cap', diamond.address)
             capFacet = capFacet.connect(signer_A)
             await capFacet.setMaxSupply(
                 balanceOf_C_Original + balanceOf_E_Original + 2 * amount
@@ -1718,21 +1719,21 @@ describe('ERC1400 Tests', () => {
 
             // add to list fails
             await expect(
-                erc1410Facet.issueByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    3 * amount,
-                    data
-                )
+                erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_E,
+                    value: 3 * amount,
+                    data: data,
+                })
             ).to.be.rejectedWith('MaxSupplyReached')
 
             await expect(
-                erc1410Facet.issueByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    2 * amount,
-                    data
-                )
+                erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_E,
+                    value: 2 * amount,
+                    data: data,
+                })
             ).to.be.rejectedWith('MaxSupplyReachedForPartition')
         })
 
@@ -1769,12 +1770,12 @@ describe('ERC1400 Tests', () => {
 
             //  transfer
             await expect(
-                erc1410Facet.issueByPartition(
-                    _PARTITION_ID_1,
-                    account_D,
-                    amount,
-                    data
-                )
+                erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_D,
+                    value: amount,
+                    data: data,
+                })
             )
                 .to.emit(erc1410Facet, 'IssuedByPartition')
                 .withArgs(_PARTITION_ID_1, account_A, account_D, amount, data)
@@ -1810,7 +1811,7 @@ describe('ERC1400 Tests', () => {
             // Set Max supplies to test
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CAP_ROLE, account_A)
-            capFacet = await ethers.getContractAt('Cap_2', diamond.address)
+            capFacet = await ethers.getContractAt('Cap', diamond.address)
             capFacet = capFacet.connect(signer_A)
             await capFacet.setMaxSupply(
                 balanceOf_C_Original + balanceOf_E_Original + 100 * amount
@@ -1825,12 +1826,12 @@ describe('ERC1400 Tests', () => {
 
             // transfer
             await expect(
-                erc1410Facet.issueByPartition(
-                    _PARTITION_ID_1,
-                    account_D,
-                    amount,
-                    data
-                )
+                erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_D,
+                    value: amount,
+                    data: data,
+                })
             )
                 .to.emit(erc1410Facet, 'SnapshotTriggered')
                 .withArgs(account_A, 1)
@@ -2069,12 +2070,12 @@ describe('ERC1400 Tests', () => {
             await controlList.addToControlList(account_E)
 
             // issue succeds
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_E,
-                amount,
-                data
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_E,
+                value: amount,
+                data: data,
+            })
         })
 
         it('GIVEN an account without controller role WHEN controllerTransfer THEN transaction fails with AccountHasNoRole', async () => {
@@ -2082,12 +2083,12 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             const balanceOf_D_Original = 4 * amount
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_D,
-                balanceOf_D_Original,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_D,
+                value: balanceOf_D_Original,
+                data: '0x',
+            })
 
             const canTransfer = await erc1410Facet.canTransferByPartition(
                 account_D,
@@ -2118,12 +2119,12 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             const balanceOf_D_Original = 4 * amount
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_D,
-                balanceOf_D_Original,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_D,
+                value: balanceOf_D_Original,
+                data: '0x',
+            })
 
             const canRedeem = await erc1410Facet.canRedeemByPartition(
                 account_D,
@@ -2212,12 +2213,12 @@ describe('ERC1400 Tests', () => {
             equityFacet = equityFacet.connect(signer_C)
             // issueing 2 tokens to account D
             const balanceOf_D_Original = 4 * amount
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_D,
-                balanceOf_D_Original,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_D,
+                value: balanceOf_D_Original,
+                data: '0x',
+            })
             // scheduling 2 snapshots
             const currentTimeInSeconds = (
                 await ethers.provider.getBlock('latest')
@@ -2417,7 +2418,7 @@ describe('ERC1400 Tests', () => {
                 factory,
             })
 
-            accessControlFacet = AccessControl__factory.connect(
+            accessControlFacet = AccessControlFacet__factory.connect(
                 diamond.address,
                 signer_A
             )
@@ -2426,7 +2427,7 @@ describe('ERC1400 Tests', () => {
                 signer_A
             )
             equityFacet = Equity__factory.connect(diamond.address, signer_A)
-            pauseFacet = Pause__factory.connect(diamond.address, signer_B)
+            pauseFacet = PauseFacet__factory.connect(diamond.address, signer_B)
             controlList = ControlList__factory.connect(
                 diamond.address,
                 signer_A
@@ -2434,18 +2435,18 @@ describe('ERC1400 Tests', () => {
 
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
 
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_C,
-                balanceOf_C_Original,
-                '0x'
-            )
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_E,
-                balanceOf_E_Original,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_C,
+                value: balanceOf_C_Original,
+                data: '0x',
+            })
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_E,
+                value: balanceOf_E_Original,
+                data: '0x',
+            })
         })
 
         it(
@@ -2560,12 +2561,12 @@ describe('ERC1400 Tests', () => {
                     )
                     .withArgs(_PARTITION_ID_2)
                 await expect(
-                    erc1410Facet.issueByPartition(
-                        _PARTITION_ID_2,
-                        account_C,
-                        amount,
-                        data
-                    )
+                    erc1410Facet.issueByPartition({
+                        partition: _PARTITION_ID_2,
+                        tokenHolder: account_C,
+                        value: amount,
+                        data: data,
+                    })
                 )
                     .to.be.revertedWithCustomError(
                         erc1410Facet,
@@ -2791,18 +2792,18 @@ describe('ERC1400 Tests', () => {
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
                 erc1410Facet = erc1410Facet.connect(signer_A)
 
-                await erc1410Facet.issueByPartition(
-                    _PARTITION_ID_1,
-                    account_A,
-                    balanceOf_A_Original[0],
-                    '0x'
-                )
-                await erc1410Facet.issueByPartition(
-                    _PARTITION_ID_2,
-                    account_A,
-                    balanceOf_A_Original[1],
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_A,
+                    value: balanceOf_A_Original[0],
+                    data: '0x',
+                })
+                await erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_2,
+                    tokenHolder: account_A,
+                    value: balanceOf_A_Original[1],
+                    data: '0x',
+                })
 
                 const balanceOf_A_Before = await erc1410Facet.balanceOf(
                     account_A
@@ -2820,12 +2821,12 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // issue after adjust
-                await erc1410Facet.issueByPartition(
-                    _PARTITION_ID_1,
-                    account_A,
-                    balanceOf_A_Original[0],
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_A,
+                    value: balanceOf_A_Original[0],
+                    data: '0x',
+                })
 
                 const balanceOf_A_After = await erc1410Facet.balanceOf(
                     account_A
@@ -3629,7 +3630,7 @@ describe('ERC1400 Tests', () => {
                 )
 
                 const LABAF_Before =
-                    await adjustBalancesFacet.getAllowanceLABAF(
+                    await adjustBalancesFacet.getAllowanceLabaf(
                         account_A,
                         account_B
                     )
@@ -3648,7 +3649,7 @@ describe('ERC1400 Tests', () => {
                     account_B
                 )
 
-                const LABAF_After = await adjustBalancesFacet.getAllowanceLABAF(
+                const LABAF_After = await adjustBalancesFacet.getAllowanceLabaf(
                     account_A,
                     account_B
                 )
@@ -3680,7 +3681,7 @@ describe('ERC1400 Tests', () => {
                     account_B
                 )
                 const LABAF_Before =
-                    await adjustBalancesFacet.getAllowanceLABAF(
+                    await adjustBalancesFacet.getAllowanceLabaf(
                         account_A,
                         account_B
                     )
@@ -3701,7 +3702,7 @@ describe('ERC1400 Tests', () => {
                     account_A,
                     account_B
                 )
-                const LABAF_After = await adjustBalancesFacet.getAllowanceLABAF(
+                const LABAF_After = await adjustBalancesFacet.getAllowanceLabaf(
                     account_A,
                     account_B
                 )

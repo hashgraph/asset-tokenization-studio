@@ -212,19 +212,18 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CAP_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {CapStorageWrapper} from './CapStorageWrapper.sol';
+import {Common} from '../common/Common.sol';
 
-contract Cap is ICap, IStaticFunctionSelectors, CapStorageWrapper {
+contract Cap is ICap, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_Cap(
         uint256 maxSupply,
         PartitionCap[] calldata partitionCap
     )
         external
-        virtual
         override
         onlyUninitialized(_capStorage().initialized)
-        onlyValidNewMaxSupply(maxSupply)
+        checkNewMaxSupply(maxSupply)
     {
         CapDataStorage storage capStorage = _capStorage();
 
@@ -243,12 +242,10 @@ contract Cap is ICap, IStaticFunctionSelectors, CapStorageWrapper {
         uint256 _maxSupply
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
-        onlyValidNewMaxSupply(_maxSupply)
-        onlyWithoutMultiPartition
+        checkNewMaxSupply(_maxSupply)
         returns (bool success_)
     {
         _setMaxSupply(_maxSupply);
@@ -260,12 +257,10 @@ contract Cap is ICap, IStaticFunctionSelectors, CapStorageWrapper {
         uint256 _maxSupply
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
-        onlyValidNewMaxSupplyByPartition(_partition, _maxSupply)
-        onlyWithoutMultiPartition
+        checkNewMaxSupplyForPartition(_partition, _maxSupply)
         returns (bool success_)
     {
         _setMaxSupplyByPartition(_partition, _maxSupply);
@@ -278,19 +273,18 @@ contract Cap is ICap, IStaticFunctionSelectors, CapStorageWrapper {
         override
         returns (uint256 maxSupply_)
     {
-        return _getMaxSupply();
+        return _getMaxSupplyAdjusted();
     }
 
     function getMaxSupplyByPartition(
         bytes32 _partition
     ) external view override returns (uint256 maxSupply_) {
-        return _getMaxSupplyByPartition(_partition);
+        return _getMaxSupplyByPartitionAdjusted(_partition);
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -300,7 +294,6 @@ contract Cap is ICap, IStaticFunctionSelectors, CapStorageWrapper {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -322,7 +315,6 @@ contract Cap is ICap, IStaticFunctionSelectors, CapStorageWrapper {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

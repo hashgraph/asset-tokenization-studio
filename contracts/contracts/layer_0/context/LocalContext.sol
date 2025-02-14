@@ -209,8 +209,13 @@ pragma solidity 0.8.18;
 import {Context} from '@openzeppelin/contracts/utils/Context.sol';
 
 abstract contract LocalContext is Context {
-    function _blockTimestamp() internal view returns (uint256 blockTimestamp_) {
-        return block.timestamp;
+    function _blockTimestamp()
+        internal
+        view
+        virtual
+        returns (uint256 blockTimestamp_)
+    {
+        blockTimestamp_ = block.timestamp;
     }
 
     function _blockChainid() internal view returns (uint256 chainid_) {

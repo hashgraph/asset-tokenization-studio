@@ -211,16 +211,16 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     ResolverProxy,
     Bond,
-    AccessControl,
-    Pause,
-    Lock_2,
+    AccessControlFacet,
+    PauseFacet,
+    Lock,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
     ERC1410ScheduledTasks__factory,
-    Lock_2__factory,
-    Pause__factory,
-    AccessControl__factory,
+    Lock__factory,
+    PauseFacet__factory,
+    AccessControlFacet__factory,
     Bond__factory,
 } from '@typechain'
 import {
@@ -276,9 +276,9 @@ describe('Bond Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let bondFacet: Bond
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
-    let lockFacet: Lock_2
+    let accessControlFacet: AccessControlFacet
+    let pauseFacet: PauseFacet
+    let lockFacet: Lock
     let erc1410Facet: ERC1410ScheduledTasks
 
     before(async () => {
@@ -353,12 +353,12 @@ describe('Bond Tests', () => {
         })
 
         bondFacet = Bond__factory.connect(diamond.address, signer_A)
-        accessControlFacet = AccessControl__factory.connect(
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
@@ -412,7 +412,7 @@ describe('Bond Tests', () => {
 
             await expect(
                 bondFacet.setCoupon(wrongcouponData_1)
-            ).to.be.rejectedWith('WrongDates')
+            ).to.be.revertedWithCustomError(bondFacet, 'WrongDates')
 
             const wrongcouponData_2 = {
                 recordDate: (
@@ -424,7 +424,7 @@ describe('Bond Tests', () => {
 
             await expect(
                 bondFacet.setCoupon(wrongcouponData_2)
-            ).to.be.rejectedWith('WrongTimestamp')
+            ).to.be.revertedWithCustomError(bondFacet, 'WrongTimestamp')
         })
 
         it('GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds', async () => {
@@ -489,12 +489,12 @@ describe('Bond Tests', () => {
             const TotalAmount = numberOfUnits
             const LockedAmount = TotalAmount - 5
 
-            await erc1410Facet.issueByPartition(
-                DEFAULT_PARTITION,
-                account_A,
-                TotalAmount,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
             await lockFacet.lock(LockedAmount, account_A, 99999999999)
 
             // set coupon
@@ -577,7 +577,7 @@ describe('Bond Tests', () => {
             // Set maturity date
             await expect(
                 bondFacet.updateMaturityDate(yesterdayInSeconds)
-            ).to.be.rejectedWith('BondMaturityDateWrong')
+            ).to.be.revertedWithCustomError(bondFacet, 'BondMaturityDateWrong')
             // Ensure maturity date is not updated
             const maturityDateAfter = (await bondFacet.getBondDetails())
                 .maturityDate

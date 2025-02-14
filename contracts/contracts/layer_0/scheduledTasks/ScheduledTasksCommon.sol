@@ -206,18 +206,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {HoldStorageWrapper_2} from '../hold/HoldStorageWrapper_2.sol';
 import {
-    _SCHEDULED_TASKS_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {LibCommon} from '../common/LibCommon.sol';
-import {IEquity} from '../../layer_2/interfaces/equity/IEquity.sol';
+    SnapshotsStorageWrapper1
+} from '../snapshots/SnapshotsStorageWrapper1.sol';
 import {
-    ScheduledTask
-} from '../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
-import {ScheduledTasksDataStorage} from './ScheduledTasksCommonRead.sol';
+    ScheduledTasksLib
+} from '../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
 
-abstract contract ScheduledTasksCommon is HoldStorageWrapper_2 {
+abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     error WrongTimestamp(uint256 timeStamp);
     error NotAutocalling();
 
@@ -228,135 +224,11 @@ abstract contract ScheduledTasksCommon is HoldStorageWrapper_2 {
         _;
     }
 
-    modifier onlyAutoCalling() {
-        if (!_scheduledTaskStorage().autoCalling) revert NotAutocalling();
+    // TODO: It is necessary right now ??? Autocalling?
+    modifier onlyAutoCalling(
+        ScheduledTasksLib.ScheduledTasksDataStorage storage _scheduledTasks
+    ) {
+        if (!_scheduledTasks.autoCalling) revert NotAutocalling();
         _;
-    }
-
-    function _addScheduledTask(
-        uint256 _newScheduledTimestamp,
-        bytes memory _newData
-    ) internal {
-        ScheduledTask memory newScheduledTask = ScheduledTask(
-            _newScheduledTimestamp,
-            _newData
-        );
-
-        uint256 scheduledTasksLength = _getScheduledTaskCount();
-
-        uint256 newScheduledTaskId = scheduledTasksLength;
-
-        bool added = false;
-
-        if (scheduledTasksLength > 0) {
-            for (uint256 index = 1; index <= scheduledTasksLength; index++) {
-                uint256 scheduledTaskPosition = scheduledTasksLength - index;
-
-                if (
-                    _scheduledTaskStorage()
-                        .scheduledTasks[scheduledTaskPosition]
-                        .scheduledTimestamp < _newScheduledTimestamp
-                ) {
-                    slideScheduledTasks(scheduledTaskPosition);
-                } else {
-                    newScheduledTaskId = scheduledTaskPosition + 1;
-                    insertScheduledTask(newScheduledTaskId, newScheduledTask);
-                    added = true;
-                    break;
-                }
-            }
-        }
-        if (!added) {
-            insertScheduledTask(0, newScheduledTask);
-        }
-    }
-
-    function _triggerScheduledTasks(
-        uint256 _max,
-        uint256 _timestamp
-    ) internal returns (uint256) {
-        uint256 scheduledTasksLength = _getScheduledTaskCount();
-
-        if (scheduledTasksLength == 0) return 0;
-
-        uint256 max = _max;
-        uint256 newTaskID;
-
-        if (max > scheduledTasksLength || max == 0) {
-            max = scheduledTasksLength;
-        }
-        ScheduledTasksDataStorage
-            storage scheduledTasks = _scheduledTaskStorage();
-
-        for (uint256 j = 1; j <= max; j++) {
-            uint256 pos = scheduledTasksLength - j;
-
-            ScheduledTask
-                memory currentScheduledTask = _getScheduledTasksByIndex(pos);
-
-            if (currentScheduledTask.scheduledTimestamp < _timestamp) {
-                popScheduledTask();
-
-                scheduledTasks.autoCalling = true;
-
-                if (_isSnapshotTaskType(currentScheduledTask.data)) {
-                    triggerSnapshotTaskType();
-                }
-                if (_isBalanceAdjustmentTaskType(currentScheduledTask.data)) {
-                    triggerBalanceAdjustmentTaskType();
-                }
-
-                scheduledTasks.autoCalling = false;
-            } else {
-                break;
-            }
-        }
-
-        return newTaskID;
-    }
-
-    function triggerSnapshotTaskType() private {
-        // TODO: Implement it
-    }
-
-    function triggerBalanceAdjustmentTaskType() private {
-        // TODO: Implement it
-    }
-
-    function slideScheduledTasks(uint256 _pos) private {
-        ScheduledTasksDataStorage
-            storage scheduledTasks = _scheduledTaskStorage();
-        scheduledTasks
-            .scheduledTasks[_pos + 1]
-            .scheduledTimestamp = scheduledTasks
-            .scheduledTasks[_pos]
-            .scheduledTimestamp;
-        scheduledTasks.scheduledTasks[_pos + 1].data = scheduledTasks
-            .scheduledTasks[_pos]
-            .data;
-    }
-
-    function insertScheduledTask(
-        uint256 _pos,
-        ScheduledTask memory scheduledTaskToInsert
-    ) private {
-        ScheduledTasksDataStorage
-            storage scheduledTasks = _scheduledTaskStorage();
-        scheduledTasks
-            .scheduledTasks[_pos]
-            .scheduledTimestamp = scheduledTaskToInsert.scheduledTimestamp;
-        scheduledTasks.scheduledTasks[_pos].data = scheduledTaskToInsert.data;
-        scheduledTasks.scheduledTaskCount++;
-    }
-
-    function popScheduledTask() private {
-        uint256 scheduledTasksLength = _getScheduledTaskCount();
-        if (scheduledTasksLength == 0) {
-            return;
-        }
-        ScheduledTasksDataStorage
-            storage scheduledTasks = _scheduledTaskStorage();
-        delete (scheduledTasks.scheduledTasks[scheduledTasksLength - 1]);
-        scheduledTasks.scheduledTaskCount--;
     }
 }

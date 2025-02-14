@@ -220,7 +220,6 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         address _operator
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
@@ -233,7 +232,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
     /// @param _operator An address which is being de-authorised
     function revokeOperator(
         address _operator
-    ) external virtual override onlyUnpaused checkControlList(_msgSender()) {
+    ) external override onlyUnpaused checkControlList(_msgSender()) {
         _revokeOperator(_operator);
     }
 
@@ -245,10 +244,9 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         address _operator
     )
         external
-        virtual
         override
         onlyUnpaused
-        //onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         checkControlList(_msgSender())
         checkControlList(_operator)
     {
@@ -263,10 +261,9 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         address _operator
     )
         external
-        virtual
         override
         onlyUnpaused
-        //onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         checkControlList(_msgSender())
     {
         _revokeOperatorByPartition(_partition, _operator);
@@ -289,10 +286,9 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
-        //onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         checkControlList(_msgSender())
         checkControlList(_from)
         checkControlList(_to)
@@ -321,7 +317,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
     function isOperator(
         address _operator,
         address _tokenHolder
-    ) public view virtual override returns (bool) {
+    ) public view override returns (bool) {
         return _isOperator(_operator, _tokenHolder);
     }
 
@@ -334,7 +330,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         bytes32 _partition,
         address _operator,
         address _tokenHolder
-    ) public view virtual override returns (bool) {
+    ) public view override returns (bool) {
         return _isOperatorForPartition(_partition, _operator, _tokenHolder);
     }
 }

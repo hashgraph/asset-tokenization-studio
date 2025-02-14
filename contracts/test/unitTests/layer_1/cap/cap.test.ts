@@ -209,16 +209,16 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Cap_2,
+    type Cap,
     AccessControl,
     Pause,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
-    Cap_2__factory,
-    AccessControl__factory,
+    Cap__factory,
+    AccessControlFacet__factory,
     ERC1410ScheduledTasks__factory,
-    Pause__factory,
+    PauseFacet__factory,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -249,8 +249,8 @@ describe('CAP Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let capFacet: Cap_2
-    let accessControlFacet: AccessControl
+    let capFacet: Cap
+    let accessControl: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
 
@@ -314,12 +314,12 @@ describe('CAP Tests', () => {
             factory: factory,
         })
 
-        capFacet = Cap_2__factory.connect(diamond.address, signer_A)
-        accessControlFacet = AccessControl__factory.connect(
+        capFacet = Cap__factory.connect(diamond.address, signer_A)
+        accessControl = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
@@ -427,8 +427,8 @@ describe('CAP Tests', () => {
 
     describe('New Max Supply Too low or 0', () => {
         it('GIVEN a token WHEN setMaxSupply to 0 THEN transaction fails with NewMaxSupplyCannotBeZero', async () => {
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CAP_ROLE, account_C)
+            accessControl = accessControl.connect(signer_A)
+            await accessControl.grantRole(CAP_ROLE, account_C)
 
             // Using account C (non role)
             capFacet = capFacet.connect(signer_C)
@@ -442,17 +442,17 @@ describe('CAP Tests', () => {
             )
         })
         it('GIVEN a token WHEN setMaxSupply a value that is less than the current total supply THEN transaction fails with NewMaxSupplyTooLow', async () => {
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-            await accessControlFacet.grantRole(CAP_ROLE, account_C)
+            accessControl = accessControl.connect(signer_A)
+            await accessControl.grantRole(ISSUER_ROLE, account_C)
+            await accessControl.grantRole(CAP_ROLE, account_C)
 
             erc1410Facet = erc1410Facet.connect(signer_C)
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_A,
-                maxSupply * 2,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_A,
+                value: maxSupply * 2,
+                data: '0x',
+            })
 
             // Using account C (non role)
             capFacet = capFacet.connect(signer_C)
@@ -464,17 +464,17 @@ describe('CAP Tests', () => {
         })
 
         it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyForPartitionTooLow', async () => {
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-            await accessControlFacet.grantRole(CAP_ROLE, account_C)
+            accessControl = accessControl.connect(signer_A)
+            await accessControl.grantRole(ISSUER_ROLE, account_C)
+            await accessControl.grantRole(CAP_ROLE, account_C)
 
             erc1410Facet = erc1410Facet.connect(signer_C)
-            await erc1410Facet.issueByPartition(
-                _PARTITION_ID_1,
-                account_A,
-                maxSupply * 2,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: _PARTITION_ID_1,
+                tokenHolder: account_A,
+                value: maxSupply * 2,
+                data: '0x',
+            })
 
             // Using account C (non role)
             capFacet = capFacet.connect(signer_C)
@@ -491,9 +491,9 @@ describe('CAP Tests', () => {
 
     describe('New Max Supply By Partition Too High', () => {
         it('GIVEN a token WHEN setMaxSupplyByPartition a value that is less than the current total supply THEN transaction fails with NewMaxSupplyByPartitionTooHigh', async () => {
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
-            await accessControlFacet.grantRole(CAP_ROLE, account_C)
+            accessControl = accessControl.connect(signer_A)
+            await accessControl.grantRole(ISSUER_ROLE, account_C)
+            await accessControl.grantRole(CAP_ROLE, account_C)
 
             // Using account C (non role)
             capFacet = capFacet.connect(signer_C)
@@ -510,8 +510,8 @@ describe('CAP Tests', () => {
 
     describe('New Max Supply OK', () => {
         it('GIVEN a token WHEN setMaxSupply THEN transaction succeeds', async () => {
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CAP_ROLE, account_C)
+            accessControl = accessControl.connect(signer_A)
+            await accessControl.grantRole(CAP_ROLE, account_C)
 
             capFacet = capFacet.connect(signer_C)
 
@@ -525,8 +525,8 @@ describe('CAP Tests', () => {
         })
 
         it('GIVEN a token WHEN setMaxSupplyByPartition THEN transaction succeeds', async () => {
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(CAP_ROLE, account_C)
+            accessControl = accessControl.connect(signer_A)
+            await accessControl.grantRole(CAP_ROLE, account_C)
 
             capFacet = capFacet.connect(signer_C)
 

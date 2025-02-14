@@ -209,17 +209,17 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     AccessControl,
-    AccessControl__factory,
+    AccessControlFacet__factory,
     BusinessLogicResolver,
-    type Cap_2,
-    Cap_2__factory,
+    type Cap,
+    Cap__factory,
     Equity,
     Equity__factory,
     ERC1410ScheduledTasks,
     ERC1410ScheduledTasks__factory,
     IFactory,
-    Snapshots_2,
-    Snapshots_2__factory,
+    Snapshots,
+    Snapshots__factory,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -248,10 +248,10 @@ describe('CAP Layer 2 Tests', () => {
     let factory: IFactory,
         businessLogicResolver: BusinessLogicResolver,
         diamond: Equity,
-        capFacet: Cap_2,
+        capFacet: Cap,
         accessControlFacet: AccessControl,
         equityFacet: Equity,
-        snapshotFacet: Snapshots_2,
+        snapshotFacet: Snapshots,
         erc1410Facet: ERC1410ScheduledTasks
     let signer_A: SignerWithAddress,
         signer_B: SignerWithAddress,
@@ -300,13 +300,13 @@ describe('CAP Layer 2 Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        capFacet = Cap_2__factory.connect(diamond.address, signer_A)
-        accessControlFacet = AccessControl__factory.connect(
+        capFacet = Cap__factory.connect(diamond.address, signer_A)
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )
         equityFacet = Equity__factory.connect(diamond.address, signer_A)
-        snapshotFacet = Snapshots_2__factory.connect(diamond.address, signer_A)
+        snapshotFacet = Snapshots__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
@@ -433,12 +433,12 @@ describe('CAP Layer 2 Tests', () => {
             maxSupplyByPartition
         )
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_C,
-            issueAmount,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_C,
+            value: issueAmount,
+            data: '0x',
+        })
 
         const currentTime = (await ethers.provider.getBlock('latest')).timestamp
         const adjustments = createAdjustmentData(
@@ -470,12 +470,12 @@ describe('CAP Layer 2 Tests', () => {
         snapshotFacet = snapshotFacet.connect(signer_A)
         erc1410Facet = erc1410Facet.connect(signer_C)
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_C,
-            issueAmount,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_C,
+            value: issueAmount,
+            data: '0x',
+        })
 
         await capFacet.setMaxSupply(maxSupply)
         await capFacet.setMaxSupplyByPartition(

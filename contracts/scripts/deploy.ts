@@ -405,35 +405,35 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-   
+
    */
 
 import { ethers } from 'hardhat'
 import { Contract, ContractFactory, ContractTransaction } from 'ethers'
 import {
-    AccessControl__factory,
+    AccessControlFacet__factory,
     AdjustBalances__factory,
     BondUSA__factory,
     BusinessLogicResolver__factory,
-    Cap_2__factory,
+    Cap__factory,
     ControlList__factory,
-    CorporateActionsSecurity__factory,
+    CorporateActions__factory,
     DiamondFacet__factory,
     EquityUSA__factory,
     ERC1410ScheduledTasks__factory,
-    ERC1594_2__factory,
+    ERC1594__factory,
     ERC1643__factory,
-    ERC1644_2__factory,
-    ERC20_2__factory,
+    ERC1644__factory,
+    ERC20__factory,
     Factory__factory,
-    Lock_2__factory,
-    Pause__factory,
+    Lock__factory,
+    PauseFacet__factory,
     ProtectedPartitions__factory,
     ProxyAdmin__factory,
     ScheduledBalanceAdjustments__factory,
     ScheduledSnapshots__factory,
     ScheduledTasks__factory,
-    Snapshots_2__factory,
+    Snapshots__factory,
     TransferAndLock__factory,
     TransparentUpgradeableProxy__factory,
 } from '@typechain'
@@ -580,7 +580,7 @@ export async function deployAtsContracts({
             overrides,
         }),
         accessControl: new DeployContractWithFactoryCommand({
-            factory: new AccessControl__factory(),
+            factory: new AccessControlFacet__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.AccessControl.addresses?.[network]
@@ -588,7 +588,7 @@ export async function deployAtsContracts({
             overrides,
         }),
         cap: new DeployContractWithFactoryCommand({
-            factory: new Cap_2__factory(),
+            factory: new Cap__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.Cap.addresses?.[network]
@@ -604,7 +604,7 @@ export async function deployAtsContracts({
             overrides,
         }),
         pause: new DeployContractWithFactoryCommand({
-            factory: new Pause__factory(),
+            factory: new PauseFacet__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.Pause.addresses?.[network]
@@ -612,7 +612,7 @@ export async function deployAtsContracts({
             overrides,
         }),
         lock: new DeployContractWithFactoryCommand({
-            factory: new Lock_2__factory(),
+            factory: new Lock__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.Lock.addresses?.[network]
@@ -620,7 +620,7 @@ export async function deployAtsContracts({
             overrides,
         }),
         erc20: new DeployContractWithFactoryCommand({
-            factory: new ERC20_2__factory(),
+            factory: new ERC20__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.ERC20.addresses?.[network]
@@ -638,7 +638,7 @@ export async function deployAtsContracts({
             overrides,
         }),
         erc1594: new DeployContractWithFactoryCommand({
-            factory: new ERC1594_2__factory(),
+            factory: new ERC1594__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.ERC1594.addresses?.[network]
@@ -654,7 +654,7 @@ export async function deployAtsContracts({
             overrides,
         }),
         erc1644: new DeployContractWithFactoryCommand({
-            factory: new ERC1644_2__factory(),
+            factory: new ERC1644__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.ERC1644.addresses?.[network]
@@ -662,7 +662,7 @@ export async function deployAtsContracts({
             overrides,
         }),
         snapshots: new DeployContractWithFactoryCommand({
-            factory: new Snapshots_2__factory(),
+            factory: new Snapshots__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.Snapshots.addresses?.[network]
@@ -721,7 +721,7 @@ export async function deployAtsContracts({
             overrides,
         }),
         corporateActionsSecurity: new DeployContractWithFactoryCommand({
-            factory: new CorporateActionsSecurity__factory(),
+            factory: new CorporateActions__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.CorporateActionsSecurity.addresses?.[

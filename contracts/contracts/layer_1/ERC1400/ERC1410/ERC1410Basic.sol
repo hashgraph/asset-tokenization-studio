@@ -215,7 +215,6 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
         bool _multiPartition
     )
         external
-        virtual
         override
         onlyUninitialized(_getERC1410BasicStorage().initialized)
     {
@@ -236,13 +235,12 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
         bytes calldata _data
     )
         external
-        virtual
         override
         onlyUnpaused
-        //onlyValidAddress(_to)
+        onlyValidAddress(_to)
         checkControlList(_msgSender())
         checkControlList(_to)
-        //onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bytes32)
     {
@@ -268,7 +266,7 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
     /**
      * @dev Total number of tokens in existence
      */
-    function totalSupply() external view virtual override returns (uint256) {
+    function totalSupply() external view override returns (uint256) {
         return _totalSupply();
     }
 
@@ -281,42 +279,12 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
         return _isMultiPartition();
     }
 
-    /**
-     * @dev Total number of tokens in existence in a partition
-     */
-    function totalSupplyByPartition(
-        bytes32 _partition
-    ) external view virtual override returns (uint256) {
-        return _totalSupplyByPartition(_partition);
-    }
-
-    /// @notice Counts the sum of all partitions balances assigned to an owner
-    /// @param _tokenHolder An address for whom to query the balance
-    /// @return The number of tokens owned by `_tokenHolder`, possibly zero
-    function balanceOf(
-        address _tokenHolder
-    ) external view virtual override returns (uint256) {
-        return _balanceOf(_tokenHolder);
-    }
-
-    /// @notice Counts the balance associated with a specific partition assigned to an tokenHolder
-    /// @param _partition The partition for which to query the balance
-    /// @param _tokenHolder An address for whom to query the balance
-    /// @return The number of tokens owned by `_tokenHolder` with the metadata associated with `_partition`,
-    ////        possibly zero
-    function balanceOfByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view virtual override returns (uint256) {
-        return _balanceOfByPartition(_partition, _tokenHolder);
-    }
-
     /// @notice Use to get the list of partitions `_tokenHolder` is associated with
     /// @param _tokenHolder An address corresponds whom partition list is queried
     /// @return List of partitions
     function partitionsOf(
         address _tokenHolder
-    ) external view virtual override returns (bytes32[] memory) {
+    ) external view override returns (bytes32[] memory) {
         return _partitionsOf(_tokenHolder);
     }
 }

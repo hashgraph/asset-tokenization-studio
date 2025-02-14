@@ -224,12 +224,78 @@ import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
 {
+    function _beforeTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
+    ) internal override {
+        _triggerAndSyncAll(partition, from, to);
+
+        if (from == address(0)) {
+            // mint
+            _updateAccountSnapshot(to, partition);
+            _updateTotalSupplySnapshot(partition);
+        } else if (to == address(0)) {
+            // burn
+            _updateAccountSnapshot(from, partition);
+            _updateTotalSupplySnapshot(partition);
+        } else {
+            // transfer
+            _updateAccountSnapshot(from, partition);
+            _updateAccountSnapshot(to, partition);
+        }
+    }
+
+    function _triggerAndSyncAll(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) internal {
+        _triggerScheduledTasks(0);
+        _syncBalanceAdjustments(_partition, _from, _to);
+    }
+
+    function _syncBalanceAdjustments(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) internal {
+        // adjust the total supply for the partition
+        _adjustTotalAndMaxSupplyForPartition(_partition);
+
+        // adjust "from" total and partition balance
+        if (_from != address(0))
+            _adjustTotalBalanceAndPartitionBalanceFor(_partition, _from);
+
+        // adjust "to" total and partition balance
+        if (_to != address(0))
+            _adjustTotalBalanceAndPartitionBalanceFor(_partition, _to);
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    ) internal override {
+        _pushLabafUserPartition(_account, _getAbaf());
+
+        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+
+        erc1410Storage.partitions[_account].push(Partition(_value, _partition));
+        erc1410Storage.partitionToIndex[_account][
+            _partition
+        ] = _getERC1410BasicStorage().partitions[_account].length;
+
+        if (_value != 0) erc1410Storage.balances[_account] += _value;
+    }
+
     function _issueByPartition(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _value,
         bytes memory _data
-    ) internal virtual {
+    ) internal {
         _validateParams(_partition, _value);
 
         _beforeTokenTransfer(_partition, address(0), _tokenHolder, _value);
@@ -258,7 +324,7 @@ abstract contract ERC1410StandardStorageWrapper is
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData
-    ) internal virtual {
+    ) internal {
         _beforeTokenTransfer(_partition, _from, address(0), _value);
 
         _reduceBalanceByPartition(_from, _value, _partition);
@@ -278,7 +344,7 @@ abstract contract ERC1410StandardStorageWrapper is
     function _reduceTotalSupplyByPartition(
         bytes32 _partition,
         uint256 _value
-    ) internal virtual {
+    ) internal {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
 
         erc1410Storage.totalSupply -= _value;
@@ -288,17 +354,14 @@ abstract contract ERC1410StandardStorageWrapper is
     function _increaseTotalSupplyByPartition(
         bytes32 _partition,
         uint256 _value
-    ) internal virtual {
+    ) internal {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
 
         erc1410Storage.totalSupply += _value;
         erc1410Storage.totalSupplyByPartition[_partition] += _value;
     }
 
-    function _validateParams(
-        bytes32 _partition,
-        uint256 _value
-    ) internal pure virtual {
+    function _validateParams(bytes32 _partition, uint256 _value) internal pure {
         if (_value == uint256(0)) {
             revert ZeroValue();
         }
@@ -313,7 +376,7 @@ abstract contract ERC1410StandardStorageWrapper is
         uint256 _value,
         bytes calldata _data, // solhint-disable-line no-unused-vars
         bytes calldata _operatorData // solhint-disable-line no-unused-vars
-    ) internal view virtual returns (bool, bytes1, bytes32) {
+    ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
@@ -345,4 +408,84 @@ abstract contract ERC1410StandardStorageWrapper is
 
         return (true, _SUCCESS, bytes32(0));
     }
+
+    function _totalSupplyAdjusted() internal view returns (uint256) {
+        return _totalSupplyAdjustedAt(_blockTimestamp());
+    }
+
+    function _totalSupplyAdjustedAt(
+        uint256 _timestamp
+    ) internal view returns (uint256) {
+        (uint256 pendingABAF, ) = _getPendingScheduledBalanceAdjustmentsAt(
+            _timestamp
+        );
+        return _totalSupply() * pendingABAF;
+    }
+
+    function _totalSupplyByPartitionAdjusted(
+        bytes32 _partition
+    ) internal view returns (uint256) {
+        uint256 factor = _calculateFactor(
+            _getAbafAdjusted(),
+            _getLabafByPartition(_partition)
+        );
+        return _totalSupplyByPartition(_partition) * factor;
+    }
+
+    function _balanceOfAdjusted(
+        address _tokenHolder
+    ) internal view returns (uint256) {
+        return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
+    }
+
+    function _balanceOfAdjustedAt(
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view returns (uint256) {
+        uint256 factor = _calculateFactor(
+            _getAbafAdjustedAt(_timestamp),
+            _getLabafByUser(_tokenHolder)
+        );
+        return _balanceOf(_tokenHolder) * factor;
+    }
+
+    function _balanceOfByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view returns (uint256) {
+        return
+            _balanceOfByPartitionAdjustedAt(
+                _partition,
+                _tokenHolder,
+                _blockTimestamp()
+            );
+    }
+
+    function _balanceOfByPartitionAdjustedAt(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _timestamp
+    ) internal view returns (uint256) {
+        uint256 factor = _calculateFactor(
+            _getAbafAdjustedAt(_timestamp),
+            _getLabafByUserAndPartition(_partition, _tokenHolder)
+        );
+        return _balanceOfByPartition(_partition, _tokenHolder) * factor;
+    }
+
+    function _updateAccountSnapshot(
+        address account,
+        bytes32 partition
+    ) internal virtual;
+
+    function _updateTotalSupplySnapshot(bytes32 partition) internal virtual;
+
+    function _getLabafByUserAndPartition(
+        bytes32 _partition,
+        address _account
+    ) internal view virtual returns (uint256);
+
+    function _adjustTotalAndMaxSupplyForPartition(
+        bytes32 _partition
+    ) internal virtual;
 }

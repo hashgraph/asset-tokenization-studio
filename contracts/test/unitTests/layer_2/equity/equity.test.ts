@@ -212,14 +212,14 @@ import {
     type Equity,
     type Pause,
     type AccessControl,
-    Lock_2,
+    Lock,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
-    AccessControl__factory,
+    AccessControlFacet__factory,
     Equity__factory,
-    Pause__factory,
-    Lock_2__factory,
+    PauseFacet__factory,
+    Lock__factory,
     ERC1410ScheduledTasks__factory,
 } from '@typechain'
 import {
@@ -285,7 +285,7 @@ describe('Equity Tests', () => {
     let equityFacet: Equity
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let lockFacet: Lock_2
+    let lockFacet: Lock
     let erc1410Facet: ERC1410ScheduledTasks
 
     before(async () => {
@@ -348,13 +348,13 @@ describe('Equity Tests', () => {
             factory,
         })
 
-        accessControlFacet = AccessControl__factory.connect(
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )
         equityFacet = Equity__factory.connect(diamond.address, signer_A)
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
@@ -432,7 +432,7 @@ describe('Equity Tests', () => {
 
             await expect(
                 equityFacet.setDividends(wrongDividendData_1)
-            ).to.be.rejectedWith('WrongDates')
+            ).to.be.revertedWithCustomError(equityFacet, 'WrongDates')
 
             const wrongDividendData_2 = {
                 recordDate: (
@@ -444,7 +444,7 @@ describe('Equity Tests', () => {
 
             await expect(
                 equityFacet.setDividends(wrongDividendData_2)
-            ).to.be.rejectedWith('WrongTimestamp')
+            ).to.be.revertedWithCustomError(equityFacet, 'WrongTimestamp')
         })
 
         it('GIVEN an account with corporateActions role WHEN setDividends THEN transaction succeeds', async () => {
@@ -511,12 +511,12 @@ describe('Equity Tests', () => {
             const TotalAmount = number_Of_Shares
             const LockedAmount = TotalAmount - 5n
 
-            await erc1410Facet.issueByPartition(
-                DEFAULT_PARTITION,
-                account_A,
-                TotalAmount,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
             await lockFacet.lock(LockedAmount, account_A, 99999999999)
 
             // set dividend
@@ -624,12 +624,12 @@ describe('Equity Tests', () => {
             const TotalAmount = number_Of_Shares
             const LockedAmount = TotalAmount - 5n
 
-            await erc1410Facet.issueByPartition(
-                DEFAULT_PARTITION,
-                account_A,
-                TotalAmount,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
             await lockFacet.lock(LockedAmount, account_A, 99999999999)
 
             // set dividend

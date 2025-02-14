@@ -216,9 +216,9 @@ import {
     ERC1410ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
-    AccessControl__factory,
+    AccessControlFacet__factory,
     Equity__factory,
-    Pause__factory,
+    PauseFacet__factory,
     ERC1410ScheduledTasks__factory,
     ScheduledTasks__factory,
 } from '@typechain'
@@ -325,7 +325,7 @@ describe('Scheduled Tasks Tests', () => {
             factory,
         })
 
-        accessControlFacet = AccessControl__factory.connect(
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )
@@ -334,7 +334,7 @@ describe('Scheduled Tasks Tests', () => {
             diamond.address,
             signer_A
         )
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
@@ -364,12 +364,12 @@ describe('Scheduled Tasks Tests', () => {
         await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
 
         erc1410Facet = erc1410Facet.connect(signer_B)
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_A,
-            INITIAL_AMOUNT,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_A,
+            value: INITIAL_AMOUNT,
+            data: '0x',
+        })
 
         // Using account C (with role)
         equityFacet = equityFacet.connect(signer_C)

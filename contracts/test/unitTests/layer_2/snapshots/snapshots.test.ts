@@ -209,16 +209,16 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Snapshots_2,
+    type Snapshots,
     type Equity,
     type ERC1410ScheduledTasks,
     type AccessControl,
     BusinessLogicResolver,
     IFactory,
-    AccessControl__factory,
+    AccessControlFacet__factory,
     Equity__factory,
     ERC1410ScheduledTasks__factory,
-    Snapshots_2__factory,
+    Snapshots__factory,
 } from '@typechain'
 import {
     SNAPSHOT_ROLE,
@@ -257,7 +257,7 @@ describe('Snapshots Layer 2 Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
-    let snapshotFacet: Snapshots_2
+    let snapshotFacet: Snapshots
     let accessControlFacet: AccessControl
     let equityFacet: Equity
 
@@ -321,7 +321,7 @@ describe('Snapshots Layer 2 Tests', () => {
             factory,
         })
 
-        accessControlFacet = AccessControl__factory.connect(
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )
@@ -330,7 +330,7 @@ describe('Snapshots Layer 2 Tests', () => {
             diamond.address,
             signer_A
         )
-        snapshotFacet = Snapshots_2__factory.connect(diamond.address, signer_A)
+        snapshotFacet = Snapshots__factory.connect(diamond.address, signer_A)
     })
 
     it('GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds', async () => {
@@ -344,18 +344,18 @@ describe('Snapshots Layer 2 Tests', () => {
         erc1410Facet = erc1410Facet.connect(signer_A)
         equityFacet = equityFacet.connect(signer_A)
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_C,
-            balanceOf_C_Original,
-            '0x'
-        )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_B,
-            balanceOf_B_Original,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_C,
+            value: balanceOf_C_Original,
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original,
+            data: '0x',
+        })
 
         // schedule tasks
         const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
@@ -540,10 +540,10 @@ describe('Snapshots Layer 2 Tests', () => {
         expect(decimals_At_Snapshot_3).to.be.equal(DECIMALS + decimalFactor_2)
         expect(decimals_At_Snapshot_4).to.be.equal(DECIMALS + decimalFactor_3)
 
-        const ABAF_At_Snapshot_1 = await snapshotFacet.ABAFAtSnapshot(1)
-        const ABAF_At_Snapshot_2 = await snapshotFacet.ABAFAtSnapshot(2)
-        const ABAF_At_Snapshot_3 = await snapshotFacet.ABAFAtSnapshot(3)
-        const ABAF_At_Snapshot_4 = await snapshotFacet.ABAFAtSnapshot(4)
+        const ABAF_At_Snapshot_1 = await snapshotFacet.abafAtSnapshot(1)
+        const ABAF_At_Snapshot_2 = await snapshotFacet.abafAtSnapshot(2)
+        const ABAF_At_Snapshot_3 = await snapshotFacet.abafAtSnapshot(3)
+        const ABAF_At_Snapshot_4 = await snapshotFacet.abafAtSnapshot(4)
 
         expect(ABAF_At_Snapshot_1).to.be.equal(0)
         expect(ABAF_At_Snapshot_2).to.be.equal(adjustmentFactor_1)

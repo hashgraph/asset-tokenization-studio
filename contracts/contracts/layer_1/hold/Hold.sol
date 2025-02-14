@@ -211,16 +211,16 @@ import {
 import {IHold} from '../interfaces/hold/IHold.sol';
 import {Common} from '../common/Common.sol';
 import {_CONTROLLER_ROLE} from '../constants/roles.sol';
+import {_HOLD_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
+contract Hold is IHold, IStaticFunctionSelectors, Common {
     function createHoldByPartition(
         bytes32 _partition,
         Hold calldata _hold
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyValidAddress(_hold.escrow)
@@ -253,7 +253,6 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyValidAddress(_from)
@@ -287,7 +286,6 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyValidAddress(_from)
@@ -322,7 +320,6 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyValidAddress(_from)
@@ -357,7 +354,6 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
         bytes calldata _signature
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyValidAddress(_from)
@@ -394,7 +390,6 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
         uint256 _amount
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -426,7 +421,6 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
         uint256 _amount
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -453,7 +447,6 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
         uint256 _holdId
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -477,21 +470,21 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
 
     function getHeldAmountFor(
         address _tokenHolder
-    ) external view virtual override returns (uint256 amount_) {
+    ) external view override returns (uint256 amount_) {
         return _getHeldAmountFor(_tokenHolder);
     }
 
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual override returns (uint256 amount_) {
+    ) external view override returns (uint256 amount_) {
         return _getHeldAmountForByPartition(_partition, _tokenHolder);
     }
 
     function getHoldCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual override returns (uint256 holdCount_) {
+    ) external view override returns (uint256 holdCount_) {
         return _getHoldCountForByPartition(_partition, _tokenHolder);
     }
 
@@ -500,7 +493,7 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
         address _tokenHolder,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view virtual override returns (uint256[] memory holdsId_) {
+    ) external view override returns (uint256[] memory holdsId_) {
         return
             _getHoldsIdForByPartition(
                 _partition,
@@ -517,7 +510,6 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
     )
         external
         view
-        virtual
         override
         returns (
             uint256 amount_,
@@ -529,5 +521,93 @@ abstract contract Hold is IHold, IStaticFunctionSelectors, Common {
         )
     {
         return _getHoldForByPartition(_partition, _tokenHolder, _holdId);
+    }
+
+    function getHeldAmountForAdjusted(
+        address _tokenHolder
+    ) external view returns (uint256 amount_) {
+        return _getHeldAmountForAdjusted(_tokenHolder);
+    }
+
+    function getHeldAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 amount_) {
+        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _HOLD_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](15);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .createHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .createHoldFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .controllerCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .executeHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .releaseHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .reclaimHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHeldAmountForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldCountForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldsIdForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHeldAmountForAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHeldAmountForByPartitionAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHeldAmountFor
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IHold).interfaceId;
     }
 }

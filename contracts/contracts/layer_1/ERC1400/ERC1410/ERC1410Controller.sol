@@ -223,10 +223,9 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
-        //onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_CONTROLLER_ROLE)
         onlyControllable
     {
@@ -249,10 +248,9 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
-        //onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_CONTROLLER_ROLE)
         onlyControllable
     {
@@ -273,7 +271,7 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external view virtual override returns (bool, bytes1, bytes32) {
+    ) external view override returns (bool, bytes1, bytes32) {
         return
             _canTransferByPartition(
                 _from,

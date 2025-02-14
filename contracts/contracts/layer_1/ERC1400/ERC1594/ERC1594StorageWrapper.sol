@@ -237,7 +237,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
     }
 
     // solhint-disable-next-line func-name-mixedcase
-    function _initialize_ERC1594() internal virtual {
+    function _initialize_ERC1594() internal {
         _getErc1594Storage().issuance = true;
         _getErc1594Storage().initialized = true;
     }
@@ -256,7 +256,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         address _tokenHolder,
         uint256 _value,
         bytes calldata _data
-    ) internal virtual {
+    ) internal {
         // Add a function to validate the `_data` parameter
         _mint(_tokenHolder, _value);
         emit Issued(_msgSender(), _tokenHolder, _value, _data);
@@ -269,7 +269,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
      * @param _value The amount of tokens need to be redeemed
      * @param _data The `bytes calldata _data` it can be used in the token contract to authenticate the redemption.
      */
-    function _redeem(uint256 _value, bytes calldata _data) internal virtual {
+    function _redeem(uint256 _value, bytes calldata _data) internal {
         // Add a function to validate the `_data` parameter
         _burn(_msgSender(), _value);
         emit Redeemed(address(0), _msgSender(), _value, _data);
@@ -288,7 +288,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         address _tokenHolder,
         uint256 _value,
         bytes calldata _data
-    ) internal virtual {
+    ) internal {
         // Add a function to validate the `_data` parameter
         _burnFrom(_tokenHolder, _value);
         emit Redeemed(_msgSender(), _tokenHolder, _value, _data);
@@ -301,7 +301,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
      * If a token returns FALSE for `isIssuable()` then it MUST never allow additional tokens to be issued.
      * @return bool `true` signifies the minting is allowed. While `false` denotes the end of minting
      */
-    function _isIssuable() internal view virtual returns (bool) {
+    function _isIssuable() internal view returns (bool) {
         return _getErc1594Storage().issuance;
     }
 
@@ -320,7 +320,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         address _to,
         uint256 _value,
         bytes calldata _data // solhint-disable-line no-unused-vars
-    ) internal view virtual returns (bool, bytes1, bytes32) {
+    ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
@@ -333,7 +333,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (!_checkControlList(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (_balanceOf(_msgSender()) < _value) {
+        if (_balanceOfAdjusted(_msgSender()) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
 
@@ -357,7 +357,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         address _to,
         uint256 _value,
         bytes calldata _data // solhint-disable-line no-unused-vars
-    ) internal view virtual returns (bool, bytes1, bytes32) {
+    ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
@@ -376,10 +376,10 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (!_checkControlList(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (_allowance(_from, _msgSender()) < _value) {
+        if (_allowanceAdjusted(_from, _msgSender()) < _value) {
             return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
         }
-        if (_balanceOf(_from) < _value) {
+        if (_balanceOfAdjusted(_from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
 
@@ -389,7 +389,6 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
     function _getErc1594Storage()
         internal
         pure
-        virtual
         returns (ERC1594Storage storage erc1594Storage_)
     {
         bytes32 position = _ERC1594_STORAGE_POSITION;

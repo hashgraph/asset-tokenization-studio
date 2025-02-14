@@ -225,7 +225,6 @@ abstract contract ERC1410ProtectedPartitions is
         bytes calldata _signature
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_protectedPartitionsRole(_partition))
@@ -253,7 +252,6 @@ abstract contract ERC1410ProtectedPartitions is
         bytes calldata _signature
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_protectedPartitionsRole(_partition))

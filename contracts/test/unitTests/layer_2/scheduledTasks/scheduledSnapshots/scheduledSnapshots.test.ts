@@ -215,7 +215,7 @@ import {
     ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
-    AccessControl__factory,
+    AccessControlFacet__factory,
     Equity__factory,
     ScheduledTasks__factory,
     ScheduledSnapshots__factory,
@@ -311,7 +311,7 @@ describe('Scheduled Snapshots Tests', () => {
             factory,
         })
 
-        accessControlFacet = AccessControl__factory.connect(
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )

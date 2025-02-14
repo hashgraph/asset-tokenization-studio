@@ -226,12 +226,12 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         _;
     }
 
-    function _authorizeOperator(address _operator) internal virtual {
+    function _authorizeOperator(address _operator) internal {
         _getERC1410operatorStorage().approvals[_msgSender()][_operator] = true;
         emit AuthorizedOperator(_operator, _msgSender());
     }
 
-    function _revokeOperator(address _operator) internal virtual {
+    function _revokeOperator(address _operator) internal {
         _getERC1410operatorStorage().approvals[_msgSender()][_operator] = false;
         emit RevokedOperator(_operator, _msgSender());
     }
@@ -239,7 +239,7 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
     function _authorizeOperatorByPartition(
         bytes32 _partition,
         address _operator
-    ) internal virtual {
+    ) internal {
         _getERC1410operatorStorage().partitionApprovals[_msgSender()][
             _partition
         ][_operator] = true;
@@ -249,7 +249,7 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
     function _revokeOperatorByPartition(
         bytes32 _partition,
         address _operator
-    ) internal virtual {
+    ) internal {
         _getERC1410operatorStorage().partitionApprovals[_msgSender()][
             _partition
         ][_operator] = false;
@@ -263,7 +263,7 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) internal virtual returns (bytes32) {
+    ) internal returns (bytes32) {
         _transferByPartition(
             _from,
             _to,
@@ -278,7 +278,7 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
     function _isOperator(
         address _operator,
         address _tokenHolder
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         return _getERC1410operatorStorage().approvals[_tokenHolder][_operator];
     }
 
@@ -286,7 +286,7 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         bytes32 _partition,
         address _operator,
         address _tokenHolder
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         return
             _getERC1410operatorStorage().partitionApprovals[_tokenHolder][
                 _partition
@@ -297,7 +297,7 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         bytes32 _partition,
         address _operator,
         address _tokenHolder
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         return
             _isOperator(_operator, _tokenHolder) ||
             _isOperatorForPartition(_partition, _operator, _tokenHolder);
@@ -306,7 +306,6 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
     function _getERC1410operatorStorage()
         internal
         pure
-        virtual
         returns (ERC1410OperatorStorage storage erc1410OperatorStorage_)
     {
         bytes32 position = _ERC1410_OPERATOR_STORAGE_POSITION;

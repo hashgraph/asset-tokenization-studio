@@ -218,12 +218,7 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1644(
         bool _controllable
-    )
-        external
-        virtual
-        override
-        onlyUninitialized(_getErc1644Storage().initialized)
-    {
+    ) external override onlyUninitialized(_getErc1644Storage().initialized) {
         _getErc1644Storage().isControllable = _controllable;
         _getErc1644Storage().initialized = true;
     }
@@ -250,11 +245,10 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyRole(_CONTROLLER_ROLE)
         onlyUnpaused
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyControllable
     {
         _controllerTransfer(_from, _to, _value, _data, _operatorData);
@@ -279,23 +273,14 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyRole(_CONTROLLER_ROLE)
         onlyUnpaused
-        //onlyWithoutMultiPartition
+        onlyWithoutMultiPartition
         onlyControllable
     {
         _controllerRedeem(_tokenHolder, _value, _data, _operatorData);
     }
-
-    // solhint-disable no-empty-blocks
-    function _beforeTokenTransfer(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value
-    ) internal virtual override {}
 
     // solhint-enable no-empty-blocks
     // solhint-enable no-unused-vars
@@ -307,14 +292,13 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
      * `controllerTransfer` / `controllerRedeem` will always revert.
      * @return bool `true` when controller address is non-zero otherwise return `false`.
      */
-    function isControllable() external view virtual override returns (bool) {
+    function isControllable() external view override returns (bool) {
         return _isControllable();
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -324,7 +308,6 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -350,7 +333,6 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {
@@ -365,7 +347,6 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
      */
     function finalizeControllable()
         external
-        virtual
         override
         onlyRole(_DEFAULT_ADMIN_ROLE)
         onlyControllable

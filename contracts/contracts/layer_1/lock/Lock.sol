@@ -208,17 +208,14 @@ pragma solidity 0.8.18;
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_0/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
 import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {_LOCKER_ROLE} from '../constants/roles.sol';
 import {ILock} from '../interfaces/lock/ILock.sol';
-import {LockStorageWrapper} from './LockStorageWrapper.sol';
+import {Common} from '../common/Common.sol';
 import {_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
+contract Lock is ILock, IStaticFunctionSelectors, Common {
     // Functions
     function lockByPartition(
         bytes32 _partition,
@@ -227,7 +224,6 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         uint256 _expirationTimestamp
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_LOCKER_ROLE)
@@ -257,7 +253,6 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         address _tokenHolder
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -277,14 +272,14 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     function getLockedAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual override returns (uint256 amount_) {
-        return _getLockedAmountForByPartition(_partition, _tokenHolder);
+    ) external view override returns (uint256 amount_) {
+        return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function getLockCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual override returns (uint256 lockCount_) {
+    ) external view override returns (uint256 lockCount_) {
         return _getLockCountForByPartition(_partition, _tokenHolder);
     }
 
@@ -293,7 +288,7 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         address _tokenHolder,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view virtual override returns (uint256[] memory locksId_) {
+    ) external view override returns (uint256[] memory locksId_) {
         return
             _getLocksIdForByPartition(
                 _partition,
@@ -310,11 +305,11 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     )
         external
         view
-        virtual
         override
         returns (uint256 amount_, uint256 expirationTimestamp_)
     {
-        return _getLockForByPartition(_partition, _tokenHolder, _lockId);
+        return
+            _getLockForByPartitionAdjusted(_partition, _tokenHolder, _lockId);
     }
 
     // Uses default parititon in case Multipartition is not activated
@@ -324,7 +319,6 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         uint256 _expirationTimestamp
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_LOCKER_ROLE)
@@ -353,7 +347,6 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         address _tokenHolder
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyWithoutMultiPartition
@@ -380,13 +373,17 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
 
     function getLockedAmountFor(
         address _tokenHolder
-    ) external view virtual override returns (uint256 amount_) {
-        return _getLockedAmountFor(_tokenHolder);
+    ) external view override returns (uint256 amount_) {
+        return
+            _getLockedAmountForByPartitionAdjusted(
+                _DEFAULT_PARTITION,
+                _tokenHolder
+            );
     }
 
     function getLockCountFor(
         address _tokenHolder
-    ) external view virtual override returns (uint256 lockCount_) {
+    ) external view override returns (uint256 lockCount_) {
         return _getLockCountForByPartition(_DEFAULT_PARTITION, _tokenHolder);
     }
 
@@ -394,7 +391,7 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
         address _tokenHolder,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view virtual override returns (uint256[] memory locksId_) {
+    ) external view override returns (uint256[] memory locksId_) {
         return
             _getLocksIdForByPartition(
                 _DEFAULT_PARTITION,
@@ -410,36 +407,33 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     )
         external
         view
-        virtual
         override
         returns (uint256 amount_, uint256 expirationTimestamp_)
     {
         return
-            _getLockForByPartitionAdjustedAt(
+            _getLockForByPartitionAdjusted(
                 _DEFAULT_PARTITION,
                 _tokenHolder,
-                _lockId,
-                _blockTimestamp()
+                _lockId
             );
     }
 
     function getLockedAmountForAdjusted(
         address _tokenHolder
-    ) external view virtual returns (uint256 amount_) {
+    ) external view returns (uint256 amount_) {
         return _getLockedAmountFor(_tokenHolder);
     }
 
     function getLockedAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual returns (uint256 amount_) {
+    ) external view returns (uint256 amount_) {
         return _getLockedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -449,7 +443,6 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -495,7 +488,6 @@ contract Lock is ILock, IStaticFunctionSelectors, LockStorageWrapper {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

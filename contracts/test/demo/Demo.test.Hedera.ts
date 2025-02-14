@@ -231,8 +231,8 @@ import {
     BondUSA__factory,
     ERC1644__factory,
     ControlList__factory,
-    Pause__factory,
-    AccessControl__factory,
+    PauseFacet__factory,
+    AccessControlFacet__factory,
     ERC1643__factory,
     ERC20__factory,
     ERC1410ScheduledTasks__factory,
@@ -549,12 +549,12 @@ describe('Demo RedSwam', () => {
         ) as DiamondLoupeFacet
         accessControl = new ethers.Contract(
             await toEvmAddress(accessControlAddress, true),
-            AccessControl__factory.abi,
+            AccessControlFacet__factory.abi,
             signer_A
         ) as AccessControl
         pause = new ethers.Contract(
             await toEvmAddress(pauseAddress, true),
-            Pause__factory.abi,
+            PauseFacet__factory.abi,
             signer_A
         ) as Pause
         cap = new ethers.Contract(
