@@ -508,6 +508,7 @@ async function processFacetLists(
     facetVersionList: number[],
     businessLogicResolverProxyAddress: string,
     signer: Signer,
+    partialBatchDeploy: boolean,
     batchSize = 2
 ): Promise<void> {
     if (facetIdList.length !== facetVersionList.length) {
@@ -521,7 +522,9 @@ async function processFacetLists(
         const batchVersions = facetVersionList.slice(i, i + batchSize)
         const batch = createFacetConfigurations(batchIds, batchVersions)
 
-        const isLastBatch = i + batchSize >= facetIdList.length
+        const isLastBatch = partialBatchDeploy
+            ? false
+            : i + batchSize >= facetIdList.length
 
         await sendBatchConfiguration(
             configId,
@@ -533,13 +536,16 @@ async function processFacetLists(
     }
 }
 
-export async function createConfigurationsForDeployedContracts({
-    commonFacetAddressList,
-    businessLogicResolverProxyAddress,
-    equityUsaAddress,
-    bondUsaAddress,
-    signer,
-}: CreateConfigurationsForDeployedContractsCommand): Promise<CreateConfigurationsForDeployedContractsResult> {
+export async function createConfigurationsForDeployedContracts(
+    partialBatchDeploy: boolean,
+    {
+        commonFacetAddressList,
+        businessLogicResolverProxyAddress,
+        equityUsaAddress,
+        bondUsaAddress,
+        signer,
+    }: CreateConfigurationsForDeployedContractsCommand
+): Promise<CreateConfigurationsForDeployedContractsResult> {
     let result = CreateConfigurationsForDeployedContractsResult.empty()
     result.commonFacetIdList = await Promise.all(
         commonFacetAddressList.map(async (address) => {
@@ -574,14 +580,16 @@ export async function createConfigurationsForDeployedContracts({
         result.equityFacetIdList,
         result.equityFacetVersionList,
         businessLogicResolverProxyAddress,
-        signer
+        signer,
+        partialBatchDeploy
     )
     await processFacetLists(
         BOND_CONFIG_ID,
         result.bondFacetIdList,
         result.bondFacetVersionList,
         businessLogicResolverProxyAddress,
-        signer
+        signer,
+        partialBatchDeploy
     )
     return result
 }
