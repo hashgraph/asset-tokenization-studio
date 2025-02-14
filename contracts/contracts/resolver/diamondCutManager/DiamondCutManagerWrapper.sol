@@ -284,6 +284,10 @@ abstract contract DiamondCutManagerWrapper is
 
     function _activateConfiguration(bytes32 _configurationId) internal {
         DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
+        if (!_dcms.activeConfigurations[_configurationId]) {
+            _dcms.configurations.push(_configurationId);
+            _dcms.activeConfigurations[_configurationId] = true;
+        }
         _dcms.latestVersion[_configurationId] = _dcms.batchVersion[
             _configurationId
         ];
@@ -294,14 +298,13 @@ abstract contract DiamondCutManagerWrapper is
         bytes32 _configurationId
     ) internal returns (uint256 batchVersion_) {
         DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
-        if (!_dcms.activeConfigurations[_configurationId]) {
-            _dcms.configurations.push(_configurationId);
-            _dcms.activeConfigurations[_configurationId] = true;
-        }
 
         unchecked {
-            batchVersion_ = ++_dcms.batchVersion[_configurationId];
+            _dcms.batchVersion[_configurationId] =
+                _dcms.latestVersion[_configurationId] +
+                1;
         }
+        batchVersion_ = _dcms.batchVersion[_configurationId];
     }
 
     function _getBatchConfigurationVersion(
@@ -436,22 +439,7 @@ abstract contract DiamondCutManagerWrapper is
 
         delete _dcms.facetVersions[configVersionHash];
         delete _dcms.facetIds[configVersionHash];
-        --_dcms.batchVersion[_configurationId];
-
-        if (_dcms.latestVersion[_configurationId] == 0) {
-            delete _dcms.activeConfigurations[_configurationId];
-            for (uint256 i = 0; i < _dcms.configurations.length; i++) {
-                if (_dcms.configurations[i] == _configurationId) {
-                    if (i < _dcms.configurations.length - 1) {
-                        _dcms.configurations[i] = _dcms.configurations[
-                            _dcms.configurations.length - 1
-                        ];
-                    }
-                    _dcms.configurations.pop();
-                    break;
-                }
-            }
-        }
+        delete _dcms.batchVersion[_configurationId];
     }
 
     function _isOngoingConfiguration(

@@ -857,15 +857,15 @@ describe('DiamondCutManager', () => {
         const configLength = (
             await diamondCutManager.getConfigurationsLength()
         ).toNumber()
-        expect(configLength).to.equal(2)
+        expect(configLength).to.equal(0)
 
         const configIds = await diamondCutManager.getConfigurations(
             0,
             configLength
         )
-        expect(configIds).to.have.members([EQUITY_CONFIG_ID, BOND_CONFIG_ID])
+        expect(configIds).to.have.members([])
 
-        for (const configId of configIds) {
+        for (const configId of [EQUITY_CONFIG_ID, BOND_CONFIG_ID]) {
             const configLatestVersion = (
                 await diamondCutManager.getLatestVersionByConfiguration(
                     configId
