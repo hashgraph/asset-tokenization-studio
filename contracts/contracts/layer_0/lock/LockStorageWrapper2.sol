@@ -375,6 +375,10 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
                 _tokenHolder,
                 factor_lock
             );
+            /**
+             * @dev Each lock has its own LABAF, which is not updated as the lock is deleted shortly after.
+             * Skipping the update saves gas.
+            */
         }
     }
 
