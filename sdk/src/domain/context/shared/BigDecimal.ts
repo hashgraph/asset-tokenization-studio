@@ -209,8 +209,8 @@ import {
   FixedFormat,
   BigNumber,
 } from '@ethersproject/bignumber';
-import Long from 'long';
 import CheckNums from '../../../core/checks/numbers/CheckNums.js';
+import { Long } from '@hashgraph/sdk';
 
 export type BigDecimalFormat = string | number | FixedFormat | undefined;
 
