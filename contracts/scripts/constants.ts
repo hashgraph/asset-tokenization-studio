@@ -408,7 +408,10 @@
 
    */
 
+import { HashZero } from '@ethersproject/constants'
+
 // * General
+export const HASH_ZERO=HashZero
 export const MAX_UINT256 = BigInt(
     '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 )

@@ -224,7 +224,6 @@ import {
     CONTROL_LIST_ROLE,
     DEFAULT_PARTITION,
     FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    FROM_ACCOUNT_NULL_ERROR_ID,
     IS_PAUSED_ERROR_ID,
     ISSUER_ROLE,
     KYC_ROLE,
@@ -245,6 +244,7 @@ import {
     MAX_UINT256,
     FROM_ACCOUNT_KYC_ERROR_ID,
     TO_ACCOUNT_KYC_ERROR_ID,
+    HASH_ZERO,
 } from '@scripts'
 
 const amount = 1000
@@ -839,15 +839,15 @@ describe('ERC1594 Tests', () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
             await ssiManagementFacet.addIssuer(account_E)
-            await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
-            await kycFacet.grantKYC(account_D, '', 0, 9999999999, account_E)
+            await kycFacet.grantKYC(account_E, '', 0, MAX_UINT256, account_E)
+            await kycFacet.grantKYC(account_D, '', 0, MAX_UINT256, account_E)
         })
 
         describe('Paused', () => {
             beforeEach(async () => {
                 // Pausing the token
                 pauseFacet = pauseFacet.connect(signer_B)
-                await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_E)
+                await kycFacet.grantKYC(account_C, '', 0, MAX_UINT256, account_E)
                 await erc1594Issuer.issue(account_C, amount, data)
                 await erc1594Issuer.issue(account_E, amount, data)
                 await erc20Facet
@@ -865,7 +865,7 @@ describe('ERC1594 Tests', () => {
                 ).to.be.deep.equal([
                     false,
                     IS_PAUSED_ERROR_ID,
-                    ethers.constants.HashZero,
+                    HASH_ZERO,
                 ])
 
                 expect(
@@ -878,7 +878,7 @@ describe('ERC1594 Tests', () => {
                 ).to.be.deep.equal([
                     false,
                     IS_PAUSED_ERROR_ID,
-                    ethers.constants.HashZero,
+                    HASH_ZERO,
                 ])
             })
         })
@@ -889,7 +889,7 @@ describe('ERC1594 Tests', () => {
                 'THEN transaction returns _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, ' +
                 '_FROM_ACCOUNT_BLOCKED_ERROR_ID or _TO_ACCOUNT_BLOCKED_ERROR_ID',
             async () => {
-                await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_E)
+                await kycFacet.grantKYC(account_C, '', 0, MAX_UINT256, account_E)
                 await erc1594Issuer.issue(account_C, amount, data)
                 await erc20Facet
                     .connect(signer_C)
@@ -911,7 +911,7 @@ describe('ERC1594 Tests', () => {
                 ).to.be.deep.equal([
                     false,
                     FROM_ACCOUNT_BLOCKED_ERROR_ID,
-                    ethers.constants.HashZero,
+                    HASH_ZERO,
                 ])
                 await erc1594Issuer.issue(account_D, amount, data)
                 expect(
@@ -921,7 +921,7 @@ describe('ERC1594 Tests', () => {
                 ).to.be.deep.equal([
                     false,
                     TO_ACCOUNT_BLOCKED_ERROR_ID,
-                    ethers.constants.HashZero,
+                    HASH_ZERO,
                 ])
 
                 await erc1594Issuer.issue(account_E, amount, data)
@@ -935,7 +935,7 @@ describe('ERC1594 Tests', () => {
                 ).to.be.deep.equal([
                     false,
                     OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-                    ethers.constants.HashZero,
+                    HASH_ZERO,
                 ])
                 erc1594Facet = erc1594Facet.connect(signer_A)
                 expect(
@@ -948,7 +948,7 @@ describe('ERC1594 Tests', () => {
                 ).to.be.deep.equal([
                     false,
                     FROM_ACCOUNT_BLOCKED_ERROR_ID,
-                    ethers.constants.HashZero,
+                    HASH_ZERO,
                 ])
                 await erc20Facet
                     .connect(signer_E)
@@ -963,7 +963,7 @@ describe('ERC1594 Tests', () => {
                 ).to.be.deep.equal([
                     false,
                     TO_ACCOUNT_BLOCKED_ERROR_ID,
-                    ethers.constants.HashZero,
+                    HASH_ZERO,
                 ])
             }
         )
@@ -987,7 +987,7 @@ describe('ERC1594 Tests', () => {
                     ).to.be.deep.equal([
                         false,
                         FROM_ACCOUNT_KYC_ERROR_ID,
-                        ethers.constants.HashZero,
+                        HASH_ZERO,
                     ])
                     expect(
                         await erc1594Facet
@@ -996,7 +996,7 @@ describe('ERC1594 Tests', () => {
                     ).to.be.deep.equal([
                         false,
                         FROM_ACCOUNT_KYC_ERROR_ID,
-                        ethers.constants.HashZero,
+                        HASH_ZERO,
                     ])
                     // non kyc'd receiver
                     await erc1594Issuer.issue(account_D, amount, data)
@@ -1007,7 +1007,7 @@ describe('ERC1594 Tests', () => {
                     ).to.be.deep.equal([
                         false,
                         TO_ACCOUNT_KYC_ERROR_ID,
-                        ethers.constants.HashZero,
+                        HASH_ZERO,
                     ])
                     await erc20Facet
                         .connect(signer_D)
@@ -1019,7 +1019,7 @@ describe('ERC1594 Tests', () => {
                     ).to.be.deep.equal([
                         false,
                         TO_ACCOUNT_KYC_ERROR_ID,
-                        ethers.constants.HashZero,
+                        HASH_ZERO,
                     ])
                 }
             )
@@ -1114,7 +1114,7 @@ describe('ERC1594 Tests', () => {
         })
 
         it('GIVEN a zero address in to WHEN canTransfer and canTransferFrom THEN responds _TO_ACCOUNT_NULL_ERROR_ID', async () => {
-            await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_E)
+            await kycFacet.grantKYC(account_A, '', 0, MAX_UINT256, account_E)
             await erc1594Issuer.issue(account_A, amount, data)
             expect(
                 await erc1594Facet.canTransfer(
@@ -1125,7 +1125,7 @@ describe('ERC1594 Tests', () => {
             ).to.be.deep.equal([
                 false,
                 TO_ACCOUNT_NULL_ERROR_ID,
-                ethers.constants.HashZero,
+                HASH_ZERO,
             ])
             await erc1594Issuer.issue(account_D, amount, data)
             await erc20Facet
@@ -1141,7 +1141,7 @@ describe('ERC1594 Tests', () => {
             ).to.be.deep.equal([
                 false,
                 TO_ACCOUNT_NULL_ERROR_ID,
-                ethers.constants.HashZero,
+                HASH_ZERO,
             ])
         })
 
