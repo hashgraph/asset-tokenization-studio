@@ -227,13 +227,13 @@ abstract contract HoldStorageWrapper2 is
         address _from,
         IHold.Hold memory _hold,
         bytes memory _operatorData
-    ) internal virtual returns (bool success_, uint256 holdId_) {
+    ) internal returns (bool success_, uint256 holdId_) {
         _triggerAndSyncAll(_partition, _from, address(0));
 
         uint256 abaf = _updateTotalHold(_partition, _from);
         _pushLabafHold(_partition, _from, abaf);
 
-        _beforeHold(_partition, _from, _hold);
+        _beforeHold(_partition, _from);
         _reduceBalanceByPartition(_from, _hold.amount, _partition);
 
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
@@ -261,7 +261,7 @@ abstract contract HoldStorageWrapper2 is
         address _from,
         IHold.Hold memory _hold,
         bytes memory _operatorData
-    ) internal virtual returns (bool success_, uint256 holdId_) {
+    ) internal returns (bool success_, uint256 holdId_) {
         _decreaseAllowedBalance(_from, _msgSender(), _hold.amount);
 
         return _createHoldByPartition(_partition, _from, _hold, _operatorData);
@@ -272,7 +272,7 @@ abstract contract HoldStorageWrapper2 is
         address _from,
         IHold.ProtectedHold memory _protectedHold,
         bytes calldata _signature
-    ) internal virtual returns (bool success_, uint256 holdId_) {
+    ) internal returns (bool success_, uint256 holdId_) {
         checkNounceAndDeadline(
             _protectedHold.nonce,
             _from,
@@ -305,7 +305,7 @@ abstract contract HoldStorageWrapper2 is
         uint256 _holdId,
         address _to,
         uint256 _amount
-    ) internal virtual returns (bool success_) {
+    ) internal returns (bool success_) {
         _beforeExecuteHold(_partition, _tokenHolder, _holdId, _to);
 
         success_ = _operateHoldByPartition(
@@ -333,7 +333,7 @@ abstract contract HoldStorageWrapper2 is
         address _tokenHolder,
         uint256 _holdId,
         uint256 _amount
-    ) internal virtual returns (bool success_) {
+    ) internal returns (bool success_) {
         _beforeReleaseHold(_partition, _tokenHolder, _holdId);
 
         success_ = _operateHoldByPartition(
@@ -360,7 +360,7 @@ abstract contract HoldStorageWrapper2 is
         bytes32 _partition,
         address _tokenHolder,
         uint256 _holdId
-    ) internal virtual returns (bool success_, uint256 amount_) {
+    ) internal returns (bool success_, uint256 amount_) {
         _beforeReclaimHold(_partition, _tokenHolder, _holdId);
 
         IHold.HoldData memory holdData = _getHold(
@@ -389,7 +389,7 @@ abstract contract HoldStorageWrapper2 is
         address _to,
         uint256 _amount,
         IHold.OperationType _operation
-    ) internal virtual returns (bool success_) {
+    ) internal returns (bool success_) {
         IHold.HoldData memory holdData = _getHold(
             _partition,
             _tokenHolder,
@@ -498,7 +498,7 @@ abstract contract HoldStorageWrapper2 is
         address _tokenHolder,
         uint256 _holdIndex,
         IHold.HoldData memory _holdData
-    ) internal virtual {
+    ) internal {
         uint256 currentHoldIndex = _getHoldIndex(
             _partition,
             _tokenHolder,
@@ -529,32 +529,32 @@ abstract contract HoldStorageWrapper2 is
     function _updateTotalHold(
         bytes32 _partition,
         address _tokenHolder
-    ) internal returns (uint256 ABAF_) {
-        ABAF_ = _getAbaf();
+    ) internal returns (uint256 abaf_) {
+        abaf_ = _getAbaf();
 
         uint256 labaf = _getTotalHeldLabaf(_tokenHolder);
-        uint256 LABAFByPartition = _getTotalHeldLabafByPartition(
+        uint256 labafByPartition = _getTotalHeldLabafByPartition(
             _partition,
             _tokenHolder
         );
 
-        if (ABAF_ != labaf) {
-            uint256 factor = _calculateFactor(ABAF_, labaf);
+        if (abaf_ != labaf) {
+            uint256 factor = _calculateFactor(abaf_, labaf);
 
-            _updateTotalHeldAmountAndLabaf(_tokenHolder, factor, ABAF_);
+            _updateTotalHeldAmountAndLabaf(_tokenHolder, factor, abaf_);
         }
 
-        if (ABAF_ != LABAFByPartition) {
+        if (abaf_ != labafByPartition) {
             uint256 factorByPartition = _calculateFactor(
-                ABAF_,
-                LABAFByPartition
+                abaf_,
+                labafByPartition
             );
 
             _updateTotalHeldAmountAndLabafByPartition(
                 _partition,
                 _tokenHolder,
                 factorByPartition,
-                ABAF_
+                abaf_
             );
         }
     }
@@ -563,7 +563,7 @@ abstract contract HoldStorageWrapper2 is
         address _tokenHolder,
         uint256 _factor,
         uint256 _abaf
-    ) internal virtual {
+    ) internal {
         if (_factor == 1) return;
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
@@ -576,7 +576,7 @@ abstract contract HoldStorageWrapper2 is
         address _tokenHolder,
         uint256 _factor,
         uint256 _abaf
-    ) internal virtual {
+    ) internal {
         if (_factor == 1) return;
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
@@ -584,11 +584,7 @@ abstract contract HoldStorageWrapper2 is
         _updateLabafTotalHeldByPartition(_partition, _tokenHolder, _abaf);
     }
 
-    function _beforeHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        IHold.Hold memory _hold
-    ) internal virtual {
+    function _beforeHold(bytes32 _partition, address _tokenHolder) internal {
         _updateAccountSnapshot(_tokenHolder, _partition);
         _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
     }
@@ -598,7 +594,7 @@ abstract contract HoldStorageWrapper2 is
         address _tokenHolder,
         uint256 _holdId,
         address _to
-    ) internal virtual {
+    ) internal {
         _adjustHoldBalances(_partition, _tokenHolder, _holdId, _to);
         _updateAccountSnapshot(_to, _partition);
         _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
@@ -608,7 +604,7 @@ abstract contract HoldStorageWrapper2 is
         bytes32 _partition,
         address _tokenHolder,
         uint256 _holdId
-    ) internal virtual {
+    ) internal {
         _adjustHoldBalances(_partition, _tokenHolder, _holdId, _tokenHolder);
         _beforeExecuteHold(_partition, _tokenHolder, _holdId, _tokenHolder);
     }
@@ -617,7 +613,7 @@ abstract contract HoldStorageWrapper2 is
         bytes32 _partition,
         address _tokenHolder,
         uint256 _holdId
-    ) internal virtual {
+    ) internal {
         _adjustHoldBalances(_partition, _tokenHolder, _holdId, _tokenHolder);
         _beforeExecuteHold(_partition, _tokenHolder, _holdId, _tokenHolder);
     }
@@ -627,7 +623,7 @@ abstract contract HoldStorageWrapper2 is
         address _tokenHolder,
         uint256 _holdId,
         address _to
-    ) internal virtual {
+    ) internal {
         _triggerAndSyncAll(_partition, _tokenHolder, _to);
 
         uint256 abaf = _updateTotalHold(_partition, _tokenHolder);
@@ -640,15 +636,15 @@ abstract contract HoldStorageWrapper2 is
         uint256 _holdId,
         address _tokenHolder,
         uint256 _abaf
-    ) internal virtual {
-        uint256 hold_LABAF = _getHoldLabafByPartition(
+    ) internal {
+        uint256 holdLabaf = _getHoldLabafByPartition(
             _partition,
             _holdId,
             _tokenHolder
         );
 
-        if (_abaf != hold_LABAF) {
-            uint256 factor_hold = _calculateFactor(_abaf, hold_LABAF);
+        if (_abaf != holdLabaf) {
+            uint256 holdFactor = _calculateFactor(_abaf, holdLabaf);
 
             uint256 holdIndex = _getHoldIndex(
                 _partition,
@@ -660,7 +656,7 @@ abstract contract HoldStorageWrapper2 is
                 _partition,
                 holdIndex,
                 _tokenHolder,
-                factor_hold
+                holdFactor
             );
             _updateLabafHold(_partition, _tokenHolder, _abaf, holdIndex);
         }
@@ -671,7 +667,7 @@ abstract contract HoldStorageWrapper2 is
         uint256 _holdIndex,
         address _tokenHolder,
         uint256 _factor
-    ) internal virtual {
+    ) internal {
         if (_factor == 1) return;
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
@@ -708,7 +704,6 @@ abstract contract HoldStorageWrapper2 is
     )
         internal
         view
-        virtual
         returns (
             uint256 amount_,
             uint256 expirationTimestamp_,

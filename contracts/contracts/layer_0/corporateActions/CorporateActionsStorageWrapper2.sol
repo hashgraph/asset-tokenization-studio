@@ -260,7 +260,6 @@ abstract contract CorporateActionsStorageWrapper2 is
         bytes memory _data
     )
         internal
-        virtual
         returns (
             bool success_,
             bytes32 corporateActionId_,
@@ -368,7 +367,7 @@ abstract contract CorporateActionsStorageWrapper2 is
         );
     }
 
-    function _onScheduledTaskTriggered(bytes memory _data) internal virtual {
+    function _onScheduledTaskTriggered(bytes memory _data) internal {
         if (_data.length > 0) {
             bytes32 taskType = abi.decode(_data, (bytes32));
             if (taskType == SNAPSHOT_TASK_TYPE) {
@@ -381,7 +380,7 @@ abstract contract CorporateActionsStorageWrapper2 is
 
     function _onScheduledBalanceAdjustmentTriggered(
         bytes memory _data
-    ) internal virtual {
+    ) internal {
         if (_data.length > 0) {
             bytes32 actionId = abi.decode(_data, (bytes32));
             (, bytes memory balanceAdjustmentData) = _getCorporateAction(
@@ -402,9 +401,7 @@ abstract contract CorporateActionsStorageWrapper2 is
         }
     }
 
-    function _getSnapshotID(
-        bytes32 _actionId
-    ) internal view virtual returns (uint256) {
+    function _getSnapshotID(bytes32 _actionId) internal view returns (uint256) {
         bytes memory data = _getResult(_actionId, SNAPSHOT_RESULT_ID);
 
         uint256 bytesLength = data.length;

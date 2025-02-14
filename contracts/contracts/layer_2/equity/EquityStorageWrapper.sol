@@ -247,7 +247,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
         IEquity.Dividend calldata _newDividend
     )
         internal
-        virtual
         returns (bool success_, bytes32 corporateActionId_, uint256 dividendId_)
     {
         (success_, corporateActionId_, dividendId_) = _addCorporateAction(
@@ -267,7 +266,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     )
         internal
         view
-        virtual
         returns (IEquity.RegisteredDividend memory registeredDividend_)
     {
         bytes32 actionId = _corporateActionsStorage()
@@ -296,7 +294,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     function _getDividendsFor(
         uint256 _dividendID,
         address _account
-    ) internal view virtual returns (IEquity.DividendFor memory dividendFor_) {
+    ) internal view returns (IEquity.DividendFor memory dividendFor_) {
         IEquity.RegisteredDividend memory registeredDividend = _getDividends(
             _dividendID
         );
@@ -319,7 +317,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     function _getDividendsCount()
         internal
         view
-        virtual
         returns (uint256 dividendCount_)
     {
         return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
@@ -329,7 +326,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
         IEquity.Voting calldata _newVoting
     )
         internal
-        virtual
         returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
     {
         (success_, corporateActionId_, voteID_) = _addCorporateAction(
@@ -343,7 +339,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     )
         internal
         view
-        virtual
         returns (IEquity.RegisteredVoting memory registeredVoting_)
     {
         bytes32 actionId = _corporateActionsStorage()
@@ -369,7 +364,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     function _getVotingFor(
         uint256 _voteID,
         address _account
-    ) internal view virtual returns (IEquity.VotingFor memory votingFor_) {
+    ) internal view returns (IEquity.VotingFor memory votingFor_) {
         IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
 
         votingFor_.recordDate = registeredVoting.voting.recordDate;
@@ -386,12 +381,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
         );
     }
 
-    function _getVotingCount()
-        internal
-        view
-        virtual
-        returns (uint256 votingCount_)
-    {
+    function _getVotingCount() internal view returns (uint256 votingCount_) {
         return
             _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
     }
@@ -400,7 +390,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
         IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     )
         internal
-        virtual
         returns (
             bool success_,
             bytes32 corporateActionId_,
@@ -422,7 +411,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     )
         internal
         view
-        virtual
         returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_)
     {
         bytes32 actionId = _corporateActionsStorage()
@@ -442,7 +430,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     function _getScheduledBalanceAdjustmentsCount()
         internal
         view
-        virtual
         returns (uint256 balanceAdjustmentCount_)
     {
         return
@@ -458,7 +445,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     )
         internal
         view
-        virtual
         returns (uint256 balance_, uint8 decimals_, bool dateReached_)
     {
         if (_date < _blockTimestamp()) {
@@ -481,7 +467,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     function _equityStorage()
         internal
         pure
-        virtual
         returns (EquityDataStorage storage equityData_)
     {
         bytes32 position = _EQUITY_STORAGE_POSITION;

@@ -252,7 +252,7 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
     function _registerBusinessLogics(
         IBusinessLogicResolver.BusinessLogicRegistryData[]
             calldata _businessLogicsRegistryDatas
-    ) internal virtual returns (uint256 latestVersion_) {
+    ) internal returns (uint256 latestVersion_) {
         BusinessLogicResolverDataStorage
             storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
 
@@ -314,19 +314,13 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
 
     function _getVersionStatus(
         uint256 _version
-    )
-        internal
-        view
-        virtual
-        returns (IBusinessLogicResolver.VersionStatus status_)
-    {
+    ) internal view returns (IBusinessLogicResolver.VersionStatus status_) {
         status_ = _businessLogicResolverStorage().versionStatuses[_version];
     }
 
     function _getLatestVersion()
         internal
         view
-        virtual
         returns (uint256 latestVersion_)
     {
         latestVersion_ = _businessLogicResolverStorage().latestVersion;
@@ -334,7 +328,7 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
 
     function _resolveLatestBusinessLogic(
         bytes32 _businessLogicKey
-    ) internal view virtual returns (address businessLogicAddress_) {
+    ) internal view returns (address businessLogicAddress_) {
         businessLogicAddress_ = _resolveBusinessLogicByVersion(
             _businessLogicKey,
             _businessLogicResolverStorage().latestVersion
@@ -344,7 +338,6 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
     function _getBusinessLogicCount()
         internal
         view
-        virtual
         returns (uint256 businessLogicCount_)
     {
         businessLogicCount_ = _businessLogicResolverStorage()
@@ -355,7 +348,7 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
     function _getBusinessLogicKeys(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory businessLogicKeys_) {
+    ) internal view returns (bytes32[] memory businessLogicKeys_) {
         BusinessLogicResolverDataStorage
             storage businessLogicResolverDataStorage = _businessLogicResolverStorage();
 
@@ -460,7 +453,6 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
     function _businessLogicResolverStorage()
         internal
         pure
-        virtual
         returns (
             BusinessLogicResolverDataStorage storage businessLogicResolverData_
         )

@@ -219,7 +219,7 @@ import {
     Cap,
     IFactory,
     BusinessLogicResolver,
-    AccessControl__factory,
+    AccessControlFacet__factory,
     ERC1410ScheduledTasks__factory,
     AdjustBalances__factory,
     Cap__factory,
@@ -321,7 +321,7 @@ describe('Locks Layer 2 Tests', () => {
         diamond: ResolverProxy
         defaultSigner?: SignerWithAddress | providers.Provider
     }) {
-        accessControlFacet = AccessControl__factory.connect(
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             defaultSigner
         )

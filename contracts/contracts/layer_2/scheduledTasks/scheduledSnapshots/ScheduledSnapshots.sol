@@ -232,7 +232,7 @@ contract ScheduledSnapshots is
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    ) external virtual override onlyAutoCalling(_scheduledSnapshotStorage()) {
+    ) external override onlyAutoCalling(_scheduledSnapshotStorage()) {
         uint256 newSnapShotID;
         if (_pos == _scheduledTasksLength - 1) {
             newSnapShotID = _snapshot();
@@ -241,13 +241,7 @@ contract ScheduledSnapshots is
         _onScheduledSnapshotTriggered(newSnapShotID, _data);
     }
 
-    function scheduledSnapshotCount()
-        external
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function scheduledSnapshotCount() external view override returns (uint256) {
         return _getScheduledSnapshotCount();
     }
 
@@ -257,7 +251,6 @@ contract ScheduledSnapshots is
     )
         external
         view
-        virtual
         override
         returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_)
     {
@@ -267,7 +260,6 @@ contract ScheduledSnapshots is
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -277,7 +269,6 @@ contract ScheduledSnapshots is
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -297,7 +288,6 @@ contract ScheduledSnapshots is
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

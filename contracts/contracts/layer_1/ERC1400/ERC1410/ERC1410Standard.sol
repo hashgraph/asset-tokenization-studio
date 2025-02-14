@@ -216,7 +216,6 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         IERC1410Standard.IssueData calldata _issueData
     )
         external
-        virtual
         override
         checkMaxSupply(_issueData.value)
         checkMaxSupplyForPartition(_issueData.partition, _issueData.value)
@@ -244,7 +243,6 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         bytes calldata _data
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -277,7 +275,6 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -302,7 +299,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external view virtual override returns (bool, bytes1, bytes32) {
+    ) external view override returns (bool, bytes1, bytes32) {
         return
             _canRedeemByPartition(
                 _from,

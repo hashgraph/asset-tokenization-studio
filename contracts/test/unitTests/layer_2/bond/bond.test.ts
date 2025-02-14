@@ -211,16 +211,16 @@ import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     ResolverProxy,
     Bond,
-    AccessControl,
-    Pause,
+    AccessControlFacet,
+    PauseFacet,
     Lock,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
     ERC1410ScheduledTasks__factory,
     Lock__factory,
-    Pause__factory,
-    AccessControl__factory,
+    PauseFacet__factory,
+    AccessControlFacet__factory,
     Bond__factory,
 } from '@typechain'
 import {
@@ -276,8 +276,8 @@ describe('Bond Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let bondFacet: Bond
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
+    let accessControlFacet: AccessControlFacet
+    let pauseFacet: PauseFacet
     let lockFacet: Lock
     let erc1410Facet: ERC1410ScheduledTasks
 
@@ -353,11 +353,11 @@ describe('Bond Tests', () => {
         })
 
         bondFacet = Bond__factory.connect(diamond.address, signer_A)
-        accessControlFacet = AccessControl__factory.connect(
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
         lockFacet = Lock__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
@@ -412,7 +412,7 @@ describe('Bond Tests', () => {
 
             await expect(
                 bondFacet.setCoupon(wrongcouponData_1)
-            ).to.be.rejectedWith('WrongDates')
+            ).to.be.revertedWithCustomError(bondFacet, 'WrongDates')
 
             const wrongcouponData_2 = {
                 recordDate: (
@@ -424,7 +424,7 @@ describe('Bond Tests', () => {
 
             await expect(
                 bondFacet.setCoupon(wrongcouponData_2)
-            ).to.be.rejectedWith('WrongTimestamp')
+            ).to.be.revertedWithCustomError(bondFacet, 'WrongTimestamp')
         })
 
         it('GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds', async () => {

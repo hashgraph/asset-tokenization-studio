@@ -245,7 +245,7 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
     function _onScheduledSnapshotTriggered(
         uint256 _snapShotID,
         bytes memory _data
-    ) internal virtual {
+    ) internal {
         if (_data.length > 0) {
             bytes32 actionId = abi.decode(_data, (bytes32));
             _addSnapshotToAction(actionId, _snapShotID);
@@ -255,7 +255,7 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
     function _addSnapshotToAction(
         bytes32 _actionId,
         uint256 _snapshotId
-    ) internal virtual {
+    ) internal {
         bytes memory result = abi.encodePacked(_snapshotId);
 
         _updateCorporateActionResult(_actionId, SNAPSHOT_RESULT_ID, result);
@@ -265,7 +265,7 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
         bytes32 actionId,
         uint256 resultId,
         bytes memory newResult
-    ) internal virtual {
+    ) internal {
         CorporateActionDataStorage
             storage corporateActions_ = _corporateActionsStorage();
         bytes[] memory results = corporateActions_
@@ -288,7 +288,7 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
 
     function _getCorporateAction(
         bytes32 _corporateActionId
-    ) internal view virtual returns (bytes32 actionType_, bytes memory data_) {
+    ) internal view returns (bytes32 actionType_, bytes memory data_) {
         CorporateActionDataStorage
             storage corporateActions_ = _corporateActionsStorage();
         actionType_ = corporateActions_
@@ -309,7 +309,7 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
     function _getCorporateActionIds(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
+    ) internal view returns (bytes32[] memory corporateActionIds_) {
         corporateActionIds_ = _corporateActionsStorage().actions.getFromSet(
             _pageIndex,
             _pageLength
@@ -318,7 +318,7 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
 
     function _getCorporateActionCountByType(
         bytes32 _actionType
-    ) internal view virtual returns (uint256 corporateActionCount_) {
+    ) internal view returns (uint256 corporateActionCount_) {
         return _corporateActionsStorage().actionsByType[_actionType].length();
     }
 
@@ -326,7 +326,7 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
         bytes32 _actionType,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory corporateActionIds_) {
+    ) internal view returns (bytes32[] memory corporateActionIds_) {
         corporateActionIds_ = _corporateActionsStorage()
             .actionsByType[_actionType]
             .getFromSet(_pageIndex, _pageLength);
@@ -335,7 +335,7 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
     function _getResult(
         bytes32 actionId,
         uint256 resultId
-    ) internal view virtual returns (bytes memory) {
+    ) internal view returns (bytes memory) {
         bytes memory result;
 
         if (_getCorporateActionResultCount(actionId) > resultId)
@@ -346,7 +346,7 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
 
     function _getCorporateActionResultCount(
         bytes32 actionId
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         return _corporateActionsStorage().actionsData[actionId].results.length;
     }
 
@@ -358,14 +358,14 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
     function _getCorporateActionResult(
         bytes32 actionId,
         uint256 resultId
-    ) internal view virtual returns (bytes memory) {
+    ) internal view returns (bytes memory) {
         return
             _corporateActionsStorage().actionsData[actionId].results[resultId];
     }
 
     function _getCorporateActionData(
         bytes32 actionId
-    ) internal view virtual returns (bytes memory) {
+    ) internal view returns (bytes memory) {
         return _corporateActionsStorage().actionsData[actionId].data;
     }
 
@@ -384,7 +384,6 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
     function _corporateActionsStorage()
         internal
         pure
-        virtual
         returns (CorporateActionDataStorage storage corporateActions_)
     {
         bytes32 position = _CORPORATE_ACTION_STORAGE_POSITION;

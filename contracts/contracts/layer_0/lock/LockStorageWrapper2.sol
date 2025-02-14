@@ -221,7 +221,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         uint256 _amount,
         address _tokenHolder,
         uint256 _expirationTimestamp
-    ) internal virtual returns (bool success_, uint256 lockId_) {
+    ) internal returns (bool success_, uint256 lockId_) {
         _triggerAndSyncAll(_partition, _tokenHolder, address(0));
 
         uint256 abaf = _updateTotalLock(_partition, _tokenHolder);
@@ -266,7 +266,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) internal virtual returns (bool success_) {
+    ) internal returns (bool success_) {
         _triggerAndSyncAll(_partition, address(0), _tokenHolder);
 
         uint256 abaf = _updateTotalLock(_partition, _tokenHolder);
@@ -318,32 +318,32 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
     function _updateTotalLock(
         bytes32 _partition,
         address _tokenHolder
-    ) internal returns (uint256 ABAF_) {
-        ABAF_ = _getAbaf();
+    ) internal returns (uint256 abaf_) {
+        abaf_ = _getAbaf();
 
         uint256 labaf = _getTotalLockLabaf(_tokenHolder);
-        uint256 LABAFByPartition = _getTotalLockLabafByPartition(
+        uint256 labafByPartition = _getTotalLockLabafByPartition(
             _partition,
             _tokenHolder
         );
 
-        if (ABAF_ != labaf) {
-            uint256 factor = _calculateFactor(ABAF_, labaf);
+        if (abaf_ != labaf) {
+            uint256 factor = _calculateFactor(abaf_, labaf);
 
-            _updateTotalLockedAmountAndLabaf(_tokenHolder, factor, ABAF_);
+            _updateTotalLockedAmountAndLabaf(_tokenHolder, factor, abaf_);
         }
 
-        if (ABAF_ != LABAFByPartition) {
+        if (abaf_ != labafByPartition) {
             uint256 factorByPartition = _calculateFactor(
-                ABAF_,
-                LABAFByPartition
+                abaf_,
+                labafByPartition
             );
 
             _updateTotalLockedAmountAndLabafByPartition(
                 _partition,
                 _tokenHolder,
                 factorByPartition,
-                ABAF_
+                abaf_
             );
         }
     }
@@ -357,15 +357,15 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         uint256 _lockId,
         address _tokenHolder,
         uint256 _abaf
-    ) internal virtual {
-        uint256 lock_LABAF = _getLockLabafByPartition(
+    ) internal {
+        uint256 lockLabaf = _getLockLabafByPartition(
             _partition,
             _lockId,
             _tokenHolder
         );
 
-        if (_abaf != lock_LABAF) {
-            uint256 factor_lock = _calculateFactor(_abaf, lock_LABAF);
+        if (_abaf != lockLabaf) {
+            uint256 factorLock = _calculateFactor(_abaf, lockLabaf);
 
             uint256 lockIndex = _getLockIndex(
                 _partition,
@@ -377,7 +377,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
                 _partition,
                 lockIndex,
                 _tokenHolder,
-                factor_lock
+                factorLock
             );
         }
     }
@@ -387,7 +387,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         uint256 _lockIndex,
         address _tokenHolder,
         uint256 _factor
-    ) internal virtual {
+    ) internal {
         if (_factor == 1) return;
         LockDataStorage storage lockStorage = _lockStorage();
 
@@ -400,7 +400,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         address _tokenHolder,
         uint256 _factor,
         uint256 _abaf
-    ) internal virtual {
+    ) internal {
         if (_factor == 1) return;
         LockDataStorage storage lockStorage = _lockStorage();
 
@@ -413,7 +413,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         address _tokenHolder,
         uint256 _factor,
         uint256 _abaf
-    ) internal virtual {
+    ) internal {
         if (_factor == 1) return;
         LockDataStorage storage lockStorage = _lockStorage();
 
@@ -429,7 +429,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         uint256 _amount,
         address _tokenHolder,
         uint256 _expirationTimestamp
-    ) internal virtual {
+    ) internal {
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }
 
@@ -437,7 +437,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) internal virtual {
+    ) internal {
         _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
     }
     // solhint-enable no-unused-vars
@@ -446,8 +446,8 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         address _tokenHolder,
         uint256 _lockIndex,
         LockData memory _lock
-    ) internal virtual {
-        uint256 lockIndex_lock = _getLockIndex(
+    ) internal {
+        uint256 lockIndexLock = _getLockIndex(
             _partition,
             _tokenHolder,
             _lock.id
@@ -456,7 +456,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         uint256 labaf = _getLockLabafByIndex(
             _partition,
             _tokenHolder,
-            lockIndex_lock
+            lockIndexLock
         );
         _setLockLabafByIndex(_partition, _tokenHolder, _lockIndex, labaf);
 

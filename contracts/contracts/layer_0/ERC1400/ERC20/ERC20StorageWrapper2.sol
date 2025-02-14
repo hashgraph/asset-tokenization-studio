@@ -218,12 +218,7 @@ abstract contract ERC20StorageWrapper2 is
     IERC20StorageWrapper,
     ERC1410StandardStorageWrapper
 {
-    function _beforeAllowanceUpdate(
-        address _owner,
-        address _spender,
-        uint256 _amount,
-        bool _isIncrease
-    ) internal virtual {
+    function _beforeAllowanceUpdate(address _owner, address _spender) internal {
         _triggerAndSyncAll(_DEFAULT_PARTITION, _owner, address(0));
 
         _updateAllowanceAndLabaf(_owner, _spender);
@@ -232,7 +227,7 @@ abstract contract ERC20StorageWrapper2 is
     function _updateAllowanceAndLabaf(
         address _owner,
         address _spender
-    ) internal virtual {
+    ) internal {
         uint256 abaf = _getAbaf();
         uint256 labaf = _getAllowanceLabaf(_owner, _spender);
 
@@ -244,10 +239,7 @@ abstract contract ERC20StorageWrapper2 is
         _updateAllowanceLabaf(_owner, _spender, abaf);
     }
 
-    function _approve(
-        address spender,
-        uint256 value
-    ) internal virtual returns (bool) {
+    function _approve(address spender, uint256 value) internal returns (bool) {
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
@@ -269,11 +261,11 @@ abstract contract ERC20StorageWrapper2 is
     function _increaseAllowance(
         address spender,
         uint256 addedValue
-    ) internal virtual returns (bool) {
+    ) internal returns (bool) {
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
-        _beforeAllowanceUpdate(_msgSender(), spender, addedValue, true);
+        _beforeAllowanceUpdate(_msgSender(), spender);
 
         _getErc20Storage().allowed[_msgSender()][spender] += addedValue;
         emit Approval(
@@ -296,7 +288,7 @@ abstract contract ERC20StorageWrapper2 is
     function _decreaseAllowance(
         address spender,
         uint256 subtractedValue
-    ) internal virtual returns (bool) {
+    ) internal returns (bool) {
         if (spender == address(0)) {
             revert SpenderWithZeroAddress();
         }
@@ -314,7 +306,7 @@ abstract contract ERC20StorageWrapper2 is
         address from,
         address to,
         uint256 value
-    ) internal virtual returns (bool) {
+    ) internal returns (bool) {
         _decreaseAllowedBalance(from, spender, value);
         bytes memory data;
         _transferByPartition(
@@ -333,7 +325,7 @@ abstract contract ERC20StorageWrapper2 is
         address from,
         address to,
         uint256 value
-    ) internal virtual returns (bool) {
+    ) internal returns (bool) {
         _transferByPartition(
             from,
             to,
@@ -346,13 +338,13 @@ abstract contract ERC20StorageWrapper2 is
         return _emitTransferEvent(from, to, value);
     }
 
-    function _mint(address to, uint256 value) internal virtual {
+    function _mint(address to, uint256 value) internal {
         bytes memory _data;
         _issueByPartition(_DEFAULT_PARTITION, to, value, _data);
         _emitTransferEvent(address(0), to, value);
     }
 
-    function _burn(address from, uint256 value) internal virtual {
+    function _burn(address from, uint256 value) internal {
         bytes memory _data;
         _redeemByPartition(
             _DEFAULT_PARTITION,
@@ -365,7 +357,7 @@ abstract contract ERC20StorageWrapper2 is
         _emitTransferEvent(from, address(0), value);
     }
 
-    function _burnFrom(address account, uint256 value) internal virtual {
+    function _burnFrom(address account, uint256 value) internal {
         _decreaseAllowedBalance(account, _msgSender(), value);
         _burn(account, value);
     }
@@ -375,7 +367,7 @@ abstract contract ERC20StorageWrapper2 is
         address spender,
         uint256 value
     ) internal {
-        _beforeAllowanceUpdate(from, spender, value, false);
+        _beforeAllowanceUpdate(from, spender);
 
         ERC20Storage storage erc20Storage = _getErc20Storage();
 

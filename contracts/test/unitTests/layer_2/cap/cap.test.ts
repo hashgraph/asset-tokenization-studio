@@ -209,7 +209,7 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     AccessControl,
-    AccessControl__factory,
+    AccessControlFacet__factory,
     BusinessLogicResolver,
     type Cap,
     Cap__factory,
@@ -301,7 +301,7 @@ describe('CAP Layer 2 Tests', () => {
         })
 
         capFacet = Cap__factory.connect(diamond.address, signer_A)
-        accessControlFacet = AccessControl__factory.connect(
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )

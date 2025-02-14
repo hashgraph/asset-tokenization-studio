@@ -226,7 +226,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal virtual returns (bool success_, uint256 lockId_) {
+    ) internal returns (bool success_, uint256 lockId_) {
         checkNounceAndDeadline(
             _nounce,
             _transferAndLock.from,
@@ -276,7 +276,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal virtual returns (bool success_, uint256 lockId_) {
+    ) internal returns (bool success_, uint256 lockId_) {
         checkNounceAndDeadline(
             _nounce,
             _transferAndLock.from,
@@ -326,7 +326,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual {
+    ) internal view {
         if (
             !_isTransferAndLockByPartitionSignatureValid(
                 _partition,
@@ -344,7 +344,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         bytes32 functionHash = getMessageHashTransferAndLockByPartition(
             _partition,
             _transferAndLock.from,
@@ -372,7 +372,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual {
+    ) internal view {
         if (
             !_isTransferAndLockSignatureValid(
                 _transferAndLock,
@@ -388,7 +388,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         bytes32 functionHash = getMessageHashTransferAndLock(
             _transferAndLock.from,
             _transferAndLock.to,

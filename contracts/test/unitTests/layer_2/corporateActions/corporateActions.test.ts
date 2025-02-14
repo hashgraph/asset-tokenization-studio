@@ -214,9 +214,9 @@ import {
     type AccessControl,
     IFactory,
     BusinessLogicResolver,
-    AccessControl__factory,
+    AccessControlFacet__factory,
     CorporateActions__factory,
-    Pause__factory,
+    PauseFacet__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -313,7 +313,7 @@ describe('Corporate Actions Tests', () => {
             factory,
         })
 
-        accessControlFacet = AccessControl__factory.connect(
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )
@@ -321,7 +321,7 @@ describe('Corporate Actions Tests', () => {
             diamond.address,
             signer_A
         )
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
     })
 
     it('GIVEN an account without corporateActions role WHEN addCorporateAction THEN transaction fails with AccountHasNoRole', async () => {

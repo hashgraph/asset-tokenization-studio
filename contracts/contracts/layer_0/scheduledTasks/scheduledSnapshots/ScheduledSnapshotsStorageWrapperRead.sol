@@ -207,30 +207,25 @@
 pragma solidity 0.8.18;
 
 import {
-    _SCHEDULED_SNAPSHOTS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
+    IScheduledSnapshots
+} from '../../../layer_2/interfaces/scheduledTasks/scheduledSnapshots/IScheduledSnapshots.sol';
+import {
+    ScheduledTasksLib
+} from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
 import {
     ScheduledTasksStorageWrapper
 } from '../scheduledTasks/ScheduledTasksStorageWrapper.sol';
 import {
-    ScheduledTasksLib
-} from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
+    _SCHEDULED_SNAPSHOTS_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
 
 abstract contract ScheduledSnapshotsStorageWrapperRead is
     ScheduledTasksStorageWrapper
 {
-    function onScheduledSnapshotTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external virtual {
-        revert('This method should never be executed, it should be overriden');
-    } // solhint-enable no-unused-vars, custom-errors
-
     function _addScheduledSnapshot(
         uint256 _newScheduledTimestamp,
         bytes memory _newData
-    ) internal virtual {
+    ) internal {
         ScheduledTasksLib.addScheduledTask(
             _scheduledSnapshotStorage(),
             _newScheduledTimestamp,
@@ -240,22 +235,17 @@ abstract contract ScheduledSnapshotsStorageWrapperRead is
 
     function _triggerScheduledSnapshots(
         uint256 _max
-    ) internal virtual returns (uint256) {
+    ) internal returns (uint256) {
         return
             ScheduledTasksLib.triggerScheduledTasks(
                 _scheduledSnapshotStorage(),
-                this.onScheduledSnapshotTriggered.selector,
+                IScheduledSnapshots.onScheduledSnapshotTriggered.selector,
                 _max,
                 _blockTimestamp()
             );
     }
 
-    function _getScheduledSnapshotCount()
-        internal
-        view
-        virtual
-        returns (uint256)
-    {
+    function _getScheduledSnapshotCount() internal view returns (uint256) {
         return
             ScheduledTasksLib.getScheduledTaskCount(
                 _scheduledSnapshotStorage()
@@ -268,7 +258,6 @@ abstract contract ScheduledSnapshotsStorageWrapperRead is
     )
         internal
         view
-        virtual
         returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_)
     {
         return
@@ -282,7 +271,6 @@ abstract contract ScheduledSnapshotsStorageWrapperRead is
     function _scheduledSnapshotStorage()
         internal
         pure
-        virtual
         returns (
             ScheduledTasksLib.ScheduledTasksDataStorage
                 storage scheduledSnapshots_

@@ -209,9 +209,9 @@ pragma solidity 0.8.18;
 interface ISnapshots {
     function takeSnapshot() external returns (uint256 snapshotID_);
 
-    function AbafAtSnapshot(
+    function abafAtSnapshot(
         uint256 _snapshotID
-    ) external view returns (uint256 ABAF_);
+    ) external view returns (uint256 abaf_);
 
     function decimalsAtSnapshot(
         uint256 _snapshotID

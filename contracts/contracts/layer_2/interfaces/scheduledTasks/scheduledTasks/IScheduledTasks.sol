@@ -214,6 +214,12 @@ struct ScheduledTask {
 }
 
 interface IScheduledTasks {
+    function onScheduledTaskTriggered(
+        uint256 _pos,
+        uint256 _scheduledTasksLength,
+        bytes memory _data
+    ) external;
+
     function triggerPendingScheduledTasks() external returns (uint256);
 
     function triggerScheduledTasks(uint256 _max) external returns (uint256);

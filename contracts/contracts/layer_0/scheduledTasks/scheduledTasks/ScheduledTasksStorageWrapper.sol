@@ -207,29 +207,21 @@
 pragma solidity 0.8.18;
 
 import {
-    _SCHEDULED_TASKS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
-import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+    IScheduledTasks
+} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 import {
     ScheduledTasksLib
 } from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
+import {
+    _SCHEDULED_TASKS_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
+import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
 
 abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
-    // TODO: Remove the method
-    // solhint-disable no-unused-vars, custom-errors
-    function onScheduledTaskTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external virtual {
-        revert('This method should never be executed, it should be overriden');
-    } // solhint-enable no-unused-vars, custom-errors
-
     function _addScheduledTask(
         uint256 _newScheduledTimestamp,
         bytes memory _newData
-    ) internal virtual {
+    ) internal {
         ScheduledTasksLib.addScheduledTask(
             _scheduledTaskStorage(),
             _newScheduledTimestamp,
@@ -237,19 +229,17 @@ abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
         );
     }
 
-    function _triggerScheduledTasks(
-        uint256 _max
-    ) internal virtual returns (uint256) {
+    function _triggerScheduledTasks(uint256 _max) internal returns (uint256) {
         return
             ScheduledTasksLib.triggerScheduledTasks(
                 _scheduledTaskStorage(),
-                this.onScheduledTaskTriggered.selector,
+                IScheduledTasks.onScheduledTaskTriggered.selector,
                 _max,
                 _blockTimestamp()
             );
     }
 
-    function _getScheduledTaskCount() internal view virtual returns (uint256) {
+    function _getScheduledTaskCount() internal view returns (uint256) {
         return ScheduledTasksLib.getScheduledTaskCount(_scheduledTaskStorage());
     }
 
@@ -259,7 +249,6 @@ abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
     )
         internal
         view
-        virtual
         returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
     {
         return
@@ -273,7 +262,6 @@ abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
     function _scheduledTaskStorage()
         internal
         pure
-        virtual
         returns (
             ScheduledTasksLib.ScheduledTasksDataStorage storage scheduledTasks_
         )

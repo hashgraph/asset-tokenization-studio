@@ -226,7 +226,6 @@ contract CorporateActions is
         bytes memory _data
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
@@ -256,20 +255,13 @@ contract CorporateActions is
 
     function getCorporateAction(
         bytes32 _corporateActionId
-    )
-        external
-        view
-        virtual
-        override
-        returns (bytes32 actionType_, bytes memory data_)
-    {
+    ) external view override returns (bytes32 actionType_, bytes memory data_) {
         (actionType_, data_) = _getCorporateAction(_corporateActionId);
     }
 
     function getCorporateActionCount()
         external
         view
-        virtual
         override
         returns (uint256 corporateActionCount_)
     {
@@ -279,19 +271,13 @@ contract CorporateActions is
     function getCorporateActionIds(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        virtual
-        override
-        returns (bytes32[] memory corporateActionIds_)
-    {
+    ) external view override returns (bytes32[] memory corporateActionIds_) {
         corporateActionIds_ = _getCorporateActionIds(_pageIndex, _pageLength);
     }
 
     function getCorporateActionCountByType(
         bytes32 _actionType
-    ) external view virtual override returns (uint256 corporateActionCount_) {
+    ) external view override returns (uint256 corporateActionCount_) {
         corporateActionCount_ = _getCorporateActionCountByType(_actionType);
     }
 
@@ -299,13 +285,7 @@ contract CorporateActions is
         bytes32 _actionType,
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        virtual
-        override
-        returns (bytes32[] memory corporateActionIds_)
-    {
+    ) external view override returns (bytes32[] memory corporateActionIds_) {
         corporateActionIds_ = _getCorporateActionIdsByType(
             _actionType,
             _pageIndex,
@@ -316,7 +296,6 @@ contract CorporateActions is
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -326,7 +305,6 @@ contract CorporateActions is
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -355,7 +333,6 @@ contract CorporateActions is
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

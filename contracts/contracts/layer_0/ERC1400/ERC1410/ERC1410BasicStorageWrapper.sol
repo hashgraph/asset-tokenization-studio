@@ -223,7 +223,7 @@ abstract contract ERC1410BasicStorageWrapper is
         bytes memory _data,
         address _operator,
         bytes memory _operatorData
-    ) internal virtual {
+    ) internal {
         _beforeTokenTransfer(_partition, _from, _to, _value);
 
         _reduceBalanceByPartition(_from, _value, _partition);

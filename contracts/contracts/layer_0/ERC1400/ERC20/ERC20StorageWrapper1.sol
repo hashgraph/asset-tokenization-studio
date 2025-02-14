@@ -228,27 +228,27 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
         _getErc20Storage().decimals += decimals;
     }
 
-    function _decimalsAdjusted() internal view virtual returns (uint8) {
+    function _decimalsAdjusted() internal view returns (uint8) {
         return _decimalsAdjustedAt(_blockTimestamp());
     }
 
     function _allowanceAdjusted(
         address _owner,
         address _spender
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         return _allowanceAdjustedAt(_owner, _spender, _blockTimestamp());
     }
 
     function _allowance(
         address owner,
         address spender
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         return _getErc20Storage().allowed[owner][spender];
     }
 
     function _decimalsAdjustedAt(
         uint256 _timestamp
-    ) internal view virtual returns (uint8) {
+    ) internal view returns (uint8) {
         return _getERC20MetadataAdjustedAt(_timestamp).info.decimals;
     }
 
@@ -256,7 +256,7 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
         address _owner,
         address _spender,
         uint256 _timestamp
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         uint256 factor = _calculateFactor(
             _getAbafAdjustedAt(_timestamp),
             _getAllowanceLabaf(_owner, _spender)
@@ -267,7 +267,6 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
     function _getERC20MetadataAdjusted()
         internal
         view
-        virtual
         returns (IERC20.ERC20Metadata memory erc20Metadata_)
     {
         erc20Metadata_ = _getERC20MetadataAdjustedAt(_blockTimestamp());
@@ -275,12 +274,7 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
 
     function _getERC20MetadataAdjustedAt(
         uint256 _timestamp
-    )
-        internal
-        view
-        virtual
-        returns (IERC20.ERC20Metadata memory erc20Metadata_)
-    {
+    ) internal view returns (IERC20.ERC20Metadata memory erc20Metadata_) {
         (, uint8 pendingDecimals) = _getPendingScheduledBalanceAdjustmentsAt(
             _timestamp
         );
@@ -291,7 +285,6 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
     function _getERC20Metadata()
         internal
         view
-        virtual
         returns (IERC20.ERC20Metadata memory erc20Metadata_)
     {
         ERC20Storage storage erc20Storage = _getErc20Storage();
@@ -314,7 +307,6 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
     function _getErc20Storage()
         internal
         view
-        virtual
         returns (ERC20Storage storage erc20Storage_)
     {
         bytes32 position = _ERC20_STORAGE_POSITION;

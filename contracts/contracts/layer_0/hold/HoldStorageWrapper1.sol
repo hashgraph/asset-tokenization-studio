@@ -279,14 +279,14 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
 
     function _getHeldAmountFor(
         address _tokenHolder
-    ) internal view virtual returns (uint256 amount_) {
+    ) internal view returns (uint256 amount_) {
         return _holdStorage().totalHeldAmount[_tokenHolder];
     }
 
     function _getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view virtual returns (uint256 amount_) {
+    ) internal view returns (uint256 amount_) {
         return _holdStorage().heldAmountByPartition[_tokenHolder][_partition];
     }
 
@@ -295,7 +295,7 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
         address _tokenHolder,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view virtual returns (uint256[] memory holdsId_) {
+    ) internal view returns (uint256[] memory holdsId_) {
         return
             _holdStorage().holdIds[_tokenHolder][_partition].getFromSet(
                 _pageIndex,
@@ -310,7 +310,6 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
     )
         internal
         view
-        virtual
         returns (
             uint256 amount_,
             uint256 expirationTimestamp_,
@@ -338,7 +337,7 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
     function _getHoldCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         return _holdStorage().holds[_tokenHolder][_partition].length;
     }
 
@@ -369,7 +368,6 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
     function _holdStorage()
         internal
         pure
-        virtual
         returns (IHold.HoldDataStorage storage hold_)
     {
         bytes32 position = _HOLD_STORAGE_POSITION;

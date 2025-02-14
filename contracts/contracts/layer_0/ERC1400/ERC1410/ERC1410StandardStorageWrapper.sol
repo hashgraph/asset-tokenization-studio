@@ -229,7 +229,7 @@ abstract contract ERC1410StandardStorageWrapper is
         address from,
         address to,
         uint256 amount
-    ) internal virtual override {
+    ) internal override {
         _triggerAndSyncAll(partition, from, to);
 
         if (from == address(0)) {
@@ -251,7 +251,7 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32 _partition,
         address _from,
         address _to
-    ) internal virtual {
+    ) internal {
         _triggerScheduledTasks(0);
         _syncBalanceAdjustments(_partition, _from, _to);
     }
@@ -260,7 +260,7 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32 _partition,
         address _from,
         address _to
-    ) internal virtual {
+    ) internal {
         // adjust the total supply for the partition
         _adjustTotalAndMaxSupplyForPartition(_partition);
 
@@ -277,7 +277,7 @@ abstract contract ERC1410StandardStorageWrapper is
         uint256 _value,
         address _account,
         bytes32 _partition
-    ) internal virtual override {
+    ) internal override {
         _pushLabafUserPartition(_account, _getAbaf());
 
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
@@ -295,7 +295,7 @@ abstract contract ERC1410StandardStorageWrapper is
         address _tokenHolder,
         uint256 _value,
         bytes memory _data
-    ) internal virtual {
+    ) internal {
         _validateParams(_partition, _value);
 
         _beforeTokenTransfer(_partition, address(0), _tokenHolder, _value);
@@ -324,7 +324,7 @@ abstract contract ERC1410StandardStorageWrapper is
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData
-    ) internal virtual {
+    ) internal {
         _beforeTokenTransfer(_partition, _from, address(0), _value);
 
         _reduceBalanceByPartition(_from, _value, _partition);
@@ -344,7 +344,7 @@ abstract contract ERC1410StandardStorageWrapper is
     function _reduceTotalSupplyByPartition(
         bytes32 _partition,
         uint256 _value
-    ) internal virtual {
+    ) internal {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
 
         erc1410Storage.totalSupply -= _value;
@@ -354,17 +354,14 @@ abstract contract ERC1410StandardStorageWrapper is
     function _increaseTotalSupplyByPartition(
         bytes32 _partition,
         uint256 _value
-    ) internal virtual {
+    ) internal {
         ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
 
         erc1410Storage.totalSupply += _value;
         erc1410Storage.totalSupplyByPartition[_partition] += _value;
     }
 
-    function _validateParams(
-        bytes32 _partition,
-        uint256 _value
-    ) internal pure virtual {
+    function _validateParams(bytes32 _partition, uint256 _value) internal pure {
         if (_value == uint256(0)) {
             revert ZeroValue();
         }
@@ -379,7 +376,7 @@ abstract contract ERC1410StandardStorageWrapper is
         uint256 _value,
         bytes calldata _data, // solhint-disable-line no-unused-vars
         bytes calldata _operatorData // solhint-disable-line no-unused-vars
-    ) internal view virtual returns (bool, bytes1, bytes32) {
+    ) internal view returns (bool, bytes1, bytes32) {
         if (_isPaused()) {
             return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
         }
@@ -412,13 +409,13 @@ abstract contract ERC1410StandardStorageWrapper is
         return (true, _SUCCESS, bytes32(0));
     }
 
-    function _totalSupplyAdjusted() internal view virtual returns (uint256) {
+    function _totalSupplyAdjusted() internal view returns (uint256) {
         return _totalSupplyAdjustedAt(_blockTimestamp());
     }
 
     function _totalSupplyAdjustedAt(
         uint256 _timestamp
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         (uint256 pendingABAF, ) = _getPendingScheduledBalanceAdjustmentsAt(
             _timestamp
         );
@@ -427,7 +424,7 @@ abstract contract ERC1410StandardStorageWrapper is
 
     function _totalSupplyByPartitionAdjusted(
         bytes32 _partition
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         uint256 factor = _calculateFactor(
             _getAbafAdjusted(),
             _getLabafByPartition(_partition)
@@ -437,14 +434,14 @@ abstract contract ERC1410StandardStorageWrapper is
 
     function _balanceOfAdjusted(
         address _tokenHolder
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         return _balanceOfAdjustedAt(_tokenHolder, _blockTimestamp());
     }
 
     function _balanceOfAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         uint256 factor = _calculateFactor(
             _getAbafAdjustedAt(_timestamp),
             _getLabafByUser(_tokenHolder)
@@ -455,7 +452,7 @@ abstract contract ERC1410StandardStorageWrapper is
     function _balanceOfByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         return
             _balanceOfByPartitionAdjustedAt(
                 _partition,
@@ -468,7 +465,7 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32 _partition,
         address _tokenHolder,
         uint256 _timestamp
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         uint256 factor = _calculateFactor(
             _getAbafAdjustedAt(_timestamp),
             _getLabafByUserAndPartition(_partition, _tokenHolder)

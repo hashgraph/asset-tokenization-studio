@@ -213,8 +213,8 @@ import {
     AccessControl,
     IFactory,
     BusinessLogicResolver,
-    AccessControl__factory,
-    Pause__factory,
+    AccessControlFacet__factory,
+    PauseFacet__factory,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -292,11 +292,11 @@ describe('Pause Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        accessControlFacet = AccessControl__factory.connect(
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
     })
 
     it('GIVEN an account without pause role WHEN pause THEN transaction fails with AccountHasNoRole', async () => {

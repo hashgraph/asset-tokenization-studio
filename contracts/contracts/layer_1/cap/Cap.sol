@@ -221,7 +221,6 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
         PartitionCap[] calldata partitionCap
     )
         external
-        virtual
         override
         onlyUninitialized(_capStorage().initialized)
         checkNewMaxSupply(maxSupply)
@@ -243,7 +242,6 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
         uint256 _maxSupply
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
@@ -259,7 +257,6 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
         uint256 _maxSupply
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
@@ -288,7 +285,6 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -298,7 +294,6 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -320,7 +315,6 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

@@ -48,7 +48,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
         _;
     }
 
-    function _setProtectedPartitions(bool _protected) internal virtual {
+    function _setProtectedPartitions(bool _protected) internal {
         _protectedPartitionsStorage().arePartitionsProtected = _protected;
         if (_protected) emit PartitionsProtected(_msgSender());
         else emit PartitionsUnProtected(_msgSender());
@@ -60,7 +60,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
 
     function _protectedPartitionsRole(
         bytes32 _partition
-    ) internal view virtual returns (bytes32) {
+    ) internal view returns (bytes32) {
         return
             keccak256(
                 abi.encodePacked(
@@ -70,13 +70,11 @@ abstract contract ProtectedPartitionsStorageWrapper is
             );
     }
 
-    function _arePartitionsProtected() internal view virtual returns (bool) {
+    function _arePartitionsProtected() internal view returns (bool) {
         return _protectedPartitionsStorage().arePartitionsProtected;
     }
 
-    function _getNounceFor(
-        address _account
-    ) internal view virtual returns (uint256) {
+    function _getNounceFor(address _account) internal view returns (uint256) {
         return _protectedPartitionsStorage().nounces[_account];
     }
 
@@ -88,7 +86,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual {
+    ) internal view {
         if (
             !_isTransferSignatureValid(
                 _partition,
@@ -110,7 +108,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         bytes32 functionHash = getMessageHashTransfer(
             _partition,
             _from,
@@ -138,7 +136,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual {
+    ) internal view {
         if (
             !_isRedeemSignatureValid(
                 _partition,
@@ -158,7 +156,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         bytes32 functionHash = getMessageHashRedeem(
             _partition,
             _from,
@@ -183,7 +181,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
         address _from,
         IHold.ProtectedHold memory _protectedHold,
         bytes calldata _signature
-    ) internal view virtual {
+    ) internal view {
         if (
             !_isCreateHoldSignatureValid(
                 _partition,
@@ -199,7 +197,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
         address _from,
         IHold.ProtectedHold memory _protectedHold,
         bytes calldata _signature
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         bytes32 functionHash = getMessageHashCreateHold(
             _partition,
             _from,
@@ -236,7 +234,6 @@ abstract contract ProtectedPartitionsStorageWrapper is
     function _protectedPartitionsStorage()
         internal
         pure
-        virtual
         returns (ProtectedPartitionsDataStorage storage protectedPartitions_)
     {
         bytes32 position = _PROTECTED_PARTITIONS_STORAGE_POSITION;

@@ -218,12 +218,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(
         ERC20Metadata calldata erc20Metadata
-    )
-        external
-        virtual
-        override
-        onlyUninitialized(_getErc20Storage().initialized)
-    {
+    ) external override onlyUninitialized(_getErc20Storage().initialized) {
         ERC20Storage storage erc20Storage = _getErc20Storage();
         erc20Storage.name = erc20Metadata.info.name;
         erc20Storage.symbol = erc20Metadata.info.symbol;
@@ -236,17 +231,17 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     function allowance(
         address owner,
         address spender
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _allowanceAdjusted(owner, spender);
     }
 
-    function decimalsAdjusted() external view virtual returns (uint8) {
+    function decimalsAdjusted() external view returns (uint8) {
         return _decimalsAdjusted();
     }
 
     function decimalsAdjustedAt(
         uint256 _timestamp
-    ) external view virtual returns (uint8) {
+    ) external view returns (uint8) {
         return _decimalsAdjustedAt(_timestamp);
     }
 
@@ -256,7 +251,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         uint256 value
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
@@ -272,7 +266,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         uint256 value
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
@@ -290,7 +283,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         uint256 value
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
@@ -308,7 +300,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         uint256 addedValue
     )
         external
-        virtual
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(spender)
@@ -323,7 +314,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         uint256 subtractedValue
     )
         external
-        virtual
         onlyUnpaused
         checkControlList(_msgSender())
         checkControlList(spender)
@@ -341,26 +331,20 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         return _getERC20Metadata().info.symbol;
     }
 
-    function decimals() external view virtual returns (uint8) {
+    function decimals() external view returns (uint8) {
         return _decimals();
     }
 
     // solhint-enable no-empty-blocks
     // solhint-enable no-unused-vars
 
-    function getERC20Metadata()
-        external
-        view
-        virtual
-        returns (ERC20Metadata memory)
-    {
+    function getERC20Metadata() external view returns (ERC20Metadata memory) {
         return _getERC20MetadataAdjusted();
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -370,7 +354,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -406,7 +389,6 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

@@ -262,14 +262,14 @@ abstract contract AccessControlStorageWrapper is
     function _grantRole(
         bytes32 _role,
         address _account
-    ) internal virtual returns (bool success_) {
+    ) internal returns (bool success_) {
         success_ = _grant(_rolesStorage(), _role, _account);
     }
 
     function _revokeRole(
         bytes32 _role,
         address _account
-    ) internal virtual returns (bool success_) {
+    ) internal returns (bool success_) {
         success_ = _remove(_rolesStorage(), _role, _account);
     }
 
@@ -318,22 +318,20 @@ abstract contract AccessControlStorageWrapper is
         success_ = true;
     }
 
-    function _getRoleAdmin(
-        bytes32 _role
-    ) internal view virtual returns (bytes32) {
+    function _getRoleAdmin(bytes32 _role) internal view returns (bytes32) {
         return _rolesStorage().roles[_role].roleAdmin;
     }
 
     function _hasRole(
         bytes32 _role,
         address _account
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         return _has(_rolesStorage(), _role, _account);
     }
 
     function _getRoleCountFor(
         address _account
-    ) internal view virtual returns (uint256 roleCount_) {
+    ) internal view returns (uint256 roleCount_) {
         roleCount_ = _rolesStorage().memberRoles[_account].length();
     }
 
@@ -341,7 +339,7 @@ abstract contract AccessControlStorageWrapper is
         address _account,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view virtual returns (bytes32[] memory roles_) {
+    ) internal view returns (bytes32[] memory roles_) {
         roles_ = _rolesStorage().memberRoles[_account].getFromSet(
             _pageIndex,
             _pageLength
@@ -350,7 +348,7 @@ abstract contract AccessControlStorageWrapper is
 
     function _getRoleMemberCount(
         bytes32 _role
-    ) internal view virtual returns (uint256 memberCount_) {
+    ) internal view returns (uint256 memberCount_) {
         memberCount_ = _rolesStorage().roles[_role].roleMembers.length();
     }
 
@@ -358,18 +356,18 @@ abstract contract AccessControlStorageWrapper is
         bytes32 _role,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view virtual returns (address[] memory members_) {
+    ) internal view returns (address[] memory members_) {
         members_ = _rolesStorage().roles[_role].roleMembers.getFromSet(
             _pageIndex,
             _pageLength
         );
     }
 
-    function _checkRole(bytes32 _role) internal view virtual {
+    function _checkRole(bytes32 _role) internal view {
         _checkRole(_role, _msgSender());
     }
 
-    function _checkRole(bytes32 _role, address _account) internal view virtual {
+    function _checkRole(bytes32 _role, address _account) internal view {
         if (!_hasRole(_role, _account)) {
             revert AccountHasNoRole(_account, _role);
         }
@@ -378,7 +376,6 @@ abstract contract AccessControlStorageWrapper is
     function _rolesStorage()
         internal
         pure
-        virtual
         returns (RoleDataStorage storage roles_)
     {
         bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
@@ -412,7 +409,7 @@ abstract contract AccessControlStorageWrapper is
         RoleDataStorage storage _rolesStorageData,
         bytes32 _role,
         address _account
-    ) internal view virtual returns (bool hasRole_) {
+    ) internal view returns (bool hasRole_) {
         hasRole_ = _rolesStorageData.memberRoles[_account].contains(_role);
     }
 }

@@ -257,7 +257,7 @@ abstract contract CapStorageWrapper2 is
         _;
     }
 
-    function _checkNewMaxSupply(uint256 _newMaxSupply) internal virtual {
+    function _checkNewMaxSupply(uint256 _newMaxSupply) internal {
         if (_newMaxSupply == 0) {
             revert NewMaxSupplyCannotBeZero();
         }
@@ -270,7 +270,7 @@ abstract contract CapStorageWrapper2 is
     function _checkNewMaxSupplyForPartition(
         bytes32 _partition,
         uint256 _newMaxSupply
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         if (_newMaxSupply == 0) return true;
         uint256 totalSupplyForPartition = _totalSupplyByPartitionAdjusted(
             _partition
@@ -293,7 +293,7 @@ abstract contract CapStorageWrapper2 is
         return true;
     }
 
-    function _checkNewTotalSupply(uint256 _amount) internal virtual {
+    function _checkNewTotalSupply(uint256 _amount) internal {
         uint256 newTotalSupply = _totalSupplyAdjusted() + _amount;
         if (!_checkMaxSupply(newTotalSupply)) {
             revert MaxSupplyReached(_getMaxSupplyAdjusted());
@@ -303,7 +303,7 @@ abstract contract CapStorageWrapper2 is
     function _checkNewTotalSupplyForPartition(
         bytes32 _partition,
         uint256 _amount
-    ) internal virtual {
+    ) internal {
         uint256 newTotalSupply = _totalSupplyByPartitionAdjusted(_partition) +
             _amount;
         if (!_checkMaxSupplyForPartition(_partition, newTotalSupply)) {
@@ -314,16 +314,14 @@ abstract contract CapStorageWrapper2 is
         }
     }
 
-    function _checkMaxSupply(
-        uint256 _amount
-    ) internal view virtual returns (bool) {
+    function _checkMaxSupply(uint256 _amount) internal view returns (bool) {
         return _checkMaxSupply(_amount, _getMaxSupplyAdjusted());
     }
 
     function _checkMaxSupplyForPartition(
         bytes32 _partition,
         uint256 _amount
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         return
             _checkMaxSupply(
                 _amount,

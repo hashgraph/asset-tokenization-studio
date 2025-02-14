@@ -286,11 +286,6 @@ describe('BusinessLogicResolver', () => {
         ).to.be.rejectedWith('AlreadyInitialized')
     })
 
-    it('Check interface Id', async () => {
-        const Id = await businessLogicResolver.getStaticInterfaceIds()
-        expect(Id.length).to.be.equals(4)
-    })
-
     describe('Paused', () => {
         beforeEach(async () => {
             // Pausing the token

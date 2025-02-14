@@ -221,7 +221,6 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         uint8 decimals
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_ADJUSTMENT_BALANCE_ROLE)
@@ -233,62 +232,56 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         success_ = true;
     }
 
-    function getAbaf() external view virtual override returns (uint256) {
+    function getAbaf() external view override returns (uint256) {
         return _getAbaf();
     }
 
-    function getAbafAdjusted()
-        external
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function getAbafAdjusted() external view override returns (uint256) {
         return _getAbafAdjusted();
     }
 
     function getAbafAdjustedAt(
         uint256 _timestamp
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _getAbafAdjustedAt(_timestamp);
     }
 
     function getLabafByUser(
         address _account
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _getLabafByUser(_account);
     }
 
     function getLabafByPartition(
         bytes32 _partition
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _getLabafByPartition(_partition);
     }
 
     function getLabafByUserAndPartition(
         bytes32 _partition,
         address _account
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _getLabafByUserAndPartition(_partition, _account);
     }
 
     function getAllowanceLabaf(
         address _owner,
         address _spender
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _getAllowanceLabaf(_owner, _spender);
     }
 
     function getTotalLockLabaf(
         address _tokenHolder
-    ) external view virtual override returns (uint256 labaf_) {
+    ) external view override returns (uint256 labaf_) {
         return _getTotalLockLabaf(_tokenHolder);
     }
 
     function getTotalLockLabafByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual override returns (uint256 labaf_) {
+    ) external view override returns (uint256 labaf_) {
         return _getTotalLockLabafByPartition(_partition, _tokenHolder);
     }
 
@@ -296,7 +289,7 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockIndex
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _getLockLabafByIndex(_partition, _tokenHolder, _lockIndex);
     }
 
@@ -304,20 +297,20 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
-    ) external view virtual override returns (uint256 labaf_) {
+    ) external view override returns (uint256 labaf_) {
         return _getLockLabafByPartition(_partition, _lockId, _tokenHolder);
     }
 
     function getTotalHeldLabaf(
         address _tokenHolder
-    ) external view virtual override returns (uint256 labaf_) {
+    ) external view override returns (uint256 labaf_) {
         return _getTotalHeldLabaf(_tokenHolder);
     }
 
     function getTotalHeldLabafByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual override returns (uint256 labaf_) {
+    ) external view override returns (uint256 labaf_) {
         return _getTotalHeldLabafByPartition(_partition, _tokenHolder);
     }
 
@@ -325,7 +318,7 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _holdIndex
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _getHoldLabafByIndex(_partition, _tokenHolder, _holdIndex);
     }
 
@@ -333,14 +326,13 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         bytes32 _partition,
         uint256 _holdId,
         address _tokenHolder
-    ) external view virtual override returns (uint256 labaf_) {
+    ) external view override returns (uint256 labaf_) {
         return _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -350,7 +342,6 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -407,7 +398,6 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

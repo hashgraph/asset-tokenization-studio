@@ -216,9 +216,9 @@ import {
     ERC1410ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
-    AccessControl__factory,
+    AccessControlFacet__factory,
     Equity__factory,
-    Pause__factory,
+    PauseFacet__factory,
     ERC1410ScheduledTasks__factory,
     ScheduledTasks__factory,
 } from '@typechain'
@@ -325,7 +325,7 @@ describe('Scheduled Tasks Tests', () => {
             factory,
         })
 
-        accessControlFacet = AccessControl__factory.connect(
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )
@@ -334,7 +334,7 @@ describe('Scheduled Tasks Tests', () => {
             diamond.address,
             signer_A
         )
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A

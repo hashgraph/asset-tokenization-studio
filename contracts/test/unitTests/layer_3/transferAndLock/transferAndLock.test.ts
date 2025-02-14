@@ -217,7 +217,7 @@ import {
     IFactory,
     Lock__factory,
     TransferAndLock__factory,
-    Pause__factory,
+    PauseFacet__factory,
     ERC1410ScheduledTasks__factory,
 } from '@typechain'
 import {
@@ -342,7 +342,7 @@ describe('Transfer and lock Tests', () => {
                 diamond.address,
                 signer_C
             )
-            pauseFacet = Pause__factory.connect(diamond.address, signer_D)
+            pauseFacet = PauseFacet__factory.connect(diamond.address, signer_D)
             erc1410Facet = ERC1410ScheduledTasks__factory.connect(
                 diamond.address,
                 signer_B

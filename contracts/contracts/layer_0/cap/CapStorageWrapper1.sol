@@ -249,7 +249,6 @@ contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
     function _getMaxSupplyAdjusted()
         internal
         view
-        virtual
         returns (uint256 maxSupply_)
     {
         return _getMaxSupplyAdjustedAt(_blockTimestamp());
@@ -259,21 +258,16 @@ contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         uint256 timestamp
     ) internal view returns (uint256) {
         CapDataStorage storage capStorage = _capStorage();
-        if (
-            capStorage.maxSupply ==
-            0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        )
-            return
-                0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-        (uint256 pendingABF, ) = _getPendingScheduledBalanceAdjustmentsAt(
+        if (capStorage.maxSupply == _MAX_UINT256) return _MAX_UINT256;
+        (uint256 pendingAbaf, ) = _getPendingScheduledBalanceAdjustmentsAt(
             timestamp
         );
-        return capStorage.maxSupply * pendingABF;
+        return capStorage.maxSupply * pendingAbaf;
     }
 
     function _getMaxSupplyByPartitionAdjusted(
         bytes32 _partition
-    ) internal view virtual returns (uint256 maxSupply_) {
+    ) internal view returns (uint256 maxSupply_) {
         return
             _getMaxSupplyByPartitionAdjustedAt(_partition, _blockTimestamp());
     }

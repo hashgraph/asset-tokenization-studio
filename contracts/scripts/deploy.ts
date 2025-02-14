@@ -405,13 +405,13 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-   
+
    */
 
 import { ethers } from 'hardhat'
 import { Contract, ContractFactory, ContractTransaction } from 'ethers'
 import {
-    AccessControl__factory,
+    AccessControlFacet__factory,
     AdjustBalances__factory,
     BondUSA__factory,
     BusinessLogicResolver__factory,
@@ -427,7 +427,7 @@ import {
     ERC20__factory,
     Factory__factory,
     Lock__factory,
-    Pause__factory,
+    PauseFacet__factory,
     ProtectedPartitions__factory,
     ProxyAdmin__factory,
     ScheduledBalanceAdjustments__factory,
@@ -580,7 +580,7 @@ export async function deployAtsContracts({
             overrides,
         }),
         accessControl: new DeployContractWithFactoryCommand({
-            factory: new AccessControl__factory(),
+            factory: new AccessControlFacet__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.AccessControl.addresses?.[network]
@@ -604,7 +604,7 @@ export async function deployAtsContracts({
             overrides,
         }),
         pause: new DeployContractWithFactoryCommand({
-            factory: new Pause__factory(),
+            factory: new PauseFacet__factory(),
             signer,
             deployedContract: useDeployed
                 ? Configuration.contracts.Pause.addresses?.[network]

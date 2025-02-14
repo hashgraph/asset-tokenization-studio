@@ -223,11 +223,11 @@ import {
     IERC20,
     IFactory,
     BusinessLogicResolver,
-    AccessControl__factory,
+    AccessControlFacet__factory,
     ControlList__factory,
     Equity__factory,
     ERC1410ScheduledTasks__factory,
-    Pause__factory,
+    PauseFacet__factory,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -744,7 +744,7 @@ describe('ERC1400 Tests', () => {
                 factory,
             })
 
-            accessControlFacet = AccessControl__factory.connect(
+            accessControlFacet = AccessControlFacet__factory.connect(
                 diamond.address,
                 signer_A
             )
@@ -753,7 +753,7 @@ describe('ERC1400 Tests', () => {
                 signer_A
             )
             equityFacet = Equity__factory.connect(diamond.address, signer_A)
-            pauseFacet = Pause__factory.connect(diamond.address, signer_B)
+            pauseFacet = PauseFacet__factory.connect(diamond.address, signer_B)
             controlList = ControlList__factory.connect(
                 diamond.address,
                 signer_A
@@ -2418,7 +2418,7 @@ describe('ERC1400 Tests', () => {
                 factory,
             })
 
-            accessControlFacet = AccessControl__factory.connect(
+            accessControlFacet = AccessControlFacet__factory.connect(
                 diamond.address,
                 signer_A
             )
@@ -2427,7 +2427,7 @@ describe('ERC1400 Tests', () => {
                 signer_A
             )
             equityFacet = Equity__factory.connect(diamond.address, signer_A)
-            pauseFacet = Pause__factory.connect(diamond.address, signer_B)
+            pauseFacet = PauseFacet__factory.connect(diamond.address, signer_B)
             controlList = ControlList__factory.connect(
                 diamond.address,
                 signer_A

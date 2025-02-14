@@ -222,18 +222,18 @@ import {
 contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
+    // TODO: ésto para qué?????
     // solhint-disable no-unused-vars
     function onScheduledTaskTriggered(
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    ) external virtual override onlyAutoCalling(_scheduledTaskStorage()) {
+    ) external override onlyAutoCalling(_scheduledTaskStorage()) {
         _onScheduledTaskTriggered(_data);
     } // solhint-enable no-unused-vars
 
     function triggerPendingScheduledTasks()
         external
-        virtual
         override
         onlyUnpaused
         returns (uint256)
@@ -243,17 +243,11 @@ contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
 
     function triggerScheduledTasks(
         uint256 _max
-    ) external virtual override onlyUnpaused returns (uint256) {
+    ) external override onlyUnpaused returns (uint256) {
         return _triggerScheduledTasks(_max);
     }
 
-    function scheduledTaskCount()
-        external
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function scheduledTaskCount() external view override returns (uint256) {
         return _getScheduledTaskCount();
     }
 
@@ -263,7 +257,6 @@ contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
     )
         external
         view
-        virtual
         override
         returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
     {
@@ -273,7 +266,6 @@ contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -283,7 +275,6 @@ contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -309,7 +300,6 @@ contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

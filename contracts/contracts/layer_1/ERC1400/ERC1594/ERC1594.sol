@@ -218,7 +218,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1594()
         external
-        virtual
         override
         onlyUninitialized(_getErc1594Storage().initialized)
     {
@@ -243,7 +242,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         bytes calldata _data // solhint-disable-line no-unused-vars
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
@@ -275,7 +273,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         bytes calldata _data // solhint-disable-line no-unused-vars
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
@@ -303,7 +300,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         bytes calldata _data
     )
         external
-        virtual
         override
         checkMaxSupply(_value)
         onlyUnpaused
@@ -327,7 +323,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         bytes calldata _data
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
@@ -352,7 +347,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         bytes calldata _data
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
@@ -370,7 +364,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
      * If a token returns FALSE for `isIssuable()` then it MUST never allow additional tokens to be issued.
      * @return bool `true` signifies the minting is allowed. While `false` denotes the end of minting
      */
-    function isIssuable() external view virtual override returns (bool) {
+    function isIssuable() external view override returns (bool) {
         return _isIssuable();
     }
 
@@ -392,7 +386,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     )
         external
         view
-        virtual
         override
         onlyWithoutMultiPartition
         returns (bool, bytes1, bytes32)
@@ -420,7 +413,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     )
         external
         view
-        virtual
         override
         onlyWithoutMultiPartition
         returns (bool, bytes1, bytes32)
@@ -434,7 +426,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -444,7 +435,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -472,7 +462,6 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

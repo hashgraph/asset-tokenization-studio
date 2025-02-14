@@ -234,19 +234,13 @@ contract ScheduledBalanceAdjustments is
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    )
-        external
-        virtual
-        override
-        onlyAutoCalling(_scheduledBalanceAdjustmentStorage())
-    {
+    ) external override onlyAutoCalling(_scheduledBalanceAdjustmentStorage()) {
         _onScheduledBalanceAdjustmentTriggered(_data);
     } // solhint-enable no-unused-vars
 
     function scheduledBalanceAdjustmentCount()
         external
         view
-        virtual
         override
         returns (uint256)
     {
@@ -259,7 +253,6 @@ contract ScheduledBalanceAdjustments is
     )
         external
         view
-        virtual
         override
         returns (
             ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
@@ -274,7 +267,6 @@ contract ScheduledBalanceAdjustments is
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -284,7 +276,6 @@ contract ScheduledBalanceAdjustments is
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -304,7 +295,6 @@ contract ScheduledBalanceAdjustments is
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

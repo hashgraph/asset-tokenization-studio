@@ -222,57 +222,62 @@ contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
         bytes32 _partition,
         address _from,
         address _to
-    ) external virtual onlyUnpaused {
+    ) external onlyUnpaused {
         _triggerAndSyncAll(_partition, _from, _to);
     }
 
-    function totalSupplyAdjusted() external view virtual returns (uint256) {
+    function totalSupplyAdjusted() external view returns (uint256) {
         return _totalSupplyAdjusted();
     }
 
     function totalSupplyByPartitionAdjusted(
         bytes32 _partition
-    ) external view virtual returns (uint256) {
+    ) external view returns (uint256) {
         return _totalSupplyByPartitionAdjusted(_partition);
     }
 
     function balanceOfAdjusted(
         address _tokenHolder
-    ) external view virtual returns (uint256) {
+    ) external view returns (uint256) {
         return _balanceOfAdjusted(_tokenHolder);
     }
 
     function balanceOfAdjustedAt(
         address _tokenHolder,
         uint256 _timestamp
-    ) external view virtual returns (uint256) {
+    ) external view returns (uint256) {
         return _balanceOfAdjustedAt(_tokenHolder, _timestamp);
     }
 
     function balanceOfByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual returns (uint256) {
+    ) external view returns (uint256) {
         return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function balanceOf(
         address _tokenHolder
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _balanceOfAdjusted(_tokenHolder);
     }
 
     function balanceOfByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function totalSupplyByPartition(
+        bytes32 _partition
+    ) external view override returns (uint256) {
+        return _totalSupplyByPartitionAdjusted(_partition);
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -282,7 +287,6 @@ contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -375,7 +379,6 @@ contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

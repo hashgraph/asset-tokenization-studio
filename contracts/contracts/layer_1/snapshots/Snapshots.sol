@@ -219,112 +219,110 @@ import {_SNAPSHOT_ROLE} from '../constants/roles.sol';
 contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
     function takeSnapshot()
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_SNAPSHOT_ROLE)
-        returns (uint256 snapshotID)
+        returns (uint256 snapshotID_)
     {
         _triggerScheduledTasks(0);
-        return _takeSnapshot();
+        snapshotID_ = _takeSnapshot();
     }
 
-    function AbafAtSnapshot(
+    function abafAtSnapshot(
         uint256 _snapshotID
-    ) external view returns (uint256 ABAF_) {
-        return _AbafAtSnapshot(_snapshotID);
+    ) external view returns (uint256 abaf_) {
+        abaf_ = _abafAtSnapshot(_snapshotID);
     }
 
     function decimalsAtSnapshot(
         uint256 _snapshotID
-    ) external view virtual returns (uint8 decimals_) {
-        return _decimalsAtSnapshot(_snapshotID);
+    ) external view returns (uint8 decimals_) {
+        decimals_ = _decimalsAtSnapshot(_snapshotID);
     }
 
     function balanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
+    ) external view override returns (uint256 balance_) {
+        balance_ = _balanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     function balanceOfAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID,
         address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _balanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
+    ) external view override returns (uint256 balance_) {
+        balance_ = _balanceOfAtSnapshotByPartition(
+            _partition,
+            _snapshotID,
+            _tokenHolder
+        );
     }
 
     function partitionsOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
-    ) external view virtual override returns (bytes32[] memory) {
+    ) external view override returns (bytes32[] memory) {
         return _partitionsOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     function totalSupplyAtSnapshot(
         uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshot(_snapshotID);
+    ) external view override returns (uint256 totalSupply_) {
+        totalSupply_ = _totalSupplyAtSnapshot(_snapshotID);
     }
 
     function totalSupplyAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID
-    ) external view virtual override returns (uint256 totalSupply_) {
-        return _totalSupplyAtSnapshotByPartition(_partition, _snapshotID);
+    ) external view override returns (uint256 totalSupply_) {
+        totalSupply_ = _totalSupplyAtSnapshotByPartition(
+            _partition,
+            _snapshotID
+        );
     }
 
     function lockedBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
+    ) external view override returns (uint256 balance_) {
+        balance_ = _lockedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     function lockedBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID,
         address _tokenHolder
-    ) external view virtual override returns (uint256 balance_) {
-        return
-            _lockedBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
+    ) external view override returns (uint256 balance_) {
+        balance_ = _lockedBalanceOfAtSnapshotByPartition(
+            _partition,
+            _snapshotID,
+            _tokenHolder
+        );
     }
 
     function heldBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
+    ) external view returns (uint256 balance_) {
+        balance_ = _heldBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
     }
 
     function heldBalanceOfAtSnapshotByPartition(
         bytes32 _partition,
         uint256 _snapshotID,
         address _tokenHolder
-    ) external view virtual returns (uint256 balance_) {
-        return
-            _heldBalanceOfAtSnapshotByPartition(
-                _partition,
-                _snapshotID,
-                _tokenHolder
-            );
+    ) external view returns (uint256 balance_) {
+        balance_ = _heldBalanceOfAtSnapshotByPartition(
+            _partition,
+            _snapshotID,
+            _tokenHolder
+        );
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -334,7 +332,6 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -369,7 +366,7 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
             .heldBalanceOfAtSnapshotByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .AbafAtSnapshot
+            .abafAtSnapshot
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .decimalsAtSnapshot
@@ -379,7 +376,6 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

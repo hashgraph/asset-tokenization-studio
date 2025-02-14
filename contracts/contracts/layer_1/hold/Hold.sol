@@ -221,7 +221,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         Hold calldata _hold
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyValidAddress(_hold.escrow)
@@ -254,7 +253,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyValidAddress(_from)
@@ -288,7 +286,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyValidAddress(_from)
@@ -323,7 +320,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyValidAddress(_from)
@@ -358,7 +354,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         bytes calldata _signature
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyValidAddress(_from)
@@ -395,7 +390,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         uint256 _amount
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -427,7 +421,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         uint256 _amount
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -454,7 +447,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         uint256 _holdId
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -478,21 +470,21 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
 
     function getHeldAmountFor(
         address _tokenHolder
-    ) external view virtual override returns (uint256 amount_) {
+    ) external view override returns (uint256 amount_) {
         return _getHeldAmountFor(_tokenHolder);
     }
 
     function getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual override returns (uint256 amount_) {
+    ) external view override returns (uint256 amount_) {
         return _getHeldAmountForByPartition(_partition, _tokenHolder);
     }
 
     function getHoldCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual override returns (uint256 holdCount_) {
+    ) external view override returns (uint256 holdCount_) {
         return _getHoldCountForByPartition(_partition, _tokenHolder);
     }
 
@@ -501,7 +493,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         address _tokenHolder,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view virtual override returns (uint256[] memory holdsId_) {
+    ) external view override returns (uint256[] memory holdsId_) {
         return
             _getHoldsIdForByPartition(
                 _partition,
@@ -518,7 +510,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     )
         external
         view
-        virtual
         override
         returns (
             uint256 amount_,
@@ -534,21 +525,20 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
 
     function getHeldAmountForAdjusted(
         address _tokenHolder
-    ) external view virtual returns (uint256 amount_) {
+    ) external view returns (uint256 amount_) {
         return _getHeldAmountForAdjusted(_tokenHolder);
     }
 
     function getHeldAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
-    ) external view virtual returns (uint256 amount_) {
+    ) external view returns (uint256 amount_) {
         return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -558,7 +548,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -614,7 +603,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

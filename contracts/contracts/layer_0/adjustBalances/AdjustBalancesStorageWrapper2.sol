@@ -206,7 +206,6 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {MappingLib} from '../common/MappingLib.sol';
 import {HoldStorageWrapper2} from '../hold/HoldStorageWrapper2.sol';
 import {
     IAdjustBalancesStorageWrapper
@@ -218,7 +217,9 @@ abstract contract AdjustBalancesStorageWrapper2 is
 {
     // solhint-disable no-unused-vars
     function _adjustBalances(uint256 _factor, uint8 _decimals) internal {
-        _beforeBalanceAdjustment(_factor, _decimals);
+        _updateDecimalsSnapshot();
+        _updateAbafSnapshot();
+        _updateAssetTotalSupplySnapshot();
         _adjustTotalSupply(_factor);
         _adjustDecimals(_decimals);
         _adjustMaxSupply(_factor);
@@ -241,16 +242,6 @@ abstract contract AdjustBalancesStorageWrapper2 is
         _adjustMaxSupplyByPartition(_partition, factor);
 
         _updateLabafByPartition(_partition);
-    }
-
-    // solhint-disable no-unused-vars
-    function _beforeBalanceAdjustment(
-        uint256 _factor,
-        uint8 _decimals
-    ) internal virtual {
-        _updateDecimalsSnapshot();
-        _updateAbafSnapshot();
-        _updateAssetTotalSupplySnapshot();
     }
 
     function _getHoldLabafByPartition(

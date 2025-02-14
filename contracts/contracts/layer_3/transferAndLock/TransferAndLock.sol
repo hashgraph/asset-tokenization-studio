@@ -229,7 +229,6 @@ contract TransferAndLock is
         uint256 _expirationTimestamp
     )
         external
-        virtual
         override
         onlyRole(_LOCKER_ROLE)
         onlyUnpaused
@@ -271,7 +270,6 @@ contract TransferAndLock is
         uint256 _expirationTimestamp
     )
         external
-        virtual
         override
         onlyRole(_LOCKER_ROLE)
         onlyUnpaused
@@ -314,7 +312,6 @@ contract TransferAndLock is
         bytes calldata _signature
     )
         external
-        virtual
         override
         onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
         onlyRole(_protectedPartitionsRole(_partition))
@@ -342,7 +339,6 @@ contract TransferAndLock is
         bytes calldata _signature
     )
         external
-        virtual
         override
         onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
         onlyRole(_protectedPartitionsRole(_DEFAULT_PARTITION))
@@ -365,7 +361,6 @@ contract TransferAndLock is
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -375,7 +370,6 @@ contract TransferAndLock is
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -392,7 +386,6 @@ contract TransferAndLock is
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

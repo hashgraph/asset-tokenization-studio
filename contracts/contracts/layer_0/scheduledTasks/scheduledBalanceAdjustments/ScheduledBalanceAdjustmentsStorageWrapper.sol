@@ -207,33 +207,26 @@
 pragma solidity 0.8.18;
 
 import {
-    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
+    IScheduledBalanceAdjustments
+} from '../../../layer_2/interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol';
+import {
+    ScheduledSnapshotsStorageWrapperRead
+} from '../scheduledSnapshots/ScheduledSnapshotsStorageWrapperRead.sol';
 import {
     ScheduledTasksLib
 } from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
 import {
-    ScheduledSnapshotsStorageWrapperRead
-} from '../scheduledSnapshots/ScheduledSnapshotsStorageWrapperRead.sol';
+    _SCHEDULED_BALANCE_ADJUSTMENTS_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
 import {IEquity} from '../../../layer_2/interfaces/equity/IEquity.sol';
 
 abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
     ScheduledSnapshotsStorageWrapperRead
 {
-    // TODO: Remove the method
-    // solhint-disable no-unused-vars, custom-errors
-    function onScheduledBalanceAdjustmentTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external virtual {
-        revert('This method should never be executed, it should be overriden');
-    } // solhint-enable no-unused-vars, custom-errors
-
     function _addScheduledBalanceAdjustment(
         uint256 _newScheduledTimestamp,
         bytes memory _newData
-    ) internal virtual {
+    ) internal {
         ScheduledTasksLib.addScheduledTask(
             _scheduledBalanceAdjustmentStorage(),
             _newScheduledTimestamp,
@@ -243,11 +236,13 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
 
     function _triggerScheduledBalanceAdjustments(
         uint256 _max
-    ) internal virtual returns (uint256) {
+    ) internal returns (uint256) {
         return
             ScheduledTasksLib.triggerScheduledTasks(
                 _scheduledBalanceAdjustmentStorage(),
-                this.onScheduledBalanceAdjustmentTriggered.selector,
+                IScheduledBalanceAdjustments
+                    .onScheduledBalanceAdjustmentTriggered
+                    .selector,
                 _max,
                 _blockTimestamp()
             );
@@ -256,7 +251,6 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
     function _getScheduledBalanceAdjustmentCount()
         internal
         view
-        virtual
         returns (uint256)
     {
         return
@@ -271,7 +265,6 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
     )
         internal
         view
-        virtual
         returns (
             ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
         )
@@ -328,7 +321,6 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
     function _scheduledBalanceAdjustmentStorage()
         internal
         pure
-        virtual
         returns (
             ScheduledTasksLib.ScheduledTasksDataStorage
                 storage scheduledBalanceAdjustments_

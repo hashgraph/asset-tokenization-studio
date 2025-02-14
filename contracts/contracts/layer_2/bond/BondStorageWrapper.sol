@@ -293,7 +293,6 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         IBond.Coupon memory _newCoupon
     )
         internal
-        virtual
         returns (bool success_, bytes32 corporateActionId_, uint256 couponID_)
     {
         (success_, corporateActionId_, couponID_) = _addCorporateAction(
@@ -336,12 +335,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
 
     function _getCoupon(
         uint256 _couponID
-    )
-        internal
-        view
-        virtual
-        returns (IBond.RegisteredCoupon memory registeredCoupon_)
-    {
+    ) internal view returns (IBond.RegisteredCoupon memory registeredCoupon_) {
         bytes32 actionId = _corporateActionsStorage()
             .actionsByType[COUPON_CORPORATE_ACTION_TYPE]
             .at(_couponID - 1);
@@ -358,7 +352,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
     function _getCouponFor(
         uint256 _couponID,
         address _account
-    ) internal view virtual returns (IBond.CouponFor memory couponFor_) {
+    ) internal view returns (IBond.CouponFor memory couponFor_) {
         IBond.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
 
         couponFor_.rate = registeredCoupon.coupon.rate;
@@ -386,19 +380,13 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         }
     }
 
-    function _getCouponCount()
-        internal
-        view
-        virtual
-        returns (uint256 couponCount_)
-    {
+    function _getCouponCount() internal view returns (uint256 couponCount_) {
         return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
     }
 
     function _bondStorage()
         internal
         pure
-        virtual
         returns (BondDataStorage storage bondData_)
     {
         bytes32 position = _BOND_STORAGE_POSITION;

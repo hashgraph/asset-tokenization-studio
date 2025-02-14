@@ -251,7 +251,6 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         Coupon calldata _newCoupon
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
@@ -279,7 +278,6 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         uint256 _newMaturityDate
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_BOND_MANAGER_ROLE)
@@ -309,7 +307,6 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     )
         external
         view
-        virtual
         override
         checkIndexForCorporateActionByType(
             COUPON_CORPORATE_ACTION_TYPE,
@@ -326,7 +323,6 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     )
         external
         view
-        virtual
         override
         checkIndexForCorporateActionByType(
             COUPON_CORPORATE_ACTION_TYPE,
@@ -340,7 +336,6 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     function getCouponCount()
         external
         view
-        virtual
         override
         returns (uint256 couponCount_)
     {

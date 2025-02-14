@@ -299,12 +299,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         bytes32 partition,
         address tokenHolder,
         uint256 lockId
-    )
-        internal
-        view
-        virtual
-        returns (uint256 amount, uint256 expirationTimestamp)
-    {
+    ) internal view returns (uint256 amount, uint256 expirationTimestamp) {
         LockData memory lock = _getLock(partition, tokenHolder, lockId);
         amount = lock.amount;
         expirationTimestamp = lock.expirationTimestamp;
@@ -314,12 +309,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         bytes32 _partition,
         address _tokenHolder,
         uint256 _lockId
-    )
-        internal
-        view
-        virtual
-        returns (uint256 amount_, uint256 expirationTimestamp_)
-    {
+    ) internal view returns (uint256 amount_, uint256 expirationTimestamp_) {
         uint256 factor = _calculateFactor(
             _getAbafAdjusted(),
             _getLockLabafByPartition(_partition, _lockId, _tokenHolder)
@@ -354,7 +344,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     function _getLockedAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view virtual returns (uint256 amount_) {
+    ) internal view returns (uint256 amount_) {
         uint256 factor = _calculateFactor(
             _getAbafAdjusted(),
             _getTotalLockLabafByPartition(_partition, _tokenHolder)
@@ -399,7 +389,6 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     function _lockStorage()
         internal
         pure
-        virtual
         returns (LockDataStorage storage lock_)
     {
         bytes32 position = _LOCK_STORAGE_POSITION;

@@ -216,15 +216,15 @@ abstract contract SnapshotsStorageWrapper2 is
     ISnapshotsStorageWrapper,
     ERC20StorageWrapper2
 {
-    function _updateAbafSnapshot() internal virtual {
+    function _updateAbafSnapshot() internal {
         _updateSnapshot(_snapshotStorage().abafSnapshots, _getAbaf());
     }
 
-    function _updateDecimalsSnapshot() internal virtual {
+    function _updateDecimalsSnapshot() internal {
         _updateSnapshot(_snapshotStorage().decimals, _decimals());
     }
 
-    function _updateAssetTotalSupplySnapshot() internal virtual {
+    function _updateAssetTotalSupplySnapshot() internal {
         _updateSnapshot(
             _snapshotStorage().totalSupplySnapshots,
             _totalSupply()
@@ -241,10 +241,10 @@ abstract contract SnapshotsStorageWrapper2 is
 
         if (currentSnapshotId == 0) return;
 
-        uint256 ABAFAtCurrentSnapshot = _AbafAtSnapshot(currentSnapshotId);
+        uint256 abafAtCurrentSnapshot = _abafAtSnapshot(currentSnapshotId);
         uint256 abaf = _getAbafAdjusted();
 
-        if (abaf == ABAFAtCurrentSnapshot) {
+        if (abaf == abafAtCurrentSnapshot) {
             _updateAccountSnapshot(
                 _snapshotStorage().accountBalanceSnapshots[account],
                 _balanceOf(account),
@@ -257,14 +257,14 @@ abstract contract SnapshotsStorageWrapper2 is
             );
             return;
         }
-        if (ABAFAtCurrentSnapshot == 0) ABAFAtCurrentSnapshot = 1;
+        if (abafAtCurrentSnapshot == 0) abafAtCurrentSnapshot = 1;
 
         uint256 balance = _balanceOfAdjusted(account);
         uint256 balanceForPartition = _balanceOfByPartitionAdjusted(
             partition,
             account
         );
-        uint256 factor = abaf / ABAFAtCurrentSnapshot;
+        uint256 factor = abaf / abafAtCurrentSnapshot;
 
         balance /= factor;
         balanceForPartition /= factor;
@@ -317,7 +317,7 @@ abstract contract SnapshotsStorageWrapper2 is
     function _updateAccountHeldBalancesSnapshot(
         address account,
         bytes32 partition
-    ) internal virtual {
+    ) internal {
         _updateSnapshot(
             _snapshotStorage().accountHeldBalanceSnapshots[account],
             _getHeldAmountFor(account)
@@ -341,9 +341,9 @@ abstract contract SnapshotsStorageWrapper2 is
         );
     }
 
-    function _AbafAtSnapshot(
+    function _abafAtSnapshot(
         uint256 _snapshotID
-    ) internal view returns (uint256 ABAF_) {
+    ) internal view returns (uint256 abaf_) {
         (bool snapshotted, uint256 value) = _valueAt(
             _snapshotID,
             _snapshotStorage().abafSnapshots
@@ -408,7 +408,7 @@ abstract contract SnapshotsStorageWrapper2 is
         uint256 snapshotId
     ) internal view returns (uint256) {
         return
-            _balanceOfAt_Adjusted(
+            _balanceOfAtAdjusted(
                 snapshotId,
                 _snapshotStorage().accountBalanceSnapshots[account],
                 _balanceOfAdjusted(account)
@@ -421,7 +421,7 @@ abstract contract SnapshotsStorageWrapper2 is
         uint256 snapshotId
     ) internal view returns (uint256) {
         return
-            _balanceOfAt_Adjusted(
+            _balanceOfAtAdjusted(
                 snapshotId,
                 _snapshotStorage().accountPartitionBalanceSnapshots[account][
                     _partition
@@ -435,7 +435,7 @@ abstract contract SnapshotsStorageWrapper2 is
         uint256 _snapshotID
     ) internal view returns (uint256 totalSupply_) {
         return
-            _balanceOfAt_Adjusted(
+            _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().totalSupplyByPartitionSnapshots[_partition],
                 _totalSupplyByPartitionAdjusted(_partition)
@@ -447,7 +447,7 @@ abstract contract SnapshotsStorageWrapper2 is
         address _tokenHolder
     ) internal view returns (uint256 balance_) {
         return
-            _balanceOfAt_Adjusted(
+            _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().accountLockedBalanceSnapshots[_tokenHolder],
                 _getLockedAmountForAdjustedAt(_tokenHolder, _blockTimestamp())
@@ -460,7 +460,7 @@ abstract contract SnapshotsStorageWrapper2 is
         address _tokenHolder
     ) internal view returns (uint256 balance_) {
         return
-            _balanceOfAt_Adjusted(
+            _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().accountPartitionLockedBalanceSnapshots[
                     _tokenHolder
@@ -472,9 +472,9 @@ abstract contract SnapshotsStorageWrapper2 is
     function _heldBalanceOfAtSnapshot(
         uint256 _snapshotID,
         address _tokenHolder
-    ) internal view virtual returns (uint256 balance_) {
+    ) internal view returns (uint256 balance_) {
         return
-            _balanceOfAt_Adjusted(
+            _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().accountHeldBalanceSnapshots[_tokenHolder],
                 _getHeldAmountForAdjusted(_tokenHolder)
@@ -485,9 +485,9 @@ abstract contract SnapshotsStorageWrapper2 is
         bytes32 _partition,
         uint256 _snapshotID,
         address _tokenHolder
-    ) internal view virtual returns (uint256 balance_) {
+    ) internal view returns (uint256 balance_) {
         return
-            _balanceOfAt_Adjusted(
+            _balanceOfAtAdjusted(
                 _snapshotID,
                 _snapshotStorage().accountPartitionHeldBalanceSnapshots[
                     _tokenHolder
@@ -496,21 +496,21 @@ abstract contract SnapshotsStorageWrapper2 is
             );
     }
 
-    function _balanceOfAt_Adjusted(
+    function _balanceOfAtAdjusted(
         uint256 _snapshotId,
         Snapshots storage _snapshots,
         uint256 _currentBalanceAdjusted
-    ) internal view virtual returns (uint256) {
+    ) internal view returns (uint256) {
         (bool snapshotted, uint256 value) = _valueAt(_snapshotId, _snapshots);
         if (snapshotted) return value;
 
-        uint256 ABAFAtSnapshot = _AbafAtSnapshot(_snapshotId);
+        uint256 abafAtSnapshot = _abafAtSnapshot(_snapshotId);
         uint256 abaf = _getAbaf();
 
-        if (ABAFAtSnapshot == abaf) return _currentBalanceAdjusted;
-        if (ABAFAtSnapshot == 0) ABAFAtSnapshot = 1;
+        if (abafAtSnapshot == abaf) return _currentBalanceAdjusted;
+        if (abafAtSnapshot == 0) abafAtSnapshot = 1;
 
-        uint256 factor = abaf / ABAFAtSnapshot;
+        uint256 factor = abaf / abafAtSnapshot;
 
         return _currentBalanceAdjusted / factor;
     }
