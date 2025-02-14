@@ -122,24 +122,80 @@ exports[`Balance should render correctly 1`] = `
         </div>
       </div>
       <div
-        class="chakra-stack css-19rghx9"
+        class="chakra-stack css-b1sb84"
       >
-        <p
-          class="css-kwpule"
-        >
-          Account Balance
-        </p>
         <div
-          class="chakra-stack css-1kn39y0"
+          class="chakra-stack css-19rghx9"
         >
           <p
-            class="css-1ysbn4y"
+            class="css-kwpule"
           >
-            -
-            <span
-              class="css-650xeh"
-            />
+            Total Balance
           </p>
+          <div
+            class="chakra-stack css-apqn8k"
+          >
+            <p
+              class="css-1ysbn4y"
+            >
+              -
+              <span
+                class="css-650xeh"
+              />
+            </p>
+          </div>
+          <div
+            class="chakra-stack css-1ok80jm"
+          >
+            <div
+              class="chakra-stack css-1h4ws66"
+            >
+              <p
+                class="css-ncp2jn"
+              >
+                Available balance
+              </p>
+              <p
+                class="css-vzbq89"
+              >
+                - 
+              </p>
+            </div>
+            <div
+              class="chakra-stack css-nkhb6s"
+            />
+            <div
+              class="chakra-stack css-1h4ws66"
+            >
+              <p
+                class="css-ncp2jn"
+              >
+                Lock balance
+              </p>
+              <p
+                class="css-vzbq89"
+              >
+                - 
+              </p>
+            </div>
+            <div
+              class="chakra-stack css-nkhb6s"
+            />
+            <div
+              class="chakra-stack css-1h4ws66"
+            >
+              <p
+                class="css-ncp2jn"
+              >
+                Held balance
+              </p>
+              <p
+                class="css-vzbq89"
+              >
+                - 
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

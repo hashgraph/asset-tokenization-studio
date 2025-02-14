@@ -221,6 +221,7 @@ import {
     ERC1410Basic_CD_Lib
 } from '../../layer_1/ERC1400/ERC1410/ERC1410Basic_CD_Lib.sol';
 import {Lock_CD_Lib} from '../../layer_1/lock/Lock_CD_Lib.sol';
+import {Hold_CD_Lib} from '../../layer_1/hold/Hold_CD_Lib.sol';
 
 abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
     using EnumerableSet for EnumerableSet.Bytes32Set;
@@ -244,31 +245,29 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
 
     function _storeBondDetails(
         IBond.BondDetailsData memory _bondDetails
-    ) internal returns (bool) {
+    ) internal {
         _bondStorage().bondDetail = _bondDetails;
-        return true;
     }
 
     function _storeCouponDetails(
         IBond.CouponDetailsData memory _couponDetails,
         uint256 _startingDate,
         uint256 _maturityDate
-    ) internal returns (bool) {
+    ) internal {
         _bondStorage().couponDetail = _couponDetails;
-        if (_couponDetails.firstCouponDate == 0) return true;
+        if (_couponDetails.firstCouponDate == 0) return;
         if (
             _couponDetails.firstCouponDate < _startingDate ||
             _couponDetails.firstCouponDate > _maturityDate
         ) revert CouponFirstDateWrong();
         if (_couponDetails.couponFrequency == 0) revert CouponFrequencyWrong();
 
-        return
-            _setFixedCoupons(
-                _couponDetails.firstCouponDate,
-                _couponDetails.couponFrequency,
-                _maturityDate,
-                _couponDetails.couponRate
-            );
+        _setFixedCoupons(
+            _couponDetails.firstCouponDate,
+            _couponDetails.couponFrequency,
+            _maturityDate,
+            _couponDetails.couponRate
+        );
     }
 
     function _setFixedCoupons(
@@ -385,9 +384,14 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
                     Snapshots_CD_Lib.lockedBalanceOfAtSnapshot(
                         registeredCoupon.snapshotId,
                         _account
+                    ) +
+                    Snapshots_CD_Lib.heldBalanceOfAtSnapshot(
+                        registeredCoupon.snapshotId,
+                        _account
                     ))
                 : (ERC1410Basic_CD_Lib.balanceOf(_account) +
-                    Lock_CD_Lib.getLockedAmountFor(_account));
+                    Lock_CD_Lib.getLockedAmountFor(_account) +
+                    Hold_CD_Lib.getHeldAmountFor(_account));
 
             couponFor_.decimals = ERC20_2_CD_Lib.decimalsAdjusted();
         }

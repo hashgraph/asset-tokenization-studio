@@ -218,9 +218,8 @@ abstract contract Security is ISecurity, SecurityStorageWrapper, Common {
     function _initializeSecurity(
         RegulationData memory _regulationData,
         AdditionalSecurityData calldata _additionalSecurityData
-    ) internal returns (bool) {
+    ) internal {
         _storeRegulationData(_regulationData, _additionalSecurityData);
-        return true;
     }
 
     function getSecurityRegulationData()

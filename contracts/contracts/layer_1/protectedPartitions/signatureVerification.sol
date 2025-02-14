@@ -5,8 +5,12 @@ import {
     _DOMAIN_TYPE_HASH,
     _SALT,
     _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH,
-    _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH
+    _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH,
+    _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
+    _PROTECTED_HOLD_TYPEHASH,
+    _HOLD_TYPEHASH
 } from '../constants/values.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
 
 error WrongSignatureLength();
 error WrongNounce(uint256 nounce, address account);
@@ -50,6 +54,38 @@ function getMessageHashRedeem(
                 _amount,
                 _deadline,
                 _nounce
+            )
+        );
+}
+
+function getMessageHashCreateHold(
+    bytes32 _partition,
+    address _from,
+    IHold.ProtectedHold memory _protectedHold
+) pure returns (bytes32) {
+    return
+        keccak256(
+            abi.encode(
+                _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
+                _partition,
+                _from,
+                keccak256(
+                    abi.encode(
+                        _PROTECTED_HOLD_TYPEHASH,
+                        keccak256(
+                            abi.encode(
+                                _HOLD_TYPEHASH,
+                                _protectedHold.hold.amount,
+                                _protectedHold.hold.expirationTimestamp,
+                                _protectedHold.hold.escrow,
+                                _protectedHold.hold.to,
+                                keccak256(_protectedHold.hold.data)
+                            )
+                        ),
+                        _protectedHold.deadline,
+                        _protectedHold.nonce
+                    )
+                )
             )
         );
 }

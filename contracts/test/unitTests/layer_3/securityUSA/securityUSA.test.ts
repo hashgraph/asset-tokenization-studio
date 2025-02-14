@@ -205,20 +205,25 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type EquityUSA,
     type BondUSA,
-} from '../../../../typechain-types'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+    BusinessLogicResolver,
+    IFactory,
+} from '@typechain'
 import {
     Rbac,
     deployBondFromFactory,
     deployEquityFromFactory,
     RegulationType,
     RegulationSubType,
-} from '../../../../scripts/factory'
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+    MAX_UINT256,
+} from '@scripts'
 
 const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
@@ -242,13 +247,29 @@ describe('Security USA Tests', () => {
 
     let account_A: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let equityUSAFacet: EquityUSA
     let bondUSAFacet: BondUSA
 
     before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B] = await ethers.getSigners()
         account_A = signer_A.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    timeTravelEnabled: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
         currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
             .timestamp
@@ -261,40 +282,38 @@ describe('Security USA Tests', () => {
         expect(firstCouponDate).to.be.gt(startingDate)
     })
 
-    beforeEach(async () => {
-        await deployEnvironment()
-    })
-
     describe('equity USA', () => {
         it('Given regulation type REG_S and subtype NONE WHEN Read regulation data from Equity USA THEN all ok', async () => {
-            diamond = await deployEquityFromFactory(
-                account_A,
-                false,
-                true,
-                false,
-                false,
-                'TEST_AccessControl',
-                'TAC',
-                6,
-                'ABCDEF123456',
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                false,
-                1,
-                '0x345678',
-                0,
-                100,
-                RegulationType.REG_S,
-                RegulationSubType.NONE,
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: false,
+                name: 'TEST_AccessControl',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_S,
+                regulationSubType: RegulationSubType.NONE,
                 countriesControlListType,
                 listOfCountries,
                 info,
-                init_rbacs
-            )
+                init_rbacs,
+                businessLogicResolver: businessLogicResolver.address,
+                factory,
+            })
 
             equityUSAFacet = await ethers.getContractAt(
                 'EquityUSA',
@@ -339,34 +358,36 @@ describe('Security USA Tests', () => {
         })
 
         it('Given regulation type REG_D and subtype REG_D_506_B WHEN Read regulation data from Equity USA THEN all ok', async () => {
-            diamond = await deployEquityFromFactory(
-                account_A,
-                false,
-                true,
-                false,
-                false,
-                'TEST_AccessControl',
-                'TAC',
-                6,
-                'ABCDEF123456',
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                false,
-                1,
-                '0x345678',
-                0,
-                100,
-                RegulationType.REG_D,
-                RegulationSubType.REG_D_506_B,
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: false,
+                name: 'TEST_AccessControl',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_D,
+                regulationSubType: RegulationSubType.REG_D_506_B,
                 countriesControlListType,
                 listOfCountries,
                 info,
-                init_rbacs
-            )
+                init_rbacs,
+                businessLogicResolver: businessLogicResolver.address,
+                factory,
+            })
 
             equityUSAFacet = await ethers.getContractAt(
                 'EquityUSA',
@@ -411,34 +432,36 @@ describe('Security USA Tests', () => {
         })
 
         it('Given regulation type REG_D and subtype REG_D_506_C WHEN Read regulation data from Equity USA THEN all ok', async () => {
-            diamond = await deployEquityFromFactory(
-                account_A,
-                false,
-                true,
-                false,
-                false,
-                'TEST_AccessControl',
-                'TAC',
-                6,
-                'ABCDEF123456',
-                false,
-                false,
-                false,
-                true,
-                true,
-                true,
-                false,
-                1,
-                '0x345678',
-                0,
-                100,
-                RegulationType.REG_D,
-                RegulationSubType.REG_D_506_C,
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: false,
+                name: 'TEST_AccessControl',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_D,
+                regulationSubType: RegulationSubType.REG_D_506_C,
                 countriesControlListType,
                 listOfCountries,
                 info,
-                init_rbacs
-            )
+                init_rbacs,
+                businessLogicResolver: businessLogicResolver.address,
+                factory,
+            })
 
             equityUSAFacet = await ethers.getContractAt(
                 'EquityUSA',
@@ -485,31 +508,33 @@ describe('Security USA Tests', () => {
 
     describe('bond USA', () => {
         it('Given regulation type REG_S and subtype NONE WHEN Read regulation data from Bond USA THEN all ok', async () => {
-            diamond = await deployBondFromFactory(
-                account_A,
-                false,
-                true,
-                false,
-                false,
-                'TEST_AccessControl',
-                'TAC',
-                6,
-                'ABCDEF123456',
-                '0x455552',
+            diamond = await deployBondFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: false,
+                name: 'TEST_AccessControl',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                currency: '0x455552',
                 numberOfUnits,
-                100,
+                nominalValue: 100,
                 startingDate,
                 maturityDate,
-                frequency,
-                rate,
+                couponFrequency: frequency,
+                couponRate: rate,
                 firstCouponDate,
-                RegulationType.REG_S,
-                RegulationSubType.NONE,
+                regulationType: RegulationType.REG_S,
+                regulationSubType: RegulationSubType.NONE,
                 countriesControlListType,
                 listOfCountries,
                 info,
-                init_rbacs
-            )
+                init_rbacs,
+                businessLogicResolver: businessLogicResolver.address,
+                factory,
+            })
 
             bondUSAFacet = await ethers.getContractAt(
                 'BondUSA',
@@ -554,31 +579,33 @@ describe('Security USA Tests', () => {
         })
 
         it('Given regulation type REG_D and subtype REG_D_506_B WHEN Read regulation data from Bond USA THEN all ok', async () => {
-            diamond = await deployBondFromFactory(
-                account_A,
-                false,
-                true,
-                false,
-                false,
-                'TEST_AccessControl',
-                'TAC',
-                6,
-                'ABCDEF123456',
-                '0x455552',
+            diamond = await deployBondFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: false,
+                name: 'TEST_AccessControl',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                currency: '0x455552',
                 numberOfUnits,
-                100,
+                nominalValue: 100,
                 startingDate,
                 maturityDate,
-                frequency,
-                rate,
+                couponFrequency: frequency,
+                couponRate: rate,
                 firstCouponDate,
-                RegulationType.REG_D,
-                RegulationSubType.REG_D_506_B,
+                regulationType: RegulationType.REG_D,
+                regulationSubType: RegulationSubType.REG_D_506_B,
                 countriesControlListType,
                 listOfCountries,
                 info,
-                init_rbacs
-            )
+                init_rbacs,
+                businessLogicResolver: businessLogicResolver.address,
+                factory,
+            })
 
             bondUSAFacet = await ethers.getContractAt(
                 'BondUSA',
@@ -623,31 +650,33 @@ describe('Security USA Tests', () => {
         })
 
         it('Given regulation type REG_D and subtype REG_D_506_C WHEN Read regulation data from Bond USA THEN all ok', async () => {
-            diamond = await deployBondFromFactory(
-                account_A,
-                false,
-                true,
-                false,
-                false,
-                'TEST_AccessControl',
-                'TAC',
-                6,
-                'ABCDEF123456',
-                '0x455552',
+            diamond = await deployBondFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                isMultiPartition: false,
+                name: 'TEST_AccessControl',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                currency: '0x455552',
                 numberOfUnits,
-                100,
+                nominalValue: 100,
                 startingDate,
                 maturityDate,
-                frequency,
-                rate,
+                couponFrequency: frequency,
+                couponRate: rate,
                 firstCouponDate,
-                RegulationType.REG_D,
-                RegulationSubType.REG_D_506_C,
+                regulationType: RegulationType.REG_D,
+                regulationSubType: RegulationSubType.REG_D_506_C,
                 countriesControlListType,
                 listOfCountries,
                 info,
-                init_rbacs
-            )
+                init_rbacs,
+                businessLogicResolver: businessLogicResolver.address,
+                factory,
+            })
 
             bondUSAFacet = await ethers.getContractAt(
                 'BondUSA',

@@ -214,8 +214,8 @@ import {
 } from './ERC1410ControllerStorageWrapper.sol';
 
 abstract contract ERC1410SnapshotStorageWrapper is
-    ERC1410ControllerStorageWrapper,
-    SnapshotsStorageWrapper
+    SnapshotsStorageWrapper,
+    ERC1410ControllerStorageWrapper
 {
     function _beforeTokenTransfer(
         bytes32 partition,

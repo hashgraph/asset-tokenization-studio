@@ -228,6 +228,7 @@ import {
 import {
     AdjustBalancesStorageWrapperRead
 } from './AdjustBalancesStorageWrapperRead.sol';
+import {_MAX_UINT256} from '../constants/values.sol';
 
 contract AdjustBalancesStorageWrapper is
     IAdjustBalancesStorageWrapper,
@@ -257,11 +258,16 @@ contract AdjustBalancesStorageWrapper is
 
         erc1410Storage.totalSupply *= _factor;
 
-        if (_getABAF() == 0) adjustBalancesStorage.abaf = _factor;
-        else adjustBalancesStorage.abaf *= _factor;
+        if (_getABAF() == 0) {
+            adjustBalancesStorage.abaf = _factor;
+        } else {
+            adjustBalancesStorage.abaf *= _factor;
+        }
 
         erc20Storage.decimals += _decimals;
-        capStorage.maxSupply *= _factor;
+        if (capStorage.maxSupply != _MAX_UINT256) {
+            capStorage.maxSupply *= _factor;
+        }
 
         emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
     }
@@ -367,6 +373,43 @@ contract AdjustBalancesStorageWrapper is
         uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
         if (lockIndex == 0) return 0;
         return _getLockLABAFByIndex(_partition, _tokenHolder, lockIndex);
+    }
+
+    function _getTotalHeldLABAF(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 labaf_) {
+        return _getAdjustBalancesStorage().labafsTotalHeld[_tokenHolder];
+    }
+
+    function _getTotalHeldLABAFByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 labaf_) {
+        return
+            _getAdjustBalancesStorage().labafsTotalHeldByPartition[
+                _tokenHolder
+            ][_partition];
+    }
+
+    function _getHoldLABAFByIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex
+    ) internal view virtual returns (uint256) {
+        return
+            _getAdjustBalancesStorage().labafHolds[_tokenHolder][_partition][
+                _holdIndex - 1
+            ];
+    }
+
+    function _getHoldLABAFByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder
+    ) internal view virtual returns (uint256) {
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+        if (holdIndex == 0) return 0;
+        return _getHoldLABAFByIndex(_partition, _tokenHolder, holdIndex);
     }
 
     function _beforeTokenTransfer(

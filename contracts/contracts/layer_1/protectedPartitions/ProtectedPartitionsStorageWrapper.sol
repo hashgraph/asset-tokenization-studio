@@ -7,18 +7,17 @@ import {
 import {
     IProtectedPartitionsStorageWrapper
 } from '../interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol';
-import {
-    _PROTECTED_PARTITIONS_ROLE,
-    _PROTECTED_PARTITIONS_PARTICIPANT_ROLE
-} from '../constants/roles.sol';
+import {_PROTECTED_PARTITIONS_PARTICIPANT_ROLE} from '../constants/roles.sol';
 import {
     _PROTECTED_PARTITIONS_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 import {
     getMessageHashTransfer,
     getMessageHashRedeem,
+    getMessageHashCreateHold,
     verify
 } from './signatureVerification.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
 
 abstract contract ProtectedPartitionsStorageWrapper is
     IProtectedPartitionsStorageWrapper,
@@ -165,6 +164,46 @@ abstract contract ProtectedPartitionsStorageWrapper is
             _deadline,
             _nounce
         );
+        return
+            verify(
+                _from,
+                functionHash,
+                _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
+            );
+    }
+
+    function _checkCreateHoldSignature(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold,
+        bytes calldata _signature
+    ) internal view virtual {
+        if (
+            !_isCreateHoldSignatureValid(
+                _partition,
+                _from,
+                _protectedHold,
+                _signature
+            )
+        ) revert WrongSignature();
+    }
+
+    function _isCreateHoldSignatureValid(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold,
+        bytes calldata _signature
+    ) internal view virtual returns (bool) {
+        bytes32 functionHash = getMessageHashCreateHold(
+            _partition,
+            _from,
+            _protectedHold
+        );
+
         return
             verify(
                 _from,

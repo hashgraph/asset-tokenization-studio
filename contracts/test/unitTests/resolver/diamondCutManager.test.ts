@@ -204,25 +204,29 @@
 */
 
 //import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
-import { ethers } from 'hardhat'
 import { expect } from 'chai'
+import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import {
     AccessControl,
     Pause,
     BusinessLogicResolver,
     DiamondCutManager,
-} from '../../../typechain-types'
+    IDiamondCutManager,
+    IFactory,
+    AccessControl__factory,
+    Pause__factory,
+    DiamondCutManager__factory,
+} from '@typechain'
 import {
-    BondConfigId,
-    EquityConfigId,
-    _PAUSER_ROLE,
-} from '../../../scripts/constants'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import {
-    deployEnvironment,
-    environment,
-} from '../../../scripts/deployEnvironmentByRpc'
-import { FacetConfiguration } from '../../../scripts/resolverDiamondCut.js'
+    BOND_CONFIG_ID,
+    deployAtsFullInfrastructure,
+    DeployAtsFullInfrastructureCommand,
+    DeployContractWithFactoryResult,
+    EQUITY_CONFIG_ID,
+    PAUSER_ROLE,
+} from '@scripts'
+import { BaseContract } from 'ethers'
 
 describe('DiamondCutManager', () => {
     let signer_A: SignerWithAddress
@@ -230,42 +234,55 @@ describe('DiamondCutManager', () => {
 
     let account_B: string
 
-    let resolver: BusinessLogicResolver
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let diamondCutManager: DiamondCutManager
     let accessControl: AccessControl
     let pause: Pause
+    let deployedContracts: DeployContractWithFactoryResult<BaseContract>[] = []
+    let commonFacetIdList: string[] = []
+    let equityFacetIdList: string[] = []
+    let bondFacetIdList: string[] = []
+    let equityFacetVersionList: number[] = []
+    let bondFacetVersionList: number[] = []
 
     before(async () => {
+        // mute | mock console.log
+        // console.log = () => {}
         //await loadFixture(deployBusinessLogicResolverFixture)
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B] = await ethers.getSigners()
         account_B = signer_B.address
 
-        await deployEnvironment()
+        const { deployer, facetLists, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                })
+            )
 
-        resolver = await ethers.getContractAt(
-            'BusinessLogicResolver',
-            environment.resolver.address
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+
+        accessControl = AccessControl__factory.connect(
+            businessLogicResolver.address,
+            signer_A
         )
+        await accessControl.grantRole(PAUSER_ROLE, account_B)
 
-        resolver = resolver.connect(signer_A)
-
-        accessControl = await ethers.getContractAt(
-            'AccessControl',
-            environment.resolver.address
+        pause = Pause__factory.connect(businessLogicResolver.address, signer_A)
+        diamondCutManager = DiamondCutManager__factory.connect(
+            businessLogicResolver.address,
+            signer_A
         )
-        accessControl = accessControl.connect(signer_A)
-        await accessControl.grantRole(_PAUSER_ROLE, account_B)
-
-        pause = await ethers.getContractAt(
-            'Pause',
-            environment.resolver.address
-        )
-
-        diamondCutManager = await ethers.getContractAt(
-            'DiamondCutManager',
-            environment.resolver.address
-        )
+        ;({
+            commonFacetIdList,
+            equityFacetIdList,
+            bondFacetIdList,
+            equityFacetVersionList,
+            bondFacetVersionList,
+        } = facetLists)
     })
 
     it('GIVEN a resolver WHEN reading configuration information THEN everything matches', async () => {
@@ -279,7 +296,7 @@ describe('DiamondCutManager', () => {
             0,
             configLength
         )
-        expect(configIds).to.have.members([EquityConfigId, BondConfigId])
+        expect(configIds).to.have.members([EQUITY_CONFIG_ID, BOND_CONFIG_ID])
 
         for (let configIndex = 0; configIndex < configLength; configIndex++) {
             const configId = configIds[configIndex]
@@ -437,24 +454,19 @@ describe('DiamondCutManager', () => {
 
                 expect(facetAddresses).to.have.members(facetAddresses_2)
 
-                switch (configId) {
-                    case EquityConfigId:
-                        expect(facetsLength).to.equal(
-                            environment.facetIdsEquities.length
-                        )
-                        expect(facetIds).to.have.members(
-                            environment.facetIdsEquities
-                        )
-                        break
-                    default:
-                        expect(facetsLength).to.equal(
-                            environment.facetIdsBonds.length
-                        )
-                        expect(facetIds).to.have.members(
-                            environment.facetIdsBonds
-                        )
-                        break
+                const expectedFacetIdList =
+                    configId === EQUITY_CONFIG_ID
+                        ? equityFacetIdList
+                        : configId === BOND_CONFIG_ID
+                        ? bondFacetIdList
+                        : null
+
+                if (!expectedFacetIdList) {
+                    expect.fail('Unknown configId')
                 }
+
+                expect(facetsLength).to.equal(expectedFacetIdList.length)
+                expect(facetIds).to.have.members(expectedFacetIdList)
             }
         }
     })
@@ -462,23 +474,23 @@ describe('DiamondCutManager', () => {
     it('GIVEN a resolver WHEN resolving calls THEN success', async () => {
         const facets =
             await diamondCutManager.getFacetsByConfigurationIdAndVersion(
-                EquityConfigId,
+                EQUITY_CONFIG_ID,
                 1,
                 0,
-                environment.facetIdsEquities.length
+                equityFacetIdList.length
             )
 
         expect(facets.length).to.be.greaterThan(0)
 
         const configVersionDoesNotExist =
             await diamondCutManager.isResolverProxyConfigurationRegistered(
-                EquityConfigId,
+                EQUITY_CONFIG_ID,
                 2
             )
         expect(configVersionDoesNotExist).to.be.false
         await expect(
             diamondCutManager.checkResolverProxyConfigurationRegistered(
-                EquityConfigId,
+                EQUITY_CONFIG_ID,
                 2
             )
         ).to.be.rejectedWith('ResolverProxyConfigurationNoRegistered')
@@ -497,7 +509,7 @@ describe('DiamondCutManager', () => {
         ).to.be.rejectedWith('ResolverProxyConfigurationNoRegistered')
 
         const noFacetAddress = await diamondCutManager.resolveResolverProxyCall(
-            EquityConfigId,
+            EQUITY_CONFIG_ID,
             1,
             '0x00000001'
         )
@@ -507,7 +519,7 @@ describe('DiamondCutManager', () => {
 
         const interfaceDoesnotExist =
             await diamondCutManager.resolveSupportsInterface(
-                EquityConfigId,
+                EQUITY_CONFIG_ID,
                 1,
                 '0x00000001'
             )
@@ -517,11 +529,12 @@ describe('DiamondCutManager', () => {
     it('GIVEN a resolver WHEN adding a new configuration with configId at 0 THEN fails with DefaultValueForConfigurationIdNotPermitted', async () => {
         diamondCutManager = diamondCutManager.connect(signer_A)
 
-        const facetConfigurations: FacetConfiguration[] = []
-        environment.facetIdsEquities.forEach((id, index) =>
+        const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] =
+            []
+        equityFacetIdList.forEach((id, index) =>
             facetConfigurations.push({
                 id,
-                version: environment.facetVersionsEquities[index],
+                version: equityFacetVersionList[index],
             })
         )
 
@@ -536,17 +549,18 @@ describe('DiamondCutManager', () => {
     it('GIVEN a resolver and a non admin user WHEN adding a new configuration THEN fails with AccountHasNoRole', async () => {
         diamondCutManager = diamondCutManager.connect(signer_B)
 
-        const facetConfigurations: FacetConfiguration[] = []
-        environment.facetIdsEquities.forEach((id, index) =>
+        const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] =
+            []
+        equityFacetIdList.forEach((id, index) =>
             facetConfigurations.push({
                 id,
-                version: environment.facetVersionsEquities[index],
+                version: equityFacetVersionList[index],
             })
         )
 
         await expect(
             diamondCutManager.createConfiguration(
-                EquityConfigId,
+                EQUITY_CONFIG_ID,
                 facetConfigurations
             )
         ).to.be.rejectedWith('AccountHasNoRole')
@@ -558,17 +572,18 @@ describe('DiamondCutManager', () => {
 
         await pause.pause()
 
-        const facetConfigurations: FacetConfiguration[] = []
-        environment.facetIdsEquities.forEach((id, index) =>
+        const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] =
+            []
+        equityFacetIdList.forEach((id, index) =>
             facetConfigurations.push({
                 id,
-                version: environment.facetVersionsEquities[index],
+                version: equityFacetVersionList[index],
             })
         )
 
         await expect(
             diamondCutManager.createConfiguration(
-                EquityConfigId,
+                EQUITY_CONFIG_ID,
                 facetConfigurations
             )
         ).to.be.rejectedWith('TokenIsPaused')
@@ -579,16 +594,17 @@ describe('DiamondCutManager', () => {
     it('GIVEN a resolver WHEN adding a new configuration with a non registered facet THEN fails with FacetIdNotRegistered', async () => {
         diamondCutManager = diamondCutManager.connect(signer_A)
 
-        const facetConfigurations: FacetConfiguration[] = [
-            {
-                id: '0x0000000000000000000000000000000000000000000000000000000000000000',
-                version: 1,
-            },
-        ]
+        const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] =
+            [
+                {
+                    id: '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    version: 1,
+                },
+            ]
 
         await expect(
             diamondCutManager.createConfiguration(
-                EquityConfigId,
+                EQUITY_CONFIG_ID,
                 facetConfigurations
             )
         ).to.be.rejectedWith('FacetIdNotRegistered')
@@ -597,13 +613,16 @@ describe('DiamondCutManager', () => {
     it('GIVEN a resolver WHEN adding a new configuration with a duplicated facet THEN fails with DuplicatedFacetInConfiguration', async () => {
         diamondCutManager = diamondCutManager.connect(signer_A)
 
-        const facetsIds = [...environment.facetIdsEquities]
-        facetsIds.push(environment.facetIdsEquities[0])
+        // Add a duplicated facet
+        const facetsIds = [...equityFacetIdList, equityFacetIdList[0]]
+        // Add a duplicated version
+        const facetVersions = [
+            ...equityFacetVersionList,
+            equityFacetVersionList[0],
+        ]
 
-        const facetVersions = [...environment.facetVersionsEquities]
-        facetVersions.push(environment.facetVersionsEquities[0])
-
-        const facetConfigurations: FacetConfiguration[] = []
+        const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] =
+            []
         facetsIds.forEach((id, index) => {
             facetConfigurations.push({
                 id,
@@ -613,7 +632,7 @@ describe('DiamondCutManager', () => {
 
         await expect(
             diamondCutManager.createConfiguration(
-                EquityConfigId,
+                EQUITY_CONFIG_ID,
                 facetConfigurations
             )
         ).to.be.rejectedWith('DuplicatedFacetInConfiguration')

@@ -213,12 +213,9 @@ interface IERC1644 {
      * @dev Initial configuration
      *
      * @param _isControllable true is controllable, false is not controllable
-     * @return success_
      */
     // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1644(
-        bool _isControllable
-    ) external returns (bool success_);
+    function initialize_ERC1644(bool _isControllable) external;
 
     function controllerTransfer(
         address _from,

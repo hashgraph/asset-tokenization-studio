@@ -222,6 +222,7 @@ import {
 } from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
 import {IEquity} from '../interfaces/equity/IEquity.sol';
 import {Lock_2_CD_Lib} from '../lock/Lock_2_CD_Lib.sol';
+import {Hold_2_CD_Lib} from '../hold/Hold_2_CD_Lib.sol';
 import {Snapshots_2_CD_Lib} from '../snapshots/Snapshots_2_CD_Lib.sol';
 import {
     EnumerableSet
@@ -239,9 +240,8 @@ abstract contract EquityStorageWrapper is
 
     function _storeEquityDetails(
         IEquity.EquityDetailsData memory _equityDetailsData
-    ) internal returns (bool) {
+    ) internal {
         _equityStorage().equityDetailsData = _equityDetailsData;
-        return true;
     }
 
     function _getEquityDetails()
@@ -478,11 +478,17 @@ abstract contract EquityStorageWrapper is
                     Snapshots_CD_Lib.lockedBalanceOfAtSnapshot(
                         _snapshotId,
                         _account
+                    ) +
+                    Snapshots_CD_Lib.heldBalanceOfAtSnapshot(
+                        _snapshotId,
+                        _account
                     ))
                 : (ERC1410ScheduledTasks_CD_Lib.balanceOfAdjustedAt(
                     _account,
                     _date
-                ) + Lock_2_CD_Lib.getLockedAmountForAdjusted(_account));
+                ) +
+                    Lock_2_CD_Lib.getLockedAmountForAdjusted(_account) +
+                    Hold_2_CD_Lib.getHeldAmountForAdjusted(_account));
 
             decimals_ = (_snapshotId != 0)
                 ? Snapshots_2_CD_Lib.decimalsAtSnapshot(_snapshotId)

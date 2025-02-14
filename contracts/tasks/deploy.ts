@@ -204,8 +204,8 @@
 */
 
 import { task, types } from 'hardhat/config'
-import { DeployAllArgs, DeployArgs, GetClientResult } from './Arguments'
-import { deployAtsFullInfrastructure, deployContract } from '../scripts/deploy'
+import { CONTRACT_NAMES, ContractName, Network } from '@configuration'
+import { DeployAllArgs, DeployArgs, GetSignerResult } from './Arguments'
 
 task(
     'deployAll',
@@ -217,103 +217,122 @@ task(
         undefined,
         types.string
     )
-    .addOptionalPositionalParam(
-        'privateKey',
-        'The private key of the account, Raw hexadecimal string',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'clientIsEd25519',
-        'Client is ED25519 key type',
-        false,
-        types.boolean
-    )
     .addOptionalParam(
         'useDeployed',
         'Use already deployed contracts',
         true,
         types.boolean
     )
+    .addOptionalParam(
+        'privateKey',
+        'The private key of the account in raw hexadecimal format',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
+    )
     .setAction(async (args: DeployAllArgs, hre) => {
+        // Inlined to avoid circular dependency
+        const {
+            deployAtsFullInfrastructure,
+            DeployAtsFullInfrastructureCommand,
+            addresstoHederaId,
+        } = await import('@scripts')
+        const network = hre.network.name as Network
         console.log(`Executing deployAll on ${hre.network.name} ...`)
-        const { client, privateKey }: GetClientResult = await hre.run(
-            'getClient',
-            {
-                account: args.account,
-                privateKey: args.privateKey,
-                isEd25519: args.isEd25519,
-            }
-        )
+        const { signer }: GetSignerResult = await hre.run('getSigner', {
+            privateKey: args.privateKey,
+            signerAddress: args.signerAddress,
+            signerPosition: args.signerPosition,
+        })
+
         // * Deploy the full infrastructure
         const {
-            resolver,
+            factory,
+            businessLogicResolver,
             accessControl,
             cap,
             controlList,
             pause,
             erc20,
-            erc1410,
+            erc1410ScheduledTasks,
             erc1594,
             erc1643,
             erc1644,
             snapshots,
             diamondFacet,
-            equity,
-            bond,
+            equityUsa,
+            bondUsa,
             scheduledSnapshots,
             scheduledBalanceAdjustments,
             scheduledTasks,
             corporateActionsSecurity,
             lock,
+            hold,
             transferAndLock,
             adjustBalances,
-            protectedPartitions,
-            factory,
-        } = await deployAtsFullInfrastructure({
-            clientOperator: client,
-            privateKey: privateKey,
-            isED25519: args.isEd25519,
-            useDeployed: args.useDeployed,
-        })
+        } = await deployAtsFullInfrastructure(
+            new DeployAtsFullInfrastructureCommand({
+                signer: signer,
+                network: hre.network.name as Network,
+                useDeployed: args.useDeployed,
+                useEnvironment: false,
+            })
+        )
 
         // * Display the deployed addresses
-        const ids = {
-            'Resolver Proxy': resolver.proxy,
-            'Resolver Proxy Admin': resolver.proxyAdmin,
-            Resolver: resolver.contract,
-            'Factory Proxy': factory.proxy,
-            'Factory Proxy Admin': factory.proxyAdmin,
-            Factory: factory.contract,
-            'Access Control': accessControl.contract,
-            Cap: cap.contract,
-            'Control List': controlList.contract,
-            Pause: pause.contract,
-            ERC20: erc20.contract,
-            ERC1410: erc1410.contract,
-            ERC1594: erc1594.contract,
-            ERC1643: erc1643.contract,
-            ERC1644: erc1644.contract,
-            Snapshots: snapshots.contract,
-            'Diamond Facet': diamondFacet.contract,
-            Equity: equity.contract,
-            Bond: bond.contract,
-            'Scheduled Snapshots': scheduledSnapshots.contract,
+        const addressList = {
+            'Business Logic Resolver Proxy': businessLogicResolver.proxyAddress,
+            'Business Logic Resolver Proxy Admin':
+                businessLogicResolver.proxyAdminAddress,
+            'Business Logic Resolver': businessLogicResolver.address,
+            'Factory Proxy': factory.proxyAddress,
+            'Factory Proxy Admin': factory.proxyAdminAddress,
+            Factory: factory.address,
+            'Access Control': accessControl.address,
+            Cap: cap.address,
+            'Control List': controlList.address,
+            Pause: pause.address,
+            ERC20: erc20.address,
+            ERC1410: erc1410ScheduledTasks.address,
+            ERC1594: erc1594.address,
+            ERC1643: erc1643.address,
+            ERC1644: erc1644.address,
+            Snapshots: snapshots.address,
+            'Diamond Facet': diamondFacet.address,
+            Equity: equityUsa.address,
+            Bond: bondUsa.address,
+            'Scheduled Snapshots': scheduledSnapshots.address,
             'Scheduled Balance Adjustments':
-                scheduledBalanceAdjustments.contract,
-            'Scheduled Tasks': scheduledTasks.contract,
-            'Corporate Actions': corporateActionsSecurity.contract,
-            Lock: lock.contract,
-            'Transfer and Lock': transferAndLock.contract,
-            'Adjust Balances': adjustBalances.contract,
-            'Protected Partitions': protectedPartitions.contract,
+                scheduledBalanceAdjustments.address,
+            'Scheduled Tasks': scheduledTasks.address,
+            'Corporate Actions': corporateActionsSecurity.address,
+            Lock: lock.address,
+            Hold: hold.address,
+            'Transfer and Lock': transferAndLock.address,
+            'Adjust Balances': adjustBalances.address,
         }
 
-        console.log('\n 🟢 Deployed IDs:')
-        for (const [key, value] of Object.entries(ids)) {
-            console.log(
-                `   --> ${key}: ${value?.contract_id}(${value?.evm_address})`
-            )
+        console.log('\n 🟢 Deployed ATS Contract List:')
+        for (const [key, address] of Object.entries(addressList)) {
+            if (!address) {
+                continue
+            }
+            const contractId = await addresstoHederaId({
+                address,
+                network,
+            })
+            console.log(`   --> ${key}: ${address} (${contractId})`)
         }
     })
 
@@ -325,50 +344,71 @@ task('deploy', 'Deploy new contract')
         types.string
     )
     .addOptionalParam(
-        'account',
-        'The Hedera account to use for deployment. 0.0.XXXX format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
         'privateKey',
-        'The private key of the account, Raw hexadecimal string',
+        'The private key of the account in raw hexadecimal format',
         undefined,
         types.string
     )
     .addOptionalParam(
-        'isEd25519',
-        'Client is ED25519 key type',
-        false,
-        types.boolean
+        'signerAddress',
+        'The address of the signer to select from the Hardhat signers array',
+        undefined,
+        types.string
+    )
+    .addOptionalParam(
+        'signerPosition',
+        'The index of the signer in the Hardhat signers array',
+        undefined,
+        types.int
     )
     .setAction(async (args: DeployArgs, hre) => {
-        console.log(`Executing deploy on ${hre.network.name} ...`)
-        const { client, privateKey }: GetClientResult = await hre.run(
-            'getClient',
-            {
-                account: args.account,
-                privateKey: args.privateKey,
-                isEd25519: args.isEd25519,
-            }
-        )
-        // * Deploy the contract
-        const { proxyAdmin, proxy, contract } = await deployContract({
-            clientOperator: client,
-            privateKey: privateKey,
-            isED25519: args.isEd25519,
-            contractName: args.contractName,
-        })
-
-        if (proxyAdmin) {
-            console.log(
-                `Proxy Admin: ${proxyAdmin.evm_address}(${proxyAdmin.contract_id})`
+        // Inlined to avoid circular dependency
+        const {
+            deployContract,
+            DeployContractCommand,
+            addressListToHederaIdList,
+        } = await import('@scripts')
+        const network = hre.network.name as Network
+        console.log(`Executing deploy on ${network} ...`)
+        if (!CONTRACT_NAMES.includes(args.contractName as ContractName)) {
+            throw new Error(
+                `Contract name ${args.contractName} is not in the list of deployable contracts`
             )
         }
-        if (proxy) {
-            console.log(`Proxy: ${proxy.evm_address}(${proxy.contract_id})`)
+        const contractName = args.contractName as ContractName
+        const { signer }: GetSignerResult = await hre.run('getSigner', {
+            privateKey: args.privateKey,
+            signerAddress: args.signerAddress,
+            signerPosition: args.signerPosition,
+        })
+        console.log(`Using signer: ${signer.address}`)
+        // * Deploy the contract
+        const { proxyAdminAddress, proxyAddress, address } =
+            await deployContract(
+                new DeployContractCommand({
+                    name: contractName,
+                    signer,
+                })
+            )
+
+        const [contractId, proxyContractId, proxyAdminContractId] =
+            await addressListToHederaIdList({
+                addressList: [address, proxyAddress, proxyAdminAddress].filter(
+                    (addr): addr is string => !!addr
+                ),
+                network,
+            })
+
+        console.log('\n 🟢 Deployed Contract:')
+        if (proxyAdminAddress) {
+            console.log(
+                `Proxy Admin: ${proxyAdminAddress} (${proxyAdminContractId})`
+            )
+        }
+        if (proxyAddress) {
+            console.log(`Proxy: ${proxyAddress} (${proxyContractId})`)
         }
         console.log(
-            `Implementation: ${contract.evm_address}(${contract.contract_id})`
+            `Implementation: ${address} (${contractId}) for ${contractName}`
         )
     })

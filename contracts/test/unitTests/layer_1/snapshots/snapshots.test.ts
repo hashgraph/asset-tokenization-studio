@@ -205,6 +205,8 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
     type Snapshots_2,
@@ -212,22 +214,25 @@ import {
     type ERC1410ScheduledTasks,
     type AccessControl,
     type Lock_2,
-} from '../../../../typechain-types'
-import { deployEnvironment } from '../../../../scripts/deployEnvironmentByRpc'
+    type Hold_2,
+    IFactory,
+    BusinessLogicResolver,
+} from '@typechain'
 import {
-    _SNAPSHOT_ROLE,
-    _PAUSER_ROLE,
-    _ISSUER_ROLE,
-    _LOCKER_ROLE,
-} from '../../../../scripts/constants'
-import {
+    SNAPSHOT_ROLE,
+    PAUSER_ROLE,
+    ISSUER_ROLE,
+    LOCKER_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-} from '../../../../scripts/factory'
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { grantRoleAndPauseToken } from '../../../../scripts/testCommon'
+    DeployAtsFullInfrastructureCommand,
+    deployAtsFullInfrastructure,
+    MAX_UINT256,
+    ADDRESS_ZERO,
+} from '@scripts'
+import { grantRoleAndPauseToken } from '../../../common'
 
 const amount = 1000
 const balanceOf_C_Original = 2 * amount
@@ -238,6 +243,9 @@ const _PARTITION_ID_2 =
 const lockedAmountOf_A_Partition_1 = 1
 const lockedAmountOf_A_Partition_2 = 2
 const lockedAmountOf_C_Partition_1 = 3
+const heldAmountOf_A_Partition_1 = 4
+const heldAmountOf_A_Partition_2 = 5
+const heldAmountOf_C_Partition_1 = 6
 
 describe('Snapshots Tests', () => {
     let diamond: ResolverProxy
@@ -249,59 +257,78 @@ describe('Snapshots Tests', () => {
     let account_B: string
     let account_C: string
 
+    let factory: IFactory
+    let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
     let snapshotFacet: Snapshots_2
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock_2
+    let holdFacet: Hold_2
 
-    beforeEach(async () => {
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address
         account_B = signer_B.address
         account_C = signer_C.address
 
-        await deployEnvironment()
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
 
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
         const rbacPause: Rbac = {
-            role: _PAUSER_ROLE,
+            role: PAUSER_ROLE,
             members: [account_B],
         }
         const rbacLock: Rbac = {
-            role: _LOCKER_ROLE,
+            role: LOCKER_ROLE,
             members: [account_B],
         }
         const init_rbacs: Rbac[] = [rbacPause, rbacLock]
 
-        diamond = await deployEquityFromFactory(
-            account_A,
-            false,
-            true,
-            false,
-            true,
-            'TEST_AccessControl',
-            'TAC',
-            6,
-            'ABCDEF123456',
-            false,
-            false,
-            false,
-            true,
-            true,
-            true,
-            false,
-            1,
-            '0x345678',
-            0,
-            100,
-            RegulationType.REG_D,
-            RegulationSubType.REG_D_506_B,
-            true,
-            'ES,FR,CH',
-            'nothing',
-            init_rbacs
-        )
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            isMultiPartition: true,
+            arePartitionsProtected: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            factory,
+            businessLogicResolver: businessLogicResolver.address,
+        })
 
         accessControlFacet = await ethers.getContractAt(
             'AccessControl',
@@ -321,6 +348,8 @@ describe('Snapshots Tests', () => {
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
         lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
+
+        holdFacet = await ethers.getContractAt('Hold_2', diamond.address)
     })
 
     it('GIVEN an account without snapshot role WHEN takeSnapshot THEN transaction fails with AccountHasNoRole', async () => {
@@ -338,7 +367,7 @@ describe('Snapshots Tests', () => {
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            _SNAPSHOT_ROLE,
+            SNAPSHOT_ROLE,
             signer_A,
             signer_B,
             account_C
@@ -392,12 +421,13 @@ describe('Snapshots Tests', () => {
     it('GIVEN an account with snapshot role WHEN takeSnapshot THEN transaction succeeds', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(_SNAPSHOT_ROLE, account_C)
-        await accessControlFacet.grantRole(_ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_C)
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         // Using account C (with role)
         snapshotFacet = snapshotFacet.connect(signer_C)
         erc1410Facet = erc1410Facet.connect(signer_A)
         lockFacet = lockFacet.connect(signer_B)
+        holdFacet = holdFacet.connect(signer_B)
 
         await erc1410Facet.issueByPartition(
             _PARTITION_ID_1,
@@ -449,6 +479,29 @@ describe('Snapshots Tests', () => {
             account_A,
             9999999999
         )
+
+        let hold = {
+            amount: 0,
+            expirationTimestamp: 999999999999,
+            escrow: account_B,
+            to: ADDRESS_ZERO,
+            data: '0x',
+        }
+
+        hold.amount = heldAmountOf_A_Partition_1
+        await holdFacet
+            .connect(signer_A)
+            .createHoldByPartition(_PARTITION_ID_1, hold)
+
+        hold.amount = heldAmountOf_C_Partition_1
+        await holdFacet
+            .connect(signer_C)
+            .createHoldByPartition(_PARTITION_ID_1, hold)
+
+        hold.amount = heldAmountOf_A_Partition_2
+        await holdFacet
+            .connect(signer_A)
+            .createHoldByPartition(_PARTITION_ID_2, hold)
 
         await snapshotFacet.takeSnapshot()
 
@@ -510,6 +563,35 @@ describe('Snapshots Tests', () => {
             )
         const snapshot_LockedBalance_Of_C_1_Partition_2 =
             await snapshotFacet.lockedBalanceOfAtSnapshotByPartition(
+                _PARTITION_ID_2,
+                1,
+                account_C
+            )
+
+        const snapshot_HeldBalance_Of_A_1 =
+            await snapshotFacet.heldBalanceOfAtSnapshot(1, account_A)
+        const snapshot_HeldBalance_Of_C_1 =
+            await snapshotFacet.heldBalanceOfAtSnapshot(1, account_C)
+        const snapshot_HeldBalance_Of_A_1_Partition_1 =
+            await snapshotFacet.heldBalanceOfAtSnapshotByPartition(
+                _PARTITION_ID_1,
+                1,
+                account_A
+            )
+        const snapshot_HeldBalance_Of_C_1_Partition_1 =
+            await snapshotFacet.heldBalanceOfAtSnapshotByPartition(
+                _PARTITION_ID_1,
+                1,
+                account_C
+            )
+        const snapshot_HeldBalance_Of_A_1_Partition_2 =
+            await snapshotFacet.heldBalanceOfAtSnapshotByPartition(
+                _PARTITION_ID_2,
+                1,
+                account_A
+            )
+        const snapshot_HeldBalance_Of_C_1_Partition_2 =
+            await snapshotFacet.heldBalanceOfAtSnapshotByPartition(
                 _PARTITION_ID_2,
                 1,
                 account_C
@@ -594,6 +676,35 @@ describe('Snapshots Tests', () => {
                 account_C
             )
 
+        const snapshot_HeldBalance_Of_A_2 =
+            await snapshotFacet.heldBalanceOfAtSnapshot(2, account_A)
+        const snapshot_HeldBalance_Of_C_2 =
+            await snapshotFacet.heldBalanceOfAtSnapshot(2, account_C)
+        const snapshot_HeldBalance_Of_A_2_Partition_1 =
+            await snapshotFacet.heldBalanceOfAtSnapshotByPartition(
+                _PARTITION_ID_1,
+                2,
+                account_A
+            )
+        const snapshot_HeldBalance_Of_C_2_Partition_1 =
+            await snapshotFacet.heldBalanceOfAtSnapshotByPartition(
+                _PARTITION_ID_1,
+                2,
+                account_C
+            )
+        const snapshot_HeldBalance_Of_A_2_Partition_2 =
+            await snapshotFacet.heldBalanceOfAtSnapshotByPartition(
+                _PARTITION_ID_2,
+                2,
+                account_A
+            )
+        const snapshot_HeldBalance_Of_C_2_Partition_2 =
+            await snapshotFacet.heldBalanceOfAtSnapshotByPartition(
+                _PARTITION_ID_2,
+                2,
+                account_C
+            )
+
         const snapshot_Partitions_Of_A_2 =
             await snapshotFacet.partitionsOfAtSnapshot(2, account_A)
         const snapshot_Partitions_Of_C_2 =
@@ -637,6 +748,13 @@ describe('Snapshots Tests', () => {
         expect(snapshot_LockedBalance_Of_A_1_Partition_2).to.equal(0)
         expect(snapshot_LockedBalance_Of_C_1_Partition_2).to.equal(0)
 
+        expect(snapshot_HeldBalance_Of_A_1).to.equal(0)
+        expect(snapshot_HeldBalance_Of_C_1).to.equal(0)
+        expect(snapshot_HeldBalance_Of_A_1_Partition_1).to.equal(0)
+        expect(snapshot_HeldBalance_Of_C_1_Partition_1).to.equal(0)
+        expect(snapshot_HeldBalance_Of_A_1_Partition_2).to.equal(0)
+        expect(snapshot_HeldBalance_Of_C_1_Partition_2).to.equal(0)
+
         expect(snapshot_Partitions_Of_C_1.length).to.equal(1)
         expect(snapshot_Partitions_Of_C_1[0]).to.equal(_PARTITION_ID_1)
 
@@ -649,21 +767,28 @@ describe('Snapshots Tests', () => {
         expect(current_Balance_Of_A).to.equal(
             3 * amount -
                 lockedAmountOf_A_Partition_1 -
-                lockedAmountOf_A_Partition_2
+                lockedAmountOf_A_Partition_2 -
+                heldAmountOf_A_Partition_1 -
+                heldAmountOf_A_Partition_2
         )
         expect(snapshot_Balance_Of_A_2).to.equal(current_Balance_Of_A)
         expect(snapshot_Balance_Of_A_2_Partition_1).to.equal(
-            2 * amount - lockedAmountOf_A_Partition_1
+            2 * amount -
+                lockedAmountOf_A_Partition_1 -
+                heldAmountOf_A_Partition_1
         )
         expect(snapshot_Balance_Of_A_2_Partition_2).to.equal(
-            amount - lockedAmountOf_A_Partition_2
+            amount - lockedAmountOf_A_Partition_2 - heldAmountOf_A_Partition_2
         )
         expect(snapshot_Partitions_Of_A_2.length).to.equal(2)
         expect(snapshot_Partitions_Of_A_2[0]).to.equal(_PARTITION_ID_1)
         expect(snapshot_Partitions_Of_A_2[1]).to.equal(_PARTITION_ID_2)
 
         expect(current_Balance_Of_C).to.equal(
-            balanceOf_C_Original - amount - lockedAmountOf_C_Partition_1
+            balanceOf_C_Original -
+                amount -
+                lockedAmountOf_C_Partition_1 -
+                heldAmountOf_C_Partition_1
         )
         expect(snapshot_Balance_Of_C_2).to.equal(current_Balance_Of_C)
         expect(snapshot_Balance_Of_C_2_Partition_1).to.equal(
@@ -687,6 +812,21 @@ describe('Snapshots Tests', () => {
             lockedAmountOf_A_Partition_2
         )
         expect(snapshot_LockedBalance_Of_C_2_Partition_2).to.equal(0)
+
+        expect(snapshot_HeldBalance_Of_A_2).to.equal(
+            heldAmountOf_A_Partition_1 + heldAmountOf_A_Partition_2
+        )
+        expect(snapshot_HeldBalance_Of_C_2).to.equal(heldAmountOf_C_Partition_1)
+        expect(snapshot_HeldBalance_Of_A_2_Partition_1).to.equal(
+            heldAmountOf_A_Partition_1
+        )
+        expect(snapshot_HeldBalance_Of_C_2_Partition_1).to.equal(
+            heldAmountOf_C_Partition_1
+        )
+        expect(snapshot_HeldBalance_Of_A_2_Partition_2).to.equal(
+            heldAmountOf_A_Partition_2
+        )
+        expect(snapshot_HeldBalance_Of_C_2_Partition_2).to.equal(0)
 
         expect(snapshot_Partitions_Of_C_2.length).to.equal(1)
         expect(snapshot_Partitions_Of_C_2[0]).to.equal(_PARTITION_ID_1)
