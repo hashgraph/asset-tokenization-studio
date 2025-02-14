@@ -259,6 +259,9 @@ interface IDiamondCutManager {
         uint256 version
     );
 
+    /// @notice emited when cancelBatchConfiguration is executed
+    event DiamondBatchConfigurationCanceled(bytes32 configurationId);
+
     /// @notice Create a new configuration to the latest version of all facets.
     /// @param _configurationId unused identifier to the configuration.
     /// @param _facetConfigurations.id list of business logics to be registered.
@@ -278,6 +281,10 @@ interface IDiamondCutManager {
         FacetConfiguration[] calldata _facetConfigurations,
         bool _isLastBatch
     ) external;
+
+    /// @notice Cancel a current batch configuration.
+    /// @param _configurationId unused identifier to the configuration.
+    function cancelBatchConfiguration(bytes32 _configurationId) external;
 
     /// @notice Resolve the facet address knowing configuration, version and selector.
     /// @param _configurationId configured key in the resolverProxy.

@@ -259,8 +259,25 @@ abstract contract DiamondCutManager is
             _configurationId,
             _facetConfigurations,
             _isLastBatch,
-            _createBatchConfiguration(_configurationId, _facetConfigurations, _isLastBatch)
+            _createBatchConfiguration(
+                _configurationId,
+                _facetConfigurations,
+                _isLastBatch
+            )
         );
+    }
+
+    function cancelBatchConfiguration(
+        bytes32 _configurationId
+    )
+        external
+        override
+        validConfigurationIdFormat(_configurationId)
+        onlyRole(_DEFAULT_ADMIN_ROLE)
+        onlyUnpaused
+    {
+        _cancelBatchConfiguration(_configurationId);
+        emit DiamondBatchConfigurationCanceled(_configurationId);
     }
 
     function resolveResolverProxyCall(

@@ -287,7 +287,7 @@ abstract contract DiamondCutManagerWrapper is
         _dcms.latestVersion[_configurationId] = _dcms.batchVersion[
             _configurationId
         ];
-        delete (_dcms.batchVersion[_configurationId]);
+        delete _dcms.batchVersion[_configurationId];
     }
 
     function _startBatchConfiguration(
@@ -370,6 +370,86 @@ abstract contract DiamondCutManagerWrapper is
 
             unchecked {
                 ++index;
+            }
+        }
+    }
+
+    function _cancelBatchConfiguration(bytes32 _configurationId) internal {
+        DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
+        uint256 batchVersion = _dcms.batchVersion[_configurationId];
+        bytes32 configVersionHash = _buildHash(_configurationId, batchVersion);
+
+        bytes32[] storage facetIds = _dcms.facetIds[configVersionHash];
+
+        for (uint256 i = 0; i < facetIds.length; ) {
+            bytes32 facetId = facetIds[i];
+            bytes32 configVersionFacetHash = _buildHash(
+                _configurationId,
+                batchVersion,
+                facetId
+            );
+
+            delete _dcms.addr[configVersionFacetHash];
+
+            bytes4[] storage selectors = _dcms.selectors[
+                configVersionFacetHash
+            ];
+            for (uint256 j = 0; j < selectors.length; ) {
+                bytes4 selector = selectors[j];
+                bytes32 configVersionSelectorHash = _buildHashSelector(
+                    _configurationId,
+                    batchVersion,
+                    selector
+                );
+                delete _dcms.facetAddress[configVersionSelectorHash];
+                delete _dcms.selectorToFacetId[configVersionSelectorHash];
+
+                unchecked {
+                    ++j;
+                }
+            }
+            delete _dcms.selectors[configVersionFacetHash];
+
+            bytes4[] storage interfaceIds = _dcms.interfaceIds[
+                configVersionFacetHash
+            ];
+            for (uint256 k = 0; k < interfaceIds.length; ) {
+                bytes4 interfaceId = interfaceIds[k];
+                delete _dcms.supportsInterface[
+                    _buildHashSelector(
+                        _configurationId,
+                        batchVersion,
+                        interfaceId
+                    )
+                ];
+
+                unchecked {
+                    ++k;
+                }
+            }
+            delete _dcms.interfaceIds[configVersionFacetHash];
+
+            unchecked {
+                ++i;
+            }
+        }
+
+        delete _dcms.facetVersions[configVersionHash];
+        delete _dcms.facetIds[configVersionHash];
+        --_dcms.batchVersion[_configurationId];
+
+        if (_dcms.latestVersion[_configurationId] == 0) {
+            delete _dcms.activeConfigurations[_configurationId];
+            for (uint256 i = 0; i < _dcms.configurations.length; i++) {
+                if (_dcms.configurations[i] == _configurationId) {
+                    if (i < _dcms.configurations.length - 1) {
+                        _dcms.configurations[i] = _dcms.configurations[
+                            _dcms.configurations.length - 1
+                        ];
+                    }
+                    _dcms.configurations.pop();
+                    break;
+                }
             }
         }
     }
