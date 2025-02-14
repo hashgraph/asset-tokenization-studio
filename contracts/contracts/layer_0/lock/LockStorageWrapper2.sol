@@ -347,7 +347,11 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
             );
         }
     }
-
+    /**
+     * @dev Updates the lock by its index for the specified partition and token holder.
+     * LABAF (Locked Amount Before Adjustment Factor) for each lock is not updated
+     * because the lock is deleted right after, optimizing gas usage.
+     */
     function _updateLockByIndex(
         bytes32 _partition,
         uint256 _lockId,
