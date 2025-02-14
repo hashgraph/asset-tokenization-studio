@@ -569,21 +569,19 @@ export async function createConfigurationsForDeployedContracts({
     )
     result.bondFacetVersionList = Array(result.bondFacetIdList.length).fill(1)
 
-    await Promise.all([
-        processFacetLists(
-            EQUITY_CONFIG_ID,
-            result.equityFacetIdList,
-            result.equityFacetVersionList,
-            businessLogicResolverProxyAddress,
-            signer
-        ),
-        processFacetLists(
-            BOND_CONFIG_ID,
-            result.bondFacetIdList,
-            result.bondFacetVersionList,
-            businessLogicResolverProxyAddress,
-            signer
-        ),
-    ])
+    await processFacetLists(
+        EQUITY_CONFIG_ID,
+        result.equityFacetIdList,
+        result.equityFacetVersionList,
+        businessLogicResolverProxyAddress,
+        signer
+    )
+    await processFacetLists(
+        BOND_CONFIG_ID,
+        result.bondFacetIdList,
+        result.bondFacetVersionList,
+        businessLogicResolverProxyAddress,
+        signer
+    )
     return result
 }
