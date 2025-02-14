@@ -205,6 +205,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ContractFactory } from 'ethers'
+import { Interface } from 'ethers/lib/utils'
 import {
     Client,
     ContractExecuteTransaction,
@@ -212,9 +213,6 @@ import {
     Hbar,
     Long,
 } from '@hashgraph/sdk'
-import Web3 from 'web3'
-
-const web3 = new Web3()
 
 export async function contractCall(
     contractId: ContractId,
@@ -252,12 +250,9 @@ export async function contractCall(
 }
 
 function encodeFunctionCall(functionName: string, parameters: any[], abi: any) {
-    const functionAbi = abi.find(
-        (func: { name: string; type: string }) =>
-            func.name === functionName && func.type === 'function'
-    )
-    const encodedParametersHex = web3.eth.abi
-        .encodeFunctionCall(functionAbi, parameters)
+    const iface = new Interface(abi)
+    const encodedParametersHex = iface
+        .encodeFunctionData(functionName, parameters)
         .slice(2)
     return Buffer.from(encodedParametersHex, 'hex')
 }
@@ -267,19 +262,12 @@ function decodeFunctionResult(
     functionName: string,
     resultAsBytes: Uint8Array
 ) {
-    const functionAbi = abi.find(
-        (func: { name: any }) => func.name === functionName
-    )
-    const functionParameters = functionAbi?.outputs
+    const iface = new Interface(abi)
     const resultHex = '0x'.concat(Buffer.from(resultAsBytes).toString('hex'))
-    const result = web3.eth.abi.decodeParameters(
-        functionParameters || [],
-        resultHex
-    )
+    const decodedResult = iface.decodeFunctionResult(functionName, resultHex)
 
     try {
-        const jsonParsedArray = JSON.parse(JSON.stringify(result))
-
+        const jsonParsedArray = JSON.parse(JSON.stringify(decodedResult))
         return jsonParsedArray
     } catch (e) {
         return resultHex
