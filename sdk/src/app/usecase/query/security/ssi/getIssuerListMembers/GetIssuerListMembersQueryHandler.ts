@@ -248,6 +248,12 @@ export class GetIssuerListMembersQueryHandler
       end,
     );
 
-    return new GetIssuerListMembersQueryResponse(res);
+    const hederaIds = await Promise.all(
+      res.map(
+        async (t) => (await this.mirrorNodeAdapter.getContractInfo(t)).id,
+      ),
+    );
+
+    return new GetIssuerListMembersQueryResponse(hederaIds);
   }
 }

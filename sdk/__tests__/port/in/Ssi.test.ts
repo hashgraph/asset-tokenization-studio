@@ -419,7 +419,7 @@ describe('🧪 SSI Management tests', () => {
           end: 1,
         }),
       ),
-    ).toContain(CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString());
+    ).toContain(CLIENT_ACCOUNT_ECDSA_A.id.toString());
 
     //Remove Issuer
     expect(
