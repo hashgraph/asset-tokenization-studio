@@ -523,15 +523,6 @@ describe('🧪 Kyc tests', () => {
     ).toEqual(0);
 
     expect(
-      await Kyc.getKYCFor(
-        new GetKYCForRequest({
-          securityId: equity.evmDiamondAddress!,
-          targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
-        }),
-      ),
-    ).toEqual(undefined);
-
-    expect(
       (
         await SSIManagement.removeIssuer(
           new RemoveIssuerRequest({

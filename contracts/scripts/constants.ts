@@ -408,11 +408,16 @@
 
    */
 
+import { HashZero, AddressZero, Zero } from '@ethersproject/constants'
+
 // * General
+export const ZERO = Zero
+export const HASH_ZERO = HashZero
+export const ADDRESS_ZERO = AddressZero
+export const EMPTY_STRING = ''
 export const MAX_UINT256 = BigInt(
     '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 )
-export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 export const EQUITY_CONFIG_ID =
@@ -472,6 +477,8 @@ export const NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = '0x46'
 export const IS_NOT_OPERATOR_ERROR_ID = '0x47'
 export const WRONG_PARTITION_ERROR_ID = '0x48'
 export const ALLOWANCE_REACHED_ERROR_ID = '0x49'
+export const FROM_ACCOUNT_KYC_ERROR_ID = '0x50'
+export const TO_ACCOUNT_KYC_ERROR_ID = '0x51'
 
 export const SUCCESS = '0x00'
 
