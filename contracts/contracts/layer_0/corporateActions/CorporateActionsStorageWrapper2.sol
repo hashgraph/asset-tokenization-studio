@@ -367,38 +367,20 @@ abstract contract CorporateActionsStorageWrapper2 is
         );
     }
 
-    function _onScheduledTaskTriggered(bytes memory _data) internal {
-        if (_data.length > 0) {
-            bytes32 taskType = abi.decode(_data, (bytes32));
-            if (taskType == SNAPSHOT_TASK_TYPE) {
-                _triggerScheduledSnapshots(1);
-            } else if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
-                _triggerScheduledBalanceAdjustments(1);
-            }
-        }
-    }
-
     function _onScheduledBalanceAdjustmentTriggered(
         bytes memory _data
-    ) internal {
-        if (_data.length > 0) {
-            bytes32 actionId = abi.decode(_data, (bytes32));
-            (, bytes memory balanceAdjustmentData) = _getCorporateAction(
-                actionId
-            );
+    ) internal override {
+        if (_data.length == 0) return;
+        bytes32 actionId = abi.decode(_data, (bytes32));
 
-            if (balanceAdjustmentData.length > 0) {
-                IEquity.ScheduledBalanceAdjustment
-                    memory balanceAdjustment = abi.decode(
-                        balanceAdjustmentData,
-                        (IEquity.ScheduledBalanceAdjustment)
-                    );
-                _adjustBalances(
-                    balanceAdjustment.factor,
-                    balanceAdjustment.decimals
-                );
-            }
-        }
+        (, bytes memory balanceAdjustmentData) = _getCorporateAction(actionId);
+        if (balanceAdjustmentData.length == 0) return;
+        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi
+            .decode(
+                balanceAdjustmentData,
+                (IEquity.ScheduledBalanceAdjustment)
+            );
+        _adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
 
     function _getSnapshotID(bytes32 _actionId) internal view returns (uint256) {

@@ -246,10 +246,9 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
         uint256 _snapShotID,
         bytes memory _data
     ) internal {
-        if (_data.length > 0) {
-            bytes32 actionId = abi.decode(_data, (bytes32));
-            _addSnapshotToAction(actionId, _snapShotID);
-        }
+        if (_data.length == 0) return;
+        bytes32 actionId = abi.decode(_data, (bytes32));
+        _addSnapshotToAction(actionId, _snapShotID);
     }
 
     function _addSnapshotToAction(

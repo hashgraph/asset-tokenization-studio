@@ -210,15 +210,15 @@ import {
     _ADJUST_BALANCES_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+    ScheduledTasksStorageWrapper
+} from '../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
 import {
     IAdjustBalancesStorageWrapper
 } from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
 
 abstract contract AdjustBalancesStorageWrapper1 is
     IAdjustBalancesStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper
+    ScheduledTasksStorageWrapper
 {
     modifier checkFactor(uint256 _factor) {
         if (_factor == 0) revert FactorIsZero();

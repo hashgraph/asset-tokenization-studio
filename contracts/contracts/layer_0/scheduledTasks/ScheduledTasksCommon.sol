@@ -207,13 +207,20 @@
 pragma solidity 0.8.18;
 
 import {
+    ScheduledTask
+} from '../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
+import {
     SnapshotsStorageWrapper1
 } from '../snapshots/SnapshotsStorageWrapper1.sol';
-import {
-    ScheduledTasksLib
-} from '../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
+import {LibCommon} from '../../layer_0/common/LibCommon.sol';
 
 abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
+    struct ScheduledTasksDataStorage {
+        mapping(uint256 => ScheduledTask) scheduledTasks;
+        uint256 scheduledTaskCount;
+        bool autoCalling;
+    }
+
     error WrongTimestamp(uint256 timeStamp);
     error NotAutocalling();
 
@@ -224,11 +231,125 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
         _;
     }
 
-    // TODO: It is necessary right now ??? Autocalling?
-    modifier onlyAutoCalling(
-        ScheduledTasksLib.ScheduledTasksDataStorage storage _scheduledTasks
-    ) {
-        if (!_scheduledTasks.autoCalling) revert NotAutocalling();
-        _;
+    function _addScheduledTaskCommon(
+        ScheduledTasksDataStorage storage _scheduledTasks,
+        uint256 _newScheduledTimestamp,
+        bytes memory _newData
+    ) internal {
+        ScheduledTask memory newScheduledTask = ScheduledTask(
+            _newScheduledTimestamp,
+            _newData
+        );
+
+        uint256 scheduledTasksLength = _getScheduledTaskCount(_scheduledTasks);
+
+        uint256 newScheduledTaskId = scheduledTasksLength;
+
+        bool added = false;
+
+        if (scheduledTasksLength > 0) {
+            for (uint256 index = 1; index <= scheduledTasksLength; index++) {
+                uint256 scheduledTaskPosition = scheduledTasksLength - index;
+
+                if (
+                    _scheduledTasks
+                        .scheduledTasks[scheduledTaskPosition]
+                        .scheduledTimestamp < _newScheduledTimestamp
+                ) {
+                    _slideScheduledTasks(
+                        _scheduledTasks,
+                        scheduledTaskPosition
+                    );
+                } else {
+                    newScheduledTaskId = scheduledTaskPosition + 1;
+                    _insertScheduledTask(
+                        _scheduledTasks,
+                        newScheduledTaskId,
+                        newScheduledTask
+                    );
+                    added = true;
+                    break;
+                }
+            }
+        }
+        if (!added) {
+            _insertScheduledTask(_scheduledTasks, 0, newScheduledTask);
+        }
+    }
+
+    function _getScheduledTaskCount(
+        ScheduledTasksDataStorage storage _scheduledTasks
+    ) internal view returns (uint256) {
+        return _scheduledTasks.scheduledTaskCount;
+    }
+
+    function _getScheduledTasksByIndex(
+        ScheduledTasksDataStorage storage _scheduledTasks,
+        uint256 _index
+    ) internal view returns (ScheduledTask memory) {
+        return _scheduledTasks.scheduledTasks[_index];
+    }
+
+    function _slideScheduledTasks(
+        ScheduledTasksDataStorage storage _scheduledTasks,
+        uint256 _pos
+    ) private {
+        _scheduledTasks
+            .scheduledTasks[_pos + 1]
+            .scheduledTimestamp = _scheduledTasks
+            .scheduledTasks[_pos]
+            .scheduledTimestamp;
+        _scheduledTasks.scheduledTasks[_pos + 1].data = _scheduledTasks
+            .scheduledTasks[_pos]
+            .data;
+    }
+
+    function _insertScheduledTask(
+        ScheduledTasksDataStorage storage _scheduledTasks,
+        uint256 _pos,
+        ScheduledTask memory scheduledTaskToInsert
+    ) private {
+        _scheduledTasks
+            .scheduledTasks[_pos]
+            .scheduledTimestamp = scheduledTaskToInsert.scheduledTimestamp;
+        _scheduledTasks.scheduledTasks[_pos].data = scheduledTaskToInsert.data;
+        _scheduledTasks.scheduledTaskCount++;
+    }
+
+    function _popScheduledTask(
+        ScheduledTasksDataStorage storage _scheduledTasks
+    ) internal {
+        uint256 scheduledTasksLength = _getScheduledTaskCount(_scheduledTasks);
+        if (scheduledTasksLength == 0) {
+            return;
+        }
+        delete (_scheduledTasks.scheduledTasks[scheduledTasksLength - 1]);
+        _scheduledTasks.scheduledTaskCount--;
+    }
+
+    function _getScheduledTasks(
+        ScheduledTasksDataStorage storage _scheduledTasks,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (ScheduledTask[] memory scheduledTask_) {
+        (uint256 start, uint256 end) = LibCommon.getStartAndEnd(
+            _pageIndex,
+            _pageLength
+        );
+
+        scheduledTask_ = new ScheduledTask[](
+            LibCommon.getSize(
+                start,
+                end,
+                _getScheduledTaskCount(_scheduledTasks)
+            )
+        );
+
+        for (uint256 i = 0; i < scheduledTask_.length; i++) {
+            scheduledTask_[i] = _getScheduledTasksByIndex(
+                _scheduledTasks,
+                start + i
+            );
+        }
     }
 }

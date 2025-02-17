@@ -207,22 +207,23 @@
 pragma solidity 0.8.18;
 
 import {
-    IScheduledTasks
-} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
-import {
-    ScheduledTasksLib
-} from '../../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
-import {
     _SCHEDULED_TASKS_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
-import {ScheduledTasksCommon} from '../ScheduledTasksCommon.sol';
+import {
+    ScheduledTask
+} from '../../../layer_2/interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
+import {
+    ScheduledBalanceAdjustmentsStorageWrapper
+} from '../scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
 
-abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
+abstract contract ScheduledTasksStorageWrapper is
+    ScheduledBalanceAdjustmentsStorageWrapper
+{
     function _addScheduledTask(
         uint256 _newScheduledTimestamp,
         bytes memory _newData
     ) internal {
-        ScheduledTasksLib.addScheduledTask(
+        _addScheduledTaskCommon(
             _scheduledTaskStorage(),
             _newScheduledTimestamp,
             _newData
@@ -230,29 +231,72 @@ abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
     }
 
     function _triggerScheduledTasks(uint256 _max) internal returns (uint256) {
-        return
-            ScheduledTasksLib.triggerScheduledTasks(
-                _scheduledTaskStorage(),
-                IScheduledTasks.onScheduledTaskTriggered.selector,
-                _max,
-                _blockTimestamp()
+        ScheduledTasksDataStorage
+            storage _scheduledTasks = _scheduledTaskStorage();
+        uint256 _timestamp = _blockTimestamp() - 1;
+
+        uint256 scheduledTasksLength = _getScheduledTaskCount(_scheduledTasks);
+        if (scheduledTasksLength == 0) {
+            return 0;
+        }
+
+        uint256 pendingTasks = _max > scheduledTasksLength || _max == 0
+            ? scheduledTasksLength
+            : _max;
+
+        uint256 newTaskID;
+
+        for (uint256 index = 1; index <= pendingTasks; ) {
+            uint256 pos = scheduledTasksLength - index;
+
+            ScheduledTask
+                memory currentScheduledTask = _getScheduledTasksByIndex(
+                    _scheduledTasks,
+                    pos
+                );
+            if (currentScheduledTask.scheduledTimestamp > _timestamp) break;
+            _popScheduledTask(_scheduledTasks);
+            _triggerScheduledTask(
+                scheduledTasksLength,
+                currentScheduledTask.data
             );
+            unchecked {
+                ++index;
+            }
+        }
+
+        return newTaskID;
+    }
+
+    function _triggerScheduledTask(
+        uint256 _scheduledTaskLength,
+        bytes memory _data
+    ) internal {
+        if (_data.length == 0) return;
+        if (_isSnapshotTaskType(_data)) {
+            return
+                _onScheduledSnapshotTriggered(
+                    0 == _scheduledTaskLength - 1
+                        ? _snapshot()
+                        : _getCurrentSnapshotId(),
+                    _data
+                );
+        }
+        if (_isBalanceAdjustmentTaskType(_data)) {
+            _onScheduledBalanceAdjustmentTriggered(_data);
+        }
     }
 
     function _getScheduledTaskCount() internal view returns (uint256) {
-        return ScheduledTasksLib.getScheduledTaskCount(_scheduledTaskStorage());
+        return _getScheduledTaskCount(_scheduledTaskStorage());
     }
 
     function _getScheduledTasks(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        internal
-        view
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
-    {
+    ) internal view returns (ScheduledTask[] memory scheduledTask_) {
         return
-            ScheduledTasksLib.getScheduledTasks(
+            _getScheduledTasks(
                 _scheduledTaskStorage(),
                 _pageIndex,
                 _pageLength
@@ -262,9 +306,7 @@ abstract contract ScheduledTasksStorageWrapper is ScheduledTasksCommon {
     function _scheduledTaskStorage()
         internal
         pure
-        returns (
-            ScheduledTasksLib.ScheduledTasksDataStorage storage scheduledTasks_
-        )
+        returns (ScheduledTasksDataStorage storage scheduledTasks_)
     {
         bytes32 position = _SCHEDULED_TASKS_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
