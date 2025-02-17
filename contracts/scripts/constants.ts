@@ -408,14 +408,16 @@
 
    */
 
-import { HashZero } from '@ethersproject/constants'
+import { HashZero, AddressZero, Zero } from '@ethersproject/constants'
 
 // * General
-export const HASH_ZERO=HashZero
+export const ZERO = Zero
+export const HASH_ZERO = HashZero
+export const ADDRESS_ZERO = AddressZero
+export const EMPTY_STRING = ''
 export const MAX_UINT256 = BigInt(
     '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 )
-export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 export const EQUITY_CONFIG_ID =
