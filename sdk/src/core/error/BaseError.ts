@@ -252,6 +252,8 @@ export enum ErrorCode {
   SecurityPaused = '20010',
   SecurityUnPaused = '20014',
   UnlistedIssuer = '20021',
+  InvalidVCHolder = '20022',
+  InvalidVC = '20023',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',

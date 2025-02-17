@@ -225,6 +225,12 @@ export class Terminal3VC {
     }
   }
 
+  public static extractHolder(signedCredential: SignedCredential): string {
+    const holder = signedCredential.credentialSubject.id.split(':').pop();
+    if (!holder) throw new Error('VC must include a valid holder.');
+    return holder;
+  }
+
   public static extractIssuer(signedCredential: SignedCredential): string {
     const issuer = signedCredential.issuer.split(':').pop();
     if (!issuer) throw new Error('VC must include a valid issuer.');
