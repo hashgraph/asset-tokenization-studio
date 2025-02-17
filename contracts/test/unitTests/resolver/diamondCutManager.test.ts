@@ -887,4 +887,121 @@ describe('DiamondCutManager', () => {
         }
         expect(await diamondCutManager.getConfigurationsLength()).to.equal(0)
     })
+    
+    it('GIVEN a resolver WHEN adding a new configuration with configId at 0 with createBatchConfiguration THEN fails with DefaultValueForConfigurationIdNotPermitted', async () => {
+        diamondCutManager = diamondCutManager.connect(signer_A)
+
+        const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] =
+            []
+        equityFacetIdList.forEach((id, index) =>
+            facetConfigurations.push({
+                id,
+                version: equityFacetVersionList[index],
+            })
+        )
+
+        await expect(
+            diamondCutManager.createBatchConfiguration(
+                '0x0000000000000000000000000000000000000000000000000000000000000000',
+                facetConfigurations,
+                false
+            )
+        ).to.be.rejectedWith('DefaultValueForConfigurationIdNotPermitted')
+    })
+
+    it('GIVEN a resolver and a non admin user WHEN adding a new configuration with createBatchConfiguration THEN fails with AccountHasNoRole', async () => {
+        diamondCutManager = diamondCutManager.connect(signer_B)
+
+        const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] =
+            []
+        equityFacetIdList.forEach((id, index) =>
+            facetConfigurations.push({
+                id,
+                version: equityFacetVersionList[index],
+            })
+        )
+
+        await expect(
+            diamondCutManager.createBatchConfiguration(
+                EQUITY_CONFIG_ID,
+                facetConfigurations,
+                false
+            )
+        ).to.be.rejectedWith('AccountHasNoRole')
+    })
+
+    it('GIVEN a paused resolver WHEN adding a new configuration with createBatchConfiguration THEN fails with TokenIsPaused', async () => {
+        diamondCutManager = diamondCutManager.connect(signer_A)
+        pause = pause.connect(signer_B)
+
+        await pause.pause()
+
+        const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] =
+            []
+        equityFacetIdList.forEach((id, index) =>
+            facetConfigurations.push({
+                id,
+                version: equityFacetVersionList[index],
+            })
+        )
+
+        await expect(
+            diamondCutManager.createBatchConfiguration(
+                EQUITY_CONFIG_ID,
+                facetConfigurations,
+                false
+            )
+        ).to.be.rejectedWith('TokenIsPaused')
+
+        await pause.unpause()
+    })
+
+    it('GIVEN a resolver WHEN adding a new configuration with a non registered facet using createBatchConfiguration THEN fails with FacetIdNotRegistered', async () => {
+        diamondCutManager = diamondCutManager.connect(signer_A)
+
+        const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] =
+            [
+                {
+                    id: '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    version: 1,
+                },
+            ]
+
+        await expect(
+            diamondCutManager.createBatchConfiguration(
+                EQUITY_CONFIG_ID,
+                facetConfigurations,
+                false
+            )
+        ).to.be.rejectedWith('FacetIdNotRegistered')
+    })
+
+    it('GIVEN a resolver WHEN adding a new configuration with a duplicated facet using createBatchConfiguration THEN fails with DuplicatedFacetInConfiguration', async () => {
+        diamondCutManager = diamondCutManager.connect(signer_A)
+
+        // Add a duplicated facet
+        const facetsIds = [...equityFacetIdList, equityFacetIdList[0]]
+        // Add a duplicated version
+        const facetVersions = [
+            ...equityFacetVersionList,
+            equityFacetVersionList[0],
+        ]
+
+        const facetConfigurations: IDiamondCutManager.FacetConfigurationStruct[] =
+            []
+        facetsIds.forEach((id, index) => {
+            facetConfigurations.push({
+                id,
+                version: facetVersions[index],
+            })
+        })
+
+        await expect(
+            diamondCutManager.createBatchConfiguration(
+                EQUITY_CONFIG_ID,
+                facetConfigurations,
+                false
+            )
+        ).to.be.rejectedWith('DuplicatedFacetInConfiguration')
+    })
 })

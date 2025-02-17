@@ -304,7 +304,7 @@ abstract contract DiamondCutManagerWrapper is
                 _dcms.latestVersion[_configurationId] +
                 1;
         }
-        batchVersion_ = _dcms.batchVersion[_configurationId];
+        batchVersion_ = _getBatchConfigurationVersion(_configurationId);
     }
 
     function _getBatchConfigurationVersion(
@@ -379,7 +379,7 @@ abstract contract DiamondCutManagerWrapper is
 
     function _cancelBatchConfiguration(bytes32 _configurationId) internal {
         DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
-        uint256 batchVersion = _dcms.batchVersion[_configurationId];
+        uint256 batchVersion = _getBatchConfigurationVersion(_configurationId);
         bytes32 configVersionHash = _buildHash(_configurationId, batchVersion);
 
         bytes32[] storage facetIds = _dcms.facetIds[configVersionHash];
@@ -445,8 +445,7 @@ abstract contract DiamondCutManagerWrapper is
     function _isOngoingConfiguration(
         bytes32 _configurationId
     ) internal returns (bool) {
-        DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
-        return _dcms.batchVersion[_configurationId] != 0;
+        return _getBatchConfigurationVersion(_configurationId) != 0;
     }
 
     function _registerSelectors(
