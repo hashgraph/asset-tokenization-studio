@@ -214,7 +214,6 @@ import EvmAddress from '../../../../../../domain/context/contract/EvmAddress';
 import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter';
 import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter';
 import { SecurityPaused } from '../../error/SecurityPaused';
-import ValidationService from '../../../../../service/ValidationService';
 import { SecurityRole } from '../../../../../../domain/context/security/SecurityRole';
 import { NotGrantedRole } from '../../error/NotGrantedRole';
 
@@ -231,8 +230,6 @@ export class RevokeKYCCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-    @lazyInject(ValidationService)
-    private readonly validationService: ValidationService,
   ) {}
 
   async execute(command: RevokeKYCCommand): Promise<RevokeKYCCommandResponse> {

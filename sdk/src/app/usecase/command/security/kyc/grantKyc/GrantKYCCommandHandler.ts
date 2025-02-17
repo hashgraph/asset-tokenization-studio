@@ -221,6 +221,8 @@ import { NotGrantedRole } from '../../error/NotGrantedRole';
 import { Terminal3VC } from '../../../../../../domain/context/kyc/terminal3';
 import { verifyVc } from '@terminal3/verify_vc';
 import { SignedCredential } from '@terminal3/vc_core';
+import { InvalidVCHolder } from '../../error/InvalidVCHolder';
+import { InvalidVC } from '../../error/InvalidVC';
 
 @CommandHandler(GrantKYCCommand)
 export class GrantKYCCommandHandler
@@ -245,11 +247,12 @@ export class GrantKYCCommandHandler
     let signedCredential: SignedCredential = Terminal3VC.vcFromBase64(vcBase64);
     const verificationResult = await verifyVc(signedCredential);
     if (!verificationResult.isValid) {
-      throw new Error('Invalid VC');
+      throw new InvalidVC();
     }
 
     const issuer = Terminal3VC.extractIssuer(signedCredential);
     signedCredential = Terminal3VC.checkValidDates(signedCredential);
+    const holder = Terminal3VC.extractHolder(signedCredential);
 
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
@@ -265,6 +268,14 @@ export class GrantKYCCommandHandler
         ? (await this.mirrorNodeAdapter.getContractInfo(issuer)).evmAddress
         : issuer.toString(),
     );
+
+    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
+      : new EvmAddress(targetId);
+
+    if (targetEvmAddress.toString() != holder) {
+      throw new InvalidVCHolder();
+    }
 
     await this.validationService.validateIssuer(securityId, issuer);
 
@@ -282,11 +293,6 @@ export class GrantKYCCommandHandler
     ) {
       throw new NotGrantedRole(SecurityRole._KYC_ROLE);
     }
-
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
-
     const res = await handler.grantKYC(
       securityEvmAddress,
       targetEvmAddress,
