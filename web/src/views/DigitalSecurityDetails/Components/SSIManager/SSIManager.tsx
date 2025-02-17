@@ -81,6 +81,7 @@ export const SSIManager = () => {
         },
       },
     );
+
   const {
     data: revocationRegistryAddress,
     isLoading: isLoadingRevocationRegistryAddress,
@@ -128,7 +129,7 @@ export const SSIManager = () => {
                   variant="table"
                   size="xs"
                 >
-                  {tTable("fields.remove")}
+                  <PhosphorIcon as={Trash} sx={{ color: "secondary.500" }} />
                 </Button>
               );
             },

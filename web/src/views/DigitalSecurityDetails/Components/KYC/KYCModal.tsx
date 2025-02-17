@@ -81,6 +81,9 @@ export const KYCModal = ({ isOpen, onClose }: KYCModalProps) => {
       onSettled() {
         setIsLoading(false);
       },
+      onSuccess() {
+        onClose();
+      },
     });
   };
 

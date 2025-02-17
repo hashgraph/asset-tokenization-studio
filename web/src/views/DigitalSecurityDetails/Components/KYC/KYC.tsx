@@ -62,7 +62,7 @@ export const KYC = () => {
   const { data: KYCList, isLoading: isLoadingKYCList } = useGetKYCList(
     new GetKYCAccountsRequest({
       securityId,
-      kycStatus: 0,
+      kycStatus: 1,
       start: 0,
       end: 100,
     }),
@@ -125,7 +125,7 @@ export const KYC = () => {
                   variant="table"
                   size="xs"
                 >
-                  {tTable("fields.revoke")}
+                  <PhosphorIcon as={Trash} sx={{ color: "secondary.500" }} />
                 </Button>
               );
             },

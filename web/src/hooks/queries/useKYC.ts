@@ -5,7 +5,8 @@ import {
   KYCViewModel,
 } from "@hashgraph/asset-tokenization-sdk";
 
-export const GET_KYC_LIST = (securityId: string) => `GET_KYC_LIST${securityId}`;
+export const GET_KYC_LIST = (securityId: string) =>
+  `GET_KYC_LIST_${securityId}`;
 
 export const useGetKYCList = (
   request: GetKYCAccountsDataRequest,
