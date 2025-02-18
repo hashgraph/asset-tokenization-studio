@@ -2,8 +2,8 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 import {
-    AccessControlStorageWrapper
-} from '../accessControl/AccessControlStorageWrapper.sol';
+    KYCStorageWrapper
+} from '../kyc/KYCStorageWrapper.sol';
 import {
     IProtectedPartitionsStorageWrapper
 } from '../../../layer_1/interfaces/protectedPartitions/IProtectedPartitionsStorageWrapper.sol';
@@ -23,7 +23,7 @@ import {IHold} from '../../../layer_1/interfaces/hold/IHold.sol';
 
 abstract contract ProtectedPartitionsStorageWrapper is
     IProtectedPartitionsStorageWrapper,
-    AccessControlStorageWrapper
+    KYCStorageWrapper
 {
     struct ProtectedPartitionsDataStorage {
         bool initialized;

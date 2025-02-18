@@ -210,13 +210,13 @@ import {LibCommon} from '../../common/LibCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {LocalContext} from '../../context/LocalContext.sol';
+import {AccessControlStorageWrapper} from '../accessControl/AccessControlStorageWrapper.sol';
 import {
     _SSI_MANAGEMENT_STORAGE_POSITION
 } from '../../constants/storagePositions.sol';
 import {ISSIManagement} from '../../../layer_1/interfaces/ssi/ISSIManagement.sol';
 
-abstract contract SSIManagementStorageWrapper is LocalContext {
+abstract contract SSIManagementStorageWrapper is AccessControlStorageWrapper {
     using LibCommon for EnumerableSet.AddressSet;
     using EnumerableSet for EnumerableSet.AddressSet;
 
