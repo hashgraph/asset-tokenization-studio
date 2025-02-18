@@ -280,6 +280,7 @@ describe('KYC Tests', () => {
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
                     useDeployed: false,
+                    useEnvironment: true,
                 })
             )
 
