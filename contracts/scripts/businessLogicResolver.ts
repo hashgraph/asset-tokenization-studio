@@ -508,14 +508,14 @@ async function processFacetLists(
     facetVersionList: number[],
     businessLogicResolverProxyAddress: string,
     signer: Signer,
-    partialBatchDeploy: boolean,
-    batchSize = 2
+    partialBatchDeploy: boolean
 ): Promise<void> {
     if (facetIdList.length !== facetVersionList.length) {
         throw new Error(
             'facetIdList and facetVersionList must have the same length'
         )
     }
+    const batchSize = Math.ceil(facetIdList.length / 2);
 
     for (let i = 0; i < facetIdList.length; i += batchSize) {
         const batchIds = facetIdList.slice(i, i + batchSize)
