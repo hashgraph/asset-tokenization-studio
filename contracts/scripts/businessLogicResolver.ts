@@ -515,7 +515,7 @@ async function processFacetLists(
             'facetIdList and facetVersionList must have the same length'
         )
     }
-    const batchSize = Math.ceil(facetIdList.length / 2);
+    const batchSize = Math.ceil(facetIdList.length / 2)
 
     for (let i = 0; i < facetIdList.length; i += batchSize) {
         const batchIds = facetIdList.slice(i, i + batchSize)

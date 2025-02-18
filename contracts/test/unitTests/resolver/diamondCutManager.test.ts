@@ -203,7 +203,6 @@
 
 */
 
-//import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
@@ -249,8 +248,7 @@ describe('DiamondCutManager', () => {
 
     before(async () => {
         // mute | mock console.log
-        // console.log = () => {}
-        //await loadFixture(deployBusinessLogicResolverFixture)
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B] = await ethers.getSigners()
         account_B = signer_B.address
@@ -887,7 +885,7 @@ describe('DiamondCutManager', () => {
         }
         expect(await diamondCutManager.getConfigurationsLength()).to.equal(0)
     })
-    
+
     it('GIVEN a resolver WHEN adding a new configuration with configId at 0 with createBatchConfiguration THEN fails with DefaultValueForConfigurationIdNotPermitted', async () => {
         diamondCutManager = diamondCutManager.connect(signer_A)
 
