@@ -234,7 +234,6 @@ import {
     deployContractWithFactory,
     DeployContractWithFactoryCommand,
 } from '@scripts'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const _VALID_FROM = 0
 const _VALID_TO = 99999999999999
