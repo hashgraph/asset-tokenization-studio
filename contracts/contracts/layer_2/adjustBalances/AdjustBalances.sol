@@ -214,6 +214,7 @@ import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 
 contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
     function adjustBalances(

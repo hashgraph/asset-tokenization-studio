@@ -210,6 +210,7 @@ import {HoldStorageWrapper2} from '../hold/HoldStorageWrapper2.sol';
 import {
     IAdjustBalancesStorageWrapper
 } from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 
 abstract contract AdjustBalancesStorageWrapper2 is
     IAdjustBalancesStorageWrapper,
@@ -249,7 +250,9 @@ abstract contract AdjustBalancesStorageWrapper2 is
         uint256 _holdId,
         address _tokenHolder
     ) internal view override returns (uint256) {
-        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+        uint256 holdIndex = _getHoldIndex(
+            IHold.HoldIdentifier(_partition, _tokenHolder, _holdId)
+        );
         if (holdIndex == 0) return 0;
         return _getHoldLabafByIndex(_partition, _tokenHolder, holdIndex);
     }
