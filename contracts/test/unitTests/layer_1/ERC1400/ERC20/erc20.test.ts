@@ -718,6 +718,19 @@ describe('ERC20 Tests', () => {
         })
 
         describe('transfer', () => {
+            it('GIVEN a non kyc account THEN transfer fails with InvalidKYCStatus', async () => {
+                await kycFacet.revokeKYC(account_E)
+                await expect(
+                    erc20SignerC.transfer(account_E, amount / 2)
+                ).to.revertedWithCustomError(erc20Facet, 'InvalidKYCStatus')
+
+                await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
+
+                await kycFacet.revokeKYC(account_C)
+                await expect(
+                    erc20SignerC.transfer(account_E, amount / 2)
+                ).to.revertedWithCustomError(erc20Facet, 'InvalidKYCStatus')
+            })
             it(
                 'GIVEN an account with balance ' +
                     'WHEN transfer to another whitelisted account ' +
@@ -757,6 +770,23 @@ describe('ERC20 Tests', () => {
         describe('transferFrom', () => {
             beforeEach(async () => {
                 await erc20SignerC.approve(account_E, amount)
+            })
+
+            it('GIVEN a non kyc account THEN transferFrom fails with InvalidKYCStatus', async () => {
+                await kycFacet.revokeKYC(account_C)
+                // non kyc'd sender
+                await expect(
+                    erc20Facet
+                        .connect(signer_A)
+                        .transferFrom(account_E, account_C, amount / 2)
+                ).to.revertedWithCustomError(erc20Facet, 'InvalidKYCStatus')
+
+                // non kyc'd receiver
+                await expect(
+                    erc20Facet
+                        .connect(signer_A)
+                        .transferFrom(account_C, account_E, amount / 2)
+                ).to.revertedWithCustomError(erc20Facet, 'InvalidKYCStatus')
             })
 
             it(

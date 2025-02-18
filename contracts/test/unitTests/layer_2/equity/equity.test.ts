@@ -373,6 +373,7 @@ describe('Equity Tests', () => {
             diamond.address,
             signer_A
         )
+        rbacSSI
         kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
             'SSIManagement',
