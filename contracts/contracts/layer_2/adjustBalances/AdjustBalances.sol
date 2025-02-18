@@ -306,14 +306,6 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         return _getTotalHeldLabafByPartition(_partition, _tokenHolder);
     }
 
-    function getHoldLabafByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdIndex
-    ) external view override returns (uint256) {
-        return _getHoldLabafByIndex(_partition, _tokenHolder, _holdIndex);
-    }
-
     function getHoldLabafByPartition(
         bytes32 _partition,
         uint256 _holdId,
@@ -375,9 +367,6 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getTotalHeldLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldLabafByIndex
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getHoldLabafByPartition

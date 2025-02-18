@@ -260,12 +260,6 @@ interface IAdjustBalances {
         address _tokenHolder
     ) external view returns (uint256 labaf_);
 
-    function getHoldLabafByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdIndex
-    ) external view returns (uint256);
-
     function getHoldLabafByPartition(
         bytes32 _partition,
         uint256 _holdId,

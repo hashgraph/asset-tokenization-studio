@@ -231,27 +231,33 @@ abstract contract HoldStorageWrapper2 is
         _triggerAndSyncAll(_partition, _from, address(0));
 
         uint256 abaf = _updateTotalHold(_partition, _from);
-        _pushLabafHold(_partition, _from, abaf);
 
         _beforeHold(_partition, _from);
         _reduceBalanceByPartition(_from, _hold.amount, _partition);
 
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
-        holdId_ = ++holdStorage.holdNextId[_from][_partition];
+        holdId_ = ++holdStorage.nextHoldIdByAccountAndPartition[_from][
+            _partition
+        ];
 
         IHold.HoldData memory hold = IHold.HoldData(
             holdId_,
             _hold,
             _operatorData
         );
+        _setHeldLabafById(_partition, _from, holdId_, abaf);
 
-        holdStorage.holds[_from][_partition].push(hold);
-        holdStorage.holdIds[_from][_partition].add(holdId_);
-        holdStorage.holdsIndex[_from][_partition][holdId_] = holdStorage
-        .holds[_from][_partition].length;
-        holdStorage.heldAmountByPartition[_from][_partition] += _hold.amount;
-        holdStorage.totalHeldAmount[_from] += _hold.amount;
+        holdStorage.holdsByAccountPartitionAndId[_from][_partition][
+            holdId_
+        ] = hold;
+        holdStorage.holdIdsByAccountAndPartition[_from][_partition].add(
+            holdId_
+        );
+        holdStorage.totalHeldAmountByAccountAndPartition[_from][
+            _partition
+        ] += _hold.amount;
+        holdStorage.totalHeldAmountByAccount[_from] += _hold.amount;
 
         success_ = true;
     }
@@ -324,7 +330,7 @@ abstract contract HoldStorageWrapper2 is
         );
 
         if (holdData.hold.amount == 0) {
-            _popLabafHold(_partition, _tokenHolder);
+            _removeLabafHold(_partition, _tokenHolder, _holdId);
         }
     }
 
@@ -352,7 +358,7 @@ abstract contract HoldStorageWrapper2 is
         );
 
         if (holdData.hold.amount == 0) {
-            _popLabafHold(_partition, _tokenHolder);
+            _removeLabafHold(_partition, _tokenHolder, _holdId);
         }
     }
 
@@ -379,7 +385,7 @@ abstract contract HoldStorageWrapper2 is
             IHold.OperationType.Reclaim
         );
 
-        _popLabafHold(_partition, _tokenHolder);
+        _removeLabafHold(_partition, _tokenHolder, _holdId);
     }
 
     function _operateHoldByPartition(
@@ -452,15 +458,19 @@ abstract contract HoldStorageWrapper2 is
     ) internal returns (uint256 newHoldBalance_) {
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
-        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
-
-        holdStorage.totalHeldAmount[_tokenHolder] -= _amount;
-        holdStorage.heldAmountByPartition[_tokenHolder][_partition] -= _amount;
+        holdStorage.totalHeldAmountByAccount[_tokenHolder] -= _amount;
+        holdStorage.totalHeldAmountByAccountAndPartition[_tokenHolder][
+            _partition
+        ] -= _amount;
         holdStorage
-        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount -= _amount;
+        .holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId]
+            .hold
+            .amount -= _amount;
 
         newHoldBalance_ = holdStorage
-        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount;
+        .holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId]
+            .hold
+            .amount;
     }
 
     function _removeHold(
@@ -470,60 +480,13 @@ abstract contract HoldStorageWrapper2 is
     ) internal {
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
-        // Remove Hold
-        uint256 holdIndex = holdStorage.holdsIndex[_tokenHolder][_partition][
-            _holdId
-        ];
-        holdStorage.holdsIndex[_tokenHolder][_partition][_holdId] = 0;
-        holdStorage.holdIds[_tokenHolder][_partition].remove(_holdId);
-
-        uint256 holdLastIndex = _getHoldCountForByPartition(
-            _partition,
-            _tokenHolder
-        );
-        if (holdIndex < holdLastIndex) {
-            IHold.HoldData memory lastHold = _getHoldByIndex(
-                _partition,
-                _tokenHolder,
-                holdLastIndex
-            );
-            _setHoldAtIndex(_partition, _tokenHolder, holdIndex, lastHold);
-        }
-
-        holdStorage.holds[_tokenHolder][_partition].pop();
-    }
-
-    function _setHoldAtIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdIndex,
-        IHold.HoldData memory _holdData
-    ) internal {
-        uint256 currentHoldIndex = _getHoldIndex(
-            _partition,
-            _tokenHolder,
-            _holdData.id
-        );
-        uint256 labaf = _getHoldLabafByIndex(
-            _partition,
-            _tokenHolder,
-            currentHoldIndex
-        );
-
-        _updateLabafHold(_partition, _tokenHolder, _holdIndex, labaf);
-
-        IHold.HoldDataStorage storage holdStorage = _holdStorage();
-
         holdStorage
-        .holds[_tokenHolder][_partition][_holdIndex - 1].id = _holdData.id;
-        holdStorage
-        .holds[_tokenHolder][_partition][_holdIndex - 1].hold = _holdData.hold;
-        holdStorage
-        .holds[_tokenHolder][_partition][_holdIndex - 1]
-            .operatorData = _holdData.operatorData;
-        holdStorage.holdsIndex[_tokenHolder][_partition][
-            _holdData.id
-        ] = _holdIndex;
+        .holdIdsByAccountAndPartition[_tokenHolder][_partition].remove(_holdId);
+
+        delete holdStorage.holdsByAccountPartitionAndId[_tokenHolder][
+            _partition
+        ][_holdId];
+        _removeLabafHold(_partition, _tokenHolder, _holdId);
     }
 
     function _updateTotalHold(
@@ -565,10 +528,9 @@ abstract contract HoldStorageWrapper2 is
         uint256 _abaf
     ) internal {
         if (_factor == 1) return;
-        IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
-        holdStorage.totalHeldAmount[_tokenHolder] *= _factor;
-        _updateLabafTotalHeld(_tokenHolder, _abaf);
+        _holdStorage().totalHeldAmountByAccount[_tokenHolder] *= _factor;
+        _setTotalHeldLabaf(_tokenHolder, _abaf);
     }
 
     function _updateTotalHeldAmountAndLabafByPartition(
@@ -578,10 +540,11 @@ abstract contract HoldStorageWrapper2 is
         uint256 _abaf
     ) internal {
         if (_factor == 1) return;
-        IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
-        holdStorage.heldAmountByPartition[_tokenHolder][_partition] *= _factor;
-        _updateLabafTotalHeldByPartition(_partition, _tokenHolder, _abaf);
+        _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][
+            _partition
+        ] *= _factor;
+        _setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
     function _beforeHold(bytes32 _partition, address _tokenHolder) internal {
@@ -646,25 +609,19 @@ abstract contract HoldStorageWrapper2 is
         if (_abaf != holdLabaf) {
             uint256 holdFactor = _calculateFactor(_abaf, holdLabaf);
 
-            uint256 holdIndex = _getHoldIndex(
+            _updateHoldAmountById(
                 _partition,
-                _tokenHolder,
-                _holdId
-            );
-
-            _updateHoldAmountByIndex(
-                _partition,
-                holdIndex,
+                _holdId,
                 _tokenHolder,
                 holdFactor
             );
-            _updateLabafHold(_partition, _tokenHolder, _abaf, holdIndex);
+            _setHeldLabafById(_partition, _tokenHolder, _holdId, _abaf);
         }
     }
 
-    function _updateHoldAmountByIndex(
+    function _updateHoldAmountById(
         bytes32 _partition,
-        uint256 _holdIndex,
+        uint256 _holdId,
         address _tokenHolder,
         uint256 _factor
     ) internal {
@@ -672,7 +629,9 @@ abstract contract HoldStorageWrapper2 is
         IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
         holdStorage
-        .holds[_tokenHolder][_partition][_holdIndex - 1].hold.amount *= _factor;
+        .holdsByAccountPartitionAndId[_tokenHolder][_partition][_holdId]
+            .hold
+            .amount *= _factor;
     }
 
     function _getHeldAmountForAdjusted(

@@ -271,12 +271,11 @@ interface IHold {
     }
 
     struct HoldDataStorage {
-        mapping(address => uint256) totalHeldAmount;
-        mapping(address => mapping(bytes32 => uint256)) heldAmountByPartition;
-        mapping(address => mapping(bytes32 => HoldData[])) holds;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIds;
-        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) holdsIndex;
-        mapping(address => mapping(bytes32 => uint256)) holdNextId;
+        mapping(address => uint256) totalHeldAmountByAccount;
+        mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
+        mapping(address => mapping(bytes32 => mapping(uint256 => HoldData))) holdsByAccountPartitionAndId;
+        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
+        mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
     }
 
     enum OperationType {
