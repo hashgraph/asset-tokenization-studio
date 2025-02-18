@@ -486,7 +486,7 @@ export const SUCCESS = '0x00'
 export const EVENTS = {
     businessLogicResolver: {
         registered: 'BusinessLogicsRegistered',
-        configurationCreated: 'DiamondConfigurationCreated',
+        configurationCreated: 'DiamondBatchConfigurationCreated',
     },
     equity: {
         deployed: 'EquityDeployed',
@@ -519,7 +519,7 @@ export const GAS_LIMIT = {
     businessLogicResolver: {
         getStaticResolverKey: 60_000,
         registerBusinessLogics: 7_800_000,
-        createConfiguration: 20_000_000,
+        createConfiguration: 15_000_000,
     },
 }
 

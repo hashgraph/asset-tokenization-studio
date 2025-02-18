@@ -501,6 +501,7 @@ export async function deployAtsFullInfrastructure({
     useDeployed,
     useEnvironment,
     timeTravelEnabled,
+    partialBatchDeploy,
 }: DeployAtsFullInfrastructureCommand): Promise<DeployAtsFullInfrastructureResult> {
     if (timeTravelEnabled && (await signer.getChainId()) !== 1337) {
         throw new Error(MESSAGES.timeTravel.error.notSupported)
@@ -564,6 +565,7 @@ export async function deployAtsFullInfrastructure({
                 signer,
             })
         facetLists = await createConfigurationsForDeployedContracts(
+            partialBatchDeploy,
             createCommand
         )
     }
