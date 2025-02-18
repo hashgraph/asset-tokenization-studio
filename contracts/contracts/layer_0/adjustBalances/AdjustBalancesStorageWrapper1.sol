@@ -237,9 +237,13 @@ abstract contract AdjustBalancesStorageWrapper1 is
         // Last Aggregated Balance Adjustment per allowance
         mapping(address => mapping(address => uint256)) labafsAllowances;
         // Locks
+        //labaf per account
         mapping(address => uint256) labafLockedAmountByAccount;
+        //labaf pero account and partition {0xaccount: {0xpartition: 1, ...}, ...}
         mapping(address => mapping(bytes32 => uint256)) labafLockedAmountByAccountAndPartition;
+        //labaf per account, partition and index {0xaccount: {0xpartition: [1, 3, ...], ...}, ...}
         mapping(address => mapping(bytes32 => uint256[])) labafLockedAmountByAccountPartitionAndIndex;
+
         // Holds
         mapping(address => uint256) labafsTotalHeld;
         mapping(address => mapping(bytes32 => uint256)) labafsTotalHeldByPartition;
@@ -282,8 +286,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
     }
 
     function _popLabafLock(bytes32 _partition, address _tokenHolder) internal {
-        _getAdjustBalancesStorage()
-        .labafLockedAmountByAccountPartitionAndIndex[_tokenHolder][_partition]
+        _getAdjustBalancesStorage().labafLockedAmountByAccountPartitionAndIndex[_tokenHolder][_partition]
             .pop();
     }
 

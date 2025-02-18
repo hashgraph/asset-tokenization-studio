@@ -231,20 +231,9 @@ abstract contract ERC1410StandardStorageWrapper is
         uint256 amount
     ) internal override {
         _triggerAndSyncAll(partition, from, to);
-
-        if (from == address(0)) {
-            // mint
-            _updateAccountSnapshot(to, partition);
-            _updateTotalSupplySnapshot(partition);
-        } else if (to == address(0)) {
-            // burn
-            _updateAccountSnapshot(from, partition);
-            _updateTotalSupplySnapshot(partition);
-        } else {
-            // transfer
-            _updateAccountSnapshot(from, partition);
-            _updateAccountSnapshot(to, partition);
-        }
+        _updateAccountSnapshot(from, partition);
+        _updateAccountSnapshot(to, partition);
+        _updateTotalSupplySnapshot(partition);
     }
 
     function _triggerAndSyncAll(
@@ -261,16 +250,9 @@ abstract contract ERC1410StandardStorageWrapper is
         address _from,
         address _to
     ) internal {
-        // adjust the total supply for the partition
         _adjustTotalAndMaxSupplyForPartition(_partition);
-
-        // adjust "from" total and partition balance
-        if (_from != address(0))
-            _adjustTotalBalanceAndPartitionBalanceFor(_partition, _from);
-
-        // adjust "to" total and partition balance
-        if (_to != address(0))
-            _adjustTotalBalanceAndPartitionBalanceFor(_partition, _to);
+        _adjustTotalBalanceAndPartitionBalanceFor(_partition, _from);
+        _adjustTotalBalanceAndPartitionBalanceFor(_partition, _to);
     }
 
     function _addPartitionTo(

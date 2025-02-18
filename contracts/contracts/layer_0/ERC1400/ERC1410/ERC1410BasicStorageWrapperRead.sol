@@ -437,6 +437,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
         bytes32 partition,
         address account
     ) internal {
+        if (account == address(0)) return;
         uint256 abaf = _getAbaf();
         ERC1410BasicStorage storage basicStorage = _getERC1410BasicStorage();
         _adjustPartitionBalanceFor(basicStorage, abaf, partition, account);

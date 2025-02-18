@@ -237,6 +237,7 @@ abstract contract SnapshotsStorageWrapper2 is
         address account,
         bytes32 partition
     ) internal override {
+        if (account == address(0)) return;
         uint256 currentSnapshotId = _getCurrentSnapshotId();
 
         if (currentSnapshotId == 0) return;
