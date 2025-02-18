@@ -249,8 +249,8 @@ export class GetIssuerListMembersQueryHandler
     );
 
     const hederaIds = await Promise.all(
-      res.map(
-        async (t) => (await this.mirrorNodeAdapter.getAccountInfo(t)).id.toString(),
+      res.map(async (t) =>
+        (await this.mirrorNodeAdapter.getAccountInfo(t)).id.toString(),
       ),
     );
 
