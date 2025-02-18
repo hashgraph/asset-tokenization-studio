@@ -203,74 +203,142 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {Common} from '../common/Common.sol';
+import {_SSI_MANAGER_ROLE} from '../constants/roles.sol';
 import {
-    IERC1410StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {ERC20StorageWrapper1} from '../ERC20/ERC20StorageWrapper1.sol';
-import {
-    IERC1410Basic
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_SSI_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ISSIManagement} from '../interfaces/ssi/ISSIManagement.sol';
 
-abstract contract ERC1410BasicStorageWrapper is
-    IERC1410StorageWrapper,
-    ERC20StorageWrapper1
-{
-    function _transferByPartition(
-        address _from,
-        IERC1410Basic.BasicTransferInfo memory _basicTransferInfo,
-        bytes32 _partition,
-        bytes memory _data,
-        address _operator,
-        bytes memory _operatorData
-    ) internal {
-        _beforeTokenTransfer(
-            _partition,
-            _from,
-            _basicTransferInfo.to,
-            _basicTransferInfo.value
-        );
-
-        _reduceBalanceByPartition(_from, _basicTransferInfo.value, _partition);
-
-        if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
-            _addPartitionTo(
-                _basicTransferInfo.value,
-                _basicTransferInfo.to,
-                _partition
-            );
-        } else {
-            _increaseBalanceByPartition(
-                _basicTransferInfo.to,
-                _basicTransferInfo.value,
-                _partition
-            );
-        }
-
-        // Emit transfer event.
-        emit TransferByPartition(
-            _partition,
-            _operator,
-            _from,
-            _basicTransferInfo.to,
-            _basicTransferInfo.value,
-            _data,
-            _operatorData
+contract SSIManagement is ISSIManagement, IStaticFunctionSelectors, Common {
+    function setRevocationRegistryAddress(
+        address _revocationRegistryAddress
+    )
+        external
+        override
+        onlyRole(_SSI_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        address oldRevocationRegistryAddress = _getRevocationRegistryAddress();
+        success_ = _setRevocationRegistryAddress(_revocationRegistryAddress);
+        emit RevocationRegistryUpdated(
+            oldRevocationRegistryAddress,
+            _getRevocationRegistryAddress()
         );
     }
 
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual;
+    function addIssuer(
+        address _issuer
+    )
+        external
+        override
+        onlyRole(_SSI_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _addIssuer(_issuer);
+        if (!success_) {
+            revert ListedIssuer(_issuer);
+        }
+        emit AddedToIssuerList(_msgSender(), _issuer);
+    }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    ) internal virtual;
+    function removeIssuer(
+        address _issuer
+    )
+        external
+        override
+        onlyRole(_SSI_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _removeIssuer(_issuer);
+        if (!success_) {
+            revert UnlistedIssuer(_issuer);
+        }
+        emit RemovedFromIssuerList(_msgSender(), _issuer);
+    }
+
+    function getRevocationRegistryAddress()
+        external
+        view
+        override
+        returns (address revocationRegistryAddress_)
+    {
+        return _getRevocationRegistryAddress();
+    }
+
+    function isIssuer(address _issuer) external view override returns (bool) {
+        return _isIssuer(_issuer);
+    }
+
+    function getIssuerListCount()
+        external
+        view
+        override
+        returns (uint256 issuerListCount_)
+    {
+        return _getIssuerListCount();
+    }
+
+    function getIssuerListMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (address[] memory members_) {
+        return _getIssuerListMembers(_pageIndex, _pageLength);
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _SSI_MANAGEMENT_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .setRevocationRegistryAddress
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.addIssuer.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.removeIssuer.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isIssuer.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getRevocationRegistryAddress
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getIssuerListCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getIssuerListMembers
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        virtual
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(ISSIManagement)
+            .interfaceId;
+    }
 }

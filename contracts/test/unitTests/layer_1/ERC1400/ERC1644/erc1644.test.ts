@@ -217,6 +217,8 @@ import {
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
+    SSIManagement,
+    KYC,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -231,6 +233,8 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../../common'
 
@@ -260,6 +264,8 @@ describe('ERC1644 Tests', () => {
     let pauseFacet: Pause
     let equityFacet: Equity
     let erc1410Facet: ERC1410ScheduledTasks
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     describe('single partition', () => {
         before(async () => {
@@ -300,7 +306,21 @@ describe('ERC1644 Tests', () => {
                 role: CONTROLLER_ROLE,
                 members: [account_B],
             }
-            const init_rbacs: Rbac[] = [rbacPause, rbacIssuable, rbacController]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [
+                rbacPause,
+                rbacIssuable,
+                rbacController,
+                rbacKYC,
+                rbacSSI,
+            ]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -356,6 +376,16 @@ describe('ERC1644 Tests', () => {
                 'ERC1410ScheduledTasks',
                 diamond.address,
                 signer_B
+            )
+            kycFacet = await ethers.getContractAt(
+                'KYC',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SSIManagement',
+                diamond.address,
+                signer_A
             )
         })
 
@@ -451,6 +481,8 @@ describe('ERC1644 Tests', () => {
             beforeEach(async () => {
                 // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
                 // Granting Role to account C
+                await ssiManagementFacet.addIssuer(account_E)
+                await kycFacet.grantKYC(account_D, '', 0, 9999999999, account_E)
                 await erc1410Facet.connect(signer_B).issueByPartition({
                     partition: DEFAULT_PARTITION,
                     tokenHolder: account_D,

@@ -208,6 +208,7 @@ pragma solidity 0.8.18;
 
 import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
 import {ERC1644StorageWrapper} from '../ERC1644/ERC1644StorageWrapper.sol';
+import {IKYC} from '../../../layer_1/interfaces/kyc/IKYC.sol';
 import {
     _IS_PAUSED_ERROR_ID,
     _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
@@ -218,7 +219,9 @@ import {
     _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
     _IS_NOT_OPERATOR_ERROR_ID,
     _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS
+    _SUCCESS,
+    _FROM_ACCOUNT_KYC_ERROR_ID,
+    _TO_ACCOUNT_KYC_ERROR_ID
 } from '../../constants/values.sol';
 
 abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
@@ -247,6 +250,12 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
         }
         if (!_checkControlList(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _from)) {
+            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        }
+        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)) {
+            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
         if (!_validPartition(_partition, _from)) {
             return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));

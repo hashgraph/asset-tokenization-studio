@@ -206,87 +206,133 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { takeSnapshot, time } from '@nomicfoundation/hardhat-network-helpers'
+import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type AdjustBalances,
-    type Pause,
-    type ERC1410ScheduledTasks,
-    type AccessControl,
-    Equity,
-    ScheduledTasks,
-    BusinessLogicResolver,
+    type KYC,
+    Pause,
     IFactory,
-    KYC,
+    BusinessLogicResolver,
     SSIManagement,
+    T3RevocationRegistry,
+    T3RevocationRegistry__factory,
 } from '@typechain'
 import {
-    ADJUSTMENT_BALANCE_ROLE,
     PAUSER_ROLE,
-    ISSUER_ROLE,
-    CORPORATE_ACTION_ROLE,
+    SSI_MANAGER_ROLE,
+    KYC_ROLE,
+    MAX_UINT256,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
     RegulationType,
-    deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
-    KYC_ROLE,
-    SSI_MANAGER_ROLE,
+    deployAtsFullInfrastructure,
+    ADDRESS_ZERO,
+    deployContractWithFactory,
+    DeployContractWithFactoryCommand,
 } from '@scripts'
-import { grantRoleAndPauseToken } from '../../../common'
+import { dateToUnixTimestamp } from 'test/dateFormatter'
 
-const amount = 1
-const balanceOf_B_Original = [20 * amount, 200 * amount]
-const _PARTITION_ID_2 =
-    '0x0000000000000000000000000000000000000000000000000000000000000002'
-const adjustFactor = 253
-const adjustDecimals = 2
-const decimals_Original = 6
-const maxSupply_Original = 1000000 * amount
-const TIME = 6000
+const _VALID_FROM = 0
+const _VALID_TO = 99999999999999
+const _VC_ID = 'VC_24'
 
-describe('Adjust Balances Tests', () => {
+describe('KYC Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
     let signer_C: SignerWithAddress
+    let signer_D: SignerWithAddress
 
     let account_A: string
     let account_B: string
     let account_C: string
+    let account_D: string
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc1410Facet: ERC1410ScheduledTasks
-    let adjustBalancesFacet: AdjustBalances
-    let accessControlFacet: AccessControl
-    let pauseFacet: Pause
-    let equityFacet: Equity
-    let scheduledTasksFacet: ScheduledTasks
     let kycFacet: KYC
+    let pauseFacet: Pause
     let ssiManagementFacet: SSIManagement
+    let revocationList: T3RevocationRegistry
 
-    async function deployAsset({
-        multiPartition,
-        factory,
-        businessLogicResolver,
-    }: {
-        multiPartition: boolean
-        factory: IFactory
-        businessLogicResolver: BusinessLogicResolver
-    }) {
-        const init_rbacs: Rbac[] = set_initRbacs()
+    const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
+    let currentTimestamp = 0
+    let expirationTimestamp = 0
+
+    let snapshot: SnapshotRestorer
+
+    before(async () => {
+        snapshot = await takeSnapshot()
+        // mute | mock console.log
+        console.log = () => {}
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+        account_D = signer_D.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+
+        let reovationListDeployed = await deployContractWithFactory(
+            new DeployContractWithFactoryCommand({
+                factory: new T3RevocationRegistry__factory(),
+                signer: signer_A,
+            })
+        )
+
+        revocationList = await ethers.getContractAt(
+            'T3RevocationRegistry',
+            reovationListDeployed.address,
+            signer_C
+        )
+    })
+
+    after(async () => {
+        await snapshot.restore()
+    })
+
+    beforeEach(async () => {
+        currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
+        expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
+
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_A],
+        }
+        const rbacPausable: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_A],
+        }
+        const rbacSSIManager: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_C],
+        }
+        const init_rbacs: Rbac[] = [rbacKYC, rbacPausable, rbacSSIManager]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: false,
-            isMultiPartition: multiPartition,
-            name: 'TEST_AccessControl',
+            isMultiPartition: false,
+            name: 'TEST_KYC',
             symbol: 'TAC',
-            decimals: decimals_Original,
-            isin: 'RO3682287482',
+            decimals: 6,
+            isin: isinGenerator(),
             votingRight: false,
             informationRight: false,
             liquidationRight: false,
@@ -296,7 +342,7 @@ describe('Adjust Balances Tests', () => {
             putRight: false,
             dividendRight: 1,
             currency: '0x345678',
-            numberOfShares: BigInt(maxSupply_Original),
+            numberOfShares: MAX_UINT256,
             nominalValue: 100,
             regulationType: RegulationType.REG_D,
             regulationSubType: RegulationSubType.REG_D_506_B,
@@ -308,194 +354,251 @@ describe('Adjust Balances Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        await setFacets(diamond)
-    }
-
-    async function setFacets(diamond: ResolverProxy) {
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_A)
+        pauseFacet = await ethers.getContractAt(
+            'Pause',
+            diamond.address,
+            signer_A
         )
-
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
-        )
-
-        adjustBalancesFacet = await ethers.getContractAt(
-            'AdjustBalances',
-            diamond.address
-        )
-
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
-
-        scheduledTasksFacet = await ethers.getContractAt(
-            'ScheduledTasks',
-            diamond.address
-        )
-        kycFacet = await ethers.getContractAt('KYC', diamond.address)
         ssiManagementFacet = await ethers.getContractAt(
             'SSIManagement',
-            diamond.address
+            diamond.address,
+            signer_C
         )
-    }
 
-    function set_initRbacs(): Rbac[] {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        const rbacKYC: Rbac = {
-            role: KYC_ROLE,
-            members: [account_B],
-        }
-        const rbacSSI: Rbac = {
-            role: SSI_MANAGER_ROLE,
-            members: [account_A],
-        }
-        return [rbacPause, rbacKYC, rbacSSI]
-    }
+        await ssiManagementFacet.addIssuer(account_C)
+        await ssiManagementFacet.setRevocationRegistryAddress(
+            revocationList.address
+        )
+    })
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
+    describe('Paused', () => {
+        beforeEach(async () => {
+            // Pausing the token
+            await pauseFacet.pause()
+        })
 
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                })
+        it('GIVEN a paused Token WHEN grantKYC THEN transaction fails with TokenIsPaused', async () => {
+            await expect(
+                kycFacet.grantKYC(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'TokenIsPaused')
+        })
+
+        it('GIVEN a paused Token WHEN revokeKYC THEN transaction fails with TokenIsPaused', async () => {
+            await expect(
+                kycFacet.revokeKYC(account_B)
+            ).to.be.revertedWithCustomError(kycFacet, 'TokenIsPaused')
+        })
+    })
+
+    describe('Access Control', () => {
+        it('GIVEN a non KYC account WHEN grantKYC THEN transaction fails with AccountHasNoRole', async () => {
+            await expect(
+                kycFacet
+                    .connect(signer_C)
+                    .grantKYC(
+                        account_B,
+                        _VC_ID,
+                        _VALID_FROM,
+                        _VALID_TO,
+                        account_C
+                    )
+            ).to.be.revertedWithCustomError(kycFacet, 'AccountHasNoRole')
+        })
+
+        it('GIVEN a paused Token WHEN revokeKYC THEN transaction fails with AccountHasNoRole', async () => {
+            await expect(
+                kycFacet.connect(signer_C).revokeKYC(account_B)
+            ).to.be.rejectedWith('AccountHasNoRole')
+        })
+    })
+
+    describe('KYC Wrong input data', () => {
+        it('GIVEN account ZERO WHEN grantKYC THEN transaction fails with InvalidZeroAddress', async () => {
+            await expect(
+                kycFacet.grantKYC(
+                    ADDRESS_ZERO,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidZeroAddress')
+        })
+
+        it('GIVEN account ZERO WHEN revokeKYC THEN transaction fails with InvalidZeroAddress', async () => {
+            await expect(
+                kycFacet.revokeKYC(ADDRESS_ZERO)
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidZeroAddress')
+        })
+
+        it('GIVEN wrong Valid From Date WHEN grantKYC THEN transaction fails with InvalidDates', async () => {
+            await expect(
+                kycFacet.grantKYC(
+                    account_B,
+                    _VC_ID,
+                    _VALID_TO + 1,
+                    _VALID_TO,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidDates')
+        })
+
+        it('GIVEN wrong Valid To Date WHEN grantKYC THEN transaction fails with InvalidDates', async () => {
+            await expect(
+                kycFacet.grantKYC(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    currentTimestamp - 1,
+                    account_C
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidDates')
+        })
+
+        it('GIVEN wrong issuer WHEN grantKYC THEN transaction fails with AccountIsNotIssuer', async () => {
+            await expect(
+                kycFacet.grantKYC(
+                    account_B,
+                    _VC_ID,
+                    _VALID_FROM,
+                    _VALID_TO,
+                    account_D
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'AccountIsNotIssuer')
+        })
+    })
+
+    describe('KYC OK', () => {
+        it('GIVEN a VC WHEN grantKYC THEN transaction succeed', async () => {
+            let KYCStatusFor_B_Before = await kycFacet.getKYCStatusFor(
+                account_B
+            )
+            let KYC_Count_Before = await kycFacet.getKYCAccountsCount(1)
+
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
             )
 
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
+            let KYCStatusFor_B_After = await kycFacet.getKYCStatusFor(account_B)
+            let KYC_Count_After = await kycFacet.getKYCAccountsCount(1)
+            let KYCAccounts = await kycFacet.getKYCAccounts(1, 0, 100)
+            let KYCSFor_B = await kycFacet.getKYCFor(account_B)
+            let [kycAccountsData_After] = await kycFacet.getKYCAccountsData(
+                1,
+                0,
+                1
+            )
 
-    beforeEach(async () => {
-        await deployAsset({
-            multiPartition: true,
-            factory,
-            businessLogicResolver,
-        })
-    })
-
-    it('GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole', async () => {
-        // Using account C (non role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-
-        // adjustBalances fails
-        await expect(
-            adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
-        ).to.be.rejectedWith('AccountHasNoRole')
-    })
-
-    it('GIVEN a paused Token WHEN adjustBalances THEN transaction fails with TokenIsPaused', async () => {
-        // Granting Role to account C and Pause
-        await grantRoleAndPauseToken(
-            accessControlFacet,
-            pauseFacet,
-            ADJUSTMENT_BALANCE_ROLE,
-            signer_A,
-            signer_B,
-            account_C
-        )
-
-        // Using account C (with role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-
-        // adjustBalances fails
-        await expect(
-            adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
-        ).to.be.rejectedWith('TokenIsPaused')
-    })
-
-    it('GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero', async () => {
-        // Granting Role to account C and Pause
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
-
-        // Using account C (with role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-
-        // adjustBalances fails
-        await expect(
-            adjustBalancesFacet.adjustBalances(0, adjustDecimals)
-        ).to.be.revertedWithCustomError(adjustBalancesFacet, 'FactorIsZero')
-    })
-
-    it('GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds', async () => {
-        // Granting Role to account C
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_A)
-        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
-
-        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet
-            .connect(signer_B)
-            .grantKYC(account_B, '', 0, 9999999999, account_A)
-
-        erc1410Facet = erc1410Facet.connect(signer_A)
-        equityFacet = equityFacet.connect(signer_A)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
-
-        await erc1410Facet.issueByPartition({
-            partition: _PARTITION_ID_2,
-            tokenHolder: account_B,
-            value: balanceOf_B_Original,
-            data: '0x',
+            expect(KYCStatusFor_B_Before).to.equal(0)
+            expect(KYCStatusFor_B_After).to.equal(1)
+            expect(KYC_Count_Before).to.equal(0)
+            expect(KYC_Count_After).to.equal(1)
+            expect(KYCAccounts.length).to.equal(1)
+            expect(KYCAccounts[0]).to.equal(account_B)
+            expect(KYCSFor_B.validFrom).to.equal(_VALID_FROM)
+            expect(KYCSFor_B.validTo).to.equal(_VALID_TO)
+            expect(KYCSFor_B.issuer).to.equal(account_C)
+            expect(KYCSFor_B.VCid).to.equal(_VC_ID)
+            expect(kycAccountsData_After.status).to.equal(1)
         })
 
-        // schedule tasks
-        const currentTimeInSeconds = (await ethers.provider.getBlock('latest'))
-            .timestamp
+        it('GIVEN a VC WHEN revokeKYC THEN transaction succeed', async () => {
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
 
-        const dividendsRecordDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000
-        const dividendsExecutionDateInSeconds =
-            currentTimeInSeconds + (10 * TIME) / 1000
-        const dividendsAmountPerEquity = 1
-        const dividendData_1 = {
-            recordDate: dividendsRecordDateInSeconds_1.toString(),
-            executionDate: dividendsExecutionDateInSeconds.toString(),
-            amount: dividendsAmountPerEquity,
-        }
+            await kycFacet.revokeKYC(account_B)
 
-        await equityFacet.setDividends(dividendData_1)
+            let KYCStatusFor_B_After = await kycFacet.getKYCStatusFor(account_B)
+            let KYC_Count_After = await kycFacet.getKYCAccountsCount(1)
+            let KYCAccounts = await kycFacet.getKYCAccounts(1, 0, 100)
 
-        const balanceAdjustmentExecutionDateInSeconds_1 =
-            currentTimeInSeconds + TIME / 1000 + 1
+            expect(KYCStatusFor_B_After).to.equal(0)
+            expect(KYC_Count_After).to.equal(0)
+            expect(KYCAccounts.length).to.equal(0)
+        })
 
-        const balanceAdjustmentData_1 = {
-            executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
-            factor: adjustFactor,
-            decimals: adjustDecimals,
-        }
+        //TODO activate this test when TimeTravel is migrated
+        // it('Check KYC status after expiration', async () => {
+        //     await kycFacet.grantKYC(
+        //         account_B,
+        //         _VC_ID,
+        //         _VALID_FROM,
+        //         _VALID_TO,
+        //         account_C
+        //     )
 
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
+        //     let KYCStatusFor_B_After_Grant = await kycFacet.getKYCStatusFor(
+        //         account_B
+        //     )
 
-        const tasks_count_Before =
-            await scheduledTasksFacet.scheduledTaskCount()
+        //     await timeTravelFacet.changeSystemTimestamp(_VALID_TO + 1)
 
-        //-------------------------
-        await new Promise((f) => setTimeout(f, TIME + 2))
+        //     let KYCStatusFor_B_After_Expiration =
+        //         await kycFacet.getKYCStatusFor(account_B)
 
-        // balance adjustment
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
-        await adjustBalancesFacet.adjustBalances(1, 0)
+        //     expect(KYCStatusFor_B_After_Grant).to.equal(1)
+        //     expect(KYCStatusFor_B_After_Expiration).to.equal(0)
+        // })
 
-        const tasks_count_After = await scheduledTasksFacet.scheduledTaskCount()
+        it('Check KYC status after issuer removed', async () => {
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
 
-        expect(tasks_count_Before).to.be.equal(2)
-        expect(tasks_count_After).to.be.equal(0)
+            let KYCStatusFor_B_After_Grant = await kycFacet.getKYCStatusFor(
+                account_B
+            )
+
+            await ssiManagementFacet.removeIssuer(account_C)
+
+            let KYCStatusFor_B_After_Cancelling_Issuer =
+                await kycFacet.getKYCStatusFor(account_B)
+
+            expect(KYCStatusFor_B_After_Grant).to.equal(1)
+            expect(KYCStatusFor_B_After_Cancelling_Issuer).to.equal(0)
+        })
+
+        it('Check KYC status after issuer revokes VC', async () => {
+            await kycFacet.grantKYC(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
+
+            let KYCStatusFor_B_After_Grant = await kycFacet.getKYCStatusFor(
+                account_B
+            )
+
+            await revocationList.connect(signer_C).revoke(_VC_ID)
+
+            let KYCFor_B_After_Revoking_VC = await kycFacet.getKYCStatusFor(
+                account_B
+            )
+
+            expect(KYCStatusFor_B_After_Grant).to.equal(1)
+            expect(KYCFor_B_After_Revoking_VC).to.equal(0)
+        })
     })
 })

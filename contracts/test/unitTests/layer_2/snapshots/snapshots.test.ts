@@ -219,6 +219,8 @@ import {
     Equity__factory,
     ERC1410ScheduledTasks__factory,
     Snapshots__factory,
+    SSIManagement,
+    KYC,
 } from '@typechain'
 import {
     SNAPSHOT_ROLE,
@@ -231,6 +233,8 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
 } from '@scripts'
 
 const amount = 1
@@ -260,6 +264,8 @@ describe('Snapshots Layer 2 Tests', () => {
     let snapshotFacet: Snapshots
     let accessControlFacet: AccessControl
     let equityFacet: Equity
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     before(async () => {
         // mute | mock console.log
@@ -288,7 +294,15 @@ describe('Snapshots Layer 2 Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        const init_rbacs: Rbac[] = [rbacPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -331,6 +345,12 @@ describe('Snapshots Layer 2 Tests', () => {
             signer_A
         )
         snapshotFacet = Snapshots__factory.connect(diamond.address, signer_A)
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_A
+        )
     })
 
     it('GIVEN an account with snapshot role WHEN takeSnapshot THEN scheduled tasks get executed succeeds', async () => {
@@ -339,6 +359,10 @@ describe('Snapshots Layer 2 Tests', () => {
         await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_A)
         await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
+
+        await ssiManagementFacet.addIssuer(account_A)
+        await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
+        await kycFacet.grantKYC(account_B, '', 0, 9999999999, account_A)
 
         snapshotFacet = snapshotFacet.connect(signer_A)
         erc1410Facet = erc1410Facet.connect(signer_A)

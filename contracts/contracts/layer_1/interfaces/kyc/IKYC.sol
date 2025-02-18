@@ -206,71 +206,130 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    IERC1410StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {ERC20StorageWrapper1} from '../ERC20/ERC20StorageWrapper1.sol';
-import {
-    IERC1410Basic
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
-
-abstract contract ERC1410BasicStorageWrapper is
-    IERC1410StorageWrapper,
-    ERC20StorageWrapper1
-{
-    function _transferByPartition(
-        address _from,
-        IERC1410Basic.BasicTransferInfo memory _basicTransferInfo,
-        bytes32 _partition,
-        bytes memory _data,
-        address _operator,
-        bytes memory _operatorData
-    ) internal {
-        _beforeTokenTransfer(
-            _partition,
-            _from,
-            _basicTransferInfo.to,
-            _basicTransferInfo.value
-        );
-
-        _reduceBalanceByPartition(_from, _basicTransferInfo.value, _partition);
-
-        if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
-            _addPartitionTo(
-                _basicTransferInfo.value,
-                _basicTransferInfo.to,
-                _partition
-            );
-        } else {
-            _increaseBalanceByPartition(
-                _basicTransferInfo.to,
-                _basicTransferInfo.value,
-                _partition
-            );
-        }
-
-        // Emit transfer event.
-        emit TransferByPartition(
-            _partition,
-            _operator,
-            _from,
-            _basicTransferInfo.to,
-            _basicTransferInfo.value,
-            _data,
-            _operatorData
-        );
+interface IKYC {
+    struct KYCData {
+        uint256 validFrom;
+        uint256 validTo;
+        string VCid;
+        address issuer;
+        KYCStatus status;
     }
 
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual;
+    enum KYCStatus {
+        NOT_GRANTED,
+        GRANTED
+    }
 
-    function _addPartitionTo(
-        uint256 _value,
+    error InvalidDates();
+    error InvalidKYCStatus();
+    error KYCIsNotGranted();
+    error InvalidZeroAddress();
+
+    /**
+     * @dev Emitted when a KYC is granted
+     *
+     * @param account The address for which the KYC is granted
+     * @param issuer The address of the issuer of the KYC
+     */
+
+    event KYCGranted(address indexed account, address indexed issuer);
+
+    /**
+     * @dev Emitted when a KYC is revoked
+     *
+     * @param account The address for which the KYC is revoked
+     * @param issuer The address of the issuer of the KYC
+     */
+    event KYCRevoked(address indexed account, address indexed issuer);
+
+    /**
+     * @dev Grant kyc to an address
+     *
+     * @param _account user whose KYC is being granted
+     * @param _VCid credential Id
+     * @param _validFrom start date of the KYC
+     * @param _validTo end date of the KYC
+     * @param _issuer issurer of the KYC
+     * @return success_ true or false
+     */
+
+    function grantKYC(
         address _account,
-        bytes32 _partition
-    ) internal virtual;
+        string memory _VCid,
+        uint256 _validFrom,
+        uint256 _validTo,
+        address _issuer
+    ) external returns (bool success_);
+
+    /**
+     * @dev Revoke kyc to an address
+     *
+     * @param _account user whose KYC is being revoked
+     * @return success_ true or false
+     */
+
+    function revokeKYC(address _account) external returns (bool success_);
+
+    /**
+     * @dev Get the status of the KYC for an account
+     *
+     * @param _account the account to check
+     * @return kycStatus_ GRANTED or NOT_GRANTED
+     */
+
+    function getKYCStatusFor(
+        address _account
+    ) external view returns (KYCStatus kycStatus_);
+
+    /**
+     * @dev Get all the info of the KYC for an account
+     *
+     * @param _account the account to check
+     * @return kyc_
+     */
+
+    function getKYCFor(
+        address _account
+    ) external view returns (KYCData memory kyc_);
+
+    /**
+     * @dev Get the count of accounts with a given KYC status
+     *
+     * @param _kycStatus GRANTED or NOT_GRANTED
+     * @return KYCAccountsCount_ count of accounts with the given KYC status
+     */
+
+    function getKYCAccountsCount(
+        KYCStatus _kycStatus
+    ) external view returns (uint256 KYCAccountsCount_);
+
+    /**
+     * @dev Returns an array of accounts with a given KYC status
+     *
+     * @param _kycStatus GRANTED or NOT_GRANTED
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return accounts_ The array containing the accounts addresses
+     */
+
+    function getKYCAccounts(
+        KYCStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory accounts_);
+
+    /**
+     * @dev Returns an array with the KYC data from accounts with a given KYC status
+     *
+     * @param _kycStatus GRANTED or NOT_GRANTED
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return kycData_ The array containing the data from the accounts
+     */
+
+    function getKYCAccountsData(
+        KYCStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (KYCData[] memory kycData_);
 }

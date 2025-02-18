@@ -217,9 +217,14 @@ import {
     _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
     _IS_NOT_OPERATOR_ERROR_ID,
     _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS
+    _SUCCESS,
+    _FROM_ACCOUNT_KYC_ERROR_ID
 } from '../../constants/values.sol';
 import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
+import {IKYC} from '../../../layer_1/interfaces/kyc/IKYC.sol';
+import {
+    IERC1410Standard
+} from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
 
 abstract contract ERC1410StandardStorageWrapper is
     ERC1410OperatorStorageWrapper
@@ -291,29 +296,44 @@ abstract contract ERC1410StandardStorageWrapper is
     }
 
     function _issueByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes memory _data
+        IERC1410Standard.IssueData memory _issueData
     ) internal {
-        _validateParams(_partition, _value);
+        _validateParams(_issueData.partition, _issueData.value);
 
-        _beforeTokenTransfer(_partition, address(0), _tokenHolder, _value);
+        _beforeTokenTransfer(
+            _issueData.partition,
+            address(0),
+            _issueData.tokenHolder,
+            _issueData.value
+        );
 
-        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
-            _addPartitionTo(_value, _tokenHolder, _partition);
+        if (
+            !_validPartitionForReceiver(
+                _issueData.partition,
+                _issueData.tokenHolder
+            )
+        ) {
+            _addPartitionTo(
+                _issueData.value,
+                _issueData.tokenHolder,
+                _issueData.partition
+            );
         } else {
-            _increaseBalanceByPartition(_tokenHolder, _value, _partition);
+            _increaseBalanceByPartition(
+                _issueData.tokenHolder,
+                _issueData.value,
+                _issueData.partition
+            );
         }
 
-        _increaseTotalSupplyByPartition(_partition, _value);
+        _increaseTotalSupplyByPartition(_issueData.partition, _issueData.value);
 
         emit IssuedByPartition(
-            _partition,
+            _issueData.partition,
             _msgSender(),
-            _tokenHolder,
-            _value,
-            _data
+            _issueData.tokenHolder,
+            _issueData.value,
+            _issueData.data
         );
     }
 
@@ -388,6 +408,9 @@ abstract contract ERC1410StandardStorageWrapper is
         }
         if (!_checkControlList(_from)) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _from)) {
+            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
         if (!_validPartition(_partition, _from)) {
             return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));

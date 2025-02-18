@@ -265,3 +265,9 @@ bytes32 constant _PAUSE_STORAGE_POSITION = 0x5a5b295532a8b6e97bc9d45d68fc49b85a0
 
 // keccak256('security.token.standard.protectedpartitions.storage');
 bytes32 constant _PROTECTED_PARTITIONS_STORAGE_POSITION = 0x564ecdb30bda57ccdf5f0ccce9a283978b97919c80a3230163042042418b1546;
+
+// keccak256('security.token.standard.ssiManagement.storage');
+bytes32 constant _SSI_MANAGEMENT_STORAGE_POSITION = 0xdbde0b1f7457f92983806323b8056e5eabfce9a23b8924af999a4df0e4154e18;
+
+// keccak256('security.token.standard.kyc.storage');
+bytes32 constant _KYC_STORAGE_POSITION = 0x589d3365cb6f9141f65f568666d0e4cb837c3b1edc1527dd31a1aa423ad940c7;

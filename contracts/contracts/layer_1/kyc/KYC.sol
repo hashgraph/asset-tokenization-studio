@@ -206,71 +206,129 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {_KYC_ROLE} from '../constants/roles.sol';
+import {IKYC} from '../interfaces/kyc/IKYC.sol';
+import {_KYC_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
-    IERC1410StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {ERC20StorageWrapper1} from '../ERC20/ERC20StorageWrapper1.sol';
-import {
-    IERC1410Basic
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../common/Common.sol';
 
-abstract contract ERC1410BasicStorageWrapper is
-    IERC1410StorageWrapper,
-    ERC20StorageWrapper1
-{
-    function _transferByPartition(
-        address _from,
-        IERC1410Basic.BasicTransferInfo memory _basicTransferInfo,
-        bytes32 _partition,
-        bytes memory _data,
-        address _operator,
-        bytes memory _operatorData
-    ) internal {
-        _beforeTokenTransfer(
-            _partition,
-            _from,
-            _basicTransferInfo.to,
-            _basicTransferInfo.value
-        );
-
-        _reduceBalanceByPartition(_from, _basicTransferInfo.value, _partition);
-
-        if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
-            _addPartitionTo(
-                _basicTransferInfo.value,
-                _basicTransferInfo.to,
-                _partition
-            );
-        } else {
-            _increaseBalanceByPartition(
-                _basicTransferInfo.to,
-                _basicTransferInfo.value,
-                _partition
-            );
-        }
-
-        // Emit transfer event.
-        emit TransferByPartition(
-            _partition,
-            _operator,
-            _from,
-            _basicTransferInfo.to,
-            _basicTransferInfo.value,
-            _data,
-            _operatorData
-        );
+contract KYC is IKYC, IStaticFunctionSelectors, Common {
+    function grantKYC(
+        address _account,
+        string memory _VCid,
+        uint256 _validFrom,
+        uint256 _validTo,
+        address _issuer
+    )
+        external
+        virtual
+        override
+        onlyRole(_KYC_ROLE)
+        onlyUnpaused
+        checkAddress(_account)
+        checkKYCStatus(KYCStatus.NOT_GRANTED, _account)
+        onlyValidDates(_validFrom, _validTo)
+        checkIssuerList(_issuer)
+        returns (bool success_)
+    {
+        success_ = _grantKYC(_account, _VCid, _validFrom, _validTo, _issuer);
+        emit KYCGranted(_account, _msgSender());
     }
 
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual;
+    function revokeKYC(
+        address _account
+    )
+        external
+        virtual
+        override
+        onlyRole(_KYC_ROLE)
+        onlyUnpaused
+        checkAddress(_account)
+        returns (bool success_)
+    {
+        success_ = _revokeKYC(_account);
+        emit KYCRevoked(_account, _msgSender());
+    }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    ) internal virtual;
+    function getKYCStatusFor(
+        address _account
+    ) external view virtual override returns (KYCStatus kycStatus_) {
+        kycStatus_ = _getKYCStatusFor(_account);
+    }
+
+    function getKYCFor(
+        address _account
+    ) external view virtual override returns (KYCData memory kyc_) {
+        kyc_ = _getKYCFor(_account);
+    }
+
+    function getKYCAccountsCount(
+        KYCStatus _kycStatus
+    ) external view virtual override returns (uint256 KYCAccountsCount_) {
+        KYCAccountsCount_ = _getKYCAccountsCount(_kycStatus);
+    }
+
+    function getKYCAccounts(
+        KYCStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view virtual override returns (address[] memory accounts_) {
+        accounts_ = _getKYCAccounts(_kycStatus, _pageIndex, _pageLength);
+    }
+
+    function getKYCAccountsData(
+        KYCStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view virtual override returns (KYCData[] memory kycData_) {
+        kycData_ = _getKYCAccountsData(_kycStatus, _pageIndex, _pageLength);
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _KYC_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_[selectorIndex++] = this.grantKYC.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.revokeKYC.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getKYCFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getKYCStatusFor
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getKYCAccountsCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getKYCAccounts
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getKYCAccountsData
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IKYC).interfaceId;
+    }
 }

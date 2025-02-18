@@ -225,6 +225,8 @@ import {
     Cap__factory,
     Lock__factory,
     Equity__factory,
+    SSIManagement,
+    KYC,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -241,6 +243,8 @@ import {
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
     MAX_UINT256,
+    SSI_MANAGER_ROLE,
+    KYC_ROLE,
 } from '@scripts'
 
 const amount = 1
@@ -276,6 +280,8 @@ describe('Locks Layer 2 Tests', () => {
     let capFacet: Cap
     let equityFacet: Equity
     let lockFacet: Lock
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     async function deployAsset(multiPartition: boolean) {
         const init_rbacs: Rbac[] = set_initRbacs()
@@ -336,6 +342,12 @@ describe('Locks Layer 2 Tests', () => {
         capFacet = Cap__factory.connect(diamond.address, defaultSigner)
         lockFacet = Lock__factory.connect(diamond.address, defaultSigner)
         equityFacet = Equity__factory.connect(diamond.address, defaultSigner)
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_A
+        )
     }
 
     function set_initRbacs(): Rbac[] {
@@ -347,7 +359,15 @@ describe('Locks Layer 2 Tests', () => {
             role: CORPORATE_ACTION_ROLE,
             members: [account_B],
         }
-        return [rbacPause, corporateActionPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        return [rbacPause, corporateActionPause, rbacKYC, rbacSSI]
     }
 
     async function setPreBalanceAdjustment() {
@@ -373,6 +393,9 @@ describe('Locks Layer 2 Tests', () => {
             _PARTITION_ID_2,
             maxSupply_Partition_2_Original
         )
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
+        await kycFacet.grantKYC(account_B, '', 0, 9999999999, account_A)
 
         await erc1410Facet.issueByPartition({
             partition: _PARTITION_ID_1,

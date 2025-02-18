@@ -216,6 +216,8 @@ import {
     type ERC1594,
     BusinessLogicResolver,
     IFactory,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
@@ -230,6 +232,8 @@ import {
     SecurityType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
 } from '@scripts'
 import { assertObject } from '../../../../common'
 
@@ -254,6 +258,8 @@ describe('ERC20 Tests', () => {
     let pauseFacet: Pause
     let controlListFacet: ControlList
     let erc1594Facet: ERC1594
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
@@ -512,7 +518,15 @@ describe('ERC20 Tests', () => {
                 role: ISSUER_ROLE,
                 members: [account_B],
             }
-            const init_rbacs: Rbac[] = [rbacIssuer]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [rbacIssuer, rbacKYC, rbacSSI]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -565,6 +579,19 @@ describe('ERC20 Tests', () => {
                 diamond.address,
                 signer_B
             )
+            kycFacet = await ethers.getContractAt(
+                'KYC',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SSIManagement',
+                diamond.address,
+                signer_A
+            )
+            await ssiManagementFacet.addIssuer(account_E)
+            await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_E)
+            await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
             await erc1594Facet.issue(account_C, amount, '0x')
         })
 

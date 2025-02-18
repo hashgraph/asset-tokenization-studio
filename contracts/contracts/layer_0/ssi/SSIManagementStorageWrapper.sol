@@ -203,74 +203,92 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
+import {LibCommon} from '../common/LibCommon.sol';
 import {
-    IERC1410StorageWrapper
-} from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
-import {ERC20StorageWrapper1} from '../ERC20/ERC20StorageWrapper1.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {LocalContext} from '../context/LocalContext.sol';
 import {
-    IERC1410Basic
-} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+    _SSI_MANAGEMENT_STORAGE_POSITION
+} from '../constants/storagePositions.sol';
+import {ISSIManagement} from '../../layer_1/interfaces/ssi/ISSIManagement.sol';
 
-abstract contract ERC1410BasicStorageWrapper is
-    IERC1410StorageWrapper,
-    ERC20StorageWrapper1
-{
-    function _transferByPartition(
-        address _from,
-        IERC1410Basic.BasicTransferInfo memory _basicTransferInfo,
-        bytes32 _partition,
-        bytes memory _data,
-        address _operator,
-        bytes memory _operatorData
-    ) internal {
-        _beforeTokenTransfer(
-            _partition,
-            _from,
-            _basicTransferInfo.to,
-            _basicTransferInfo.value
-        );
+abstract contract SSIManagementStorageWrapper is LocalContext {
+    using LibCommon for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
-        _reduceBalanceByPartition(_from, _basicTransferInfo.value, _partition);
-
-        if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
-            _addPartitionTo(
-                _basicTransferInfo.value,
-                _basicTransferInfo.to,
-                _partition
-            );
-        } else {
-            _increaseBalanceByPartition(
-                _basicTransferInfo.to,
-                _basicTransferInfo.value,
-                _partition
-            );
-        }
-
-        // Emit transfer event.
-        emit TransferByPartition(
-            _partition,
-            _operator,
-            _from,
-            _basicTransferInfo.to,
-            _basicTransferInfo.value,
-            _data,
-            _operatorData
-        );
+    struct SSIManagementStorage {
+        EnumerableSet.AddressSet issuerList;
+        address revocationRegistry;
     }
 
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual;
+    // modifiers
+    modifier checkIssuerList(address issuer) {
+        if (!_isIssuer(issuer)) {
+            revert ISSIManagement.AccountIsNotIssuer(issuer);
+        }
+        _;
+    }
 
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    ) internal virtual;
+    // Internal
+    function _setRevocationRegistryAddress(
+        address _revocationRegistryAddress
+    ) internal returns (bool success_) {
+        _SSIManagementStorage().revocationRegistry = _revocationRegistryAddress;
+        return true;
+    }
+
+    function _addIssuer(address _issuer) internal returns (bool success_) {
+        success_ = _SSIManagementStorage().issuerList.add(_issuer);
+    }
+
+    function _removeIssuer(address _issuer) internal returns (bool success_) {
+        success_ = _SSIManagementStorage().issuerList.remove(_issuer);
+    }
+
+    function _getRevocationRegistryAddress()
+        internal
+        view
+        returns (address revocationRegistryAddress_)
+    {
+        revocationRegistryAddress_ = _SSIManagementStorage().revocationRegistry;
+    }
+
+    function _getIssuerListCount()
+        internal
+        view
+        returns (uint256 issuerListCount_)
+    {
+        issuerListCount_ = _SSIManagementStorage().issuerList.length();
+    }
+
+    function _getIssuerListMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory members_) {
+        return
+            _SSIManagementStorage().issuerList.getFromSet(
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function _isIssuer(address _issuer) internal view returns (bool) {
+        return _SSIManagementStorage().issuerList.contains(_issuer);
+    }
+
+    function _SSIManagementStorage()
+        internal
+        pure
+        returns (SSIManagementStorage storage ssiManagement_)
+    {
+        bytes32 position = _SSI_MANAGEMENT_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            ssiManagement_.slot := position
+        }
+    }
 }

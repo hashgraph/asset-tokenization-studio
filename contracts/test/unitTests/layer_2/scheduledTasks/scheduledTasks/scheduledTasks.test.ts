@@ -221,6 +221,8 @@ import {
     PauseFacet__factory,
     ERC1410ScheduledTasks__factory,
     ScheduledTasks__factory,
+    SSIManagement,
+    KYC,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -235,6 +237,8 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
 } from '@scripts'
 
 const TIME = 15000
@@ -260,6 +264,8 @@ describe('Scheduled Tasks Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     before(async () => {
         // mute | mock console.log
@@ -292,7 +298,15 @@ describe('Scheduled Tasks Tests', () => {
             role: ISSUER_ROLE,
             members: [account_B],
         }
-        const init_rbacs: Rbac[] = [rbacPause, rbacIssue]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs: Rbac[] = [rbacPause, rbacIssue, rbacKYC, rbacSSI]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -339,6 +353,14 @@ describe('Scheduled Tasks Tests', () => {
             diamond.address,
             signer_A
         )
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_A
+        )
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
     })
 
     it('GIVEN a paused Token WHEN triggerTasks THEN transaction fails with TokenIsPaused', async () => {
