@@ -206,15 +206,15 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LibCommon} from '../common/LibCommon.sol';
+import {LibCommon} from '../../common/LibCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {LocalContext} from '../context/LocalContext.sol';
+import {LocalContext} from '../../context/LocalContext.sol';
 import {
     _SSI_MANAGEMENT_STORAGE_POSITION
-} from '../constants/storagePositions.sol';
-import {ISSIManagement} from '../../layer_1/interfaces/ssi/ISSIManagement.sol';
+} from '../../constants/storagePositions.sol';
+import {ISSIManagement} from '../../../layer_1/interfaces/ssi/ISSIManagement.sol';
 
 abstract contract SSIManagementStorageWrapper is LocalContext {
     using LibCommon for EnumerableSet.AddressSet;

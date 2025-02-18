@@ -206,18 +206,18 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IKYC} from '../../layer_1/interfaces/kyc/IKYC.sol';
+import {IKYC} from '../../../layer_1/interfaces/kyc/IKYC.sol';
 import {
     SSIManagementStorageWrapper
 } from '../ssi/SSIManagementStorageWrapper.sol';
-import {_KYC_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {LibCommon} from '../common/LibCommon.sol';
+import {_KYC_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {LibCommon} from '../../common/LibCommon.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
     IRevocationList
-} from '../../layer_1/interfaces/kyc/IRevocationList.sol';
+} from '../../../layer_1/interfaces/kyc/IRevocationList.sol';
 
 abstract contract KYCStorageWrapper is SSIManagementStorageWrapper {
     using LibCommon for EnumerableSet.AddressSet;
