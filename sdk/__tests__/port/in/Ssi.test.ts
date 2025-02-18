@@ -385,7 +385,7 @@ describe('🧪 SSI Management tests', () => {
           securityId: equity.evmDiamondAddress!,
         }),
       ),
-    ).toEqual(CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString());
+    ).toEqual(CLIENT_ACCOUNT_ECDSA_A.id!.toString());
   }, 600_000);
 
   it('Issuer functionality work successfully', async () => {

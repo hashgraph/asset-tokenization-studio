@@ -245,6 +245,10 @@ export class GetRevocationRegistryAddressQueryHandler
     const res =
       await this.queryAdapter.getRevocationRegistryAddress(securityEvmAddress);
 
-    return new GetRevocationRegistryAddressQueryResponse(res);
+    const hederaId = (
+      await this.mirrorNodeAdapter.getAccountInfo(res)
+    ).id.toString();
+
+    return new GetRevocationRegistryAddressQueryResponse(hederaId);
   }
 }
