@@ -383,7 +383,7 @@ describe('Bond Tests', () => {
             diamond.address,
             signer_A
         )
-        
+
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
         await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
     })

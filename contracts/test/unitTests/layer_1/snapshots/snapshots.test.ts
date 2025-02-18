@@ -426,7 +426,7 @@ describe('Snapshots Tests', () => {
         await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
         await accessControlFacet.grantRole(KYC_ROLE, account_B)
-        
+
         await ssiManagementFacet.addIssuer(account_A)
         await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
         await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)

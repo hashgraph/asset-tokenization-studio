@@ -217,10 +217,10 @@ import {
 
 abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
     using LibCommon for EnumerableSet.UintSet;
+    using EnumerableSet for EnumerableSet.UintSet;
 
-    modifier onlyWithValidHoldId(
-        IHold.HoldIdentifier calldata _holdIdentifier
-    ) {
+    modifier onlyWithValidHoldId(IHold.HoldIdentifier calldata _holdIdentifier)
+    {
         if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
         _;
     }
@@ -235,23 +235,10 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
     function _getHold(
         IHold.HoldIdentifier memory _holdIdentifier
     ) internal view returns (IHold.HoldData memory) {
-        uint256 holdIndex = _getHoldIndex(_holdIdentifier);
-
         return
-            _getHoldByIndex(
-                _holdIdentifier.partition,
-                _holdIdentifier.tokenHolder,
-                holdIndex
-            );
-    }
-
-    function _getHoldIndex(
-        IHold.HoldIdentifier memory _holdIdentifier
-    ) internal view returns (uint256) {
-        return
-            _holdStorage().holdsIndex[_holdIdentifier.tokenHolder][
-                _holdIdentifier.partition
-            ][_holdIdentifier.holdId];
+            _holdStorage().holdsByAccountPartitionAndId[
+                _holdIdentifier.tokenHolder
+            ][_holdIdentifier.partition][_holdIdentifier.holdId];
     }
 
     function _getHoldByIndex(
@@ -271,22 +258,35 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
 
         _holdIndex--;
 
-        assert(_holdIndex < holdStorage.holds[_tokenHolder][_partition].length);
+        assert(
+            _holdIndex <
+                holdStorage
+                .holdIdsByAccountAndPartition[_tokenHolder][_partition].length()
+        );
 
-        return holdStorage.holds[_tokenHolder][_partition][_holdIndex];
+        uint256 holdId = holdStorage
+        .holdIdsByAccountAndPartition[_tokenHolder][_partition].at(_holdIndex);
+
+        return
+            holdStorage.holdsByAccountPartitionAndId[_tokenHolder][_partition][
+                holdId
+            ];
     }
 
     function _getHeldAmountFor(
         address _tokenHolder
     ) internal view returns (uint256 amount_) {
-        return _holdStorage().totalHeldAmount[_tokenHolder];
+        return _holdStorage().totalHeldAmountByAccount[_tokenHolder];
     }
 
     function _getHeldAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) internal view returns (uint256 amount_) {
-        return _holdStorage().heldAmountByPartition[_tokenHolder][_partition];
+        return
+            _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][
+                _partition
+            ];
     }
 
     function _getHoldsIdForByPartition(
@@ -296,10 +296,11 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
         uint256 _pageLength
     ) internal view returns (uint256[] memory holdsId_) {
         return
-            _holdStorage().holdIds[_tokenHolder][_partition].getFromSet(
-                _pageIndex,
-                _pageLength
-            );
+            _holdStorage()
+            .holdIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(
+                    _pageIndex,
+                    _pageLength
+                );
     }
 
     function _getHoldForByPartition(
@@ -331,7 +332,9 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
         bytes32 _partition,
         address _tokenHolder
     ) internal view returns (uint256) {
-        return _holdStorage().holds[_tokenHolder][_partition].length;
+        return
+            _holdStorage()
+            .holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
     }
 
     function _isHoldExpired(

@@ -2081,7 +2081,7 @@ describe('ERC1400 Tests', () => {
             await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
             await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
             await accessControlFacet.grantRole(KYC_ROLE, account_B)
-            
+
             await ssiManagementFacet.addIssuer(account_E)
             await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
 

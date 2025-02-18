@@ -279,7 +279,7 @@ describe('KYC Tests', () => {
             await deployAtsFullInfrastructure(
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
-                    useDeployed: false
+                    useDeployed: false,
                 })
             )
 

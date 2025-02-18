@@ -783,9 +783,7 @@ export async function deployAtsContracts({
         cap: await deployContractWithFactory(commands.cap),
         controlList: await deployContractWithFactory(commands.controlList),
         kyc: await deployContractWithFactory(commands.kyc),
-        ssiManagement: await deployContractWithFactory(
-            commands.ssiManagement
-        ),
+        ssiManagement: await deployContractWithFactory(commands.ssiManagement),
         pause: await deployContractWithFactory(commands.pause),
         lock: await deployContractWithFactory(commands.lock),
         erc20: await deployContractWithFactory(commands.erc20),

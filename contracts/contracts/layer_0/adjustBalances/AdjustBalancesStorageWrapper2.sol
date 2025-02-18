@@ -250,21 +250,7 @@ abstract contract AdjustBalancesStorageWrapper2 is
         uint256 _holdId,
         address _tokenHolder
     ) internal view override returns (uint256) {
-        uint256 holdIndex = _getHoldIndex(
-            IHold.HoldIdentifier(_partition, _tokenHolder, _holdId)
-        );
-        if (holdIndex == 0) return 0;
-        return _getHoldLabafByIndex(_partition, _tokenHolder, holdIndex);
-    }
-
-    function _getLockLabafByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) internal view override returns (uint256) {
-        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
-        if (lockIndex == 0) return 0;
-        return _getLockLabafByIndex(_partition, _tokenHolder, lockIndex);
+        return _getHoldLabafById(_partition, _tokenHolder, _holdId);
     }
 
     function _getLabafByUserAndPartition(
