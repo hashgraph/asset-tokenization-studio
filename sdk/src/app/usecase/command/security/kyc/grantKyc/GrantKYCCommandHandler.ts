@@ -273,7 +273,7 @@ export class GrantKYCCommandHandler
       ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
       : new EvmAddress(targetId);
 
-    if (targetEvmAddress.toString() != holder) {
+    if (targetEvmAddress.toString().toLowerCase() !== holder.toLowerCase()) {
       throw new InvalidVCHolder();
     }
 
