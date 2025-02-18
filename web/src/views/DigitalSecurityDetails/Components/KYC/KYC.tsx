@@ -16,23 +16,6 @@ import { useRevokeKYC } from "../../../../hooks/mutations/useKYC";
 import { useRolesStore } from "../../../../store/rolesStore";
 import { SecurityRole } from "../../../../utils/SecurityRole";
 
-const MOCK_KYC: KYCViewModel[] = [
-  {
-    issuer: "0.0.49666568",
-    validFrom: "",
-    validTo: "",
-    VCid: "1",
-    status: 1,
-  },
-  {
-    issuer: "0.0.49666568",
-    validFrom: "",
-    validTo: "",
-    VCid: "2",
-    status: 1,
-  },
-];
-
 export const KYC = () => {
   const { id: securityId = "" } = useParams();
 
@@ -163,7 +146,7 @@ export const KYC = () => {
         <Table
           name="kyc-list"
           columns={columns}
-          data={KYCList ?? MOCK_KYC}
+          data={KYCList ?? []}
           isLoading={isLoadingKYCList}
         />
       </Stack>
