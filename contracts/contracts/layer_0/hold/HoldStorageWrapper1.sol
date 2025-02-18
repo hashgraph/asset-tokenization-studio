@@ -221,37 +221,41 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
     modifier onlyWithValidHoldId(
         IHold.HoldIdentifier calldata _holdIdentifier
     ) {
-        if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
+        if (
+            !_isHoldIdValid(
+                _holdIdentifier.partition,
+                _holdIdentifier.tokenHolder,
+                _holdIdentifier.holdId
+            )
+        ) revert IHold.WrongHoldId();
         _;
     }
 
     function _isHoldIdValid(
-        IHold.HoldIdentifier memory _holdIdentifier
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
     ) internal view returns (bool) {
-        if (_getHold(_holdIdentifier).id == 0) return false;
+        if (_getHold(_partition, _tokenHolder, _holdId).id == 0) return false;
         return true;
     }
 
     function _getHold(
-        IHold.HoldIdentifier memory _holdIdentifier
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
     ) internal view returns (IHold.HoldData memory) {
-        uint256 holdIndex = _getHoldIndex(_holdIdentifier);
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
 
-        return
-            _getHoldByIndex(
-                _holdIdentifier.partition,
-                _holdIdentifier.tokenHolder,
-                holdIndex
-            );
+        return _getHoldByIndex(_partition, _tokenHolder, holdIndex);
     }
 
     function _getHoldIndex(
-        IHold.HoldIdentifier memory _holdIdentifier
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
     ) internal view returns (uint256) {
-        return
-            _holdStorage().holdsIndex[_holdIdentifier.tokenHolder][
-                _holdIdentifier.partition
-            ][_holdIdentifier.holdId];
+        return _holdStorage().holdsIndex[_tokenHolder][_partition][_holdId];
     }
 
     function _getHoldByIndex(
@@ -303,7 +307,9 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
     }
 
     function _getHoldForByPartition(
-        IHold.HoldIdentifier calldata _holdIdentifier
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
     )
         internal
         view
@@ -316,7 +322,11 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
             bytes memory operatorData_
         )
     {
-        IHold.HoldData memory holdData = _getHold(_holdIdentifier);
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
         return (
             holdData.hold.amount,
             holdData.hold.expirationTimestamp,

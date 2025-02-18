@@ -398,7 +398,13 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)
         returns (bool success_)
     {
-        success_ = _executeHoldByPartition(_holdIdentifier, _to, _amount);
+        success_ = _executeHoldByPartition(
+            _holdIdentifier.partition,
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.holdId,
+            _to,
+            _amount
+        );
 
         emit HoldByPartitionExecuted(
             _holdIdentifier.tokenHolder,
@@ -420,7 +426,12 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyWithValidHoldId(_holdIdentifier)
         returns (bool success_)
     {
-        success_ = _releaseHoldByPartition(_holdIdentifier, _amount);
+        success_ = _releaseHoldByPartition(
+            _holdIdentifier.partition,
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.holdId,
+            _amount
+        );
         emit HoldByPartitionReleased(
             _holdIdentifier.tokenHolder,
             _holdIdentifier.partition,
@@ -440,7 +451,11 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         returns (bool success_)
     {
         uint256 amount_;
-        (success_, amount_) = _reclaimHoldByPartition(_holdIdentifier);
+        (success_, amount_) = _reclaimHoldByPartition(
+            _holdIdentifier.partition,
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.holdId
+        );
         emit HoldByPartitionReclaimed(
             _msgSender(),
             _holdIdentifier.tokenHolder,
@@ -500,7 +515,9 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             bytes memory operatorData_
         )
     {
-        return _getHoldForByPartition(_holdIdentifier);
+        return _getHoldForByPartition(   _holdIdentifier.partition,
+            _holdIdentifier.tokenHolder,
+            _holdIdentifier.holdId);
     }
 
     function getHeldAmountForAdjusted(
