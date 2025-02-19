@@ -22,7 +22,7 @@
       outstanding shares, or (iii) beneficial ownership of such entity.
 
       "You" (or "Your") shall mean an individual or Legal Entity
-      exercising permissions granted by this License.
+      exercising permiSsions granted by this License.
 
       "Source" form shall mean the preferred form for making modifications,
       including but not limited to software source code, documentation
@@ -56,7 +56,7 @@
       to the Licensor or its representatives, including but not limited to
       communication on electronic mailing lists, source code control systems,
       and issue tracking systems that are managed by, or on behalf of, the
-      Licensor for the purpose of discussing and improving the Work, but
+      Licensor for the purpose of discuSsing and improving the Work, but
       excluding communication that is conspicuously marked or otherwise
       designated in writing by the copyright owner as "Not a Contribution."
 
@@ -128,7 +128,7 @@
       reproduction, and distribution of the Work otherwise complies with
       the conditions stated in this License.
 
-   5. Submission of Contributions. Unless You explicitly state otherwise,
+   5. SubmiSsion of Contributions. Unless You explicitly state otherwise,
       any Contribution intentionally submitted for inclusion in the Work
       by You to the Licensor shall be under the terms and conditions of
       this License, without any additional terms or conditions.
@@ -136,7 +136,7 @@
       the terms of any separate license agreement you may have executed
       with Licensor regarding such Contributions.
 
-   6. Trademarks. This License does not grant permission to use the trade
+   6. Trademarks. This License does not grant permiSsion to use the trade
       names, trademarks, service marks, or product names of the Licensor,
       except as required for reasonable and customary use in describing the
       origin of the Work and reproducing the content of the NOTICE file.
@@ -149,7 +149,7 @@
       of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS FOR A
       PARTICULAR PURPOSE. You are solely responsible for determining the
       appropriateness of using or redistributing the Work and assume any
-      risks associated with Your exercise of permissions under this License.
+      risks associated with Your exercise of permiSsions under this License.
 
    8. Limitation of Liability. In no event and under no legal theory,
       whether in tort (including negligence), contract, or otherwise,
@@ -161,7 +161,7 @@
       Work (including but not limited to damages for loss of goodwill,
       work stoppage, computer failure or malfunction, or any and all
       other commercial damages or losses), even if such Contributor
-      has been advised of the possibility of such damages.
+      has been advised of the poSsibility of such damages.
 
    9. Accepting Warranty or Additional Liability. While redistributing
       the Work or Derivative Works thereof, You may choose to offer,
@@ -198,7 +198,7 @@
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
+   See the License for the specific language governing permiSsions and
    limitations under the License.
 
 */
@@ -209,18 +209,20 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     AccessControl,
-    AccessControlFacet__factory,
+    AccessControl__factory,
     BusinessLogicResolver,
     type Cap,
+    TimeTravel,
     Cap__factory,
     Equity,
     Equity__factory,
     ERC1410ScheduledTasks,
     ERC1410ScheduledTasks__factory,
     IFactory,
-    Kyc,
     Snapshots,
     Snapshots__factory,
+    TimeTravel__factory,
+    Kyc,
     SsiManagement,
 } from '@typechain'
 import {
@@ -229,17 +231,16 @@ import {
     ISSUER_ROLE,
     PAUSER_ROLE,
     SNAPSHOT_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     deployEquityFromFactory,
     RegulationSubType,
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
-    SSI_MANAGER_ROLE,
-    KYC_ROLE,
-    ZERO,
-    EMPTY_STRING,
 } from '@scripts'
+import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -249,7 +250,6 @@ const _PARTITION_ID_1 =
 const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const TIME = 6000
-const EMPTY_VC_ID = EMPTY_STRING
 
 describe('CAP Layer 2 Tests', () => {
     let factory: IFactory,
@@ -260,6 +260,7 @@ describe('CAP Layer 2 Tests', () => {
         equityFacet: Equity,
         snapshotFacet: Snapshots,
         erc1410Facet: ERC1410ScheduledTasks,
+        timeTravelFacet: TimeTravel,
         kycFacet: Kyc,
         ssiManagementFacet: SsiManagement
 
@@ -277,15 +278,15 @@ describe('CAP Layer 2 Tests', () => {
     const setupEnvironment = async () => {
         const rbacPause = { role: PAUSER_ROLE, members: [account_B] }
         const rbaCap = { role: CAP_ROLE, members: [account_B] }
-        const rbacKYC = {
+        const rbacKyc = {
             role: KYC_ROLE,
             members: [account_B],
         }
-        const rbacSSI = {
+        const rbacSsi = {
             role: SSI_MANAGER_ROLE,
             members: [account_A],
         }
-        const init_rbacs = [rbacPause, rbaCap, rbacKYC, rbacSSI]
+        const init_rbacs = [rbacPause, rbaCap, rbacKyc, rbacSsi]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -319,7 +320,7 @@ describe('CAP Layer 2 Tests', () => {
         })
 
         capFacet = Cap__factory.connect(diamond.address, signer_A)
-        accessControlFacet = AccessControlFacet__factory.connect(
+        accessControlFacet = AccessControl__factory.connect(
             diamond.address,
             signer_A
         )
@@ -329,6 +330,7 @@ describe('CAP Layer 2 Tests', () => {
             diamond.address,
             signer_A
         )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',
@@ -336,13 +338,7 @@ describe('CAP Layer 2 Tests', () => {
             signer_A
         )
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKyc(
-            account_C,
-            EMPTY_VC_ID,
-            ZERO,
-            MAX_UINT256,
-            account_A
-        )
+        await kycFacet.grantKyc(account_C, '', 0, 9999999999, account_A)
     }
 
     const setupScheduledBalanceAdjustments = async (
@@ -381,6 +377,7 @@ describe('CAP Layer 2 Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
+                    timeTravelEnabled: true,
                 })
             )
 
@@ -392,6 +389,10 @@ describe('CAP Layer 2 Tests', () => {
         await setupEnvironment()
     })
 
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
+    })
+
     const testBalanceAdjustments = async (
         adjustments: Adjustment[],
         expectedFactors: number[]
@@ -400,7 +401,11 @@ describe('CAP Layer 2 Tests', () => {
 
         // Execute adjustments and verify
         for (let i = 0; i < adjustments.length; i++) {
-            await new Promise((resolve) => setTimeout(resolve, TIME + 1))
+            await timeTravelFacet.changeSystemTimestamp(
+                dateToUnixTimestamp(`2030-01-01T00:00:00Z`) +
+                    ((i + 1) * TIME) / 1000 +
+                    1
+            )
             await snapshotFacet.takeSnapshot()
         }
 
@@ -434,9 +439,8 @@ describe('CAP Layer 2 Tests', () => {
             maxSupplyByPartition
         )
 
-        const currentTime = (await ethers.provider.getBlock('latest')).timestamp
         const adjustments = createAdjustmentData(
-            currentTime,
+            dateToUnixTimestamp('2030-01-01T00:00:00Z'),
             [TIME / 1000, (2 * TIME) / 1000, (3 * TIME) / 1000],
             [5, 6, 7],
             [2, 0, 1]
@@ -472,7 +476,7 @@ describe('CAP Layer 2 Tests', () => {
             data: '0x',
         })
 
-        const currentTime = (await ethers.provider.getBlock('latest')).timestamp
+        const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`)
         const adjustments = createAdjustmentData(
             currentTime,
             [TIME / 1000],
@@ -483,7 +487,9 @@ describe('CAP Layer 2 Tests', () => {
         await setupScheduledBalanceAdjustments(adjustments)
 
         // Execute adjustments and verify reversion case
-        await new Promise((resolve) => setTimeout(resolve, TIME + 1))
+        await timeTravelFacet.changeSystemTimestamp(
+            adjustments[0].executionDate + 1
+        )
 
         await expect(
             capFacet.setMaxSupply(maxSupplyByPartition)
@@ -516,7 +522,7 @@ describe('CAP Layer 2 Tests', () => {
         )
 
         // scheduled balance adjustments
-        const currentTime = (await ethers.provider.getBlock('latest')).timestamp
+        const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`)
         const adjustments = createAdjustmentData(
             currentTime,
             [TIME / 1000],
@@ -527,7 +533,9 @@ describe('CAP Layer 2 Tests', () => {
         await setupScheduledBalanceAdjustments(adjustments)
         //-------------------------
         // wait for first balance adjustment
-        await new Promise((f) => setTimeout(f, TIME + 1))
+        await timeTravelFacet.changeSystemTimestamp(
+            adjustments[0].executionDate + 1
+        )
 
         // Attempt to change the max supply by partition with the same value as before
         await expect(
