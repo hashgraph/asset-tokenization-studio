@@ -220,6 +220,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     error LockExpirationNotReached();
 
     using LibCommon for EnumerableSet.UintSet;
+    using EnumerableSet for EnumerableSet.UintSet;
 
     struct LockData {
         uint256 id;
@@ -230,9 +231,8 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     struct LockDataStorage {
         mapping(address => uint256) totalLockedAmountByAccount;
         mapping(address => mapping(bytes32 => uint256)) totalLockedAmountByAccountAndPartition;
-        mapping(address => mapping(bytes32 => LockData[])) locksByAccountAndPartition;
+        mapping(address => mapping(bytes32 => mapping(uint256 => LockData))) locksByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) lockIdsByAccountAndPartition;
-        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) lockIndexByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => uint256)) nextLockIdByAccountAndPartition;
     }
 
@@ -278,7 +278,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     ) internal view returns (uint256 lockCount_) {
         return
             _lockStorage()
-            .locksByAccountAndPartition[_tokenHolder][_partition].length;
+            .lockIdsByAccountAndPartition[_tokenHolder][_partition].length();
     }
 
     function _getLocksIdForByPartition(
@@ -312,7 +312,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     ) internal view returns (uint256 amount_, uint256 expirationTimestamp_) {
         uint256 factor = _calculateFactor(
             _getAbafAdjusted(),
-            _getLockLabafByPartition(_partition, _lockId, _tokenHolder)
+            _getLockLabafById(_partition, _tokenHolder, _lockId)
         );
 
         (amount_, expirationTimestamp_) = _getLockForByPartition(
@@ -358,9 +358,10 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         address _tokenHolder,
         uint256 _lockId
     ) internal view returns (LockData memory) {
-        uint256 lockIndex = _getLockIndex(_partition, _tokenHolder, _lockId);
-
-        return _getLockByIndex(_partition, _tokenHolder, lockIndex);
+        return
+            _lockStorage().locksByAccountPartitionAndId[_tokenHolder][
+                _partition
+            ][_lockId];
     }
 
     function _getLockByIndex(
@@ -377,12 +378,15 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         assert(
             _lockIndex <
                 lockStorage
-                .locksByAccountAndPartition[_tokenHolder][_partition].length
+                .lockIdsByAccountAndPartition[_tokenHolder][_partition].length()
         );
 
+        uint256 lockId = lockStorage
+        .lockIdsByAccountAndPartition[_tokenHolder][_partition].at(_lockIndex);
+
         return
-            lockStorage.locksByAccountAndPartition[_tokenHolder][_partition][
-                _lockIndex
+            lockStorage.locksByAccountPartitionAndId[_tokenHolder][_partition][
+                lockId
             ];
     }
 
@@ -415,24 +419,10 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         address _tokenHolder,
         uint256 _lockId
     ) internal view returns (bool) {
-        if (_getLockIndex(_partition, _tokenHolder, _lockId) == 0) return false;
-        return true;
-    }
-
-    function _getLockIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId
-    ) internal view returns (uint256) {
         return
-            _lockStorage().lockIndexByAccountPartitionAndId[_tokenHolder][
-                _partition
-            ][_lockId];
+            _lockStorage()
+            .lockIdsByAccountAndPartition[_tokenHolder][_partition].contains(
+                    _lockId
+                );
     }
-
-    function _getLockLabafByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) internal view virtual returns (uint256);
 }

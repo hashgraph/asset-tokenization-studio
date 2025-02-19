@@ -205,183 +205,140 @@
 
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {
-    IAdjustBalances
-} from '../interfaces/adjustBalances/IAdjustBalances.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-import {_BALANCE_ADJUSTMENTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
+
+import {Common} from '../common/Common.sol';
+import {_SSI_MANAGER_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_SSI_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {ISsiManagement} from '../interfaces/ssi/ISsiManagement.sol';
 
-contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
-    function adjustBalances(
-        uint256 factor,
-        uint8 decimals
+contract SsiManagement is ISsiManagement, IStaticFunctionSelectors, Common {
+    function setRevocationRegistryAddress(
+        address _revocationRegistryAddress
     )
         external
         override
+        onlyRole(_SSI_MANAGER_ROLE)
         onlyUnpaused
-        onlyRole(_ADJUSTMENT_BALANCE_ROLE)
-        checkFactor(factor)
         returns (bool success_)
     {
-        _triggerScheduledTasks(0);
-        _adjustBalances(factor, decimals);
-        success_ = true;
+        address oldRevocationRegistryAddress = _getRevocationRegistryAddress();
+        success_ = _setRevocationRegistryAddress(_revocationRegistryAddress);
+        emit RevocationRegistryUpdated(
+            oldRevocationRegistryAddress,
+            _getRevocationRegistryAddress()
+        );
     }
 
-    function getAbaf() external view override returns (uint256) {
-        return _getAbaf();
+    function addIssuer(
+        address _issuer
+    )
+        external
+        override
+        onlyRole(_SSI_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _addIssuer(_issuer);
+        if (!success_) {
+            revert ListedIssuer(_issuer);
+        }
+        emit AddedToIssuerList(_msgSender(), _issuer);
     }
 
-    function getAbafAdjusted() external view override returns (uint256) {
-        return _getAbafAdjusted();
+    function removeIssuer(
+        address _issuer
+    )
+        external
+        override
+        onlyRole(_SSI_MANAGER_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _removeIssuer(_issuer);
+        if (!success_) {
+            revert UnlistedIssuer(_issuer);
+        }
+        emit RemovedFromIssuerList(_msgSender(), _issuer);
     }
 
-    function getAbafAdjustedAt(
-        uint256 _timestamp
-    ) external view override returns (uint256) {
-        return _getAbafAdjustedAt(_timestamp);
+    function getRevocationRegistryAddress()
+        external
+        view
+        override
+        returns (address revocationRegistryAddress_)
+    {
+        return _getRevocationRegistryAddress();
     }
 
-    function getLabafByUser(
-        address _account
-    ) external view override returns (uint256) {
-        return _getLabafByUser(_account);
+    function isIssuer(address _issuer) external view override returns (bool) {
+        return _isIssuer(_issuer);
     }
 
-    function getLabafByPartition(
-        bytes32 _partition
-    ) external view override returns (uint256) {
-        return _getLabafByPartition(_partition);
+    function getIssuerListCount()
+        external
+        view
+        override
+        returns (uint256 issuerListCount_)
+    {
+        return _getIssuerListCount();
     }
 
-    function getLabafByUserAndPartition(
-        bytes32 _partition,
-        address _account
-    ) external view override returns (uint256) {
-        return _getLabafByUserAndPartition(_partition, _account);
-    }
-
-    function getAllowanceLabaf(
-        address _owner,
-        address _spender
-    ) external view override returns (uint256) {
-        return _getAllowanceLabaf(_owner, _spender);
-    }
-
-    function getTotalLockLabaf(
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalLockLabaf(_tokenHolder);
-    }
-
-    function getTotalLockLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalLockLabafByPartition(_partition, _tokenHolder);
-    }
-
-    function getLockLabafByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getLockLabafById(_partition, _tokenHolder, _lockId);
-    }
-
-    function getTotalHeldLabaf(
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalHeldLabaf(_tokenHolder);
-    }
-
-    function getTotalHeldLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalHeldLabafByPartition(_partition, _tokenHolder);
-    }
-
-    function getHoldLabafByPartition(
-        bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
+    function getIssuerListMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (address[] memory members_) {
+        return _getIssuerListMembers(_pageIndex, _pageLength);
     }
 
     function getStaticResolverKey()
         external
         pure
+        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _BALANCE_ADJUSTMENTS_RESOLVER_KEY;
+        staticResolverKey_ = _SSI_MANAGEMENT_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
         external
         pure
+        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](15);
+        staticFunctionSelectors_ = new bytes4[](7);
         staticFunctionSelectors_[selectorIndex++] = this
-            .adjustBalances
+            .setRevocationRegistryAddress
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAbaf.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.addIssuer.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.removeIssuer.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.isIssuer.selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getAbafAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAbafAdjustedAt
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByUser
+            .getRevocationRegistryAddress
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByPartition
+            .getIssuerListCount
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByUserAndPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAllowanceLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalHeldLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalHeldLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldLabafByPartition
+            .getIssuerListMembers
             .selector;
     }
 
     function getStaticInterfaceIds()
         external
         pure
+        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IAdjustBalances)
+        staticInterfaceIds_[selectorsIndex++] = type(ISsiManagement)
             .interfaceId;
     }
 }

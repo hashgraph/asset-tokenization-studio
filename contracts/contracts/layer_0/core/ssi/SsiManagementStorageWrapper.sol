@@ -205,183 +205,94 @@
 
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+
+import {LibCommon} from '../../common/LibCommon.sol';
 import {
-    IAdjustBalances
-} from '../interfaces/adjustBalances/IAdjustBalances.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-import {_BALANCE_ADJUSTMENTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+    AccessControlStorageWrapper
+} from '../accessControl/AccessControlStorageWrapper.sol';
+import {
+    _SSI_MANAGEMENT_STORAGE_POSITION
+} from '../../constants/storagePositions.sol';
+import {
+    ISsiManagement
+} from '../../../layer_1/interfaces/ssi/ISsiManagement.sol';
 
-contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
-    function adjustBalances(
-        uint256 factor,
-        uint8 decimals
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_ADJUSTMENT_BALANCE_ROLE)
-        checkFactor(factor)
-        returns (bool success_)
+abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
+    using LibCommon for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    struct SsiManagementStorage {
+        EnumerableSet.AddressSet issuerList;
+        address revocationRegistry;
+    }
+
+    // modifiers
+    modifier checkIssuerList(address issuer) {
+        if (!_isIssuer(issuer)) {
+            revert ISsiManagement.AccountIsNotIssuer(issuer);
+        }
+        _;
+    }
+
+    // Internal
+    function _setRevocationRegistryAddress(
+        address _revocationRegistryAddress
+    ) internal returns (bool success_) {
+        _SsiManagementStorage().revocationRegistry = _revocationRegistryAddress;
+        return true;
+    }
+
+    function _addIssuer(address _issuer) internal returns (bool success_) {
+        success_ = _SsiManagementStorage().issuerList.add(_issuer);
+    }
+
+    function _removeIssuer(address _issuer) internal returns (bool success_) {
+        success_ = _SsiManagementStorage().issuerList.remove(_issuer);
+    }
+
+    function _getRevocationRegistryAddress()
+        internal
+        view
+        returns (address revocationRegistryAddress_)
     {
-        _triggerScheduledTasks(0);
-        _adjustBalances(factor, decimals);
-        success_ = true;
+        revocationRegistryAddress_ = _SsiManagementStorage().revocationRegistry;
     }
 
-    function getAbaf() external view override returns (uint256) {
-        return _getAbaf();
+    function _getIssuerListCount()
+        internal
+        view
+        returns (uint256 issuerListCount_)
+    {
+        issuerListCount_ = _SsiManagementStorage().issuerList.length();
     }
 
-    function getAbafAdjusted() external view override returns (uint256) {
-        return _getAbafAdjusted();
+    function _getIssuerListMembers(
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view returns (address[] memory members_) {
+        return
+            _SsiManagementStorage().issuerList.getFromSet(
+                _pageIndex,
+                _pageLength
+            );
     }
 
-    function getAbafAdjustedAt(
-        uint256 _timestamp
-    ) external view override returns (uint256) {
-        return _getAbafAdjustedAt(_timestamp);
+    function _isIssuer(address _issuer) internal view returns (bool) {
+        return _SsiManagementStorage().issuerList.contains(_issuer);
     }
 
-    function getLabafByUser(
-        address _account
-    ) external view override returns (uint256) {
-        return _getLabafByUser(_account);
-    }
-
-    function getLabafByPartition(
-        bytes32 _partition
-    ) external view override returns (uint256) {
-        return _getLabafByPartition(_partition);
-    }
-
-    function getLabafByUserAndPartition(
-        bytes32 _partition,
-        address _account
-    ) external view override returns (uint256) {
-        return _getLabafByUserAndPartition(_partition, _account);
-    }
-
-    function getAllowanceLabaf(
-        address _owner,
-        address _spender
-    ) external view override returns (uint256) {
-        return _getAllowanceLabaf(_owner, _spender);
-    }
-
-    function getTotalLockLabaf(
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalLockLabaf(_tokenHolder);
-    }
-
-    function getTotalLockLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalLockLabafByPartition(_partition, _tokenHolder);
-    }
-
-    function getLockLabafByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getLockLabafById(_partition, _tokenHolder, _lockId);
-    }
-
-    function getTotalHeldLabaf(
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalHeldLabaf(_tokenHolder);
-    }
-
-    function getTotalHeldLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalHeldLabafByPartition(_partition, _tokenHolder);
-    }
-
-    function getHoldLabafByPartition(
-        bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
-    }
-
-    function getStaticResolverKey()
-        external
+    function _SsiManagementStorage()
+        internal
         pure
-        override
-        returns (bytes32 staticResolverKey_)
+        returns (SsiManagementStorage storage ssiManagement_)
     {
-        staticResolverKey_ = _BALANCE_ADJUSTMENTS_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](15);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .adjustBalances
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAbaf.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAbafAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAbafAdjustedAt
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByUser
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByUserAndPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAllowanceLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalHeldLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalHeldLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldLabafByPartition
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IAdjustBalances)
-            .interfaceId;
+        bytes32 position = _SSI_MANAGEMENT_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            ssiManagement_.slot := position
+        }
     }
 }

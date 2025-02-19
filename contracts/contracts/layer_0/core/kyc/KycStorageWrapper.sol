@@ -203,185 +203,160 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {
-    IAdjustBalances
-} from '../interfaces/adjustBalances/IAdjustBalances.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-import {_BALANCE_ADJUSTMENTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
-contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
-    function adjustBalances(
-        uint256 factor,
-        uint8 decimals
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_ADJUSTMENT_BALANCE_ROLE)
-        checkFactor(factor)
-        returns (bool success_)
-    {
-        _triggerScheduledTasks(0);
-        _adjustBalances(factor, decimals);
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {
+    SsiManagementStorageWrapper
+} from '../ssi/SsiManagementStorageWrapper.sol';
+import {_KYC_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {LibCommon} from '../../common/LibCommon.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    IRevocationList
+} from '../../../layer_1/interfaces/kyc/IRevocationList.sol';
+
+abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
+    using LibCommon for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
+
+    struct KycStorage {
+        mapping(address => IKyc.KycData) kyc;
+        mapping(IKyc.KycStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
+    }
+
+    modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) {
+        if (_validFrom > _validTo || _validTo < _blockTimestamp()) {
+            revert IKyc.InvalidDates();
+        }
+        _;
+    }
+
+    modifier onlyValidKycStatus(IKyc.KycStatus _kycStatus, address _account) {
+        if (!_checkKycStatus(_kycStatus, _account))
+            revert IKyc.InvalidKycStatus();
+        _;
+    }
+
+    modifier checkAddress(address _account) {
+        if (_account == address(0)) revert IKyc.InvalidZeroAddress();
+        _;
+    }
+
+    function _grantKyc(
+        address _account,
+        string memory _vcId,
+        uint256 _validFrom,
+        uint256 _validTo,
+        address _issuer
+    ) internal returns (bool success_) {
+        _KycStorage().kyc[_account] = IKyc.KycData(
+            _validFrom,
+            _validTo,
+            _vcId,
+            _issuer,
+            IKyc.KycStatus.GRANTED
+        );
+        _KycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(
+            _account
+        );
         success_ = true;
     }
 
-    function getAbaf() external view override returns (uint256) {
-        return _getAbaf();
+    function _revokeKyc(address _account) internal returns (bool success_) {
+        delete _KycStorage().kyc[_account];
+
+        _KycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].remove(
+            _account
+        );
+        success_ = true;
     }
 
-    function getAbafAdjusted() external view override returns (uint256) {
-        return _getAbafAdjusted();
-    }
-
-    function getAbafAdjustedAt(
-        uint256 _timestamp
-    ) external view override returns (uint256) {
-        return _getAbafAdjustedAt(_timestamp);
-    }
-
-    function getLabafByUser(
+    function _getKycStatusFor(
         address _account
-    ) external view override returns (uint256) {
-        return _getLabafByUser(_account);
+    ) internal view virtual returns (IKyc.KycStatus kycStatus_) {
+        IKyc.KycData memory kycFor = _getKycFor(_account);
+
+        if (kycFor.validTo < _blockTimestamp())
+            return IKyc.KycStatus.NOT_GRANTED;
+        if (kycFor.validFrom > _blockTimestamp())
+            return IKyc.KycStatus.NOT_GRANTED;
+        if (!_isIssuer(kycFor.issuer)) return IKyc.KycStatus.NOT_GRANTED;
+
+        address revocationListAddress = _getRevocationRegistryAddress();
+
+        if (
+            revocationListAddress != address(0) &&
+            IRevocationList(revocationListAddress).revoked(
+                kycFor.issuer,
+                kycFor.vcId
+            )
+        ) return IKyc.KycStatus.NOT_GRANTED;
+
+        return kycFor.status;
     }
 
-    function getLabafByPartition(
-        bytes32 _partition
-    ) external view override returns (uint256) {
-        return _getLabafByPartition(_partition);
-    }
-
-    function getLabafByUserAndPartition(
-        bytes32 _partition,
+    function _getKycFor(
         address _account
-    ) external view override returns (uint256) {
-        return _getLabafByUserAndPartition(_partition, _account);
+    ) internal view virtual returns (IKyc.KycData memory) {
+        return _KycStorage().kyc[_account];
     }
 
-    function getAllowanceLabaf(
-        address _owner,
-        address _spender
-    ) external view override returns (uint256) {
-        return _getAllowanceLabaf(_owner, _spender);
+    function _getKycAccountsCount(
+        IKyc.KycStatus _kycStatus
+    ) internal view virtual returns (uint256 kycAccountsCount_) {
+        kycAccountsCount_ = _KycStorage()
+            .kycAddressesByStatus[_kycStatus]
+            .length();
     }
 
-    function getTotalLockLabaf(
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalLockLabaf(_tokenHolder);
+    function _getKycAccounts(
+        IKyc.KycStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (address[] memory accounts_) {
+        accounts_ = _KycStorage().kycAddressesByStatus[_kycStatus].getFromSet(
+            _pageIndex,
+            _pageLength
+        );
     }
 
-    function getTotalLockLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalLockLabafByPartition(_partition, _tokenHolder);
+    function _getKycAccountsData(
+        IKyc.KycStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (IKyc.KycData[] memory kycData_) {
+        address[] memory accounts = _KycStorage()
+            .kycAddressesByStatus[_kycStatus]
+            .getFromSet(_pageIndex, _pageLength);
+
+        uint256 totalAccounts = accounts.length;
+
+        kycData_ = new IKyc.KycData[](totalAccounts);
+
+        for (uint256 index; index < totalAccounts; ) {
+            kycData_[index] = _getKycFor(accounts[index]);
+            unchecked {
+                ++index;
+            }
+        }
     }
 
-    function getLockLabafByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getLockLabafById(_partition, _tokenHolder, _lockId);
+    function _checkKycStatus(
+        IKyc.KycStatus _kycStatus,
+        address _account
+    ) internal view virtual returns (bool) {
+        return _getKycStatusFor(_account) == _kycStatus;
     }
 
-    function getTotalHeldLabaf(
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalHeldLabaf(_tokenHolder);
-    }
-
-    function getTotalHeldLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalHeldLabafByPartition(_partition, _tokenHolder);
-    }
-
-    function getHoldLabafByPartition(
-        bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _BALANCE_ADJUSTMENTS_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](15);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .adjustBalances
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAbaf.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAbafAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAbafAdjustedAt
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByUser
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByUserAndPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAllowanceLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalHeldLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalHeldLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldLabafByPartition
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IAdjustBalances)
-            .interfaceId;
+    function _KycStorage() internal pure returns (KycStorage storage kyc_) {
+        bytes32 position = _KYC_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            kyc_.slot := position
+        }
     }
 }
