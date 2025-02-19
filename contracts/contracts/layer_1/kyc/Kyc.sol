@@ -266,8 +266,8 @@ contract Kyc is IKyc, IStaticFunctionSelectors, Common {
 
     function getKycAccountsCount(
         KycStatus _kycStatus
-    ) external view virtual override returns (uint256 KYCAccountsCount_) {
-        KYCAccountsCount_ = _getKycAccountsCount(_kycStatus);
+    ) external view virtual override returns (uint256 kycAccountsCount_) {
+        kycAccountsCount_ = _getKycAccountsCount(_kycStatus);
     }
 
     function getKycAccounts(
