@@ -247,6 +247,15 @@ export class GetKYCAccountsDataQueryHandler
       end,
     );
 
-    return new GetKYCAccountsDataQueryResponse(res);
+    const hederaIdFormat = await Promise.all(
+      res.map(async (item) => ({
+        ...item,
+        issuer: (
+          await this.mirrorNodeAdapter.getAccountInfo(item.issuer)
+        ).id.toString(),
+      })),
+    );
+
+    return new GetKYCAccountsDataQueryResponse(hederaIdFormat);
   }
 }
