@@ -239,7 +239,7 @@ const _VALID_FROM = 0
 const _VALID_TO = 99999999999999
 const _VC_ID = 'VC_24'
 
-describe('Kyc.sol Tests', () => {
+describe('Kyc Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -398,7 +398,7 @@ describe('Kyc.sol Tests', () => {
     })
 
     describe('Access Control', () => {
-        it('GIVEN a non Kyc.sol account WHEN grantKyc THEN transaction fails with AccountHasNoRole', async () => {
+        it('GIVEN a non Kyc account WHEN grantKyc THEN transaction fails with AccountHasNoRole', async () => {
             await expect(
                 kycFacet
                     .connect(signer_C)
@@ -419,7 +419,7 @@ describe('Kyc.sol Tests', () => {
         })
     })
 
-    describe('Kyc.sol Wrong input data', () => {
+    describe('Kyc Wrong input data', () => {
         it('GIVEN account ZERO WHEN grantKyc THEN transaction fails with InvalidZeroAddress', async () => {
             await expect(
                 kycFacet.grantKyc(
@@ -475,7 +475,7 @@ describe('Kyc.sol Tests', () => {
         })
     })
 
-    describe('Kyc.sol OK', () => {
+    describe('Kyc OK', () => {
         it('GIVEN a VC WHEN grantKyc THEN transaction succeed', async () => {
             let KYCStatusFor_B_Before = await kycFacet.getKycStatusFor(
                 account_B
@@ -534,7 +534,7 @@ describe('Kyc.sol Tests', () => {
         })
 
         //TODO activate this test when TimeTravel is migrated
-        // it('Check Kyc.sol status after expiration', async () => {
+        // it('Check Kyc status after expiration', async () => {
         //     await kycFacet.grantKyc(
         //         account_B,
         //         _VC_ID,
@@ -556,7 +556,7 @@ describe('Kyc.sol Tests', () => {
         //     expect(KYCStatusFor_B_After_Expiration).to.equal(0)
         // })
 
-        it('Check Kyc.sol status after issuer removed', async () => {
+        it('Check Kyc status after issuer removed', async () => {
             await kycFacet.grantKyc(
                 account_B,
                 _VC_ID,
@@ -578,7 +578,7 @@ describe('Kyc.sol Tests', () => {
             expect(KYCStatusFor_B_After_Cancelling_Issuer).to.equal(0)
         })
 
-        it('Check Kyc.sol status after issuer revokes VC', async () => {
+        it('Check Kyc status after issuer revokes VC', async () => {
             await kycFacet.grantKyc(
                 account_B,
                 _VC_ID,
