@@ -221,6 +221,8 @@ import {
     PauseFacet__factory,
     Lock__factory,
     ERC1410ScheduledTasks__factory,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -234,6 +236,11 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
+    SSI_MANAGER_ROLE,
+    KYC_ROLE,
+    MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
@@ -269,6 +276,7 @@ let balanceAdjustmentData = {
     decimals: balanceAdjustmentDecimals,
 }
 const number_Of_Shares = 100000n
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Equity Tests', () => {
     let diamond: ResolverProxy
@@ -287,6 +295,8 @@ describe('Equity Tests', () => {
     let pauseFacet: Pause
     let lockFacet: Lock
     let erc1410Facet: ERC1410ScheduledTasks
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     before(async () => {
         // mute | mock console.log
@@ -315,7 +325,15 @@ describe('Equity Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        const init_rbacs: Rbac[] = [rbacPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -358,6 +376,21 @@ describe('Equity Tests', () => {
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
+        )
+        rbacSSI
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
         )
 
         currentTimeInSeconds = (await ethers.provider.getBlock('latest'))

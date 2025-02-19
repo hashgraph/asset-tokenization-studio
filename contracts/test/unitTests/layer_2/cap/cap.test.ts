@@ -218,8 +218,10 @@ import {
     ERC1410ScheduledTasks,
     ERC1410ScheduledTasks__factory,
     IFactory,
+    Kyc,
     Snapshots,
     Snapshots__factory,
+    SsiManagement,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -233,6 +235,10 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    SSI_MANAGER_ROLE,
+    KYC_ROLE,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 
 const maxSupply = 3
@@ -243,6 +249,7 @@ const _PARTITION_ID_1 =
 const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const TIME = 6000
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('CAP Layer 2 Tests', () => {
     let factory: IFactory,
@@ -252,7 +259,10 @@ describe('CAP Layer 2 Tests', () => {
         accessControlFacet: AccessControl,
         equityFacet: Equity,
         snapshotFacet: Snapshots,
-        erc1410Facet: ERC1410ScheduledTasks
+        erc1410Facet: ERC1410ScheduledTasks,
+        kycFacet: Kyc,
+        ssiManagementFacet: SsiManagement
+
     let signer_A: SignerWithAddress,
         signer_B: SignerWithAddress,
         signer_C: SignerWithAddress
@@ -267,7 +277,15 @@ describe('CAP Layer 2 Tests', () => {
     const setupEnvironment = async () => {
         const rbacPause = { role: PAUSER_ROLE, members: [account_B] }
         const rbaCap = { role: CAP_ROLE, members: [account_B] }
-        const init_rbacs = [rbacPause, rbaCap]
+        const rbacKYC = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs = [rbacPause, rbaCap, rbacKYC, rbacSSI]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -310,6 +328,20 @@ describe('CAP Layer 2 Tests', () => {
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
+        )
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
         )
     }
 

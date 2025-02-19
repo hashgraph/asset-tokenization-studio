@@ -228,8 +228,8 @@ import {
     Lock,
     Hold,
     ProtectedPartitions,
-    KYC,
-    SSIManagement
+    Kyc,
+    SsiManagement,
     TimeTravel,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
@@ -239,8 +239,8 @@ export interface DeployAtsContractsResultParams {
     accessControl: DeployContractWithFactoryResult<AccessControlFacet>
     cap: DeployContractWithFactoryResult<Cap>
     controlList: DeployContractWithFactoryResult<ControlList>
-    kyc: DeployContractWithFactoryResult<KYC>
-    ssiManagement: DeployContractWithFactoryResult<SSIManagement>
+    kyc: DeployContractWithFactoryResult<Kyc>
+    ssiManagement: DeployContractWithFactoryResult<SsiManagement>
     pause: DeployContractWithFactoryResult<PauseFacet>
     erc20: DeployContractWithFactoryResult<ERC20>
     erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
@@ -269,6 +269,8 @@ export default class DeployAtsContractsResult {
     public readonly accessControl: DeployContractWithFactoryResult<AccessControlFacet>
     public readonly cap: DeployContractWithFactoryResult<Cap>
     public readonly controlList: DeployContractWithFactoryResult<ControlList>
+    public readonly kyc: DeployContractWithFactoryResult<Kyc>
+    public readonly ssiManagement: DeployContractWithFactoryResult<SsiManagement>
     public readonly pause: DeployContractWithFactoryResult<PauseFacet>
     public readonly erc20: DeployContractWithFactoryResult<ERC20>
     public readonly erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
@@ -296,6 +298,8 @@ export default class DeployAtsContractsResult {
         accessControl,
         cap,
         controlList,
+        kyc,
+        ssiManagement,
         pause,
         erc20,
         erc1410ScheduledTasks,
@@ -322,6 +326,8 @@ export default class DeployAtsContractsResult {
         this.accessControl = accessControl
         this.cap = cap
         this.controlList = controlList
+        this.kyc = kyc
+        this.ssiManagement = ssiManagement
         this.pause = pause
         this.erc20 = erc20
         this.erc1410ScheduledTasks = erc1410ScheduledTasks

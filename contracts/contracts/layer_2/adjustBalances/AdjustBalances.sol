@@ -285,20 +285,12 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         return _getTotalLockLabafByPartition(_partition, _tokenHolder);
     }
 
-    function getLockLabafByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockIndex
-    ) external view override returns (uint256) {
-        return _getLockLabafByIndex(_partition, _tokenHolder, _lockIndex);
-    }
-
     function getLockLabafByPartition(
         bytes32 _partition,
         uint256 _lockId,
         address _tokenHolder
     ) external view override returns (uint256 labaf_) {
-        return _getLockLabafByPartition(_partition, _lockId, _tokenHolder);
+        return _getLockLabafById(_partition, _tokenHolder, _lockId);
     }
 
     function getTotalHeldLabaf(
@@ -312,14 +304,6 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         address _tokenHolder
     ) external view override returns (uint256 labaf_) {
         return _getTotalHeldLabafByPartition(_partition, _tokenHolder);
-    }
-
-    function getHoldLabafByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdIndex
-    ) external view override returns (uint256) {
-        return _getHoldLabafByIndex(_partition, _tokenHolder, _holdIndex);
     }
 
     function getHoldLabafByPartition(
@@ -346,7 +330,7 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](16);
+        staticFunctionSelectors_ = new bytes4[](15);
         staticFunctionSelectors_[selectorIndex++] = this
             .adjustBalances
             .selector;
@@ -376,9 +360,6 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
             .getTotalLockLabafByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLockLabafByIndex
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
             .getLockLabafByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
@@ -386,9 +367,6 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getTotalHeldLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldLabafByIndex
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getHoldLabafByPartition

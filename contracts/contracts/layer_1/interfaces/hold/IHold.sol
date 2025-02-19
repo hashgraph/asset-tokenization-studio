@@ -250,6 +250,12 @@ interface IHold {
     error HoldExpirationReached();
     error IsNotEscrow();
 
+    struct HoldIdentifier {
+        bytes32 partition;
+        address tokenHolder;
+        uint256 holdId;
+    }
+
     struct Hold {
         uint256 amount;
         uint256 expirationTimestamp;
@@ -271,12 +277,11 @@ interface IHold {
     }
 
     struct HoldDataStorage {
-        mapping(address => uint256) totalHeldAmount;
-        mapping(address => mapping(bytes32 => uint256)) heldAmountByPartition;
-        mapping(address => mapping(bytes32 => HoldData[])) holds;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIds;
-        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) holdsIndex;
-        mapping(address => mapping(bytes32 => uint256)) holdNextId;
+        mapping(address => uint256) totalHeldAmountByAccount;
+        mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
+        mapping(address => mapping(bytes32 => mapping(uint256 => HoldData))) holdsByAccountPartitionAndId;
+        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
+        mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
     }
 
     enum OperationType {
@@ -319,24 +324,18 @@ interface IHold {
     ) external returns (bool success_, uint256 holdId_);
 
     function executeHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
     ) external returns (bool success_);
 
     function releaseHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     ) external returns (bool success_);
 
     function reclaimHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        HoldIdentifier calldata _holdIdentifier
     ) external returns (bool success_);
 
     function getHeldAmountFor(
@@ -361,9 +360,7 @@ interface IHold {
     ) external view returns (uint256[] memory holdsId_);
 
     function getHoldForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        HoldIdentifier calldata _holdIdentifier
     )
         external
         view

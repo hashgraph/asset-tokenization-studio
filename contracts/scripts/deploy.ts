@@ -438,6 +438,10 @@ import {
     ERC20__factory,
     ERC20TimeTravel__factory,
     Factory__factory,
+    Kyc__factory,
+    KycTimeTravel__factory,
+    SsiManagement__factory,
+    SsiManagementTimeTravel__factory,
     Lock__factory,
     LockTimeTravel__factory,
     Hold__factory,
@@ -459,10 +463,6 @@ import {
     TransferAndLockTimeTravel__factory,
     TransparentUpgradeableProxy__factory,
     TimeTravel__factory,
-    KYC__factory,
-    KYC__factory,
-    SSIManagement__factory,
-    SSIManagementTimeTravel__factory,
 } from '@typechain'
 import Configuration from '@configuration'
 import {
@@ -656,8 +656,8 @@ export async function deployAtsContracts({
         }),
         kyc: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new KYC__factory(),
-                new KYCTimeTravel__factory()
+                new Kyc__factory(),
+                new KycTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
@@ -667,8 +667,8 @@ export async function deployAtsContracts({
         }),
         ssiManagement: new DeployContractWithFactoryCommand({
             factory: getFactory(
-                new SSIManagement__factory(),
-                new SSIManagementTimeTravel__factory()
+                new SsiManagement__factory(),
+                new SsiManagementTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed

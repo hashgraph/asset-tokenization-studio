@@ -408,11 +408,16 @@
    
    */
 
+import { HashZero, AddressZero, Zero } from '@ethersproject/constants'
+
 // * General
+export const ZERO = Zero
+export const HASH_ZERO = HashZero
+export const ADDRESS_ZERO = AddressZero
+export const EMPTY_STRING = ''
 export const MAX_UINT256 = BigInt(
     '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 )
-export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 export const EQUITY_CONFIG_ID =
@@ -451,6 +456,10 @@ export const PROTECTED_PARTITIONS_PARTICIPANT_ROLE =
     '0xdaba153046c65d49da6a7597abc24374aa681e3eee7004426ca6185b3927a3f5'
 export const WILD_CARD_ROLE =
     '0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46'
+export const SSI_MANAGER_ROLE =
+    '0x0995a089e16ba792fdf9ec5a4235cba5445a9fb250d6e96224c586678b81ebd0'
+export const KYC_ROLE =
+    '0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d'
 // * Tasks
 export const BALANCE_ADJUSTMENT_TASK_TYPE =
     '0x9ce9cffaccaf68fc544ce4df9e5e2774249df2f0b3c9cf940a53a6827465db9d'
@@ -468,6 +477,8 @@ export const NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = '0x46'
 export const IS_NOT_OPERATOR_ERROR_ID = '0x47'
 export const WRONG_PARTITION_ERROR_ID = '0x48'
 export const ALLOWANCE_REACHED_ERROR_ID = '0x49'
+export const FROM_ACCOUNT_KYC_ERROR_ID = '0x50'
+export const TO_ACCOUNT_KYC_ERROR_ID = '0x51'
 
 export const SUCCESS = '0x00'
 

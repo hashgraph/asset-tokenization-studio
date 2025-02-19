@@ -221,6 +221,8 @@ import {
     PauseFacet__factory,
     ERC1410ScheduledTasks__factory,
     ScheduledTasks__factory,
+    SsiManagement,
+    Kyc,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -235,6 +237,10 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 
 const TIME = 15000
@@ -242,6 +248,7 @@ const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 const INITIAL_AMOUNT = 1000
 const DECIMALS_INIT = 6
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Scheduled Tasks Tests', () => {
     let diamond: ResolverProxy
@@ -260,6 +267,8 @@ describe('Scheduled Tasks Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     before(async () => {
         // mute | mock console.log
@@ -292,7 +301,15 @@ describe('Scheduled Tasks Tests', () => {
             role: ISSUER_ROLE,
             members: [account_B],
         }
-        const init_rbacs: Rbac[] = [rbacPause, rbacIssue]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs: Rbac[] = [rbacPause, rbacIssue, rbacKYC, rbacSSI]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -338,6 +355,20 @@ describe('Scheduled Tasks Tests', () => {
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
+        )
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
         )
     })
 

@@ -213,6 +213,12 @@ import {
 import {
     ERC1410StandardStorageWrapper
 } from '../ERC1410/ERC1410StandardStorageWrapper.sol';
+import {
+    IERC1410Basic
+} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import {
+    IERC1410Standard
+} from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
 
 abstract contract ERC20StorageWrapper2 is
     IERC20StorageWrapper,
@@ -311,8 +317,7 @@ abstract contract ERC20StorageWrapper2 is
         bytes memory data;
         _transferByPartition(
             from,
-            to,
-            value,
+            IERC1410Basic.BasicTransferInfo(to, value),
             _DEFAULT_PARTITION,
             data,
             spender,
@@ -328,8 +333,7 @@ abstract contract ERC20StorageWrapper2 is
     ) internal returns (bool) {
         _transferByPartition(
             from,
-            to,
-            value,
+            IERC1410Basic.BasicTransferInfo(to, value),
             _DEFAULT_PARTITION,
             '',
             address(0),
@@ -340,7 +344,9 @@ abstract contract ERC20StorageWrapper2 is
 
     function _mint(address to, uint256 value) internal {
         bytes memory _data;
-        _issueByPartition(_DEFAULT_PARTITION, to, value, _data);
+        _issueByPartition(
+            IERC1410Standard.IssueData(_DEFAULT_PARTITION, to, value, _data)
+        );
         _emitTransferEvent(address(0), to, value);
     }
 
