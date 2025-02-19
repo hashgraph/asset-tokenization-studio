@@ -470,6 +470,7 @@ export async function registerBusinessLogics({
 }
 
 export async function createConfigurationsForDeployedContracts({
+    commonFacetAddressList,
     equityFacetAddressList,
     bondFacetAddressList,
     businessLogicResolverProxyAddress,
@@ -480,6 +481,7 @@ export async function createConfigurationsForDeployedContracts({
     await fetchFacetResolverKeys(
         result,
         signer,
+        commonFacetAddressList,
         equityFacetAddressList,
         bondFacetAddressList
     )
@@ -537,10 +539,17 @@ export async function createConfigurationsForDeployedContracts({
 async function fetchFacetResolverKeys(
     result: CreateConfigurationsForDeployedContractsResult,
     signer: Signer,
+    commonFacetAddressList: string[],
     equityFacetAddressList: string[],
     bondFacetAddressList: string[]
 ): Promise<void> {
     const resolverKeyMap = new Map<string, string>()
+
+    result.commonFacetIdList = await Promise.all(
+        commonFacetAddressList.map((address) =>
+            getResolverKey(address, signer, resolverKeyMap)
+        )
+    )
 
     result.equityFacetIdList = await Promise.all(
         equityFacetAddressList.map((address) =>

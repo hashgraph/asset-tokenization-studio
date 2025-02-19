@@ -252,9 +252,16 @@ export default class CreateConfigurationsForDeployedContractsCommand extends Bas
         this.equityUsaAddress = equityUsa.address
         this.bondUsaAddress = bondUsa.address
         this.excludeBondAddresses = [
-           deployedContractList.adjustBalances.address,
-           deployedContractList.scheduledBalanceAdjustments.address,
+            deployedContractList.adjustBalances.address,
+            deployedContractList.scheduledBalanceAdjustments.address,
         ]
+    }
+
+    get commonFacetAddressList(): string[] {
+        const bondFacetSet = new Set(this.bondFacetAddressList)
+        return this.equityFacetAddressList.filter((address) =>
+            bondFacetSet.has(address)
+        )
     }
 
     get equityFacetAddressList(): string[] {
