@@ -307,8 +307,8 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
 
     function _getKycAccountsCount(
         IKyc.KycStatus _kycStatus
-    ) internal view virtual returns (uint256 KYCAccountsCount_) {
-        KYCAccountsCount_ = _KycStorage()
+    ) internal view virtual returns (uint256 kycAccountsCount_) {
+        kycAccountsCount_ = _KycStorage()
             .kycAddressesByStatus[_kycStatus]
             .length();
     }
