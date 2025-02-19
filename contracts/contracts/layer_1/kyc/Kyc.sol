@@ -217,7 +217,7 @@ import {Common} from '../common/Common.sol';
 contract Kyc is IKyc, IStaticFunctionSelectors, Common {
     function grantKyc(
         address _account,
-        string memory _VCid,
+        string memory _vcId,
         uint256 _validFrom,
         uint256 _validTo,
         address _issuer
@@ -233,7 +233,7 @@ contract Kyc is IKyc, IStaticFunctionSelectors, Common {
         checkIssuerList(_issuer)
         returns (bool success_)
     {
-        success_ = _grantKyc(_account, _VCid, _validFrom, _validTo, _issuer);
+        success_ = _grantKyc(_account, _vcId, _validFrom, _validTo, _issuer);
         emit KycGranted(_account, _msgSender());
     }
 
