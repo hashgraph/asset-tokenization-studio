@@ -242,7 +242,7 @@ export const CONTRACT_NAMES = [
     'ScheduledBalanceAdjustments',
     'ScheduledTasks',
     'Snapshots',
-    'CorporateActionsSecurity',
+    'CorporateActions',
     'TransferAndLock',
     'Lock',
     'AdjustBalances',

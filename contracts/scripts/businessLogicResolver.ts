@@ -244,7 +244,7 @@ export interface DeployedBusinessLogics {
     controlList: IStaticFunctionSelectors
     kyc: IStaticFunctionSelectors
     ssiManagement: IStaticFunctionSelectors
-    corporateActionsSecurity: IStaticFunctionSelectors
+    corporateActions: IStaticFunctionSelectors
     pause: IStaticFunctionSelectors
     ERC20: IStaticFunctionSelectors
     ERC1644: IStaticFunctionSelectors

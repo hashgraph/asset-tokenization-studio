@@ -280,7 +280,7 @@ function buildEmptyEnvironment(): Environment {
             controlList: {} as IStaticFunctionSelectors,
             kyc: {} as IStaticFunctionSelectors,
             ssiManagement: {} as IStaticFunctionSelectors,
-            corporateActionsSecurity: {} as IStaticFunctionSelectors,
+            corporateActions: {} as IStaticFunctionSelectors,
             pause: {} as IStaticFunctionSelectors,
             ERC20: {} as IStaticFunctionSelectors,
             ERC1644: {} as IStaticFunctionSelectors,

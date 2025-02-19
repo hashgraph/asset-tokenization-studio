@@ -850,7 +850,7 @@ export async function deployAtsContracts({
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.CorporateActionsSecurity.addresses?.[
+                ? Configuration.contracts.CorporateActions.addresses?.[
                       network
                   ]
                 : undefined,
@@ -1043,7 +1043,7 @@ export async function deployAtsContracts({
                 commands.corporateActions
             ).then((result) => {
                 console.log(
-                    'CorporateActionsSecurity has been deployed successfully'
+                    'CorporateActions has been deployed successfully'
                 )
                 return result
             }),
