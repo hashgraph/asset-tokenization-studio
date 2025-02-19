@@ -346,6 +346,11 @@ import {
 } from '../../../domain/context/factory/RegulationType.js';
 import { ResolverProxyConfiguration } from '../../../domain/context/factory/ResolverProxyConfiguration.js';
 import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
+import {
+  BasicTransferInfo,
+  IssueData,
+  OperatorTransferData,
+} from '../../../domain/context/factory/ERC1410Metadata.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -945,19 +950,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()}`,
     );
 
+    const basicTransferInfo: BasicTransferInfo = {
+      to: targetId.toString(),
+      value: amount.toHexString(),
+    };
+
     return RPCTransactionResponseAdapter.manageResponse(
       await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).transferByPartition(
-        _PARTITION_ID_1,
-        targetId.toString(),
-        amount.toBigNumber(),
-        '0x',
-        {
-          gasLimit: TRANSFER_GAS,
-        },
-      ),
+      ).transferByPartition(_PARTITION_ID_1, basicTransferInfo, '0x', {
+        gasLimit: TRANSFER_GAS,
+      }),
       this.networkService.environment,
     );
   }
@@ -1111,17 +1115,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Issue ${amount} ${security} to account: ${targetId.toString()}`,
     );
 
+    const issueData: IssueData = {
+      partition: _PARTITION_ID_1,
+      tokenHolder: targetId.toString(),
+      value: amount.toHexString(),
+      data: '0x',
+    };
+
     return RPCTransactionResponseAdapter.manageResponse(
       await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).issueByPartition(
-        _PARTITION_ID_1,
-        targetId.toString(),
-        amount.toBigNumber(),
-        '0x',
-        { gasLimit: ISSUE_GAS },
-      ),
+      ).issueByPartition(issueData, { gasLimit: ISSUE_GAS }),
       this.networkService.environment,
     );
   }
@@ -1430,19 +1435,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()} for partition ${partitionId}`,
     );
 
+    const operatorTransferData: OperatorTransferData = {
+      partition: partitionId,
+      from: sourceId.toString(),
+      to: targetId.toString(),
+      value: amount.toHexString(),
+      data: '0x',
+      operatorData: '0x',
+    };
+
     return RPCTransactionResponseAdapter.manageResponse(
       await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).operatorTransferByPartition(
-        partitionId,
-        sourceId.toString(),
-        targetId.toString(),
-        amount.toBigNumber(),
-        '0x',
-        '0x',
-        { gasLimit: TRANSFER_OPERATOR_GAS },
-      ),
+      ).operatorTransferByPartition(operatorTransferData, {
+        gasLimit: TRANSFER_OPERATOR_GAS,
+      }),
       this.networkService.environment,
     );
   }
