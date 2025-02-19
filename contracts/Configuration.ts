@@ -226,10 +226,10 @@ export const CONTRACT_NAMES = [
     'ProxyAdmin',
     'Factory',
     'BusinessLogicResolver',
-    'AccessControl',
+    'AccessControlFacet',
     'Cap',
     'ControlList',
-    'Pause',
+    'PauseFacet',
     'ERC20',
     'ERC1410ScheduledTasks',
     'ERC1594',
@@ -247,6 +247,10 @@ export const CONTRACT_NAMES = [
     'Lock',
     'AdjustBalances',
     'ProtectedPartitions',
+    'Hold',
+    'TimeTravel',
+    'KYC',
+    'SSIManagement',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]
 export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']

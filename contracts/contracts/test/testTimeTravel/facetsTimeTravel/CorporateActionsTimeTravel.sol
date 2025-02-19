@@ -214,7 +214,7 @@ import {
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract CorporateActionsSecurityTimeTravel is
+contract CorporateActionsTimeTravel is
     CorporateActions,
     TimeTravelStorageWrapper
 {
