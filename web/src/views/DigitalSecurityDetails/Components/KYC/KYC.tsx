@@ -67,17 +67,31 @@ export const KYC = () => {
     columnsHelper.accessor("validFrom", {
       header: tTable("fields.validFrom"),
       enableSorting: false,
-      cell() {
-        const date = new Date();
-        return <Box>{date.toLocaleDateString()}</Box>;
+      cell({ getValue }) {
+        const date = Number(getValue());
+
+        if (date > 1e13) {
+          return "-";
+        }
+
+        const formatDate = new Date(date);
+
+        return <Box>{formatDate.toLocaleString()}</Box>;
       },
     }),
     columnsHelper.accessor("validTo", {
       header: tTable("fields.validTo"),
       enableSorting: false,
-      cell() {
-        const date = new Date();
-        return <Box>{date.toLocaleDateString()}</Box>;
+      cell({ getValue }) {
+        const date = Number(getValue());
+
+        if (date > 1e13) {
+          return "-";
+        }
+
+        const formatDate = new Date(Number(date));
+
+        return <Box>{formatDate.toLocaleString()}</Box>;
       },
     }),
     columnsHelper.accessor("VCid", {
