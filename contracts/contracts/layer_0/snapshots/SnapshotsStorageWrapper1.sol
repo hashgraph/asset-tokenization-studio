@@ -273,14 +273,10 @@ abstract contract SnapshotsStorageWrapper1 is
         emit SnapshotTaken(_msgSender(), snapshotID_);
     }
 
-    function _snapshot() internal returns (uint256) {
+    function _snapshot() internal returns (uint256 currentId_) {
         _snapshotStorage().currentSnapshotId.increment();
-
-        uint256 currentId = _getCurrentSnapshotId();
-
-        emit SnapshotTriggered(_msgSender(), currentId);
-
-        return currentId;
+        currentId_ = _getCurrentSnapshotId();
+        emit SnapshotTriggered(_msgSender(), currentId_);
     }
 
     function _getCurrentSnapshotId() internal view returns (uint256) {
@@ -288,13 +284,13 @@ abstract contract SnapshotsStorageWrapper1 is
     }
 
     function _updateSnapshot(
-        Snapshots storage snapshots,
-        uint256 currentValue
+        Snapshots storage _snapshots,
+        uint256 _currentValue
     ) internal {
         uint256 currentId = _getCurrentSnapshotId();
-        if (_lastSnapshotId(snapshots.ids) < currentId) {
-            snapshots.ids.push(currentId);
-            snapshots.values.push(currentValue);
+        if (_lastSnapshotId(_snapshots.ids) < currentId) {
+            _snapshots.ids.push(currentId);
+            _snapshots.values.push(_currentValue);
         }
     }
 
@@ -330,19 +326,19 @@ abstract contract SnapshotsStorageWrapper1 is
     }
 
     function _indexFor(
-        uint256 snapshotId,
-        uint256[] storage ids
+        uint256 _snapshotId,
+        uint256[] storage _ids
     ) internal view returns (bool, uint256) {
-        if (snapshotId == 0) {
+        if (_snapshotId == 0) {
             revert SnapshotIdNull();
         }
-        if (snapshotId > _getCurrentSnapshotId()) {
-            revert SnapshotIdDoesNotExists(snapshotId);
+        if (_snapshotId > _getCurrentSnapshotId()) {
+            revert SnapshotIdDoesNotExists(_snapshotId);
         }
 
-        uint256 index = ids.findUpperBound(snapshotId);
+        uint256 index = _ids.findUpperBound(_snapshotId);
 
-        if (index == ids.length) {
+        if (index == _ids.length) {
             return (false, 0);
         } else {
             return (true, index);

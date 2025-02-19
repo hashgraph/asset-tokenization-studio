@@ -225,7 +225,7 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
     }
 
     function _adjustDecimals(uint8 decimals) internal {
-        _getErc20Storage().decimals += decimals;
+        _erc20Storage().decimals += decimals;
     }
 
     function _decimalsAdjusted() internal view returns (uint8) {
@@ -243,7 +243,7 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
         address owner,
         address spender
     ) internal view returns (uint256) {
-        return _getErc20Storage().allowed[owner][spender];
+        return _erc20Storage().allowed[owner][spender];
     }
 
     function _decimalsAdjustedAt(
@@ -287,7 +287,7 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
         view
         returns (IERC20.ERC20Metadata memory erc20Metadata_)
     {
-        ERC20Storage storage erc20Storage = _getErc20Storage();
+        ERC20Storage storage erc20Storage = _erc20Storage();
         IERC20.ERC20MetadataInfo memory erc20Info = IERC20.ERC20MetadataInfo({
             name: erc20Storage.name,
             symbol: erc20Storage.symbol,
@@ -301,10 +301,10 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
     }
 
     function _decimals() internal view returns (uint8) {
-        return _getErc20Storage().decimals;
+        return _erc20Storage().decimals;
     }
 
-    function _getErc20Storage()
+    function _erc20Storage()
         internal
         view
         returns (ERC20Storage storage erc20Storage_)

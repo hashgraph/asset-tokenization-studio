@@ -273,7 +273,7 @@ describe('Snapshots Layer 2 Tests', () => {
 
     before(async () => {
         // mute | mock console.log
-        console.log = () => {}
+        // console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
         account_A = signer_A.address

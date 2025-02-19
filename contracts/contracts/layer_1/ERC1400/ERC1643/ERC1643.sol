@@ -252,7 +252,7 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
         if (_documentHash == bytes32(0)) {
             revert EmptyHASH();
         }
-        ERC1643Storage storage erc1643Storage = _getERC1643Storage();
+        ERC1643Storage storage erc1643Storage = _erc1643Storage();
         if (erc1643Storage.documents[_name].lastModified == uint256(0)) {
             erc1643Storage.docNames.push(_name);
             erc1643Storage.docIndexes[_name] = erc1643Storage.docNames.length;
@@ -273,7 +273,7 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
     function removeDocument(
         bytes32 _name
     ) external override onlyRole(_DOCUMENTER_ROLE) onlyUnpaused {
-        ERC1643Storage storage erc1643Storage = _getERC1643Storage();
+        ERC1643Storage storage erc1643Storage = _erc1643Storage();
         if (erc1643Storage.documents[_name].lastModified == uint256(0)) {
             revert DocumentDoesNotExist(_name);
         }
@@ -305,7 +305,7 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
     function getDocument(
         bytes32 _name
     ) external view override returns (string memory, bytes32, uint256) {
-        ERC1643Storage storage erc1643Storage = _getERC1643Storage();
+        ERC1643Storage storage erc1643Storage = _erc1643Storage();
         return (
             erc1643Storage.documents[_name].uri,
             erc1643Storage.documents[_name].docHash,
@@ -323,7 +323,7 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
         override
         returns (bytes32[] memory)
     {
-        return _getERC1643Storage().docNames;
+        return _erc1643Storage().docNames;
     }
 
     function getStaticResolverKey()
@@ -364,7 +364,7 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
         staticInterfaceIds_[selectorsIndex++] = type(IERC1643).interfaceId;
     }
 
-    function _getERC1643Storage()
+    function _erc1643Storage()
         internal
         pure
         returns (ERC1643Storage storage erc1643Storage)

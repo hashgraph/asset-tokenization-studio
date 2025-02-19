@@ -246,19 +246,21 @@ abstract contract SnapshotsStorageWrapper2 is
         uint256 abaf = _getAbafAdjusted();
 
         if (abaf == abafAtCurrentSnapshot) {
-            _updateAccountSnapshot(
-                _snapshotStorage().accountBalanceSnapshots[account],
-                _balanceOf(account),
-                _snapshotStorage().accountPartitionBalanceSnapshots[account][
-                    partition
-                ],
-                _snapshotStorage().accountPartitionMetadata[account],
-                _balanceOfByPartition(partition, account),
-                _partitionsOf(account)
-            );
-            return;
+            return
+                _updateAccountSnapshot(
+                    _snapshotStorage().accountBalanceSnapshots[account],
+                    _balanceOf(account),
+                    _snapshotStorage().accountPartitionBalanceSnapshots[
+                        account
+                    ][partition],
+                    _snapshotStorage().accountPartitionMetadata[account],
+                    _balanceOfByPartition(partition, account),
+                    _partitionsOf(account)
+                );
         }
-        if (abafAtCurrentSnapshot == 0) abafAtCurrentSnapshot = 1;
+        abafAtCurrentSnapshot = abafAtCurrentSnapshot == 0
+            ? 1
+            : abafAtCurrentSnapshot;
 
         uint256 balance = _balanceOfAdjusted(account);
         uint256 balanceForPartition = _balanceOfByPartitionAdjusted(

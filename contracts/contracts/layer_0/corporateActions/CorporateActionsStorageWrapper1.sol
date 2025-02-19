@@ -242,47 +242,23 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
         _;
     }
 
-    function _onScheduledSnapshotTriggered(
-        uint256 _snapShotID,
-        bytes memory _data
-    ) internal {
-        if (_data.length == 0) return;
-        bytes32 actionId = abi.decode(_data, (bytes32));
-        _addSnapshotToAction(actionId, _snapShotID);
-    }
-
     function _addSnapshotToAction(
         bytes32 _actionId,
         uint256 _snapshotId
     ) internal {
-        bytes memory result = abi.encodePacked(_snapshotId);
-
-        _updateCorporateActionResult(_actionId, SNAPSHOT_RESULT_ID, result);
-    }
-
-    function _updateCorporateActionResult(
-        bytes32 actionId,
-        uint256 resultId,
-        bytes memory newResult
-    ) internal {
+        bytes memory newResult = abi.encodePacked(_snapshotId);
         CorporateActionDataStorage
             storage corporateActions_ = _corporateActionsStorage();
         bytes[] memory results = corporateActions_
-            .actionsData[actionId]
+            .actionsData[_actionId]
             .results;
-
-        if (results.length > resultId) {
-            corporateActions_.actionsData[actionId].results[
-                resultId
+        if (results.length > SNAPSHOT_RESULT_ID) {
+            corporateActions_.actionsData[_actionId].results[
+                SNAPSHOT_RESULT_ID
             ] = newResult;
             return;
         }
-
-        for (uint256 i = results.length; i < resultId; i++) {
-            corporateActions_.actionsData[actionId].results.push('');
-        }
-
-        corporateActions_.actionsData[actionId].results.push(newResult);
+        corporateActions_.actionsData[_actionId].results.push(newResult);
     }
 
     function _getCorporateAction(
@@ -334,13 +310,9 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
     function _getResult(
         bytes32 actionId,
         uint256 resultId
-    ) internal view returns (bytes memory) {
-        bytes memory result;
-
+    ) internal view returns (bytes memory result_) {
         if (_getCorporateActionResultCount(actionId) > resultId)
-            result = _getCorporateActionResult(actionId, resultId);
-
-        return result;
+            result_ = _getCorporateActionResult(actionId, resultId);
     }
 
     function _getCorporateActionResultCount(
@@ -369,15 +341,15 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
     }
 
     function _isSnapshotTaskType(
-        bytes memory data
+        bytes32 _actionId
     ) internal pure returns (bool) {
-        return abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE;
+        return _actionId == SNAPSHOT_TASK_TYPE;
     }
 
     function _isBalanceAdjustmentTaskType(
-        bytes memory data
+        bytes32 _actionId
     ) internal pure returns (bool) {
-        return abi.decode(data, (bytes32)) == BALANCE_ADJUSTMENT_TASK_TYPE;
+        return _actionId == BALANCE_ADJUSTMENT_TASK_TYPE;
     }
 
     function _corporateActionsStorage()

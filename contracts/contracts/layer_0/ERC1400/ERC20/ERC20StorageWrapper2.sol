@@ -241,7 +241,7 @@ abstract contract ERC20StorageWrapper2 is
 
         uint256 factor = _calculateFactor(abaf, labaf);
 
-        _getErc20Storage().allowed[_owner][_spender] *= factor;
+        _erc20Storage().allowed[_owner][_spender] *= factor;
         _updateAllowanceLabaf(_owner, _spender, abaf);
     }
 
@@ -250,7 +250,7 @@ abstract contract ERC20StorageWrapper2 is
             revert SpenderWithZeroAddress();
         }
 
-        _getErc20Storage().allowed[_msgSender()][spender] = value;
+        _erc20Storage().allowed[_msgSender()][spender] = value;
         emit Approval(_msgSender(), spender, value);
         return true;
     }
@@ -273,11 +273,11 @@ abstract contract ERC20StorageWrapper2 is
         }
         _beforeAllowanceUpdate(_msgSender(), spender);
 
-        _getErc20Storage().allowed[_msgSender()][spender] += addedValue;
+        _erc20Storage().allowed[_msgSender()][spender] += addedValue;
         emit Approval(
             _msgSender(),
             spender,
-            _getErc20Storage().allowed[_msgSender()][spender]
+            _erc20Storage().allowed[_msgSender()][spender]
         );
         return true;
     }
@@ -302,7 +302,7 @@ abstract contract ERC20StorageWrapper2 is
         emit Approval(
             _msgSender(),
             spender,
-            _getErc20Storage().allowed[_msgSender()][spender]
+            _erc20Storage().allowed[_msgSender()][spender]
         );
         return true;
     }
@@ -375,7 +375,7 @@ abstract contract ERC20StorageWrapper2 is
     ) internal {
         _beforeAllowanceUpdate(from, spender);
 
-        ERC20Storage storage erc20Storage = _getErc20Storage();
+        ERC20Storage storage erc20Storage = _erc20Storage();
 
         if (value > erc20Storage.allowed[from][spender]) {
             revert InsufficientAllowance(spender, from);

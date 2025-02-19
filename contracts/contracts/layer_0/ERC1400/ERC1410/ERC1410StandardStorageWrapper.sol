@@ -267,12 +267,12 @@ abstract contract ERC1410StandardStorageWrapper is
     ) internal override {
         _pushLabafUserPartition(_account, _getAbaf());
 
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
 
         erc1410Storage.partitions[_account].push(Partition(_value, _partition));
         erc1410Storage.partitionToIndex[_account][
             _partition
-        ] = _getERC1410BasicStorage().partitions[_account].length;
+        ] = _erc1410BasicStorage().partitions[_account].length;
 
         if (_value != 0) erc1410Storage.balances[_account] += _value;
     }
@@ -347,7 +347,7 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32 _partition,
         uint256 _value
     ) internal {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
 
         erc1410Storage.totalSupply -= _value;
         erc1410Storage.totalSupplyByPartition[_partition] -= _value;
@@ -357,7 +357,7 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32 _partition,
         uint256 _value
     ) internal {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
 
         erc1410Storage.totalSupply += _value;
         erc1410Storage.totalSupplyByPartition[_partition] += _value;

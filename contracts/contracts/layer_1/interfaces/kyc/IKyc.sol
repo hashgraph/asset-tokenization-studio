@@ -223,7 +223,6 @@ interface IKyc {
     error InvalidDates();
     error InvalidKycStatus();
     error KycIsNotGranted();
-    error InvalidZeroAddress();
 
     /**
      * @dev Emitted when a Kyc is granted

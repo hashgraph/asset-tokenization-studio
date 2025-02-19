@@ -368,12 +368,9 @@ abstract contract CorporateActionsStorageWrapper2 is
     }
 
     function _onScheduledBalanceAdjustmentTriggered(
-        bytes memory _data
+        bytes32 _actionId
     ) internal override {
-        if (_data.length == 0) return;
-        bytes32 actionId = abi.decode(_data, (bytes32));
-
-        (, bytes memory balanceAdjustmentData) = _getCorporateAction(actionId);
+        (, bytes memory balanceAdjustmentData) = _getCorporateAction(_actionId);
         if (balanceAdjustmentData.length == 0) return;
         IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi
             .decode(
@@ -385,18 +382,12 @@ abstract contract CorporateActionsStorageWrapper2 is
 
     function _getSnapshotID(bytes32 _actionId) internal view returns (uint256) {
         bytes memory data = _getResult(_actionId, SNAPSHOT_RESULT_ID);
-
-        uint256 bytesLength = data.length;
-
-        if (bytesLength < 32) return 0;
-
+        if (data.length < 32) return 0;
         uint256 snapshotId;
-
         // solhint-disable-next-line no-inline-assembly
         assembly {
             snapshotId := mload(add(data, 0x20))
         }
-
         return snapshotId;
     }
 }

@@ -230,7 +230,7 @@ abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
     }
 
     // modifiers
-    modifier checkIssuerList(address issuer) {
+    modifier onlyValidIssuer(address issuer) {
         if (!_isIssuer(issuer)) {
             revert ISsiManagement.AccountIsNotIssuer(issuer);
         }

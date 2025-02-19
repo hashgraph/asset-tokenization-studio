@@ -232,7 +232,7 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
     }
 
     function _onScheduledBalanceAdjustmentTriggered(
-        bytes memory _data
+        bytes32 _actionId
     ) internal virtual;
 
     function _getScheduledBalanceAdjustmentCount()

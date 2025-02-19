@@ -258,11 +258,10 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     /**
      * @dev returns the properties and related snapshots (if any) of a dividend.
      *
-     * @param _dividendID The dividend Id
-     * @param _dividendID The dividend Id
+     * @param _dividendId The dividend Id
      */
     function _getDividends(
-        uint256 _dividendID
+        uint256 _dividendId
     )
         internal
         view
@@ -270,7 +269,7 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     {
         bytes32 actionId = _corporateActionsStorage()
             .actionsByType[DIVIDEND_CORPORATE_ACTION_TYPE]
-            .at(_dividendID - 1);
+            .at(_dividendId - 1);
 
         (, bytes memory data) = _getCorporateAction(actionId);
 

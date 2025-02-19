@@ -241,11 +241,6 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
         _;
     }
 
-    modifier checkAddress(address _account) {
-        if (_account == address(0)) revert IKyc.InvalidZeroAddress();
-        _;
-    }
-
     function _grantKyc(
         address _account,
         string memory _vcId,

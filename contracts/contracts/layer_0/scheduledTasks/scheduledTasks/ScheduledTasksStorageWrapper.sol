@@ -230,7 +230,9 @@ abstract contract ScheduledTasksStorageWrapper is
         );
     }
 
-    function _triggerScheduledTasks(uint256 _max) internal returns (uint256) {
+    function _triggerScheduledTasks(
+        uint256 _max
+    ) internal returns (uint256 newScheduledTaskId_) {
         ScheduledTasksDataStorage
             storage _scheduledTasks = _scheduledTaskStorage();
         uint256 _timestamp = _blockTimestamp() - 1;
@@ -244,19 +246,18 @@ abstract contract ScheduledTasksStorageWrapper is
             ? scheduledTasksLength
             : _max;
 
-        uint256 newTaskID;
-
         for (uint256 index = 1; index <= pendingTasks; ) {
-            uint256 pos = scheduledTasksLength - index;
+            uint256 actionId = scheduledTasksLength - index;
 
             ScheduledTask
                 memory currentScheduledTask = _getScheduledTasksByIndex(
                     _scheduledTasks,
-                    pos
+                    actionId
                 );
             if (currentScheduledTask.scheduledTimestamp > _timestamp) break;
             _popScheduledTask(_scheduledTasks);
-            _triggerScheduledTask(
+            newScheduledTaskId_ = _triggerScheduledTask(
+                actionId,
                 scheduledTasksLength,
                 currentScheduledTask.data
             );
@@ -264,26 +265,24 @@ abstract contract ScheduledTasksStorageWrapper is
                 ++index;
             }
         }
-
-        return newTaskID;
     }
 
     function _triggerScheduledTask(
+        uint256 _actionId,
         uint256 _scheduledTaskLength,
         bytes memory _data
-    ) internal {
-        if (_data.length == 0) return;
-        if (_isSnapshotTaskType(_data)) {
-            return
-                _onScheduledSnapshotTriggered(
-                    0 == _scheduledTaskLength - 1
-                        ? _snapshot()
-                        : _getCurrentSnapshotId(),
-                    _data
-                );
+    ) internal returns (uint256 newSnapshotId_) {
+        if (_data.length == 0) return newSnapshotId_;
+        bytes32 taskType = abi.decode(_data, (bytes32));
+        if (_isSnapshotTaskType(taskType)) {
+            newSnapshotId_ = _actionId == _scheduledTaskLength - 1
+                ? _snapshot()
+                : _getCurrentSnapshotId();
+            _addSnapshotToAction(bytes32(_actionId), newSnapshotId_);
+            return newSnapshotId_;
         }
-        if (_isBalanceAdjustmentTaskType(_data)) {
-            _onScheduledBalanceAdjustmentTriggered(_data);
+        if (_isBalanceAdjustmentTaskType(taskType)) {
+            _onScheduledBalanceAdjustmentTriggered(taskType);
         }
     }
 

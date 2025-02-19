@@ -255,7 +255,7 @@ abstract contract DiamondCutManagerWrapper is
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
     ) internal returns (uint256 latestVersion_) {
-        DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
+        DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
 
         if (!_dcms.activeConfigurations[_configurationId]) {
             _dcms.configurations.push(_configurationId);
@@ -646,7 +646,7 @@ abstract contract DiamondCutManagerWrapper is
         ];
     }
 
-    function _getDiamondCutManagerStorage()
+    function _diamondCutManagerStorage()
         internal
         pure
         returns (DiamondCutManagerStorage storage ds)
