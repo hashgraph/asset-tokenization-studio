@@ -230,6 +230,7 @@ import {
 import { BOND_CONFIG_ID, EQUITY_CONFIG_ID, EVENTS } from './constants'
 import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
 import { FacetConfiguration } from './resolverDiamondCut'
+import { Signer } from 'ethers'
 
 export interface BusinessLogicRegistryData {
     businessLogicKey: string
@@ -469,40 +470,19 @@ export async function registerBusinessLogics({
 }
 
 export async function createConfigurationsForDeployedContracts({
-    commonFacetAddressList,
+    equityFacetAddressList,
+    bondFacetAddressList,
     businessLogicResolverProxyAddress,
-    equityUsaAddress,
-    bondUsaAddress,
     signer,
 }: CreateConfigurationsForDeployedContractsCommand): Promise<CreateConfigurationsForDeployedContractsResult> {
-    let result = CreateConfigurationsForDeployedContractsResult.empty()
-    result.commonFacetIdList = await Promise.all(
-        commonFacetAddressList.map(async (address) => {
-            return await IStaticFunctionSelectors__factory.connect(
-                address,
-                signer
-            ).getStaticResolverKey()
-        })
-    )
-    // Get the resolver keys for the equities and bonds
-    const [equityResolverKey, bondResolverKey] = await Promise.all([
-        IStaticFunctionSelectors__factory.connect(
-            equityUsaAddress,
-            signer
-        ).getStaticResolverKey(),
-        IStaticFunctionSelectors__factory.connect(
-            bondUsaAddress,
-            signer
-        ).getStaticResolverKey(),
-    ])
+    const result = CreateConfigurationsForDeployedContractsResult.empty()
 
-    result.equityFacetIdList = [...result.commonFacetIdList, equityResolverKey]
-    result.bondFacetIdList = [...result.commonFacetIdList, bondResolverKey]
-
-    result.equityFacetVersionList = Array(result.equityFacetIdList.length).fill(
-        1
+    await fetchFacetResolverKeys(
+        result,
+        signer,
+        equityFacetAddressList,
+        bondFacetAddressList
     )
-    result.bondFacetVersionList = Array(result.bondFacetIdList.length).fill(1)
 
     // Create configuration for equities
     let equityTxResponse = await IDiamondCutManager__factory.connect(
@@ -552,4 +532,45 @@ export async function createConfigurationsForDeployedContracts({
         })
     )
     return result
+}
+
+async function fetchFacetResolverKeys(
+    result: CreateConfigurationsForDeployedContractsResult,
+    signer: Signer,
+    equityFacetAddressList: string[],
+    bondFacetAddressList: string[]
+): Promise<void> {
+    const resolverKeyMap = new Map<string, string>()
+
+    result.equityFacetIdList = await Promise.all(
+        equityFacetAddressList.map((address) =>
+            getResolverKey(address, signer, resolverKeyMap)
+        )
+    )
+
+    result.bondFacetIdList = await Promise.all(
+        bondFacetAddressList.map((address) =>
+            getResolverKey(address, signer, resolverKeyMap)
+        )
+    )
+
+    result.equityFacetVersionList = Array(result.equityFacetIdList.length).fill(
+        1
+    )
+    result.bondFacetVersionList = Array(result.bondFacetIdList.length).fill(1)
+}
+
+async function getResolverKey(
+    address: string,
+    signer: Signer,
+    keyMap: Map<string, string>
+): Promise<string> {
+    if (!keyMap.has(address)) {
+        const key = await IStaticFunctionSelectors__factory.connect(
+            address,
+            signer
+        ).getStaticResolverKey()
+        keyMap.set(address, key)
+    }
+    return keyMap.get(address)!
 }
