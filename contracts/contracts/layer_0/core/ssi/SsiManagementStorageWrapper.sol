@@ -241,16 +241,16 @@ abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
     function _setRevocationRegistryAddress(
         address _revocationRegistryAddress
     ) internal returns (bool success_) {
-        _SsiManagementStorage().revocationRegistry = _revocationRegistryAddress;
+        _ssiManagementStorage().revocationRegistry = _revocationRegistryAddress;
         return true;
     }
 
     function _addIssuer(address _issuer) internal returns (bool success_) {
-        success_ = _SsiManagementStorage().issuerList.add(_issuer);
+        success_ = _ssiManagementStorage().issuerList.add(_issuer);
     }
 
     function _removeIssuer(address _issuer) internal returns (bool success_) {
-        success_ = _SsiManagementStorage().issuerList.remove(_issuer);
+        success_ = _ssiManagementStorage().issuerList.remove(_issuer);
     }
 
     function _getRevocationRegistryAddress()
@@ -258,7 +258,7 @@ abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
         view
         returns (address revocationRegistryAddress_)
     {
-        revocationRegistryAddress_ = _SsiManagementStorage().revocationRegistry;
+        revocationRegistryAddress_ = _ssiManagementStorage().revocationRegistry;
     }
 
     function _getIssuerListCount()
@@ -266,7 +266,7 @@ abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
         view
         returns (uint256 issuerListCount_)
     {
-        issuerListCount_ = _SsiManagementStorage().issuerList.length();
+        issuerListCount_ = _ssiManagementStorage().issuerList.length();
     }
 
     function _getIssuerListMembers(
@@ -274,17 +274,17 @@ abstract contract SsiManagementStorageWrapper is AccessControlStorageWrapper {
         uint256 _pageLength
     ) internal view returns (address[] memory members_) {
         return
-            _SsiManagementStorage().issuerList.getFromSet(
+            _ssiManagementStorage().issuerList.getFromSet(
                 _pageIndex,
                 _pageLength
             );
     }
 
     function _isIssuer(address _issuer) internal view returns (bool) {
-        return _SsiManagementStorage().issuerList.contains(_issuer);
+        return _ssiManagementStorage().issuerList.contains(_issuer);
     }
 
-    function _SsiManagementStorage()
+    function _ssiManagementStorage()
         internal
         pure
         returns (SsiManagementStorage storage ssiManagement_)

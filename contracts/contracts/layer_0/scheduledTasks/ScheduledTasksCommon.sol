@@ -244,37 +244,44 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
         uint256 scheduledTasksLength = _getScheduledTaskCount(_scheduledTasks);
 
         uint256 newScheduledTaskId = scheduledTasksLength;
+        uint256 scheduledTaskPosition;
 
-        bool added = false;
-
-        if (scheduledTasksLength > 0) {
-            for (uint256 index = 1; index <= scheduledTasksLength; index++) {
-                uint256 scheduledTaskPosition = scheduledTasksLength - index;
-
-                if (
-                    _scheduledTasks
-                        .scheduledTasks[scheduledTaskPosition]
-                        .scheduledTimestamp < _newScheduledTimestamp
-                ) {
-                    _slideScheduledTasks(
-                        _scheduledTasks,
-                        scheduledTaskPosition
-                    );
-                } else {
-                    newScheduledTaskId = scheduledTaskPosition + 1;
-                    _insertScheduledTask(
-                        _scheduledTasks,
-                        newScheduledTaskId,
-                        newScheduledTask
-                    );
-                    added = true;
-                    break;
-                }
+        for (uint256 index = 1; index <= scheduledTasksLength; ) {
+            unchecked {
+                scheduledTaskPosition = scheduledTasksLength - index;
+                ++index;
             }
+            if (
+                _scheduledTasks
+                    .scheduledTasks[scheduledTaskPosition]
+                    .scheduledTimestamp < _newScheduledTimestamp
+            ) {
+                _slideScheduledTasks(_scheduledTasks, scheduledTaskPosition);
+                continue;
+            }
+            newScheduledTaskId = scheduledTaskPosition + 1;
+            _insertScheduledTask(
+                _scheduledTasks,
+                newScheduledTaskId,
+                newScheduledTask
+            );
+            return;
         }
-        if (!added) {
-            _insertScheduledTask(_scheduledTasks, 0, newScheduledTask);
+        _insertScheduledTask(_scheduledTasks, 0, newScheduledTask);
+    }
+
+    function _getFirstScheduledTaskId(
+        ScheduledTasksDataStorage storage _scheduledTasks
+    ) internal returns (bytes32 actionId_) {
+        uint256 scheduledTasksLength = _getScheduledTaskCount(_scheduledTasks);
+        if (scheduledTasksLength == 0) {
+            return actionId_;
         }
+        bytes memory data = _getScheduledTasksByIndex(
+            _scheduledTasks,
+            scheduledTasksLength - 1
+        ).data;
+        actionId_ = data.length != 32 ? actionId_ : _bytesToBytes32(data);
     }
 
     function _getScheduledTaskCount(
@@ -351,5 +358,11 @@ abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
                 start + i
             );
         }
+    }
+
+    function _bytesToBytes32(
+        bytes memory _bytes32
+    ) internal pure returns (bytes32 bytes32_) {
+        bytes32_ = abi.decode(_bytes32, (bytes32));
     }
 }

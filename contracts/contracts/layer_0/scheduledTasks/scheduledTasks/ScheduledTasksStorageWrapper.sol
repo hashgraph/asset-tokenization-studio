@@ -232,7 +232,7 @@ abstract contract ScheduledTasksStorageWrapper is
 
     function _triggerScheduledTasks(
         uint256 _max
-    ) internal returns (uint256 newScheduledTaskId_) {
+    ) internal returns (uint256 newTaskId_) {
         ScheduledTasksDataStorage
             storage _scheduledTasks = _scheduledTaskStorage();
         uint256 _timestamp = _blockTimestamp() - 1;
@@ -247,20 +247,16 @@ abstract contract ScheduledTasksStorageWrapper is
             : _max;
 
         for (uint256 index = 1; index <= pendingTasks; ) {
-            uint256 actionId = scheduledTasksLength - index;
+            uint256 scheduledTaskPosition = scheduledTasksLength - index;
 
             ScheduledTask
                 memory currentScheduledTask = _getScheduledTasksByIndex(
                     _scheduledTasks,
-                    actionId
+                    scheduledTaskPosition
                 );
             if (currentScheduledTask.scheduledTimestamp > _timestamp) break;
             _popScheduledTask(_scheduledTasks);
-            newScheduledTaskId_ = _triggerScheduledTask(
-                actionId,
-                scheduledTasksLength,
-                currentScheduledTask.data
-            );
+            newTaskId_ = _triggerScheduledTask(currentScheduledTask.data);
             unchecked {
                 ++index;
             }
@@ -268,22 +264,31 @@ abstract contract ScheduledTasksStorageWrapper is
     }
 
     function _triggerScheduledTask(
-        uint256 _actionId,
-        uint256 _scheduledTaskLength,
         bytes memory _data
     ) internal returns (uint256 newSnapshotId_) {
         if (_data.length == 0) return newSnapshotId_;
-        bytes32 taskType = abi.decode(_data, (bytes32));
+        bytes32 taskType = _bytesToBytes32(_data);
+
+        ScheduledTasksDataStorage
+            storage scheduledTasksDataStorage = _getStorageByTaskType(taskType);
+        bytes32 actionId = _getFirstScheduledTaskId(scheduledTasksDataStorage);
+        if (uint256(actionId) == 0) return newSnapshotId_;
+
+        _popScheduledTask(scheduledTasksDataStorage);
         if (_isSnapshotTaskType(taskType)) {
-            newSnapshotId_ = _actionId == _scheduledTaskLength - 1
-                ? _snapshot()
-                : _getCurrentSnapshotId();
-            _addSnapshotToAction(bytes32(_actionId), newSnapshotId_);
+            newSnapshotId_ = _snapshot();
+            _addSnapshotToAction(actionId, newSnapshotId_);
             return newSnapshotId_;
         }
-        if (_isBalanceAdjustmentTaskType(taskType)) {
-            _onScheduledBalanceAdjustmentTriggered(taskType);
-        }
+
+        _onScheduledBalanceAdjustmentTriggered(actionId);
+    }
+
+    function _getStorageByTaskType(
+        bytes32 taskType
+    ) private pure returns (ScheduledTasksDataStorage storage) {
+        if (_isSnapshotTaskType(taskType)) return _scheduledSnapshotStorage();
+        return _scheduledBalanceAdjustmentStorage();
     }
 
     function _getScheduledTaskCount() internal view returns (uint256) {

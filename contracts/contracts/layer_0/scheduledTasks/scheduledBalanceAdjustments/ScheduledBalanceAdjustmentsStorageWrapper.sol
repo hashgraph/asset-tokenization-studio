@@ -282,10 +282,8 @@ abstract contract ScheduledBalanceAdjustmentsStorageWrapper is
             );
 
             if (scheduledTask.scheduledTimestamp < _timestamp) {
-                bytes32 actionId = abi.decode(scheduledTask.data, (bytes32));
-
                 bytes memory balanceAdjustmentData = _getCorporateActionData(
-                    actionId
+                    _bytesToBytes32(scheduledTask.data)
                 );
 
                 IEquity.ScheduledBalanceAdjustment
