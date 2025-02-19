@@ -216,6 +216,8 @@ import {
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -228,6 +230,10 @@ import {
     RegulationType,
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 
 const _NON_DEFAULT_PARTITION =
@@ -235,6 +241,7 @@ const _NON_DEFAULT_PARTITION =
 const _DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 const _AMOUNT = 1000
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Lock Tests', () => {
     let diamond: ResolverProxy
@@ -253,6 +260,8 @@ describe('Lock Tests', () => {
     let lockFacet: Lock
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -306,7 +315,21 @@ describe('Lock Tests', () => {
                 role: PAUSER_ROLE,
                 members: [account_D],
             }
-            const init_rbacs: Rbac[] = [rbacIssuer, rbacLocker, rbacPausable]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [
+                rbacIssuer,
+                rbacLocker,
+                rbacPausable,
+                rbacKYC,
+                rbacSSI,
+            ]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -353,6 +376,38 @@ describe('Lock Tests', () => {
                 'ERC1410ScheduledTasks',
                 diamond.address,
                 signer_B
+            )
+            kycFacet = await ethers.getContractAt(
+                'Kyc',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SsiManagement',
+                diamond.address,
+                signer_A
+            )
+            await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+            await kycFacet.grantKyc(
+                account_A,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_A
+            )
+            await kycFacet.grantKyc(
+                account_B,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_A
+            )
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_A
             )
         })
 
@@ -713,7 +768,21 @@ describe('Lock Tests', () => {
                 role: PAUSER_ROLE,
                 members: [account_D],
             }
-            const init_rbacs: Rbac[] = [rbacIssuer, rbacLocker, rbacPausable]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [
+                rbacIssuer,
+                rbacLocker,
+                rbacPausable,
+                rbacKYC,
+                rbacSSI,
+            ]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -760,6 +829,38 @@ describe('Lock Tests', () => {
                 'ERC1410ScheduledTasks',
                 diamond.address,
                 signer_B
+            )
+            kycFacet = await ethers.getContractAt(
+                'Kyc',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SsiManagement',
+                diamond.address,
+                signer_A
+            )
+            await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+            await kycFacet.grantKyc(
+                account_A,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_A
+            )
+            await kycFacet.grantKyc(
+                account_B,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_A
+            )
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_A
             )
         })
 

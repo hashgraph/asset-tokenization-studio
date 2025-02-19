@@ -208,6 +208,7 @@ pragma solidity 0.8.18;
 
 import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
 import {Common} from '../../common/Common.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410Basic is IERC1410Basic, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -224,24 +225,24 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
 
     /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
     /// @param _partition The partition from which to transfer tokens
-    /// @param _to The address to which to transfer tokens to
-    /// @param _value The amount of tokens to transfer from `_partition`
+    /// @param _basicTransferInfo The address to which to transfer tokens to and the amountn`
     /// @param _data Additional data attached to the transfer of tokens
     /// @return The partition to which the transferred tokens were allocated for the _to address
     function transferByPartition(
         bytes32 _partition,
-        address _to,
-        uint256 _value,
+        BasicTransferInfo calldata _basicTransferInfo,
         bytes calldata _data
     )
         external
         override
         onlyUnpaused
-        onlyValidAddress(_to)
+        onlyValidAddress(_basicTransferInfo.to)
         checkControlList(_msgSender())
-        checkControlList(_to)
+        checkControlList(_basicTransferInfo.to)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _basicTransferInfo.to)
         returns (bytes32)
     {
         // Add a function to verify the `_data` parameter
@@ -254,8 +255,7 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
         // in event is address(0) same for the `_operatorData`
         _transferByPartition(
             msg.sender,
-            _to,
-            _value,
+            _basicTransferInfo,
             _partition,
             _data,
             address(0),

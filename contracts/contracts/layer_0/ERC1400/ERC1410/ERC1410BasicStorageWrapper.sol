@@ -210,6 +210,9 @@ import {
     IERC1410StorageWrapper
 } from '../../../layer_1/interfaces/ERC1400/IERC1410StorageWrapper.sol';
 import {ERC20StorageWrapper1} from '../ERC20/ERC20StorageWrapper1.sol';
+import {
+    IERC1410Basic
+} from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 
 abstract contract ERC1410BasicStorageWrapper is
     IERC1410StorageWrapper,
@@ -217,21 +220,33 @@ abstract contract ERC1410BasicStorageWrapper is
 {
     function _transferByPartition(
         address _from,
-        address _to,
-        uint256 _value,
+        IERC1410Basic.BasicTransferInfo memory _basicTransferInfo,
         bytes32 _partition,
         bytes memory _data,
         address _operator,
         bytes memory _operatorData
     ) internal {
-        _beforeTokenTransfer(_partition, _from, _to, _value);
+        _beforeTokenTransfer(
+            _partition,
+            _from,
+            _basicTransferInfo.to,
+            _basicTransferInfo.value
+        );
 
-        _reduceBalanceByPartition(_from, _value, _partition);
+        _reduceBalanceByPartition(_from, _basicTransferInfo.value, _partition);
 
-        if (!_validPartitionForReceiver(_partition, _to)) {
-            _addPartitionTo(_value, _to, _partition);
+        if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
+            _addPartitionTo(
+                _basicTransferInfo.value,
+                _basicTransferInfo.to,
+                _partition
+            );
         } else {
-            _increaseBalanceByPartition(_to, _value, _partition);
+            _increaseBalanceByPartition(
+                _basicTransferInfo.to,
+                _basicTransferInfo.value,
+                _partition
+            );
         }
 
         // Emit transfer event.
@@ -239,8 +254,8 @@ abstract contract ERC1410BasicStorageWrapper is
             _partition,
             _operator,
             _from,
-            _to,
-            _value,
+            _basicTransferInfo.to,
+            _basicTransferInfo.value,
             _data,
             _operatorData
         );

@@ -216,6 +216,8 @@ import {
     ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -228,6 +230,11 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
+    MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
@@ -240,6 +247,7 @@ const adjustDecimals = 2
 const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
 const TIME = 6000
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Adjust Balances Tests', () => {
     let diamond: ResolverProxy
@@ -259,6 +267,8 @@ describe('Adjust Balances Tests', () => {
     let pauseFacet: Pause
     let equityFacet: Equity
     let scheduledTasksFacet: ScheduledTasks
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     async function deployAsset({
         multiPartition,
@@ -329,6 +339,11 @@ describe('Adjust Balances Tests', () => {
             'ScheduledTasks',
             diamond.address
         )
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address
+        )
     }
 
     function set_initRbacs(): Rbac[] {
@@ -336,7 +351,15 @@ describe('Adjust Balances Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        return [rbacPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        return [rbacPause, rbacKYC, rbacSSI]
     }
 
     before(async () => {
@@ -419,6 +442,11 @@ describe('Adjust Balances Tests', () => {
         await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_A)
         await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet
+            .connect(signer_B)
+            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
 
         erc1410Facet = erc1410Facet.connect(signer_A)
         equityFacet = equityFacet.connect(signer_A)

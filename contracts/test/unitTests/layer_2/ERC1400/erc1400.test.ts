@@ -228,6 +228,8 @@ import {
     Equity__factory,
     ERC1410ScheduledTasks__factory,
     PauseFacet__factory,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -255,6 +257,12 @@ import {
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
     MAX_UINT256,
+    SSI_MANAGER_ROLE,
+    KYC_ROLE,
+    FROM_ACCOUNT_KYC_ERROR_ID,
+    TO_ACCOUNT_KYC_ERROR_ID,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
@@ -277,6 +285,9 @@ const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
+const EMPTY_VC_ID = EMPTY_STRING
+let basicTransferInfo: any
+let operatorTransferData: any
 
 interface BalanceAdjustedValues {
     maxSupply: BigNumber
@@ -321,9 +332,12 @@ describe('ERC1400 Tests', () => {
     let erc1594Facet: ERC1594
     let erc1644Facet: ERC1644
     let adjustBalancesFacet: AdjustBalances
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
         await grantRolesToAccounts()
+        await grantKycToAccounts()
         await connectFacetsToSigners()
         await setMaxSupply(singlePartition)
         await issueTokens(singlePartition)
@@ -336,6 +350,21 @@ describe('ERC1400 Tests', () => {
         await accessControlFacet.grantRole(CAP_ROLE, account_A)
         await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
         await accessControlFacet.grantRole(LOCKER_ROLE, account_A)
+        await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
+        await accessControlFacet.grantRole(KYC_ROLE, account_A)
+    }
+
+    async function grantKycToAccounts() {
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet
+            .connect(signer_A)
+            .grantKyc(account_A, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
+        await kycFacet
+            .connect(signer_A)
+            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
+        await kycFacet
+            .connect(signer_A)
+            .grantKyc(account_C, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
     }
 
     async function connectFacetsToSigners() {
@@ -665,6 +694,11 @@ describe('ERC1400 Tests', () => {
         erc1644Facet = await ethers.getContractAt('ERC1644', diamond.address)
 
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address
+        )
     }
 
     function set_initRbacs(): Rbac[] {
@@ -711,7 +745,15 @@ describe('ERC1400 Tests', () => {
                 role: PAUSER_ROLE,
                 members: [account_B],
             }
-            const init_rbacs: Rbac[] = [rbacPause]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -758,8 +800,40 @@ describe('ERC1400 Tests', () => {
                 diamond.address,
                 signer_A
             )
+            kycFacet = await ethers.getContractAt(
+                'Kyc',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SsiManagement',
+                diamond.address,
+                signer_A
+            )
 
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+            await ssiManagementFacet.addIssuer(account_E)
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+            await kycFacet.grantKyc(
+                account_E,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+            await kycFacet.grantKyc(
+                account_D,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
 
             await erc1410Facet.issueByPartition({
                 partition: _PARTITION_ID_1,
@@ -773,6 +847,20 @@ describe('ERC1400 Tests', () => {
                 value: balanceOf_E_Original,
                 data: '0x',
             })
+
+            basicTransferInfo = {
+                to: account_D,
+                value: amount,
+            }
+
+            operatorTransferData = {
+                partition: _PARTITION_ID_1,
+                from: account_E,
+                to: account_D,
+                value: amount,
+                data: data,
+                operatorData: operatorData,
+            }
         })
 
         it('GIVEN an account WHEN authorizing and revoking operators THEN transaction succeeds', async () => {
@@ -881,8 +969,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_D,
-                    amount,
+                    basicTransferInfo,
                     data
                 )
             ).to.be.rejectedWith('TokenIsPaused')
@@ -891,14 +978,7 @@ describe('ERC1400 Tests', () => {
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(IS_PAUSED_ERROR_ID)
@@ -1027,8 +1107,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_D,
-                    amount,
+                    basicTransferInfo,
                     data
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
@@ -1039,14 +1118,7 @@ describe('ERC1400 Tests', () => {
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(
@@ -1077,8 +1149,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_D,
-                    amount,
+                    basicTransferInfo,
                     data
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
@@ -1087,14 +1158,7 @@ describe('ERC1400 Tests', () => {
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(TO_ACCOUNT_BLOCKED_ERROR_ID)
@@ -1113,17 +1177,73 @@ describe('ERC1400 Tests', () => {
 
             // transfer from with data fails
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('AccountIsBlocked')
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(FROM_ACCOUNT_BLOCKED_ERROR_ID)
+        })
+
+        it('GIVEN non kyc accounts (to, from) WHEN transfer THEN transaction fails with InvalidKycStatus', async () => {
+            await erc1410Facet.connect(signer_E).authorizeOperator(account_C)
+            await erc1410Facet.connect(signer_D).authorizeOperator(account_C)
+            await kycFacet.revokeKyc(account_D)
+
+            erc1410Facet = erc1410Facet.connect(signer_C)
+            let canTransfer = await erc1410Facet.canTransferByPartition(
+                account_E,
+                account_D,
+                _PARTITION_ID_1,
+                amount,
+                data,
+                operatorData
+            )
+
+            // transfer from with data fails
+            await expect(
+                erc1410Facet.transferByPartition(
+                    _PARTITION_ID_1,
+                    basicTransferInfo,
+                    data
+                )
+            ).to.be.rejectedWith('InvalidKycStatus')
+            await expect(
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+            ).to.be.rejectedWith('InvalidKycStatus')
+            expect(canTransfer[0]).to.be.equal(false)
+            expect(canTransfer[1]).to.be.equal(TO_ACCOUNT_KYC_ERROR_ID)
+
+            await kycFacet.grantKyc(
+                account_D,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+            await kycFacet.revokeKyc(account_E)
+            canTransfer = await erc1410Facet.canTransferByPartition(
+                account_E,
+                account_D,
+                _PARTITION_ID_1,
+                amount,
+                data,
+                operatorData
+            )
+
+            // transfer from with data fails
+            await expect(
+                erc1410Facet
+                    .connect(signer_E)
+                    .transferByPartition(
+                        _PARTITION_ID_1,
+                        basicTransferInfo,
+                        data
+                    )
+            ).to.be.rejectedWith('InvalidKycStatus')
+            await expect(
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+            ).to.be.rejectedWith('InvalidKycStatus')
+            expect(canTransfer[0]).to.be.equal(false)
+            expect(canTransfer[1]).to.be.equal(FROM_ACCOUNT_KYC_ERROR_ID)
         })
 
         it('GIVEN blocked accounts (to) USING WHITELIST WHEN issue THEN transaction fails with AccountIsBlocked', async () => {
@@ -1185,6 +1305,42 @@ describe('ERC1400 Tests', () => {
                     data: data,
                 })
             ).to.be.rejectedWith('AccountIsBlocked')
+        })
+
+        it('GIVEN non kyc account WHEN issue or redeem THEN transaction fails with InvalidKycStatus', async () => {
+            await erc1410Facet.connect(signer_D).authorizeOperator(account_A)
+            await kycFacet.revokeKyc(account_D)
+            await expect(
+                erc1410Facet.issueByPartition({
+                    partition: _PARTITION_ID_1,
+                    tokenHolder: account_D,
+                    value: amount,
+                    data: data,
+                })
+            ).to.be.rejectedWith('InvalidKycStatus')
+            let canRedeem = await erc1410Facet.canRedeemByPartition(
+                account_D,
+                _PARTITION_ID_1,
+                amount,
+                data,
+                operatorData
+            )
+            await expect(
+                erc1410Facet
+                    .connect(signer_D)
+                    .redeemByPartition(_PARTITION_ID_1, amount, data)
+            ).to.be.rejectedWith('InvalidKycStatus')
+            await expect(
+                erc1410Facet.operatorRedeemByPartition(
+                    _PARTITION_ID_1,
+                    account_D,
+                    amount,
+                    data,
+                    operatorData
+                )
+            ).to.be.rejectedWith('InvalidKycStatus')
+            expect(canRedeem[0]).to.be.equal(false)
+            expect(canRedeem[1]).to.be.equal(FROM_ACCOUNT_KYC_ERROR_ID)
         })
 
         it('GIVEN blocked accounts (sender, from) WHEN redeem THEN transaction fails with AccountIsBlocked', async () => {
@@ -1274,8 +1430,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_2,
-                    account_D,
-                    amount,
+                    basicTransferInfo,
                     data
                 )
             ).to.be.rejectedWith('InvalidPartition')
@@ -1330,11 +1485,11 @@ describe('ERC1400 Tests', () => {
                 data,
                 operatorData
             )
+            basicTransferInfo.value = 2 * balanceOf_C_Original
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_D,
-                    2 * balanceOf_C_Original,
+                    basicTransferInfo,
                     data
                 )
             ).to.be.rejected
@@ -1355,15 +1510,9 @@ describe('ERC1400 Tests', () => {
                 data,
                 operatorData
             )
+            operatorTransferData.value = 2 * balanceOf_E_Original
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    2 * balanceOf_E_Original,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejected
             expect(canTransfer_2[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(
@@ -1436,21 +1585,17 @@ describe('ERC1400 Tests', () => {
                 data,
                 operatorData
             )
+
+            operatorTransferData.from = ADDRESS_ZERO
+            basicTransferInfo.to = ADDRESS_ZERO
+
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    ADDRESS_ZERO,
-                    account_D,
-                    balanceOf_E_Original,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejected
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    ADDRESS_ZERO,
-                    balanceOf_C_Original,
+                    basicTransferInfo,
                     data
                 )
             ).to.be.rejected
@@ -1525,8 +1670,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_D,
-                    amount,
+                    basicTransferInfo,
                     data
                 )
             )
@@ -1554,14 +1698,7 @@ describe('ERC1400 Tests', () => {
             )
             erc1410Facet = erc1410Facet.connect(signer_C)
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             )
                 .to.emit(erc1410Facet, 'TransferByPartition')
                 .withArgs(
@@ -1644,8 +1781,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_D,
-                    amount,
+                    basicTransferInfo,
                     data
                 )
             )
@@ -1683,14 +1819,7 @@ describe('ERC1400 Tests', () => {
 
             // transfer From
             await expect(
-                erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_E,
-                    account_D,
-                    amount,
-                    data,
-                    operatorData
-                )
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
             )
                 .to.emit(erc1410Facet, 'SnapshotTriggered')
                 .withArgs(account_C, 2)
@@ -2057,11 +2186,32 @@ describe('ERC1400 Tests', () => {
                 'ControlList',
                 newDiamond.address
             )
+            kycFacet = await ethers.getContractAt(
+                'Kyc',
+                newDiamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SsiManagement',
+                newDiamond.address,
+                signer_A
+            )
 
             // accounts are blacklisted by default (white list)
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
             await accessControlFacet.grantRole(CONTROL_LIST_ROLE, account_A)
+            await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
+            await accessControlFacet.grantRole(KYC_ROLE, account_B)
+
+            await ssiManagementFacet.addIssuer(account_E)
+            await kycFacet.grantKyc(
+                account_E,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
 
             // Using account A (with role)
             erc1410Facet = erc1410Facet.connect(signer_A)
@@ -2385,7 +2535,15 @@ describe('ERC1400 Tests', () => {
                 role: PAUSER_ROLE,
                 members: [account_B],
             }
-            const init_rbacs: Rbac[] = [rbacPause]
+            const rbacKYC: Rbac = {
+                role: KYC_ROLE,
+                members: [account_B],
+            }
+            const rbacSSI: Rbac = {
+                role: SSI_MANAGER_ROLE,
+                members: [account_A],
+            }
+            const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -2432,8 +2590,33 @@ describe('ERC1400 Tests', () => {
                 diamond.address,
                 signer_A
             )
+            kycFacet = await ethers.getContractAt(
+                'Kyc',
+                diamond.address,
+                signer_B
+            )
+            ssiManagementFacet = await ethers.getContractAt(
+                'SsiManagement',
+                diamond.address,
+                signer_A
+            )
 
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+            await ssiManagementFacet.addIssuer(account_E)
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+            await kycFacet.grantKyc(
+                account_E,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
 
             await erc1410Facet.issueByPartition({
                 partition: _PARTITION_ID_1,
@@ -2457,8 +2640,7 @@ describe('ERC1400 Tests', () => {
                 await expect(
                     erc1410Facet.transferByPartition(
                         _PARTITION_ID_2,
-                        account_D,
-                        amount,
+                        basicTransferInfo,
                         data
                     )
                 )
@@ -2497,14 +2679,12 @@ describe('ERC1400 Tests', () => {
                     )
                     .withArgs(_PARTITION_ID_2)
                 // TODO canTransferByPartition
+                operatorTransferData.partition = _PARTITION_ID_2
+                operatorTransferData.from = account_C
+                operatorTransferData.operatorData = data
                 await expect(
                     erc1410Facet.operatorTransferByPartition(
-                        _PARTITION_ID_2,
-                        account_C,
-                        account_D,
-                        amount,
-                        data,
-                        data
+                        operatorTransferData
                     )
                 )
                     .to.be.revertedWithCustomError(
@@ -2607,6 +2787,18 @@ describe('ERC1400 Tests', () => {
                 factory,
                 businessLogicResolverAddress: businessLogicResolver.address,
             })
+            basicTransferInfo = {
+                to: account_D,
+                value: amount,
+            }
+            operatorTransferData = {
+                partition: _PARTITION_ID_1,
+                from: account_E,
+                to: account_D,
+                value: amount,
+                data: data,
+                operatorData: operatorData,
+            }
         })
 
         it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN transaction succeeds', async () => {
@@ -2674,6 +2866,10 @@ describe('ERC1400 Tests', () => {
                 )
                 await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
                 await accessControlFacet.grantRole(CAP_ROLE, account_A)
+                await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
+                await accessControlFacet.grantRole(KYC_ROLE, account_A)
+
+                await grantKycToAccounts()
 
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -2744,6 +2940,10 @@ describe('ERC1400 Tests', () => {
                 )
                 await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
                 await accessControlFacet.grantRole(CAP_ROLE, account_A)
+                await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
+                await accessControlFacet.grantRole(KYC_ROLE, account_A)
+
+                await grantKycToAccounts()
 
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -2787,6 +2987,10 @@ describe('ERC1400 Tests', () => {
                 )
                 await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
                 await accessControlFacet.grantRole(CAP_ROLE, account_A)
+                await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
+                await accessControlFacet.grantRole(KYC_ROLE, account_A)
+
+                await grantKycToAccounts()
 
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -2864,10 +3068,12 @@ describe('ERC1400 Tests', () => {
                 )
 
                 // Transaction Partition 1
+                basicTransferInfo.to = account_B
+
+                // Transaction Partition 1
                 await erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
-                    account_B,
-                    amount,
+                    basicTransferInfo,
                     '0x'
                 )
 
@@ -2892,13 +3098,14 @@ describe('ERC1400 Tests', () => {
 
                 // Transaction Partition 1
                 await erc1410Facet.authorizeOperator(account_A)
+
+                operatorTransferData.from = account_A
+                operatorTransferData.to = account_B
+                operatorTransferData.data = '0x'
+                operatorTransferData.operatorData = '0x'
+
                 await erc1410Facet.operatorTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_A,
-                    account_B,
-                    amount,
-                    '0x',
-                    '0x'
+                    operatorTransferData
                 )
 
                 // After Transaction Partition 1 Values

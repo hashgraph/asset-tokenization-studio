@@ -203,124 +203,97 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {
-    IAdjustBalances
-} from '../interfaces/adjustBalances/IAdjustBalances.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-import {_BALANCE_ADJUSTMENTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
+
+import {_KYC_ROLE} from '../constants/roles.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
+import {_KYC_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../common/Common.sol';
 
-contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
-    function adjustBalances(
-        uint256 factor,
-        uint8 decimals
+contract Kyc is IKyc, IStaticFunctionSelectors, Common {
+    function grantKyc(
+        address _account,
+        string memory _vcId,
+        uint256 _validFrom,
+        uint256 _validTo,
+        address _issuer
     )
         external
+        virtual
         override
+        onlyRole(_KYC_ROLE)
         onlyUnpaused
-        onlyRole(_ADJUSTMENT_BALANCE_ROLE)
-        checkFactor(factor)
+        checkAddress(_account)
+        onlyValidKycStatus(KycStatus.NOT_GRANTED, _account)
+        onlyValidDates(_validFrom, _validTo)
+        checkIssuerList(_issuer)
         returns (bool success_)
     {
-        _triggerScheduledTasks(0);
-        _adjustBalances(factor, decimals);
-        success_ = true;
+        success_ = _grantKyc(_account, _vcId, _validFrom, _validTo, _issuer);
+        emit KycGranted(_account, _msgSender());
     }
 
-    function getAbaf() external view override returns (uint256) {
-        return _getAbaf();
-    }
-
-    function getAbafAdjusted() external view override returns (uint256) {
-        return _getAbafAdjusted();
-    }
-
-    function getAbafAdjustedAt(
-        uint256 _timestamp
-    ) external view override returns (uint256) {
-        return _getAbafAdjustedAt(_timestamp);
-    }
-
-    function getLabafByUser(
+    function revokeKyc(
         address _account
-    ) external view override returns (uint256) {
-        return _getLabafByUser(_account);
+    )
+        external
+        virtual
+        override
+        onlyRole(_KYC_ROLE)
+        onlyUnpaused
+        checkAddress(_account)
+        returns (bool success_)
+    {
+        success_ = _revokeKyc(_account);
+        emit KycRevoked(_account, _msgSender());
     }
 
-    function getLabafByPartition(
-        bytes32 _partition
-    ) external view override returns (uint256) {
-        return _getLabafByPartition(_partition);
-    }
-
-    function getLabafByUserAndPartition(
-        bytes32 _partition,
+    function getKycStatusFor(
         address _account
-    ) external view override returns (uint256) {
-        return _getLabafByUserAndPartition(_partition, _account);
+    ) external view virtual override returns (KycStatus kycStatus_) {
+        kycStatus_ = _getKycStatusFor(_account);
     }
 
-    function getAllowanceLabaf(
-        address _owner,
-        address _spender
-    ) external view override returns (uint256) {
-        return _getAllowanceLabaf(_owner, _spender);
+    function getKycFor(
+        address _account
+    ) external view virtual override returns (KycData memory kyc_) {
+        kyc_ = _getKycFor(_account);
     }
 
-    function getTotalLockLabaf(
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalLockLabaf(_tokenHolder);
+    function getKycAccountsCount(
+        KycStatus _kycStatus
+    ) external view virtual override returns (uint256 kycAccountsCount_) {
+        kycAccountsCount_ = _getKycAccountsCount(_kycStatus);
     }
 
-    function getTotalLockLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalLockLabafByPartition(_partition, _tokenHolder);
+    function getKycAccounts(
+        KycStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view virtual override returns (address[] memory accounts_) {
+        accounts_ = _getKycAccounts(_kycStatus, _pageIndex, _pageLength);
     }
 
-    function getLockLabafByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getLockLabafById(_partition, _tokenHolder, _lockId);
-    }
-
-    function getTotalHeldLabaf(
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalHeldLabaf(_tokenHolder);
-    }
-
-    function getTotalHeldLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalHeldLabafByPartition(_partition, _tokenHolder);
-    }
-
-    function getHoldLabafByPartition(
-        bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
+    function getKycAccountsData(
+        KycStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view virtual override returns (KycData[] memory kycData_) {
+        kycData_ = _getKycAccountsData(_kycStatus, _pageIndex, _pageLength);
     }
 
     function getStaticResolverKey()
         external
         pure
+        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _BALANCE_ADJUSTMENTS_RESOLVER_KEY;
+        staticResolverKey_ = _KYC_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
@@ -330,46 +303,21 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](15);
+        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_[selectorIndex++] = this.grantKyc.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.revokeKyc.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getKycFor.selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .adjustBalances
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAbaf.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAbafAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAbafAdjustedAt
+            .getKycStatusFor
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByUser
+            .getKycAccountsCount
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByPartition
+            .getKycAccounts
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByUserAndPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAllowanceLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalHeldLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalHeldLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldLabafByPartition
+            .getKycAccountsData
             .selector;
     }
 
@@ -381,7 +329,6 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
     {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IAdjustBalances)
-            .interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IKyc).interfaceId;
     }
 }

@@ -203,185 +203,133 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {
-    IAdjustBalances
-} from '../interfaces/adjustBalances/IAdjustBalances.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-import {_BALANCE_ADJUSTMENTS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 
-contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
-    function adjustBalances(
-        uint256 factor,
-        uint8 decimals
-    )
-        external
-        override
-        onlyUnpaused
-        onlyRole(_ADJUSTMENT_BALANCE_ROLE)
-        checkFactor(factor)
-        returns (bool success_)
-    {
-        _triggerScheduledTasks(0);
-        _adjustBalances(factor, decimals);
-        success_ = true;
+interface IKyc {
+    struct KycData {
+        uint256 validFrom;
+        uint256 validTo;
+        string vcId;
+        address issuer;
+        KycStatus status;
     }
 
-    function getAbaf() external view override returns (uint256) {
-        return _getAbaf();
+    enum KycStatus {
+        NOT_GRANTED,
+        GRANTED
     }
 
-    function getAbafAdjusted() external view override returns (uint256) {
-        return _getAbafAdjusted();
-    }
+    error InvalidDates();
+    error InvalidKycStatus();
+    error KycIsNotGranted();
+    error InvalidZeroAddress();
 
-    function getAbafAdjustedAt(
-        uint256 _timestamp
-    ) external view override returns (uint256) {
-        return _getAbafAdjustedAt(_timestamp);
-    }
+    /**
+     * @dev Emitted when a Kyc is granted
+     *
+     * @param account The address for which the Kyc is granted
+     * @param issuer The address of the issuer of the Kyc
+     */
 
-    function getLabafByUser(
+    event KycGranted(address indexed account, address indexed issuer);
+
+    /**
+     * @dev Emitted when a Kyc is revoked
+     *
+     * @param account The address for which the Kyc is revoked
+     * @param issuer The address of the issuer of the Kyc
+     */
+    event KycRevoked(address indexed account, address indexed issuer);
+
+    /**
+     * @dev Grant kyc to an address
+     *
+     * @param _account user whose Kyc is being granted
+     * @param _vcId credential Id
+     * @param _validFrom start date of the Kyc
+     * @param _validTo end date of the Kyc
+     * @param _issuer issurer of the Kyc
+     * @return success_ true or false
+     */
+
+    function grantKyc(
+        address _account,
+        string memory _vcId,
+        uint256 _validFrom,
+        uint256 _validTo,
+        address _issuer
+    ) external returns (bool success_);
+
+    /**
+     * @dev Revoke kyc to an address
+     *
+     * @param _account user whose Kyc is being revoked
+     * @return success_ true or false
+     */
+
+    function revokeKyc(address _account) external returns (bool success_);
+
+    /**
+     * @dev Get the status of the Kyc for an account
+     *
+     * @param _account the account to check
+     * @return kycStatus_ GRANTED or NOT_GRANTED
+     */
+
+    function getKycStatusFor(
         address _account
-    ) external view override returns (uint256) {
-        return _getLabafByUser(_account);
-    }
+    ) external view returns (KycStatus kycStatus_);
 
-    function getLabafByPartition(
-        bytes32 _partition
-    ) external view override returns (uint256) {
-        return _getLabafByPartition(_partition);
-    }
+    /**
+     * @dev Get all the info of the Kyc for an account
+     *
+     * @param _account the account to check
+     * @return kyc_
+     */
 
-    function getLabafByUserAndPartition(
-        bytes32 _partition,
+    function getKycFor(
         address _account
-    ) external view override returns (uint256) {
-        return _getLabafByUserAndPartition(_partition, _account);
-    }
+    ) external view returns (KycData memory kyc_);
 
-    function getAllowanceLabaf(
-        address _owner,
-        address _spender
-    ) external view override returns (uint256) {
-        return _getAllowanceLabaf(_owner, _spender);
-    }
+    /**
+     * @dev Get the count of accounts with a given Kyc status
+     *
+     * @param _kycStatus GRANTED or NOT_GRANTED
+     * @return kycAccountsCount_ count of accounts with the given Kyc status
+     */
 
-    function getTotalLockLabaf(
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalLockLabaf(_tokenHolder);
-    }
+    function getKycAccountsCount(
+        KycStatus _kycStatus
+    ) external view returns (uint256 kycAccountsCount_);
 
-    function getTotalLockLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalLockLabafByPartition(_partition, _tokenHolder);
-    }
+    /**
+     * @dev Returns an array of accounts with a given Kyc status
+     *
+     * @param _kycStatus GRANTED or NOT_GRANTED
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return accounts_ The array containing the accounts addresses
+     */
 
-    function getLockLabafByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getLockLabafById(_partition, _tokenHolder, _lockId);
-    }
+    function getKycAccounts(
+        KycStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (address[] memory accounts_);
 
-    function getTotalHeldLabaf(
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalHeldLabaf(_tokenHolder);
-    }
+    /**
+     * @dev Returns an array with the Kyc data from accounts with a given Kyc status
+     *
+     * @param _kycStatus GRANTED or NOT_GRANTED
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return kycData_ The array containing the data from the accounts
+     */
 
-    function getTotalHeldLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getTotalHeldLabafByPartition(_partition, _tokenHolder);
-    }
-
-    function getHoldLabafByPartition(
-        bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) external view override returns (uint256 labaf_) {
-        return _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _BALANCE_ADJUSTMENTS_RESOLVER_KEY;
-    }
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](15);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .adjustBalances
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAbaf.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAbafAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAbafAdjustedAt
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByUser
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLabafByUserAndPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAllowanceLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalLockLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getLockLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalHeldLabaf
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getTotalHeldLabafByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldLabafByPartition
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IAdjustBalances)
-            .interfaceId;
-    }
+    function getKycAccountsData(
+        KycStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (KycData[] memory kycData_);
 }
