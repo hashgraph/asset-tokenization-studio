@@ -462,12 +462,11 @@ describe('Adjust Balances Tests', () => {
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
 
         await erc1410Facet.issueByPartition({
-                        partition: _PARTITION_ID_2,
-                        tokenHolder: account_B,
-                        value: balanceOf_B_Original,
-                        data: '0x',
-                    })
-        
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original,
+            data: '0x',
+        })
 
         // schedule tasks
         const dividendsRecordDateInSeconds_1 =

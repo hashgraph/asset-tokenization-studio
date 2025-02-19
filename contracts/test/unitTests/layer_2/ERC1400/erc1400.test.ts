@@ -387,7 +387,6 @@ describe('ERC1400 Tests', () => {
     }
 
     async function issueTokens(singlePartition?: boolean) {
-
         await erc1410Facet.issueByPartition({
             partition: _PARTITION_ID_1,
             tokenHolder: account_A,
@@ -402,21 +401,21 @@ describe('ERC1400 Tests', () => {
                 value: balanceOf_A_Original[1],
                 data: '0x',
             })
-            }
+        }
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_B,
+            value: balanceOf_A_Original[0],
+            data: '0x',
+        })
+        if (!singlePartition) {
             await erc1410Facet.issueByPartition({
-                partition: _PARTITION_ID_1,
+                partition: _PARTITION_ID,
                 tokenHolder: account_B,
-                value: balanceOf_A_Original[0],
+                value: balanceOf_A_Original[1],
                 data: '0x',
             })
-            if (!singlePartition) {
-                await erc1410Facet.issueByPartition({
-                    partition: _PARTITION_ID,
-                    tokenHolder: account_B,
-                    value: balanceOf_A_Original[1],
-                    data: '0x',
-                })
-                }
+        }
     }
 
     /**
@@ -829,14 +828,14 @@ describe('ERC1400 Tests', () => {
             await kycFacet.grantKyc(account_C, '', 0, 9999999999, account_E)
             await kycFacet.grantKyc(account_E, '', 0, 9999999999, account_E)
             await kycFacet.grantKyc(account_D, '', 0, 9999999999, account_E)
-            
+
             await erc1410Facet.issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_C,
                 value: balanceOf_C_Original,
                 data: '0x',
             })
-            
+
             await erc1410Facet.issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_E,
@@ -870,7 +869,7 @@ describe('ERC1400 Tests', () => {
                 value: balanceOf_C_Original,
                 data: '0x',
             })
-    
+
             // authorize
             erc1410Facet = erc1410Facet.connect(signer_C)
             await erc1410Facet.authorizeOperator(account_D)
@@ -932,12 +931,11 @@ describe('ERC1400 Tests', () => {
 
             // check
             isOperator_D = await erc1410Facet.isOperator(account_D, account_C)
-            isOperatorByPartition_E =
-                await erc1410Facet.isOperatorForPartition(
-                    _PARTITION_ID,
-                    account_E,
-                    account_C
-                )
+            isOperatorByPartition_E = await erc1410Facet.isOperatorForPartition(
+                _PARTITION_ID,
+                account_E,
+                account_C
+            )
             expect(isOperator_D).to.be.equal(false)
             expect(isOperatorByPartition_E).to.be.equal(false)
         })
@@ -1010,7 +1008,8 @@ describe('ERC1400 Tests', () => {
             // issue fails
             await expect(
                 erc1410Facet.issueByPartition({
-                    partition: '0x0000000000000000000000000000000000000000000000000000000000000000',
+                    partition:
+                        '0x0000000000000000000000000000000000000000000000000000000000000000',
                     tokenHolder: account_E,
                     value: amount,
                     data: '0x',
@@ -1427,9 +1426,7 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejectedWith('InvalidPartition')
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(
-                WRONG_PARTITION_ERROR_ID
-            )
+            expect(canTransfer[1]).to.be.equal(WRONG_PARTITION_ERROR_ID)
         })
 
         it('GIVEN wrong partition WHEN redeem THEN transaction fails with InValidPartition', async () => {
@@ -1595,9 +1592,7 @@ describe('ERC1400 Tests', () => {
                 )
             ).to.be.rejected
             expect(canTransfer[0]).to.be.equal(false)
-            expect(canTransfer[1]).to.be.equal(
-                FROM_ACCOUNT_NULL_ERROR_ID
-            )
+            expect(canTransfer[1]).to.be.equal(FROM_ACCOUNT_NULL_ERROR_ID)
         })
 
         it('GIVEN an account WHEN redeem from address 0 THEN transaction fails', async () => {
@@ -2260,7 +2255,7 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             const balanceOf_D_Original = 4 * amount
-            
+
             await erc1410Facet.issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_D,
@@ -2698,11 +2693,7 @@ describe('ERC1400 Tests', () => {
                     )
                     .withArgs(_PARTITION_ID)
                 await expect(
-                    erc1410Facet.redeemByPartition(
-                        _PARTITION_ID,
-                        amount,
-                        data
-                    )
+                    erc1410Facet.redeemByPartition(_PARTITION_ID, amount, data)
                 )
                     .to.be.revertedWithCustomError(
                         erc1410Facet,
@@ -3153,7 +3144,7 @@ describe('ERC1400 Tests', () => {
                     amount,
                     '0x',
                     '0x'
-                )         
+                )
 
                 // After Transaction Partition 1 Values
                 const after = await getBalanceAdjustedValues()
