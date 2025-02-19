@@ -402,7 +402,7 @@ describe('SSI Tests', () => {
         })
     })
 
-    describe('SsiManagement.sol Wrong input data', () => {
+    describe('SsiManagement Wrong input data', () => {
         it('GIVEN listed issuer WHEN adding issuer THEN fails with ListedIssuer', async () => {
             await ssiManagementFacet.addIssuer(account_B)
 
@@ -421,7 +421,7 @@ describe('SSI Tests', () => {
         })
     })
 
-    describe('SsiManagement.sol OK', () => {
+    describe('SsiManagement OK', () => {
         it('GIVEN a revocationList WHEN setRevocationRegistryAddress THEN transaction succeed', async () => {
             expect(
                 await ssiManagementFacet.setRevocationRegistryAddress(
