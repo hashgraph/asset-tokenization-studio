@@ -256,9 +256,6 @@ export default class CreateConfigurationsForDeployedContractsCommand extends Bas
            deployedContractList.scheduledBalanceAdjustments.address,
         ]
     }
-    get commonFacetAddressList() {
-        return this.contractAddressList
-    }
 
     get equityFacetAddressList(): string[] {
         return [
@@ -275,7 +272,7 @@ export default class CreateConfigurationsForDeployedContractsCommand extends Bas
     }
 
     private getFilteredFacetAddresses(excludeList: string[]): string[] {
-        return this.commonFacetAddressList.filter(
+        return this.contractAddressList.filter(
             (address) => !excludeList.includes(address)
         )
     }
