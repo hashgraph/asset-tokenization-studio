@@ -219,8 +219,8 @@ import {
     AccessControlFacet__factory,
     ERC1410ScheduledTasks__factory,
     PauseFacet__factory,
-    KYC,
-    SSIManagement,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -234,13 +234,16 @@ import {
     RegulationType,
     KYC_ROLE,
     SSI_MANAGER_ROLE,
+    ZERO,
+    MAX_UINT256,
+    EMPTY_STRING,
 } from '@scripts'
 
 const maxSupply = 1
 const maxSupplyByPartition = 1
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
-
+const EMPTY_VC_ID = EMPTY_STRING
 describe('CAP Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
@@ -257,8 +260,8 @@ describe('CAP Tests', () => {
     let accessControl: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     before(async () => {
         // mute | mock console.log
@@ -338,15 +341,21 @@ describe('CAP Tests', () => {
             diamond.address,
             signer_A
         )
-        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address,
             signer_A
         )
 
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
     })
 
     it('GIVEN setting 0 to max supply WHEN trying to initialize THEN transaction fails', async () => {

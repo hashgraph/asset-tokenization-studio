@@ -227,8 +227,8 @@ import {
     TransferAndLock,
     Lock,
     ProtectedPartitions,
-    KYC,
-    SSIManagement,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
@@ -237,8 +237,8 @@ export interface DeployAtsContractsResultParams {
     accessControl: DeployContractWithFactoryResult<AccessControl>
     cap: DeployContractWithFactoryResult<Cap>
     controlList: DeployContractWithFactoryResult<ControlList>
-    kyc: DeployContractWithFactoryResult<KYC>
-    ssiManagement: DeployContractWithFactoryResult<SSIManagement>
+    kyc: DeployContractWithFactoryResult<Kyc>
+    ssiManagement: DeployContractWithFactoryResult<SsiManagement>
     pause: DeployContractWithFactoryResult<Pause>
     erc20: DeployContractWithFactoryResult<ERC20>
     erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
@@ -265,8 +265,8 @@ export default class DeployAtsContractsResult {
     public readonly accessControl: DeployContractWithFactoryResult<AccessControl>
     public readonly cap: DeployContractWithFactoryResult<Cap>
     public readonly controlList: DeployContractWithFactoryResult<ControlList>
-    public readonly kyc: DeployContractWithFactoryResult<KYC>
-    public readonly ssiManagement: DeployContractWithFactoryResult<SSIManagement>
+    public readonly kyc: DeployContractWithFactoryResult<Kyc>
+    public readonly ssiManagement: DeployContractWithFactoryResult<SsiManagement>
     public readonly pause: DeployContractWithFactoryResult<Pause>
     public readonly erc20: DeployContractWithFactoryResult<ERC20>
     public readonly erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>

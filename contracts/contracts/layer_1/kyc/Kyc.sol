@@ -203,92 +203,132 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {LibCommon} from '../../common/LibCommon.sol';
+import {_KYC_ROLE} from '../constants/roles.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
+import {_KYC_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {AccessControlStorageWrapper} from '../accessControl/AccessControlStorageWrapper.sol';
-import {
-    _SSI_MANAGEMENT_STORAGE_POSITION
-} from '../../constants/storagePositions.sol';
-import {ISSIManagement} from '../../../layer_1/interfaces/ssi/ISSIManagement.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {Common} from '../common/Common.sol';
 
-abstract contract SSIManagementStorageWrapper is AccessControlStorageWrapper {
-    using LibCommon for EnumerableSet.AddressSet;
-    using EnumerableSet for EnumerableSet.AddressSet;
-
-    struct SSIManagementStorage {
-        EnumerableSet.AddressSet issuerList;
-        address revocationRegistry;
-    }
-
-    // modifiers
-    modifier checkIssuerList(address issuer) {
-        if (!_isIssuer(issuer)) {
-            revert ISSIManagement.AccountIsNotIssuer(issuer);
-        }
-        _;
-    }
-
-    // Internal
-    function _setRevocationRegistryAddress(
-        address _revocationRegistryAddress
-    ) internal returns (bool success_) {
-        _SSIManagementStorage().revocationRegistry = _revocationRegistryAddress;
-        return true;
-    }
-
-    function _addIssuer(address _issuer) internal returns (bool success_) {
-        success_ = _SSIManagementStorage().issuerList.add(_issuer);
-    }
-
-    function _removeIssuer(address _issuer) internal returns (bool success_) {
-        success_ = _SSIManagementStorage().issuerList.remove(_issuer);
-    }
-
-    function _getRevocationRegistryAddress()
-        internal
-        view
-        returns (address revocationRegistryAddress_)
+contract Kyc is IKyc, IStaticFunctionSelectors, Common {
+    function grantKyc(
+        address _account,
+        string memory _VCid,
+        uint256 _validFrom,
+        uint256 _validTo,
+        address _issuer
+    )
+        external
+        virtual
+        override
+        onlyRole(_KYC_ROLE)
+        onlyUnpaused
+        checkAddress(_account)
+        onlyValidKycStatus(KycStatus.NOT_GRANTED, _account)
+        onlyValidDates(_validFrom, _validTo)
+        checkIssuerList(_issuer)
+        returns (bool success_)
     {
-        revocationRegistryAddress_ = _SSIManagementStorage().revocationRegistry;
+        success_ = _grantKyc(_account, _VCid, _validFrom, _validTo, _issuer);
+        emit KycGranted(_account, _msgSender());
     }
 
-    function _getIssuerListCount()
-        internal
-        view
-        returns (uint256 issuerListCount_)
+    function revokeKyc(
+        address _account
+    )
+        external
+        virtual
+        override
+        onlyRole(_KYC_ROLE)
+        onlyUnpaused
+        checkAddress(_account)
+        returns (bool success_)
     {
-        issuerListCount_ = _SSIManagementStorage().issuerList.length();
+        success_ = _revokeKyc(_account);
+        emit KycRevoked(_account, _msgSender());
     }
 
-    function _getIssuerListMembers(
+    function getKycStatusFor(
+        address _account
+    ) external view virtual override returns (KycStatus kycStatus_) {
+        kycStatus_ = _getKycStatusFor(_account);
+    }
+
+    function getKycFor(
+        address _account
+    ) external view virtual override returns (KycData memory kyc_) {
+        kyc_ = _getKycFor(_account);
+    }
+
+    function getKycAccountsCount(
+        KycStatus _kycStatus
+    ) external view virtual override returns (uint256 KYCAccountsCount_) {
+        KYCAccountsCount_ = _getKycAccountsCount(_kycStatus);
+    }
+
+    function getKycAccounts(
+        KycStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view returns (address[] memory members_) {
-        return
-            _SSIManagementStorage().issuerList.getFromSet(
-                _pageIndex,
-                _pageLength
-            );
+    ) external view virtual override returns (address[] memory accounts_) {
+        accounts_ = _getKycAccounts(_kycStatus, _pageIndex, _pageLength);
     }
 
-    function _isIssuer(address _issuer) internal view returns (bool) {
-        return _SSIManagementStorage().issuerList.contains(_issuer);
+    function getKycAccountsData(
+        KycStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view virtual override returns (KycData[] memory kycData_) {
+        kycData_ = _getKycAccountsData(_kycStatus, _pageIndex, _pageLength);
     }
 
-    function _SSIManagementStorage()
-        internal
+    function getStaticResolverKey()
+        external
         pure
-        returns (SSIManagementStorage storage ssiManagement_)
+        virtual
+        override
+        returns (bytes32 staticResolverKey_)
     {
-        bytes32 position = _SSI_MANAGEMENT_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            ssiManagement_.slot := position
-        }
+        staticResolverKey_ = _KYC_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_[selectorIndex++] = this.grantKyc.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.revokeKyc.selector;
+        staticFunctionSelectors_[selectorIndex++] = this.getKycFor.selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getKycStatusFor
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getKycAccountsCount
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getKycAccounts
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getKycAccountsData
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IKyc).interfaceId;
     }
 }

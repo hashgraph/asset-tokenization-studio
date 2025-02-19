@@ -208,7 +208,7 @@ pragma solidity 0.8.18;
 
 import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
 import {Common} from '../../common/Common.sol';
-import {IKYC} from '../../../layer_1/interfaces/kyc/IKYC.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410Basic is IERC1410Basic, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -241,8 +241,8 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
         checkControlList(_basicTransferInfo.to)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, _msgSender())
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, _basicTransferInfo.to)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _basicTransferInfo.to)
         returns (bytes32)
     {
         // Add a function to verify the `_data` parameter

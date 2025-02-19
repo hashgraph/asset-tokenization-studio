@@ -221,7 +221,7 @@ import {
     _FROM_ACCOUNT_KYC_ERROR_ID
 } from '../../constants/values.sol';
 import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
-import {IKYC} from '../../../layer_1/interfaces/kyc/IKYC.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
     IERC1410Standard
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
@@ -409,7 +409,7 @@ abstract contract ERC1410StandardStorageWrapper is
         if (!_checkControlList(_from)) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _from)) {
+        if (!_checkKycStatus(IKyc.KycStatus.GRANTED, _from)) {
             return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
         if (!_validPartition(_partition, _from)) {

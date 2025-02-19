@@ -213,7 +213,7 @@ import {
     IStaticFunctionSelectors
 } from '../../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_ERC20_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
-import {IKYC} from '../../../layer_1/interfaces/kyc/IKYC.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
@@ -273,8 +273,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         checkControlList(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, _msgSender())
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, to)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
         returns (bool)
     {
         return _transfer(_msgSender(), to, value);
@@ -293,8 +293,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         checkControlList(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, from)
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, to)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, from)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
         returns (bool)
     {
         return _transferFrom(_msgSender(), from, to, value);

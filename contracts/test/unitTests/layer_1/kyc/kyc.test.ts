@@ -211,11 +211,11 @@ import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/h
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type KYC,
+    type Kyc,
     Pause,
     IFactory,
     BusinessLogicResolver,
-    SSIManagement,
+    SsiManagement,
     T3RevocationRegistry,
     T3RevocationRegistry__factory,
 } from '@typechain'
@@ -239,7 +239,7 @@ const _VALID_FROM = 0
 const _VALID_TO = 99999999999999
 const _VC_ID = 'VC_24'
 
-describe('KYC Tests', () => {
+describe('Kyc.sol Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -253,9 +253,9 @@ describe('KYC Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let kycFacet: KYC
+    let kycFacet: Kyc
     let pauseFacet: Pause
-    let ssiManagementFacet: SSIManagement
+    let ssiManagementFacet: SsiManagement
     let revocationList: T3RevocationRegistry
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
@@ -354,14 +354,14 @@ describe('KYC Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_A)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_A)
         pauseFacet = await ethers.getContractAt(
             'Pause',
             diamond.address,
             signer_A
         )
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address,
             signer_C
         )
@@ -378,9 +378,9 @@ describe('KYC Tests', () => {
             await pauseFacet.pause()
         })
 
-        it('GIVEN a paused Token WHEN grantKYC THEN transaction fails with TokenIsPaused', async () => {
+        it('GIVEN a paused Token WHEN grantKyc THEN transaction fails with TokenIsPaused', async () => {
             await expect(
-                kycFacet.grantKYC(
+                kycFacet.grantKyc(
                     account_B,
                     _VC_ID,
                     _VALID_FROM,
@@ -390,19 +390,19 @@ describe('KYC Tests', () => {
             ).to.be.revertedWithCustomError(kycFacet, 'TokenIsPaused')
         })
 
-        it('GIVEN a paused Token WHEN revokeKYC THEN transaction fails with TokenIsPaused', async () => {
+        it('GIVEN a paused Token WHEN revokeKyc THEN transaction fails with TokenIsPaused', async () => {
             await expect(
-                kycFacet.revokeKYC(account_B)
+                kycFacet.revokeKyc(account_B)
             ).to.be.revertedWithCustomError(kycFacet, 'TokenIsPaused')
         })
     })
 
     describe('Access Control', () => {
-        it('GIVEN a non KYC account WHEN grantKYC THEN transaction fails with AccountHasNoRole', async () => {
+        it('GIVEN a non Kyc.sol account WHEN grantKyc THEN transaction fails with AccountHasNoRole', async () => {
             await expect(
                 kycFacet
                     .connect(signer_C)
-                    .grantKYC(
+                    .grantKyc(
                         account_B,
                         _VC_ID,
                         _VALID_FROM,
@@ -412,17 +412,17 @@ describe('KYC Tests', () => {
             ).to.be.revertedWithCustomError(kycFacet, 'AccountHasNoRole')
         })
 
-        it('GIVEN a paused Token WHEN revokeKYC THEN transaction fails with AccountHasNoRole', async () => {
+        it('GIVEN a paused Token WHEN revokeKyc THEN transaction fails with AccountHasNoRole', async () => {
             await expect(
-                kycFacet.connect(signer_C).revokeKYC(account_B)
+                kycFacet.connect(signer_C).revokeKyc(account_B)
             ).to.be.rejectedWith('AccountHasNoRole')
         })
     })
 
-    describe('KYC Wrong input data', () => {
-        it('GIVEN account ZERO WHEN grantKYC THEN transaction fails with InvalidZeroAddress', async () => {
+    describe('Kyc.sol Wrong input data', () => {
+        it('GIVEN account ZERO WHEN grantKyc THEN transaction fails with InvalidZeroAddress', async () => {
             await expect(
-                kycFacet.grantKYC(
+                kycFacet.grantKyc(
                     ADDRESS_ZERO,
                     _VC_ID,
                     _VALID_FROM,
@@ -432,15 +432,15 @@ describe('KYC Tests', () => {
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidZeroAddress')
         })
 
-        it('GIVEN account ZERO WHEN revokeKYC THEN transaction fails with InvalidZeroAddress', async () => {
+        it('GIVEN account ZERO WHEN revokeKyc THEN transaction fails with InvalidZeroAddress', async () => {
             await expect(
-                kycFacet.revokeKYC(ADDRESS_ZERO)
+                kycFacet.revokeKyc(ADDRESS_ZERO)
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidZeroAddress')
         })
 
-        it('GIVEN wrong Valid From Date WHEN grantKYC THEN transaction fails with InvalidDates', async () => {
+        it('GIVEN wrong Valid From Date WHEN grantKyc THEN transaction fails with InvalidDates', async () => {
             await expect(
-                kycFacet.grantKYC(
+                kycFacet.grantKyc(
                     account_B,
                     _VC_ID,
                     _VALID_TO + 1,
@@ -450,9 +450,9 @@ describe('KYC Tests', () => {
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidDates')
         })
 
-        it('GIVEN wrong Valid To Date WHEN grantKYC THEN transaction fails with InvalidDates', async () => {
+        it('GIVEN wrong Valid To Date WHEN grantKyc THEN transaction fails with InvalidDates', async () => {
             await expect(
-                kycFacet.grantKYC(
+                kycFacet.grantKyc(
                     account_B,
                     _VC_ID,
                     _VALID_FROM,
@@ -462,9 +462,9 @@ describe('KYC Tests', () => {
             ).to.be.revertedWithCustomError(kycFacet, 'InvalidDates')
         })
 
-        it('GIVEN wrong issuer WHEN grantKYC THEN transaction fails with AccountIsNotIssuer', async () => {
+        it('GIVEN wrong issuer WHEN grantKyc THEN transaction fails with AccountIsNotIssuer', async () => {
             await expect(
-                kycFacet.grantKYC(
+                kycFacet.grantKyc(
                     account_B,
                     _VC_ID,
                     _VALID_FROM,
@@ -475,14 +475,14 @@ describe('KYC Tests', () => {
         })
     })
 
-    describe('KYC OK', () => {
-        it('GIVEN a VC WHEN grantKYC THEN transaction succeed', async () => {
-            let KYCStatusFor_B_Before = await kycFacet.getKYCStatusFor(
+    describe('Kyc.sol OK', () => {
+        it('GIVEN a VC WHEN grantKyc THEN transaction succeed', async () => {
+            let KYCStatusFor_B_Before = await kycFacet.getKycStatusFor(
                 account_B
             )
-            let KYC_Count_Before = await kycFacet.getKYCAccountsCount(1)
+            let KYC_Count_Before = await kycFacet.getKycAccountsCount(1)
 
-            await kycFacet.grantKYC(
+            await kycFacet.grantKyc(
                 account_B,
                 _VC_ID,
                 _VALID_FROM,
@@ -490,11 +490,11 @@ describe('KYC Tests', () => {
                 account_C
             )
 
-            let KYCStatusFor_B_After = await kycFacet.getKYCStatusFor(account_B)
-            let KYC_Count_After = await kycFacet.getKYCAccountsCount(1)
-            let KYCAccounts = await kycFacet.getKYCAccounts(1, 0, 100)
-            let KYCSFor_B = await kycFacet.getKYCFor(account_B)
-            let [kycAccountsData_After] = await kycFacet.getKYCAccountsData(
+            let KYCStatusFor_B_After = await kycFacet.getKycStatusFor(account_B)
+            let KYC_Count_After = await kycFacet.getKycAccountsCount(1)
+            let KYCAccounts = await kycFacet.getKycAccounts(1, 0, 100)
+            let KYCSFor_B = await kycFacet.getKycFor(account_B)
+            let [kycAccountsData_After] = await kycFacet.getKycAccountsData(
                 1,
                 0,
                 1
@@ -509,12 +509,12 @@ describe('KYC Tests', () => {
             expect(KYCSFor_B.validFrom).to.equal(_VALID_FROM)
             expect(KYCSFor_B.validTo).to.equal(_VALID_TO)
             expect(KYCSFor_B.issuer).to.equal(account_C)
-            expect(KYCSFor_B.VCid).to.equal(_VC_ID)
+            expect(KYCSFor_B.vcId).to.equal(_VC_ID)
             expect(kycAccountsData_After.status).to.equal(1)
         })
 
-        it('GIVEN a VC WHEN revokeKYC THEN transaction succeed', async () => {
-            await kycFacet.grantKYC(
+        it('GIVEN a VC WHEN revokeKyc THEN transaction succeed', async () => {
+            await kycFacet.grantKyc(
                 account_B,
                 _VC_ID,
                 _VALID_FROM,
@@ -522,11 +522,11 @@ describe('KYC Tests', () => {
                 account_C
             )
 
-            await kycFacet.revokeKYC(account_B)
+            await kycFacet.revokeKyc(account_B)
 
-            let KYCStatusFor_B_After = await kycFacet.getKYCStatusFor(account_B)
-            let KYC_Count_After = await kycFacet.getKYCAccountsCount(1)
-            let KYCAccounts = await kycFacet.getKYCAccounts(1, 0, 100)
+            let KYCStatusFor_B_After = await kycFacet.getKycStatusFor(account_B)
+            let KYC_Count_After = await kycFacet.getKycAccountsCount(1)
+            let KYCAccounts = await kycFacet.getKycAccounts(1, 0, 100)
 
             expect(KYCStatusFor_B_After).to.equal(0)
             expect(KYC_Count_After).to.equal(0)
@@ -534,8 +534,8 @@ describe('KYC Tests', () => {
         })
 
         //TODO activate this test when TimeTravel is migrated
-        // it('Check KYC status after expiration', async () => {
-        //     await kycFacet.grantKYC(
+        // it('Check Kyc.sol status after expiration', async () => {
+        //     await kycFacet.grantKyc(
         //         account_B,
         //         _VC_ID,
         //         _VALID_FROM,
@@ -543,21 +543,21 @@ describe('KYC Tests', () => {
         //         account_C
         //     )
 
-        //     let KYCStatusFor_B_After_Grant = await kycFacet.getKYCStatusFor(
+        //     let KYCStatusFor_B_After_Grant = await kycFacet.getKycStatusFor(
         //         account_B
         //     )
 
         //     await timeTravelFacet.changeSystemTimestamp(_VALID_TO + 1)
 
         //     let KYCStatusFor_B_After_Expiration =
-        //         await kycFacet.getKYCStatusFor(account_B)
+        //         await kycFacet.getKycStatusFor(account_B)
 
         //     expect(KYCStatusFor_B_After_Grant).to.equal(1)
         //     expect(KYCStatusFor_B_After_Expiration).to.equal(0)
         // })
 
-        it('Check KYC status after issuer removed', async () => {
-            await kycFacet.grantKYC(
+        it('Check Kyc.sol status after issuer removed', async () => {
+            await kycFacet.grantKyc(
                 account_B,
                 _VC_ID,
                 _VALID_FROM,
@@ -565,21 +565,21 @@ describe('KYC Tests', () => {
                 account_C
             )
 
-            let KYCStatusFor_B_After_Grant = await kycFacet.getKYCStatusFor(
+            let KYCStatusFor_B_After_Grant = await kycFacet.getKycStatusFor(
                 account_B
             )
 
             await ssiManagementFacet.removeIssuer(account_C)
 
             let KYCStatusFor_B_After_Cancelling_Issuer =
-                await kycFacet.getKYCStatusFor(account_B)
+                await kycFacet.getKycStatusFor(account_B)
 
             expect(KYCStatusFor_B_After_Grant).to.equal(1)
             expect(KYCStatusFor_B_After_Cancelling_Issuer).to.equal(0)
         })
 
-        it('Check KYC status after issuer revokes VC', async () => {
-            await kycFacet.grantKYC(
+        it('Check Kyc.sol status after issuer revokes VC', async () => {
+            await kycFacet.grantKyc(
                 account_B,
                 _VC_ID,
                 _VALID_FROM,
@@ -587,13 +587,13 @@ describe('KYC Tests', () => {
                 account_C
             )
 
-            let KYCStatusFor_B_After_Grant = await kycFacet.getKYCStatusFor(
+            let KYCStatusFor_B_After_Grant = await kycFacet.getKycStatusFor(
                 account_B
             )
 
             await revocationList.connect(signer_C).revoke(_VC_ID)
 
-            let KYCFor_B_After_Revoking_VC = await kycFacet.getKYCStatusFor(
+            let KYCFor_B_After_Revoking_VC = await kycFacet.getKycStatusFor(
                 account_B
             )
 

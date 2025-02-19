@@ -212,7 +212,7 @@ import {IHold} from '../interfaces/hold/IHold.sol';
 import {Common} from '../common/Common.sol';
 import {_CONTROLLER_ROLE} from '../constants/roles.sol';
 import {_HOLD_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IKYC} from '../../layer_1/interfaces/kyc/IKYC.sol';
+import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -394,8 +394,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyWithValidHoldId(_holdIdentifier)
         checkControlList(_to)
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, _holdIdentifier.tokenHolder)
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _holdIdentifier.tokenHolder)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         returns (bool success_)
     {
         success_ = _executeHoldByPartition(_holdIdentifier, _to, _amount);

@@ -216,8 +216,8 @@ import {
     type Lock,
     IFactory,
     BusinessLogicResolver,
-    SSIManagement,
-    KYC,
+    SsiManagement,
+    Kyc,
 } from '@typechain'
 import {
     SNAPSHOT_ROLE,
@@ -233,6 +233,8 @@ import {
     MAX_UINT256,
     SSI_MANAGER_ROLE,
     KYC_ROLE,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
@@ -245,6 +247,7 @@ const _PARTITION_ID_2 =
 const lockedAmountOf_A_Partition_1 = 1
 const lockedAmountOf_A_Partition_2 = 2
 const lockedAmountOf_C_Partition_1 = 3
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Snapshots Tests', () => {
     let diamond: ResolverProxy
@@ -263,8 +266,8 @@ describe('Snapshots Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     before(async () => {
         // mute | mock console.log
@@ -345,9 +348,9 @@ describe('Snapshots Tests', () => {
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
         lockFacet = await ethers.getContractAt('Lock', diamond.address)
-        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address,
             signer_A
         )
@@ -428,8 +431,20 @@ describe('Snapshots Tests', () => {
         await accessControlFacet.grantRole(KYC_ROLE, account_B)
 
         await ssiManagementFacet.addIssuer(account_A)
-        await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
-        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
         // Using account C (with role)
         snapshotFacet = snapshotFacet.connect(signer_C)
         erc1410Facet = erc1410Facet.connect(signer_A)

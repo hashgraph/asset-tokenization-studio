@@ -222,8 +222,8 @@ import {
     PauseFacet__factory,
     AccessControlFacet__factory,
     Bond__factory,
-    KYC,
-    SSIManagement,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -240,6 +240,9 @@ import {
     DeployAtsFullInfrastructureCommand,
     SSI_MANAGER_ROLE,
     KYC_ROLE,
+    ZERO,
+    MAX_UINT256,
+    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
@@ -260,6 +263,7 @@ const TIME_2 = 2 * TIME
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
 const couponRate = 5
+const EMPTY_VC_ID = EMPTY_STRING
 
 let couponData = {
     recordDate: couponRecordDateInSeconds.toString(),
@@ -284,8 +288,8 @@ describe('Bond Tests', () => {
     let pauseFacet: PauseFacet
     let lockFacet: Lock
     let erc1410Facet: ERC1410ScheduledTasks
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     before(async () => {
         // mute | mock console.log
@@ -377,15 +381,21 @@ describe('Bond Tests', () => {
             diamond.address,
             signer_A
         )
-        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address,
             signer_A
         )
 
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
     })
 
     describe('Coupons', () => {

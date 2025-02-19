@@ -208,7 +208,7 @@ pragma solidity 0.8.18;
 
 import {IERC1410Operator} from '../../interfaces/ERC1400/IERC1410Operator.sol';
 import {Common} from '../../common/Common.sol';
-import {IKYC} from '../../../layer_1/interfaces/kyc/IKYC.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
     IERC1410Operator
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
@@ -290,8 +290,8 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
             _operatorTransferData.from
         )
         onlyUnProtectedPartitionsOrWildCardRole
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, _operatorTransferData.from)
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, _operatorTransferData.to)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.from)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.to)
         returns (bytes32)
     {
         {

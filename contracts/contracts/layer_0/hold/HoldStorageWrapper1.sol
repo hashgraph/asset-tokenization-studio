@@ -228,8 +228,7 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
     function _isHoldIdValid(
         IHold.HoldIdentifier memory _holdIdentifier
     ) internal view returns (bool) {
-        if (_getHold(_holdIdentifier).id == 0) return false;
-        return true;
+        return _getHold(_holdIdentifier).id != 0;
     }
 
     function _getHold(

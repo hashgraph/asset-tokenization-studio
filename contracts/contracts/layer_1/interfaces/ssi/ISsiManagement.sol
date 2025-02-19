@@ -206,130 +206,104 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface IKYC {
-    struct KYCData {
-        uint256 validFrom;
-        uint256 validTo;
-        string VCid;
-        address issuer;
-        KYCStatus status;
-    }
-
-    enum KYCStatus {
-        NOT_GRANTED,
-        GRANTED
-    }
-
-    error InvalidDates();
-    error InvalidKYCStatus();
-    error KYCIsNotGranted();
-    error InvalidZeroAddress();
+interface ISsiManagement {
+    error ListedIssuer(address issuer);
+    error UnlistedIssuer(address issuer);
+    error AccountIsNotIssuer(address issuer);
 
     /**
-     * @dev Emitted when a KYC is granted
+     * @dev Emitted when the revocation registry address is updated
      *
-     * @param account The address for which the KYC is granted
-     * @param issuer The address of the issuer of the KYC
+     * @param oldRegistryAddress previous revocation list address
+     * @param newRegistryAddress new revocation list address
      */
-
-    event KYCGranted(address indexed account, address indexed issuer);
+    event RevocationRegistryUpdated(
+        address indexed oldRegistryAddress,
+        address indexed newRegistryAddress
+    );
 
     /**
-     * @dev Emitted when a KYC is revoked
+     * @dev Emitted when an issuer is added to the issuerlist
      *
-     * @param account The address for which the KYC is revoked
-     * @param issuer The address of the issuer of the KYC
+     * @param issuer The issuer that was added to the issuerlist
+     * @param operator The caller of the function that emitted the event
      */
-    event KYCRevoked(address indexed account, address indexed issuer);
+    event AddedToIssuerList(address indexed operator, address indexed issuer);
 
     /**
-     * @dev Grant kyc to an address
+     * @dev Emitted when an issuer is removed from the issuerlist
      *
-     * @param _account user whose KYC is being granted
-     * @param _VCid credential Id
-     * @param _validFrom start date of the KYC
-     * @param _validTo end date of the KYC
-     * @param _issuer issurer of the KYC
+     * @param issuer The issuer that was removed from the issuerlist
+     * @param operator The caller of the function that emitted the event
+     */
+    event RemovedFromIssuerList(
+        address indexed operator,
+        address indexed issuer
+    );
+
+    /**
+     * @dev Updates the revocation registry address
+     *
+     * @param _revocationRegistryAddress revocation list address
      * @return success_ true or false
      */
-
-    function grantKYC(
-        address _account,
-        string memory _VCid,
-        uint256 _validFrom,
-        uint256 _validTo,
-        address _issuer
+    function setRevocationRegistryAddress(
+        address _revocationRegistryAddress
     ) external returns (bool success_);
 
     /**
-     * @dev Revoke kyc to an address
+     * @dev Adds an issuer to the issuer list
      *
-     * @param _account user whose KYC is being revoked
+     * @param _issuer issuer address
      * @return success_ true or false
      */
-
-    function revokeKYC(address _account) external returns (bool success_);
+    function addIssuer(address _issuer) external returns (bool success_);
 
     /**
-     * @dev Get the status of the KYC for an account
+     * @dev Remove an issuer from the issuer list
      *
-     * @param _account the account to check
-     * @return kycStatus_ GRANTED or NOT_GRANTED
+     * @param _issuer issuer address
+     * @return success_ true or false
      */
-
-    function getKYCStatusFor(
-        address _account
-    ) external view returns (KYCStatus kycStatus_);
+    function removeIssuer(address _issuer) external returns (bool success_);
 
     /**
-     * @dev Get all the info of the KYC for an account
+     * @dev returns the revocation registry address
      *
-     * @param _account the account to check
-     * @return kyc_
+     * @return revocationRegistryAddress_
      */
-
-    function getKYCFor(
-        address _account
-    ) external view returns (KYCData memory kyc_);
+    function getRevocationRegistryAddress()
+        external
+        view
+        returns (address revocationRegistryAddress_);
 
     /**
-     * @dev Get the count of accounts with a given KYC status
+     * @dev Checks if an issuer is in the issuer list
      *
-     * @param _kycStatus GRANTED or NOT_GRANTED
-     * @return KYCAccountsCount_ count of accounts with the given KYC status
+     * @param _issuer the issuer address
+     * @return bool true or false
      */
-
-    function getKYCAccountsCount(
-        KYCStatus _kycStatus
-    ) external view returns (uint256 KYCAccountsCount_);
+    function isIssuer(address _issuer) external view returns (bool);
 
     /**
-     * @dev Returns an array of accounts with a given KYC status
+     * @dev Returns the number of members the issuer list currently has
      *
-     * @param _kycStatus GRANTED or NOT_GRANTED
+     * @return issuerListCount_ The number of members
+     */
+    function getIssuerListCount()
+        external
+        view
+        returns (uint256 issuerListCount_);
+
+    /**
+     * @dev Returns an array of members the issuerlist currently has
+     *
      * @param _pageIndex members to skip : _pageIndex * _pageLength
      * @param _pageLength number of members to return
-     * @return accounts_ The array containing the accounts addresses
+     * @return members_ The array containing the members addresses
      */
-
-    function getKYCAccounts(
-        KYCStatus _kycStatus,
+    function getIssuerListMembers(
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view returns (address[] memory accounts_);
-
-    /**
-     * @dev Returns an array with the KYC data from accounts with a given KYC status
-     *
-     * @param _kycStatus GRANTED or NOT_GRANTED
-     * @param _pageIndex members to skip : _pageIndex * _pageLength
-     * @param _pageLength number of members to return
-     * @return kycData_ The array containing the data from the accounts
-     */
-
-    function getKYCAccountsData(
-        KYCStatus _kycStatus,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (KYCData[] memory kycData_);
+    ) external view returns (address[] memory members_);
 }

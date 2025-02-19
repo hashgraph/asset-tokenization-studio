@@ -219,8 +219,8 @@ import {
     Equity__factory,
     ERC1410ScheduledTasks__factory,
     Snapshots__factory,
-    SSIManagement,
-    KYC,
+    SsiManagement,
+    Kyc,
 } from '@typechain'
 import {
     SNAPSHOT_ROLE,
@@ -235,6 +235,9 @@ import {
     DeployAtsFullInfrastructureCommand,
     KYC_ROLE,
     SSI_MANAGER_ROLE,
+    MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 
 const amount = 1
@@ -247,6 +250,7 @@ const _PARTITION_ID_2 =
 const TIME = 6000
 const DECIMALS = 6
 const MAX_SUPPLY = BigInt(100000000)
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Snapshots Layer 2 Tests', () => {
     let diamond: ResolverProxy
@@ -264,8 +268,8 @@ describe('Snapshots Layer 2 Tests', () => {
     let snapshotFacet: Snapshots
     let accessControlFacet: AccessControl
     let equityFacet: Equity
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     before(async () => {
         // mute | mock console.log
@@ -345,9 +349,9 @@ describe('Snapshots Layer 2 Tests', () => {
             signer_A
         )
         snapshotFacet = Snapshots__factory.connect(diamond.address, signer_A)
-        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address,
             signer_A
         )
@@ -361,8 +365,20 @@ describe('Snapshots Layer 2 Tests', () => {
         await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
 
         await ssiManagementFacet.addIssuer(account_A)
-        await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
-        await kycFacet.grantKYC(account_B, '', 0, 9999999999, account_A)
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+        await kycFacet.grantKyc(
+            account_B,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
 
         snapshotFacet = snapshotFacet.connect(signer_A)
         erc1410Facet = erc1410Facet.connect(signer_A)

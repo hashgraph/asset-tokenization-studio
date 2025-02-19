@@ -225,8 +225,8 @@ import {
     Cap__factory,
     Lock__factory,
     Equity__factory,
-    SSIManagement,
-    KYC,
+    SsiManagement,
+    Kyc,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -245,6 +245,8 @@ import {
     MAX_UINT256,
     SSI_MANAGER_ROLE,
     KYC_ROLE,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 
 const amount = 1
@@ -261,6 +263,7 @@ const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
 const ONE_SECOND = 1
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Locks Layer 2 Tests', () => {
     let diamond: ResolverProxy
@@ -280,8 +283,8 @@ describe('Locks Layer 2 Tests', () => {
     let capFacet: Cap
     let equityFacet: Equity
     let lockFacet: Lock
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     async function deployAsset(multiPartition: boolean) {
         const init_rbacs: Rbac[] = set_initRbacs()
@@ -342,9 +345,9 @@ describe('Locks Layer 2 Tests', () => {
         capFacet = Cap__factory.connect(diamond.address, defaultSigner)
         lockFacet = Lock__factory.connect(diamond.address, defaultSigner)
         equityFacet = Equity__factory.connect(diamond.address, defaultSigner)
-        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address,
             signer_A
         )
@@ -394,8 +397,20 @@ describe('Locks Layer 2 Tests', () => {
             maxSupply_Partition_2_Original
         )
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
-        await kycFacet.grantKYC(account_B, '', 0, 9999999999, account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+        await kycFacet.grantKyc(
+            account_B,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
 
         await erc1410Facet.issueByPartition({
             partition: _PARTITION_ID_1,

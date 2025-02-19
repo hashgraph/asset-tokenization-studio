@@ -216,8 +216,8 @@ import {
     ScheduledTasks,
     BusinessLogicResolver,
     IFactory,
-    KYC,
-    SSIManagement,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -232,6 +232,9 @@ import {
     DeployAtsFullInfrastructureCommand,
     KYC_ROLE,
     SSI_MANAGER_ROLE,
+    MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
@@ -244,6 +247,7 @@ const adjustDecimals = 2
 const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
 const TIME = 6000
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Adjust Balances Tests', () => {
     let diamond: ResolverProxy
@@ -263,8 +267,8 @@ describe('Adjust Balances Tests', () => {
     let pauseFacet: Pause
     let equityFacet: Equity
     let scheduledTasksFacet: ScheduledTasks
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     async function deployAsset({
         multiPartition,
@@ -335,9 +339,9 @@ describe('Adjust Balances Tests', () => {
             'ScheduledTasks',
             diamond.address
         )
-        kycFacet = await ethers.getContractAt('KYC', diamond.address)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address)
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address
         )
     }
@@ -442,7 +446,7 @@ describe('Adjust Balances Tests', () => {
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
         await kycFacet
             .connect(signer_B)
-            .grantKYC(account_B, '', 0, 9999999999, account_A)
+            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
 
         erc1410Facet = erc1410Facet.connect(signer_A)
         equityFacet = equityFacet.connect(signer_A)

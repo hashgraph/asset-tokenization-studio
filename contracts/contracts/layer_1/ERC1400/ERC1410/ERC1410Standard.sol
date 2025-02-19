@@ -210,7 +210,7 @@ import {IERC1410Standard} from '../../interfaces/ERC1400/IERC1410Standard.sol';
 import {Common} from '../../common/Common.sol';
 
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
-import {IKYC} from '../../../layer_1/interfaces/kyc/IKYC.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410Standard is IERC1410Standard, Common {
     function issueByPartition(
@@ -225,7 +225,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
         onlyRole(_ISSUER_ROLE)
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, _issueData.tokenHolder)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _issueData.tokenHolder)
     {
         _issueByPartition(_issueData);
     }
@@ -245,7 +245,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyDefaultPartitionWithSinglePartition(_partition)
         checkControlList(_msgSender())
         onlyUnProtectedPartitionsOrWildCardRole
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, _msgSender())
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
     {
         // Add the function to validate the `_data` parameter
         _redeemByPartition(
@@ -280,7 +280,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         checkControlList(_msgSender())
         onlyOperator(_partition, _tokenHolder)
         onlyUnProtectedPartitionsOrWildCardRole
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, _tokenHolder)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
     {
         _redeemByPartition(
             _partition,

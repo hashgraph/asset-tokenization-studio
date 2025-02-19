@@ -426,7 +426,7 @@ import {
     ERC1644__factory,
     ERC20__factory,
     Factory__factory,
-    KYC__factory,
+    Kyc__factory,
     Lock__factory,
     PauseFacet__factory,
     ProtectedPartitions__factory,
@@ -435,7 +435,7 @@ import {
     ScheduledSnapshots__factory,
     ScheduledTasks__factory,
     Snapshots__factory,
-    SSIManagement__factory,
+    SsiManagement__factory,
     TransferAndLock__factory,
     TransparentUpgradeableProxy__factory,
 } from '@typechain'
@@ -606,18 +606,18 @@ export async function deployAtsContracts({
             overrides,
         }),
         kyc: new DeployContractWithFactoryCommand({
-            factory: new KYC__factory(),
+            factory: new Kyc__factory(),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.KYC.addresses?.[network]
+                ? Configuration.contracts.Kyc.addresses?.[network]
                 : undefined,
             overrides,
         }),
         ssiManagement: new DeployContractWithFactoryCommand({
-            factory: new SSIManagement__factory(),
+            factory: new SsiManagement__factory(),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.SSIManagement.addresses?.[network]
+                ? Configuration.contracts.SsiManagement.addresses?.[network]
                 : undefined,
             overrides,
         }),

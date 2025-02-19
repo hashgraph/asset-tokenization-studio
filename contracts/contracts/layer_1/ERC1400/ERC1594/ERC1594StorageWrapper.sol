@@ -224,7 +224,7 @@ import {
     _TO_ACCOUNT_KYC_ERROR_ID
 } from '../../constants/values.sol';
 import {Common} from '../../common/Common.sol';
-import {IKYC} from '../../../layer_1/interfaces/kyc/IKYC.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
     struct ERC1594Storage {
@@ -339,10 +339,10 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (_balanceOfAdjusted(_msgSender()) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _msgSender())) {
+        if (!_checkKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
             return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
-        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)) {
+        if (!_checkKycStatus(IKyc.KycStatus.GRANTED, _to)) {
             return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
 
@@ -391,10 +391,10 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (_balanceOfAdjusted(_from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _from)) {
+        if (!_checkKycStatus(IKyc.KycStatus.GRANTED, _from)) {
             return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
-        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)) {
+        if (!_checkKycStatus(IKyc.KycStatus.GRANTED, _to)) {
             return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
 

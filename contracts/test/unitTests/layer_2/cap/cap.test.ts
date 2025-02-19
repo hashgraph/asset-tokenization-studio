@@ -218,10 +218,10 @@ import {
     ERC1410ScheduledTasks,
     ERC1410ScheduledTasks__factory,
     IFactory,
-    KYC,
+    Kyc,
     Snapshots,
     Snapshots__factory,
-    SSIManagement,
+    SsiManagement,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -237,6 +237,8 @@ import {
     MAX_UINT256,
     SSI_MANAGER_ROLE,
     KYC_ROLE,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 
 const maxSupply = 3
@@ -247,6 +249,7 @@ const _PARTITION_ID_1 =
 const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const TIME = 6000
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('CAP Layer 2 Tests', () => {
     let factory: IFactory,
@@ -257,8 +260,8 @@ describe('CAP Layer 2 Tests', () => {
         equityFacet: Equity,
         snapshotFacet: Snapshots,
         erc1410Facet: ERC1410ScheduledTasks,
-        kycFacet: KYC,
-        ssiManagementFacet: SSIManagement
+        kycFacet: Kyc,
+        ssiManagementFacet: SsiManagement
 
     let signer_A: SignerWithAddress,
         signer_B: SignerWithAddress,
@@ -326,14 +329,20 @@ describe('CAP Layer 2 Tests', () => {
             diamond.address,
             signer_A
         )
-        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address,
             signer_A
         )
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
     }
 
     const setupScheduledBalanceAdjustments = async (

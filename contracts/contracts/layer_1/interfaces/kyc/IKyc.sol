@@ -203,142 +203,133 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {Common} from '../common/Common.sol';
-import {_SSI_MANAGER_ROLE} from '../constants/roles.sol';
-import {
-    IStaticFunctionSelectors
-} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_SSI_MANAGEMENT_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {ISSIManagement} from '../interfaces/ssi/ISSIManagement.sol';
-
-contract SSIManagement is ISSIManagement, IStaticFunctionSelectors, Common {
-    function setRevocationRegistryAddress(
-        address _revocationRegistryAddress
-    )
-        external
-        override
-        onlyRole(_SSI_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
-        address oldRevocationRegistryAddress = _getRevocationRegistryAddress();
-        success_ = _setRevocationRegistryAddress(_revocationRegistryAddress);
-        emit RevocationRegistryUpdated(
-            oldRevocationRegistryAddress,
-            _getRevocationRegistryAddress()
-        );
+interface IKyc {
+    struct KycData {
+        uint256 validFrom;
+        uint256 validTo;
+        string vcId;
+        address issuer;
+        KycStatus status;
     }
 
-    function addIssuer(
+    enum KycStatus {
+        NOT_GRANTED,
+        GRANTED
+    }
+
+    error InvalidDates();
+    error InvalidKycStatus();
+    error KycIsNotGranted();
+    error InvalidZeroAddress();
+
+    /**
+     * @dev Emitted when a Kyc is granted
+     *
+     * @param account The address for which the Kyc is granted
+     * @param issuer The address of the issuer of the Kyc
+     */
+
+    event KycGranted(address indexed account, address indexed issuer);
+
+    /**
+     * @dev Emitted when a Kyc is revoked
+     *
+     * @param account The address for which the Kyc is revoked
+     * @param issuer The address of the issuer of the Kyc
+     */
+    event KycRevoked(address indexed account, address indexed issuer);
+
+    /**
+     * @dev Grant kyc to an address
+     *
+     * @param _account user whose Kyc is being granted
+     * @param _vcId credential Id
+     * @param _validFrom start date of the Kyc
+     * @param _validTo end date of the Kyc
+     * @param _issuer issurer of the Kyc
+     * @return success_ true or false
+     */
+
+    function grantKyc(
+        address _account,
+        string memory _vcId,
+        uint256 _validFrom,
+        uint256 _validTo,
         address _issuer
-    )
-        external
-        override
-        onlyRole(_SSI_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
-        success_ = _addIssuer(_issuer);
-        if (!success_) {
-            revert ListedIssuer(_issuer);
-        }
-        emit AddedToIssuerList(_msgSender(), _issuer);
-    }
+    ) external returns (bool success_);
 
-    function removeIssuer(
-        address _issuer
-    )
-        external
-        override
-        onlyRole(_SSI_MANAGER_ROLE)
-        onlyUnpaused
-        returns (bool success_)
-    {
-        success_ = _removeIssuer(_issuer);
-        if (!success_) {
-            revert UnlistedIssuer(_issuer);
-        }
-        emit RemovedFromIssuerList(_msgSender(), _issuer);
-    }
+    /**
+     * @dev Revoke kyc to an address
+     *
+     * @param _account user whose Kyc is being revoked
+     * @return success_ true or false
+     */
 
-    function getRevocationRegistryAddress()
-        external
-        view
-        override
-        returns (address revocationRegistryAddress_)
-    {
-        return _getRevocationRegistryAddress();
-    }
+    function revokeKyc(address _account) external returns (bool success_);
 
-    function isIssuer(address _issuer) external view override returns (bool) {
-        return _isIssuer(_issuer);
-    }
+    /**
+     * @dev Get the status of the Kyc for an account
+     *
+     * @param _account the account to check
+     * @return kycStatus_ GRANTED or NOT_GRANTED
+     */
 
-    function getIssuerListCount()
-        external
-        view
-        override
-        returns (uint256 issuerListCount_)
-    {
-        return _getIssuerListCount();
-    }
+    function getKycStatusFor(
+        address _account
+    ) external view returns (KycStatus kycStatus_);
 
-    function getIssuerListMembers(
+    /**
+     * @dev Get all the info of the Kyc for an account
+     *
+     * @param _account the account to check
+     * @return kyc_
+     */
+
+    function getKycFor(
+        address _account
+    ) external view returns (KycData memory kyc_);
+
+    /**
+     * @dev Get the count of accounts with a given Kyc status
+     *
+     * @param _kycStatus GRANTED or NOT_GRANTED
+     * @return kycAccountsCount_ count of accounts with the given Kyc status
+     */
+
+    function getKycAccountsCount(
+        KycStatus _kycStatus
+    ) external view returns (uint256 kycAccountsCount_);
+
+    /**
+     * @dev Returns an array of accounts with a given Kyc status
+     *
+     * @param _kycStatus GRANTED or NOT_GRANTED
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return accounts_ The array containing the accounts addresses
+     */
+
+    function getKycAccounts(
+        KycStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view override returns (address[] memory members_) {
-        return _getIssuerListMembers(_pageIndex, _pageLength);
-    }
+    ) external view returns (address[] memory accounts_);
 
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _SSI_MANAGEMENT_RESOLVER_KEY;
-    }
+    /**
+     * @dev Returns an array with the Kyc data from accounts with a given Kyc status
+     *
+     * @param _kycStatus GRANTED or NOT_GRANTED
+     * @param _pageIndex members to skip : _pageIndex * _pageLength
+     * @param _pageLength number of members to return
+     * @return kycData_ The array containing the data from the accounts
+     */
 
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {
-        uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
-        staticFunctionSelectors_[selectorIndex++] = this
-            .setRevocationRegistryAddress
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.addIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.removeIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this.isIssuer.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getRevocationRegistryAddress
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getIssuerListCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getIssuerListMembers
-            .selector;
-    }
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](1);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(ISSIManagement)
-            .interfaceId;
-    }
+    function getKycAccountsData(
+        KycStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (KycData[] memory kycData_);
 }

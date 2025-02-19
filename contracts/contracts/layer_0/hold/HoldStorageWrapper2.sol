@@ -420,16 +420,15 @@ abstract contract HoldStorageWrapper2 is
         if (_decreaseHeldAmount(_holdIdentifier, _amount) == 0) {
             _removeHold(_holdIdentifier);
         }
-
-        if (!_validPartitionForReceiver(_holdIdentifier.partition, _to)) {
-            _addPartitionTo(_amount, _to, _holdIdentifier.partition);
-        } else {
+        if (_validPartitionForReceiver(_holdIdentifier.partition, _to)) {
             _increaseBalanceByPartition(
                 _to,
                 _amount,
                 _holdIdentifier.partition
             );
+            return;
         }
+        _addPartitionTo(_amount, _to, _holdIdentifier.partition);
     }
 
     function _decreaseHeldAmount(

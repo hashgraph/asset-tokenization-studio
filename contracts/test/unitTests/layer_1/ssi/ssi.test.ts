@@ -214,7 +214,7 @@ import {
     Pause,
     IFactory,
     BusinessLogicResolver,
-    SSIManagement,
+    SsiManagement,
     T3RevocationRegistry,
     T3RevocationRegistry__factory,
 } from '@typechain'
@@ -245,7 +245,7 @@ describe('SSI Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let pauseFacet: Pause
-    let ssiManagementFacet: SSIManagement
+    let ssiManagementFacet: SsiManagement
     let revocationList: T3RevocationRegistry
 
     let snapshot: SnapshotRestorer
@@ -338,7 +338,7 @@ describe('SSI Tests', () => {
             signer_A
         )
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address,
             signer_C
         )
@@ -402,7 +402,7 @@ describe('SSI Tests', () => {
         })
     })
 
-    describe('SSIManagement Wrong input data', () => {
+    describe('SsiManagement.sol Wrong input data', () => {
         it('GIVEN listed issuer WHEN adding issuer THEN fails with ListedIssuer', async () => {
             await ssiManagementFacet.addIssuer(account_B)
 
@@ -421,7 +421,7 @@ describe('SSI Tests', () => {
         })
     })
 
-    describe('SSIManagement OK', () => {
+    describe('SsiManagement.sol OK', () => {
         it('GIVEN a revocationList WHEN setRevocationRegistryAddress THEN transaction succeed', async () => {
             expect(
                 await ssiManagementFacet.setRevocationRegistryAddress(

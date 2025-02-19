@@ -206,104 +206,157 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface ISSIManagement {
-    error ListedIssuer(address issuer);
-    error UnlistedIssuer(address issuer);
-    error AccountIsNotIssuer(address issuer);
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {
+    SsiManagementStorageWrapper
+} from '../ssi/SsiManagementStorageWrapper.sol';
+import {_KYC_STORAGE_POSITION} from '../../constants/storagePositions.sol';
+import {LibCommon} from '../../common/LibCommon.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    IRevocationList
+} from '../../../layer_1/interfaces/kyc/IRevocationList.sol';
 
-    /**
-     * @dev Emitted when the revocation registry address is updated
-     *
-     * @param oldRegistryAddress previous revocation list address
-     * @param newRegistryAddress new revocation list address
-     */
-    event RevocationRegistryUpdated(
-        address indexed oldRegistryAddress,
-        address indexed newRegistryAddress
-    );
+abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
+    using LibCommon for EnumerableSet.AddressSet;
+    using EnumerableSet for EnumerableSet.AddressSet;
 
-    /**
-     * @dev Emitted when an issuer is added to the issuerlist
-     *
-     * @param issuer The issuer that was added to the issuerlist
-     * @param operator The caller of the function that emitted the event
-     */
-    event AddedToIssuerList(address indexed operator, address indexed issuer);
+    struct KycStorage {
+        mapping(address => IKyc.KycData) kyc;
+        mapping(IKyc.KycStatus => EnumerableSet.AddressSet) kycAddressesByStatus;
+    }
 
-    /**
-     * @dev Emitted when an issuer is removed from the issuerlist
-     *
-     * @param issuer The issuer that was removed from the issuerlist
-     * @param operator The caller of the function that emitted the event
-     */
-    event RemovedFromIssuerList(
-        address indexed operator,
-        address indexed issuer
-    );
+    modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) {
+        if (_validFrom > _validTo || _validTo < _blockTimestamp()) {
+            revert IKyc.InvalidDates();
+        }
+        _;
+    }
 
-    /**
-     * @dev Updates the revocation registry address
-     *
-     * @param _revocationRegistryAddress revocation list address
-     * @return success_ true or false
-     */
-    function setRevocationRegistryAddress(
-        address _revocationRegistryAddress
-    ) external returns (bool success_);
+    modifier onlyValidKycStatus(IKyc.KycStatus _kycStatus, address _account) {
+        if (!_checkKycStatus(_kycStatus, _account))
+            revert IKyc.InvalidKycStatus();
+        _;
+    }
 
-    /**
-     * @dev Adds an issuer to the issuer list
-     *
-     * @param _issuer issuer address
-     * @return success_ true or false
-     */
-    function addIssuer(address _issuer) external returns (bool success_);
+    modifier checkAddress(address _account) {
+        if (_account == address(0)) revert IKyc.InvalidZeroAddress();
+        _;
+    }
 
-    /**
-     * @dev Remove an issuer from the issuer list
-     *
-     * @param _issuer issuer address
-     * @return success_ true or false
-     */
-    function removeIssuer(address _issuer) external returns (bool success_);
+    function _grantKyc(
+        address _account,
+        string memory _vcId,
+        uint256 _validFrom,
+        uint256 _validTo,
+        address _issuer
+    ) internal returns (bool success_) {
+        _KycStorage().kyc[_account] = IKyc.KycData(
+            _validFrom,
+            _validTo,
+            _vcId,
+            _issuer,
+            IKyc.KycStatus.GRANTED
+        );
+        _KycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(
+            _account
+        );
+        success_ = true;
+    }
 
-    /**
-     * @dev returns the revocation registry address
-     *
-     * @return revocationRegistryAddress_
-     */
-    function getRevocationRegistryAddress()
-        external
-        view
-        returns (address revocationRegistryAddress_);
+    function _revokeKyc(address _account) internal returns (bool success_) {
+        delete _KycStorage().kyc[_account];
 
-    /**
-     * @dev Checks if an issuer is in the issuer list
-     *
-     * @param _issuer the issuer address
-     * @return bool true or false
-     */
-    function isIssuer(address _issuer) external view returns (bool);
+        _KycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].remove(
+            _account
+        );
+        success_ = true;
+    }
 
-    /**
-     * @dev Returns the number of members the issuer list currently has
-     *
-     * @return issuerListCount_ The number of members
-     */
-    function getIssuerListCount()
-        external
-        view
-        returns (uint256 issuerListCount_);
+    function _getKycStatusFor(
+        address _account
+    ) internal view virtual returns (IKyc.KycStatus kycStatus_) {
+        IKyc.KycData memory kycFor = _getKycFor(_account);
 
-    /**
-     * @dev Returns an array of members the issuerlist currently has
-     *
-     * @param _pageIndex members to skip : _pageIndex * _pageLength
-     * @param _pageLength number of members to return
-     * @return members_ The array containing the members addresses
-     */
-    function getIssuerListMembers(
+        if (kycFor.validTo < _blockTimestamp())
+            return IKyc.KycStatus.NOT_GRANTED;
+        if (kycFor.validFrom > _blockTimestamp())
+            return IKyc.KycStatus.NOT_GRANTED;
+        if (!_isIssuer(kycFor.issuer)) return IKyc.KycStatus.NOT_GRANTED;
+
+        address revocationListAddress = _getRevocationRegistryAddress();
+
+        if (
+            revocationListAddress != address(0) &&
+            IRevocationList(revocationListAddress).revoked(
+                kycFor.issuer,
+                kycFor.vcId
+            )
+        ) return IKyc.KycStatus.NOT_GRANTED;
+
+        return kycFor.status;
+    }
+
+    function _getKycFor(
+        address _account
+    ) internal view virtual returns (IKyc.KycData memory) {
+        return _KycStorage().kyc[_account];
+    }
+
+    function _getKycAccountsCount(
+        IKyc.KycStatus _kycStatus
+    ) internal view virtual returns (uint256 KYCAccountsCount_) {
+        KYCAccountsCount_ = _KycStorage()
+            .kycAddressesByStatus[_kycStatus]
+            .length();
+    }
+
+    function _getKycAccounts(
+        IKyc.KycStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view returns (address[] memory members_);
+    ) internal view virtual returns (address[] memory accounts_) {
+        accounts_ = _KycStorage().kycAddressesByStatus[_kycStatus].getFromSet(
+            _pageIndex,
+            _pageLength
+        );
+    }
+
+    function _getKycAccountsData(
+        IKyc.KycStatus _kycStatus,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) internal view virtual returns (IKyc.KycData[] memory kycData_) {
+        address[] memory accounts = _KycStorage()
+            .kycAddressesByStatus[_kycStatus]
+            .getFromSet(_pageIndex, _pageLength);
+
+        uint256 totalAccounts = accounts.length;
+
+        kycData_ = new IKyc.KycData[](totalAccounts);
+
+        for (uint256 index; index < totalAccounts; ) {
+            kycData_[index] = _getKycFor(accounts[index]);
+            unchecked {
+                ++index;
+            }
+        }
+    }
+
+    function _checkKycStatus(
+        IKyc.KycStatus _kycStatus,
+        address _account
+    ) internal view virtual returns (bool) {
+        return _getKycStatusFor(_account) == _kycStatus;
+    }
+
+    function _KycStorage() internal pure returns (KycStorage storage kyc_) {
+        bytes32 position = _KYC_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            kyc_.slot := position
+        }
+    }
 }

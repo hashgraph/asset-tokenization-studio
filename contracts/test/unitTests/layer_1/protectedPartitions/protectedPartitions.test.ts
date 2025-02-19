@@ -219,8 +219,8 @@ import {
     ControlList,
     IFactory,
     BusinessLogicResolver,
-    KYC,
-    SSIManagement,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -240,6 +240,8 @@ import {
     MAX_UINT256,
     SSI_MANAGER_ROLE,
     KYC_ROLE,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 
 const amount = 1
@@ -281,7 +283,7 @@ const redeemType = {
         { name: '_nounce', type: 'uint256' },
     ],
 }
-
+const EMPTY_VC_ID = EMPTY_STRING
 let basicTransferInfo: any
 let operatorTransferData: any
 
@@ -306,8 +308,8 @@ describe('ProtectedPartitions Tests', () => {
     let transferAndLockFacet: TransferAndLock
     let controlListFacet: ControlList
     let accessControlFacet: AccessControl
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     async function grant_WILD_CARD_ROLE_and_issue_tokens(
         wildCard_Account: string,
@@ -349,36 +351,36 @@ describe('ProtectedPartitions Tests', () => {
             'AccessControl',
             address
         )
-        kycFacet = await ethers.getContractAt('KYC', address)
+        kycFacet = await ethers.getContractAt('Kyc', address)
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             address
         )
     }
 
-    async function grantKYC() {
+    async function grantKyc() {
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
         await kycFacet
             .connect(signer_B)
-            .grantKYC(account_A, '', 0, MAX_UINT256, account_A)
+            .grantKyc(account_A, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
         await kycFacet
             .connect(signer_B)
-            .grantKYC(account_B, '', 0, MAX_UINT256, account_A)
+            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
         await kycFacet
             .connect(signer_B)
-            .grantKYC(account_C, '', 0, MAX_UINT256, account_A)
+            .grantKyc(account_C, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
     }
 
     async function setProtected() {
         await setFacets(diamond_ProtectedPartitions.address)
         domain.chainId = await network.provider.send('eth_chainId')
         domain.verifyingContract = diamond_ProtectedPartitions.address
-        await grantKYC()
+        await grantKyc()
     }
 
     async function setUnProtected() {
         await setFacets(diamond_UnprotectedPartitions.address)
-        await grantKYC()
+        await grantKyc()
     }
 
     before(async () => {
@@ -612,11 +614,11 @@ describe('ProtectedPartitions Tests', () => {
             )
         })
 
-        it('GIVEN a non kyc account WHEN performing a protected transfer from or to THEN transaction fails with InvalidKYCStatus', async () => {
+        it('GIVEN a non kyc account WHEN performing a protected transfer from or to THEN transaction fails with InvalidKycStatus', async () => {
             await setProtected()
 
             kycFacet = kycFacet.connect(signer_B)
-            await kycFacet.revokeKYC(account_A)
+            await kycFacet.revokeKyc(account_A)
 
             erc1410Facet = erc1410Facet.connect(signer_B)
 
@@ -630,7 +632,7 @@ describe('ProtectedPartitions Tests', () => {
                     1,
                     '0x1234'
                 )
-            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKYCStatus')
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
 
             await expect(
                 erc1410Facet.protectedTransferFromByPartition(
@@ -642,7 +644,7 @@ describe('ProtectedPartitions Tests', () => {
                     1,
                     '0x1234'
                 )
-            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKYCStatus')
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
         })
     })
 
@@ -700,9 +702,9 @@ describe('ProtectedPartitions Tests', () => {
             ).to.be.rejectedWith('AccountIsBlocked')
         })
 
-        it('GIVEN a non kyc account WHEN performing a protected redeem from THEN transaction fails with InvalidKYCStatus', async () => {
+        it('GIVEN a non kyc account WHEN performing a protected redeem from THEN transaction fails with InvalidKycStatus', async () => {
             await setProtected()
-            await kycFacet.connect(signer_B).revokeKYC(account_A)
+            await kycFacet.connect(signer_B).revokeKyc(account_A)
 
             erc1410Facet = erc1410Facet.connect(signer_B)
 
@@ -715,7 +717,7 @@ describe('ProtectedPartitions Tests', () => {
                     1,
                     '0x1234'
                 )
-            ).to.be.rejectedWith('InvalidKYCStatus')
+            ).to.be.rejectedWith('InvalidKycStatus')
         })
     })
 

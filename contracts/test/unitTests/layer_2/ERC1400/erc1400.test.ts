@@ -228,8 +228,8 @@ import {
     Equity__factory,
     ERC1410ScheduledTasks__factory,
     PauseFacet__factory,
-    KYC,
-    SSIManagement,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -261,6 +261,8 @@ import {
     KYC_ROLE,
     FROM_ACCOUNT_KYC_ERROR_ID,
     TO_ACCOUNT_KYC_ERROR_ID,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
@@ -283,6 +285,7 @@ const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
+const EMPTY_VC_ID = EMPTY_STRING
 let basicTransferInfo: any
 let operatorTransferData: any
 
@@ -329,12 +332,12 @@ describe('ERC1400 Tests', () => {
     let erc1594Facet: ERC1594
     let erc1644Facet: ERC1644
     let adjustBalancesFacet: AdjustBalances
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
         await grantRolesToAccounts()
-        await grantKYCToAccounts()
+        await grantKycToAccounts()
         await connectFacetsToSigners()
         await setMaxSupply(singlePartition)
         await issueTokens(singlePartition)
@@ -351,17 +354,17 @@ describe('ERC1400 Tests', () => {
         await accessControlFacet.grantRole(KYC_ROLE, account_A)
     }
 
-    async function grantKYCToAccounts() {
+    async function grantKycToAccounts() {
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
         await kycFacet
             .connect(signer_A)
-            .grantKYC(account_A, '', 0, 9999999999, account_A)
+            .grantKyc(account_A, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
         await kycFacet
             .connect(signer_A)
-            .grantKYC(account_B, '', 0, 9999999999, account_A)
+            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
         await kycFacet
             .connect(signer_A)
-            .grantKYC(account_C, '', 0, 9999999999, account_A)
+            .grantKyc(account_C, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
     }
 
     async function connectFacetsToSigners() {
@@ -691,9 +694,9 @@ describe('ERC1400 Tests', () => {
         erc1644Facet = await ethers.getContractAt('ERC1644', diamond.address)
 
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
-        kycFacet = await ethers.getContractAt('KYC', diamond.address)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address)
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address
         )
     }
@@ -798,21 +801,39 @@ describe('ERC1400 Tests', () => {
                 signer_A
             )
             kycFacet = await ethers.getContractAt(
-                'KYC',
+                'Kyc',
                 diamond.address,
                 signer_B
             )
             ssiManagementFacet = await ethers.getContractAt(
-                'SSIManagement',
+                'SsiManagement',
                 diamond.address,
                 signer_A
             )
 
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
             await ssiManagementFacet.addIssuer(account_E)
-            await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_E)
-            await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
-            await kycFacet.grantKYC(account_D, '', 0, 9999999999, account_E)
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+            await kycFacet.grantKyc(
+                account_E,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+            await kycFacet.grantKyc(
+                account_D,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
 
             await erc1410Facet.issueByPartition({
                 partition: _PARTITION_ID_1,
@@ -1162,10 +1183,10 @@ describe('ERC1400 Tests', () => {
             expect(canTransfer_2[1]).to.be.equal(FROM_ACCOUNT_BLOCKED_ERROR_ID)
         })
 
-        it('GIVEN non kyc accounts (to, from) WHEN transfer THEN transaction fails with InvalidKYCStatus', async () => {
+        it('GIVEN non kyc accounts (to, from) WHEN transfer THEN transaction fails with InvalidKycStatus', async () => {
             await erc1410Facet.connect(signer_E).authorizeOperator(account_C)
             await erc1410Facet.connect(signer_D).authorizeOperator(account_C)
-            await kycFacet.revokeKYC(account_D)
+            await kycFacet.revokeKyc(account_D)
 
             erc1410Facet = erc1410Facet.connect(signer_C)
             let canTransfer = await erc1410Facet.canTransferByPartition(
@@ -1184,15 +1205,21 @@ describe('ERC1400 Tests', () => {
                     basicTransferInfo,
                     data
                 )
-            ).to.be.rejectedWith('InvalidKYCStatus')
+            ).to.be.rejectedWith('InvalidKycStatus')
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
-            ).to.be.rejectedWith('InvalidKYCStatus')
+            ).to.be.rejectedWith('InvalidKycStatus')
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(TO_ACCOUNT_KYC_ERROR_ID)
 
-            await kycFacet.grantKYC(account_D, '', 0, 9999999999, account_E)
-            await kycFacet.revokeKYC(account_E)
+            await kycFacet.grantKyc(
+                account_D,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+            await kycFacet.revokeKyc(account_E)
             canTransfer = await erc1410Facet.canTransferByPartition(
                 account_E,
                 account_D,
@@ -1211,10 +1238,10 @@ describe('ERC1400 Tests', () => {
                         basicTransferInfo,
                         data
                     )
-            ).to.be.rejectedWith('InvalidKYCStatus')
+            ).to.be.rejectedWith('InvalidKycStatus')
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
-            ).to.be.rejectedWith('InvalidKYCStatus')
+            ).to.be.rejectedWith('InvalidKycStatus')
             expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer[1]).to.be.equal(FROM_ACCOUNT_KYC_ERROR_ID)
         })
@@ -1280,9 +1307,9 @@ describe('ERC1400 Tests', () => {
             ).to.be.rejectedWith('AccountIsBlocked')
         })
 
-        it('GIVEN non kyc account WHEN issue or redeem THEN transaction fails with InvalidKYCStatus', async () => {
+        it('GIVEN non kyc account WHEN issue or redeem THEN transaction fails with InvalidKycStatus', async () => {
             await erc1410Facet.connect(signer_D).authorizeOperator(account_A)
-            await kycFacet.revokeKYC(account_D)
+            await kycFacet.revokeKyc(account_D)
             await expect(
                 erc1410Facet.issueByPartition({
                     partition: _PARTITION_ID_1,
@@ -1290,7 +1317,7 @@ describe('ERC1400 Tests', () => {
                     value: amount,
                     data: data,
                 })
-            ).to.be.rejectedWith('InvalidKYCStatus')
+            ).to.be.rejectedWith('InvalidKycStatus')
             let canRedeem = await erc1410Facet.canRedeemByPartition(
                 account_D,
                 _PARTITION_ID_1,
@@ -1302,7 +1329,7 @@ describe('ERC1400 Tests', () => {
                 erc1410Facet
                     .connect(signer_D)
                     .redeemByPartition(_PARTITION_ID_1, amount, data)
-            ).to.be.rejectedWith('InvalidKYCStatus')
+            ).to.be.rejectedWith('InvalidKycStatus')
             await expect(
                 erc1410Facet.operatorRedeemByPartition(
                     _PARTITION_ID_1,
@@ -1311,7 +1338,7 @@ describe('ERC1400 Tests', () => {
                     data,
                     operatorData
                 )
-            ).to.be.rejectedWith('InvalidKYCStatus')
+            ).to.be.rejectedWith('InvalidKycStatus')
             expect(canRedeem[0]).to.be.equal(false)
             expect(canRedeem[1]).to.be.equal(FROM_ACCOUNT_KYC_ERROR_ID)
         })
@@ -2160,12 +2187,12 @@ describe('ERC1400 Tests', () => {
                 newDiamond.address
             )
             kycFacet = await ethers.getContractAt(
-                'KYC',
+                'Kyc',
                 newDiamond.address,
                 signer_B
             )
             ssiManagementFacet = await ethers.getContractAt(
-                'SSIManagement',
+                'SsiManagement',
                 newDiamond.address,
                 signer_A
             )
@@ -2178,7 +2205,13 @@ describe('ERC1400 Tests', () => {
             await accessControlFacet.grantRole(KYC_ROLE, account_B)
 
             await ssiManagementFacet.addIssuer(account_E)
-            await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
+            await kycFacet.grantKyc(
+                account_E,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
 
             // Using account A (with role)
             erc1410Facet = erc1410Facet.connect(signer_A)
@@ -2558,20 +2591,32 @@ describe('ERC1400 Tests', () => {
                 signer_A
             )
             kycFacet = await ethers.getContractAt(
-                'KYC',
+                'Kyc',
                 diamond.address,
                 signer_B
             )
             ssiManagementFacet = await ethers.getContractAt(
-                'SSIManagement',
+                'SsiManagement',
                 diamond.address,
                 signer_A
             )
 
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
             await ssiManagementFacet.addIssuer(account_E)
-            await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_E)
-            await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+            await kycFacet.grantKyc(
+                account_E,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
 
             await erc1410Facet.issueByPartition({
                 partition: _PARTITION_ID_1,
@@ -2824,7 +2869,7 @@ describe('ERC1400 Tests', () => {
                 await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
                 await accessControlFacet.grantRole(KYC_ROLE, account_A)
 
-                await grantKYCToAccounts()
+                await grantKycToAccounts()
 
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -2898,7 +2943,7 @@ describe('ERC1400 Tests', () => {
                 await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
                 await accessControlFacet.grantRole(KYC_ROLE, account_A)
 
-                await grantKYCToAccounts()
+                await grantKycToAccounts()
 
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
@@ -2945,7 +2990,7 @@ describe('ERC1400 Tests', () => {
                 await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
                 await accessControlFacet.grantRole(KYC_ROLE, account_A)
 
-                await grantKYCToAccounts()
+                await grantKycToAccounts()
 
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
