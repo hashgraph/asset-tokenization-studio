@@ -203,10 +203,26 @@
 
 */
 
+<<<<<<<< HEAD:contracts/scripts/commands/ErrorMessageCommand.ts
 export default abstract class ErrorMessageCommand {
     public readonly errorMessage?: string
 
     constructor({ errorMessage }: { errorMessage?: string } = {}) {
         this.errorMessage = errorMessage
     }
+========
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity 0.8.18;
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+interface ISnapshots_2 {
+    function ABAFAtSnapshot(
+        uint256 _snapshotID
+    ) external view returns (uint256 ABAF_);
+
+    function decimalsAtSnapshot(
+        uint256 _snapshotID
+    ) external view returns (uint8 decimals_);
+>>>>>>>> refs/heads/sprint-11:contracts/contracts/layer_2/interfaces/snapshots/ISnapshots_2.sol
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

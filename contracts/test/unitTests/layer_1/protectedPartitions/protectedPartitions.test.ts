@@ -221,6 +221,7 @@ import {
     BusinessLogicResolver,
     Kyc,
     SsiManagement,
+    Hold,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -242,6 +243,7 @@ import {
     KYC_ROLE,
     ZERO,
     EMPTY_STRING,
+    ADDRESS_ZERO,
 } from '@scripts'
 
 const amount = 1
@@ -284,6 +286,27 @@ const redeemType = {
     ],
 }
 const EMPTY_VC_ID = EMPTY_STRING
+
+const holdType = {
+    Hold: [
+        { name: 'amount', type: 'uint256' },
+        { name: 'expirationTimestamp', type: 'uint256' },
+        { name: 'escrow', type: 'address' },
+        { name: 'to', type: 'address' },
+        { name: 'data', type: 'bytes' },
+    ],
+    ProtectedHold: [
+        { name: 'hold', type: 'Hold' },
+        { name: 'deadline', type: 'uint256' },
+        { name: 'nonce', type: 'uint256' },
+    ],
+    protectedCreateHoldByPartition: [
+        { name: '_partition', type: 'bytes32' },
+        { name: '_from', type: 'address' },
+        { name: '_protectedHold', type: 'ProtectedHold' },
+    ],
+}
+
 let basicTransferInfo: any
 let operatorTransferData: any
 
@@ -310,8 +333,12 @@ describe('ProtectedPartitions Tests', () => {
     let accessControlFacet: AccessControl
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
+    let holdFacet: Hold
 
-    async function grant_WILD_CARD_ROLE_and_issue_tokens(
+    let protectedHold: any
+    let hold: any
+
+  async function grant_WILD_CARD_ROLE_and_issue_tokens(
         wildCard_Account: string,
         issue_Account: string,
         issue_Amount: number,
@@ -351,7 +378,8 @@ describe('ProtectedPartitions Tests', () => {
             'AccessControl',
             address
         )
-        kycFacet = await ethers.getContractAt('Kyc', address)
+      holdFacet = await ethers.getContractAt('Hold', address)
+      kycFacet = await ethers.getContractAt('Kyc', address)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',
             address
@@ -397,12 +425,15 @@ describe('ProtectedPartitions Tests', () => {
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
                     useDeployed: false,
+                    useEnvironment: false,
+                    timeTravelEnabled: true,
                 })
             )
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
     })
+
     beforeEach(async () => {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
@@ -509,10 +540,27 @@ describe('ProtectedPartitions Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
+        let expirationTimestamp = MAX_UINT256
+
+        hold = {
+            amount: 1,
+            expirationTimestamp: expirationTimestamp,
+            escrow: account_B,
+            to: ADDRESS_ZERO,
+            data: '0x1234',
+        }
+
+        protectedHold = {
+            hold: hold,
+            deadline: MAX_UINT256,
+            nonce: 1,
+        }
+
         basicTransferInfo = {
             to: account_B,
             value: amount,
         }
+
         operatorTransferData = {
             partition: DEFAULT_PARTITION,
             from: account_A,
@@ -531,7 +579,7 @@ describe('ProtectedPartitions Tests', () => {
     })
 
     describe('Generic Transfer check Tests', () => {
-        it('GIVEN a paused security role WHEN performing a protected transfer THEN transaction fails with Paused', async () => {
+        it('GIVEN a paused security WHEN performing a protected transfer THEN transaction fails with Paused', async () => {
             await setProtected()
 
             pauseFacet = pauseFacet.connect(signer_B)
@@ -721,6 +769,85 @@ describe('ProtectedPartitions Tests', () => {
         })
     })
 
+    describe('Generic Hold check Tests', () => {
+        it('GIVEN a paused security WHEN performing a protected hold THEN transaction fails with Paused', async () => {
+            await setProtected()
+
+            pauseFacet = pauseFacet.connect(signer_B)
+            await pauseFacet.pause()
+
+            await expect(
+                holdFacet.protectedCreateHoldByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    protectedHold,
+                    '0x1234'
+                )
+            ).to.be.revertedWithCustomError(holdFacet, 'TokenIsPaused')
+        })
+
+        it('GIVEN a account without the participant role WHEN performing a protected hold THEN transaction fails with AccountHasNoRole', async () => {
+            await setProtected()
+
+            await expect(
+                holdFacet.protectedCreateHoldByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    protectedHold,
+                    '0x1234'
+                )
+            ).to.be.revertedWithCustomError(holdFacet, 'AccountHasNoRole')
+        })
+
+        it('GIVEN a zero address tokenHolder account WHEN performing a protected hold from it THEN transaction fails with ZeroAddressNotAllowed', async () => {
+            await setProtected()
+
+            await expect(
+                holdFacet.protectedCreateHoldByPartition(
+                    DEFAULT_PARTITION,
+                    ADDRESS_ZERO,
+                    protectedHold,
+                    '0x1234'
+                )
+            ).to.be.revertedWithCustomError(holdFacet, 'ZeroAddressNotAllowed')
+        })
+
+        it('GIVEN a zero address escrow account WHEN performing a protected hold from it THEN transaction fails with ZeroAddressNotAllowed', async () => {
+            await setProtected()
+
+            protectedHold.hold.escrow = ADDRESS_ZERO
+
+            await expect(
+                holdFacet.protectedCreateHoldByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    protectedHold,
+                    '0x1234'
+                )
+            ).to.be.revertedWithCustomError(holdFacet, 'ZeroAddressNotAllowed')
+        })
+
+        it('GIVEN a wrong expiration date WHEN performing a protected hold from it THEN transaction fails with WrongExpirationTimestamp', async () => {
+            await setProtected()
+
+            protectedHold.hold.expirationTimestamp = 1
+
+            await expect(
+                holdFacet
+                    .connect(signer_B)
+                    .protectedCreateHoldByPartition(
+                        DEFAULT_PARTITION,
+                        account_A,
+                        protectedHold,
+                        '0x1234'
+                    )
+            ).to.be.revertedWithCustomError(
+                holdFacet,
+                'WrongExpirationTimestamp'
+            )
+        })
+    })
+
     describe('Generic set Partition Status Tests', () => {
         it('GIVEN a paused security role WHEN protecting or unprotecting partitions THEN transaction fails with Paused', async () => {
             await setProtected()
@@ -803,6 +930,19 @@ describe('ProtectedPartitions Tests', () => {
                     0,
                     '0x1234'
                 )
+            ).to.be.rejectedWith('PartitionsAreUnProtected')
+        })
+
+        it('GIVEN an unprotected partitions equity WHEN performing a protected hold THEN transaction fails with PartitionsAreUnProtected', async () => {
+            await expect(
+                holdFacet
+                    .connect(signer_B)
+                    .protectedCreateHoldByPartition(
+                        DEFAULT_PARTITION,
+                        account_A,
+                        protectedHold,
+                        '0x1234'
+                    )
             ).to.be.rejectedWith('PartitionsAreUnProtected')
         })
     })
@@ -1311,6 +1451,143 @@ describe('ProtectedPartitions Tests', () => {
                     1,
                     signature
                 )
+            })
+        })
+
+        describe('Hold Tests', () => {
+            it('GIVEN a protected token WHEN performing a createHoldByPartition THEN transaction fails with PartitionsAreProtected', async () => {
+                await expect(
+                    holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)
+                ).to.be.rejectedWith('PartitionsAreProtected')
+            })
+
+            it('GIVEN a protected token WHEN performing a createHoldFromByPartition THEN transaction fails with PartitionsAreProtected', async () => {
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .createHoldFromByPartition(
+                            DEFAULT_PARTITION,
+                            account_A,
+                            hold,
+                            '0x'
+                        )
+                ).to.be.rejectedWith('PartitionsAreProtected')
+            })
+
+            it('GIVEN a protected token WHEN performing a operatorCreateHoldByPartition THEN transaction fails with PartitionsAreProtected', async () => {
+                await erc1410Facet
+                    .connect(signer_A)
+                    .authorizeOperator(account_B)
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .operatorCreateHoldByPartition(
+                            DEFAULT_PARTITION,
+                            account_A,
+                            hold,
+                            '0x'
+                        )
+                ).to.be.rejectedWith('PartitionsAreProtected')
+
+                await erc1410Facet.connect(signer_A).revokeOperator(account_B)
+            })
+
+            it('GIVEN a wrong deadline WHEN performing a protected hold THEN transaction fails with ExpiredDeadline', async () => {
+                protectedHold.deadline = 1
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .protectedCreateHoldByPartition(
+                            DEFAULT_PARTITION,
+                            account_A,
+                            protectedHold,
+                            '0x1234'
+                        )
+                ).to.be.rejectedWith('ExpiredDeadline')
+            })
+
+            it('GIVEN a wrong signature length WHEN performing a protected hold THEN transaction fails with WrongSignatureLength', async () => {
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .protectedCreateHoldByPartition(
+                            DEFAULT_PARTITION,
+                            account_A,
+                            protectedHold,
+                            '0x12'
+                        )
+                ).to.be.rejectedWith('WrongSignatureLength')
+            })
+
+            it('GIVEN a wrong signature WHEN performing a protected hold THEN transaction fails with WrongSignature', async () => {
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .protectedCreateHoldByPartition(
+                            DEFAULT_PARTITION,
+                            account_A,
+                            protectedHold,
+                            '0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344'
+                        )
+                ).to.be.rejectedWith('WrongSignature')
+            })
+
+            it('GIVEN a wrong nounce WHEN performing a protected hold THEN transaction fails with WrongNounce', async () => {
+                protectedHold.nonce = 0
+
+                await expect(
+                    holdFacet
+                        .connect(signer_B)
+                        .protectedCreateHoldByPartition(
+                            DEFAULT_PARTITION,
+                            account_A,
+                            protectedHold,
+                            '0x1234'
+                        )
+                ).to.be.rejectedWith('WrongNounce')
+            })
+
+            it('GIVEN a correct signature WHEN performing a protected hold THEN transaction succeeds', async () => {
+                const message = {
+                    _partition: DEFAULT_PARTITION,
+                    _from: account_A,
+                    _protectedHold: protectedHold,
+                }
+
+                /*const domainSeparator =
+                    ethers.utils._TypedDataEncoder.hashDomain(domain)
+                const messageHash = ethers.utils._TypedDataEncoder.hash(
+                    domain,
+                    transferType,
+                    message
+                )*/
+
+                // Sign the message hash
+                const signature = await signer_A._signTypedData(
+                    domain,
+                    holdType,
+                    message
+                )
+
+                await erc1410Facet
+                    .connect(signer_B)
+                    .issueByPartition(
+                        DEFAULT_PARTITION,
+                        account_A,
+                        protectedHold.hold.amount,
+                        '0x'
+                    )
+
+                await holdFacet
+                    .connect(signer_B)
+                    .protectedCreateHoldByPartition(
+                        DEFAULT_PARTITION,
+                        account_A,
+                        protectedHold,
+                        signature
+                    )
             })
         })
     })

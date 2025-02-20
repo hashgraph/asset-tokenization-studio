@@ -280,6 +280,7 @@ task(
             scheduledTasks,
             corporateActions,
             lock,
+            hold,
             transferAndLock,
             adjustBalances,
         } = await deployAtsFullInfrastructure(
@@ -321,6 +322,7 @@ task(
             'Scheduled Tasks': scheduledTasks.address,
             'Corporate Actions': corporateActions.address,
             Lock: lock.address,
+            Hold: hold.address,
             'Transfer and Lock': transferAndLock.address,
             'Adjust Balances': adjustBalances.address,
         }

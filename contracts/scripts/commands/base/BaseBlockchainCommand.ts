@@ -205,6 +205,7 @@
 
 import { Overrides, Signer } from 'ethers'
 
+<<<<<<<< HEAD:contracts/scripts/commands/base/BaseBlockchainCommand.ts
 export interface BaseBlockchainCommandParams {
     signer: Signer
     overrides?: Overrides
@@ -217,5 +218,18 @@ export default abstract class BaseBlockchainCommand {
     constructor({ signer, overrides }: BaseBlockchainCommandParams) {
         this.signer = signer
         this.overrides = overrides
+========
+import {CD_Lib} from '../common/CD_Lib.sol';
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+library Lock_CD_Lib {
+    function getLockedAmountFor(
+        address _tokenHolder
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getLockedAmountFor(address)', _tokenHolder)
+        );
+        return abi.decode(data, (uint256));
+>>>>>>>> refs/heads/sprint-11:contracts/contracts/layer_1/lock/Lock_CD_Lib.sol
     }
 }

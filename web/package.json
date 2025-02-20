@@ -1,6 +1,6 @@
 {
   "name": "@hashgraph/asset-tokenization-dapp",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "license": "Apache-2.0",
   "scripts": {
     "dev": "vite",
@@ -75,6 +75,11 @@
     "vite-plugin-environment": "^1.1.3",
     "vite-plugin-rewrite-all": "^1.0.1",
     "vite-tsconfig-paths": "^4.2.1"
+  },
+  "overrides": {
+    "ws": "7.5.10",
+    "elliptic": "6.5.7",
+    "path-to-regexp": "6.3.0"
   },
   "resolutions": {
     "nwsapi": "2.2.2",

@@ -228,6 +228,7 @@ import { InvalidBytes32 } from '../../../../domain/context/security/error/Invali
 import { InvalidBytes3 } from '../../../../domain/context/bond/error/InvalidBytes3.js';
 import { HEDERA_FORMAT_ID_REGEX } from '../../../../domain/context/shared/HederaId.js';
 import { InvalidBytes } from '../../../../domain/context/shared/error/InvalidBytes.js';
+import { InvalidBase64 } from '../../../../domain/context/shared/error/InvalidBase64.js';
 
 export default class Validation {
   public static checkPublicKey = () => {
@@ -419,6 +420,17 @@ export default class Validation {
       const err: BaseError[] = [];
       if (!bytesRegEx.exec(val)) {
         err.push(new InvalidBytes(val));
+      }
+      return err;
+    };
+  };
+
+  public static checkBase64Format = () => {
+    return (val: any): BaseError[] => {
+      const base64RegEx = /^[a-zA-Z0-9+/]*={0,2}$/;
+      const err: BaseError[] = [];
+      if (!base64RegEx.exec(val)) {
+        err.push(new InvalidBase64(val));
       }
       return err;
     };

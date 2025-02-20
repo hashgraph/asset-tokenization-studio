@@ -297,6 +297,7 @@ describe('ERC1594 Tests', () => {
                         signer: signer_A,
                         useDeployed: false,
                         useEnvironment: true,
+                        timeTravelEnabled: true,
                     })
                 )
 

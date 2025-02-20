@@ -206,6 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+<<<<<<<< HEAD:contracts/contracts/test/testTimeTravel/timeTravel/TimeTravel.sol
 import {TimeTravelStorageWrapper} from './TimeTravelStorageWrapper.sol';
 import {
     IStaticFunctionSelectors
@@ -219,6 +220,25 @@ contract TimeTravel is
 {
     function changeSystemTimestamp(uint256 newTimestamp) external override {
         _changeSystemTimestamp(newTimestamp);
+========
+import {CD_Lib} from '../../../layer_1/common/CD_Lib.sol';
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+library ERC1410ScheduledTasks_CD_Lib {
+    function triggerAndSyncAll(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) internal {
+        CD_Lib.delegateCall(
+            abi.encodeWithSignature(
+                'triggerAndSyncAll(bytes32,address,address)',
+                _partition,
+                _from,
+                _to
+            )
+        );
+>>>>>>>> refs/heads/sprint-11:contracts/contracts/layer_2/ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol
     }
 
     function resetSystemTimestamp() external override {

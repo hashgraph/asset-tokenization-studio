@@ -237,8 +237,10 @@ let environmentInitialized = false
 
 export async function deployEnvironment({
     signer,
+    timeTravelEnabled = false,
 }: {
     signer: SignerWithAddress
+    timeTravelEnabled?: boolean
 }) {
     if (!environmentInitialized) {
         const {
@@ -251,6 +253,7 @@ export async function deployEnvironment({
                 signer: signer,
                 network: network.name as Network,
                 useDeployed: false,
+                timeTravelEnabled: timeTravelEnabled,
             })
         )
 
@@ -298,6 +301,7 @@ function buildEmptyEnvironment(): Environment {
             transferAndLock: {} as IStaticFunctionSelectors,
             adjustBalances: {} as IStaticFunctionSelectors,
             protectedPartitions: {} as IStaticFunctionSelectors,
+            hold: {} as IStaticFunctionSelectors,
         },
         facetIdsEquities: [],
         facetVersionsEquities: [],

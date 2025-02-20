@@ -10,6 +10,29 @@ jobs:
     runs-on: token-studio-linux-large
     env:
       NODE_OPTIONS: "--max-old-space-size=32768"
+      CLIENT_PRIVATE_KEY_ECDSA_1: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_1 }}
+      CLIENT_PUBLIC_KEY_ECDSA_1: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_1 }}
+      CLIENT_ACCOUNT_ID_ECDSA_1: "0.0.1328"
+      CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT: "0x97C50bb12E1C6284cF2855cdba95c5D60AEE44CF"
+      CLIENT_EVM_ADDRESS_ECDSA_1: "0x0000000000000000000000000000000000000530"
+      CLIENT_PRIVATE_KEY_ECDSA_2: ${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_2 }}
+      CLIENT_PUBLIC_KEY_ECDSA_2: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
+      CLIENT_ACCOUNT_ID_ECDSA_2: "0.0.2168740"
+      CLIENT_EVM_ADDRESS_ECDSA_2: "0x00000000000000000000000000000000002117A4"
+      FACTORY_ADDRESS: "0.0.5480051"
+      RESOLVER_ADDRESS: "0.0.5479997"
+      FIREBLOCKS_HEDERA_ACCOUNT_ID: "0.0.2168740"
+      FIREBLOCKS_HEDERA_PUBLIC_KEY: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
+      DFNS_HEDERA_ACCOUNT_ID: "0.0.2168740"
+      DFNS_WALLET_PUBLIC_KEY: ${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}
+      AWS_KMS_HEDERA_ACCOUNT_ID: "0.0.4394946"
+      AWS_KMS_HEDERA_PUBLIC_KEY: "302d300706052b8104000a03220003ee815bb9b5e53f5dbe7264a77e586127dfcb75da8c1246f5aa6ededdb13e6c21"
+      REACT_APP_MIRROR_NODE: "https://testnet.mirrornode.hedera.com/api/v1/"
+      REACT_APP_RPC_NODE: "https://testnet.hashio.io/api"
+      REACT_APP_RPC_RESOLVER: "0.0.5479997"
+      REACT_APP_RPC_FACTORY: "0.0.5480051"
+      REACT_APP_SHOW_DISCLAIMER: "true"
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     permissions:
       contents: read
 
@@ -20,7 +43,7 @@ jobs:
           egress-policy: audit
 
       - name: Checkout repository
-        uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Setup NodeJS Environment
         uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8
@@ -59,42 +82,6 @@ jobs:
         working-directory: web
         run: yarn build
 
-      - name: Create .env file in SDK
-        working-directory: sdk
-        run: |
-          touch .env
-          echo "CLIENT_PRIVATE_KEY_ECDSA_1=${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_1 }}" >> .env
-          echo "CLIENT_PUBLIC_KEY_ECDSA_1=${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_1 }}" >> .env
-          echo "CLIENT_ACCOUNT_ID_ECDSA_1='0.0.1328'" >> .env
-          echo "CLIENT_EVM_ADDRESS_ECDSA_1='0x0000000000000000000000000000000000000530'" >> .env
-          echo "CLIENT_PRIVATE_KEY_ECDSA_2=${{ secrets.CLIENT_PRIVATE_KEY_ECDSA_2 }}" >> .env
-          echo "CLIENT_PUBLIC_KEY_ECDSA_2=${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}" >> .env
-          echo "CLIENT_ACCOUNT_ID_ECDSA_2='0.0.2168740'" >> .env
-          echo "CLIENT_EVM_ADDRESS_ECDSA_2='0x00000000000000000000000000000000002117A4'" >> .env
-          echo "FACTORY_ADDRESS='0.0.4382086'"  >> .env
-          echo "RESOLVER_ADDRESS='0.0.4382042'"  >> .env
-          echo "BUSINESS_LOGIC_KEYS_COMMON='0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6,0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c,0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c,0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b,0x064c883089ba1a596d9146c7aaa73c19ef8825f374c67a9538787c3d12e68dc5,0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f,0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625,0x0d714ae58404788b445b639b0a0bcf37eeeb2e661bfa542569f5555a9a40b5b2,0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d,0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf,0x1b5212ea37fb29e99afa2812a5d7d7e662a477424d3de1a18cc3871a2ee94d78,0x3cc74200ccfb5d585a6d170f8824979dbf1b592e0a41eef41cf6d86cf4882077,0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793,0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9,0xd9b300e6bf7a143b8fd8cf1d4ab050e691c862bf0f57a7d49cc08c60efe68d08'"  >> .env
-          echo "BUSINESS_LOGIC_KEYS_EQUITY='0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810'"  >> .env
-          echo "BUSINESS_LOGIC_KEYS_BOND='0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef'"  >> .env
-          echo "FIREBLOCKS_HEDERA_ACCOUNT_ID='0.0.2168740'" >> .env
-          echo "FIREBLOCKS_HEDERA_PUBLIC_KEY=${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}" >> .env
-          echo "DFNS_HEDERA_ACCOUNT_ID='0.0.2168740'" >> .env
-          echo "DFNS_WALLET_PUBLIC_KEY=${{ secrets.CLIENT_PUBLIC_KEY_ECDSA_2 }}" >> .env
-          echo "AWS_KMS_HEDERA_ACCOUNT_ID='0.0.4394946'" >> .env
-          echo "AWS_KMS_HEDERA_PUBLIC_KEY='302d300706052b8104000a03220003ee815bb9b5e53f5dbe7264a77e586127dfcb75da8c1246f5aa6ededdb13e6c21'" >> .env
-      - name: Create .env file in WEB
-        working-directory: web
-        run: |
-          touch .env
-          echo "REACT_APP_MIRROR_NODE='https://testnet.mirrornode.hedera.com/api/v1/'"  >> .env
-          echo "REACT_APP_RPC_NODE='https://testnet.hashio.io/api'"  >> .env
-          echo "REACT_APP_RPC_RESOLVER='0.0.3532144'"  >> .env
-          echo "REACT_APP_RPC_FACTORY='0.0.3532205'"  >> .env
-          echo "REACT_APP_BUSINESS_LOGIC_KEYS_COMMON='0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6,0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c,0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c,0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b,0x064c883089ba1a596d9146c7aaa73c19ef8825f374c67a9538787c3d12e68dc5,0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f,0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625,0x0d714ae58404788b445b639b0a0bcf37eeeb2e661bfa542569f5555a9a40b5b2,0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d,0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf,0x1b5212ea37fb29e99afa2812a5d7d7e662a477424d3de1a18cc3871a2ee94d78,0x3cc74200ccfb5d585a6d170f8824979dbf1b592e0a41eef41cf6d86cf4882077,0x100f681e33d02a1124c2c05a537a1229eca89767c5e6e8720066ca74bfb85793,0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9,0xd9b300e6bf7a143b8fd8cf1d4ab050e691c862bf0f57a7d49cc08c60efe68d08'"  >> .env
-          echo "REACT_APP_BUSINESS_LOGIC_KEYS_EQUITY='0xfe85fe0513f5a5676011f59495ae16b2b93c981c190e99e61903e5603542c810'"  >> .env
-          echo "REACT_APP_BUSINESS_LOGIC_KEYS_BOND='0x09c1d80a160a7250b5fabc46d06a7fa4067e6d7292047c5024584b43f17d55ef'"  >> .env
-          echo "REACT_APP_SHOW_DISCLAIMER='true'"  >> .env
-
       - name: Test web
         working-directory: web
         run: npm run test
@@ -111,5 +98,3 @@ jobs:
       - name: Upload coverage report
         if: ${{ !cancelled() && always() }}
         uses: codecov/codecov-action@e28ff129e5465c2c0dcc6f003fc735cb6ae0c673
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

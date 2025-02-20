@@ -203,6 +203,7 @@
 
 */
 
+<<<<<<<< HEAD:contracts/scripts/commands/UpgradeProxyImplementationCommand.ts
 import { BaseBlockchainCommand, BaseBlockchainCommandParams } from '../index'
 
 interface UpgradeProxyImplementationCommandParams
@@ -228,5 +229,40 @@ export default class UpgradeProxyImplementationCommand extends BaseBlockchainCom
         this.proxyAdminAddress = proxyAdminAddress
         this.transparentProxyAddress = transparentProxyAddress
         this.newImplementationAddress = newImplementationAddress
+========
+pragma solidity 0.8.18;
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+// TODO: Remove _ in contract name
+// solhint-disable contract-name-camelcase, avoid-low-level-calls, no-inline-assembly
+library CD_Lib {
+    function delegateCall(
+        bytes memory encodedCallData
+    ) internal returns (bytes memory) {
+        (bool success, bytes memory data) = address(this).delegatecall(
+            encodedCallData
+        );
+        checkSuccess(success, data);
+        return data;
+    }
+
+    function staticCall(
+        bytes memory encodedCallData
+    ) internal view returns (bytes memory) {
+        (bool success, bytes memory data) = address(this).staticcall(
+            encodedCallData
+        );
+        checkSuccess(success, data);
+        return data;
+    }
+
+    function checkSuccess(bool success, bytes memory data) internal pure {
+        if (!success) {
+            assembly {
+                let returndata_size := mload(data)
+                revert(add(32, data), returndata_size)
+            }
+        }
+>>>>>>>> refs/heads/sprint-11:contracts/contracts/layer_1/common/CD_Lib.sol
     }
 }
+// solhint-enable contract-name-camelcase, avoid-low-level-calls, no-inline-assembly

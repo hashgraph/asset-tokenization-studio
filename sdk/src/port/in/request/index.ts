@@ -249,6 +249,7 @@ import ReleaseRequest from './ReleaseRequest.js';
 import GetLockCountRequest from './GetLockCountRequest.js';
 import GetLocksIdRequest from './GetLocksIdRequest.js';
 import GetLockRequest from './GetLockRequest.js';
+import ExecuteHoldByPartitionRequest from './ExecuteHoldByPartitionRequest.js';
 
 import GetControlListTypeRequest from './GetControlListTypeRequest.js';
 import InitializationRequest from './InitializationRequest.js';
@@ -270,6 +271,31 @@ import ProtectedRedeemFromByPartitionRequest from './ProtectedRedeemFromByPartit
 import GetNounceRequest from './GetNounceRequest.js';
 import PartitionsProtectedRequest from './PartitionsProtectedRequest.js';
 import ProtectedTransferAndLockByPartitionRequest from './ProtectedTransferAndLockByPartitionRequest.js';
+import CreateHoldByPartitionRequest from './CreateHoldByPartition.js';
+import CreateHoldFromByPartitionRequest from './CreateHoldFromByPartition.js';
+import ControllerCreateHoldByPartitionRequest from './ControllerCreateHoldFromByPartition.js';
+import ProtectedCreateHoldByPartitionRequest from './ProtectedCreateHoldFromByPartition.js';
+import GetHeldAmountForRequest from './GetHeldAmountForRequest.js';
+import GetHeldAmountForByPartitionRequest from './GetHeldAmountForByPartitionRequest.js';
+import GetHoldCountForByPartitionRequest from './GetHoldCountForByPartitionRequest.js';
+import GetHoldsIdForByPartitionRequest from './GetHoldsIdForByPartitionRequest.js';
+import GetHoldForByPartitionRequest from './GetHoldForByPartitionRequest.js';
+import ReleaseHoldByPartitionRequest from './ReleaseHoldByPartitionRequest.js';
+import ReclaimHoldByPartitionRequest from './ReclaimHoldByPartitionRequest.js';
+import AddIssuerRequest from './AddIssuerRequest.js';
+import SetRevocationRegistryAddressRequest from './SetRevocationRegistryAddressRequest.js';
+import RemoveIssuerRequest from './RemoveIssuerRequest.js';
+import GetRevocationRegistryAddressRequest from './GetRevocationRegistryAddressRequest.js';
+import GetIssuerListCountRequest from './GetIssuerListCountRequest.js';
+import GetIssuerListMembersRequest from './GetIssuerListMembersRequest.js';
+import IsIssuerRequest from './IsIssuerRequest.js';
+import GetKYCAccountsRequest from './GetKYCAccountsRequest.js';
+import GetKYCAccountsCountRequest from './GetKYCAccountsCountRequest.js';
+import GetKYCForRequest from './GetKYCForRequest.js';
+import RevokeKYCRequest from './RevokeKYCRequest.js';
+import GrantKYCRequest from './GrantKYCRequest.js';
+import GetKYCAccountsDataRequest from './GetKYCAccountsDataRequest.js';
+import GetKYCStatusForRequest from './GetKYCStatusForRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -339,4 +365,30 @@ export {
   GetNounceRequest,
   PartitionsProtectedRequest,
   ProtectedTransferAndLockByPartitionRequest,
+  CreateHoldByPartitionRequest,
+  CreateHoldFromByPartitionRequest,
+  ControllerCreateHoldByPartitionRequest,
+  ProtectedCreateHoldByPartitionRequest,
+  GetHeldAmountForRequest,
+  GetHeldAmountForByPartitionRequest,
+  GetHoldCountForByPartitionRequest,
+  GetHoldsIdForByPartitionRequest,
+  GetHoldForByPartitionRequest,
+  ReleaseHoldByPartitionRequest,
+  ReclaimHoldByPartitionRequest,
+  ExecuteHoldByPartitionRequest,
+  AddIssuerRequest,
+  SetRevocationRegistryAddressRequest,
+  RemoveIssuerRequest,
+  GetRevocationRegistryAddressRequest,
+  GetIssuerListCountRequest,
+  GetIssuerListMembersRequest,
+  IsIssuerRequest,
+  GetKYCAccountsRequest,
+  GetKYCAccountsCountRequest,
+  GetKYCForRequest,
+  RevokeKYCRequest,
+  GrantKYCRequest,
+  GetKYCAccountsDataRequest,
+  GetKYCStatusForRequest,
 };
