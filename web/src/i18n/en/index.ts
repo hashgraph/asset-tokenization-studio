@@ -308,6 +308,8 @@ export default {
     adjustmentBalance: "Adjustment Balance role",
     locker: "Locker role",
     cap: "Cap role",
+    kyc: "KYC role",
+    ssiManager: "SSI Manager role",
   },
   landing,
   routes,

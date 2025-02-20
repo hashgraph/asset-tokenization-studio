@@ -263,134 +263,103 @@ abstract contract HoldStorageWrapper_2 is
     }
 
     function _executeHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        IHold.HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
     ) internal virtual override returns (bool success_) {
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
-        success_ = super._executeHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId,
-            _to,
-            _amount
-        );
+        success_ = super._executeHoldByPartition(_holdIdentifier, _to, _amount);
         // Updated hold amount
-        IHold.HoldData memory holdData = _getHold(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
+        IHold.HoldData memory holdData = _getHold(_holdIdentifier);
 
         if (holdData.hold.amount == 0) {
-            adjustBalancesStorage.labafHolds[_tokenHolder][_partition].pop();
+            adjustBalancesStorage
+            .labafHolds[_holdIdentifier.tokenHolder][_holdIdentifier.partition]
+                .pop();
         }
     }
 
     function _releaseHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        IHold.HoldIdentifier calldata _holdIdentifier,
         uint256 _amount
     ) internal virtual override returns (bool success_) {
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
-        success_ = super._releaseHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId,
-            _amount
-        );
+        success_ = super._releaseHoldByPartition(_holdIdentifier, _amount);
 
         // Updated hold amount
-        IHold.HoldData memory holdData = _getHold(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
+        IHold.HoldData memory holdData = _getHold(_holdIdentifier);
 
         if (holdData.hold.amount == 0) {
-            adjustBalancesStorage.labafHolds[_tokenHolder][_partition].pop();
+            adjustBalancesStorage
+            .labafHolds[_holdIdentifier.tokenHolder][_holdIdentifier.partition]
+                .pop();
         }
     }
 
     function _reclaimHoldByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        IHold.HoldIdentifier calldata _holdIdentifier
     ) internal virtual override returns (bool success_, uint256 amount_) {
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
-        (success_, amount_) = super._reclaimHoldByPartition(
-            _partition,
-            _tokenHolder,
-            _holdId
-        );
+        (success_, amount_) = super._reclaimHoldByPartition(_holdIdentifier);
 
-        adjustBalancesStorage.labafHolds[_tokenHolder][_partition].pop();
+        adjustBalancesStorage
+        .labafHolds[_holdIdentifier.tokenHolder][_holdIdentifier.partition]
+            .pop();
     }
 
     function _beforeExecuteHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        IHold.HoldIdentifier calldata _holdIdentifier,
         address _to
     ) internal virtual override {
-        _adjustHoldBalances(_partition, _tokenHolder, _holdId, _to);
-        super._beforeExecuteHold(_partition, _tokenHolder, _holdId, _to);
+        _adjustHoldBalances(_holdIdentifier, _to);
+        super._beforeExecuteHold(_holdIdentifier, _to);
     }
 
     function _beforeReleaseHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        IHold.HoldIdentifier calldata _holdIdentifier
     ) internal virtual override {
-        _adjustHoldBalances(_partition, _tokenHolder, _holdId, _tokenHolder);
+        _adjustHoldBalances(_holdIdentifier, _holdIdentifier.tokenHolder);
 
-        super._beforeReleaseHold(_partition, _tokenHolder, _holdId);
+        super._beforeReleaseHold(_holdIdentifier);
     }
 
     function _beforeReclaimHold(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        IHold.HoldIdentifier calldata _holdIdentifier
     ) internal virtual override {
-        _adjustHoldBalances(_partition, _tokenHolder, _holdId, _tokenHolder);
+        _adjustHoldBalances(_holdIdentifier, _holdIdentifier.tokenHolder);
 
-        super._beforeReclaimHold(_partition, _tokenHolder, _holdId);
+        super._beforeReclaimHold(_holdIdentifier);
     }
 
     function _adjustHoldBalances(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId,
+        IHold.HoldIdentifier calldata _holdIdentifier,
         address _to
     ) internal virtual {
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
 
         ERC1410ScheduledTasks_CD_Lib.triggerAndSyncAll(
-            _partition,
-            _tokenHolder,
+            _holdIdentifier.partition,
+            _holdIdentifier.tokenHolder,
             _to
         );
 
         uint256 abaf = _updateTotalHold(
-            _partition,
-            _tokenHolder,
+            _holdIdentifier.partition,
+            _holdIdentifier.tokenHolder,
             adjustBalancesStorage
         );
 
         _updateHold(
-            _partition,
-            _holdId,
-            _tokenHolder,
+            _holdIdentifier.partition,
+            _holdIdentifier.holdId,
+            _holdIdentifier.tokenHolder,
             abaf,
             adjustBalancesStorage
         );
@@ -405,9 +374,7 @@ abstract contract HoldStorageWrapper_2 is
         AdjustBalancesStorage
             storage adjustBalancesStorage = _getAdjustBalancesStorage();
         uint256 currentHoldIndex = _getHoldIndex(
-            _partition,
-            _tokenHolder,
-            _holdData.id
+            IHold.HoldIdentifier(_partition, _tokenHolder, _holdData.id)
         );
         uint256 labaf = adjustBalancesStorage.labafHolds[_tokenHolder][
             _partition
@@ -513,9 +480,7 @@ abstract contract HoldStorageWrapper_2 is
             );
 
             uint256 holdIndex = _getHoldIndex(
-                _partition,
-                _tokenHolder,
-                _holdId
+                IHold.HoldIdentifier(_partition, _tokenHolder, _holdId)
             );
 
             _updateHoldAmountByIndex(
@@ -588,9 +553,7 @@ abstract contract HoldStorageWrapper_2 is
     }
 
     function _getHoldForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdId
+        IHold.HoldIdentifier calldata _holdIdentifier
     )
         internal
         view
@@ -607,9 +570,9 @@ abstract contract HoldStorageWrapper_2 is
         uint256 factor = AdjustBalanceLib.calculateFactor(
             AdjustBalances_CD_Lib.getABAFAdjusted(),
             AdjustBalances_CD_Lib.getHoldLABAFByPartition(
-                _partition,
-                _holdId,
-                _tokenHolder
+                _holdIdentifier.partition,
+                _holdIdentifier.holdId,
+                _holdIdentifier.tokenHolder
             )
         );
 
@@ -620,7 +583,7 @@ abstract contract HoldStorageWrapper_2 is
             destination_,
             data_,
             operatorData_
-        ) = _getHoldForByPartition(_partition, _tokenHolder, _holdId);
+        ) = _getHoldForByPartition(_holdIdentifier);
         amount_ *= factor;
     }
 

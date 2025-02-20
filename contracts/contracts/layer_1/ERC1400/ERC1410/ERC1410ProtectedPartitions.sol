@@ -212,6 +212,7 @@ import {
 import {
     ERC1410ProtectedPartitionsStorageWrapper
 } from './ERC1410ProtectedPartitionsStorageWrapper.sol';
+import {IKYC} from '../../interfaces/kyc/IKYC.sol';
 
 abstract contract ERC1410ProtectedPartitions is
     IERC1410ProtectedPartitions,
@@ -233,6 +234,8 @@ abstract contract ERC1410ProtectedPartitions is
         onlyRole(_protectedPartitionsRole(_partition))
         checkControlList(_from)
         checkControlList(_to)
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _from)
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)
         onlyProtectedPartitions
     {
         _protectedTransferFromByPartition(
@@ -261,6 +264,7 @@ abstract contract ERC1410ProtectedPartitions is
         onlyRole(_protectedPartitionsRole(_partition))
         checkControlList(_from)
         onlyProtectedPartitions
+        checkKYCStatus(IKYC.KYCStatus.GRANTED, _from)
     {
         _protectedRedeemFromByPartition(
             _partition,

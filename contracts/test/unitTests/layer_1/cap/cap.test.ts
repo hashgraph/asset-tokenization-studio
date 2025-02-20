@@ -219,6 +219,8 @@ import {
     AccessControl__factory,
     ERC1410ScheduledTasks__factory,
     Pause__factory,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -226,6 +228,8 @@ import {
     DeployAtsFullInfrastructureCommand,
     ISSUER_ROLE,
     PAUSER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
@@ -253,6 +257,8 @@ describe('CAP Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     before(async () => {
         // mute | mock console.log
@@ -281,7 +287,15 @@ describe('CAP Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        const init_rbacs: Rbac[] = [rbacPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -324,6 +338,15 @@ describe('CAP Tests', () => {
             diamond.address,
             signer_A
         )
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_A
+        )
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
     })
 
     it('GIVEN setting 0 to max supply WHEN trying to initialize THEN transaction fails', async () => {

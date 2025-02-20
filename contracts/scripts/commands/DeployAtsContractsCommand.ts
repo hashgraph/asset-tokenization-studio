@@ -211,6 +211,7 @@ interface DeployAtsContractsCommandNewParams {
     useDeployed?: boolean
     useEnvironment?: boolean
     timeTravelEnabled?: boolean
+    partialBatchDeploy?: boolean
 }
 
 export interface DeployAtsContractsCommandParams
@@ -224,6 +225,7 @@ export default class DeployAtsContractsCommand {
     public readonly signer: Signer
     public readonly network: Network
     public readonly timeTravelEnabled: boolean = false
+    public readonly partialBatchDeploy: boolean = false
 
     constructor({
         signer,
@@ -231,12 +233,14 @@ export default class DeployAtsContractsCommand {
         useDeployed = true,
         useEnvironment = false,
         timeTravelEnabled = false,
+        partialBatchDeploy = false,
     }: DeployAtsContractsCommandParams) {
         this.useDeployed = useDeployed
         this.useEnvironment = useEnvironment
         this.network = network!
         this.signer = signer
         this.timeTravelEnabled = timeTravelEnabled
+        this.partialBatchDeploy = partialBatchDeploy
     }
 
     public static async newInstance({
@@ -244,6 +248,7 @@ export default class DeployAtsContractsCommand {
         useDeployed = true,
         useEnvironment = false,
         timeTravelEnabled = false,
+        partialBatchDeploy = false,
     }: DeployAtsContractsCommandNewParams): Promise<DeployAtsContractsCommand> {
         if (!signer.provider) {
             throw new Error('Signer must have a provider')
@@ -254,6 +259,7 @@ export default class DeployAtsContractsCommand {
             useDeployed,
             useEnvironment,
             timeTravelEnabled,
+            partialBatchDeploy,
         })
     }
 }

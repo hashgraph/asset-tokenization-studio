@@ -243,6 +243,8 @@ import {
   DiamondFacet__factory,
   ProtectedPartitions__factory,
   Hold_2__factory,
+  SSIManagement__factory,
+  KYC__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -264,6 +266,7 @@ import { ScheduledBalanceAdjustment } from '../../../domain/context/equity/Sched
 import { DividendFor } from '../../../domain/context/equity/DividendFor';
 import { VotingFor } from '../../../domain/context/equity/VotingFor';
 import { HoldDetails } from '../../../domain/context/security/HoldDetails.js';
+import { KYC } from '../../../domain/context/kyc/KYC.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -1250,7 +1253,11 @@ export class RPCQueryAdapter {
     const hold = await this.connect(
       Hold_2__factory,
       address.toString(),
-    ).getHoldForByPartition(partitionId, targetId.toString(), holdId);
+    ).getHoldForByPartition({
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      holdId,
+    });
 
     return new HoldDetails(
       hold.expirationTimestamp_.toNumber(),
@@ -1261,5 +1268,138 @@ export class RPCQueryAdapter {
       hold.data_,
       hold.operatorData_,
     );
+  }
+
+  async getRevocationRegistryAddress(address: EvmAddress): Promise<string> {
+    LogService.logTrace(
+      `Getting Revocation Registry Address of ${address.toString()}`,
+    );
+
+    return await this.connect(
+      SSIManagement__factory,
+      address.toString(),
+    ).getRevocationRegistryAddress();
+  }
+
+  async getIssuerListCount(address: EvmAddress): Promise<number> {
+    LogService.logTrace(`Getting Issuer List Count of ${address.toString()}`);
+
+    const count = await this.connect(
+      SSIManagement__factory,
+      address.toString(),
+    ).getIssuerListCount();
+
+    return count.toNumber();
+  }
+
+  async getIssuerListMembers(
+    address: EvmAddress,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(
+      `Getting Issuer List Count of ${address.toString()} from ${start} to ${end}`,
+    );
+
+    return await this.connect(
+      SSIManagement__factory,
+      address.toString(),
+    ).getIssuerListMembers(start, end);
+  }
+
+  async isIssuer(address: EvmAddress, issuer: EvmAddress): Promise<boolean> {
+    LogService.logTrace(`Getting if ${issuer.toString()} is an Issuer`);
+
+    return await this.connect(
+      SSIManagement__factory,
+      address.toString(),
+    ).isIssuer(issuer.toString());
+  }
+
+  async getKYCFor(address: EvmAddress, targetId: EvmAddress): Promise<KYC> {
+    LogService.logTrace(`Getting KYC details for ${targetId}}`);
+
+    const kycData = await this.connect(
+      KYC__factory,
+      address.toString(),
+    ).getKYCFor(targetId.toString());
+
+    return new KYC(
+      kycData.validFrom.toString(),
+      kycData.validTo.toString(),
+      kycData.VCid,
+      kycData.issuer,
+      kycData.status,
+    );
+  }
+
+  async getKYCStatusFor(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(`Getting KYC status for ${targetId}}`);
+
+    const kycData = await this.connect(
+      KYC__factory,
+      address.toString(),
+    ).getKYCStatusFor(targetId.toString());
+
+    return kycData;
+  }
+
+  async getKYCAccounts(
+    address: EvmAddress,
+    kycStatus: number,
+    start: number,
+    end: number,
+  ): Promise<string[]> {
+    LogService.logTrace(`Getting accounts with KYC status ${kycStatus}`);
+
+    const kycAccounts = await this.connect(
+      KYC__factory,
+      address.toString(),
+    ).getKYCAccounts(kycStatus, start, end);
+
+    return kycAccounts;
+  }
+
+  async getKYCAccountsData(
+    address: EvmAddress,
+    kycStatus: number,
+    start: number,
+    end: number,
+  ): Promise<KYC[]> {
+    LogService.logTrace(`Getting accounts data with KYC status ${kycStatus}`);
+
+    const kycAccountsData = await this.connect(
+      KYC__factory,
+      address.toString(),
+    ).getKYCAccountsData(kycStatus, start, end);
+
+    return kycAccountsData.map(
+      (data) =>
+        new KYC(
+          data.validFrom.toString(),
+          data.validTo.toString(),
+          data.VCid,
+          data.issuer,
+          data.status,
+        ),
+    );
+  }
+
+  async getKYCAccountsCount(
+    address: EvmAddress,
+    kycStatus: number,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting count of accounts with KYC status ${kycStatus}}`,
+    );
+    const kycAccountsCount = await this.connect(
+      KYC__factory,
+      address.toString(),
+    ).getKYCAccountsCount(kycStatus);
+
+    return kycAccountsCount.toNumber();
   }
 }

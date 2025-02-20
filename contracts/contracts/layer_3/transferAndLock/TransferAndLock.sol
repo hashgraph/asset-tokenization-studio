@@ -216,6 +216,9 @@ import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     TransferAndLockStorageWrapper
 } from './TransferAndLockStorageWrapper.sol';
+import {
+    IERC1410Basic
+} from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 
 contract TransferAndLock is
     IStaticFunctionSelectors,
@@ -240,8 +243,7 @@ contract TransferAndLock is
     {
         _transferByPartition(
             _msgSender(),
-            _to,
-            _amount,
+            IERC1410Basic.BasicTransferInfo(_to, _amount),
             _partition,
             _data,
             _msgSender(),
@@ -282,8 +284,7 @@ contract TransferAndLock is
     {
         _transferByPartition(
             _msgSender(),
-            _to,
-            _amount,
+            IERC1410Basic.BasicTransferInfo(_to, _amount),
             _DEFAULT_PARTITION,
             _data,
             _msgSender(),

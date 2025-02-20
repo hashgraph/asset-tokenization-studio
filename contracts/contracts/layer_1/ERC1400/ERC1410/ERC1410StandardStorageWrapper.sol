@@ -217,10 +217,12 @@ import {
     _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
     _IS_NOT_OPERATOR_ERROR_ID,
     _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS
+    _SUCCESS,
+    _FROM_ACCOUNT_KYC_ERROR_ID
 } from '../../constants/values.sol';
 import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
 import {CapStorageWrapper} from '../../cap/CapStorageWrapper.sol';
+import {IKYC} from '../../interfaces/kyc/IKYC.sol';
 
 abstract contract ERC1410StandardStorageWrapper is
     CapStorageWrapper,
@@ -327,6 +329,9 @@ abstract contract ERC1410StandardStorageWrapper is
         }
         if (!_checkControlList(_from)) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _from)) {
+            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
         if (!_validPartition(_partition, _from)) {
             return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));

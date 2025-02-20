@@ -217,11 +217,15 @@ import {
     BusinessLogicResolver,
     IFactory,
     TimeTravel,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
     PAUSER_ROLE,
     ISSUER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     CORPORATE_ACTION_ROLE,
     deployEquityFromFactory,
     Rbac,
@@ -261,6 +265,8 @@ describe('Adjust Balances Tests', () => {
     let equityFacet: Equity
     let scheduledTasksFacet: ScheduledTasks
     let timeTravelFacet: TimeTravel
+    let kycFacet: KYC
+    let ssiManagementFacet: SSIManagement
 
     async function deployAsset({
         multiPartition,
@@ -336,6 +342,12 @@ describe('Adjust Balances Tests', () => {
             'TimeTravel',
             diamond.address
         )
+
+        kycFacet = await ethers.getContractAt('KYC', diamond.address)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address
+        )
     }
 
     function set_initRbacs(): Rbac[] {
@@ -343,7 +355,15 @@ describe('Adjust Balances Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        return [rbacPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        return [rbacPause, rbacKYC, rbacSSI]
     }
 
     before(async () => {
@@ -431,6 +451,11 @@ describe('Adjust Balances Tests', () => {
         await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_A)
         await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet
+            .connect(signer_B)
+            .grantKYC(account_B, '', 0, 9999999999, account_A)
 
         erc1410Facet = erc1410Facet.connect(signer_A)
         equityFacet = equityFacet.connect(signer_A)

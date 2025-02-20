@@ -212,6 +212,7 @@ import {
 import {
     checkNounceAndDeadline
 } from '../../protectedPartitions/signatureVerification.sol';
+import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
 
 abstract contract ERC1410ProtectedPartitionsStorageWrapper is
     ERC1410ControllerStorageWrapper
@@ -247,8 +248,7 @@ abstract contract ERC1410ProtectedPartitionsStorageWrapper is
 
         _transferByPartition(
             _from,
-            _to,
-            _amount,
+            IERC1410Basic.BasicTransferInfo(_to, _amount),
             _partition,
             '',
             _msgSender(),

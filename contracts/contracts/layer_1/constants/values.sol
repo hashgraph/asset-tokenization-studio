@@ -226,6 +226,8 @@ bytes1 constant _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = 0x46;
 bytes1 constant _IS_NOT_OPERATOR_ERROR_ID = 0x47;
 bytes1 constant _WRONG_PARTITION_ERROR_ID = 0x48;
 bytes1 constant _ALLOWANCE_REACHED_ERROR_ID = 0x49;
+bytes1 constant _FROM_ACCOUNT_KYC_ERROR_ID = 0x50;
+bytes1 constant _TO_ACCOUNT_KYC_ERROR_ID = 0x51;
 
 bytes1 constant _SUCCESS = 0x00;
 
