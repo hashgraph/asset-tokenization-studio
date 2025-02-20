@@ -206,137 +206,40 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
-import { takeSnapshot, time } from '@nomicfoundation/hardhat-network-helpers'
-import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/helpers/takeSnapshot'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
-    type ResolverProxy,
-    type Kyc,
-    Pause,
-    IFactory,
     BusinessLogicResolver,
-    SsiManagement,
-    T3RevocationRegistry,
-    T3RevocationRegistry__factory,
     TimeTravel,
+    Equity,
+    IFactory,
+    TimeTravel__factory,
 } from '@typechain'
 import {
-    PAUSER_ROLE,
-    SSI_MANAGER_ROLE,
-    KYC_ROLE,
-    MAX_UINT256,
     deployEquityFromFactory,
-    Rbac,
     RegulationSubType,
     RegulationType,
-    DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
-    ADDRESS_ZERO,
-    deployContractWithFactory,
-    DeployContractWithFactoryCommand,
+    DeployAtsFullInfrastructureCommand,
+    MAX_UINT256,
 } from '@scripts'
+import { dateToUnixTimestamp } from '../../dateFormatter'
 
-const _VALID_FROM = 0
-const _VALID_TO = 99999999999999
-const _VC_ID = 'VC_24'
-
-describe('Kyc Tests', () => {
-    let diamond: ResolverProxy
+describe('Time Travel Tests', () => {
+    let factory: IFactory,
+        businessLogicResolver: BusinessLogicResolver,
+        diamond: Equity,
+        timeTravelFacet: TimeTravel
     let signer_A: SignerWithAddress
-    let signer_B: SignerWithAddress
-    let signer_C: SignerWithAddress
-    let signer_D: SignerWithAddress
-
     let account_A: string
-    let account_B: string
-    let account_C: string
-    let account_D: string
 
-    let factory: IFactory
-    let businessLogicResolver: BusinessLogicResolver
-    let kycFacet: Kyc
-    let pauseFacet: Pause
-    let ssiManagementFacet: SsiManagement
-    let revocationList: T3RevocationRegistry
-    let timeTravelFacet: TimeTravel
-
-    const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
-    let currentTimestamp = 0
-    let expirationTimestamp = 0
-
-    let snapshot: SnapshotRestorer
-
-    before(async () => {
-        snapshot = await takeSnapshot()
-        // mute | mock console.log
-        console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-        account_D = signer_D.address
-
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: false,
-                    timeTravelEnabled: true,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-
-        let reovationListDeployed = await deployContractWithFactory(
-            new DeployContractWithFactoryCommand({
-                factory: new T3RevocationRegistry__factory(),
-                signer: signer_A,
-            })
-        )
-
-        revocationList = await ethers.getContractAt(
-            'T3RevocationRegistry',
-            reovationListDeployed.address,
-            signer_C
-        )
-    })
-
-    after(async () => {
-        await snapshot.restore()
-    })
-
-    afterEach(async () => {
-        await timeTravelFacet.resetSystemTimestamp()
-    })
-
-    beforeEach(async () => {
-        currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
-        expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
-
-        const rbacKYC: Rbac = {
-            role: KYC_ROLE,
-            members: [account_A],
-        }
-        const rbacPausable: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_A],
-        }
-        const rbacSSIManager: Rbac = {
-            role: SSI_MANAGER_ROLE,
-            members: [account_C],
-        }
-        const init_rbacs: Rbac[] = [rbacKYC, rbacPausable, rbacSSIManager]
-
+    const setupEnvironment = async () => {
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: false,
             isMultiPartition: false,
-            name: 'TEST_KYC',
+            name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: 6,
             isin: isinGenerator(),
@@ -356,260 +259,75 @@ describe('Kyc Tests', () => {
             countriesControlListType: true,
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
-            init_rbacs,
             factory,
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_A)
-        pauseFacet = await ethers.getContractAt(
-            'Pause',
-            diamond.address,
-            signer_A
-        )
-        ssiManagementFacet = await ethers.getContractAt(
-            'SsiManagement',
-            diamond.address,
-            signer_C
-        )
-        timeTravelFacet = await ethers.getContractAt(
-            'TimeTravel',
-            diamond.address,
-            signer_A
-        )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+    }
 
-        await ssiManagementFacet.addIssuer(account_C)
-        await ssiManagementFacet.setRevocationRegistryAddress(
-            revocationList.address
-        )
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[signer_A] = await ethers.getSigners()
+        account_A = signer_A.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: false,
+                    timeTravelEnabled: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
     })
 
-    describe('Paused', () => {
-        beforeEach(async () => {
-            // Pausing the token
-            await pauseFacet.pause()
-        })
-
-        it('GIVEN a paused Token WHEN grantKyc THEN transaction fails with TokenIsPaused', async () => {
-            await expect(
-                kycFacet.grantKyc(
-                    account_B,
-                    _VC_ID,
-                    _VALID_FROM,
-                    _VALID_TO,
-                    account_C
-                )
-            ).to.be.revertedWithCustomError(kycFacet, 'TokenIsPaused')
-        })
-
-        it('GIVEN a paused Token WHEN revokeKyc THEN transaction fails with TokenIsPaused', async () => {
-            await expect(
-                kycFacet.revokeKyc(account_B)
-            ).to.be.revertedWithCustomError(kycFacet, 'TokenIsPaused')
-        })
+    beforeEach(async () => {
+        await setupEnvironment()
     })
 
-    describe('Access Control', () => {
-        it('GIVEN a non Kyc account WHEN grantKyc THEN transaction fails with AccountHasNoRole', async () => {
-            await expect(
-                kycFacet
-                    .connect(signer_C)
-                    .grantKyc(
-                        account_B,
-                        _VC_ID,
-                        _VALID_FROM,
-                        _VALID_TO,
-                        account_C
-                    )
-            ).to.be.revertedWithCustomError(kycFacet, 'AccountHasNoRole')
-        })
-
-        it('GIVEN a paused Token WHEN revokeKyc THEN transaction fails with AccountHasNoRole', async () => {
-            await expect(
-                kycFacet.connect(signer_C).revokeKyc(account_B)
-            ).to.be.rejectedWith('AccountHasNoRole')
-        })
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
-    describe('Kyc Wrong input data', () => {
-        it('GIVEN account ZERO WHEN grantKyc THEN transaction fails with InvalidZeroAddress', async () => {
-            await expect(
-                kycFacet.grantKyc(
-                    ADDRESS_ZERO,
-                    _VC_ID,
-                    _VALID_FROM,
-                    _VALID_TO,
-                    account_C
-                )
-            ).to.be.revertedWithCustomError(kycFacet, 'InvalidZeroAddress')
-        })
-
-        it('GIVEN account ZERO WHEN revokeKyc THEN transaction fails with InvalidZeroAddress', async () => {
-            await expect(
-                kycFacet.revokeKyc(ADDRESS_ZERO)
-            ).to.be.revertedWithCustomError(kycFacet, 'InvalidZeroAddress')
-        })
-
-        it('GIVEN wrong Valid From Date WHEN grantKyc THEN transaction fails with InvalidDates', async () => {
-            await expect(
-                kycFacet.grantKyc(
-                    account_B,
-                    _VC_ID,
-                    _VALID_TO + 1,
-                    _VALID_TO,
-                    account_C
-                )
-            ).to.be.revertedWithCustomError(kycFacet, 'InvalidDates')
-        })
-
-        it('GIVEN wrong Valid To Date WHEN grantKyc THEN transaction fails with InvalidDates', async () => {
-            await expect(
-                kycFacet.grantKyc(
-                    account_B,
-                    _VC_ID,
-                    _VALID_FROM,
-                    currentTimestamp - 1,
-                    account_C
-                )
-            ).to.be.revertedWithCustomError(kycFacet, 'InvalidDates')
-        })
-
-        it('GIVEN wrong issuer WHEN grantKyc THEN transaction fails with AccountIsNotIssuer', async () => {
-            await expect(
-                kycFacet.grantKyc(
-                    account_B,
-                    _VC_ID,
-                    _VALID_FROM,
-                    _VALID_TO,
-                    account_D
-                )
-            ).to.be.revertedWithCustomError(kycFacet, 'AccountIsNotIssuer')
-        })
+    it('GIVEN succesful deployment THEN chainId is hardhat network id', async () => {
+        const chainId = 1337
+        expect(await timeTravelFacet.checkBlockChainid(chainId)).to.not.be
+            .reverted
     })
 
-    describe('Kyc OK', () => {
-        it('GIVEN a VC WHEN grantKyc THEN transaction succeed', async () => {
-            let KYCStatusFor_B_Before = await kycFacet.getKycStatusFor(
-                account_B
-            )
-            let KYC_Count_Before = await kycFacet.getKycAccountsCount(1)
+    it('GIVEN new system timestamp THEN change succeeds', async () => {
+        const newTimestamp = dateToUnixTimestamp('2030-01-01T00:00:00Z')
+        const oldSystemTime = 0
+        await expect(timeTravelFacet.changeSystemTimestamp(newTimestamp))
+            .to.emit(timeTravelFacet, 'SystemTimestampChanged')
+            .withArgs(oldSystemTime, newTimestamp)
+        expect(await timeTravelFacet.blockTimestamp()).to.be.equal(newTimestamp)
+    })
 
-            await kycFacet.grantKyc(
-                account_B,
-                _VC_ID,
-                _VALID_FROM,
-                _VALID_TO,
-                account_C
-            )
+    it('GIVEN incorrect system timestamp change THEN revert with InvalidTimestamp', async () => {
+        const newTimestamp = 0
+        await expect(
+            timeTravelFacet.changeSystemTimestamp(newTimestamp)
+        ).to.revertedWithCustomError(timeTravelFacet, 'InvalidTimestamp')
+    })
 
-            let KYCStatusFor_B_After = await kycFacet.getKycStatusFor(account_B)
-            let KYC_Count_After = await kycFacet.getKycAccountsCount(1)
-            let KYCAccounts = await kycFacet.getKycAccounts(1, 0, 100)
-            let KYCSFor_B = await kycFacet.getKycFor(account_B)
-            let [kycAccountsData_After] = await kycFacet.getKycAccountsData(
-                1,
-                0,
-                1
-            )
-
-            expect(KYCStatusFor_B_Before).to.equal(0)
-            expect(KYCStatusFor_B_After).to.equal(1)
-            expect(KYC_Count_Before).to.equal(0)
-            expect(KYC_Count_After).to.equal(1)
-            expect(KYCAccounts.length).to.equal(1)
-            expect(KYCAccounts[0]).to.equal(account_B)
-            expect(KYCSFor_B.validFrom).to.equal(_VALID_FROM)
-            expect(KYCSFor_B.validTo).to.equal(_VALID_TO)
-            expect(KYCSFor_B.issuer).to.equal(account_C)
-            expect(KYCSFor_B.vcId).to.equal(_VC_ID)
-            expect(kycAccountsData_After.status).to.equal(1)
-        })
-
-        it('GIVEN a VC WHEN revokeKyc THEN transaction succeed', async () => {
-            await kycFacet.grantKyc(
-                account_B,
-                _VC_ID,
-                _VALID_FROM,
-                _VALID_TO,
-                account_C
-            )
-
-            await kycFacet.revokeKyc(account_B)
-
-            let KYCStatusFor_B_After = await kycFacet.getKycStatusFor(account_B)
-            let KYC_Count_After = await kycFacet.getKycAccountsCount(1)
-            let KYCAccounts = await kycFacet.getKycAccounts(1, 0, 100)
-
-            expect(KYCStatusFor_B_After).to.equal(0)
-            expect(KYC_Count_After).to.equal(0)
-            expect(KYCAccounts.length).to.equal(0)
-        })
-
-        it('Check Kyc status after expiration', async () => {
-            await kycFacet.grantKyc(
-                account_B,
-                _VC_ID,
-                _VALID_FROM,
-                _VALID_TO,
-                account_C
-            )
-
-            let KYCStatusFor_B_After_Grant = await kycFacet.getKycStatusFor(
-                account_B
-            )
-
-            await timeTravelFacet.changeSystemTimestamp(_VALID_TO + 1)
-
-            let KYCStatusFor_B_After_Expiration =
-                await kycFacet.getKycStatusFor(account_B)
-
-            expect(KYCStatusFor_B_After_Grant).to.equal(1)
-            expect(KYCStatusFor_B_After_Expiration).to.equal(0)
-        })
-
-        it('Check Kyc status after issuer removed', async () => {
-            await kycFacet.grantKyc(
-                account_B,
-                _VC_ID,
-                _VALID_FROM,
-                _VALID_TO,
-                account_C
-            )
-
-            let KYCStatusFor_B_After_Grant = await kycFacet.getKycStatusFor(
-                account_B
-            )
-
-            await ssiManagementFacet.removeIssuer(account_C)
-
-            let KYCStatusFor_B_After_Cancelling_Issuer =
-                await kycFacet.getKycStatusFor(account_B)
-
-            expect(KYCStatusFor_B_After_Grant).to.equal(1)
-            expect(KYCStatusFor_B_After_Cancelling_Issuer).to.equal(0)
-        })
-
-        it('Check Kyc status after issuer revokes VC', async () => {
-            await kycFacet.grantKyc(
-                account_B,
-                _VC_ID,
-                _VALID_FROM,
-                _VALID_TO,
-                account_C
-            )
-
-            let KYCStatusFor_B_After_Grant = await kycFacet.getKycStatusFor(
-                account_B
-            )
-
-            await revocationList.connect(signer_C).revoke(_VC_ID)
-
-            let KYCFor_B_After_Revoking_VC = await kycFacet.getKycStatusFor(
-                account_B
-            )
-
-            expect(KYCStatusFor_B_After_Grant).to.equal(1)
-            expect(KYCFor_B_After_Revoking_VC).to.equal(0)
-        })
+    it('GIVEN system timestamp reset THEN use network timestamp', async () => {
+        const newTimestamp = dateToUnixTimestamp('2030-01-01T00:00:00Z')
+        await timeTravelFacet.changeSystemTimestamp(newTimestamp)
+        await expect(timeTravelFacet.resetSystemTimestamp()).to.emit(
+            timeTravelFacet,
+            'SystemTimestampReset'
+        )
+        const latestBlock = await ethers.provider.getBlock('latest')
+        const latestTimestamp = latestBlock.timestamp
+        expect(await timeTravelFacet.blockTimestamp()).to.be.equal(
+            latestTimestamp
+        )
     })
 })

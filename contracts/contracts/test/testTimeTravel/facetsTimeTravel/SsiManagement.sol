@@ -203,108 +203,22 @@
 
 */
 
-import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers'
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity 0.8.18;
+
+import {SsiManagement} from '../../../layer_1/ssi/SsiManagement.sol';
 import {
-    IBusinessLogicResolver,
-    IBusinessLogicResolver__factory,
-    IFactory,
-    IFactory__factory,
-    IStaticFunctionSelectors,
-    ProxyAdmin,
-    ProxyAdmin__factory,
-} from '@typechain'
-import {
-    DeployedBusinessLogics,
-    DeployAtsFullInfrastructureCommand,
-    deployAtsFullInfrastructure,
-} from '@scripts'
-import { Network } from '@configuration'
-import { network } from 'hardhat'
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-export interface Environment {
-    deployedBusinessLogics: DeployedBusinessLogics
-    facetIdsEquities: string[]
-    facetVersionsEquities: number[]
-    facetIdsBonds: string[]
-    facetVersionsBonds: number[]
-    proxyAdmin: ProxyAdmin
-    resolver: IBusinessLogicResolver
-    factory: IFactory
-}
-
-export const environment: Environment = buildEmptyEnvironment()
-let environmentInitialized = false
-
-export async function deployEnvironment({
-    signer,
-}: {
-    signer: SignerWithAddress
-}) {
-    if (!environmentInitialized) {
-        const {
-            deployer,
-            factory,
-            businessLogicResolver,
-            ...deployedContracts
-        } = await deployAtsFullInfrastructure(
-            new DeployAtsFullInfrastructureCommand({
-                signer: signer,
-                network: network.name as Network,
-                useDeployed: false,
-            })
-        )
-
-        environment.proxyAdmin = ProxyAdmin__factory.connect(
-            businessLogicResolver.proxyAdminAddress!,
-            deployer!
-        )
-        environment.resolver = IBusinessLogicResolver__factory.connect(
-            businessLogicResolver.proxyAddress!,
-            deployer!
-        )
-        environment.factory = IFactory__factory.connect(
-            factory.proxyAddress!,
-            deployer!
-        )
-        environmentInitialized = true
-    }
-}
-
-function buildEmptyEnvironment(): Environment {
-    return {
-        deployedBusinessLogics: {
-            businessLogicResolver: {} as IStaticFunctionSelectors,
-            factory: {} as IStaticFunctionSelectors,
-            diamondFacet: {} as IStaticFunctionSelectors,
-            accessControl: {} as IStaticFunctionSelectors,
-            controlList: {} as IStaticFunctionSelectors,
-            kyc: {} as IStaticFunctionSelectors,
-            ssiManagement: {} as IStaticFunctionSelectors,
-            corporateActions: {} as IStaticFunctionSelectors,
-            pause: {} as IStaticFunctionSelectors,
-            ERC20: {} as IStaticFunctionSelectors,
-            ERC1644: {} as IStaticFunctionSelectors,
-            eRC1410ScheduledTasks: {} as IStaticFunctionSelectors,
-            ERC1594: {} as IStaticFunctionSelectors,
-            eRC1643: {} as IStaticFunctionSelectors,
-            equityUSA: {} as IStaticFunctionSelectors,
-            bondUSA: {} as IStaticFunctionSelectors,
-            Snapshots: {} as IStaticFunctionSelectors,
-            scheduledSnapshots: {} as IStaticFunctionSelectors,
-            scheduledBalanceAdjustments: {} as IStaticFunctionSelectors,
-            scheduledTasks: {} as IStaticFunctionSelectors,
-            Cap: {} as IStaticFunctionSelectors,
-            Lock: {} as IStaticFunctionSelectors,
-            transferAndLock: {} as IStaticFunctionSelectors,
-            adjustBalances: {} as IStaticFunctionSelectors,
-            protectedPartitions: {} as IStaticFunctionSelectors,
-        },
-        facetIdsEquities: [],
-        facetVersionsEquities: [],
-        facetIdsBonds: [],
-        facetVersionsBonds: [],
-        proxyAdmin: {} as ProxyAdmin,
-        resolver: {} as IBusinessLogicResolver,
-        factory: {} as IFactory,
+contract SsiManagementTimeTravel is SsiManagement, TimeTravelStorageWrapper {
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

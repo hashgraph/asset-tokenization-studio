@@ -203,8 +203,8 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity 0.8.18;
 
 import {PauseFacet} from '../../../layer_1/pause/PauseFacet.sol';
 import {
@@ -212,7 +212,7 @@ import {
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract PauseTimeTravel is PauseFacet, TimeTravelStorageWrapper {
+contract PauseFacetTimeTravel is PauseFacet, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view

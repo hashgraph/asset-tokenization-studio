@@ -206,7 +206,7 @@
 import { Signer } from 'ethers'
 import {
     BusinessLogicResolver,
-    AccessControl,
+    AccessControlFacet,
     AdjustBalances,
     BondUSA,
     Cap,
@@ -219,27 +219,29 @@ import {
     ERC1643,
     ERC1644,
     ERC20,
-    Pause,
+    PauseFacet,
     ScheduledBalanceAdjustments,
     ScheduledSnapshots,
     ScheduledTasks,
     Snapshots,
     TransferAndLock,
     Lock,
+    Hold,
     ProtectedPartitions,
     Kyc,
     SsiManagement,
+    TimeTravel,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
 export interface DeployAtsContractsResultParams {
     businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    accessControl: DeployContractWithFactoryResult<AccessControl>
+    accessControl: DeployContractWithFactoryResult<AccessControlFacet>
     cap: DeployContractWithFactoryResult<Cap>
     controlList: DeployContractWithFactoryResult<ControlList>
     kyc: DeployContractWithFactoryResult<Kyc>
     ssiManagement: DeployContractWithFactoryResult<SsiManagement>
-    pause: DeployContractWithFactoryResult<Pause>
+    pause: DeployContractWithFactoryResult<PauseFacet>
     erc20: DeployContractWithFactoryResult<ERC20>
     erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
     erc1594: DeployContractWithFactoryResult<ERC1594>
@@ -252,22 +254,24 @@ export interface DeployAtsContractsResultParams {
     scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
     snapshots: DeployContractWithFactoryResult<Snapshots>
-    corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActions>
+    corporateActions: DeployContractWithFactoryResult<CorporateActions>
     transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     lock: DeployContractWithFactoryResult<Lock>
+    hold: DeployContractWithFactoryResult<Hold>
     adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
     protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
+    timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     deployer?: Signer
 }
 
 export default class DeployAtsContractsResult {
     public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    public readonly accessControl: DeployContractWithFactoryResult<AccessControl>
+    public readonly accessControl: DeployContractWithFactoryResult<AccessControlFacet>
     public readonly cap: DeployContractWithFactoryResult<Cap>
     public readonly controlList: DeployContractWithFactoryResult<ControlList>
     public readonly kyc: DeployContractWithFactoryResult<Kyc>
     public readonly ssiManagement: DeployContractWithFactoryResult<SsiManagement>
-    public readonly pause: DeployContractWithFactoryResult<Pause>
+    public readonly pause: DeployContractWithFactoryResult<PauseFacet>
     public readonly erc20: DeployContractWithFactoryResult<ERC20>
     public readonly erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
     public readonly erc1594: DeployContractWithFactoryResult<ERC1594>
@@ -280,11 +284,13 @@ export default class DeployAtsContractsResult {
     public readonly scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     public readonly scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
     public readonly snapshots: DeployContractWithFactoryResult<Snapshots>
-    public readonly corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActions>
+    public readonly corporateActions: DeployContractWithFactoryResult<CorporateActions>
     public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     public readonly lock: DeployContractWithFactoryResult<Lock>
+    public readonly hold: DeployContractWithFactoryResult<Hold>
     public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
     public readonly protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
+    public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     public readonly deployer?: Signer
 
     constructor({
@@ -307,11 +313,13 @@ export default class DeployAtsContractsResult {
         scheduledBalanceAdjustments,
         scheduledTasks,
         snapshots,
-        corporateActionsSecurity,
+        corporateActions,
         transferAndLock,
         lock,
+        hold,
         adjustBalances,
         protectedPartitions,
+        timeTravel,
         deployer,
     }: DeployAtsContractsResultParams) {
         this.businessLogicResolver = businessLogicResolver
@@ -333,11 +341,13 @@ export default class DeployAtsContractsResult {
         this.scheduledBalanceAdjustments = scheduledBalanceAdjustments
         this.scheduledTasks = scheduledTasks
         this.snapshots = snapshots
-        this.corporateActionsSecurity = corporateActionsSecurity
+        this.corporateActions = corporateActions
         this.transferAndLock = transferAndLock
         this.lock = lock
+        this.hold = hold
         this.adjustBalances = adjustBalances
         this.protectedPartitions = protectedPartitions
+        this.timeTravel = timeTravel
         // Deployer
         this.deployer = deployer
     }

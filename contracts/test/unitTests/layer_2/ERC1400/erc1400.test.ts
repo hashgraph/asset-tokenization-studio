@@ -215,6 +215,9 @@ import {
     type AccessControl,
     type Equity,
     type ControlList,
+    Kyc,
+    SsiManagement,
+    TimeTravel,
     ERC20,
     ERC1594,
     ERC1644,
@@ -223,13 +226,12 @@ import {
     IERC20,
     IFactory,
     BusinessLogicResolver,
-    AccessControlFacet__factory,
+    AccessControl__factory,
     ControlList__factory,
     Equity__factory,
     ERC1410ScheduledTasks__factory,
-    PauseFacet__factory,
-    Kyc,
-    SsiManagement,
+    Pause__factory,
+    TimeTravel__factory,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -243,6 +245,8 @@ import {
     IS_NOT_OPERATOR_ERROR_ID,
     IS_PAUSED_ERROR_ID,
     LOCKER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
     OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
     PAUSER_ROLE,
@@ -257,25 +261,22 @@ import {
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
     MAX_UINT256,
-    SSI_MANAGER_ROLE,
-    KYC_ROLE,
     FROM_ACCOUNT_KYC_ERROR_ID,
     TO_ACCOUNT_KYC_ERROR_ID,
     ZERO,
     EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
+import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
 const balanceOf_E_Original = 2 * amount
-const snapshot_1_delay = 8000
-const snapshot_2_delay = snapshot_1_delay * 3
 const data = '0x1234'
 const operatorData = '0x5678'
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
-const _PARTITION_ID_2 =
+const _PARTITION_ID =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const balanceOf_A_Original = [10 * amount, 100 * amount]
 const balanceOf_B_Original = [20 * amount, 200 * amount]
@@ -284,7 +285,7 @@ const adjustDecimals = 2
 const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
-const maxSupply_Partition_2_Original = 0
+const maxSupply_Partition_Original = ZERO
 const EMPTY_VC_ID = EMPTY_STRING
 let basicTransferInfo: any
 let operatorTransferData: any
@@ -292,16 +293,16 @@ let operatorTransferData: any
 interface BalanceAdjustedValues {
     maxSupply: BigNumber
     maxSupply_Partition_1: BigNumber
-    maxSupply_Partition_2: BigNumber
+    maxSupply_Partition: BigNumber
     totalSupply: BigNumber
     totalSupply_Partition_1: BigNumber
-    totalSupply_Partition_2: BigNumber
+    totalSupply_Partition: BigNumber
     balanceOf_A: BigNumber
     balanceOf_A_Partition_1: BigNumber
-    balanceOf_A_Partition_2: BigNumber
+    balanceOf_A_Partition: BigNumber
     balanceOf_B: BigNumber
     balanceOf_B_Partition_1: BigNumber
-    balanceOf_B_Partition_2: BigNumber
+    balanceOf_B_Partition: BigNumber
     decimals: number
     metadata?: IERC20.ERC20MetadataStructOutput
 }
@@ -332,6 +333,7 @@ describe('ERC1400 Tests', () => {
     let erc1594Facet: ERC1594
     let erc1644Facet: ERC1644
     let adjustBalancesFacet: AdjustBalances
+    let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
 
@@ -381,8 +383,8 @@ describe('ERC1400 Tests', () => {
         )
         if (!singlePartition) {
             await capFacet.setMaxSupplyByPartition(
-                _PARTITION_ID_2,
-                maxSupply_Partition_2_Original
+                _PARTITION_ID,
+                maxSupply_Partition_Original
             )
         }
     }
@@ -394,9 +396,10 @@ describe('ERC1400 Tests', () => {
             value: balanceOf_A_Original[0],
             data: '0x',
         })
+
         if (!singlePartition) {
             await erc1410Facet.issueByPartition({
-                partition: _PARTITION_ID_2,
+                partition: _PARTITION_ID,
                 tokenHolder: account_A,
                 value: balanceOf_A_Original[1],
                 data: '0x',
@@ -405,14 +408,14 @@ describe('ERC1400 Tests', () => {
         await erc1410Facet.issueByPartition({
             partition: _PARTITION_ID_1,
             tokenHolder: account_B,
-            value: balanceOf_B_Original[0],
+            value: balanceOf_A_Original[0],
             data: '0x',
         })
         if (!singlePartition) {
             await erc1410Facet.issueByPartition({
-                partition: _PARTITION_ID_2,
+                partition: _PARTITION_ID,
                 tokenHolder: account_B,
-                value: balanceOf_B_Original[1],
+                value: balanceOf_A_Original[1],
                 data: '0x',
             })
         }
@@ -444,13 +447,13 @@ describe('ERC1400 Tests', () => {
             balanceOf_A: balanceOf_A[`balanceOf_${account_A}`],
             balanceOf_A_Partition_1:
                 balanceOf_A[`balanceOf_${account_A}_Partition_1`],
-            balanceOf_A_Partition_2:
-                balanceOf_A[`balanceOf_${account_A}_Partition_2`],
+            balanceOf_A_Partition:
+                balanceOf_A[`balanceOf_${account_A}_Partition`],
             balanceOf_B: balanceOf_B[`balanceOf_${account_B}`],
             balanceOf_B_Partition_1:
                 balanceOf_B[`balanceOf_${account_B}_Partition_1`],
-            balanceOf_B_Partition_2:
-                balanceOf_B[`balanceOf_${account_B}_Partition_2`],
+            balanceOf_B_Partition:
+                balanceOf_B[`balanceOf_${account_B}_Partition`],
             decimals,
             metadata,
         }
@@ -461,14 +464,14 @@ describe('ERC1400 Tests', () => {
         const maxSupply_Partition_1 = await capFacet.getMaxSupplyByPartition(
             _PARTITION_ID_1
         )
-        const maxSupply_Partition_2 = await capFacet.getMaxSupplyByPartition(
-            _PARTITION_ID_2
+        const maxSupply_Partition = await capFacet.getMaxSupplyByPartition(
+            _PARTITION_ID
         )
 
         return {
             maxSupply,
             maxSupply_Partition_1,
-            maxSupply_Partition_2,
+            maxSupply_Partition,
         }
     }
 
@@ -476,13 +479,13 @@ describe('ERC1400 Tests', () => {
         const totalSupply = await erc1410Facet.totalSupplyAdjusted()
         const totalSupply_Partition_1 =
             await erc1410Facet.totalSupplyByPartitionAdjusted(_PARTITION_ID_1)
-        const totalSupply_Partition_2 =
-            await erc1410Facet.totalSupplyByPartitionAdjusted(_PARTITION_ID_2)
+        const totalSupply_Partition =
+            await erc1410Facet.totalSupplyByPartitionAdjusted(_PARTITION_ID)
 
         return {
             totalSupply,
             totalSupply_Partition_1,
-            totalSupply_Partition_2,
+            totalSupply_Partition,
         }
     }
 
@@ -492,15 +495,15 @@ describe('ERC1400 Tests', () => {
             _PARTITION_ID_1,
             account
         )
-        const balance_Partition_2 = await erc1410Facet.balanceOfByPartition(
-            _PARTITION_ID_2,
+        const balance_Partition = await erc1410Facet.balanceOfByPartition(
+            _PARTITION_ID,
             account
         )
 
         return {
             [`balanceOf_${account}`]: balance,
             [`balanceOf_${account}_Partition_1`]: balance_Partition_1,
-            [`balanceOf_${account}_Partition_2`]: balance_Partition_2,
+            [`balanceOf_${account}_Partition`]: balance_Partition,
         }
     }
 
@@ -516,8 +519,8 @@ describe('ERC1400 Tests', () => {
         expect(after.maxSupply_Partition_1).to.be.equal(
             before.maxSupply_Partition_1.mul(factorSquared)
         )
-        expect(after.maxSupply_Partition_2).to.be.equal(
-            before.maxSupply_Partition_2.mul(factorSquared)
+        expect(after.maxSupply_Partition).to.be.equal(
+            before.maxSupply_Partition.mul(factorSquared)
         )
 
         expect(after.totalSupply).to.be.equal(
@@ -526,8 +529,8 @@ describe('ERC1400 Tests', () => {
         expect(after.totalSupply_Partition_1).to.be.equal(
             before.totalSupply_Partition_1.mul(factorSquared)
         )
-        expect(after.totalSupply_Partition_2).to.be.equal(
-            before.totalSupply_Partition_2.mul(factorSquared)
+        expect(after.totalSupply_Partition).to.be.equal(
+            before.totalSupply_Partition.mul(factorSquared)
         )
 
         expect(after.balanceOf_A).to.be.equal(
@@ -536,8 +539,8 @@ describe('ERC1400 Tests', () => {
         expect(after.balanceOf_A_Partition_1).to.be.equal(
             before.balanceOf_A_Partition_1.mul(factorSquared)
         )
-        expect(after.balanceOf_A_Partition_2).to.be.equal(
-            before.balanceOf_A_Partition_2.mul(factorSquared)
+        expect(after.balanceOf_A_Partition).to.be.equal(
+            before.balanceOf_A_Partition.mul(factorSquared)
         )
 
         expect(after.balanceOf_B).to.be.equal(
@@ -546,8 +549,8 @@ describe('ERC1400 Tests', () => {
         expect(after.balanceOf_B_Partition_1).to.be.equal(
             before.balanceOf_B_Partition_1.mul(factorSquared)
         )
-        expect(after.balanceOf_B_Partition_2).to.be.equal(
-            before.balanceOf_B_Partition_2.mul(factorSquared)
+        expect(after.balanceOf_B_Partition).to.be.equal(
+            before.balanceOf_B_Partition.mul(factorSquared)
         )
 
         expect(after.decimals).to.be.equal(before.decimals + doubleDecimals)
@@ -580,8 +583,8 @@ describe('ERC1400 Tests', () => {
         expect(after.maxSupply_Partition_1).to.be.equal(
             before.maxSupply_Partition_1.mul(adjustFactor)
         )
-        expect(after.maxSupply_Partition_2).to.be.equal(
-            before.maxSupply_Partition_2.mul(adjustFactor)
+        expect(after.maxSupply_Partition).to.be.equal(
+            before.maxSupply_Partition.mul(adjustFactor)
         )
 
         expect(after.totalSupply).to.be.equal(
@@ -592,8 +595,8 @@ describe('ERC1400 Tests', () => {
                 .mul(adjustFactor)
                 .sub(balanceReduction)
         )
-        expect(after.totalSupply_Partition_2).to.be.equal(
-            before.totalSupply_Partition_2.mul(adjustFactor)
+        expect(after.totalSupply_Partition).to.be.equal(
+            before.totalSupply_Partition.mul(adjustFactor)
         )
 
         expect(after.balanceOf_A).to.be.equal(
@@ -604,8 +607,8 @@ describe('ERC1400 Tests', () => {
                 .mul(adjustFactor)
                 .sub(subtractedAmount)
         )
-        expect(after.balanceOf_A_Partition_2).to.be.equal(
-            before.balanceOf_A_Partition_2.mul(adjustFactor)
+        expect(after.balanceOf_A_Partition).to.be.equal(
+            before.balanceOf_A_Partition.mul(adjustFactor)
         )
 
         expect(after.balanceOf_B).to.be.equal(
@@ -614,8 +617,8 @@ describe('ERC1400 Tests', () => {
         expect(after.balanceOf_B_Partition_1).to.be.equal(
             before.balanceOf_B_Partition_1.mul(adjustFactor).add(addedAmount)
         )
-        expect(after.balanceOf_B_Partition_2).to.be.equal(
-            before.balanceOf_B_Partition_2.mul(adjustFactor)
+        expect(after.balanceOf_B_Partition).to.be.equal(
+            before.balanceOf_B_Partition.mul(adjustFactor)
         )
 
         expect(after.decimals).to.be.equal(before.decimals + adjustDecimals)
@@ -674,7 +677,12 @@ describe('ERC1400 Tests', () => {
         )
 
         erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
+            'ERC1410ScheduledTasksTimeTravel',
+            diamond.address
+        )
+
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
             diamond.address
         )
 
@@ -694,6 +702,7 @@ describe('ERC1400 Tests', () => {
         erc1644Facet = await ethers.getContractAt('ERC1644', diamond.address)
 
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
+
         kycFacet = await ethers.getContractAt('Kyc', diamond.address)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',
@@ -706,6 +715,7 @@ describe('ERC1400 Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
+
         const corporateActionPause: Rbac = {
             role: CORPORATE_ACTION_ROLE,
             members: [account_B],
@@ -731,7 +741,8 @@ describe('ERC1400 Tests', () => {
                     await DeployAtsFullInfrastructureCommand.newInstance({
                         signer: signer_A,
                         useDeployed: false,
-                        useEnvironment: true,
+                        useEnvironment: false,
+                        timeTravelEnabled: true,
                     })
                 )
 
@@ -745,15 +756,15 @@ describe('ERC1400 Tests', () => {
                 role: PAUSER_ROLE,
                 members: [account_B],
             }
-            const rbacKYC: Rbac = {
+            const rbacKyc: Rbac = {
                 role: KYC_ROLE,
                 members: [account_B],
             }
-            const rbacSSI: Rbac = {
+            const rbacSsi: Rbac = {
                 role: SSI_MANAGER_ROLE,
                 members: [account_A],
             }
-            const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
+            const init_rbacs: Rbac[] = [rbacPause, rbacKyc, rbacSsi]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -786,7 +797,7 @@ describe('ERC1400 Tests', () => {
                 factory,
             })
 
-            accessControlFacet = AccessControlFacet__factory.connect(
+            accessControlFacet = AccessControl__factory.connect(
                 diamond.address,
                 signer_A
             )
@@ -795,8 +806,12 @@ describe('ERC1400 Tests', () => {
                 signer_A
             )
             equityFacet = Equity__factory.connect(diamond.address, signer_A)
-            pauseFacet = PauseFacet__factory.connect(diamond.address, signer_B)
+            pauseFacet = Pause__factory.connect(diamond.address, signer_B)
             controlList = ControlList__factory.connect(
+                diamond.address,
+                signer_A
+            )
+            timeTravelFacet = TimeTravel__factory.connect(
                 diamond.address,
                 signer_A
             )
@@ -815,21 +830,21 @@ describe('ERC1400 Tests', () => {
             await ssiManagementFacet.addIssuer(account_E)
             await kycFacet.grantKyc(
                 account_C,
-                EMPTY_VC_ID,
+                EMPTY_STRING,
                 ZERO,
                 MAX_UINT256,
                 account_E
             )
             await kycFacet.grantKyc(
                 account_E,
-                EMPTY_VC_ID,
+                EMPTY_STRING,
                 ZERO,
                 MAX_UINT256,
                 account_E
             )
             await kycFacet.grantKyc(
                 account_D,
-                EMPTY_VC_ID,
+                EMPTY_STRING,
                 ZERO,
                 MAX_UINT256,
                 account_E
@@ -841,6 +856,7 @@ describe('ERC1400 Tests', () => {
                 value: balanceOf_C_Original,
                 data: '0x',
             })
+
             await erc1410Facet.issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_E,
@@ -863,18 +879,23 @@ describe('ERC1400 Tests', () => {
             }
         })
 
+        afterEach(async () => {
+            timeTravelFacet.resetSystemTimestamp()
+        })
+
         it('GIVEN an account WHEN authorizing and revoking operators THEN transaction succeeds', async () => {
             await erc1410Facet.issueByPartition({
-                partition: _PARTITION_ID_2,
+                partition: _PARTITION_ID,
                 tokenHolder: account_C,
                 value: balanceOf_C_Original,
                 data: '0x',
             })
+
             // authorize
             erc1410Facet = erc1410Facet.connect(signer_C)
             await erc1410Facet.authorizeOperator(account_D)
             await erc1410Facet.authorizeOperatorByPartition(
-                _PARTITION_ID_2,
+                _PARTITION_ID,
                 account_E
             )
 
@@ -893,16 +914,16 @@ describe('ERC1400 Tests', () => {
                     account_E,
                     account_C
                 )
-            let isOperatorByPartition_E_2 =
+            let isOperatorByPartition_E =
                 await erc1410Facet.isOperatorForPartition(
-                    _PARTITION_ID_2,
+                    _PARTITION_ID,
                     account_E,
                     account_C
                 )
             expect(isOperator_D).to.be.equal(true)
             expect(isOperator_E).to.be.equal(false)
             expect(isOperatorByPartition_E_1).to.be.equal(false)
-            expect(isOperatorByPartition_E_2).to.be.equal(true)
+            expect(isOperatorByPartition_E).to.be.equal(true)
 
             erc1410Facet = erc1410Facet.connect(signer_D)
             await erc1410Facet.operatorRedeemByPartition(
@@ -914,7 +935,7 @@ describe('ERC1400 Tests', () => {
             )
             erc1410Facet = erc1410Facet.connect(signer_E)
             await erc1410Facet.operatorRedeemByPartition(
-                _PARTITION_ID_2,
+                _PARTITION_ID,
                 account_C,
                 balanceOf_C_Original,
                 '0x',
@@ -925,20 +946,19 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
             await erc1410Facet.revokeOperator(account_D)
             await erc1410Facet.revokeOperatorByPartition(
-                _PARTITION_ID_2,
+                _PARTITION_ID,
                 account_E
             )
 
             // check
             isOperator_D = await erc1410Facet.isOperator(account_D, account_C)
-            isOperatorByPartition_E_2 =
-                await erc1410Facet.isOperatorForPartition(
-                    _PARTITION_ID_2,
-                    account_E,
-                    account_C
-                )
+            isOperatorByPartition_E = await erc1410Facet.isOperatorForPartition(
+                _PARTITION_ID,
+                account_E,
+                account_C
+            )
             expect(isOperator_D).to.be.equal(false)
-            expect(isOperatorByPartition_E_2).to.be.equal(false)
+            expect(isOperatorByPartition_E).to.be.equal(false)
         })
 
         it('GIVEN a paused Token WHEN transfer THEN transaction fails with TokenIsPaused', async () => {
@@ -980,7 +1000,7 @@ describe('ERC1400 Tests', () => {
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
             ).to.be.rejectedWith('TokenIsPaused')
-            expect(canTransfer_2[0]).to.be.equal(false)
+            expect(canTransfer[0]).to.be.equal(false)
             expect(canTransfer_2[1]).to.be.equal(IS_PAUSED_ERROR_ID)
         })
 
@@ -998,7 +1018,7 @@ describe('ERC1400 Tests', () => {
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_E,
                     value: amount,
-                    data: data,
+                    data: '0x',
                 })
             ).to.be.revertedWithCustomError(erc1410Facet, 'TokenIsPaused')
         })
@@ -1006,7 +1026,6 @@ describe('ERC1400 Tests', () => {
         it('GIVEN Token WHEN issue to partition 0 THEN transaction fails with ZeroPartition', async () => {
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_A)
-
             // issue fails
             await expect(
                 erc1410Facet.issueByPartition({
@@ -1014,7 +1033,7 @@ describe('ERC1400 Tests', () => {
                         '0x0000000000000000000000000000000000000000000000000000000000000000',
                     tokenHolder: account_E,
                     value: amount,
-                    data: data,
+                    data: '0x',
                 })
             ).to.be.rejectedWith('ZeroPartition')
         })
@@ -1022,7 +1041,6 @@ describe('ERC1400 Tests', () => {
         it('GIVEN Token WHEN issue amount 0 THEN transaction fails with ZeroValue', async () => {
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_A)
-
             // issue fails
             await expect(
                 erc1410Facet.issueByPartition({
@@ -1183,7 +1201,7 @@ describe('ERC1400 Tests', () => {
             expect(canTransfer_2[1]).to.be.equal(FROM_ACCOUNT_BLOCKED_ERROR_ID)
         })
 
-        it('GIVEN non kyc accounts (to, from) WHEN transfer THEN transaction fails with InvalidKycStatus', async () => {
+        it('GIVEN non Kyc accounts (to, from) WHEN transfer THEN transaction fails with InvalidKycStatus', async () => {
             await erc1410Facet.connect(signer_E).authorizeOperator(account_C)
             await erc1410Facet.connect(signer_D).authorizeOperator(account_C)
             await kycFacet.revokeKyc(account_D)
@@ -1214,7 +1232,7 @@ describe('ERC1400 Tests', () => {
 
             await kycFacet.grantKyc(
                 account_D,
-                EMPTY_VC_ID,
+                EMPTY_STRING,
                 ZERO,
                 MAX_UINT256,
                 account_E
@@ -1285,7 +1303,7 @@ describe('ERC1400 Tests', () => {
             )
 
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
+                'ERC1410ScheduledTasksTimeTravel',
                 newDiamond.address
             )
 
@@ -1307,7 +1325,7 @@ describe('ERC1400 Tests', () => {
             ).to.be.rejectedWith('AccountIsBlocked')
         })
 
-        it('GIVEN non kyc account WHEN issue or redeem THEN transaction fails with InvalidKycStatus', async () => {
+        it('GIVEN non Kyc account WHEN issue or redeem THEN transaction fails with InvalidKycStatus', async () => {
             await erc1410Facet.connect(signer_D).authorizeOperator(account_A)
             await kycFacet.revokeKyc(account_D)
             await expect(
@@ -1420,7 +1438,7 @@ describe('ERC1400 Tests', () => {
             const canTransfer = await erc1410Facet.canTransferByPartition(
                 account_C,
                 account_D,
-                _PARTITION_ID_2,
+                _PARTITION_ID,
                 amount,
                 data,
                 operatorData
@@ -1429,7 +1447,7 @@ describe('ERC1400 Tests', () => {
             // transfer with data fails
             await expect(
                 erc1410Facet.transferByPartition(
-                    _PARTITION_ID_2,
+                    _PARTITION_ID,
                     basicTransferInfo,
                     data
                 )
@@ -1443,7 +1461,7 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
             const canRedeem = await erc1410Facet.canRedeemByPartition(
                 account_C,
-                _PARTITION_ID_2,
+                _PARTITION_ID,
                 amount,
                 data,
                 operatorData
@@ -1451,7 +1469,7 @@ describe('ERC1400 Tests', () => {
 
             // transfer with data fails
             await expect(
-                erc1410Facet.redeemByPartition(_PARTITION_ID_2, amount, data)
+                erc1410Facet.redeemByPartition(_PARTITION_ID, amount, data)
             ).to.be.rejectedWith('InvalidPartition')
             expect(canRedeem[0]).to.be.equal(false)
             expect(canRedeem[1]).to.be.equal(WRONG_PARTITION_ERROR_ID)
@@ -1510,6 +1528,7 @@ describe('ERC1400 Tests', () => {
                 data,
                 operatorData
             )
+
             operatorTransferData.value = 2 * balanceOf_E_Original
             await expect(
                 erc1410Facet.operatorTransferByPartition(operatorTransferData)
@@ -1636,27 +1655,28 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
             equityFacet = equityFacet.connect(signer_C)
             // scheduling 2 snapshots
-            const currentTimeInSeconds = (
-                await ethers.provider.getBlock('latest')
-            ).timestamp
-            const dividendsRecordDateInSeconds_1 =
-                currentTimeInSeconds + snapshot_1_delay / 1000
-            const dividendsRecordDateInSeconds_2 =
-                currentTimeInSeconds + snapshot_2_delay / 1000
-            const dividendsExecutionDateInSeconds =
-                currentTimeInSeconds + 10 * (snapshot_2_delay / 1000)
+            const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
+                '2030-01-01T00:00:08Z'
+            )
+
+            const dividendsRecordDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:00:24Z'
+            )
+            const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:04:00Z'
+            )
             const dividendData_1 = {
                 recordDate: dividendsRecordDateInSeconds_1.toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: 1,
             }
-            const dividendData_2 = {
-                recordDate: dividendsRecordDateInSeconds_2.toString(),
+            const dividendData = {
+                recordDate: dividendsRecordDateInSeconds.toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: 1,
             }
             await equityFacet.setDividends(dividendData_1)
-            await equityFacet.setDividends(dividendData_2)
+            await equityFacet.setDividends(dividendData)
 
             //  transfer
             const canTransfer = await erc1410Facet.canTransferByPartition(
@@ -1720,9 +1740,9 @@ describe('ERC1400 Tests', () => {
             const balanceOf_D = await erc1410Facet.balanceOf(account_D)
             expect(balanceOf_D).to.equal(2 * amount)
             let dividend_1 = await equityFacet.getDividends(1)
-            let dividend_2 = await equityFacet.getDividends(2)
+            let dividend = await equityFacet.getDividends(2)
             expect(dividend_1.snapshotId.toNumber()).to.equal(0)
-            expect(dividend_2.snapshotId.toNumber()).to.equal(0)
+            expect(dividend.snapshotId.toNumber()).to.equal(0)
             let dividend_1_For_C = await equityFacet.getDividendsFor(
                 1,
                 account_C
@@ -1745,15 +1765,10 @@ describe('ERC1400 Tests', () => {
             expect(dividend_1_For_E.recordDateReached).to.equal(false)
             expect(dividend_1_For_D.recordDateReached).to.equal(false)
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) => setTimeout(f, snapshot_1_delay))
-
-            // dumb transactions just to create a new block with a new blocktimestamp without trigerring the snapshot
-            await accessControlFacet.revokeRole(
-                CORPORATE_ACTION_ROLE,
-                account_C
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds_1 + 1
             )
-            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
-            // dumb transactions just to create a new block with a new blocktimestamp without trigerring the snapshot
+
             dividend_1 = await equityFacet.getDividends(1)
             expect(dividend_1.snapshotId.toNumber()).to.equal(0)
 
@@ -1789,9 +1804,9 @@ describe('ERC1400 Tests', () => {
                 .withArgs(account_C, 1)
             // check that scheduled snapshots was triggered
             dividend_1 = await equityFacet.getDividends(1)
-            dividend_2 = await equityFacet.getDividends(2)
+            dividend = await equityFacet.getDividends(2)
             expect(dividend_1.snapshotId.toNumber()).to.equal(1)
-            expect(dividend_2.snapshotId.toNumber()).to.equal(0)
+            expect(dividend.snapshotId.toNumber()).to.equal(0)
             dividend_1_For_C = await equityFacet.getDividendsFor(1, account_C)
             dividend_1_For_E = await equityFacet.getDividendsFor(1, account_E)
             dividend_1_For_D = await equityFacet.getDividendsFor(1, account_D)
@@ -1813,8 +1828,8 @@ describe('ERC1400 Tests', () => {
             expect(dividend_1_For_D.recordDateReached).to.equal(true)
 
             // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) =>
-                setTimeout(f, snapshot_2_delay - snapshot_1_delay)
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds + 1
             )
 
             // transfer From
@@ -1826,9 +1841,9 @@ describe('ERC1400 Tests', () => {
 
             // check that scheduled snapshots was triggered
             dividend_1 = await equityFacet.getDividends(1)
-            dividend_2 = await equityFacet.getDividends(2)
+            dividend = await equityFacet.getDividends(2)
             expect(dividend_1.snapshotId.toNumber()).to.equal(1)
-            expect(dividend_2.snapshotId.toNumber()).to.equal(2)
+            expect(dividend.snapshotId.toNumber()).to.equal(2)
         })
 
         it('GIVEN an account WHEN issue more than max supply THEN transaction fails with MaxSupplyReached or MaxSupplyReachedForPartition', async () => {
@@ -1875,27 +1890,27 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_A)
             equityFacet = equityFacet.connect(signer_C)
             // scheduling 2 snapshots
-            const currentTimeInSeconds = (
-                await ethers.provider.getBlock('latest')
-            ).timestamp
-            const dividendsRecordDateInSeconds_1 =
-                currentTimeInSeconds + snapshot_1_delay / 1000
-            const dividendsRecordDateInSeconds_2 =
-                currentTimeInSeconds + snapshot_2_delay / 1000
-            const dividendsExecutionDateInSeconds =
-                currentTimeInSeconds + 10 * (snapshot_2_delay / 1000)
+            const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
+                '2030-01-01T00:00:08Z'
+            )
+            const dividendsRecordDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:00:24Z'
+            )
+            const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:04:00Z'
+            )
             const dividendData_1 = {
                 recordDate: dividendsRecordDateInSeconds_1.toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: 1,
             }
-            const dividendData_2 = {
-                recordDate: dividendsRecordDateInSeconds_2.toString(),
+            const dividendData = {
+                recordDate: dividendsRecordDateInSeconds.toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: 1,
             }
             await equityFacet.setDividends(dividendData_1)
-            await equityFacet.setDividends(dividendData_2)
+            await equityFacet.setDividends(dividendData)
 
             //  transfer
             await expect(
@@ -1933,9 +1948,9 @@ describe('ERC1400 Tests', () => {
                 totalSupply.toString()
             )
             let dividend_1 = await equityFacet.getDividends(1)
-            let dividend_2 = await equityFacet.getDividends(2)
+            let dividend = await equityFacet.getDividends(2)
             expect(dividend_1.snapshotId.toNumber()).to.equal(0)
-            expect(dividend_2.snapshotId.toNumber()).to.equal(0)
+            expect(dividend.snapshotId.toNumber()).to.equal(0)
 
             // Set Max supplies to test
             accessControlFacet = accessControlFacet.connect(signer_A)
@@ -1951,7 +1966,9 @@ describe('ERC1400 Tests', () => {
             )
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) => setTimeout(f, snapshot_1_delay))
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds_1 + 1
+            )
 
             // transfer
             await expect(
@@ -1967,9 +1984,9 @@ describe('ERC1400 Tests', () => {
 
             // check that scheduled snapshots was triggered
             dividend_1 = await equityFacet.getDividends(1)
-            dividend_2 = await equityFacet.getDividends(2)
+            dividend = await equityFacet.getDividends(2)
             expect(dividend_1.snapshotId.toNumber()).to.equal(1)
-            expect(dividend_2.snapshotId.toNumber()).to.equal(0)
+            expect(dividend.snapshotId.toNumber()).to.equal(0)
         })
 
         it('GIVEN an account WHEN redeem THEN transaction succeeds', async () => {
@@ -1981,27 +1998,27 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
             equityFacet = equityFacet.connect(signer_C)
             // scheduling 2 snapshots
-            const currentTimeInSeconds = (
-                await ethers.provider.getBlock('latest')
-            ).timestamp
-            const dividendsRecordDateInSeconds_1 =
-                currentTimeInSeconds + snapshot_1_delay / 1000
-            const dividendsRecordDateInSeconds_2 =
-                currentTimeInSeconds + snapshot_2_delay / 1000
-            const dividendsExecutionDateInSeconds =
-                currentTimeInSeconds + 10 * (snapshot_2_delay / 1000)
+            const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
+                '2030-01-01T00:00:08Z'
+            )
+            const dividendsRecordDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:00:24Z'
+            )
+            const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:24:00Z'
+            )
             const dividendData_1 = {
                 recordDate: dividendsRecordDateInSeconds_1.toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: 1,
             }
-            const dividendData_2 = {
-                recordDate: dividendsRecordDateInSeconds_2.toString(),
+            const dividendData = {
+                recordDate: dividendsRecordDateInSeconds.toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: 1,
             }
             await equityFacet.setDividends(dividendData_1)
-            await equityFacet.setDividends(dividendData_2)
+            await equityFacet.setDividends(dividendData)
 
             //  transfer
             const canRedeem = await erc1410Facet.canRedeemByPartition(
@@ -2090,16 +2107,18 @@ describe('ERC1400 Tests', () => {
             expect(balanceOf_E).to.equal(balanceOf_E_Original - amount)
             expect(balanceOf_E_Partition_1).to.equal(balanceOf_E)
             let dividend_1 = await equityFacet.getDividends(1)
-            let dividend_2 = await equityFacet.getDividends(2)
+            let dividend = await equityFacet.getDividends(2)
             expect(dividend_1.snapshotId.toNumber()).to.equal(0)
-            expect(dividend_2.snapshotId.toNumber()).to.equal(0)
+            expect(dividend.snapshotId.toNumber()).to.equal(0)
             expect(totalSupply).to.be.equal(
                 balanceOf_C_Original + balanceOf_E_Original - 2 * amount
             )
             expect(totalSupplyByPartition).to.be.equal(totalSupply)
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) => setTimeout(f, snapshot_1_delay + 1000))
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds_1 + 1
+            )
 
             // transfer
             await expect(
@@ -2110,13 +2129,13 @@ describe('ERC1400 Tests', () => {
 
             // check that scheduled snapshots was triggered
             dividend_1 = await equityFacet.getDividends(1)
-            dividend_2 = await equityFacet.getDividends(2)
+            dividend = await equityFacet.getDividends(2)
             expect(dividend_1.snapshotId.toNumber()).to.equal(1)
-            expect(dividend_2.snapshotId.toNumber()).to.equal(0)
+            expect(dividend.snapshotId.toNumber()).to.equal(0)
 
             // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) =>
-                setTimeout(f, snapshot_2_delay - snapshot_1_delay + 1000)
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds + 1
             )
 
             // transfer From
@@ -2134,9 +2153,9 @@ describe('ERC1400 Tests', () => {
 
             // check that scheduled snapshots was triggered
             dividend_1 = await equityFacet.getDividends(1)
-            dividend_2 = await equityFacet.getDividends(2)
+            dividend = await equityFacet.getDividends(2)
             expect(dividend_1.snapshotId.toNumber()).to.equal(1)
-            expect(dividend_2.snapshotId.toNumber()).to.equal(2)
+            expect(dividend.snapshotId.toNumber()).to.equal(2)
         })
 
         it('GIVEN accounts USING WHITELIST WHEN issue THEN transaction succeeds', async () => {
@@ -2178,7 +2197,7 @@ describe('ERC1400 Tests', () => {
             )
 
             erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
+                'ERC1410ScheduledTasksTimeTravel',
                 newDiamond.address
             )
 
@@ -2207,7 +2226,7 @@ describe('ERC1400 Tests', () => {
             await ssiManagementFacet.addIssuer(account_E)
             await kycFacet.grantKyc(
                 account_E,
-                EMPTY_VC_ID,
+                EMPTY_STRING,
                 ZERO,
                 MAX_UINT256,
                 account_E
@@ -2237,7 +2256,7 @@ describe('ERC1400 Tests', () => {
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_D,
                 value: balanceOf_D_Original,
-                data: '0x',
+                data: data,
             })
 
             const canTransfer = await erc1410Facet.canTransferByPartition(
@@ -2269,6 +2288,7 @@ describe('ERC1400 Tests', () => {
             erc1410Facet = erc1410Facet.connect(signer_C)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             const balanceOf_D_Original = 4 * amount
+
             await erc1410Facet.issueByPartition({
                 partition: _PARTITION_ID_1,
                 tokenHolder: account_D,
@@ -2370,27 +2390,27 @@ describe('ERC1400 Tests', () => {
                 data: '0x',
             })
             // scheduling 2 snapshots
-            const currentTimeInSeconds = (
-                await ethers.provider.getBlock('latest')
-            ).timestamp
-            const dividendsRecordDateInSeconds_1 =
-                currentTimeInSeconds + snapshot_1_delay / 1000
-            const dividendsRecordDateInSeconds_2 =
-                currentTimeInSeconds + snapshot_2_delay / 1000
-            const dividendsExecutionDateInSeconds =
-                currentTimeInSeconds + 10 * (snapshot_2_delay / 1000)
+            const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
+                '2030-01-01T00:00:08Z'
+            )
+            const dividendsRecordDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:00:24Z'
+            )
+            const dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+                '2030-01-01T00:04:00Z'
+            )
             const dividendData_1 = {
                 recordDate: dividendsRecordDateInSeconds_1.toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: 1,
             }
-            const dividendData_2 = {
-                recordDate: dividendsRecordDateInSeconds_2.toString(),
+            const dividendData = {
+                recordDate: dividendsRecordDateInSeconds.toString(),
                 executionDate: dividendsExecutionDateInSeconds.toString(),
                 amount: 1,
             }
             await equityFacet.setDividends(dividendData_1)
-            await equityFacet.setDividends(dividendData_2)
+            await equityFacet.setDividends(dividendData)
 
             // controller transfer
             await expect(
@@ -2451,12 +2471,14 @@ describe('ERC1400 Tests', () => {
             expect(balanceOf_E).to.equal(balanceOf_E_Original + amount)
             expect(balanceOf_E_Partition_1).to.equal(balanceOf_E)
             let dividend_1 = await equityFacet.getDividends(1)
-            let dividend_2 = await equityFacet.getDividends(2)
+            let dividend = await equityFacet.getDividends(2)
             expect(dividend_1.snapshotId.toNumber()).to.equal(0)
-            expect(dividend_2.snapshotId.toNumber()).to.equal(0)
+            expect(dividend.snapshotId.toNumber()).to.equal(0)
 
             // AFTER FIRST SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) => setTimeout(f, snapshot_1_delay + 1000))
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds_1 + 1
+            )
 
             // controller transfer
             await expect(
@@ -2474,13 +2496,13 @@ describe('ERC1400 Tests', () => {
 
             // check that scheduled snapshots was triggered
             dividend_1 = await equityFacet.getDividends(1)
-            dividend_2 = await equityFacet.getDividends(2)
+            dividend = await equityFacet.getDividends(2)
             expect(dividend_1.snapshotId.toNumber()).to.equal(1)
-            expect(dividend_2.snapshotId.toNumber()).to.equal(0)
+            expect(dividend.snapshotId.toNumber()).to.equal(0)
 
             // AFTER SECOND SCHEDULED SNAPSHOTS ------------------------------------------------------------------
-            await new Promise((f) =>
-                setTimeout(f, snapshot_2_delay - snapshot_1_delay + 1000)
+            await timeTravelFacet.changeSystemTimestamp(
+                dividendsRecordDateInSeconds + 1
             )
 
             // controller redeem
@@ -2498,9 +2520,9 @@ describe('ERC1400 Tests', () => {
 
             // check that scheduled snapshots was triggered
             dividend_1 = await equityFacet.getDividends(1)
-            dividend_2 = await equityFacet.getDividends(2)
+            dividend = await equityFacet.getDividends(2)
             expect(dividend_1.snapshotId.toNumber()).to.equal(1)
-            expect(dividend_2.snapshotId.toNumber()).to.equal(2)
+            expect(dividend.snapshotId.toNumber()).to.equal(2)
         })
     })
 
@@ -2523,6 +2545,7 @@ describe('ERC1400 Tests', () => {
                         signer: signer_A,
                         useDeployed: false,
                         useEnvironment: true,
+                        timeTravelEnabled: false,
                     })
                 )
 
@@ -2535,15 +2558,15 @@ describe('ERC1400 Tests', () => {
                 role: PAUSER_ROLE,
                 members: [account_B],
             }
-            const rbacKYC: Rbac = {
+            const rbacKyc: Rbac = {
                 role: KYC_ROLE,
                 members: [account_B],
             }
-            const rbacSSI: Rbac = {
+            const rbacSsi: Rbac = {
                 role: SSI_MANAGER_ROLE,
                 members: [account_A],
             }
-            const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
+            const init_rbacs: Rbac[] = [rbacPause, rbacKyc, rbacSsi]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -2576,7 +2599,7 @@ describe('ERC1400 Tests', () => {
                 factory,
             })
 
-            accessControlFacet = AccessControlFacet__factory.connect(
+            accessControlFacet = AccessControl__factory.connect(
                 diamond.address,
                 signer_A
             )
@@ -2585,7 +2608,7 @@ describe('ERC1400 Tests', () => {
                 signer_A
             )
             equityFacet = Equity__factory.connect(diamond.address, signer_A)
-            pauseFacet = PauseFacet__factory.connect(diamond.address, signer_B)
+            pauseFacet = Pause__factory.connect(diamond.address, signer_B)
             controlList = ControlList__factory.connect(
                 diamond.address,
                 signer_A
@@ -2605,14 +2628,14 @@ describe('ERC1400 Tests', () => {
             await ssiManagementFacet.addIssuer(account_E)
             await kycFacet.grantKyc(
                 account_C,
-                EMPTY_VC_ID,
+                EMPTY_STRING,
                 ZERO,
                 MAX_UINT256,
                 account_E
             )
             await kycFacet.grantKyc(
                 account_E,
-                EMPTY_VC_ID,
+                EMPTY_STRING,
                 ZERO,
                 MAX_UINT256,
                 account_E
@@ -2639,7 +2662,7 @@ describe('ERC1400 Tests', () => {
             async () => {
                 await expect(
                     erc1410Facet.transferByPartition(
-                        _PARTITION_ID_2,
+                        _PARTITION_ID,
                         basicTransferInfo,
                         data
                     )
@@ -2648,10 +2671,10 @@ describe('ERC1400 Tests', () => {
                         erc1410Facet,
                         'PartitionNotAllowedInSinglePartitionMode'
                     )
-                    .withArgs(_PARTITION_ID_2)
+                    .withArgs(_PARTITION_ID)
                 await expect(
                     erc1410Facet.controllerTransferByPartition(
-                        _PARTITION_ID_2,
+                        _PARTITION_ID,
                         account_C,
                         account_D,
                         amount,
@@ -2663,10 +2686,10 @@ describe('ERC1400 Tests', () => {
                         erc1410Facet,
                         'PartitionNotAllowedInSinglePartitionMode'
                     )
-                    .withArgs(_PARTITION_ID_2)
+                    .withArgs(_PARTITION_ID)
                 await expect(
                     erc1410Facet.controllerRedeemByPartition(
-                        _PARTITION_ID_2,
+                        _PARTITION_ID,
                         account_D,
                         amount,
                         data,
@@ -2677,9 +2700,9 @@ describe('ERC1400 Tests', () => {
                         erc1410Facet,
                         'PartitionNotAllowedInSinglePartitionMode'
                     )
-                    .withArgs(_PARTITION_ID_2)
+                    .withArgs(_PARTITION_ID)
                 // TODO canTransferByPartition
-                operatorTransferData.partition = _PARTITION_ID_2
+                operatorTransferData.partition = _PARTITION_ID
                 operatorTransferData.from = account_C
                 operatorTransferData.operatorData = data
                 await expect(
@@ -2691,10 +2714,10 @@ describe('ERC1400 Tests', () => {
                         erc1410Facet,
                         'PartitionNotAllowedInSinglePartitionMode'
                     )
-                    .withArgs(_PARTITION_ID_2)
+                    .withArgs(_PARTITION_ID)
                 await expect(
                     erc1410Facet.authorizeOperatorByPartition(
-                        _PARTITION_ID_2,
+                        _PARTITION_ID,
                         account_C
                     )
                 )
@@ -2702,10 +2725,10 @@ describe('ERC1400 Tests', () => {
                         erc1410Facet,
                         'PartitionNotAllowedInSinglePartitionMode'
                     )
-                    .withArgs(_PARTITION_ID_2)
+                    .withArgs(_PARTITION_ID)
                 await expect(
                     erc1410Facet.revokeOperatorByPartition(
-                        _PARTITION_ID_2,
+                        _PARTITION_ID,
                         account_C
                     )
                 )
@@ -2713,22 +2736,18 @@ describe('ERC1400 Tests', () => {
                         erc1410Facet,
                         'PartitionNotAllowedInSinglePartitionMode'
                     )
-                    .withArgs(_PARTITION_ID_2)
+                    .withArgs(_PARTITION_ID)
                 await expect(
-                    erc1410Facet.redeemByPartition(
-                        _PARTITION_ID_2,
-                        amount,
-                        data
-                    )
+                    erc1410Facet.redeemByPartition(_PARTITION_ID, amount, data)
                 )
                     .to.be.revertedWithCustomError(
                         erc1410Facet,
                         'PartitionNotAllowedInSinglePartitionMode'
                     )
-                    .withArgs(_PARTITION_ID_2)
+                    .withArgs(_PARTITION_ID)
                 await expect(
                     erc1410Facet.operatorRedeemByPartition(
-                        _PARTITION_ID_2,
+                        _PARTITION_ID,
                         account_C,
                         amount,
                         data,
@@ -2739,10 +2758,10 @@ describe('ERC1400 Tests', () => {
                         erc1410Facet,
                         'PartitionNotAllowedInSinglePartitionMode'
                     )
-                    .withArgs(_PARTITION_ID_2)
+                    .withArgs(_PARTITION_ID)
                 await expect(
                     erc1410Facet.issueByPartition({
-                        partition: _PARTITION_ID_2,
+                        partition: _PARTITION_ID,
                         tokenHolder: account_C,
                         value: amount,
                         data: data,
@@ -2752,7 +2771,7 @@ describe('ERC1400 Tests', () => {
                         erc1410Facet,
                         'PartitionNotAllowedInSinglePartitionMode'
                     )
-                    .withArgs(_PARTITION_ID_2)
+                    .withArgs(_PARTITION_ID)
                 // TODO canRedeemByPartition
             }
         )
@@ -2774,6 +2793,7 @@ describe('ERC1400 Tests', () => {
                         signer: signer_A,
                         useDeployed: false,
                         useEnvironment: true,
+                        timeTravelEnabled: true,
                     })
                 )
 
@@ -2801,6 +2821,10 @@ describe('ERC1400 Tests', () => {
             }
         })
 
+        afterEach(async () => {
+            await timeTravelFacet.resetSystemTimestamp()
+        })
+
         it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN transaction succeeds', async () => {
             await setPreBalanceAdjustment()
 
@@ -2817,18 +2841,18 @@ describe('ERC1400 Tests', () => {
             // scheduled two balance updates
             equityFacet = equityFacet.connect(signer_B)
 
-            const currentTimeInSeconds = (
-                await ethers.provider.getBlock('latest')
-            ).timestamp
-
             const balanceAdjustmentData = {
-                executionDate: (currentTimeInSeconds + 2).toString(),
+                executionDate: dateToUnixTimestamp(
+                    '2030-01-01T00:00:02Z'
+                ).toString(),
                 factor: adjustFactor,
                 decimals: adjustDecimals,
             }
 
             const balanceAdjustmentData_2 = {
-                executionDate: (currentTimeInSeconds + 1000).toString(),
+                executionDate: dateToUnixTimestamp(
+                    '2030-01-01T00:16:40Z'
+                ).toString(),
                 factor: adjustFactor,
                 decimals: adjustDecimals,
             }
@@ -2839,10 +2863,10 @@ describe('ERC1400 Tests', () => {
                 balanceAdjustmentData_2
             )
 
-            // wait for first scheduled balance adjustment only (run DUMB transaction)
-            await new Promise((f) => setTimeout(f, 3000))
-            await accessControlFacet.grantRole(PAUSER_ROLE, account_C) // DUMB transaction
-
+            // wait for first scheduled balance adjustment only
+            await timeTravelFacet.changeSystemTimestamp(
+                dateToUnixTimestamp('2030-01-01T00:00:03Z')
+            )
             // After Values Before Transaction
             const after: BalanceAdjustedValues =
                 await getBalanceAdjustedValues()
@@ -2995,7 +3019,6 @@ describe('ERC1400 Tests', () => {
                 // Using account C (with role)
                 adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
                 erc1410Facet = erc1410Facet.connect(signer_A)
-
                 await erc1410Facet.issueByPartition({
                     partition: _PARTITION_ID_1,
                     tokenHolder: account_A,
@@ -3003,7 +3026,7 @@ describe('ERC1400 Tests', () => {
                     data: '0x',
                 })
                 await erc1410Facet.issueByPartition({
-                    partition: _PARTITION_ID_2,
+                    partition: _PARTITION_ID,
                     tokenHolder: account_A,
                     value: balanceOf_A_Original[1],
                     data: '0x',
@@ -3023,7 +3046,6 @@ describe('ERC1400 Tests', () => {
                     adjustFactor,
                     adjustDecimals
                 )
-
                 // issue after adjust
                 await erc1410Facet.issueByPartition({
                     partition: _PARTITION_ID_1,
@@ -3070,7 +3092,6 @@ describe('ERC1400 Tests', () => {
                 // Transaction Partition 1
                 basicTransferInfo.to = account_B
 
-                // Transaction Partition 1
                 await erc1410Facet.transferByPartition(
                     _PARTITION_ID_1,
                     basicTransferInfo,
