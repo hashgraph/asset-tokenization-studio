@@ -516,6 +516,23 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
+    function getHoldForByPartitionAdjusted(
+        IHold.HoldIdentifier calldata _holdIdentifier
+    )
+        external
+        view
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address escrow_,
+            address destination_,
+            bytes memory data_,
+            bytes memory operatorData_
+        )
+    {
+        return _getHoldForByPartitionAdjusted(_holdIdentifier);
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -532,7 +549,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](15);
+        staticFunctionSelectors_ = new bytes4[](16);
         staticFunctionSelectors_[selectorIndex++] = this
             .createHoldByPartition
             .selector;
@@ -577,6 +594,9 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getHeldAmountFor
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getHoldForByPartitionAdjusted
             .selector;
     }
 
