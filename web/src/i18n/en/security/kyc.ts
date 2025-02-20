@@ -210,7 +210,7 @@ export default {
   },
   table: {
     fields: {
-      accountId: "Account ID",
+      accountId: "Issuer ID",
       validFrom: "Valid From",
       validTo: "Valid To",
       vcId: "VC ID",

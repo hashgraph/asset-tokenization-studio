@@ -209,7 +209,7 @@ export default {
     change: "Change",
     form: {
       account: {
-        label: "Account ID",
+        label: "Contract ID",
         placeholder: "0.0.1234567",
       },
     },
