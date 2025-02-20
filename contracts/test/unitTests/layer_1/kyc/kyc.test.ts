@@ -218,6 +218,7 @@ import {
     SsiManagement,
     T3RevocationRegistry,
     T3RevocationRegistry__factory,
+    TimeTravel,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -257,6 +258,7 @@ describe('Kyc Tests', () => {
     let pauseFacet: Pause
     let ssiManagementFacet: SsiManagement
     let revocationList: T3RevocationRegistry
+    let timeTravelFacet: TimeTravel
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -280,7 +282,8 @@ describe('Kyc Tests', () => {
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
                     useDeployed: false,
-                    useEnvironment: true,
+                    useEnvironment: false,
+                    timeTravelEnabled: true,
                 })
             )
 
@@ -303,6 +306,10 @@ describe('Kyc Tests', () => {
 
     after(async () => {
         await snapshot.restore()
+    })
+
+    afterEach(async () => {
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
     beforeEach(async () => {
@@ -364,6 +371,11 @@ describe('Kyc Tests', () => {
             'SsiManagement',
             diamond.address,
             signer_C
+        )
+        timeTravelFacet = await ethers.getContractAt(
+            'TimeTravel',
+            diamond.address,
+            signer_A
         )
 
         await ssiManagementFacet.addIssuer(account_C)
@@ -533,28 +545,27 @@ describe('Kyc Tests', () => {
             expect(KYCAccounts.length).to.equal(0)
         })
 
-        //TODO activate this test when TimeTravel is migrated
-        // it('Check Kyc status after expiration', async () => {
-        //     await kycFacet.grantKyc(
-        //         account_B,
-        //         _VC_ID,
-        //         _VALID_FROM,
-        //         _VALID_TO,
-        //         account_C
-        //     )
+        it('Check Kyc status after expiration', async () => {
+            await kycFacet.grantKyc(
+                account_B,
+                _VC_ID,
+                _VALID_FROM,
+                _VALID_TO,
+                account_C
+            )
 
-        //     let KYCStatusFor_B_After_Grant = await kycFacet.getKycStatusFor(
-        //         account_B
-        //     )
+            let KYCStatusFor_B_After_Grant = await kycFacet.getKycStatusFor(
+                account_B
+            )
 
-        //     await timeTravelFacet.changeSystemTimestamp(_VALID_TO + 1)
+            await timeTravelFacet.changeSystemTimestamp(_VALID_TO + 1)
 
-        //     let KYCStatusFor_B_After_Expiration =
-        //         await kycFacet.getKycStatusFor(account_B)
+            let KYCStatusFor_B_After_Expiration =
+                await kycFacet.getKycStatusFor(account_B)
 
-        //     expect(KYCStatusFor_B_After_Grant).to.equal(1)
-        //     expect(KYCStatusFor_B_After_Expiration).to.equal(0)
-        // })
+            expect(KYCStatusFor_B_After_Grant).to.equal(1)
+            expect(KYCStatusFor_B_After_Expiration).to.equal(0)
+        })
 
         it('Check Kyc status after issuer removed', async () => {
             await kycFacet.grantKyc(
