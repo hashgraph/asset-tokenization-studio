@@ -227,10 +227,10 @@ contract Kyc is IKyc, IStaticFunctionSelectors, Common {
         override
         onlyRole(_KYC_ROLE)
         onlyUnpaused
-        checkAddress(_account)
+        onlyValidAddress(_account)
         onlyValidKycStatus(KycStatus.NOT_GRANTED, _account)
         onlyValidDates(_validFrom, _validTo)
-        checkIssuerList(_issuer)
+        onlyValidIssuer(_issuer)
         returns (bool success_)
     {
         success_ = _grantKyc(_account, _vcId, _validFrom, _validTo, _issuer);
@@ -245,7 +245,7 @@ contract Kyc is IKyc, IStaticFunctionSelectors, Common {
         override
         onlyRole(_KYC_ROLE)
         onlyUnpaused
-        checkAddress(_account)
+        onlyValidAddress(_account)
         returns (bool success_)
     {
         success_ = _revokeKyc(_account);

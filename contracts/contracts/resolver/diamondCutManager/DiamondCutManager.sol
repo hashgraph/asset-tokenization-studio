@@ -250,7 +250,7 @@ abstract contract DiamondCutManager is
         bytes4 _selector
     ) external view override returns (address facetAddress_) {
         facetAddress_ = _resolveResolverProxyCall(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _selector
@@ -263,7 +263,7 @@ abstract contract DiamondCutManager is
         bytes4 _interfaceId
     ) external view override returns (bool exists_) {
         exists_ = _resolveSupportsInterface(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _interfaceId
@@ -275,7 +275,7 @@ abstract contract DiamondCutManager is
         uint256 _version
     ) external view override returns (bool isRegistered_) {
         isRegistered_ = _isResolverProxyConfigurationRegistered(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version
         );
@@ -286,7 +286,7 @@ abstract contract DiamondCutManager is
         uint256 _version
     ) external override {
         _checkResolverProxyConfigurationRegistered(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version
         );
@@ -298,7 +298,7 @@ abstract contract DiamondCutManager is
         override
         returns (uint256 configurationsLength_)
     {
-        configurationsLength_ = _getDiamondCutManagerStorage()
+        configurationsLength_ = _diamondCutManagerStorage()
             .configurations
             .length;
     }
@@ -308,7 +308,7 @@ abstract contract DiamondCutManager is
         uint256 _pageLength
     ) external view override returns (bytes32[] memory configurationIds_) {
         configurationIds_ = _getConfigurations(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _pageIndex,
             _pageLength
         );
@@ -317,7 +317,7 @@ abstract contract DiamondCutManager is
     function getLatestVersionByConfiguration(
         bytes32 _configurationId
     ) external view override returns (uint256 latestVersion_) {
-        latestVersion_ = _getDiamondCutManagerStorage().latestVersion[
+        latestVersion_ = _diamondCutManagerStorage().latestVersion[
             _configurationId
         ];
     }
@@ -327,7 +327,7 @@ abstract contract DiamondCutManager is
         uint256 _version
     ) external view override returns (uint256 facetsLength_) {
         facetsLength_ = _getFacetsLengthByConfigurationIdAndVersion(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version
         );
@@ -340,7 +340,7 @@ abstract contract DiamondCutManager is
         uint256 _pageLength
     ) external view override returns (IDiamondLoupe.Facet[] memory facets_) {
         facets_ = _getFacetsByConfigurationIdAndVersion(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _pageIndex,
@@ -354,7 +354,7 @@ abstract contract DiamondCutManager is
         bytes32 _facetId
     ) external view override returns (uint256 facetSelectorsLength_) {
         facetSelectorsLength_ = _getFacetSelectorsLengthByConfigurationIdVersionAndFacetId(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _facetId
@@ -369,7 +369,7 @@ abstract contract DiamondCutManager is
         uint256 _pageLength
     ) external view override returns (bytes4[] memory facetSelectors_) {
         facetSelectors_ = _getFacetSelectorsByConfigurationIdVersionAndFacetId(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _facetId,
@@ -385,7 +385,7 @@ abstract contract DiamondCutManager is
         uint256 _pageLength
     ) external view override returns (bytes32[] memory facetIds_) {
         facetIds_ = _getFacetIdsByConfigurationIdAndVersion(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _pageIndex,
@@ -400,7 +400,7 @@ abstract contract DiamondCutManager is
         uint256 _pageLength
     ) external view override returns (address[] memory facetAddresses_) {
         facetAddresses_ = _getFacetAddressesByConfigurationIdAndVersion(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _pageIndex,
@@ -414,7 +414,7 @@ abstract contract DiamondCutManager is
         bytes4 _selector
     ) external view override returns (bytes32 facetId_) {
         facetId_ = _getFacetIdByConfigurationIdVersionAndSelector(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _selector
@@ -427,7 +427,7 @@ abstract contract DiamondCutManager is
         bytes32 _facetId
     ) external view override returns (IDiamondLoupe.Facet memory facet_) {
         facet_ = _getFacetByConfigurationIdVersionAndFacetId(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _facetId
@@ -440,7 +440,7 @@ abstract contract DiamondCutManager is
         bytes32 _facetId
     ) external view override returns (address facetAddress_) {
         facetAddress_ = _getFacetAddressByConfigurationIdVersionAndFacetId(
-            _getDiamondCutManagerStorage(),
+            _diamondCutManagerStorage(),
             _configurationId,
             _version,
             _facetId

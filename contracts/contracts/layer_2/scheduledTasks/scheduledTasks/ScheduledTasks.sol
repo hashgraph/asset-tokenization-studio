@@ -214,24 +214,17 @@ import {_SCHEDULED_TASKS_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {
     IScheduledTasks
 } from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    ScheduledTask
+} from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 
 contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    // TODO: ésto para qué?????
-    // solhint-disable no-unused-vars
-    function onScheduledTaskTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external override onlyAutoCalling(_scheduledTaskStorage()) {
-        _onScheduledTaskTriggered(_data);
-    } // solhint-enable no-unused-vars
-
+    // TODO: Why we return uint256??
     function triggerPendingScheduledTasks()
         external
         override
@@ -241,6 +234,7 @@ contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
         return _triggerScheduledTasks(0);
     }
 
+    // TODO: Why we return uint256??
     function triggerScheduledTasks(
         uint256 _max
     ) external override onlyUnpaused returns (uint256) {
@@ -254,12 +248,7 @@ contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
     function getScheduledTasks(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        override
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
-    {
+    ) external view override returns (ScheduledTask[] memory scheduledTask_) {
         scheduledTask_ = _getScheduledTasks(_pageIndex, _pageLength);
     }
 
@@ -279,7 +268,7 @@ contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_ = new bytes4[](4);
         staticFunctionSelectors_[selectorIndex++] = this
             .triggerPendingScheduledTasks
             .selector;
@@ -291,9 +280,6 @@ contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getScheduledTasks
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .onScheduledTaskTriggered
             .selector;
     }
 

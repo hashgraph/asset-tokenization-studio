@@ -217,10 +217,12 @@ import {Common} from '../../../layer_1/common/Common.sol';
 import {
     IScheduledBalanceAdjustments
 } from '../../interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    ScheduledTask
+} from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 
 contract ScheduledBalanceAdjustments is
     IStaticFunctionSelectors,
@@ -228,15 +230,6 @@ contract ScheduledBalanceAdjustments is
     Common
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    // solhint-disable no-unused-vars
-    function onScheduledBalanceAdjustmentTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external override onlyAutoCalling(_scheduledBalanceAdjustmentStorage()) {
-        _onScheduledBalanceAdjustmentTriggered(_data);
-    } // solhint-enable no-unused-vars
 
     function scheduledBalanceAdjustmentCount()
         external
@@ -254,9 +247,7 @@ contract ScheduledBalanceAdjustments is
         external
         view
         override
-        returns (
-            ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
-        )
+        returns (ScheduledTask[] memory scheduledBalanceAdjustment_)
     {
         scheduledBalanceAdjustment_ = _getScheduledBalanceAdjustments(
             _pageIndex,
@@ -280,15 +271,12 @@ contract ScheduledBalanceAdjustments is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_ = new bytes4[](2);
         staticFunctionSelectors_[selectorIndex++] = this
             .scheduledBalanceAdjustmentCount
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getScheduledBalanceAdjustments
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .onScheduledBalanceAdjustmentTriggered
             .selector;
     }
 

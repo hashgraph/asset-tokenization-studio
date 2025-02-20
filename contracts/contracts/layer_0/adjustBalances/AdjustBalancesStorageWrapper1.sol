@@ -210,15 +210,15 @@ import {
     _ADJUST_BALANCES_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 import {
-    ScheduledBalanceAdjustmentsStorageWrapper
-} from '../scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustmentsStorageWrapper.sol';
+    ScheduledTasksStorageWrapper
+} from '../scheduledTasks/scheduledTasks/ScheduledTasksStorageWrapper.sol';
 import {
     IAdjustBalancesStorageWrapper
 } from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
 
 abstract contract AdjustBalancesStorageWrapper1 is
     IAdjustBalancesStorageWrapper,
-    ScheduledBalanceAdjustmentsStorageWrapper
+    ScheduledTasksStorageWrapper
 {
     modifier checkFactor(uint256 _factor) {
         if (_factor == 0) revert FactorIsZero();
@@ -237,8 +237,11 @@ abstract contract AdjustBalancesStorageWrapper1 is
         // Last Aggregated Balance Adjustment per allowance
         mapping(address => mapping(address => uint256)) labafsAllowances;
         // Locks
+        //labaf per account
         mapping(address => uint256) labafLockedAmountByAccount;
+        //labaf pero account and partition {0xaccount: {0xpartition: 1, ...}, ...}
         mapping(address => mapping(bytes32 => uint256)) labafLockedAmountByAccountAndPartition;
+        //labaf per account, partition and index {0xaccount: {0xpartition: [1, 3, ...], ...}, ...}
         mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) labafLockedAmountByAccountPartitionAndId;
         // holdsByAccountPartitionAndId
         mapping(address => uint256) labafHeldAmountByAccount;
@@ -247,15 +250,12 @@ abstract contract AdjustBalancesStorageWrapper1 is
     }
 
     function _updateAbaf(uint256 factor) internal {
-        _getAdjustBalancesStorage().abaf = _calculateNewAbaf(
-            _getAbaf(),
-            factor
-        );
+        _adjustBalancesStorage().abaf = _calculateNewAbaf(_getAbaf(), factor);
     }
 
     function _updateLabafByPartition(bytes32 partition) internal {
         AdjustBalancesStorage
-            storage adjustBalancesStorage = _getAdjustBalancesStorage();
+            storage adjustBalancesStorage = _adjustBalancesStorage();
         adjustBalancesStorage.labafByPartition[
             partition
         ] = adjustBalancesStorage.abaf;
@@ -265,16 +265,14 @@ abstract contract AdjustBalancesStorageWrapper1 is
         uint256 labaf,
         address tokenHolder
     ) internal {
-        _getAdjustBalancesStorage().labaf[tokenHolder] = labaf;
+        _adjustBalancesStorage().labaf[tokenHolder] = labaf;
     }
 
     function _pushLabafUserPartition(
         address _tokenHolder,
         uint256 _labaf
     ) internal {
-        _getAdjustBalancesStorage().labafUserPartition[_tokenHolder].push(
-            _labaf
-        );
+        _adjustBalancesStorage().labafUserPartition[_tokenHolder].push(_labaf);
     }
 
     function _removeLabafHold(
@@ -282,10 +280,9 @@ abstract contract AdjustBalancesStorageWrapper1 is
         address _tokenHolder,
         uint256 _holdId
     ) internal {
-        delete _getAdjustBalancesStorage()
-            .labafHeldAmountByAccountPartitionAndId[_tokenHolder][_partition][
-                _holdId
-            ];
+        delete _adjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[
+            _tokenHolder
+        ][_partition][_holdId];
     }
 
     function _removeLabafLock(
@@ -293,7 +290,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         address _tokenHolder,
         uint256 _lockId
     ) internal {
-        delete _getAdjustBalancesStorage()
+        delete _adjustBalancesStorage()
             .labafLockedAmountByAccountPartitionAndId[_tokenHolder][_partition][
                 _lockId
             ];
@@ -305,7 +302,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         uint256 _lockId,
         uint256 _labaf
     ) internal {
-        _getAdjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[
+        _adjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[
             _tokenHolder
         ][_partition][_lockId] = _labaf;
     }
@@ -316,13 +313,13 @@ abstract contract AdjustBalancesStorageWrapper1 is
         uint256 _lockId,
         uint256 _labaf
     ) internal {
-        _getAdjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[
+        _adjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[
             _tokenHolder
         ][_partition][_lockId] = _labaf;
     }
 
     function _setTotalHeldLabaf(address _tokenHolder, uint256 _labaf) internal {
-        _getAdjustBalancesStorage().labafHeldAmountByAccount[
+        _adjustBalancesStorage().labafHeldAmountByAccount[
             _tokenHolder
         ] = _labaf;
     }
@@ -332,7 +329,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         address _tokenHolder,
         uint256 _labaf
     ) internal {
-        _getAdjustBalancesStorage().labafHeldAmountByAccountAndPartition[
+        _adjustBalancesStorage().labafHeldAmountByAccountAndPartition[
             _tokenHolder
         ][_partition] = _labaf;
     }
@@ -342,7 +339,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         address tokenHolder,
         uint256 partitionIndex
     ) internal {
-        _getAdjustBalancesStorage().labafUserPartition[tokenHolder][
+        _adjustBalancesStorage().labafUserPartition[tokenHolder][
             partitionIndex - 1
         ] = labaf;
     }
@@ -352,11 +349,11 @@ abstract contract AdjustBalancesStorageWrapper1 is
         address _spender,
         uint256 _labaf
     ) internal {
-        _getAdjustBalancesStorage().labafsAllowances[_owner][_spender] = _labaf;
+        _adjustBalancesStorage().labafsAllowances[_owner][_spender] = _labaf;
     }
 
     function _setTotalLockLabaf(address _tokenHolder, uint256 _labaf) internal {
-        _getAdjustBalancesStorage().labafLockedAmountByAccount[
+        _adjustBalancesStorage().labafLockedAmountByAccount[
             _tokenHolder
         ] = _labaf;
     }
@@ -366,7 +363,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         address _tokenHolder,
         uint256 _labaf
     ) internal {
-        _getAdjustBalancesStorage().labafLockedAmountByAccountAndPartition[
+        _adjustBalancesStorage().labafLockedAmountByAccountAndPartition[
             _tokenHolder
         ][_partition] = _labaf;
     }
@@ -377,7 +374,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
     ) internal view returns (uint256 factor) {
         factor = _calculateFactor(
             abaf,
-            _getAdjustBalancesStorage().labaf[tokenHolder]
+            _adjustBalancesStorage().labaf[tokenHolder]
         );
     }
 
@@ -387,7 +384,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
     ) internal view returns (uint256 factor) {
         factor = _calculateFactor(
             abaf,
-            _getAdjustBalancesStorage().labaf[tokenHolder]
+            _adjustBalancesStorage().labaf[tokenHolder]
         );
     }
 
@@ -398,7 +395,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         return
             _calculateFactor(
                 _getAbafAdjustedAt(timestamp),
-                _getAdjustBalancesStorage().labafByPartition[partition]
+                _adjustBalancesStorage().labafByPartition[partition]
             );
     }
 
@@ -411,7 +408,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         return
             _calculateFactor(
                 _getAbafAdjustedAt(timestamp),
-                _getAdjustBalancesStorage()
+                _adjustBalancesStorage()
                     .labafLockedAmountByAccountPartitionAndId[tokenHolder][
                         partition
                     ][lockId]
@@ -425,7 +422,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
     ) internal view returns (uint256 factor) {
         factor = _calculateFactor(
             abaf,
-            _getAdjustBalancesStorage().labafUserPartition[tokenHolder][
+            _adjustBalancesStorage().labafUserPartition[tokenHolder][
                 partitionIndex - 1
             ]
         );
@@ -437,7 +434,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
     ) internal view returns (uint256 factor) {
         factor = _calculateFactor(
             _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage().labafLockedAmountByAccount[tokenHolder]
+            _adjustBalancesStorage().labafLockedAmountByAccount[tokenHolder]
         );
     }
 
@@ -448,7 +445,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
     ) internal view returns (uint256 factor) {
         factor = _calculateFactor(
             _getAbafAdjustedAt(timestamp),
-            _getAdjustBalancesStorage().labafLockedAmountByAccountAndPartition[
+            _adjustBalancesStorage().labafLockedAmountByAccountAndPartition[
                 tokenHolder
             ][partition]
         );
@@ -471,7 +468,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
     }
 
     function _getAbaf() internal view returns (uint256) {
-        return _getAdjustBalancesStorage().abaf;
+        return _adjustBalancesStorage().abaf;
     }
 
     function _getAbafAdjusted() internal view returns (uint256) {
@@ -490,29 +487,27 @@ abstract contract AdjustBalancesStorageWrapper1 is
     }
 
     function _getLabafByUser(address _account) internal view returns (uint256) {
-        return _getAdjustBalancesStorage().labaf[_account];
+        return _adjustBalancesStorage().labaf[_account];
     }
 
     function _getLabafByPartition(
         bytes32 _partition
     ) internal view returns (uint256) {
-        return _getAdjustBalancesStorage().labafByPartition[_partition];
+        return _adjustBalancesStorage().labafByPartition[_partition];
     }
 
     function _getAllowanceLabaf(
         address _owner,
         address _spender
     ) internal view returns (uint256) {
-        return _getAdjustBalancesStorage().labafsAllowances[_owner][_spender];
+        return _adjustBalancesStorage().labafsAllowances[_owner][_spender];
     }
 
     function _getTotalLockLabaf(
         address _tokenHolder
     ) internal view returns (uint256 labaf_) {
         return
-            _getAdjustBalancesStorage().labafLockedAmountByAccount[
-                _tokenHolder
-            ];
+            _adjustBalancesStorage().labafLockedAmountByAccount[_tokenHolder];
     }
 
     function _getTotalLockLabafByPartition(
@@ -520,7 +515,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         address _tokenHolder
     ) internal view returns (uint256 labaf_) {
         return
-            _getAdjustBalancesStorage().labafLockedAmountByAccountAndPartition[
+            _adjustBalancesStorage().labafLockedAmountByAccountAndPartition[
                 _tokenHolder
             ][_partition];
     }
@@ -531,17 +526,15 @@ abstract contract AdjustBalancesStorageWrapper1 is
         uint256 _lockId
     ) internal view returns (uint256) {
         return
-            _getAdjustBalancesStorage()
-                .labafLockedAmountByAccountPartitionAndId[_tokenHolder][
-                    _partition
-                ][_lockId];
+            _adjustBalancesStorage().labafLockedAmountByAccountPartitionAndId[
+                _tokenHolder
+            ][_partition][_lockId];
     }
 
     function _getTotalHeldLabaf(
         address _tokenHolder
     ) internal view returns (uint256 labaf_) {
-        return
-            _getAdjustBalancesStorage().labafHeldAmountByAccount[_tokenHolder];
+        return _adjustBalancesStorage().labafHeldAmountByAccount[_tokenHolder];
     }
 
     function _getTotalHeldLabafByPartition(
@@ -549,7 +542,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         address _tokenHolder
     ) internal view returns (uint256 labaf_) {
         return
-            _getAdjustBalancesStorage().labafHeldAmountByAccountAndPartition[
+            _adjustBalancesStorage().labafHeldAmountByAccountAndPartition[
                 _tokenHolder
             ][_partition];
     }
@@ -560,12 +553,12 @@ abstract contract AdjustBalancesStorageWrapper1 is
         uint256 _holdId
     ) internal view returns (uint256) {
         return
-            _getAdjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[
+            _adjustBalancesStorage().labafHeldAmountByAccountPartitionAndId[
                 _tokenHolder
             ][_partition][_holdId];
     }
 
-    function _getAdjustBalancesStorage()
+    function _adjustBalancesStorage()
         internal
         pure
         returns (AdjustBalancesStorage storage adjustBalancesStorage_)

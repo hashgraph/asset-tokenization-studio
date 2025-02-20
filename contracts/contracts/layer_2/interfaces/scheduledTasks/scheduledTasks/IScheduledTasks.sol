@@ -206,20 +206,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {ScheduledTasksLib} from '../../../scheduledTasks/ScheduledTasksLib.sol';
-
 struct ScheduledTask {
     uint256 scheduledTimestamp;
     bytes data;
 }
 
 interface IScheduledTasks {
-    function onScheduledTaskTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external;
-
     function triggerPendingScheduledTasks() external returns (uint256);
 
     function triggerScheduledTasks(uint256 _max) external returns (uint256);
@@ -229,8 +221,5 @@ interface IScheduledTasks {
     function getScheduledTasks(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_);
+    ) external view returns (ScheduledTask[] memory scheduledTask_);
 }

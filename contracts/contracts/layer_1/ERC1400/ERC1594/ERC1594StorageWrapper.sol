@@ -241,8 +241,8 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
 
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC1594() internal {
-        _getErc1594Storage().issuance = true;
-        _getErc1594Storage().initialized = true;
+        _erc1594Storage().issuance = true;
+        _erc1594Storage().initialized = true;
     }
 
     /**
@@ -305,7 +305,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
      * @return bool `true` signifies the minting is allowed. While `false` denotes the end of minting
      */
     function _isIssuable() internal view returns (bool) {
-        return _getErc1594Storage().issuance;
+        return _erc1594Storage().issuance;
     }
 
     /**
@@ -401,7 +401,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         return (true, _SUCCESS, bytes32(0));
     }
 
-    function _getErc1594Storage()
+    function _erc1594Storage()
         internal
         pure
         returns (ERC1594Storage storage erc1594Storage_)

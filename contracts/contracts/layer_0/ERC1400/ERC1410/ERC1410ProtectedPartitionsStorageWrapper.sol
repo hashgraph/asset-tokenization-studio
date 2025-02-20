@@ -207,8 +207,8 @@
 pragma solidity 0.8.18;
 
 import {
-    ERC1410SnapshotStorageWrapper
-} from './ERC1410SnapshotStorageWrapper.sol';
+    ERC1410ControllerStorageWrapper
+} from './ERC1410ControllerStorageWrapper.sol';
 import {
     checkNounceAndDeadline
 } from '../../../layer_1/protectedPartitions/signatureVerification.sol';
@@ -217,7 +217,7 @@ import {
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 
 abstract contract ERC1410ProtectedPartitionsStorageWrapper is
-    ERC1410SnapshotStorageWrapper
+    ERC1410ControllerStorageWrapper
 {
     function _protectedTransferFromByPartition(
         bytes32 _partition,

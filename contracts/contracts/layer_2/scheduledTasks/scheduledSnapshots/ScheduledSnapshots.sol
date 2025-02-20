@@ -216,7 +216,9 @@ import {
 import {
     IScheduledSnapshots
 } from '../../interfaces/scheduledTasks/scheduledSnapshots/IScheduledSnapshots.sol';
-import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
+import {
+    ScheduledTask
+} from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
@@ -227,19 +229,6 @@ contract ScheduledSnapshots is
     Common
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
-
-    function onScheduledSnapshotTriggered(
-        uint256 _pos,
-        uint256 _scheduledTasksLength,
-        bytes memory _data
-    ) external override onlyAutoCalling(_scheduledSnapshotStorage()) {
-        uint256 newSnapShotID;
-        if (_pos == _scheduledTasksLength - 1) {
-            newSnapShotID = _snapshot();
-        } else newSnapShotID = _getCurrentSnapshotId();
-
-        _onScheduledSnapshotTriggered(newSnapShotID, _data);
-    }
 
     function scheduledSnapshotCount() external view override returns (uint256) {
         return _getScheduledSnapshotCount();
@@ -252,7 +241,7 @@ contract ScheduledSnapshots is
         external
         view
         override
-        returns (ScheduledTasksLib.ScheduledTask[] memory scheduledSnapshot_)
+        returns (ScheduledTask[] memory scheduledSnapshot_)
     {
         scheduledSnapshot_ = _getScheduledSnapshots(_pageIndex, _pageLength);
     }
@@ -273,15 +262,12 @@ contract ScheduledSnapshots is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_ = new bytes4[](2);
         staticFunctionSelectors_[selectorIndex++] = this
             .scheduledSnapshotCount
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getScheduledSnapshots
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .onScheduledSnapshotTriggered
             .selector;
     }
 

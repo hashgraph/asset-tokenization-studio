@@ -218,9 +218,9 @@ contract ERC1644 is IERC1644, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1644(
         bool _controllable
-    ) external override onlyUninitialized(_getErc1644Storage().initialized) {
-        _getErc1644Storage().isControllable = _controllable;
-        _getErc1644Storage().initialized = true;
+    ) external override onlyUninitialized(_erc1644Storage().initialized) {
+        _erc1644Storage().isControllable = _controllable;
+        _erc1644Storage().initialized = true;
     }
 
     // solhint-disable no-unused-vars
