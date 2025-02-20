@@ -850,9 +850,7 @@ export async function deployAtsContracts({
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.CorporateActions.addresses?.[
-                      network
-                  ]
+                ? Configuration.contracts.CorporateActions.addresses?.[network]
                 : undefined,
             overrides,
         }),
@@ -1042,9 +1040,7 @@ export async function deployAtsContracts({
             corporateActions: await deployContractWithFactory(
                 commands.corporateActions
             ).then((result) => {
-                console.log(
-                    'CorporateActions has been deployed successfully'
-                )
+                console.log('CorporateActions has been deployed successfully')
                 return result
             }),
             transferAndLock: await deployContractWithFactory(

@@ -233,6 +233,9 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
+    MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 import { dateToUnixTimestamp } from '../../../dateFormatter'
@@ -245,6 +248,7 @@ const adjustFactor = 253
 const adjustDecimals = 2
 const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Adjust Balances Tests', () => {
     let diamond: ResolverProxy
@@ -455,7 +459,7 @@ describe('Adjust Balances Tests', () => {
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
         await kycFacet
             .connect(signer_B)
-            .grantKyc(account_B, '', 0, 9999999999, account_A)
+            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
 
         erc1410Facet = erc1410Facet.connect(signer_A)
         equityFacet = equityFacet.connect(signer_A)

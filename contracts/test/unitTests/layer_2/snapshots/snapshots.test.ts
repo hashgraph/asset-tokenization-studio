@@ -237,6 +237,9 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
+    MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { dateToUnixTimestamp } from '../../../dateFormatter'
 
@@ -370,8 +373,20 @@ describe('Snapshots Layer 2 Tests', () => {
         await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
 
         await ssiManagementFacet.addIssuer(account_A)
-        await kycFacet.grantKyc(account_C, '', 0, 9999999999, account_A)
-        await kycFacet.grantKyc(account_B, '', 0, 9999999999, account_A)
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_STRING,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+        await kycFacet.grantKyc(
+            account_B,
+            EMPTY_STRING,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
 
         snapshotFacet = snapshotFacet.connect(signer_A)
         erc1410Facet = erc1410Facet.connect(signer_A)

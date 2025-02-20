@@ -241,6 +241,8 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { dateToUnixTimestamp } from '../../../../dateFormatter'
 
@@ -365,7 +367,13 @@ describe('Scheduled Tasks Tests', () => {
             signer_A
         )
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKyc(account_A, '', 0, 9999999999, account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_STRING,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
     })
 
     afterEach(async () => {

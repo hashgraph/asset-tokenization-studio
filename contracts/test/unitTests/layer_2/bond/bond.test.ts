@@ -245,6 +245,9 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     ADDRESS_ZERO,
+    MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 import { dateToUnixTimestamp } from '../../../dateFormatter'
@@ -263,6 +266,7 @@ const info = 'info'
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
 const couponRate = 5
+const EMPTY_VC_ID = EMPTY_STRING
 
 let couponData = {
     recordDate: couponRecordDateInSeconds.toString(),
@@ -394,7 +398,13 @@ describe('Bond Tests', () => {
         )
 
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKyc(account_A, '', 0, 9999999999, account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
     })
 
     afterEach(async () => {
@@ -532,7 +542,7 @@ describe('Bond Tests', () => {
                 data: '0x',
             })
 
-            await lockFacet.lock(LockedAmount, account_A, 99999999999)
+            await lockFacet.lock(LockedAmount, account_A, MAX_UINT256)
 
             // set coupon
             await expect(bondFacet.setCoupon(couponData))
@@ -583,7 +593,7 @@ describe('Bond Tests', () => {
 
             let hold = {
                 amount: HeldAmount,
-                expirationTimestamp: 999999999999999,
+                expirationTimestamp: MAX_UINT256,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
                 data: '0x',

@@ -203,6 +203,7 @@
 
 */
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity 0.8.18;
 
 import {Kyc} from '../../../layer_1/kyc/Kyc.sol';
@@ -211,9 +212,6 @@ import {
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
 contract KycTimeTravel is Kyc, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
