@@ -205,7 +205,6 @@
 
 import { Signer } from 'ethers'
 
-<<<<<<<< HEAD:contracts/scripts/commands/base/BaseFromAddressListCommand.ts
 export interface BaseAtsContractListCommandParams {
     readonly contractAddressList: string[]
     readonly businessLogicResolverProxyAddress: string
@@ -220,25 +219,6 @@ export default abstract class BaseAtsContractListCommand {
     public readonly equityUsaAddress?: string
     public readonly bondUsaAddress?: string
     public readonly signer: Signer
-========
-import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-library Snapshots_CD_Lib {
-    function balanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (uint256 balance_) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature(
-                'balanceOfAtSnapshot(uint256,address)',
-                _snapshotID,
-                _tokenHolder
-            )
-        );
-        return abi.decode(data, (uint256));
-    }
->>>>>>>> refs/heads/sprint-11:contracts/contracts/layer_1/snapshots/Snapshots_CD_Lib.sol
 
     constructor({
         contractAddressList,
@@ -253,19 +233,5 @@ library Snapshots_CD_Lib {
         this.equityUsaAddress = equityUsaAddress
         this.bondUsaAddress = bondUsaAddress
         this.signer = signer
-    }
-
-    function heldBalanceOfAtSnapshot(
-        uint256 _snapshotID,
-        address _tokenHolder
-    ) internal view returns (uint256 balance_) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature(
-                'heldBalanceOfAtSnapshot(uint256,address)',
-                _snapshotID,
-                _tokenHolder
-            )
-        );
-        return abi.decode(data, (uint256));
     }
 }

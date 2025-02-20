@@ -236,6 +236,7 @@ import {
     KYC_ROLE,
     ZERO,
     EMPTY_STRING,
+    ADDRESS_ZERO,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 
@@ -248,6 +249,9 @@ const _PARTITION_ID_2 =
 const lockedAmountOf_A_Partition_1 = 1
 const lockedAmountOf_A_Partition_2 = 2
 const lockedAmountOf_C_Partition_1 = 3
+const heldAmountOf_A_Partition_1 = 4
+const heldAmountOf_A_Partition_2 = 5
+const heldAmountOf_C_Partition_1 = 6
 const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Snapshots Tests', () => {

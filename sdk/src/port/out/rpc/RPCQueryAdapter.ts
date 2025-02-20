@@ -1322,12 +1322,12 @@ export class RPCQueryAdapter {
     const kycData = await this.connect(
       Kyc__factory,
       address.toString(),
-    ).getKYCFor(targetId.toString());
+    ).getKycFor(targetId.toString());
 
     return new KYC(
       kycData.validFrom.toString(),
       kycData.validTo.toString(),
-      kycData.VCid,
+      kycData.vcId,
       kycData.issuer,
       kycData.status,
     );
@@ -1342,7 +1342,7 @@ export class RPCQueryAdapter {
     const kycData = await this.connect(
       Kyc__factory,
       address.toString(),
-    ).getKYCStatusFor(targetId.toString());
+    ).getKycStatusFor(targetId.toString());
 
     return kycData;
   }
@@ -1358,7 +1358,7 @@ export class RPCQueryAdapter {
     const kycAccounts = await this.connect(
       Kyc__factory,
       address.toString(),
-    ).getKYCAccounts(kycStatus, start, end);
+    ).getKycAccounts(kycStatus, start, end);
 
     return kycAccounts;
   }
@@ -1374,14 +1374,14 @@ export class RPCQueryAdapter {
     const kycAccountsData = await this.connect(
       Kyc__factory,
       address.toString(),
-    ).getKYCAccountsData(kycStatus, start, end);
+    ).getKycAccountsData(kycStatus, start, end);
 
     return kycAccountsData.map(
       (data) =>
         new KYC(
           data.validFrom.toString(),
           data.validTo.toString(),
-          data.VCid,
+          data.vcId,
           data.issuer,
           data.status,
         ),
@@ -1398,7 +1398,7 @@ export class RPCQueryAdapter {
     const kycAccountsCount = await this.connect(
       Kyc__factory,
       address.toString(),
-    ).getKYCAccountsCount(kycStatus);
+    ).getKycAccountsCount(kycStatus);
 
     return kycAccountsCount.toNumber();
   }

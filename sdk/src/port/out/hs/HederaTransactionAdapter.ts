@@ -2229,7 +2229,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     issuer: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'grantKYC';
+    const FUNCTION_NAME = 'grantKyc';
     LogService.logTrace(
       `Granting KYC from issuer ${issuer.toString()} to address ${targetId.toString()} with VC ${vcBase64}`,
     );
@@ -2264,7 +2264,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'revokeKYC';
+    const FUNCTION_NAME = 'revokeKyc';
     LogService.logTrace(`Revoking KYC to address ${targetId.toString()}`);
 
     const factoryInstance = new Kyc__factory().attach(security.toString());

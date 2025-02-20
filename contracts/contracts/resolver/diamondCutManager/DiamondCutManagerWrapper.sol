@@ -287,7 +287,7 @@ abstract contract DiamondCutManagerWrapper is
         bool _isLastBatch
     ) internal {
         if (!_isLastBatch) return;
-        DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
+        DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
         if (!_dcms.activeConfigurations[_configurationId]) {
             _dcms.configurations.push(_configurationId);
             _dcms.activeConfigurations[_configurationId] = true;
@@ -301,7 +301,7 @@ abstract contract DiamondCutManagerWrapper is
     function _startBatchConfiguration(
         bytes32 _configurationId
     ) internal returns (uint256 batchVersion_) {
-        DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
+        DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
 
         unchecked {
             _dcms.batchVersion[_configurationId] =
@@ -314,7 +314,7 @@ abstract contract DiamondCutManagerWrapper is
     function _getBatchConfigurationVersion(
         bytes32 _configurationId
     ) internal returns (uint256 batchVersion_) {
-        batchVersion_ = _diamondCutManagerStorage().batchVersion[
+        batchVersion_ = _getDiamondCutManagerStorage().batchVersion[
             _configurationId
         ];
     }
@@ -324,7 +324,7 @@ abstract contract DiamondCutManagerWrapper is
         FacetConfiguration[] calldata _facetConfigurations,
         uint256 _version
     ) internal {
-        DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
+        DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
         bytes32 configVersionHash = _buildHash(_configurationId, _version);
 
         uint256 facetsLength = _facetConfigurations.length;
@@ -383,7 +383,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _cancelBatchConfiguration(bytes32 _configurationId) internal {
-        DiamondCutManagerStorage storage dcms = _diamondCutManagerStorage();
+        DiamondCutManagerStorage storage dcms = _getDiamondCutManagerStorage();
         uint256 batchVersion = _getBatchConfigurationVersion(_configurationId);
         bytes32 configVersionHash = _buildHash(_configurationId, batchVersion);
 
@@ -481,16 +481,18 @@ abstract contract DiamondCutManagerWrapper is
         IStaticFunctionSelectors _static,
         bytes32 _configVersionFacetHash
     ) private {
+        address selectorAddress = address(_static);
         bytes4[] memory selectors = _static.getStaticFunctionSelectors();
         _dcms.selectors[_configVersionFacetHash] = selectors;
         uint256 length = selectors.length;
         for (uint256 index; index < length; ) {
+            bytes4 selector = selectors[index];
             bytes32 configVersionSelectorHash = _buildHashSelector(
                 _configurationId,
                 _version,
-                selectors[index]
+                selector
             );
-            _dcms.facetAddress[configVersionSelectorHash] = address(_static);
+            _dcms.facetAddress[configVersionSelectorHash] = selectorAddress;
             _dcms.selectorToFacetId[configVersionSelectorHash] = _facetId;
             unchecked {
                 ++index;
@@ -509,12 +511,9 @@ abstract contract DiamondCutManagerWrapper is
         _dcms.interfaceIds[_configVersionFacetHash] = interfaceIds;
         uint256 length = interfaceIds.length;
         for (uint256 index; index < length; ) {
+            bytes4 interfaceId = interfaceIds[index];
             _dcms.supportsInterface[
-                _buildHashSelector(
-                    _configurationId,
-                    _version,
-                    interfaceIds[index]
-                )
+                _buildHashSelector(_configurationId, _version, interfaceId)
             ] = true;
             unchecked {
                 ++index;
@@ -792,7 +791,7 @@ abstract contract DiamondCutManagerWrapper is
         ];
     }
 
-    function _diamondCutManagerStorage()
+    function _getDiamondCutManagerStorage()
         internal
         pure
         returns (DiamondCutManagerStorage storage ds)

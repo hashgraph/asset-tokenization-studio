@@ -206,7 +206,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-<<<<<<<< HEAD:contracts/contracts/test/revocationList/revocationList.sol
 contract T3RevocationRegistry {
     mapping(address => mapping(string => bool)) public revoked;
 
@@ -218,16 +217,5 @@ contract T3RevocationRegistry {
 
     function cancelRevoke(string memory vcId) public {
         delete revoked[msg.sender][vcId];
-========
-import {CD_Lib} from '../../common/CD_Lib.sol';
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-library ERC20_CD_Lib {
-    function decimals() internal view returns (uint8) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('decimals()')
-        );
-        return abi.decode(data, (uint8));
->>>>>>>> refs/heads/sprint-11:contracts/contracts/layer_1/ERC1400/ERC20/ERC20_CD_Lib.sol
     }
 }

@@ -301,7 +301,7 @@ function buildEmptyEnvironment(): Environment {
             transferAndLock: {} as IStaticFunctionSelectors,
             adjustBalances: {} as IStaticFunctionSelectors,
             protectedPartitions: {} as IStaticFunctionSelectors,
-            hold: {} as IStaticFunctionSelectors,
+            Hold: {} as IStaticFunctionSelectors,
         },
         facetIdsEquities: [],
         facetVersionsEquities: [],

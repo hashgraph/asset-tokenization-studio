@@ -306,6 +306,8 @@ import { UnprotectPartitionsCommandHandler } from '../app/usecase/command/securi
 import { ProtectedRedeemFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/redeem/ProtectedRedeemFromByPartitionCommandHandler.js';
 import { ProtectedTransferFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/transfer/ProtectedTransferFromByPartitionCommandHandler.js';
 import { ProtectedTransferAndLockByPartitionCommandHandler } from '../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommandHandler.js';
+import { PartitionsProtectedQueryHandler } from '../app/usecase/query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQueryHandler';
+import { GetNounceQueryHandler } from '../app/usecase/query/security/protectedPartitions/getNounce/GetNounceQueryHandler';
 import { CreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/createHoldByPartition/CreateHoldByPartitionCommandHandler.js';
 import { CreateHoldFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/createHoldFromByPartition/CreateHoldFromByPartitionCommandHandler.js';
 import { ControllerCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/controllerCreateHoldByPartition/ControllerCreateHoldByPartitionCommandHandler.js';
@@ -552,6 +554,14 @@ const QUERY_HANDLERS = [
   },
   {
     token: TOKENS.QUERY_HANDLER,
+    useClass: PartitionsProtectedQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetNounceQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
     useClass: GetSecurityQueryHandler,
   },
   {
@@ -773,6 +783,18 @@ const TRANSACTION_HANDLER = [
   {
     token: TOKENS.TRANSACTION_HANDLER,
     useClass: HederaWalletConnectTransactionAdapter,
+  },
+  {
+    token: TOKENS.TRANSACTION_HANDLER,
+    useClass: DFNSTransactionAdapter,
+  },
+  {
+    token: TOKENS.TRANSACTION_HANDLER,
+    useClass: FireblocksTransactionAdapter,
+  },
+  {
+    token: TOKENS.TRANSACTION_HANDLER,
+    useClass: AWSKMSTransactionAdapter,
   },
 ];
 

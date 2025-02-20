@@ -217,6 +217,7 @@ import {
     AccessControlFacet__factory,
     PauseFacet__factory,
     DiamondCutManager__factory,
+    IDiamondLoupe,
 } from '@typechain'
 import {
     BOND_CONFIG_ID,
@@ -844,13 +845,13 @@ describe('DiamondCutManager', () => {
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
-        accessControl = AccessControl__factory.connect(
+        accessControl = AccessControlFacet__factory.connect(
             businessLogicResolver.address,
             signer_A
         )
         await accessControl.grantRole(PAUSER_ROLE, account_B)
 
-        pause = Pause__factory.connect(businessLogicResolver.address, signer_A)
+        pause = PauseFacet__factory.connect(businessLogicResolver.address, signer_A)
         diamondCutManager = DiamondCutManager__factory.connect(
             businessLogicResolver.address,
             signer_A

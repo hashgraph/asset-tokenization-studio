@@ -210,7 +210,6 @@ import {
     BaseBlockchainCommandParams,
 } from '../index'
 
-<<<<<<<< HEAD:contracts/scripts/commands/RegisterDeployedContractBusinessLogicsCommand.ts
 interface RegisterDeployedContractBusinessLogicsCommandParams
     extends BaseBlockchainCommandParams {
     readonly deployedContractList: DeployAtsContractsResult
@@ -242,17 +241,6 @@ export default class RegisterDeployedContractBusinessLogicsCommand extends BaseA
             signer,
             overrides,
         })
-========
-import {CD_Lib} from '../../common/CD_Lib.sol';
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-library ERC1410Basic_CD_Lib {
-    function totalSupply() internal view returns (uint256) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('totalSupply()')
-        );
-        return abi.decode(data, (uint256));
->>>>>>>> refs/heads/sprint-11:contracts/contracts/layer_1/ERC1400/ERC1410/ERC1410Basic_CD_Lib.sol
     }
     get deployedContractAddressList() {
         return this.contractAddressList

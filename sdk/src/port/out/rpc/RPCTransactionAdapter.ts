@@ -366,7 +366,6 @@ import {
   HoldIdentifier,
   ProtectedHold,
 } from '../../../domain/context/security/Hold.js';
-import { TransferAndLock } from '../../../domain/context/security/TransferAndLock';
 import {
   BasicTransferInfo,
   IssueData,
@@ -2141,7 +2140,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await Kyc__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).grantKYC(
+      ).grantKyc(
         targetId.toString(),
         VCId,
         validFrom.toBigNumber(),
@@ -2165,7 +2164,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       await Kyc__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).revokeKYC(targetId.toString(), {
+      ).revokeKyc(targetId.toString(), {
         gasLimit: REVOKE_KYC_GAS,
       }),
       this.networkService.environment,

@@ -338,7 +338,7 @@ describe('ProtectedPartitions Tests', () => {
     let protectedHold: any
     let hold: any
 
-  async function grant_WILD_CARD_ROLE_and_issue_tokens(
+    async function grant_WILD_CARD_ROLE_and_issue_tokens(
         wildCard_Account: string,
         issue_Account: string,
         issue_Amount: number,
@@ -378,8 +378,8 @@ describe('ProtectedPartitions Tests', () => {
             'AccessControl',
             address
         )
-      holdFacet = await ethers.getContractAt('Hold', address)
-      kycFacet = await ethers.getContractAt('Kyc', address)
+        holdFacet = await ethers.getContractAt('Hold', address)
+        kycFacet = await ethers.getContractAt('Kyc', address)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',
             address
@@ -579,7 +579,7 @@ describe('ProtectedPartitions Tests', () => {
     })
 
     describe('Generic Transfer check Tests', () => {
-        it('GIVEN a paused security WHEN performing a protected transfer THEN transaction fails with Paused', async () => {
+        it('GIVEN a paused security role WHEN performing a protected transfer THEN transaction fails with Paused', async () => {
             await setProtected()
 
             pauseFacet = pauseFacet.connect(signer_B)
@@ -1571,14 +1571,12 @@ describe('ProtectedPartitions Tests', () => {
                     message
                 )
 
-                await erc1410Facet
-                    .connect(signer_B)
-                    .issueByPartition(
-                        DEFAULT_PARTITION,
-                        account_A,
-                        protectedHold.hold.amount,
-                        '0x'
-                    )
+                await erc1410Facet.connect(signer_B).issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: protectedHold.hold.amount,
+                    data: '0x',
+                })
 
                 await holdFacet
                     .connect(signer_B)

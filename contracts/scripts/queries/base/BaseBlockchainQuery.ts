@@ -205,7 +205,6 @@
 
 import { Overrides, providers } from 'ethers'
 
-<<<<<<<< HEAD:contracts/scripts/queries/base/BaseBlockchainQuery.ts
 export interface BaseBlockchainQueryParams {
     provider: providers.Provider
     overrides?: Overrides
@@ -218,18 +217,5 @@ export default abstract class BaseBlockchainQuery {
     constructor({ provider, overrides }: BaseBlockchainQueryParams) {
         this.provider = provider
         this.overrides = overrides
-========
-import {CD_Lib} from '../../layer_1/common/CD_Lib.sol';
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-library Snapshots_2_CD_Lib {
-    function decimalsAtSnapshot(
-        uint256 _snapshotID
-    ) internal view returns (uint8 decimals_) {
-        bytes memory data = CD_Lib.staticCall(
-            abi.encodeWithSignature('decimalsAtSnapshot(uint256)', _snapshotID)
-        );
-        return abi.decode(data, (uint8));
->>>>>>>> refs/heads/sprint-11:contracts/contracts/layer_2/snapshots/Snapshots_2_CD_Lib.sol
     }
 }
