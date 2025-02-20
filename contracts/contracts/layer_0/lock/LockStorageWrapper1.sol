@@ -334,7 +334,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         address tokenHolder,
         uint256 timestamp
     ) internal view returns (uint256 amount_) {
-        uint256 factor = _calculateFactorForLockedAmountByTokenHolderAdjustedAt(
+        uint256 factor = _calculateFactorForLockByTokenHolderAdjustedAt(
             tokenHolder,
             timestamp
         );
