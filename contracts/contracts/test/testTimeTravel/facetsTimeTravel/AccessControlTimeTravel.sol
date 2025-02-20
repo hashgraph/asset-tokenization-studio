@@ -203,8 +203,8 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity 0.8.18;
 
 import {
     AccessControlFacet
@@ -214,7 +214,7 @@ import {
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract AccessControlTimeTravel is
+contract AccessControlFacetTimeTravel is
     AccessControlFacet,
     TimeTravelStorageWrapper
 {

@@ -278,7 +278,7 @@ task(
             scheduledSnapshots,
             scheduledBalanceAdjustments,
             scheduledTasks,
-            corporateActionsSecurity,
+            corporateActions,
             lock,
             transferAndLock,
             adjustBalances,
@@ -319,7 +319,7 @@ task(
             'Scheduled Balance Adjustments':
                 scheduledBalanceAdjustments.address,
             'Scheduled Tasks': scheduledTasks.address,
-            'Corporate Actions': corporateActionsSecurity.address,
+            'Corporate Actions': corporateActions.address,
             Lock: lock.address,
             'Transfer and Lock': transferAndLock.address,
             'Adjust Balances': adjustBalances.address,

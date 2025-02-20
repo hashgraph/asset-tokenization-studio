@@ -203,21 +203,16 @@
 
 */
 
-pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+pragma solidity 0.8.18;
 
-import {
-    CorporateActions
-} from '../../../layer_1/corporateActions/CorporateActions.sol';
+import {Kyc} from '../../../layer_1/kyc/Kyc.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
 import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-contract CorporateActionsSecurityTimeTravel is
-    CorporateActions,
-    TimeTravelStorageWrapper
-{
+contract KycTimeTravel is Kyc, TimeTravelStorageWrapper {
     function _blockTimestamp()
         internal
         view
