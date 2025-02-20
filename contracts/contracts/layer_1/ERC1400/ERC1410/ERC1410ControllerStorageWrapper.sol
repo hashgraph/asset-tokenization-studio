@@ -218,11 +218,13 @@ import {
     _TO_ACCOUNT_NULL_ERROR_ID,
     _FROM_ACCOUNT_BLOCKED_ERROR_ID,
     _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
     _IS_NOT_OPERATOR_ERROR_ID,
     _WRONG_PARTITION_ERROR_ID,
-    _SUCCESS
+    _SUCCESS,
+    _FROM_ACCOUNT_KYC_ERROR_ID,
+    _TO_ACCOUNT_KYC_ERROR_ID
 } from '../../constants/values.sol';
+import {IKYC} from '../../interfaces/kyc/IKYC.sol';
 
 abstract contract ERC1410ControllerStorageWrapper is
     ERC1410StandardStorageWrapper,
@@ -254,11 +256,15 @@ abstract contract ERC1410ControllerStorageWrapper is
         if (!_checkControlList(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
+        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _from)) {
+            return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        }
+        if (!_checkKYCStatus(IKYC.KYCStatus.GRANTED, _to)) {
+            return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
+        }
+
         if (!_validPartition(_partition, _from)) {
             return (false, _WRONG_PARTITION_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfByPartition(_partition, _from) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
         // TODO: Better to check all in one boolean expression defined in a different pure function.
         if (

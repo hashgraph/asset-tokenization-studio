@@ -232,6 +232,7 @@ abstract contract DiamondCutManagerWrapper is
         bytes32[] configurations;
         mapping(bytes32 => bool) activeConfigurations;
         mapping(bytes32 => uint256) latestVersion;
+        mapping(bytes32 => uint256) batchVersion;
         // keccak256(configurationId, version)
         mapping(bytes32 => bytes32[]) facetIds;
         // keccak256(configurationId, version)
@@ -250,39 +251,92 @@ abstract contract DiamondCutManagerWrapper is
         mapping(bytes32 => bool) supportsInterface;
     }
 
-    // TODO: Very complex... Perhaps needs protocol with pagination
     function _createConfiguration(
         bytes32 _configurationId,
         FacetConfiguration[] calldata _facetConfigurations
     ) internal returns (uint256 latestVersion_) {
-        DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
+        latestVersion_ = _isOngoingConfiguration(_configurationId)
+            ? _getBatchConfigurationVersion(_configurationId)
+            : _startBatchConfiguration(_configurationId);
+        _addFacetsToBatchConfiguration(
+            _configurationId,
+            _facetConfigurations,
+            latestVersion_
+        );
+        _activateConfiguration(_configurationId, true);
+    }
 
+    function _createBatchConfiguration(
+        bytes32 _configurationId,
+        FacetConfiguration[] calldata _facetConfigurations,
+        bool _isLastBatch
+    ) internal returns (uint256 latestVersion_) {
+        latestVersion_ = _isOngoingConfiguration(_configurationId)
+            ? _getBatchConfigurationVersion(_configurationId)
+            : _startBatchConfiguration(_configurationId);
+        _addFacetsToBatchConfiguration(
+            _configurationId,
+            _facetConfigurations,
+            latestVersion_
+        );
+        _activateConfiguration(_configurationId, _isLastBatch);
+    }
+
+    function _activateConfiguration(
+        bytes32 _configurationId,
+        bool _isLastBatch
+    ) internal {
+        if (!_isLastBatch) return;
+        DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
         if (!_dcms.activeConfigurations[_configurationId]) {
             _dcms.configurations.push(_configurationId);
             _dcms.activeConfigurations[_configurationId] = true;
         }
+        _dcms.latestVersion[_configurationId] = _dcms.batchVersion[
+            _configurationId
+        ];
+        delete _dcms.batchVersion[_configurationId];
+    }
+
+    function _startBatchConfiguration(
+        bytes32 _configurationId
+    ) internal returns (uint256 batchVersion_) {
+        DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
 
         unchecked {
-            latestVersion_ = ++_dcms.latestVersion[_configurationId];
+            _dcms.batchVersion[_configurationId] =
+                _dcms.latestVersion[_configurationId] +
+                1;
         }
+        batchVersion_ = _getBatchConfigurationVersion(_configurationId);
+    }
 
-        bytes32 configVersionHash = _buildHash(
-            _configurationId,
-            latestVersion_
-        );
+    function _getBatchConfigurationVersion(
+        bytes32 _configurationId
+    ) internal returns (uint256 batchVersion_) {
+        batchVersion_ = _diamondCutManagerStorage().batchVersion[
+            _configurationId
+        ];
+    }
+
+    function _addFacetsToBatchConfiguration(
+        bytes32 _configurationId,
+        FacetConfiguration[] calldata _facetConfigurations,
+        uint256 _version
+    ) internal {
+        DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
+        bytes32 configVersionHash = _buildHash(_configurationId, _version);
 
         uint256 facetsLength = _facetConfigurations.length;
-        _dcms.facetIds[configVersionHash] = new bytes32[](facetsLength);
-        _dcms.facetVersions[configVersionHash] = new uint256[](facetsLength);
 
         for (uint256 index; index < facetsLength; ) {
             bytes32 facetId = _facetConfigurations[index].id;
             uint256 facetVersion = _facetConfigurations[index].version;
-            _dcms.facetIds[configVersionHash][index] = facetId;
-            _dcms.facetVersions[configVersionHash][index] = facetVersion;
+            _dcms.facetIds[configVersionHash].push(facetId);
+            _dcms.facetVersions[configVersionHash].push(facetVersion);
             bytes32 configVersionFacetHash = _buildHash(
                 _configurationId,
-                latestVersion_,
+                _version,
                 facetId
             );
 
@@ -309,7 +363,7 @@ abstract contract DiamondCutManagerWrapper is
             _registerSelectors(
                 _dcms,
                 _configurationId,
-                latestVersion_,
+                _version,
                 facetId,
                 staticFunctionSelectors,
                 configVersionFacetHash
@@ -317,7 +371,7 @@ abstract contract DiamondCutManagerWrapper is
             _registerInterfaceIds(
                 _dcms,
                 _configurationId,
-                latestVersion_,
+                _version,
                 staticFunctionSelectors,
                 configVersionFacetHash
             );
@@ -328,6 +382,97 @@ abstract contract DiamondCutManagerWrapper is
         }
     }
 
+    function _cancelBatchConfiguration(bytes32 _configurationId) internal {
+        DiamondCutManagerStorage storage dcms = _diamondCutManagerStorage();
+        uint256 batchVersion = _getBatchConfigurationVersion(_configurationId);
+        bytes32 configVersionHash = _buildHash(_configurationId, batchVersion);
+
+        bytes32[] storage facetIds = dcms.facetIds[configVersionHash];
+        uint256 facetIdsLength = facetIds.length;
+
+        for (uint256 index; index < facetIdsLength; ) {
+            bytes32 configVersionFacetHash = _buildHash(
+                _configurationId,
+                batchVersion,
+                facetIds[index]
+            );
+            delete dcms.addr[configVersionFacetHash];
+            _cleanSelectors(
+                dcms,
+                _configurationId,
+                batchVersion,
+                configVersionFacetHash
+            );
+            _cleanInterfacesIds(
+                dcms,
+                _configurationId,
+                batchVersion,
+                configVersionFacetHash
+            );
+            unchecked {
+                ++index;
+            }
+        }
+
+        delete dcms.facetVersions[configVersionHash];
+        delete dcms.facetIds[configVersionHash];
+        delete dcms.batchVersion[_configurationId];
+    }
+
+    function _cleanSelectors(
+        DiamondCutManagerStorage storage _dcms,
+        bytes32 _configurationId,
+        uint256 _batchVersion,
+        bytes32 _configVersionFacetHash
+    ) private {
+        bytes4[] storage selectors = _dcms.selectors[_configVersionFacetHash];
+        uint256 selectorsLength = selectors.length;
+        for (uint256 index; index < selectorsLength; ) {
+            bytes32 configVersionSelectorHash = _buildHashSelector(
+                _configurationId,
+                _batchVersion,
+                selectors[index]
+            );
+            delete _dcms.facetAddress[configVersionSelectorHash];
+            delete _dcms.selectorToFacetId[configVersionSelectorHash];
+            unchecked {
+                ++index;
+            }
+        }
+        delete _dcms.selectors[_configVersionFacetHash];
+    }
+
+    function _cleanInterfacesIds(
+        DiamondCutManagerStorage storage _dcms,
+        bytes32 _configurationId,
+        uint256 _batchVersion,
+        bytes32 _configVersionFacetHash
+    ) private {
+        bytes4[] storage interfaceIds = _dcms.interfaceIds[
+            _configVersionFacetHash
+        ];
+        uint256 interfaceIdsLength = interfaceIds.length;
+        for (uint256 index; index < interfaceIdsLength; ) {
+            delete _dcms.supportsInterface[
+                _buildHashSelector(
+                    _configurationId,
+                    _batchVersion,
+                    interfaceIds[index]
+                )
+            ];
+            unchecked {
+                ++index;
+            }
+        }
+        delete _dcms.interfaceIds[_configVersionFacetHash];
+    }
+
+    function _isOngoingConfiguration(
+        bytes32 _configurationId
+    ) internal returns (bool) {
+        return _getBatchConfigurationVersion(_configurationId) != 0;
+    }
+
     function _registerSelectors(
         DiamondCutManagerStorage storage _dcms,
         bytes32 _configurationId,
@@ -336,18 +481,16 @@ abstract contract DiamondCutManagerWrapper is
         IStaticFunctionSelectors _static,
         bytes32 _configVersionFacetHash
     ) private {
-        address selectorAddress = address(_static);
         bytes4[] memory selectors = _static.getStaticFunctionSelectors();
         _dcms.selectors[_configVersionFacetHash] = selectors;
         uint256 length = selectors.length;
         for (uint256 index; index < length; ) {
-            bytes4 selector = selectors[index];
             bytes32 configVersionSelectorHash = _buildHashSelector(
                 _configurationId,
                 _version,
-                selector
+                selectors[index]
             );
-            _dcms.facetAddress[configVersionSelectorHash] = selectorAddress;
+            _dcms.facetAddress[configVersionSelectorHash] = address(_static);
             _dcms.selectorToFacetId[configVersionSelectorHash] = _facetId;
             unchecked {
                 ++index;
@@ -366,9 +509,12 @@ abstract contract DiamondCutManagerWrapper is
         _dcms.interfaceIds[_configVersionFacetHash] = interfaceIds;
         uint256 length = interfaceIds.length;
         for (uint256 index; index < length; ) {
-            bytes4 interfaceId = interfaceIds[index];
             _dcms.supportsInterface[
-                _buildHashSelector(_configurationId, _version, interfaceId)
+                _buildHashSelector(
+                    _configurationId,
+                    _version,
+                    interfaceIds[index]
+                )
             ] = true;
             unchecked {
                 ++index;
@@ -646,7 +792,7 @@ abstract contract DiamondCutManagerWrapper is
         ];
     }
 
-    function _getDiamondCutManagerStorage()
+    function _diamondCutManagerStorage()
         internal
         pure
         returns (DiamondCutManagerStorage storage ds)

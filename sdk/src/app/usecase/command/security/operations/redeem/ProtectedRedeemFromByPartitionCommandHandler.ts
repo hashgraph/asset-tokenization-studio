@@ -233,6 +233,7 @@ import { AccountInBlackList } from '../../error/AccountInBlackList';
 import { AccountNotInWhiteList } from '../../error/AccountNotInWhiteList';
 import { BigNumber } from 'ethers';
 import { NounceAlreadyUsed } from '../../error/NounceAlreadyUsed';
+import ValidationService from '../../../../../../app/service/ValidationService.js';
 
 @CommandHandler(ProtectedRedeemFromByPartitionCommand)
 export class ProtectedRedeemFromByPartitionCommandHandler
@@ -249,6 +250,8 @@ export class ProtectedRedeemFromByPartitionCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
 
   async execute(
@@ -263,6 +266,9 @@ export class ProtectedRedeemFromByPartitionCommandHandler
       nounce,
       signature,
     } = command;
+
+    await this.validationService.validateKycAddresses(securityId, [sourceId]);
+
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);

@@ -278,6 +278,8 @@ export const CLIENT_EVM_ADDRESS_ECDSA_A =
   process.env.CLIENT_EVM_ADDRESS_ECDSA_2 ?? '';
 export const CLIENT_ACCOUNT_ID_ECDSA_A =
   process.env.CLIENT_ACCOUNT_ID_ECDSA_2 ?? '';
+export const CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT =
+  process.env.CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT ?? '';
 export const CLIENT_ACCOUNT_ECDSA_A: Account = new Account({
   id: CLIENT_ACCOUNT_ID_ECDSA_A,
   evmAddress: CLIENT_EVM_ADDRESS_ECDSA_A,

@@ -222,6 +222,8 @@ import {
     Snapshots_2,
     Snapshots_2__factory,
     TimeTravel__factory,
+    KYC,
+    SSIManagement,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -229,6 +231,8 @@ import {
     ISSUER_ROLE,
     PAUSER_ROLE,
     SNAPSHOT_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     deployEquityFromFactory,
     RegulationSubType,
     RegulationType,
@@ -256,7 +260,10 @@ describe('CAP Layer 2 Tests', () => {
         equityFacet: Equity,
         snapshotFacet: Snapshots_2,
         erc1410Facet: ERC1410ScheduledTasks,
-        timeTravelFacet: TimeTravel
+        timeTravelFacet: TimeTravel,
+        kycFacet: KYC,
+        ssiManagementFacet: SSIManagement
+
     let signer_A: SignerWithAddress,
         signer_B: SignerWithAddress,
         signer_C: SignerWithAddress
@@ -271,7 +278,15 @@ describe('CAP Layer 2 Tests', () => {
     const setupEnvironment = async () => {
         const rbacPause = { role: PAUSER_ROLE, members: [account_B] }
         const rbaCap = { role: CAP_ROLE, members: [account_B] }
-        const init_rbacs = [rbacPause, rbaCap]
+        const rbacKYC = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs = [rbacPause, rbaCap, rbacKYC, rbacSSI]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -316,6 +331,14 @@ describe('CAP Layer 2 Tests', () => {
             signer_A
         )
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SSIManagement',
+            diamond.address,
+            signer_A
+        )
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
     }
 
     const setupScheduledBalanceAdjustments = async (
