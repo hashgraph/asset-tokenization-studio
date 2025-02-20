@@ -851,7 +851,10 @@ describe('DiamondCutManager', () => {
         )
         await accessControl.grantRole(PAUSER_ROLE, account_B)
 
-        pause = PauseFacet__factory.connect(businessLogicResolver.address, signer_A)
+        pause = PauseFacet__factory.connect(
+            businessLogicResolver.address,
+            signer_A
+        )
         diamondCutManager = DiamondCutManager__factory.connect(
             businessLogicResolver.address,
             signer_A

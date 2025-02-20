@@ -206,7 +206,7 @@
 pragma solidity 0.8.18;
 
 import {
-IStaticFunctionSelectors
+    IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
 import {Common} from '../common/Common.sol';
@@ -221,14 +221,14 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         bytes32 _partition,
         Hold calldata _hold
     )
-    external
-    override
-    onlyUnpaused
-    onlyValidAddress(_hold.escrow)
-    onlyDefaultPartitionWithSinglePartition(_partition)
-    onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-    onlyUnProtectedPartitionsOrWildCardRole
-    returns (bool success_, uint256 holdId_)
+        external
+        override
+        onlyUnpaused
+        onlyValidAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_partition)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldByPartition(
             _partition,
