@@ -345,8 +345,10 @@ abstract contract AdjustBalancesStorageWrapper1 is
         address tokenHolder,
         uint256 partitionIndex
     ) internal {
+        require(partitionIndex > 0, "partitionIndex must be greater than 0");
+
         _getAdjustBalancesStorage().labafLockByAccountAndPartition[tokenHolder][
-            partitionIndex - 1
+        bytes32(partitionIndex - 1)
         ] = labaf;
     }
 
