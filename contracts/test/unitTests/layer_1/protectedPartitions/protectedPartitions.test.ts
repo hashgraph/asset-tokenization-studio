@@ -219,6 +219,8 @@ import {
     ControlList,
     IFactory,
     BusinessLogicResolver,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -236,6 +238,10 @@ import {
     CONTROL_LIST_ROLE,
     PAUSER_ROLE,
     MAX_UINT256,
+    SSI_MANAGER_ROLE,
+    KYC_ROLE,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 
 const amount = 1
@@ -277,6 +283,9 @@ const redeemType = {
         { name: '_nounce', type: 'uint256' },
     ],
 }
+const EMPTY_VC_ID = EMPTY_STRING
+let basicTransferInfo: any
+let operatorTransferData: any
 
 describe('ProtectedPartitions Tests', () => {
     let diamond_UnprotectedPartitions: ResolverProxy
@@ -299,6 +308,8 @@ describe('ProtectedPartitions Tests', () => {
     let transferAndLockFacet: TransferAndLock
     let controlListFacet: ControlList
     let accessControlFacet: AccessControl
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     async function grant_WILD_CARD_ROLE_and_issue_tokens(
         wildCard_Account: string,
@@ -340,16 +351,36 @@ describe('ProtectedPartitions Tests', () => {
             'AccessControl',
             address
         )
+        kycFacet = await ethers.getContractAt('Kyc', address)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            address
+        )
+    }
+
+    async function grantKyc() {
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet
+            .connect(signer_B)
+            .grantKyc(account_A, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
+        await kycFacet
+            .connect(signer_B)
+            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
+        await kycFacet
+            .connect(signer_B)
+            .grantKyc(account_C, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
     }
 
     async function setProtected() {
         await setFacets(diamond_ProtectedPartitions.address)
         domain.chainId = await network.provider.send('eth_chainId')
         domain.verifyingContract = diamond_ProtectedPartitions.address
+        await grantKyc()
     }
 
     async function setUnProtected() {
         await setFacets(diamond_UnprotectedPartitions.address)
+        await grantKyc()
     }
 
     before(async () => {
@@ -397,6 +428,14 @@ describe('ProtectedPartitions Tests', () => {
             role: LOCKER_ROLE,
             members: [account_B],
         }
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
         const init_rbacs: Rbac[] = [
             rbacPause,
             rbacControlList,
@@ -404,6 +443,8 @@ describe('ProtectedPartitions Tests', () => {
             rbacProtectedPartitions,
             rbacProtectedPartitions_1,
             rbacLocker,
+            rbacKYC,
+            rbacSSI,
         ]
 
         diamond_UnprotectedPartitions = await deployEquityFromFactory({
@@ -467,6 +508,19 @@ describe('ProtectedPartitions Tests', () => {
             factory,
             businessLogicResolver: businessLogicResolver.address,
         })
+
+        basicTransferInfo = {
+            to: account_B,
+            value: amount,
+        }
+        operatorTransferData = {
+            partition: DEFAULT_PARTITION,
+            from: account_A,
+            to: account_B,
+            value: amount,
+            data: '0x1234',
+            operatorData: '0x1234',
+        }
     })
 
     it('GIVEN an initialized contract WHEN trying to initialize it again THEN transaction fails with AlreadyInitialized', async () => {
@@ -559,6 +613,39 @@ describe('ProtectedPartitions Tests', () => {
                 'AccountIsBlocked'
             )
         })
+
+        it('GIVEN a non kyc account WHEN performing a protected transfer from or to THEN transaction fails with InvalidKycStatus', async () => {
+            await setProtected()
+
+            kycFacet = kycFacet.connect(signer_B)
+            await kycFacet.revokeKyc(account_A)
+
+            erc1410Facet = erc1410Facet.connect(signer_B)
+
+            await expect(
+                erc1410Facet.protectedTransferFromByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    account_B,
+                    amount,
+                    MAX_UINT256,
+                    1,
+                    '0x1234'
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
+
+            await expect(
+                erc1410Facet.protectedTransferFromByPartition(
+                    DEFAULT_PARTITION,
+                    account_B,
+                    account_A,
+                    amount,
+                    MAX_UINT256,
+                    1,
+                    '0x1234'
+                )
+            ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
+        })
     })
 
     describe('Generic Redeem check Tests', () => {
@@ -613,6 +700,24 @@ describe('ProtectedPartitions Tests', () => {
                     '0x1234'
                 )
             ).to.be.rejectedWith('AccountIsBlocked')
+        })
+
+        it('GIVEN a non kyc account WHEN performing a protected redeem from THEN transaction fails with InvalidKycStatus', async () => {
+            await setProtected()
+            await kycFacet.connect(signer_B).revokeKyc(account_A)
+
+            erc1410Facet = erc1410Facet.connect(signer_B)
+
+            await expect(
+                erc1410Facet.protectedRedeemFromByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    amount,
+                    MAX_UINT256,
+                    1,
+                    '0x1234'
+                )
+            ).to.be.rejectedWith('InvalidKycStatus')
         })
     })
 
@@ -729,8 +834,7 @@ describe('ProtectedPartitions Tests', () => {
                 await expect(
                     erc1410Facet.transferByPartition(
                         DEFAULT_PARTITION,
-                        account_B,
-                        amount,
+                        basicTransferInfo,
                         '0x1234'
                     )
                 ).to.be.rejectedWith('PartitionsAreProtectedAndNoRole')
@@ -746,12 +850,7 @@ describe('ProtectedPartitions Tests', () => {
 
                 await expect(
                     erc1410Facet.operatorTransferByPartition(
-                        DEFAULT_PARTITION,
-                        account_A,
-                        account_B,
-                        amount,
-                        '0x1234',
-                        '0x1234'
+                        operatorTransferData
                     )
                 ).to.be.rejectedWith('PartitionsAreProtectedAndNoRole')
             })
@@ -886,10 +985,11 @@ describe('ProtectedPartitions Tests', () => {
                     DEFAULT_PARTITION
                 )
 
+                basicTransferInfo.to = account_C
+
                 await erc1410Facet.transferByPartition(
                     DEFAULT_PARTITION,
-                    account_C,
-                    amount,
+                    basicTransferInfo,
                     '0x1234'
                 )
             })
@@ -912,12 +1012,7 @@ describe('ProtectedPartitions Tests', () => {
                 erc1410Facet = erc1410Facet.connect(signer_C)
 
                 await erc1410Facet.operatorTransferByPartition(
-                    DEFAULT_PARTITION,
-                    account_A,
-                    account_B,
-                    amount,
-                    '0x1234',
-                    '0x1234'
+                    operatorTransferData
                 )
             })
 

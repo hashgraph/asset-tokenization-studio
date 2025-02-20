@@ -219,6 +219,8 @@ import {
     AccessControlFacet__factory,
     ERC1410ScheduledTasks__factory,
     PauseFacet__factory,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -230,13 +232,18 @@ import {
     Rbac,
     RegulationSubType,
     RegulationType,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
+    ZERO,
+    MAX_UINT256,
+    EMPTY_STRING,
 } from '@scripts'
 
 const maxSupply = 1
 const maxSupplyByPartition = 1
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
-
+const EMPTY_VC_ID = EMPTY_STRING
 describe('CAP Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
@@ -253,6 +260,8 @@ describe('CAP Tests', () => {
     let accessControl: AccessControl
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     before(async () => {
         // mute | mock console.log
@@ -281,7 +290,15 @@ describe('CAP Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        const init_rbacs: Rbac[] = [rbacPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -323,6 +340,21 @@ describe('CAP Tests', () => {
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
+        )
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
         )
     })
 
