@@ -226,12 +226,8 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
 
         uint256 abaf = _updateTotalLock(_partition, _tokenHolder);
 
-        _updateLockedBalancesBeforeLock(
-            _partition,
-            _amount,
-            _tokenHolder,
-            _expirationTimestamp
-        );
+        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
+
         _reduceBalanceByPartition(_tokenHolder, _amount, _partition);
 
         LockDataStorage storage lockStorage = _lockStorage();
@@ -268,7 +264,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
 
         _updateLockByIndex(_partition, _lockId, _tokenHolder, abaf);
 
-        _updateLockedBalancesBeforeRelease(_partition, _lockId, _tokenHolder);
+        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
 
         uint256 lockAmount = _getLock(_partition, _tokenHolder, _lockId).amount;
 
@@ -395,21 +391,4 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         _setTotalLockLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
-    // solhint-disable no-unused-vars
-    function _updateLockedBalancesBeforeLock(
-        bytes32 _partition,
-        uint256 _amount,
-        address _tokenHolder,
-        uint256 _expirationTimestamp
-    ) internal {
-        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
-    }
-
-    function _updateLockedBalancesBeforeRelease(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) internal {
-        _updateAccountLockedBalancesSnapshot(_tokenHolder, _partition);
-    }
 }

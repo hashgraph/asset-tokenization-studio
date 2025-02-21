@@ -296,14 +296,14 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
     function getTotalHeldLabaf(
         address _tokenHolder
     ) external view override returns (uint256 labaf_) {
-        return _getTotalHeldLabaf(_tokenHolder);
+        return _getTotalHoldLabaf(_tokenHolder);
     }
 
     function getTotalHeldLabafByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view override returns (uint256 labaf_) {
-        return _getTotalHeldLabafByPartition(_partition, _tokenHolder);
+        return _getTotalHoldLabafByPartition(_partition, _tokenHolder);
     }
 
     function getHoldLabafByPartition(

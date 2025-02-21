@@ -263,7 +263,7 @@ abstract contract AdjustBalancesStorageWrapper2 is
 
         if (partitionsIndex == 0) return 0;
         return
-            _getAdjustBalancesStorage().labafUserPartition[_account][
+            _getAdjustBalancesStorage().labafByAccountAndPartition[_account][
                 partitionsIndex - 1
             ];
     }

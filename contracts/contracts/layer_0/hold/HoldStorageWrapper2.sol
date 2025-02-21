@@ -246,7 +246,7 @@ abstract contract HoldStorageWrapper2 is
             _hold,
             _operatorData
         );
-        _setHeldLabafById(_partition, _from, holdId_, abaf);
+        _setHoldLabafById(_partition, _from, holdId_, abaf);
 
         holdStorage.holdsByAccountPartitionAndId[_from][_partition][
             holdId_
@@ -480,8 +480,8 @@ abstract contract HoldStorageWrapper2 is
     ) internal returns (uint256 abaf_) {
         abaf_ = _getAbaf();
 
-        uint256 labaf = _getTotalHeldLabaf(_tokenHolder);
-        uint256 labafByPartition = _getTotalHeldLabafByPartition(
+        uint256 labaf = _getTotalHoldLabaf(_tokenHolder);
+        uint256 labafByPartition = _getTotalHoldLabafByPartition(
             _partition,
             _tokenHolder
         );
@@ -515,7 +515,7 @@ abstract contract HoldStorageWrapper2 is
         if (_factor == 1) return;
 
         _holdStorage().totalHeldAmountByAccount[_tokenHolder] *= _factor;
-        _setTotalHeldLabaf(_tokenHolder, _abaf);
+        _setTotalHoldLabaf(_tokenHolder, _abaf);
     }
 
     function _updateTotalHeldAmountAndLabafByPartition(
@@ -529,7 +529,7 @@ abstract contract HoldStorageWrapper2 is
         _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][
             _partition
         ] *= _factor;
-        _setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
+        _setTotalHoldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
     function _beforeHold(bytes32 _partition, address _tokenHolder) internal {
@@ -607,7 +607,7 @@ abstract contract HoldStorageWrapper2 is
                 _tokenHolder,
                 holdFactor
             );
-            _setHeldLabafById(_partition, _tokenHolder, _holdId, _abaf);
+            _setHoldLabafById(_partition, _tokenHolder, _holdId, _abaf);
         }
     }
 
@@ -631,7 +631,7 @@ abstract contract HoldStorageWrapper2 is
     ) internal view virtual override returns (uint256 amount_) {
         uint256 factor = _calculateFactor(
             _getAbafAdjusted(),
-            _getTotalHeldLabaf(_tokenHolder)
+            _getTotalHoldLabaf(_tokenHolder)
         );
 
         return _getHeldAmountFor(_tokenHolder) * factor;
@@ -643,7 +643,7 @@ abstract contract HoldStorageWrapper2 is
     ) internal view virtual override returns (uint256 amount_) {
         uint256 factor = _calculateFactor(
             _getAbafAdjusted(),
-            _getTotalHeldLabafByPartition(_partition, _tokenHolder)
+            _getTotalHoldLabafByPartition(_partition, _tokenHolder)
         );
         return _getHeldAmountForByPartition(_partition, _tokenHolder) * factor;
     }
