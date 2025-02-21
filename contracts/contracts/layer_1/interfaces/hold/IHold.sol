@@ -206,7 +206,14 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+<<<<<<<< HEAD:contracts/contracts/layer_1/lock/LockStorageWrapper.sol
+
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+========
+>>>>>>>> refs/heads/feat/BBND-461-layer0:contracts/contracts/layer_1/interfaces/hold/IHold.sol
 
 interface IHold {
     event HeldByPartition(
@@ -275,12 +282,11 @@ interface IHold {
     }
 
     struct HoldDataStorage {
-        mapping(address => uint256) totalHeldAmount;
-        mapping(address => mapping(bytes32 => uint256)) heldAmountByPartition;
-        mapping(address => mapping(bytes32 => HoldData[])) holds;
-        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIds;
-        mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) holdsIndex;
-        mapping(address => mapping(bytes32 => uint256)) holdNextId;
+        mapping(address => uint256) totalHeldAmountByAccount;
+        mapping(address => mapping(bytes32 => uint256)) totalHeldAmountByAccountAndPartition;
+        mapping(address => mapping(bytes32 => mapping(uint256 => HoldData))) holdsByAccountPartitionAndId;
+        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) holdIdsByAccountAndPartition;
+        mapping(address => mapping(bytes32 => uint256)) nextHoldIdByAccountAndPartition;
     }
 
     enum OperationType {
@@ -341,17 +347,69 @@ interface IHold {
         address _tokenHolder
     ) external view returns (uint256 amount_);
 
+<<<<<<<< HEAD:contracts/contracts/layer_1/lock/LockStorageWrapper.sol
+        LockData memory lock = _getLockByIndex(
+            _partition,
+            _tokenHolder,
+            lockIndex
+        );
+
+        //_removeLock(_partition, _tokenHolder, _lockId);
+        LockDataStorage storage lockStorage = _lockStorage();
+
+        lockStorage.lockedAmountByPartition[_tokenHolder][_partition] -= lock
+            .amount;
+        lockStorage.totalLockedAmount[_tokenHolder] -= lock.amount;
+        lockStorage.locksIndex[_tokenHolder][_partition][lock.id] = 0;
+        lockStorage.lockIds[_tokenHolder][_partition].remove(lock.id);
+
+        uint256 lastIndex = _getLockCountForByPartition(
+            _partition,
+            _tokenHolder
+        );
+
+        if (lockIndex < lastIndex) {
+            LockData memory lastLock = _getLockByIndex(
+                _partition,
+                _tokenHolder,
+                lastIndex
+            );
+            _setLockAtIndex(_partition, _tokenHolder, lockIndex, lastLock);
+        }
+
+        lockStorage.locks[_tokenHolder][_partition].pop();
+
+        if (!_validPartitionForReceiver(_partition, _tokenHolder)) {
+            _addPartitionTo(lock.amount, _tokenHolder, _partition);
+        } else {
+            _increaseBalanceByPartition(_tokenHolder, lock.amount, _partition);
+        }
+
+        //_increaseBalanceByPartition(_tokenHolder, lock.amount, _partition);
+
+        success_ = true;
+    }
+
+    // solhint-disable no-unused-vars
+    function _beforeLock(
+========
     function getHeldAmountForByPartition(
+>>>>>>>> refs/heads/feat/BBND-461-layer0:contracts/contracts/layer_1/interfaces/hold/IHold.sol
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 amount_);
 
+<<<<<<<< HEAD:contracts/contracts/layer_1/lock/LockStorageWrapper.sol
+    // solhint-enable no-unused-vars
+    function _setLockAtIndex(
+========
     function getHoldCountForByPartition(
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 holdCount_);
 
     function getHoldsIdForByPartition(
+>>>>>>>> refs/heads/feat/BBND-461-layer0:contracts/contracts/layer_1/interfaces/hold/IHold.sol
         bytes32 _partition,
         address _tokenHolder,
         uint256 _pageIndex,

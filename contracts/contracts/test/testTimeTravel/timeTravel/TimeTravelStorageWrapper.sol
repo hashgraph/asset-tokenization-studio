@@ -209,13 +209,21 @@ pragma solidity 0.8.18;
 import {
     ITimeTravelStorageWrapper
 } from '../interfaces/ITimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
+<<<<<<<< HEAD:contracts/contracts/layer_1/cap/Cap_Modifiers.sol
+// solhint-disable-next-line
+contract Cap_Modifiers is ICapStorageWrapper {
+    modifier checkMaxSupply(uint256 _amount) {
+        uint256 newTotalSupply = ERC1410Basic_CD_Lib.totalSupply() + _amount;
+        uint256 maxSupply = Cap_CD_Lib.getMaxSupply();
+========
 abstract contract TimeTravelStorageWrapper is
     ITimeTravelStorageWrapper,
     LocalContext
 {
     /* solhint-disable state-visibility */
+>>>>>>>> refs/heads/feat/BBND-461-layer0:contracts/contracts/test/testTimeTravel/timeTravel/TimeTravelStorageWrapper.sol
 
     // keccak256("security.token.standard.timeTravel.resolverKey")
     bytes32 constant _TIME_TRAVEL_RESOLVER_KEY =

@@ -24,7 +24,6 @@ contract ProtectedPartitions is
         bool _protectPartitions
     )
         external
-        virtual
         override
         onlyUninitialized(_protectedPartitionsStorage().initialized)
         returns (bool success_)
@@ -40,7 +39,6 @@ contract ProtectedPartitions is
 
     function protectPartitions()
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_PROTECTED_PARTITIONS_ROLE)
@@ -52,7 +50,6 @@ contract ProtectedPartitions is
 
     function unprotectPartitions()
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_PROTECTED_PARTITIONS_ROLE)
@@ -62,19 +59,13 @@ contract ProtectedPartitions is
         success_ = true;
     }
 
-    function arePartitionsProtected()
-        external
-        view
-        virtual
-        override
-        returns (bool)
-    {
+    function arePartitionsProtected() external view override returns (bool) {
         return _arePartitionsProtected();
     }
 
     function getNounceFor(
         address account
-    ) external view virtual override returns (uint256) {
+    ) external view override returns (uint256) {
         return _getNounceFor(account);
     }
 
@@ -87,7 +78,6 @@ contract ProtectedPartitions is
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -97,7 +87,6 @@ contract ProtectedPartitions is
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -124,7 +113,6 @@ contract ProtectedPartitions is
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

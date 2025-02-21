@@ -223,8 +223,8 @@ import {
     ERC1410ScheduledTasks__factory,
     ScheduledTasks__factory,
     TimeTravel__factory,
-    KYC,
-    SSIManagement,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -241,8 +241,10 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
+import { dateToUnixTimestamp } from '../../../../dateFormatter'
 
 const _PARTITION_ID_1 =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -267,8 +269,8 @@ describe('Scheduled Tasks Tests', () => {
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
     let timeTravelFacet: TimeTravel
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     before(async () => {
         // mute | mock console.log
@@ -358,14 +360,20 @@ describe('Scheduled Tasks Tests', () => {
             signer_A
         )
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
-        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address,
             signer_A
         )
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_STRING,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
     })
 
     afterEach(async () => {
@@ -395,12 +403,12 @@ describe('Scheduled Tasks Tests', () => {
         await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
 
         erc1410Facet = erc1410Facet.connect(signer_B)
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_A,
-            INITIAL_AMOUNT,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_A,
+            value: INITIAL_AMOUNT,
+            data: '0x',
+        })
 
         // Using account C (with role)
         equityFacet = equityFacet.connect(signer_C)

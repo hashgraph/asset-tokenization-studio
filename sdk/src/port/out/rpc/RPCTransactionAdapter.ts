@@ -337,9 +337,9 @@ import {
   ScheduledTasks__factory,
   Snapshots__factory,
   TransferAndLock__factory,
-  Hold_2__factory,
-  SSIManagement__factory,
-  KYC__factory,
+  Hold__factory,
+  SsiManagement__factory,
+  Kyc__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -366,6 +366,11 @@ import {
   HoldIdentifier,
   ProtectedHold,
 } from '../../../domain/context/security/Hold.js';
+import {
+  BasicTransferInfo,
+  IssueData,
+  OperatorTransferData,
+} from '../../../domain/context/factory/ERC1410Metadata.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -965,21 +970,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()}`,
     );
 
+    const basicTransferInfo: BasicTransferInfo = {
+      to: targetId.toString(),
+      value: amount.toHexString(),
+    };
+
     return RPCTransactionResponseAdapter.manageResponse(
       await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).transferByPartition(
-        _PARTITION_ID_1,
-        {
-          to: targetId.toString(),
-          value: amount.toBigNumber(),
-        },
-        '0x',
-        {
-          gasLimit: TRANSFER_GAS,
-        },
-      ),
+      ).transferByPartition(_PARTITION_ID_1, basicTransferInfo, '0x', {
+        gasLimit: TRANSFER_GAS,
+      }),
       this.networkService.environment,
     );
   }
@@ -1133,17 +1135,18 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Issue ${amount} ${security} to account: ${targetId.toString()}`,
     );
 
+    const issueData: IssueData = {
+      partition: _PARTITION_ID_1,
+      tokenHolder: targetId.toString(),
+      value: amount.toHexString(),
+      data: '0x',
+    };
+
     return RPCTransactionResponseAdapter.manageResponse(
       await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).issueByPartition(
-        _PARTITION_ID_1,
-        targetId.toString(),
-        amount.toBigNumber(),
-        '0x',
-        { gasLimit: ISSUE_GAS },
-      ),
+      ).issueByPartition(issueData, { gasLimit: ISSUE_GAS }),
       this.networkService.environment,
     );
   }
@@ -1452,21 +1455,22 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       `Transfering ${amount} securities to account ${targetId.toString()} for partition ${partitionId}`,
     );
 
+    const operatorTransferData: OperatorTransferData = {
+      partition: partitionId,
+      from: sourceId.toString(),
+      to: targetId.toString(),
+      value: amount.toHexString(),
+      data: '0x',
+      operatorData: '0x',
+    };
+
     return RPCTransactionResponseAdapter.manageResponse(
       await ERC1410ScheduledTasks__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).operatorTransferByPartition(
-        {
-          partition: partitionId,
-          from: sourceId.toString(),
-          to: targetId.toString(),
-          value: '0x',
-          data: '0x',
-          operatorData: '0x',
-        },
-        { gasLimit: TRANSFER_OPERATOR_GAS },
-      ),
+      ).operatorTransferByPartition(operatorTransferData, {
+        gasLimit: TRANSFER_OPERATOR_GAS,
+      }),
       this.networkService.environment,
     );
   }
@@ -1845,7 +1849,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold_2__factory.connect(
+      await Hold__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).createHoldByPartition(partitionId, hold, {
@@ -1877,7 +1881,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold_2__factory.connect(
+      await Hold__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).createHoldFromByPartition(
@@ -1915,7 +1919,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold_2__factory.connect(
+      await Hold__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).controllerCreateHoldByPartition(
@@ -1962,7 +1966,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold_2__factory.connect(
+      await Hold__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).protectedCreateHoldByPartition(
@@ -1996,7 +2000,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold_2__factory.connect(
+      await Hold__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).releaseHoldByPartition(holdIdentifier, amount.toBigNumber(), {
@@ -2023,7 +2027,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold_2__factory.connect(
+      await Hold__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).reclaimHoldByPartition(holdIdentifier, {
@@ -2052,7 +2056,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await Hold_2__factory.connect(
+      await Hold__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).executeHoldByPartition(
@@ -2076,7 +2080,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await SSIManagement__factory.connect(
+      await SsiManagement__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).setRevocationRegistryAddress(revocationRegistry.toString(), {
@@ -2093,7 +2097,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Adding issuer ${issuer}`);
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await SSIManagement__factory.connect(
+      await SsiManagement__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).addIssuer(issuer.toString(), {
@@ -2110,7 +2114,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Removing issuer ${issuer}`);
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await SSIManagement__factory.connect(
+      await SsiManagement__factory.connect(
         security.toString(),
         this.signerOrProvider,
       ).removeIssuer(issuer.toString(), {
@@ -2133,10 +2137,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     );
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await KYC__factory.connect(
+      await Kyc__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).grantKYC(
+      ).grantKyc(
         targetId.toString(),
         VCId,
         validFrom.toBigNumber(),
@@ -2157,10 +2161,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(`Revoking KYC to address ${targetId.toString()}`);
 
     return RPCTransactionResponseAdapter.manageResponse(
-      await KYC__factory.connect(
+      await Kyc__factory.connect(
         security.toString(),
         this.signerOrProvider,
-      ).revokeKYC(targetId.toString(), {
+      ).revokeKyc(targetId.toString(), {
         gasLimit: REVOKE_KYC_GAS,
       }),
       this.networkService.environment,

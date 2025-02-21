@@ -203,6 +203,7 @@
 
 */
 
+//import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
@@ -213,8 +214,8 @@ import {
     DiamondCutManager,
     IDiamondCutManager,
     IFactory,
-    AccessControl__factory,
-    Pause__factory,
+    AccessControlFacet__factory,
+    PauseFacet__factory,
     DiamondCutManager__factory,
     IDiamondLoupe,
 } from '@typechain'
@@ -248,7 +249,8 @@ describe('DiamondCutManager', () => {
 
     before(async () => {
         // mute | mock console.log
-        console.log = () => {}
+        // console.log = () => {}
+        //await loadFixture(deployBusinessLogicResolverFixture)
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B] = await ethers.getSigners()
         account_B = signer_B.address
@@ -264,13 +266,16 @@ describe('DiamondCutManager', () => {
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
-        accessControl = AccessControl__factory.connect(
+        accessControl = AccessControlFacet__factory.connect(
             businessLogicResolver.address,
             signer_A
         )
         await accessControl.grantRole(PAUSER_ROLE, account_B)
 
-        pause = Pause__factory.connect(businessLogicResolver.address, signer_A)
+        pause = PauseFacet__factory.connect(
+            businessLogicResolver.address,
+            signer_A
+        )
         diamondCutManager = DiamondCutManager__factory.connect(
             businessLogicResolver.address,
             signer_A
@@ -840,13 +845,16 @@ describe('DiamondCutManager', () => {
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
 
-        accessControl = AccessControl__factory.connect(
+        accessControl = AccessControlFacet__factory.connect(
             businessLogicResolver.address,
             signer_A
         )
         await accessControl.grantRole(PAUSER_ROLE, account_B)
 
-        pause = Pause__factory.connect(businessLogicResolver.address, signer_A)
+        pause = PauseFacet__factory.connect(
+            businessLogicResolver.address,
+            signer_A
+        )
         diamondCutManager = DiamondCutManager__factory.connect(
             businessLogicResolver.address,
             signer_A

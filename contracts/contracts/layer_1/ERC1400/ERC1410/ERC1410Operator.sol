@@ -207,15 +207,13 @@
 pragma solidity 0.8.18;
 
 import {IERC1410Operator} from '../../interfaces/ERC1400/IERC1410Operator.sol';
+import {Common} from '../../common/Common.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
-    ERC1410OperatorStorageWrapper
-} from './ERC1410OperatorStorageWrapper.sol';
-import {IKYC} from '../../interfaces/kyc/IKYC.sol';
+    IERC1410Operator
+} from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
 
-abstract contract ERC1410Operator is
-    IERC1410Operator,
-    ERC1410OperatorStorageWrapper
-{
+abstract contract ERC1410Operator is IERC1410Operator, Common {
     ///////////////////////
     /// Operator Management
     ///////////////////////
@@ -226,7 +224,6 @@ abstract contract ERC1410Operator is
         address _operator
     )
         external
-        virtual
         override
         onlyUnpaused
         checkControlList(_msgSender())
@@ -239,7 +236,7 @@ abstract contract ERC1410Operator is
     /// @param _operator An address which is being de-authorised
     function revokeOperator(
         address _operator
-    ) external virtual override onlyUnpaused checkControlList(_msgSender()) {
+    ) external override onlyUnpaused checkControlList(_msgSender()) {
         _revokeOperator(_operator);
     }
 
@@ -251,7 +248,6 @@ abstract contract ERC1410Operator is
         address _operator
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -269,7 +265,6 @@ abstract contract ERC1410Operator is
         address _operator
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -284,7 +279,6 @@ abstract contract ERC1410Operator is
         OperatorTransferData calldata _operatorTransferData
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
@@ -296,10 +290,13 @@ abstract contract ERC1410Operator is
             _operatorTransferData.from
         )
         onlyUnProtectedPartitionsOrWildCardRole
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, _operatorTransferData.from)
-        checkKYCStatus(IKYC.KYCStatus.GRANTED, _operatorTransferData.to)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.from)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.to)
         returns (bytes32)
     {
+        {
+            _checkValidAddress(_operatorTransferData.to);
+        }
         return _operatorTransferByPartition(_operatorTransferData);
     }
 
@@ -310,7 +307,7 @@ abstract contract ERC1410Operator is
     function isOperator(
         address _operator,
         address _tokenHolder
-    ) public view virtual override returns (bool) {
+    ) public view override returns (bool) {
         return _isOperator(_operator, _tokenHolder);
     }
 
@@ -323,7 +320,7 @@ abstract contract ERC1410Operator is
         bytes32 _partition,
         address _operator,
         address _tokenHolder
-    ) public view virtual override returns (bool) {
+    ) public view override returns (bool) {
         return _isOperatorForPartition(_partition, _operator, _tokenHolder);
     }
 }

@@ -210,7 +210,7 @@ import {ControlList} from '../../../layer_1/controlList/ControlList.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
 contract ControlListTimeTravel is ControlList, TimeTravelStorageWrapper {
     function _blockTimestamp()

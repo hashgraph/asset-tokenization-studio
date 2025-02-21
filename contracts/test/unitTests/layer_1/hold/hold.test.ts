@@ -211,7 +211,7 @@ import { SnapshotRestorer } from '@nomicfoundation/hardhat-network-helpers/src/h
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Hold_2,
+    type Hold,
     ControlList,
     Pause,
     ERC20,
@@ -219,8 +219,8 @@ import {
     IFactory,
     BusinessLogicResolver,
     TimeTravel,
-    KYC,
-    SSIManagement,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -237,8 +237,10 @@ import {
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
     ADDRESS_ZERO,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
+import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const _DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
@@ -246,6 +248,7 @@ const _WRONG_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000321'
 const _AMOUNT = 1000
 const _DATA = '0x1234'
+const EMPTY_VC_ID = EMPTY_STRING
 let holdIdentifier: any
 
 describe('Hold Tests', () => {
@@ -264,14 +267,14 @@ describe('Hold Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let holdFacet: Hold_2
+    let holdFacet: Hold
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
     let controlListFacet: ControlList
     let erc20Facet: ERC20
     let timeTravelFacet: TimeTravel
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -381,7 +384,7 @@ describe('Hold Tests', () => {
         })
 
         holdFacet = await ethers.getContractAt(
-            'Hold_2',
+            'Hold',
             diamond.address,
             signer_A
         )
@@ -410,24 +413,42 @@ describe('Hold Tests', () => {
             diamond.address,
             signer_A
         )
-        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address,
             signer_A
         )
 
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
-        await kycFacet.grantKYC(account_B, '', 0, 9999999999, account_A)
-        await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
-
-        await erc1410Facet.issueByPartition(
-            _DEFAULT_PARTITION,
+        await kycFacet.grantKyc(
             account_A,
-            _AMOUNT,
-            '0x'
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
         )
+        await kycFacet.grantKyc(
+            account_B,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+
+        await erc1410Facet.issueByPartition({
+            partition: _DEFAULT_PARTITION,
+            tokenHolder: account_A,
+            value: _AMOUNT,
+            data: '0x',
+        })
     }
 
     describe('Multi-partition disabled', () => {
@@ -658,19 +679,19 @@ describe('Hold Tests', () => {
         })
 
         describe('KYC', () => {
-            it('Given a non kyc account WHEN executeHoldByPartition THEN transaction fails with InvalidKYCStatus', async () => {
+            it('Given a non kyc account WHEN executeHoldByPartition THEN transaction fails with InvalidKycStatus', async () => {
                 await holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
-                await kycFacet.revokeKYC(account_A)
+                await kycFacet.revokeKyc(account_A)
                 await expect(
                     holdFacet
                         .connect(signer_A)
                         .executeHoldByPartition(holdIdentifier, account_B, 1)
-                ).to.be.revertedWithCustomError(kycFacet, 'InvalidKYCStatus')
+                ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
                 await expect(
                     holdFacet
                         .connect(signer_B)
                         .executeHoldByPartition(holdIdentifier, account_A, 1)
-                ).to.be.revertedWithCustomError(kycFacet, 'InvalidKYCStatus')
+                ).to.be.revertedWithCustomError(kycFacet, 'InvalidKycStatus')
             })
         })
 

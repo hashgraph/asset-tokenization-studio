@@ -217,16 +217,14 @@ import {
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
-    KYC,
-    SSIManagement,
+    SsiManagement,
+    Kyc,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
     ISSUER_ROLE,
     CONTROLLER_ROLE,
     PAUSER_ROLE,
-    KYC_ROLE,
-    SSI_MANAGER_ROLE,
     DEFAULT_PARTITION,
     deployEquityFromFactory,
     Rbac,
@@ -235,13 +233,17 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../../common'
 
 const amount = 1
 const data = '0x1234'
 const operatorData = '0x5678'
-
+const EMPTY_VC_ID = EMPTY_STRING
 describe('ERC1644 Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
@@ -264,8 +266,8 @@ describe('ERC1644 Tests', () => {
     let pauseFacet: Pause
     let equityFacet: Equity
     let erc1410Facet: ERC1410ScheduledTasks
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     describe('single partition', () => {
         before(async () => {
@@ -379,12 +381,12 @@ describe('ERC1644 Tests', () => {
                 signer_B
             )
             kycFacet = await ethers.getContractAt(
-                'KYC',
+                'Kyc',
                 diamond.address,
                 signer_B
             )
             ssiManagementFacet = await ethers.getContractAt(
-                'SSIManagement',
+                'SsiManagement',
                 diamond.address,
                 signer_A
             )
@@ -483,15 +485,19 @@ describe('ERC1644 Tests', () => {
                 // BEFORE SCHEDULED SNAPSHOTS ------------------------------------------------------------------
                 // Granting Role to account C
                 await ssiManagementFacet.addIssuer(account_E)
-                await kycFacet.grantKYC(account_D, '', 0, 9999999999, account_E)
-                await erc1410Facet
-                    .connect(signer_B)
-                    .issueByPartition(
-                        DEFAULT_PARTITION,
-                        account_D,
-                        amount * 2,
-                        data
-                    )
+                await kycFacet.grantKyc(
+                    account_D,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_E
+                )
+                await erc1410Facet.connect(signer_B).issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_D,
+                    value: amount * 2,
+                    data: data,
+                })
             })
 
             it(

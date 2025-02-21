@@ -217,17 +217,15 @@ import {
     IFactory,
     Lock__factory,
     TransferAndLock__factory,
-    Pause__factory,
+    PauseFacet__factory,
     ERC1410ScheduledTasks__factory,
-    KYC,
-    SSIManagement,
+    SsiManagement,
+    Kyc,
 } from '@typechain'
 import {
     PAUSER_ROLE,
     LOCKER_ROLE,
     ISSUER_ROLE,
-    KYC_ROLE,
-    SSI_MANAGER_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
@@ -235,6 +233,10 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    SSI_MANAGER_ROLE,
+    KYC_ROLE,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 
 const _NON_DEFAULT_PARTITION =
@@ -242,6 +244,7 @@ const _NON_DEFAULT_PARTITION =
 const _DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000001'
 const _AMOUNT = 1000
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Transfer and lock Tests', () => {
     let diamond: ResolverProxy
@@ -261,8 +264,8 @@ describe('Transfer and lock Tests', () => {
     let transferAndLockFacet: TransferAndLock
     let pauseFacet: Pause
     let erc1410Facet: ERC1410ScheduledTasks
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -362,24 +365,36 @@ describe('Transfer and lock Tests', () => {
                 diamond.address,
                 signer_C
             )
-            pauseFacet = Pause__factory.connect(diamond.address, signer_D)
+            pauseFacet = PauseFacet__factory.connect(diamond.address, signer_D)
             erc1410Facet = ERC1410ScheduledTasks__factory.connect(
                 diamond.address,
                 signer_B
             )
             kycFacet = await ethers.getContractAt(
-                'KYC',
+                'Kyc',
                 diamond.address,
                 signer_B
             )
             ssiManagementFacet = await ethers.getContractAt(
-                'SSIManagement',
+                'SsiManagement',
                 diamond.address,
                 signer_A
             )
             await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-            await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
-            await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
+            await kycFacet.grantKyc(
+                account_A,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_A
+            )
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_A
+            )
         })
 
         describe('Paused', () => {
@@ -492,12 +507,12 @@ describe('Transfer and lock Tests', () => {
             })
 
             it('GIVEN a valid partition WHEN transferAndLockByPartition with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition(
-                    _NON_DEFAULT_PARTITION,
-                    account_C,
-                    _AMOUNT * 2,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _NON_DEFAULT_PARTITION,
+                    tokenHolder: account_C,
+                    value: _AMOUNT * 2,
+                    data: '0x',
+                })
 
                 await expect(
                     transferAndLockFacet.transferAndLockByPartition(
@@ -674,18 +689,30 @@ describe('Transfer and lock Tests', () => {
                 signer_B
             )
             kycFacet = await ethers.getContractAt(
-                'KYC',
+                'Kyc',
                 diamond.address,
                 signer_B
             )
             ssiManagementFacet = await ethers.getContractAt(
-                'SSIManagement',
+                'SsiManagement',
                 diamond.address,
                 signer_A
             )
             await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-            await kycFacet.grantKYC(account_A, '', 0, 9999999999, account_A)
-            await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
+            await kycFacet.grantKyc(
+                account_A,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_A
+            )
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_A
+            )
         })
 
         describe('multi-partition transactions arent enabled', () => {
@@ -709,12 +736,12 @@ describe('Transfer and lock Tests', () => {
 
         describe('transferAndLock', () => {
             it('GIVEN a valid partition WHEN transferAndLockByPartition with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition(
-                    _DEFAULT_PARTITION,
-                    account_C,
-                    _AMOUNT * 2,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _DEFAULT_PARTITION,
+                    tokenHolder: account_C,
+                    value: _AMOUNT * 2,
+                    data: '0x',
+                })
 
                 await expect(
                     transferAndLockFacet.transferAndLockByPartition(
@@ -762,12 +789,12 @@ describe('Transfer and lock Tests', () => {
             })
 
             it('GIVEN a valid partition WHEN transferAndLock with enough balance THEN transaction success', async () => {
-                await erc1410Facet.issueByPartition(
-                    _DEFAULT_PARTITION,
-                    account_C,
-                    _AMOUNT * 2,
-                    '0x'
-                )
+                await erc1410Facet.issueByPartition({
+                    partition: _DEFAULT_PARTITION,
+                    tokenHolder: account_C,
+                    value: _AMOUNT * 2,
+                    data: '0x',
+                })
 
                 await expect(
                     transferAndLockFacet.transferAndLock(

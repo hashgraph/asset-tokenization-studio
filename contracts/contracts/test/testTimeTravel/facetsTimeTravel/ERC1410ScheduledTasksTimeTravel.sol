@@ -210,11 +210,11 @@ pragma solidity 0.8.18;
 
 import {
     ERC1410ScheduledTasks
-} from '../../../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasks.sol';
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410ScheduledTasks.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
 contract ERC1410ScheduledTasksTimeTravel is
     ERC1410ScheduledTasks,

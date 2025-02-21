@@ -206,13 +206,36 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
+<<<<<<<< HEAD:contracts/contracts/layer_1/cap/Cap_CD_Lib.sol
+import {CD_Lib} from '../common/CD_Lib.sol';
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+library Cap_CD_Lib {
+    function getMaxSupply() internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature('getMaxSupply()')
+        );
+        return abi.decode(data, (uint256));
+    }
+
+    function getMaxSupplyByPartition(
+        bytes32 _partition
+    ) internal view returns (uint256) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'getMaxSupplyByPartition(bytes32)',
+                _partition
+            )
+        );
+        return abi.decode(data, (uint256));
+========
 import {
     ScheduledBalanceAdjustments
 } from '../../../layer_2/scheduledTasks/scheduledBalanceAdjustments/ScheduledBalanceAdjustments.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
 contract ScheduledBalanceAdjustmentsTimeTravel is
     ScheduledBalanceAdjustments,
@@ -225,5 +248,6 @@ contract ScheduledBalanceAdjustmentsTimeTravel is
         returns (uint256)
     {
         return TimeTravelStorageWrapper._blockTimestamp();
+>>>>>>>> refs/heads/feat/BBND-461-layer0:contracts/contracts/test/testTimeTravel/facetsTimeTravel/ScheduledBalanceAdjustmentsTimeTravel.sol
     }
 }

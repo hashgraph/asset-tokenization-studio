@@ -482,30 +482,4 @@ abstract contract DiamondCutManager is
             _facetId
         );
     }
-
-    // solhint-disable no-empty-blocks
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override(AccessControl, Pause)
-        returns (bytes32 staticResolverKey_)
-    {}
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override(AccessControl, Pause)
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {}
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override(AccessControl, Pause)
-        returns (bytes4[] memory staticInterfaceIds_)
-    {}
-    // solhint-enable no-empty-blocks
 }

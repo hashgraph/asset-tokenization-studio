@@ -218,20 +218,20 @@ import {
   AccessControl__factory,
   Bond__factory,
   BondUSA__factory,
-  Cap_2__factory,
+  Cap__factory,
   ControlList__factory,
   DiamondFacet__factory,
   EquityUSA__factory,
   ERC1410ScheduledTasks__factory,
   ERC1643__factory,
   Factory__factory,
-  Hold_2__factory,
-  Lock_2__factory,
+  Hold__factory,
+  Lock__factory,
   ScheduledTasks__factory,
-  Snapshots_2__factory,
-  SSIManagement__factory,
+  Snapshots__factory,
   TransferAndLock__factory,
-  KYC__factory,
+  SsiManagement__factory,
+  Kyc__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -332,6 +332,7 @@ import {
 } from '../../../domain/context/security/Hold.js';
 import {
   BasicTransferInfo,
+  IssueData,
   OperatorTransferData,
 } from 'domain/context/factory/ERC1410Metadata.js';
 
@@ -758,13 +759,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Granting role ${role.toString()} to account: ${targetId.toString()}`,
     );
 
-    const factoryInstance = new AccessControl__factory().attach(
-      security.toString(),
-    );
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [role, targetId.toString()],
-    );
+    const functionDataEncodedHex = new Interface(
+      AccessControl__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [role, targetId.toString()]);
+
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -787,13 +785,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     let gas = roles.length * GRANT_ROLES_GAS;
     gas = gas > MAX_ROLES_GAS ? MAX_ROLES_GAS : gas;
 
-    const factoryInstance = new AccessControl__factory().attach(
-      security.toString(),
-    );
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [roles, actives, targetId.toString()],
-    );
+    const functionDataEncodedHex = new Interface(
+      AccessControl__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [roles, actives, targetId.toString()]);
+
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -816,13 +811,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Revoking role ${role.toString()} to account: ${targetId.toString()}`,
     );
 
-    const factoryInstance = new AccessControl__factory().attach(
-      security.toString(),
-    );
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [role, targetId.toString()],
-    );
+    const functionDataEncodedHex = new Interface(
+      AccessControl__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [role, targetId.toString()]);
+
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -841,13 +833,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'renounceRole';
     LogService.logTrace(`Renounce role ${role.toString()}`);
 
-    const factoryInstance = new AccessControl__factory().attach(
-      security.toString(),
-    );
-    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
-      FUNCTION_NAME,
-      [role],
-    );
+    const functionDataEncodedHex = new Interface(
+      AccessControl__factory.abi,
+    ).encodeFunctionData(FUNCTION_NAME, [role]);
+
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
     );
@@ -872,9 +861,17 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const factoryInstance = new ERC1410ScheduledTasks__factory().attach(
       security.toString(),
     );
+
+    const issueData: IssueData = {
+      partition: _PARTITION_ID_1,
+      tokenHolder: targetId.toString(),
+      value: amount.toHexString(),
+      data: '0x',
+    };
+
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
-      [_PARTITION_ID_1, targetId.toString(), amount.toHexString(), '0x'],
+      [issueData],
     );
     const functionDataEncoded = new Uint8Array(
       Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
@@ -1117,7 +1114,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'takeSnapshot';
     LogService.logTrace(`Take snapshot of: ${security.toString()}`);
 
-    const factoryInstance = new Snapshots_2__factory().attach(
+    const factoryInstance = new Snapshots__factory().attach(
       security.toString(),
     );
 
@@ -1375,7 +1372,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Setting max supply ${maxSupply} for security ${security.toString()}`,
     );
 
-    const factoryInstance = new Cap_2__factory().attach(security.toString());
+    const factoryInstance = new Cap__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -1465,7 +1462,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Locking ${amount} tokens from account ${sourceId.toString()} until ${expirationDate}`,
     );
 
-    const factoryInstance = new Lock_2__factory().attach(security.toString());
+    const factoryInstance = new Lock__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -1500,7 +1497,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Releasing lock ${lockId} from account ${sourceId.toString()}`,
     );
 
-    const factoryInstance = new Lock_2__factory().attach(security.toString());
+    const factoryInstance = new Lock__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -1862,7 +1859,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Holding ${amount} tokens from account ${targetId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
 
-    const factoryInstance = new Hold_2__factory().attach(security.toString());
+    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
@@ -1904,7 +1901,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
 
-    const factoryInstance = new Hold_2__factory().attach(security.toString());
+    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
@@ -1946,7 +1943,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Controller Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
 
-    const factoryInstance = new Hold_2__factory().attach(security.toString());
+    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
@@ -1991,7 +1988,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Protected Holding ${amount} tokens from account ${sourceId.toString()} until ${expirationDate} with escrow ${escrow}`,
     );
 
-    const factoryInstance = new Hold_2__factory().attach(security.toString());
+    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const hold: Hold = {
       amount: amount.toBigNumber(),
@@ -2036,7 +2033,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     LogService.logTrace(
       `Releasing hold amount ${amount} from account ${targetId.toString()}}`,
     );
-    const factoryInstance = new Hold_2__factory().attach(security.toString());
+    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const holdIdentifier: HoldIdentifier = {
       partition: partitionId,
@@ -2070,7 +2067,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
   ): Promise<TransactionResponse<any, Error>> {
     const FUNCTION_NAME = 'reclaimHoldByPartition';
     LogService.logTrace(`Reclaiming hold from account ${targetId.toString()}}`);
-    const factoryInstance = new Hold_2__factory().attach(security.toString());
+    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const holdIdentifier: HoldIdentifier = {
       partition: partitionId,
@@ -2109,7 +2106,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Executing hold with Id ${holdId} from account ${sourceId.toString()} to account ${targetId.toString()}`,
     );
 
-    const factoryInstance = new Hold_2__factory().attach(security.toString());
+    const factoryInstance = new Hold__factory().attach(security.toString());
 
     const holdIdentifier: HoldIdentifier = {
       partition: partitionId,
@@ -2142,7 +2139,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'addIssuer';
     LogService.logTrace(`Adding issuer ${issuer}`);
 
-    const factoryInstance = new SSIManagement__factory().attach(
+    const factoryInstance = new SsiManagement__factory().attach(
       security.toString(),
     );
 
@@ -2173,7 +2170,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       `Setting revocation registry address ${revocationRegistry}`,
     );
 
-    const factoryInstance = new SSIManagement__factory().attach(
+    const factoryInstance = new SsiManagement__factory().attach(
       security.toString(),
     );
 
@@ -2202,7 +2199,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const FUNCTION_NAME = 'removeIssuer';
     LogService.logTrace(`Removing issuer ${issuer}`);
 
-    const factoryInstance = new SSIManagement__factory().attach(
+    const factoryInstance = new SsiManagement__factory().attach(
       security.toString(),
     );
 
@@ -2232,12 +2229,12 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     issuer: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'grantKYC';
+    const FUNCTION_NAME = 'grantKyc';
     LogService.logTrace(
       `Granting KYC from issuer ${issuer.toString()} to address ${targetId.toString()} with VC ${vcBase64}`,
     );
 
-    const factoryInstance = new KYC__factory().attach(security.toString());
+    const factoryInstance = new Kyc__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,
@@ -2267,10 +2264,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     targetId: EvmAddress,
     securityId: ContractId | string,
   ): Promise<TransactionResponse> {
-    const FUNCTION_NAME = 'revokeKYC';
+    const FUNCTION_NAME = 'revokeKyc';
     LogService.logTrace(`Revoking KYC to address ${targetId.toString()}`);
 
-    const factoryInstance = new KYC__factory().attach(security.toString());
+    const factoryInstance = new Kyc__factory().attach(security.toString());
 
     const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
       FUNCTION_NAME,

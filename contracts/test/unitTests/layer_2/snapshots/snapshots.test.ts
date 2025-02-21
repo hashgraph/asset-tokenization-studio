@@ -209,19 +209,19 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Snapshots_2,
+    type Snapshots,
     type EquityUSA,
     type ERC1410ScheduledTasks,
     type AccessControl,
     TimeTravel,
-    KYC,
-    SSIManagement,
+    Kyc,
+    SsiManagement,
     BusinessLogicResolver,
     IFactory,
     AccessControl__factory,
     EquityUSA__factory,
     ERC1410ScheduledTasks__factory,
-    Snapshots_2__factory,
+    Snapshots__factory,
     TimeTravel__factory,
 } from '@typechain'
 import {
@@ -237,8 +237,11 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
+    MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
+import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -263,12 +266,12 @@ describe('Snapshots Layer 2 Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
-    let snapshotFacet: Snapshots_2
+    let snapshotFacet: Snapshots
     let accessControlFacet: AccessControl
     let equityFacet: EquityUSA
     let timeTravelFacet: TimeTravel
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     before(async () => {
         // mute | mock console.log
@@ -348,11 +351,11 @@ describe('Snapshots Layer 2 Tests', () => {
             diamond.address,
             signer_A
         )
-        snapshotFacet = Snapshots_2__factory.connect(diamond.address, signer_A)
+        snapshotFacet = Snapshots__factory.connect(diamond.address, signer_A)
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
-        kycFacet = await ethers.getContractAt('KYC', diamond.address, signer_B)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
-            'SSIManagement',
+            'SsiManagement',
             diamond.address,
             signer_A
         )
@@ -370,25 +373,36 @@ describe('Snapshots Layer 2 Tests', () => {
         await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
 
         await ssiManagementFacet.addIssuer(account_A)
-        await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_A)
-        await kycFacet.grantKYC(account_B, '', 0, 9999999999, account_A)
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_STRING,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+        await kycFacet.grantKyc(
+            account_B,
+            EMPTY_STRING,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
 
         snapshotFacet = snapshotFacet.connect(signer_A)
         erc1410Facet = erc1410Facet.connect(signer_A)
         equityFacet = equityFacet.connect(signer_A)
-
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_C,
-            balanceOf_C_Original,
-            '0x'
-        )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_B,
-            balanceOf_B_Original,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_C,
+            value: balanceOf_C_Original,
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original,
+            data: '0x',
+        })
 
         // schedule tasks
         const dividendsRecordDateInSeconds_1 = dateToUnixTimestamp(
@@ -579,10 +593,10 @@ describe('Snapshots Layer 2 Tests', () => {
         expect(decimals_At_Snapshot_3).to.be.equal(DECIMALS + decimalFactor_2)
         expect(decimals_At_Snapshot_4).to.be.equal(DECIMALS + decimalFactor_3)
 
-        const ABAF_At_Snapshot_1 = await snapshotFacet.ABAFAtSnapshot(1)
-        const ABAF_At_Snapshot_2 = await snapshotFacet.ABAFAtSnapshot(2)
-        const ABAF_At_Snapshot_3 = await snapshotFacet.ABAFAtSnapshot(3)
-        const ABAF_At_Snapshot_4 = await snapshotFacet.ABAFAtSnapshot(4)
+        const ABAF_At_Snapshot_1 = await snapshotFacet.abafAtSnapshot(1)
+        const ABAF_At_Snapshot_2 = await snapshotFacet.abafAtSnapshot(2)
+        const ABAF_At_Snapshot_3 = await snapshotFacet.abafAtSnapshot(3)
+        const ABAF_At_Snapshot_4 = await snapshotFacet.abafAtSnapshot(4)
 
         expect(ABAF_At_Snapshot_1).to.be.equal(0)
         expect(ABAF_At_Snapshot_2).to.be.equal(adjustmentFactor_1)

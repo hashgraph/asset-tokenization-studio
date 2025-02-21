@@ -205,15 +205,165 @@
 
 import { Signer } from 'ethers'
 import {
+<<<<<<<< HEAD:contracts/contracts/layer_2/ERC1400/ERC1594/ERC1594StorageWrapper_2.sol
+    ERC1594StorageWrapper
+} from '../../../layer_1/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
+    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+    _ALLOWANCE_REACHED_ERROR_ID
+} from '../../../layer_1/constants/values.sol';
+import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
+import {
+    ERC20StorageWrapper_2_Read
+} from '../ERC20/ERC20StorageWrapper_2_Read.sol';
+import {
+    ERC20StorageWrapper
+} from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+abstract contract ERC1594StorageWrapper_2 is
+    ERC1594StorageWrapper,
+    ERC20StorageWrapper_2
+{
+    function _canTransfer(
+        address _to,
+        uint256 _value,
+        bytes calldata _data // solhint-disable-line no-unused-vars
+    ) internal view virtual override returns (bool, bytes1, bytes32) {
+        if (_balanceOfAdjusted(_msgSender()) < _value) {
+            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        return super._canTransfer(_to, _value, _data);
+    }
+
+    function _canTransferFrom(
+        address _from,
+        address _to,
+        uint256 _value,
+        bytes calldata _data // solhint-disable-line no-unused-vars
+    ) internal view virtual override returns (bool, bytes1, bytes32) {
+        if (_allowanceAdjusted(_from, _msgSender()) < _value) {
+            return (false, _ALLOWANCE_REACHED_ERROR_ID, bytes32(0));
+        }
+        if (_balanceOfAdjusted(_from) < _value) {
+            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
+
+        return super._canTransferFrom(_from, _to, _value, _data);
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(ERC1410BasicStorageWrapperRead, ERC20StorageWrapper_2_Read)
+    {
+        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
+    }
+
+    function _beforeAllowanceUpdate(
+        address _owner,
+        address _spender,
+        uint256 _amount,
+        bool _isIncrease
+    ) internal virtual override(ERC20StorageWrapper, ERC20StorageWrapper_2) {
+        ERC20StorageWrapper_2._beforeAllowanceUpdate(
+            _owner,
+            _spender,
+            _amount,
+            _isIncrease
+        );
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewTotalSupply(_amount);
+    }
+
+    function _checkNewTotalSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) internal virtual override(CapStorageWrapper, ERC20StorageWrapper_2_Read) {
+        ERC20StorageWrapper_2_Read._checkNewTotalSupplyForPartition(
+            _partition,
+            _amount
+        );
+    }
+
+    function _checkMaxSupply(
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return ERC20StorageWrapper_2_Read._checkMaxSupply(_amount);
+    }
+
+    function _checkNewMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return
+            ERC20StorageWrapper_2_Read._checkNewMaxSupplyForPartition(
+                _partition,
+                _newMaxSupply
+            );
+    }
+
+    function _checkMaxSupplyForPartition(
+        bytes32 _partition,
+        uint256 _amount
+    )
+        internal
+        view
+        virtual
+        override(CapStorageWrapper, ERC20StorageWrapper_2_Read)
+        returns (bool)
+    {
+        return
+            ERC20StorageWrapper_2_Read._checkMaxSupplyForPartition(
+                _partition,
+                _amount
+            );
+========
     BusinessLogicResolver,
-    AccessControl,
+    AccessControlFacet,
     AdjustBalances,
     BondUSA,
     Cap,
     ControlList,
-    KYC,
-    SSIManagement,
-    CorporateActionsSecurity,
+    CorporateActions,
     DiamondFacet,
     EquityUSA,
     ERC1410ScheduledTasks,
@@ -221,7 +371,7 @@ import {
     ERC1643,
     ERC1644,
     ERC20,
-    Pause,
+    PauseFacet,
     ScheduledBalanceAdjustments,
     ScheduledSnapshots,
     ScheduledTasks,
@@ -230,18 +380,20 @@ import {
     Lock,
     Hold,
     ProtectedPartitions,
+    Kyc,
+    SsiManagement,
     TimeTravel,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
 export interface DeployAtsContractsResultParams {
     businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    accessControl: DeployContractWithFactoryResult<AccessControl>
+    accessControl: DeployContractWithFactoryResult<AccessControlFacet>
     cap: DeployContractWithFactoryResult<Cap>
     controlList: DeployContractWithFactoryResult<ControlList>
-    kyc: DeployContractWithFactoryResult<KYC>
-    ssiManagement: DeployContractWithFactoryResult<SSIManagement>
-    pause: DeployContractWithFactoryResult<Pause>
+    kyc: DeployContractWithFactoryResult<Kyc>
+    ssiManagement: DeployContractWithFactoryResult<SsiManagement>
+    pause: DeployContractWithFactoryResult<PauseFacet>
     erc20: DeployContractWithFactoryResult<ERC20>
     erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
     erc1594: DeployContractWithFactoryResult<ERC1594>
@@ -254,7 +406,7 @@ export interface DeployAtsContractsResultParams {
     scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
     snapshots: DeployContractWithFactoryResult<Snapshots>
-    corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActionsSecurity>
+    corporateActions: DeployContractWithFactoryResult<CorporateActions>
     transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     lock: DeployContractWithFactoryResult<Lock>
     hold: DeployContractWithFactoryResult<Hold>
@@ -266,12 +418,12 @@ export interface DeployAtsContractsResultParams {
 
 export default class DeployAtsContractsResult {
     public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    public readonly accessControl: DeployContractWithFactoryResult<AccessControl>
+    public readonly accessControl: DeployContractWithFactoryResult<AccessControlFacet>
     public readonly cap: DeployContractWithFactoryResult<Cap>
     public readonly controlList: DeployContractWithFactoryResult<ControlList>
-    public readonly kyc: DeployContractWithFactoryResult<KYC>
-    public readonly ssiManagement: DeployContractWithFactoryResult<SSIManagement>
-    public readonly pause: DeployContractWithFactoryResult<Pause>
+    public readonly kyc: DeployContractWithFactoryResult<Kyc>
+    public readonly ssiManagement: DeployContractWithFactoryResult<SsiManagement>
+    public readonly pause: DeployContractWithFactoryResult<PauseFacet>
     public readonly erc20: DeployContractWithFactoryResult<ERC20>
     public readonly erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
     public readonly erc1594: DeployContractWithFactoryResult<ERC1594>
@@ -284,7 +436,7 @@ export default class DeployAtsContractsResult {
     public readonly scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     public readonly scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
     public readonly snapshots: DeployContractWithFactoryResult<Snapshots>
-    public readonly corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActionsSecurity>
+    public readonly corporateActions: DeployContractWithFactoryResult<CorporateActions>
     public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     public readonly lock: DeployContractWithFactoryResult<Lock>
     public readonly hold: DeployContractWithFactoryResult<Hold>
@@ -313,7 +465,7 @@ export default class DeployAtsContractsResult {
         scheduledBalanceAdjustments,
         scheduledTasks,
         snapshots,
-        corporateActionsSecurity,
+        corporateActions,
         transferAndLock,
         lock,
         hold,
@@ -341,7 +493,7 @@ export default class DeployAtsContractsResult {
         this.scheduledBalanceAdjustments = scheduledBalanceAdjustments
         this.scheduledTasks = scheduledTasks
         this.snapshots = snapshots
-        this.corporateActionsSecurity = corporateActionsSecurity
+        this.corporateActions = corporateActions
         this.transferAndLock = transferAndLock
         this.lock = lock
         this.hold = hold
@@ -350,5 +502,6 @@ export default class DeployAtsContractsResult {
         this.timeTravel = timeTravel
         // Deployer
         this.deployer = deployer
+>>>>>>>> refs/heads/feat/BBND-461-layer0:contracts/scripts/results/DeployAtsContractsResult.ts
     }
 }

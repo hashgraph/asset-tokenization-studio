@@ -207,12 +207,12 @@
 pragma solidity 0.8.18;
 
 import {IBond} from '../interfaces/bond/IBond.sol';
+import {BondStorageWrapper} from './BondStorageWrapper.sol';
 import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
 import {
     _CORPORATE_ACTION_ROLE,
     _BOND_MANAGER_ROLE
 } from '../../layer_1/constants/roles.sol';
-import {BondStorageWrapper} from './BondStorageWrapper.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
@@ -251,7 +251,6 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         Coupon calldata _newCoupon
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
@@ -279,7 +278,6 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         uint256 _newMaturityDate
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_BOND_MANAGER_ROLE)
@@ -309,7 +307,6 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     )
         external
         view
-        virtual
         override
         checkIndexForCorporateActionByType(
             COUPON_CORPORATE_ACTION_TYPE,
@@ -326,7 +323,6 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     )
         external
         view
-        virtual
         override
         checkIndexForCorporateActionByType(
             COUPON_CORPORATE_ACTION_TYPE,
@@ -340,7 +336,6 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
     function getCouponCount()
         external
         view
-        virtual
         override
         returns (uint256 couponCount_)
     {

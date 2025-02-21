@@ -210,7 +210,7 @@ import {EquityUSA} from '../../../layer_3/equityUSA/EquityUSA.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
 contract EquityUSATimeTravel is EquityUSA, TimeTravelStorageWrapper {
     function _blockTimestamp()

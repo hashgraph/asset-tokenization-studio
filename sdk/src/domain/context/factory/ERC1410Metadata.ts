@@ -216,3 +216,10 @@ export class OperatorTransferData {
   public data: string;
   public operatorData: string;
 }
+
+export class IssueData {
+  public partition: string;
+  public tokenHolder: string;
+  public value: string;
+  public data: string;
+}

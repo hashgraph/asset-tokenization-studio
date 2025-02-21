@@ -210,7 +210,7 @@ import {BondUSA} from '../../../layer_3/bondUSA/BondUSA.sol';
 import {
     TimeTravelStorageWrapper
 } from '../timeTravel/TimeTravelStorageWrapper.sol';
-import {LocalContext} from '../../../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
 contract BondUSATimeTravel is BondUSA, TimeTravelStorageWrapper {
     function _blockTimestamp()

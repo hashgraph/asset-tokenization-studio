@@ -214,18 +214,15 @@ import {
     type Pause,
     type ControlList,
     type ERC1594,
-    KYC,
-    SSIManagement,
-    ERC20_2,
     BusinessLogicResolver,
     IFactory,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
     PAUSER_ROLE,
     ISSUER_ROLE,
-    KYC_ROLE,
-    SSI_MANAGER_ROLE,
     DEFAULT_PARTITION,
     MAX_UINT256,
     deployEquityFromFactory,
@@ -235,6 +232,10 @@ import {
     SecurityType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { assertObject } from '../../../../common'
 
@@ -254,18 +255,19 @@ describe('ERC20 Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc20Facet: ERC20_2
+    let erc20Facet: ERC20
     let erc20FacetBlackList: ERC20
     let pauseFacet: Pause
     let controlListFacet: ControlList
     let erc1594Facet: ERC1594
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
     const decimals = 6
     const isin = isinGenerator()
+    const EMPTY_VC_ID = EMPTY_STRING
 
     describe('Multi partition', () => {
         before(async () => {
@@ -336,7 +338,7 @@ describe('ERC20 Tests', () => {
                 businessLogicResolver: businessLogicResolver.address,
             })
 
-            erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
+            erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
             erc20FacetBlackList = await ethers.getContractAt(
                 'ERC20',
                 diamond.address,
@@ -561,7 +563,7 @@ describe('ERC20 Tests', () => {
                 businessLogicResolver: businessLogicResolver.address,
             })
 
-            erc20Facet = await ethers.getContractAt('ERC20_2', diamond.address)
+            erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
             erc20SignerC = await ethers.getContractAt(
                 'ERC20',
                 diamond.address,
@@ -582,18 +584,30 @@ describe('ERC20 Tests', () => {
                 signer_B
             )
             kycFacet = await ethers.getContractAt(
-                'KYC',
+                'Kyc',
                 diamond.address,
                 signer_B
             )
             ssiManagementFacet = await ethers.getContractAt(
-                'SSIManagement',
+                'SsiManagement',
                 diamond.address,
                 signer_A
             )
             await ssiManagementFacet.addIssuer(account_E)
-            await kycFacet.grantKYC(account_C, '', 0, 9999999999, account_E)
-            await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
+            await kycFacet.grantKyc(
+                account_C,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
+            await kycFacet.grantKyc(
+                account_E,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
             await erc1594Facet.issue(account_C, amount, '0x')
         })
 
@@ -720,20 +734,25 @@ describe('ERC20 Tests', () => {
         })
 
         describe('transfer', () => {
-            it('GIVEN a non kyc account THEN transfer fails with InvalidKYCStatus', async () => {
-                await kycFacet.revokeKYC(account_E)
+            it('GIVEN a non kyc account THEN transfer fails with InvalidKycStatus', async () => {
+                await kycFacet.revokeKyc(account_E)
                 await expect(
                     erc20SignerC.transfer(account_E, amount / 2)
-                ).to.revertedWithCustomError(erc20Facet, 'InvalidKYCStatus')
+                ).to.revertedWithCustomError(erc20Facet, 'InvalidKycStatus')
 
-                await kycFacet.grantKYC(account_E, '', 0, 9999999999, account_E)
+                await kycFacet.grantKyc(
+                    account_E,
+                    EMPTY_VC_ID,
+                    ZERO,
+                    MAX_UINT256,
+                    account_E
+                )
 
-                await kycFacet.revokeKYC(account_C)
+                await kycFacet.revokeKyc(account_C)
                 await expect(
                     erc20SignerC.transfer(account_E, amount / 2)
-                ).to.revertedWithCustomError(erc20Facet, 'InvalidKYCStatus')
+                ).to.revertedWithCustomError(erc20Facet, 'InvalidKycStatus')
             })
-
             it(
                 'GIVEN an account with balance ' +
                     'WHEN transfer to another whitelisted account ' +
@@ -774,21 +793,22 @@ describe('ERC20 Tests', () => {
             beforeEach(async () => {
                 await erc20SignerC.approve(account_E, amount)
             })
-            it('GIVEN a non kyc account THEN transferFrom fails with InvalidKYCStatus', async () => {
-                await kycFacet.revokeKYC(account_C)
+
+            it('GIVEN a non kyc account THEN transferFrom fails with InvalidKycStatus', async () => {
+                await kycFacet.revokeKyc(account_C)
                 // non kyc'd sender
                 await expect(
                     erc20Facet
                         .connect(signer_A)
                         .transferFrom(account_E, account_C, amount / 2)
-                ).to.revertedWithCustomError(erc20Facet, 'InvalidKYCStatus')
+                ).to.revertedWithCustomError(erc20Facet, 'InvalidKycStatus')
 
                 // non kyc'd receiver
                 await expect(
                     erc20Facet
                         .connect(signer_A)
                         .transferFrom(account_C, account_E, amount / 2)
-                ).to.revertedWithCustomError(erc20Facet, 'InvalidKYCStatus')
+                ).to.revertedWithCustomError(erc20Facet, 'InvalidKycStatus')
             })
 
             it(

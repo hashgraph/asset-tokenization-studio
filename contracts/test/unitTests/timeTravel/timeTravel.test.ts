@@ -222,7 +222,7 @@ import {
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
 } from '@scripts'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
+import { dateToUnixTimestamp } from '../../dateFormatter'
 
 describe('Time Travel Tests', () => {
     let factory: IFactory,

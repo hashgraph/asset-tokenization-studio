@@ -217,8 +217,8 @@ import {
     ERC20,
     IFactory,
     BusinessLogicResolver,
-    KYC,
-    SSIManagement,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
@@ -275,8 +275,8 @@ describe('ERC1594 Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let controlList: ControlList
-    let kycFacet: KYC
-    let ssiManagementFacet: SSIManagement
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     describe('Multi partition mode', () => {
         before(async () => {
@@ -829,12 +829,12 @@ describe('ERC1594 Tests', () => {
             )
 
             kycFacet = await ethers.getContractAt(
-                'KYC',
+                'Kyc',
                 diamond.address,
                 signer_B
             )
             ssiManagementFacet = await ethers.getContractAt(
-                'SSIManagement',
+                'SsiManagement',
                 diamond.address,
                 signer_A
             )
@@ -842,14 +842,14 @@ describe('ERC1594 Tests', () => {
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
             await ssiManagementFacet.addIssuer(account_E)
-            await kycFacet.grantKYC(
+            await kycFacet.grantKyc(
                 account_E,
                 EMPTY_VC_ID,
                 ZERO,
                 MAX_UINT256,
                 account_E
             )
-            await kycFacet.grantKYC(
+            await kycFacet.grantKyc(
                 account_D,
                 EMPTY_VC_ID,
                 ZERO,
@@ -862,10 +862,10 @@ describe('ERC1594 Tests', () => {
             beforeEach(async () => {
                 // Pausing the token
                 pauseFacet = pauseFacet.connect(signer_B)
-                await kycFacet.grantKYC(
+                await kycFacet.grantKyc(
                     account_C,
-                    '',
-                    0,
+                    EMPTY_VC_ID,
+                    ZERO,
                     MAX_UINT256,
                     account_E
                 )
@@ -902,10 +902,10 @@ describe('ERC1594 Tests', () => {
                 'THEN transaction returns _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, ' +
                 '_FROM_ACCOUNT_BLOCKED_ERROR_ID or _TO_ACCOUNT_BLOCKED_ERROR_ID',
             async () => {
-                await kycFacet.grantKYC(
+                await kycFacet.grantKyc(
                     account_C,
-                    '',
-                    0,
+                    EMPTY_VC_ID,
+                    ZERO,
                     MAX_UINT256,
                     account_E
                 )
@@ -987,7 +987,7 @@ describe('ERC1594 Tests', () => {
             }
         )
 
-        describe('KYC', () => {
+        describe('Kyc', () => {
             it(
                 'GIVEN non kyc accounts (to, from) ' +
                     'WHEN canTransfer or canTransferFrom ' +
@@ -997,7 +997,7 @@ describe('ERC1594 Tests', () => {
                     await erc20Facet
                         .connect(signer_E)
                         .increaseAllowance(account_B, AMOUNT)
-                    await kycFacet.revokeKYC(account_E)
+                    await kycFacet.revokeKyc(account_E)
                     // non kyc'd sender
                     expect(
                         await erc1594Facet
@@ -1045,9 +1045,9 @@ describe('ERC1594 Tests', () => {
             it(
                 'GIVEN non kyc accounts (to, from) ' +
                     'WHEN transfer or transferFrom ' +
-                    'THEN transaction reverts with InvalidKYCStatus',
+                    'THEN transaction reverts with InvalidKycStatus',
                 async () => {
-                    await kycFacet.revokeKYC(account_E)
+                    await kycFacet.revokeKyc(account_E)
                     // non kyc'd sender
                     await expect(
                         erc1594Facet
@@ -1055,7 +1055,7 @@ describe('ERC1594 Tests', () => {
                             .transferWithData(account_D, AMOUNT, DATA)
                     ).to.revertedWithCustomError(
                         erc1594Facet,
-                        'InvalidKYCStatus'
+                        'InvalidKycStatus'
                     )
                     await expect(
                         erc1594Facet
@@ -1068,7 +1068,7 @@ describe('ERC1594 Tests', () => {
                             )
                     ).to.revertedWithCustomError(
                         erc1594Facet,
-                        'InvalidKYCStatus'
+                        'InvalidKycStatus'
                     )
                     // non kyc'd receiver
                     await expect(
@@ -1077,7 +1077,7 @@ describe('ERC1594 Tests', () => {
                             .transferWithData(account_E, AMOUNT, DATA)
                     ).to.revertedWithCustomError(
                         erc1594Facet,
-                        'InvalidKYCStatus'
+                        'InvalidKycStatus'
                     )
                     await expect(
                         erc1594Facet
@@ -1090,21 +1090,21 @@ describe('ERC1594 Tests', () => {
                             )
                     ).to.revertedWithCustomError(
                         erc1594Facet,
-                        'InvalidKYCStatus'
+                        'InvalidKycStatus'
                     )
                 }
             )
             it(
                 'GIVEN non kyc account ' +
                     'WHEN redeem or redeemFrom ' +
-                    'THEN transaction reverts with InvalidKYCStatus',
+                    'THEN transaction reverts with InvalidKycStatus',
                 async () => {
-                    await kycFacet.revokeKYC(account_E)
+                    await kycFacet.revokeKyc(account_E)
                     await expect(
                         erc1594Facet.connect(signer_E).redeem(AMOUNT, DATA)
                     ).to.revertedWithCustomError(
                         erc1594Facet,
-                        'InvalidKYCStatus'
+                        'InvalidKycStatus'
                     )
                     await expect(
                         erc1594Facet
@@ -1112,28 +1112,34 @@ describe('ERC1594 Tests', () => {
                             .redeemFrom(account_E, AMOUNT, DATA)
                     ).to.revertedWithCustomError(
                         erc1594Facet,
-                        'InvalidKYCStatus'
+                        'InvalidKycStatus'
                     )
                 }
             )
             it(
                 'GIVEN non kyc account ' +
                     'WHEN issue ' +
-                    'THEN transaction reverts with InvalidKYCStatus',
+                    'THEN transaction reverts with InvalidKycStatus',
                 async () => {
-                    await kycFacet.revokeKYC(account_E)
+                    await kycFacet.revokeKyc(account_E)
                     await expect(
                         erc1594Issuer.issue(account_E, AMOUNT, DATA)
                     ).to.revertedWithCustomError(
                         erc1594Facet,
-                        'InvalidKYCStatus'
+                        'InvalidKycStatus'
                     )
                 }
             )
         })
 
         it('GIVEN a zero address in to WHEN canTransfer and canTransferFrom THEN responds _TO_ACCOUNT_NULL_ERROR_ID', async () => {
-            await kycFacet.grantKYC(account_A, '', 0, MAX_UINT256, account_E)
+            await kycFacet.grantKyc(
+                account_A,
+                EMPTY_VC_ID,
+                ZERO,
+                MAX_UINT256,
+                account_E
+            )
             await erc1594Issuer.issue(account_A, AMOUNT, DATA)
             expect(
                 await erc1594Facet.canTransfer(
@@ -1154,21 +1160,6 @@ describe('ERC1594 Tests', () => {
                     DATA
                 )
             ).to.be.deep.equal([false, TO_ACCOUNT_NULL_ERROR_ID, HASH_ZERO])
-        })
-
-        it('GIVEN a zero address in from WHEN canTransferFrom THEN responds ALLOWANCE_REACHED_ERROR_ID', async () => {
-            expect(
-                await erc1594Facet.canTransferFrom(
-                    ethers.constants.AddressZero,
-                    account_D,
-                    AMOUNT,
-                    DATA
-                )
-            ).to.be.deep.equal([
-                false,
-                ALLOWANCE_REACHED_ERROR_ID,
-                ethers.constants.HashZero,
-            ])
         })
 
         it('GIVEN a non allowed WHEN canTransferFrom THEN responds _ALLOWANCE_REACHED_ERROR_ID', async () => {

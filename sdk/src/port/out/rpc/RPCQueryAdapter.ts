@@ -242,9 +242,9 @@ import {
   Security__factory,
   DiamondFacet__factory,
   ProtectedPartitions__factory,
-  Hold_2__factory,
-  SSIManagement__factory,
-  KYC__factory,
+  Hold__factory,
+  SsiManagement__factory,
+  Kyc__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -1180,7 +1180,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Held Amount For ${targetId}`);
 
     const heldAmountFor = await this.connect(
-      Hold_2__factory,
+      Hold__factory,
       address.toString(),
     ).getHeldAmountFor(targetId.toString());
 
@@ -1197,7 +1197,7 @@ export class RPCQueryAdapter {
     );
 
     const heldAmountForByPartition = await this.connect(
-      Hold_2__factory,
+      Hold__factory,
       address.toString(),
     ).getHeldAmountForByPartition(partitionId, targetId.toString());
 
@@ -1214,7 +1214,7 @@ export class RPCQueryAdapter {
     );
 
     const holdCountForByPartition = await this.connect(
-      Hold_2__factory,
+      Hold__factory,
       address.toString(),
     ).getHoldCountForByPartition(partitionId, targetId.toString());
 
@@ -1233,7 +1233,7 @@ export class RPCQueryAdapter {
     );
 
     const holdsIdForByPartition = await this.connect(
-      Hold_2__factory,
+      Hold__factory,
       address.toString(),
     ).getHoldsIdForByPartition(partitionId, target.toString(), start, end);
 
@@ -1251,7 +1251,7 @@ export class RPCQueryAdapter {
     );
 
     const hold = await this.connect(
-      Hold_2__factory,
+      Hold__factory,
       address.toString(),
     ).getHoldForByPartition({
       partition: partitionId,
@@ -1276,7 +1276,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      SSIManagement__factory,
+      SsiManagement__factory,
       address.toString(),
     ).getRevocationRegistryAddress();
   }
@@ -1285,7 +1285,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting Issuer List Count of ${address.toString()}`);
 
     const count = await this.connect(
-      SSIManagement__factory,
+      SsiManagement__factory,
       address.toString(),
     ).getIssuerListCount();
 
@@ -1302,7 +1302,7 @@ export class RPCQueryAdapter {
     );
 
     return await this.connect(
-      SSIManagement__factory,
+      SsiManagement__factory,
       address.toString(),
     ).getIssuerListMembers(start, end);
   }
@@ -1311,7 +1311,7 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting if ${issuer.toString()} is an Issuer`);
 
     return await this.connect(
-      SSIManagement__factory,
+      SsiManagement__factory,
       address.toString(),
     ).isIssuer(issuer.toString());
   }
@@ -1320,14 +1320,14 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting KYC details for ${targetId}}`);
 
     const kycData = await this.connect(
-      KYC__factory,
+      Kyc__factory,
       address.toString(),
-    ).getKYCFor(targetId.toString());
+    ).getKycFor(targetId.toString());
 
     return new KYC(
       kycData.validFrom.toString(),
       kycData.validTo.toString(),
-      kycData.VCid,
+      kycData.vcId,
       kycData.issuer,
       kycData.status,
     );
@@ -1340,9 +1340,9 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting KYC status for ${targetId}}`);
 
     const kycData = await this.connect(
-      KYC__factory,
+      Kyc__factory,
       address.toString(),
-    ).getKYCStatusFor(targetId.toString());
+    ).getKycStatusFor(targetId.toString());
 
     return kycData;
   }
@@ -1356,9 +1356,9 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting accounts with KYC status ${kycStatus}`);
 
     const kycAccounts = await this.connect(
-      KYC__factory,
+      Kyc__factory,
       address.toString(),
-    ).getKYCAccounts(kycStatus, start, end);
+    ).getKycAccounts(kycStatus, start, end);
 
     return kycAccounts;
   }
@@ -1372,16 +1372,16 @@ export class RPCQueryAdapter {
     LogService.logTrace(`Getting accounts data with KYC status ${kycStatus}`);
 
     const kycAccountsData = await this.connect(
-      KYC__factory,
+      Kyc__factory,
       address.toString(),
-    ).getKYCAccountsData(kycStatus, start, end);
+    ).getKycAccountsData(kycStatus, start, end);
 
     return kycAccountsData.map(
       (data) =>
         new KYC(
           data.validFrom.toString(),
           data.validTo.toString(),
-          data.VCid,
+          data.vcId,
           data.issuer,
           data.status,
         ),
@@ -1396,9 +1396,9 @@ export class RPCQueryAdapter {
       `Getting count of accounts with KYC status ${kycStatus}}`,
     );
     const kycAccountsCount = await this.connect(
-      KYC__factory,
+      Kyc__factory,
       address.toString(),
-    ).getKYCAccountsCount(kycStatus);
+    ).getKycAccountsCount(kycStatus);
 
     return kycAccountsCount.toNumber();
   }

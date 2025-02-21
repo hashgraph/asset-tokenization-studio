@@ -205,43 +205,168 @@
 
 pragma solidity 0.8.18;
 
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {Common} from '../../layer_1/common/Common.sol';
 import {
     checkNounceAndDeadline,
     verify
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
 import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
-import {
-    LockStorageWrapper_2
-} from '../../layer_2/lock/LockStorageWrapper_2.sol';
-import {
-    LockStorageWrapper_2_Read
-} from '../../layer_2/lock/LockStorageWrapper_2_Read.sol';
-import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {
     getMessageHashTransferAndLockByPartition,
     getMessageHashTransferAndLock
 } from './signatureVerification.sol';
 import {
+<<<<<<<< HEAD:contracts/contracts/layer_2/ERC1400/ERC20/ERC20StorageWrapper_2_Read.sol
+    ERC20StorageWrapper
+} from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {IERC20} from '../../../layer_1/interfaces/ERC1400/IERC20.sol';
+import {AdjustBalanceLib} from '../../adjustBalances/AdjustBalanceLib.sol';
+import {
+    AdjustBalances_CD_Lib
+} from '../../adjustBalances/AdjustBalances_CD_Lib.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+// TODO: Remove those errors of solhint
+// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
+abstract contract ERC20StorageWrapper_2_Read is
+    ERC20StorageWrapper,
+    ERC1410ScheduledTasksStorageWrapper
+{
+    function _decimalsAdjusted() internal view virtual returns (uint8) {
+        return _decimalsAdjustedAt(_blockTimestamp());
+    }
+
+    function _decimalsAdjustedAt(
+        uint256 _timestamp
+    ) internal view virtual returns (uint8) {
+        return _getERC20MetadataAdjustedAt(_timestamp).info.decimals;
+    }
+
+    function _allowanceAdjusted(
+        address _owner,
+        address _spender
+    ) internal view virtual returns (uint256) {
+        return _allowanceAdjustedAt(_owner, _spender, _blockTimestamp());
+    }
+
+    function _allowanceAdjustedAt(
+        address _owner,
+        address _spender,
+        uint256 _timestamp
+    ) internal view virtual returns (uint256) {
+        uint256 factor = AdjustBalanceLib.calculateFactor(
+            AdjustBalances_CD_Lib.getABAFAdjustedAt(_timestamp),
+            AdjustBalances_CD_Lib.getAllowanceLABAF(_owner, _spender)
+        );
+        return _allowance(_owner, _spender) * factor;
+    }
+
+    function _getERC20MetadataAdjusted()
+        internal
+        view
+        virtual
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+    {
+        erc20Metadata_ = _getERC20MetadataAdjustedAt(_blockTimestamp());
+    }
+
+    function _getERC20MetadataAdjustedAt(
+        uint256 _timestamp
+    )
+        internal
+        view
+        virtual
+        returns (IERC20.ERC20Metadata memory erc20Metadata_)
+    {
+        (, uint8 pendingDecimals) = AdjustBalanceLib
+            .getPendingScheduledBalanceAdjustmentsAt(
+                _scheduledBalanceAdjustmentStorage(),
+                _corporateActionsStorage(),
+                _timestamp
+            );
+        erc20Metadata_ = super._getERC20Metadata();
+        erc20Metadata_.info.decimals += pendingDecimals;
+    }
+
+    function _beforeTokenTransfer(
+        bytes32 partition,
+        address from,
+        address to,
+        uint256 amount
+    )
+        internal
+        virtual
+        override(
+            ERC1410BasicStorageWrapper,
+            ERC1410ScheduledTasksStorageWrapper
+        )
+    {
+        ERC1410ScheduledTasksStorageWrapper._beforeTokenTransfer(
+            partition,
+            from,
+            to,
+            amount
+        );
+    }
+
+    function _addPartitionTo(
+        uint256 _value,
+        address _account,
+        bytes32 _partition
+    )
+        internal
+        virtual
+        override(
+            ERC1410BasicStorageWrapperRead,
+            ERC1410ScheduledTasksStorageWrapper
+        )
+    {
+        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
+            _value,
+            _account,
+            _partition
+        );
+    }
+
+    function _checkNewMaxSupply(
+        uint256 _newMaxSupply
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewMaxSupply(_newMaxSupply);
+    }
+
+    function _checkNewTotalSupply(
+        uint256 _amount
+    )
+        internal
+        virtual
+        override(CapStorageWrapper, ERC1410ScheduledTasksStorageWrapper)
+    {
+        ERC1410ScheduledTasksStorageWrapper._checkNewTotalSupply(_amount);
+    }
+
+    function _checkNewTotalSupplyForPartition(
+========
     IERC1410Basic
 } from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract TransferAndLockStorageWrapper is
-    ITransferAndLock,
-    ERC1410ScheduledTasksStorageWrapper,
-    LockStorageWrapper_2
-{
+abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
     function _protectedTransferAndLockByPartition(
+>>>>>>>> refs/heads/feat/BBND-461-layer0:contracts/contracts/layer_3/transferAndLock/TransferAndLockStorageWrapper.sol
         bytes32 _partition,
         TransferAndLockStruct calldata _transferAndLock,
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal virtual returns (bool success_, uint256 lockId_) {
+    ) internal returns (bool success_, uint256 lockId_) {
         checkNounceAndDeadline(
             _nounce,
             _transferAndLock.from,
@@ -293,7 +418,7 @@ abstract contract TransferAndLockStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal virtual returns (bool success_, uint256 lockId_) {
+    ) internal returns (bool success_, uint256 lockId_) {
         checkNounceAndDeadline(
             _nounce,
             _transferAndLock.from,
@@ -345,7 +470,7 @@ abstract contract TransferAndLockStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual {
+    ) internal view {
         if (
             !_isTransferAndLockByPartitionSignatureValid(
                 _partition,
@@ -363,7 +488,7 @@ abstract contract TransferAndLockStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         bytes32 functionHash = getMessageHashTransferAndLockByPartition(
             _partition,
             _transferAndLock.from,
@@ -391,7 +516,7 @@ abstract contract TransferAndLockStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual {
+    ) internal view {
         if (
             !_isTransferAndLockSignatureValid(
                 _transferAndLock,
@@ -407,7 +532,7 @@ abstract contract TransferAndLockStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         bytes32 functionHash = getMessageHashTransferAndLock(
             _transferAndLock.from,
             _transferAndLock.to,
@@ -428,20 +553,5 @@ abstract contract TransferAndLockStorageWrapper is
                 address(this)
             );
     }
-
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(ERC1410ScheduledTasksStorageWrapper, LockStorageWrapper_2_Read)
-    {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
-        );
-    }
 }
+// solhint-enable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase

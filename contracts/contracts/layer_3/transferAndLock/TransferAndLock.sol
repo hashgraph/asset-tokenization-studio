@@ -211,7 +211,7 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_LOCKER_ROLE} from '../../layer_1/constants/roles.sol';
-import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {_TRANSFER_AND_LOCK_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {
     TransferAndLockStorageWrapper
@@ -232,7 +232,6 @@ contract TransferAndLock is
         uint256 _expirationTimestamp
     )
         external
-        virtual
         override
         onlyRole(_LOCKER_ROLE)
         onlyUnpaused
@@ -273,7 +272,6 @@ contract TransferAndLock is
         uint256 _expirationTimestamp
     )
         external
-        virtual
         override
         onlyRole(_LOCKER_ROLE)
         onlyUnpaused
@@ -315,7 +313,6 @@ contract TransferAndLock is
         bytes calldata _signature
     )
         external
-        virtual
         override
         onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
         onlyRole(_protectedPartitionsRole(_partition))
@@ -343,7 +340,6 @@ contract TransferAndLock is
         bytes calldata _signature
     )
         external
-        virtual
         override
         onlyRoleFor(_LOCKER_ROLE, _transferAndLockData.from)
         onlyRole(_protectedPartitionsRole(_DEFAULT_PARTITION))
@@ -363,19 +359,9 @@ contract TransferAndLock is
         );
     }
 
-    function _beforeTokenTransfer(
-        bytes32 partition,
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual override {
-        super._beforeTokenTransfer(partition, from, to, amount);
-    }
-
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -385,7 +371,6 @@ contract TransferAndLock is
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -402,7 +387,6 @@ contract TransferAndLock is
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {
