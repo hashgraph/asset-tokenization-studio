@@ -235,6 +235,9 @@ bytes32 constant _RESOLVER_PROXY_STORAGE_POSITION = 0x4833864335c8f29dd85e3f7a36
 // keccak256('security.token.standard.protectedpartitions.storage');
 bytes32 constant _PROTECTED_PARTITIONS_STORAGE_POSITION = 0x564ecdb30bda57ccdf5f0ccce9a283978b97919c80a3230163042042418b1546;
 
+// keccak256('security.token.standard.hold.storage');
+bytes32 constant _HOLD_STORAGE_POSITION = 0x80346b80475a6f26abb9f460d81c6dbe6a8dd5d1acfb0827cfe37c4263a562ca;
+
 // ERC1410BasicStorageWrapperRead.Partition.amount.slot
 uint256 constant _PARTITION_AMOUNT_OFFSET = 0;
 

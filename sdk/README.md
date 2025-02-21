@@ -600,6 +600,89 @@ Add revocation registry address.
   - `payload`: `true` (success) or `false` (failed).
   - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
 
+### Hold
+
+#### Create Hold by Partition
+Creates a new hold for a specific partition by the token holder.
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `escrow`: Address of the escrow account.
+  - `amount`: Amount to be held.
+  - `targetId`: Identifier of the target account.
+  - `expirationDate`: Date when the hold expires.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Controller Create Hold by Partition
+Similar to "Create Hold From by Partition", but can only be executed by accounts with the "Controller Role". Control list restrictions do not apply.
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `escrow`: Address of the escrow account.
+  - `amount`: Amount to be held.
+  - `sourceId`: Identifier of the source account.
+  - `targetId`: Identifier of the target account.
+  - `expirationDate`: Date when the hold expires.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Create Hold From by Partition
+Similar to "Create Hold by Partition", but can only be executed by an authorized ERC20 account on behalf of the token holder.
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `escrow`: Address of the escrow account.
+  - `amount`: Amount to be held.
+  - `sourceId`: Identifier of the source account.
+  - `targetId`: Identifier of the target account.
+  - `expirationDate`: Date when the hold expires.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Protected Create Hold by Partition
+Similar to "Create Hold by Partition", but can only be executed when partitions are protected. Only one of these two methods can be used depending on the partition protection status. Additional fields are required.
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `escrow`: Address of the escrow account.
+  - `amount`: Amount to be held.
+  - `sourceId`: Identifier of the source account.
+  - `targetId`: Identifier of the target account.
+  - `expirationDate`: Date when the hold expires.
+  - `deadline`: Deadline for the hold execution.
+  - `nonce`: Unique identifier for the request.
+  - `signature`: Digital signature verifying the request.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Reclaim Hold by Partition
+Can be executed by anyone, but only after the expiration date. Transfers all remaining hold assets back to the original account.
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `holdId`: Identifier of the hold.
+  - `targetId`: Identifier of the target account.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Release Hold by Partition
+Can only be executed by the escrow account. Transfers all or part of the held assets back to the original account.
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `holdId`: Identifier of the hold.
+  - `targetId`: Identifier of the target account.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+
 ## Role
 
 ### applyRoles

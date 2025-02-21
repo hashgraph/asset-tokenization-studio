@@ -202,232 +202,351 @@
    limitations under the License.
 
 */
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import dotenv from 'dotenv'
+pragma solidity 0.8.18;
 
-// Load the `.env` file
-dotenv.config()
+import {ERC20StorageWrapper} from '../ERC1400/ERC20/ERC20StorageWrapper.sol';
+import {
+    SnapshotsStorageWrapper
+} from '../snapshots/SnapshotsStorageWrapper.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
+import {
+    checkNounceAndDeadline,
+    verify
+} from '../../layer_1/protectedPartitions/signatureVerification.sol';
 
-const EMPTY_STRING = ''
-export const NETWORKS = [
-    'hardhat',
-    'local',
-    'previewnet',
-    'testnet',
-    'mainnet',
-] as const
-export type Network = (typeof NETWORKS)[number]
+abstract contract HoldStorageWrapper is
+    SnapshotsStorageWrapper,
+    ERC20StorageWrapper
+{
+    using EnumerableSet for EnumerableSet.UintSet;
 
-export const DEPLOY_TYPES = ['proxy', 'direct'] as const
-export type DeployType = (typeof DEPLOY_TYPES)[number]
+    function _createHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        IHold.Hold memory _hold,
+        bytes memory _operatorData
+    ) internal virtual returns (bool success_, uint256 holdId_) {
+        _beforeHold(_partition, _from, _hold);
+        _reduceBalanceByPartition(_from, _hold.amount, _partition);
 
-export const CONTRACT_NAMES = [
-    'TransparentUpgradeableProxy',
-    'ProxyAdmin',
-    'Factory',
-    'BusinessLogicResolver',
-    'AccessControlFacet',
-    'Cap',
-    'ControlList',
-    'PauseFacet',
-    'ERC20',
-    'ERC1410ScheduledTasks',
-    'ERC1594',
-    'ERC1643',
-    'ERC1644',
-    'DiamondFacet',
-    'EquityUSA',
-    'BondUSA',
-    'ScheduledSnapshots',
-    'ScheduledBalanceAdjustments',
-    'ScheduledTasks',
-    'Snapshots',
-    'CorporateActions',
-    'TransferAndLock',
-    'Lock',
-    'Hold',
-    'AdjustBalances',
-    'ProtectedPartitions',
-    'Hold',
-    'TimeTravel',
-    'Kyc',
-    'SsiManagement',
-] as const
-export type ContractName = (typeof CONTRACT_NAMES)[number]
-export const CONTRACT_NAMES_WITH_PROXY = ['Factory', 'BusinessLogicResolver']
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
 
-export const CONTRACT_FACTORY_NAMES = CONTRACT_NAMES.map(
-    (name) => `${name}__factory`
-)
-export type ContractFactoryName = (typeof CONTRACT_FACTORY_NAMES)[number]
+        holdId_ = ++holdStorage.holdNextId[_from][_partition];
 
-export interface Endpoints {
-    jsonRpc: string
-    mirror: string
-}
+        IHold.HoldData memory hold = IHold.HoldData(
+            holdId_,
+            _hold,
+            _operatorData
+        );
 
-export interface DeployedContract {
-    address: string
-    proxyAddress?: string
-    proxyAdminAddress?: string
-}
+        holdStorage.holds[_from][_partition].push(hold);
+        holdStorage.holdIds[_from][_partition].add(holdId_);
+        holdStorage.holdsIndex[_from][_partition][holdId_] = holdStorage
+        .holds[_from][_partition].length;
+        holdStorage.heldAmountByPartition[_from][_partition] += _hold.amount;
+        holdStorage.totalHeldAmount[_from] += _hold.amount;
 
-export interface ContractConfig {
-    name: ContractName
-    factoryName: ContractFactoryName
-    deployType: DeployType
-    addresses?: Record<Network, DeployedContract>
-}
-
-export default class Configuration {
-    // private _privateKeys: Record<Network, string[]>;
-    // private _endpoints: Record<Network, Endpoints>;
-    // private _contracts: Record<ContractName, ContractConfig>;
-
-    public static get privateKeys(): Record<Network, string[]> {
-        return NETWORKS.reduce((result, network) => {
-            result[network] = Configuration._getEnvironmentVariableList({
-                name: `${network.toUpperCase()}_PRIVATE_KEY_#`,
-            })
-            return result
-        }, {} as Record<Network, string[]>)
+        success_ = true;
     }
 
-    public static get endpoints(): Record<Network, Endpoints> {
-        return NETWORKS.reduce((result, network) => {
-            result[network] = {
-                jsonRpc: Configuration._getEnvironmentVariable({
-                    name: `${network.toUpperCase()}_JSON_RPC_ENDPOINT`,
-                    defaultValue:
-                        network === 'local'
-                            ? 'http://localhost:7546'
-                            : `https://${network}.hash.io/api`,
-                }),
-                mirror: Configuration._getEnvironmentVariable({
-                    name: `${network.toUpperCase()}_MIRROR_NODE_ENDPOINT`,
-                    defaultValue:
-                        network === 'local'
-                            ? 'http://localhost:5551'
-                            : `https://${network}.mirrornode.hedera.com`,
-                }),
+    function _createHoldFromByPartition(
+        bytes32 _partition,
+        address _from,
+        IHold.Hold memory _hold,
+        bytes memory _operatorData
+    ) internal virtual returns (bool success_, uint256 holdId_) {
+        _decreaseAllowedBalance(_from, _msgSender(), _hold.amount);
+
+        return _createHoldByPartition(_partition, _from, _hold, _operatorData);
+    }
+
+    function _protectedCreateHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        IHold.ProtectedHold memory _protectedHold,
+        bytes calldata _signature
+    ) internal virtual returns (bool success_, uint256 holdId_) {
+        checkNounceAndDeadline(
+            _protectedHold.nonce,
+            _from,
+            _getNounceFor(_from),
+            _protectedHold.deadline,
+            _blockTimestamp()
+        );
+
+        _checkCreateHoldSignature(
+            _partition,
+            _from,
+            _protectedHold,
+            _signature
+        );
+
+        _setNounce(_protectedHold.nonce, _from);
+
+        return
+            _createHoldByPartition(
+                _partition,
+                _from,
+                _protectedHold.hold,
+                '0x'
+            );
+    }
+
+    function _executeHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to,
+        uint256 _amount
+    ) internal virtual returns (bool success_) {
+        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _to);
+
+        return
+            _operateHoldByPartition(
+                _partition,
+                _tokenHolder,
+                _holdId,
+                _to,
+                _amount,
+                IHold.OperationType.Execute
+            );
+    }
+
+    function _releaseHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        uint256 _amount
+    ) internal virtual returns (bool success_) {
+        _beforeReleaseHold(_partition, _tokenHolder, _holdId);
+
+        return
+            _operateHoldByPartition(
+                _partition,
+                _tokenHolder,
+                _holdId,
+                _tokenHolder,
+                _amount,
+                IHold.OperationType.Release
+            );
+    }
+
+    function _reclaimHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal virtual returns (bool success_, uint256 amount_) {
+        _beforeReclaimHold(_partition, _tokenHolder, _holdId);
+
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+        amount_ = holdData.hold.amount;
+
+        success_ = _operateHoldByPartition(
+            _partition,
+            _tokenHolder,
+            _holdId,
+            _tokenHolder,
+            amount_,
+            IHold.OperationType.Reclaim
+        );
+    }
+
+    function _operateHoldByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to,
+        uint256 _amount,
+        IHold.OperationType _operation
+    ) internal virtual returns (bool success_) {
+        IHold.HoldData memory holdData = _getHold(
+            _partition,
+            _tokenHolder,
+            _holdId
+        );
+
+        if (_operation == IHold.OperationType.Execute) {
+            if (!_checkControlList(_tokenHolder)) {
+                revert AccountIsBlocked(_tokenHolder);
             }
-            return result
-        }, {} as Record<Network, Endpoints>)
-    }
 
-    public static get contracts(): Record<ContractName, ContractConfig> {
-        const contracts: Record<ContractName, ContractConfig> = {} as Record<
-            ContractName,
-            ContractConfig
-        >
-        CONTRACT_NAMES.forEach((contractName) => {
-            contracts[contractName] = {
-                name: contractName,
-                factoryName: `${contractName}__factory`,
-                deployType: CONTRACT_NAMES_WITH_PROXY.includes(contractName)
-                    ? 'proxy'
-                    : 'direct',
-                addresses: Configuration._getDeployedAddresses({
-                    contractName,
-                }),
+            if (holdData.hold.to != address(0) && _to != holdData.hold.to) {
+                revert IHold.InvalidDestinationAddress(holdData.hold.to, _to);
             }
-        })
-        return contracts
-    }
-
-    // * Private methods
-
-    /**
-     * Retrieves the deployed contract addresses for a given contract name across different networks.
-     *
-     * @param {Object} params - The parameters object.
-     * @param {ContractName} params.contractName - The name of the contract to get deployed addresses for.
-     * @returns {Record<Network, DeployedContract>} An object mapping each network to its deployed contract details.
-     *
-     * The function iterates over all available networks and fetches the contract address, proxy address,
-     * and proxy admin address from environment variables. If the contract address is found, it adds the
-     * details to the returned object.
-     */
-    private static _getDeployedAddresses({
-        contractName,
-    }: {
-        contractName: ContractName
-    }): Record<Network, DeployedContract> {
-        const deployedAddresses: Record<Network, DeployedContract> =
-            {} as Record<Network, DeployedContract>
-
-        NETWORKS.forEach((network) => {
-            const address = Configuration._getEnvironmentVariable({
-                name: `${network.toUpperCase()}_${contractName.toUpperCase()}`,
-                defaultValue: EMPTY_STRING,
-            })
-
-            if (address !== EMPTY_STRING) {
-                const proxyAddress = Configuration._getEnvironmentVariable({
-                    name: `${network.toUpperCase()}_${contractName}_PROXY`,
-                    defaultValue: EMPTY_STRING,
-                })
-                const proxyAdminAddress = Configuration._getEnvironmentVariable(
-                    {
-                        name: `${network.toUpperCase()}_${contractName}_PROXY_ADMIN`,
-                        defaultValue: EMPTY_STRING,
-                    }
-                )
-
-                deployedAddresses[network] = {
-                    address,
-                    ...(proxyAddress !== EMPTY_STRING && { proxyAddress }),
-                    ...(proxyAdminAddress !== EMPTY_STRING && {
-                        proxyAdminAddress,
-                    }),
-                }
-            }
-        })
-
-        return deployedAddresses
-    }
-
-    private static _getEnvironmentVariableList({
-        name,
-        indexChar = '#',
-    }: {
-        name: string
-        indexChar?: string
-    }): string[] {
-        let resultList: string[] = []
-        let index = 0
-        do {
-            const env = Configuration._getEnvironmentVariable({
-                name: name.replace(indexChar, `${index}`),
-                defaultValue: EMPTY_STRING,
-            })
-            if (env !== EMPTY_STRING) {
-                resultList.push(env)
-            }
-            index++
-        } while (resultList.length === index)
-        return resultList
-    }
-
-    private static _getEnvironmentVariable({
-        name,
-        defaultValue,
-    }: {
-        name: string
-        defaultValue?: string
-    }): string {
-        const value = process.env?.[name]
-        if (value) {
-            return value
         }
-        if (defaultValue !== undefined) {
-            // console.warn(
-            //     `🟠 Environment variable ${name} is not defined, Using default value: ${defaultValue}`
-            // )
-            return defaultValue
+        if (_operation != IHold.OperationType.Reclaim) {
+            if (_isHoldExpired(holdData.hold))
+                revert IHold.HoldExpirationReached();
+            if (!_isEscrow(holdData.hold, _msgSender()))
+                revert IHold.IsNotEscrow();
+        } else if (
+            _operation == IHold.OperationType.Reclaim &&
+            !_isHoldExpired(holdData.hold)
+        ) {
+            revert IHold.HoldExpirationNotReached();
         }
-        throw new Error(
-            `Environment variable "${name}" is not defined. Please set the "${name}" environment variable.`
-        )
+
+        _checkHoldAmount(_amount, holdData);
+
+        _transferHold(_partition, _tokenHolder, _holdId, _to, _amount);
+
+        success_ = true;
+    }
+
+    function _transferHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to,
+        uint256 _amount
+    ) internal {
+        if (
+            _decreaseHeldAmount(_partition, _tokenHolder, _amount, _holdId) == 0
+        ) {
+            _removeHold(_partition, _tokenHolder, _holdId);
+        }
+
+        if (!_validPartitionForReceiver(_partition, _to)) {
+            _addPartitionTo(_amount, _to, _partition);
+        } else {
+            _increaseBalanceByPartition(_to, _amount, _partition);
+        }
+    }
+
+    function _decreaseHeldAmount(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _amount,
+        uint256 _holdId
+    ) internal returns (uint256 newHoldBalance_) {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        uint256 holdIndex = _getHoldIndex(_partition, _tokenHolder, _holdId);
+
+        holdStorage.totalHeldAmount[_tokenHolder] -= _amount;
+        holdStorage.heldAmountByPartition[_tokenHolder][_partition] -= _amount;
+        holdStorage
+        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount -= _amount;
+
+        newHoldBalance_ = holdStorage
+        .holds[_tokenHolder][_partition][holdIndex - 1].hold.amount;
+    }
+
+    function _removeHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        // Remove Hold
+        uint256 holdIndex = holdStorage.holdsIndex[_tokenHolder][_partition][
+            _holdId
+        ];
+        holdStorage.holdsIndex[_tokenHolder][_partition][_holdId] = 0;
+        holdStorage.holdIds[_tokenHolder][_partition].remove(_holdId);
+
+        uint256 holdLastIndex = _getHoldCountForByPartition(
+            _partition,
+            _tokenHolder
+        );
+        if (holdIndex < holdLastIndex) {
+            IHold.HoldData memory lastHold = _getHoldByIndex(
+                _partition,
+                _tokenHolder,
+                holdLastIndex
+            );
+            _setHoldAtIndex(_partition, _tokenHolder, holdIndex, lastHold);
+        }
+
+        holdStorage.holds[_tokenHolder][_partition].pop();
+    }
+
+    function _setHoldAtIndex(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdIndex,
+        IHold.HoldData memory _holdData
+    ) internal virtual {
+        IHold.HoldDataStorage storage holdStorage = _holdStorage();
+
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1].id = _holdData.id;
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1].hold = _holdData.hold;
+        holdStorage
+        .holds[_tokenHolder][_partition][_holdIndex - 1]
+            .operatorData = _holdData.operatorData;
+        holdStorage.holdsIndex[_tokenHolder][_partition][
+            _holdData.id
+        ] = _holdIndex;
+    }
+
+    function _beforeHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        IHold.Hold memory _hold
+    ) internal virtual {
+        _updateAccountSnapshot(_tokenHolder, _partition);
+        _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
+    }
+
+    function _beforeExecuteHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId,
+        address _to
+    ) internal virtual {
+        _updateAccountSnapshot(_to, _partition);
+        _updateAccountHeldBalancesSnapshot(_tokenHolder, _partition);
+    }
+
+    function _beforeReleaseHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal virtual {
+        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _tokenHolder);
+    }
+
+    function _beforeReclaimHold(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _holdId
+    ) internal virtual {
+        _beforeExecuteHold(_partition, _tokenHolder, _holdId, _tokenHolder);
+    }
+
+    function _checkHoldAmount(
+        uint256 _amount,
+        IHold.HoldData memory holdData
+    ) internal pure {
+        if (_amount > holdData.hold.amount) {
+            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
+        }
+    }
+
+    function _isHoldExpired(
+        IHold.Hold memory _hold
+    ) internal view returns (bool) {
+        if (_blockTimestamp() > _hold.expirationTimestamp) return true;
+        return false;
+    }
+
+    function _isEscrow(
+        IHold.Hold memory _hold,
+        address _escrow
+    ) internal pure returns (bool) {
+        if (_escrow == _hold.escrow) return true;
+        return false;
     }
 }

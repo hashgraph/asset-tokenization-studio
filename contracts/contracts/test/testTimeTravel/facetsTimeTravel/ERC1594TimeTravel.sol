@@ -225,4 +225,18 @@ contract ERC1594TimeTravel is ERC1594, TimeTravelStorageWrapper {
     {
         return TimeTravelStorageWrapper._blockTimestamp();
     }
+
+    function heldBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (uint256 balance_) {
+        bytes memory data = CD_Lib.staticCall(
+            abi.encodeWithSignature(
+                'heldBalanceOfAtSnapshot(uint256,address)',
+                _snapshotID,
+                _tokenHolder
+            )
+        );
+        return abi.decode(data, (uint256));
+    }
 }
