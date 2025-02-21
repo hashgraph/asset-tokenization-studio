@@ -325,7 +325,6 @@ import { GetRevocationRegistryAddressQueryHandler } from '../app/usecase/query/s
 import { IsIssuerQueryHandler } from '../app/usecase/query/security/ssi/isIssuer/IsIssuerQueryHandler.js';
 import { GetKYCForQueryHandler } from '../app/usecase/query/security/kyc/getKycFor/GetKYCForQueryHandler.js';
 import { GetKYCAccountsCountQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsCount/GetKYCAccountsCountQueryHandler.js';
-import { GetKYCAccountsQueryHandler } from '../app/usecase/query/security/kyc/getKycAccounts/GetKYCAccountsQueryHandler.js';
 import { GrantKYCCommandHandler } from '../app/usecase/command/security/kyc/grantKyc/GrantKYCCommandHandler.js';
 import { RevokeKYCCommandHandler } from '../app/usecase/command/security/kyc/revokeKyc/RevokeKYCCommandHandler.js';
 import { AddIssuerCommandHandler } from '../app/usecase/command/security/ssi/addIssuer/AddIssuerCommandHandler.js';
@@ -760,10 +759,6 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetKYCAccountsCountQueryHandler,
-  },
-  {
-    token: TOKENS.QUERY_HANDLER,
-    useClass: GetKYCAccountsQueryHandler,
   },
   {
     token: TOKENS.QUERY_HANDLER,

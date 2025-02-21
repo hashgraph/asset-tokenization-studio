@@ -240,6 +240,7 @@ import { VotingFor } from '../src/domain/context/equity/VotingFor';
 import DfnsSettings from '../src/domain/context/custodialWalletSettings/DfnsSettings.js';
 import { HoldDetails } from '../src/domain/context/security/HoldDetails.js';
 import { KYC } from '../src/domain/context/kyc/KYC.js';
+import { KycAccountData } from '../src/domain/context/kyc/KycAccountData.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -294,8 +295,8 @@ const lastLockIds = new Map<string, number>();
 const lastHoldIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
 const nonces = new Map<string, number>();
-let kycAccountsList: string[] = [];
 const kycAccountsData = new Map<string, KYC>();
+const kycAccountsByStatus = new Map<number, string[]>();
 
 let controlList: string[] = [];
 let issuerList: string[] = [];
@@ -1024,18 +1025,37 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
   singletonInstance.getKYCStatusFor = jest.fn(
     async (address: EvmAddress, target: EvmAddress) => {
       const account = '0x' + target.toString().toUpperCase().substring(2);
-      return kycAccountsList.includes(account) ? 1 : 0;
+
+      const kycAccounts = kycAccountsByStatus.get(1) || [];
+
+      return kycAccounts.includes(account) ? 1 : 0;
     },
   );
 
   singletonInstance.getKYCAccountsData = jest.fn(
-    async (address: EvmAddress, target: EvmAddress) => {
-      const account = '0x' + target.toString().toUpperCase().substring(2);
-      const kycDataArray: KYC[] = [];
+    async (
+      address: EvmAddress,
+      kycStatus: number,
+      start: number,
+      end: number,
+    ) => {
+      const accounts = kycAccountsByStatus.get(kycStatus) || [];
 
-      for (const [key, value] of kycAccountsData) {
-        kycDataArray.push(value);
-      }
+      const kycDataArray: KycAccountData[] = accounts
+        .map((account) => {
+          const kycData = kycAccountsData.get(account);
+          return kycData
+            ? new KycAccountData(
+                account,
+                kycData.validFrom.toString(),
+                kycData.validTo.toString(),
+                kycData.VCid,
+                kycData.issuer,
+                kycData.status,
+              )
+            : null;
+        })
+        .filter((data): data is KycAccountData => data !== null);
 
       return kycDataArray;
     },
@@ -1050,18 +1070,8 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
 
   singletonInstance.getKYCAccountsCount = jest.fn(
     async (address: EvmAddress, kycStatus: number) => {
-      return kycAccountsList.length;
-    },
-  );
-
-  singletonInstance.getKYCAccounts = jest.fn(
-    async (
-      address: EvmAddress,
-      kycStatus: number,
-      start: number,
-      end: number,
-    ) => {
-      return kycAccountsList.slice(start * end, start * end + end);
+      const kycAccounts = kycAccountsByStatus.get(1) || [];
+      return kycAccounts.length;
     },
   );
 
@@ -1877,11 +1887,13 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       issuer: EvmAddress,
     ) => {
       const account = '0x' + targetId.toString().toUpperCase().substring(2);
+      const kycStatus = 1;
 
-      const accountKycStatus = kycAccountsList.includes(account);
+      const kycAccounts = kycAccountsByStatus.get(kycStatus) || [];
 
-      if (!accountKycStatus) {
-        kycAccountsList.push(account);
+      if (!kycAccounts.includes(account)) {
+        kycAccounts.push(account);
+        kycAccountsByStatus.set(kycStatus, kycAccounts);
         kycAccountsData.set(
           account,
           new KYC(
@@ -1889,7 +1901,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
             validTo.toString(),
             VCId,
             issuer.toString(),
-            1,
+            kycStatus,
           ),
         );
       }
@@ -1904,14 +1916,29 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
   singletonInstance.revokeKYC = jest.fn(
     async (security: EvmAddress, targetId: EvmAddress) => {
       const account = '0x' + targetId.toString().toUpperCase().substring(2);
+      const kycStatus = 1;
 
-      const accountKycStatus = kycAccountsList.includes(account);
+      let kycAccounts = kycAccountsByStatus.get(kycStatus) || [];
 
-      if (accountKycStatus) {
-        kycAccountsList = kycAccountsList.filter(
-          (kycAccount) => kycAccount != account,
+      if (kycAccounts.includes(account)) {
+        kycAccounts = kycAccounts.filter(
+          (kycAccount) => kycAccount !== account,
         );
+
+        kycAccountsByStatus.set(
+          kycStatus,
+          kycAccounts.length > 0 ? kycAccounts : [],
+        );
+
         kycAccountsData.delete(account);
+
+        const revokedStatus = 0;
+        const revokedAccounts = kycAccountsByStatus.get(revokedStatus) || [];
+
+        if (!revokedAccounts.includes(account)) {
+          revokedAccounts.push(account);
+          kycAccountsByStatus.set(revokedStatus, revokedAccounts);
+        }
       }
 
       return {

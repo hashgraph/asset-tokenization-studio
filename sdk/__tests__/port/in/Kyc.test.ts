@@ -208,7 +208,6 @@ import {
   CreateEquityRequest,
   Equity,
   GetKYCAccountsCountRequest,
-  GetKYCAccountsRequest,
   GetKYCForRequest,
   GrantKYCRequest,
   GetKYCAccountsDataRequest,
@@ -248,6 +247,8 @@ import SSIManagement from '../../../src/port/in/SSIManagement';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
 import createVcT3 from '../../utils/verifiableCredentials';
 import { Terminal3VC } from '../../../src/domain/context/kyc/terminal3.js';
+import axios from 'axios';
+import { HederaId } from '../../../src/domain/context/shared/HederaId.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -404,40 +405,42 @@ describe('🧪 Kyc tests', () => {
       ).payload,
     ).toBe(true);
 
+    let vcDecoded = Terminal3VC.vcFromBase64(vcBase64);
+    const issuer = Terminal3VC.extractIssuer(vcDecoded);
+    vcDecoded = Terminal3VC.checkValidDates(vcDecoded);
+
+    // Override mock for this test to get issuer Id from EVM address
+    jest
+      .spyOn(mirrorNodeAdapter, 'getAccountInfo')
+      .mockImplementation(
+        async (accountId: HederaId | string): Promise<Account> => {
+          const res = await axios.get(mirrorNode.baseUrl + 'accounts/' + accountId);
+          const account: Account = {
+            id: HederaId.from(res.data.account),
+          };
+          return account
+        },
+      );
+
     expect(
-      await Kyc.getKYCAccounts(
-        new GetKYCAccountsRequest({
+      await Kyc.getKYCAccountsData(
+        new GetKYCAccountsDataRequest({
           securityId: equity.evmDiamondAddress!,
           kycStatus: 1,
           start: 0,
           end: 1,
         }),
       ),
-    ).toEqual([CLIENT_ACCOUNT_ECDSA_A.id!.toString()]);
-
-    let vcDecoded = Terminal3VC.vcFromBase64(vcBase64);
-    const issuer = Terminal3VC.extractIssuer(vcDecoded);
-    vcDecoded = Terminal3VC.checkValidDates(vcDecoded);
-
-    //TODO: retrieve Hedera Id from EVM address
-    // expect(
-    //   await Kyc.getKYCAccountsData(
-    //     new GetKYCAccountsDataRequest({
-    //       securityId: equity.evmDiamondAddress!,
-    //       kycStatus: 1,
-    //       start: 0,
-    //       end: 1,
-    //     }),
-    //   ),
-    // ).toEqual([
-    //   {
-    //     validFrom: vcDecoded.validFrom,
-    //     validTo: vcDecoded.validUntil,
-    //     VCid: vcDecoded.id,
-    //     issuer: issuer,
-    //     status: 1,
-    //   },
-    // ]);
+    ).toEqual([
+      {
+        account: CLIENT_ACCOUNT_ECDSA_A.id.toString(),
+        validFrom: vcDecoded.validFrom,
+        validTo: vcDecoded.validUntil,
+        VCid: vcDecoded.id,
+        issuer: CLIENT_ACCOUNT_ECDSA.id.toString(),
+        status: 1,
+      },
+    ]);
 
     expect(
       await Kyc.getKYCAccountsCount(
@@ -495,17 +498,6 @@ describe('🧪 Kyc tests', () => {
     expect(
       await Kyc.getKYCAccountsData(
         new GetKYCAccountsDataRequest({
-          securityId: equity.evmDiamondAddress!,
-          kycStatus: 1,
-          start: 0,
-          end: 1,
-        }),
-      ),
-    ).toEqual([]);
-
-    expect(
-      await Kyc.getKYCAccounts(
-        new GetKYCAccountsRequest({
           securityId: equity.evmDiamondAddress!,
           kycStatus: 1,
           start: 0,
