@@ -203,27 +203,6 @@
 
 */
 
-<<<<<<<< HEAD:contracts/scripts/commands/DeployContractCommand.ts
-import { Signer } from 'ethers'
-import { ContractName } from '@configuration'
-
-interface DeployContractCommandParams {
-    name: ContractName
-    signer: Signer
-    args?: Array<any>
-}
-
-export default class DeployContractCommand {
-    public readonly name: ContractName
-    public readonly signer: Signer
-    public readonly args: Array<any> = []
-
-    constructor({ name, signer, args = [] }: DeployContractCommandParams) {
-        this.name = name
-        this.signer = signer
-        this.args = args
-    }
-========
 import { CommandResponse } from 'core/command/CommandResponse';
 import { Command } from '../../../../../../core/command/Command';
 
@@ -248,5 +227,4 @@ export class ProtectedRedeemFromByPartitionCommand extends Command<ProtectedRede
   ) {
     super();
   }
->>>>>>>> refs/heads/feat/BBND-461-layer0:sdk/src/app/usecase/command/security/operations/redeem/ProtectedRedeemFromByPartitionCommand.ts
 }
