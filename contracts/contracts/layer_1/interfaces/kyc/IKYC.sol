@@ -304,26 +304,12 @@ interface IKYC {
     ) external view returns (uint256 KYCAccountsCount_);
 
     /**
-     * @dev Returns an array of accounts with a given KYC status
-     *
-     * @param _kycStatus GRANTED or NOT_GRANTED
-     * @param _pageIndex members to skip : _pageIndex * _pageLength
-     * @param _pageLength number of members to return
-     * @return accounts_ The array containing the accounts addresses
-     */
-
-    function getKYCAccounts(
-        KYCStatus _kycStatus,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (address[] memory accounts_);
-
-    /**
      * @dev Returns an array with the KYC data from accounts with a given KYC status
      *
      * @param _kycStatus GRANTED or NOT_GRANTED
      * @param _pageIndex members to skip : _pageIndex * _pageLength
      * @param _pageLength number of members to return
+     * @return accounts_ The array containing the accounts
      * @return kycData_ The array containing the data from the accounts
      */
 
@@ -331,5 +317,8 @@ interface IKYC {
         KYCStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view returns (KYCData[] memory kycData_);
+    )
+        external
+        view
+        returns (address[] memory accounts_, KYCData[] memory kycData_);
 }

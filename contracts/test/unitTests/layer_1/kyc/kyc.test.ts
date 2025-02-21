@@ -235,7 +235,6 @@ import {
     deployContractWithFactory,
     DeployContractWithFactoryCommand,
 } from '@scripts'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
 
 const _VALID_FROM = 0
 const _VALID_TO = 99999999999999
@@ -504,9 +503,8 @@ describe('KYC Tests', () => {
 
             let KYCStatusFor_B_After = await kycFacet.getKYCStatusFor(account_B)
             let KYC_Count_After = await kycFacet.getKYCAccountsCount(1)
-            let KYCAccounts = await kycFacet.getKYCAccounts(1, 0, 100)
             let KYCSFor_B = await kycFacet.getKYCFor(account_B)
-            let [kycAccountsData_After] = await kycFacet.getKYCAccountsData(
+            let [KYCAccounts, kycAccountsData_After] = await kycFacet.getKYCAccountsData(
                 1,
                 0,
                 1
@@ -522,7 +520,7 @@ describe('KYC Tests', () => {
             expect(KYCSFor_B.validTo).to.equal(_VALID_TO)
             expect(KYCSFor_B.issuer).to.equal(account_C)
             expect(KYCSFor_B.VCid).to.equal(_VC_ID)
-            expect(kycAccountsData_After.status).to.equal(1)
+            expect(kycAccountsData_After[0].status).to.equal(1)
         })
 
         it('GIVEN a VC WHEN revokeKYC THEN transaction succeed', async () => {
@@ -538,11 +536,12 @@ describe('KYC Tests', () => {
 
             let KYCStatusFor_B_After = await kycFacet.getKYCStatusFor(account_B)
             let KYC_Count_After = await kycFacet.getKYCAccountsCount(1)
-            let KYCAccounts = await kycFacet.getKYCAccounts(1, 0, 100)
+            let [KYCAccounts, KYCAccountsData] = await kycFacet.getKYCAccountsData(1, 0, 100)
 
             expect(KYCStatusFor_B_After).to.equal(0)
             expect(KYC_Count_After).to.equal(0)
             expect(KYCAccounts.length).to.equal(0)
+            expect(KYCAccountsData.length).to.equal(0)
         })
 
         it('Check KYC status after expiration', async () => {

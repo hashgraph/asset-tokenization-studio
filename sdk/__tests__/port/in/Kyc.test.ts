@@ -414,11 +414,13 @@ describe('🧪 Kyc tests', () => {
       .spyOn(mirrorNodeAdapter, 'getAccountInfo')
       .mockImplementation(
         async (accountId: HederaId | string): Promise<Account> => {
-          const res = await axios.get(mirrorNode.baseUrl + 'accounts/' + accountId);
+          const res = await axios.get(
+            mirrorNode.baseUrl + 'accounts/' + accountId,
+          );
           const account: Account = {
             id: HederaId.from(res.data.account),
           };
-          return account
+          return account;
         },
       );
 

@@ -282,32 +282,27 @@ abstract contract KYCStorageWrapperRead is SSIManagementStorageWrapper {
             .length();
     }
 
-    function _getKYCAccounts(
-        IKYC.KYCStatus _kycStatus,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view virtual returns (address[] memory accounts_) {
-        accounts_ = _KYCStorage().kycAddressesByStatus[_kycStatus].getFromSet(
-            _pageIndex,
-            _pageLength
-        );
-    }
-
     function _getKYCAccountsData(
         IKYC.KYCStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) internal view virtual returns (IKYC.KYCData[] memory kycData_) {
-        address[] memory accounts = _KYCStorage()
-            .kycAddressesByStatus[_kycStatus]
-            .getFromSet(_pageIndex, _pageLength);
+    )
+        internal
+        view
+        virtual
+        returns (address[] memory accounts_, IKYC.KYCData[] memory kycData_)
+    {
+        accounts_ = _KYCStorage().kycAddressesByStatus[_kycStatus].getFromSet(
+            _pageIndex,
+            _pageLength
+        );
 
-        uint256 totalAccounts = accounts.length;
+        uint256 totalAccounts = accounts_.length;
 
         kycData_ = new IKYC.KYCData[](totalAccounts);
 
         for (uint256 i = 0; i < totalAccounts; i++) {
-            kycData_[i] = _getKYCFor(accounts[i]);
+            kycData_[i] = _getKYCFor(accounts_[i]);
         }
     }
 
