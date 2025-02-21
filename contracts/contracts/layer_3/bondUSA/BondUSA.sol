@@ -233,7 +233,6 @@ contract BondUSA is IBondUSA, Bond, Security {
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -243,7 +242,6 @@ contract BondUSA is IBondUSA, Bond, Security {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -275,7 +273,6 @@ contract BondUSA is IBondUSA, Bond, Security {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

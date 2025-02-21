@@ -214,8 +214,6 @@ uint8 constant _ASCII_9 = 57;
 uint8 constant _ASCII_7 = 55;
 uint8 constant _ASCII_0 = 48;
 
-bytes32 constant _DEFAULT_PARTITION = 0x0000000000000000000000000000000000000000000000000000000000000001;
-
 bytes1 constant _IS_PAUSED_ERROR_ID = 0x40;
 bytes1 constant _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID = 0x41;
 bytes1 constant _FROM_ACCOUNT_BLOCKED_ERROR_ID = 0x42;
@@ -226,6 +224,8 @@ bytes1 constant _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID = 0x46;
 bytes1 constant _IS_NOT_OPERATOR_ERROR_ID = 0x47;
 bytes1 constant _WRONG_PARTITION_ERROR_ID = 0x48;
 bytes1 constant _ALLOWANCE_REACHED_ERROR_ID = 0x49;
+bytes1 constant _FROM_ACCOUNT_KYC_ERROR_ID = 0x50;
+bytes1 constant _TO_ACCOUNT_KYC_ERROR_ID = 0x51;
 
 bytes1 constant _SUCCESS = 0x00;
 
@@ -245,6 +245,7 @@ bytes32 constant _PROTECTED_TRANSFER_FROM_PARTITION_TYPEHASH = 0x2d745a289deb1f3
 //    'protectedRedeemFromByPartition(bytes32 _partition,address _from,uint256 _amount,uint256 _deadline,uint256 _nounce)'
 //);
 bytes32 constant _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH = 0x5075effccf2d386f2a3f230b6a45274e523d872e1b1b33a0cf97bef34dfa14e7;
+// solhint-enable max-line-length
 
 //keccak256(
 //'protectedCreateHoldByPartition(bytes32 _partition,address _from,ProtectedHold _protectedHold)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)'

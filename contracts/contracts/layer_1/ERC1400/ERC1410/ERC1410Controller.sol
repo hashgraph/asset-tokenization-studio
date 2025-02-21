@@ -206,18 +206,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {
-    ERC1410ControllerStorageWrapper
-} from './ERC1410ControllerStorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
+
 import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
 import {
     IERC1410Controller
 } from '../../interfaces/ERC1400/IERC1410Controller.sol';
+import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
 
-abstract contract ERC1410Controller is
-    IERC1410Controller,
-    ERC1410ControllerStorageWrapper
-{
+abstract contract ERC1410Controller is IERC1410Controller, Common {
     function controllerTransferByPartition(
         bytes32 _partition,
         address _from,
@@ -227,7 +224,6 @@ abstract contract ERC1410Controller is
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -236,8 +232,7 @@ abstract contract ERC1410Controller is
     {
         _transferByPartition(
             _from,
-            _to,
-            _value,
+            IERC1410Basic.BasicTransferInfo(_to, _value),
             _partition,
             _data,
             _msgSender(),
@@ -253,7 +248,6 @@ abstract contract ERC1410Controller is
         bytes calldata _operatorData
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
@@ -277,7 +271,7 @@ abstract contract ERC1410Controller is
         uint256 _value,
         bytes calldata _data,
         bytes calldata _operatorData
-    ) external view virtual override returns (bool, bytes1, bytes32) {
+    ) external view override returns (bool, bytes1, bytes32) {
         return
             _canTransferByPartition(
                 _from,

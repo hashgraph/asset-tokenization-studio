@@ -2,7 +2,6 @@ const { execSync } = require("node:child_process");
 
 const dir = __dirname;
 const webDir = `${dir}/web`;
-const uiComponentsDir = `${dir}/uiComponents`;
 const sdkDir = `${dir}/sdk`;
 const conDir = `${dir}/contracts`;
 
@@ -30,23 +29,23 @@ const yarnInstallPeer = (dir, name = "module") => {
   console.log("\tDone");
 };
 
-const npmBuild = (dir,name='module') =>{
+const npmBuild = (dir, name = "module") => {
   process.stdout.write(`Build for ${name}...`);
   execSync(`cd ${dir} && npm run build`, handleError);
   console.log("\tDone");
-}
+};
 
-const npmCompile = (dir,name='module') =>{
+const npmCompile = (dir, name = "module") => {
   process.stdout.write(`Compile for ${name}...`);
   execSync(`cd ${dir} && npm run compile:force`, handleError);
   console.log("\tDone");
-}
+};
 
-const npmRollup = (dir,name='module') =>{
+const npmRollup = (dir, name = "module") => {
   process.stdout.write(`Rollup for ${name}...`);
   execSync(`cd ${dir} && npm run rollup`, handleError);
   console.log("\tDone");
-}
+};
 
 let option = process.argv.slice(2)[0];
 
@@ -57,8 +56,6 @@ if (option) {
   npmCompile(conDir, "CONTRACTS");
   npmInstall(sdkDir, "SDK");
   npmBuild(sdkDir, "SDK");
-  // yarnInstallPeer(uiComponentsDir, "UICOMPONENTS");
-  // npmRollup(uiComponentsDir, "UICOMPONENTS");
   yarnInstall(webDir, "WEB");
 }
 

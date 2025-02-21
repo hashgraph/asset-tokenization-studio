@@ -205,13 +205,68 @@
 
 import { Signer } from 'ethers'
 import {
+<<<<<<<< HEAD:contracts/contracts/layer_2/ERC1400/ERC1594/ERC1594StorageWrapper_2.sol
+    ERC1594StorageWrapper
+} from '../../../layer_1/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
+import {
+    ERC1410ScheduledTasksStorageWrapper
+} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {
+    _IS_PAUSED_ERROR_ID,
+    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
+    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
+    _FROM_ACCOUNT_NULL_ERROR_ID,
+    _TO_ACCOUNT_BLOCKED_ERROR_ID,
+    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
+    _TO_ACCOUNT_NULL_ERROR_ID,
+    _ALLOWANCE_REACHED_ERROR_ID,
+    _SUCCESS
+} from '../../../layer_1/constants/values.sol';
+import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
+import {
+    ERC20StorageWrapper_2_Read
+} from '../ERC20/ERC20StorageWrapper_2_Read.sol';
+import {
+    ERC20StorageWrapper
+} from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
+import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
+import {
+    ERC1410BasicStorageWrapperRead
+} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
+// TODO: Remove _ in contract name
+// solhint-disable-next-line
+abstract contract ERC1594StorageWrapper_2 is
+    ERC1594StorageWrapper,
+    ERC20StorageWrapper_2
+{
+    function _canTransfer(
+        address _to,
+        uint256 _value,
+        bytes calldata _data // solhint-disable-line no-unused-vars
+    ) internal view virtual override returns (bool, bytes1, bytes32) {
+        if (_isPaused()) {
+            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
+        }
+        if (_to == address(0)) {
+            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_msgSender())) {
+            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (!_checkControlList(_to)) {
+            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
+        }
+        if (_balanceOfAdjusted(_msgSender()) < _value) {
+            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
+        }
+========
     BusinessLogicResolver,
-    AccessControl,
+    AccessControlFacet,
     AdjustBalances,
     BondUSA,
     Cap,
     ControlList,
-    CorporateActionsSecurity,
+    CorporateActions,
     DiamondFacet,
     EquityUSA,
     ERC1410ScheduledTasks,
@@ -219,7 +274,7 @@ import {
     ERC1643,
     ERC1644,
     ERC20,
-    Pause,
+    PauseFacet,
     ScheduledBalanceAdjustments,
     ScheduledSnapshots,
     ScheduledTasks,
@@ -228,16 +283,20 @@ import {
     Lock,
     Hold,
     ProtectedPartitions,
+    Kyc,
+    SsiManagement,
     TimeTravel,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
 
 export interface DeployAtsContractsResultParams {
     businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    accessControl: DeployContractWithFactoryResult<AccessControl>
+    accessControl: DeployContractWithFactoryResult<AccessControlFacet>
     cap: DeployContractWithFactoryResult<Cap>
     controlList: DeployContractWithFactoryResult<ControlList>
-    pause: DeployContractWithFactoryResult<Pause>
+    kyc: DeployContractWithFactoryResult<Kyc>
+    ssiManagement: DeployContractWithFactoryResult<SsiManagement>
+    pause: DeployContractWithFactoryResult<PauseFacet>
     erc20: DeployContractWithFactoryResult<ERC20>
     erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
     erc1594: DeployContractWithFactoryResult<ERC1594>
@@ -250,7 +309,7 @@ export interface DeployAtsContractsResultParams {
     scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
     snapshots: DeployContractWithFactoryResult<Snapshots>
-    corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActionsSecurity>
+    corporateActions: DeployContractWithFactoryResult<CorporateActions>
     transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     lock: DeployContractWithFactoryResult<Lock>
     hold: DeployContractWithFactoryResult<Hold>
@@ -259,13 +318,16 @@ export interface DeployAtsContractsResultParams {
     timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     deployer?: Signer
 }
+>>>>>>>> refs/heads/feat/BBND-461-layer0:contracts/scripts/results/DeployAtsContractsResult.ts
 
 export default class DeployAtsContractsResult {
     public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
-    public readonly accessControl: DeployContractWithFactoryResult<AccessControl>
+    public readonly accessControl: DeployContractWithFactoryResult<AccessControlFacet>
     public readonly cap: DeployContractWithFactoryResult<Cap>
     public readonly controlList: DeployContractWithFactoryResult<ControlList>
-    public readonly pause: DeployContractWithFactoryResult<Pause>
+    public readonly kyc: DeployContractWithFactoryResult<Kyc>
+    public readonly ssiManagement: DeployContractWithFactoryResult<SsiManagement>
+    public readonly pause: DeployContractWithFactoryResult<PauseFacet>
     public readonly erc20: DeployContractWithFactoryResult<ERC20>
     public readonly erc1410ScheduledTasks: DeployContractWithFactoryResult<ERC1410ScheduledTasks>
     public readonly erc1594: DeployContractWithFactoryResult<ERC1594>
@@ -278,7 +340,7 @@ export default class DeployAtsContractsResult {
     public readonly scheduledBalanceAdjustments: DeployContractWithFactoryResult<ScheduledBalanceAdjustments>
     public readonly scheduledTasks: DeployContractWithFactoryResult<ScheduledTasks>
     public readonly snapshots: DeployContractWithFactoryResult<Snapshots>
-    public readonly corporateActionsSecurity: DeployContractWithFactoryResult<CorporateActionsSecurity>
+    public readonly corporateActions: DeployContractWithFactoryResult<CorporateActions>
     public readonly transferAndLock: DeployContractWithFactoryResult<TransferAndLock>
     public readonly lock: DeployContractWithFactoryResult<Lock>
     public readonly hold: DeployContractWithFactoryResult<Hold>
@@ -292,6 +354,8 @@ export default class DeployAtsContractsResult {
         accessControl,
         cap,
         controlList,
+        kyc,
+        ssiManagement,
         pause,
         erc20,
         erc1410ScheduledTasks,
@@ -305,7 +369,7 @@ export default class DeployAtsContractsResult {
         scheduledBalanceAdjustments,
         scheduledTasks,
         snapshots,
-        corporateActionsSecurity,
+        corporateActions,
         transferAndLock,
         lock,
         hold,
@@ -318,6 +382,8 @@ export default class DeployAtsContractsResult {
         this.accessControl = accessControl
         this.cap = cap
         this.controlList = controlList
+        this.kyc = kyc
+        this.ssiManagement = ssiManagement
         this.pause = pause
         this.erc20 = erc20
         this.erc1410ScheduledTasks = erc1410ScheduledTasks
@@ -331,7 +397,7 @@ export default class DeployAtsContractsResult {
         this.scheduledBalanceAdjustments = scheduledBalanceAdjustments
         this.scheduledTasks = scheduledTasks
         this.snapshots = snapshots
-        this.corporateActionsSecurity = corporateActionsSecurity
+        this.corporateActions = corporateActions
         this.transferAndLock = transferAndLock
         this.lock = lock
         this.hold = hold

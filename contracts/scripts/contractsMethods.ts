@@ -212,6 +212,7 @@ import {
 } from '@typechain'
 import { contractCall } from './contractsLifeCycle/utils'
 import { FacetConfiguration } from './resolverDiamondCut'
+import { GAS_LIMIT } from './constants'
 
 export async function getProxyImplementation(
     proxyAdminAddress: ContractId,
@@ -287,7 +288,7 @@ export async function createConfiguration(
         'createConfiguration',
         params,
         client,
-        15000000,
+        GAS_LIMIT.businessLogicResolver.createConfiguration,
         DiamondCutManager__factory.abi
     )
 }

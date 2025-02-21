@@ -210,6 +210,7 @@ export enum ErrorCode {
   ContractKeyInvalid = '10006',
   EmptyValue = '10017',
   InvalidAmount = '10008',
+  InvalidBase64 = '10011',
   InvalidBytes = '10007',
   InvalidBytes3 = '10003',
   InvalidBytes32 = '10002',
@@ -233,6 +234,7 @@ export enum ErrorCode {
 
   // Error codes for Logic Errors (Prefix: 2XXXX)
   AccountAlreadyInControlList = '20013',
+  AccountIsAlreadyAnIssuer = '20020',
   AccountFreeze = '20008',
   AccountInBlackList = '20011',
   AccountNotAssociatedToSecurity = '20001',
@@ -249,6 +251,9 @@ export enum ErrorCode {
   RoleNotAssigned = '20003',
   SecurityPaused = '20010',
   SecurityUnPaused = '20014',
+  UnlistedIssuer = '20021',
+  InvalidVCHolder = '20022',
+  InvalidVC = '20023',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',
