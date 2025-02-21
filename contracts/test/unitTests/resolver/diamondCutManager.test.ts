@@ -249,7 +249,7 @@ describe('DiamondCutManager', () => {
 
     before(async () => {
         // mute | mock console.log
-        console.log = () => {}
+        // console.log = () => {}
         //await loadFixture(deployBusinessLogicResolverFixture)
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B] = await ethers.getSigners()
