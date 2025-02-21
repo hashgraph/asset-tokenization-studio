@@ -216,26 +216,8 @@ import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-<<<<<<<< HEAD:contracts/contracts/layer_1/hold/Hold.sol
 contract Hold is IHold, IStaticFunctionSelectors, Common {
     function createHoldByPartition(
-========
-import {LockStorageWrapper_2} from './LockStorageWrapper_2.sol';
-import {LockStorageWrapper_2_Read} from './LockStorageWrapper_2_Read.sol';
-import {LockStorageWrapper} from '../../layer_1/lock/LockStorageWrapper.sol';
-import {Lock} from '../../layer_1/lock/Lock.sol';
-import {ILock} from '../../layer_1/interfaces/lock/ILock.sol';
-import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
-import {_LOCK_RESOLVER_KEY} from '../../layer_1/constants/resolverKeys.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-
-// TODO: Remove those errors of solhint
-// solhint-disable contract-name-camelcase, var-name-mixedcase, func-name-mixedcase
-contract Lock_2 is Lock, LockStorageWrapper_2 {
-    function getLockedAmountForByPartition(
->>>>>>>> refs/remotes/origin/main:contracts/contracts/layer_2/lock/Lock_2.sol
         bytes32 _partition,
         Hold calldata _hold
     )
