@@ -236,6 +236,10 @@ import {
   SDK,
   Security,
   TransferAndLockRequest,
+  GrantKYCRequest,
+  AddIssuerRequest,
+  SSIManagement,
+  Kyc,
 } from '../../../src/index.js';
 import TransferRequest from '../../../src/port/in/request/TransferRequest.js';
 import RedeemRequest from '../../../src/port/in/request/RedeemRequest.js';
@@ -248,6 +252,7 @@ import {
   CLIENT_ACCOUNT_ECDSA_A,
   FACTORY_ADDRESS,
   RESOLVER_ADDRESS,
+  CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT,
 } from '../../config.js';
 import NetworkService from '../../../src/app/service/NetworkService.js';
 import { RPCQueryAdapter } from '../../../src/port/out/rpc/RPCQueryAdapter.js';
@@ -265,6 +270,7 @@ import {
 import Account from '../../../src/domain/context/account/Account.js';
 import { keccak256 } from 'js-sha3';
 import { _PARTITION_ID_1 } from '../../../src/core/Constants.js';
+import createVcT3 from '../../utils/verifiableCredentials.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
 
@@ -303,7 +309,6 @@ const rpcNode: JsonRpcRelay = {
 
 let th: RPCTransactionAdapter;
 let mirrorNodeAdapter: MirrorNodeAdapter;
-
 describe('🧪 Security tests', () => {
   let ns: NetworkService;
   let rpcQueryAdapter: RPCQueryAdapter;
@@ -457,7 +462,57 @@ describe('🧪 Security tests', () => {
         role: SecurityRole._PROTECTED_PARTITION_ROLE,
       }),
     );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._SSI_MANAGER_ROLE,
+      }),
+    );
+
+    await Role.grantRole(
+      new RoleRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        role: SecurityRole._KYC_ROLE,
+      }),
+    );
+
+    await SSIManagement.addIssuer(
+      new AddIssuerRequest({
+        securityId: equity.evmDiamondAddress!,
+        issuerId: CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT as string,
+      }),
+    );
+
+    await Kyc.grantKYC(
+      new GrantKYCRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        vcBase64: await createVcT3(
+          CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        ),
+      }),
+    );
+
+    await Kyc.grantKYC(
+      new GrantKYCRequest({
+        securityId: equity.evmDiamondAddress!,
+        targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        vcBase64: await createVcT3(CLIENT_ACCOUNT_ECDSA.evmAddress!.toString()),
+      }),
+    );
   }, 900_000);
+
+  afterAll(async () => {
+    await SSIManagement.removeIssuer(
+      new AddIssuerRequest({
+        securityId: equity.evmDiamondAddress!,
+        issuerId: CLIENT_EVM_ADDRESS_ECDSA_1_CORRECT as string,
+      }),
+    );
+  });
 
   it('Get security', async () => {
     const equityInfo = await Security.getInfo(

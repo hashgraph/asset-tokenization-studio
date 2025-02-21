@@ -213,9 +213,7 @@ import {Common} from '../../../layer_1/common/Common.sol';
 import {
     _SCHEDULED_BALANCE_ADJUSTMENTS_RESOLVER_KEY
 } from '../../constants/resolverKeys.sol';
-import {
-    CorporateActionsStorageWrapperSecurity
-} from '../../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+import {Common} from '../../../layer_1/common/Common.sol';
 import {
     IScheduledBalanceAdjustments
 } from '../../interfaces/scheduledTasks/scheduledBalanceAdjustments/IScheduledBalanceAdjustments.sol';
@@ -227,8 +225,7 @@ import {
 contract ScheduledBalanceAdjustments is
     IStaticFunctionSelectors,
     IScheduledBalanceAdjustments,
-    Common,
-    CorporateActionsStorageWrapperSecurity
+    Common
 {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
@@ -237,19 +234,13 @@ contract ScheduledBalanceAdjustments is
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    )
-        external
-        virtual
-        override
-        onlyAutoCalling(_scheduledBalanceAdjustmentStorage())
-    {
+    ) external override onlyAutoCalling(_scheduledBalanceAdjustmentStorage()) {
         _onScheduledBalanceAdjustmentTriggered(_data);
     } // solhint-enable no-unused-vars
 
     function scheduledBalanceAdjustmentCount()
         external
         view
-        virtual
         override
         returns (uint256)
     {
@@ -262,7 +253,6 @@ contract ScheduledBalanceAdjustments is
     )
         external
         view
-        virtual
         override
         returns (
             ScheduledTasksLib.ScheduledTask[] memory scheduledBalanceAdjustment_
@@ -277,7 +267,6 @@ contract ScheduledBalanceAdjustments is
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -287,7 +276,6 @@ contract ScheduledBalanceAdjustments is
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -307,7 +295,6 @@ contract ScheduledBalanceAdjustments is
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

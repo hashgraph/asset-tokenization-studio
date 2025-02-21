@@ -213,19 +213,21 @@ import {
     BondUSA,
     AccessControl,
     Pause,
-    Lock_2,
-    Hold_2,
+    Lock,
+    Hold,
     TimeTravel,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
     ERC1410ScheduledTasks__factory,
-    Lock_2__factory,
-    Hold_2__factory,
+    Lock__factory,
+    Hold__factory,
     Pause__factory,
     AccessControl__factory,
     BondUSATimeTravel__factory,
     TimeTravel__factory,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -233,6 +235,8 @@ import {
     BOND_MANAGER_ROLE,
     LOCKER_ROLE,
     ISSUER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     DEFAULT_PARTITION,
     Rbac,
     deployBondFromFactory,
@@ -241,9 +245,12 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     ADDRESS_ZERO,
+    MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
+import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const numberOfUnits = 1000
 let startingDate = 0
@@ -259,6 +266,7 @@ const info = 'info'
 let couponRecordDateInSeconds = 0
 let couponExecutionDateInSeconds = 0
 const couponRate = 5
+const EMPTY_VC_ID = EMPTY_STRING
 
 let couponData = {
     recordDate: couponRecordDateInSeconds.toString(),
@@ -281,10 +289,12 @@ describe('Bond Tests', () => {
     let bondFacet: BondUSA
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let lockFacet: Lock_2
-    let holdFacet: Hold_2
+    let lockFacet: Lock
+    let holdFacet: Hold
     let erc1410Facet: ERC1410ScheduledTasks
     let timeTravelFacet: TimeTravel
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     before(async () => {
         // mute | mock console.log
@@ -326,7 +336,15 @@ describe('Bond Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        const init_rbacs: Rbac[] = [rbacPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
 
         diamond = await deployBondFromFactory({
             adminAccount: account_A,
@@ -365,13 +383,28 @@ describe('Bond Tests', () => {
             signer_A
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
-        holdFacet = Hold_2__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock__factory.connect(diamond.address, signer_A)
+        holdFacet = Hold__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
         )
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
     })
 
     afterEach(async () => {
@@ -425,7 +458,7 @@ describe('Bond Tests', () => {
 
             await expect(
                 bondFacet.setCoupon(wrongcouponData_1)
-            ).to.be.rejectedWith('WrongDates')
+            ).to.be.revertedWithCustomError(bondFacet, 'WrongDates')
 
             const wrongcouponData_2 = {
                 recordDate: (
@@ -437,7 +470,7 @@ describe('Bond Tests', () => {
 
             await expect(
                 bondFacet.setCoupon(wrongcouponData_2)
-            ).to.be.rejectedWith('WrongTimestamp')
+            ).to.be.revertedWithCustomError(bondFacet, 'WrongTimestamp')
         })
 
         it('GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds', async () => {
@@ -502,13 +535,14 @@ describe('Bond Tests', () => {
             const TotalAmount = numberOfUnits
             const LockedAmount = TotalAmount - 5
 
-            await erc1410Facet.issueByPartition(
-                DEFAULT_PARTITION,
-                account_A,
-                TotalAmount,
-                '0x'
-            )
-            await lockFacet.lock(LockedAmount, account_A, 99999999999)
+            await erc1410Facet.issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
+
+            await lockFacet.lock(LockedAmount, account_A, MAX_UINT256)
 
             // set coupon
             await expect(bondFacet.setCoupon(couponData))
@@ -550,16 +584,16 @@ describe('Bond Tests', () => {
             const TotalAmount = numberOfUnits
             const HeldAmount = TotalAmount - 5
 
-            await erc1410Facet.issueByPartition(
-                DEFAULT_PARTITION,
-                account_A,
-                TotalAmount,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
 
             let hold = {
                 amount: HeldAmount,
-                expirationTimestamp: 999999999999999,
+                expirationTimestamp: MAX_UINT256,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
                 data: '0x',
@@ -648,7 +682,7 @@ describe('Bond Tests', () => {
             // Set maturity date
             await expect(
                 bondFacet.updateMaturityDate(dayBeforeCurrentMaturity)
-            ).to.be.rejectedWith('BondMaturityDateWrong')
+            ).to.be.revertedWithCustomError(bondFacet, 'BondMaturityDateWrong')
             // Ensure maturity date is not updated
             const maturityDateAfter = (await bondFacet.getBondDetails())
                 .maturityDate
