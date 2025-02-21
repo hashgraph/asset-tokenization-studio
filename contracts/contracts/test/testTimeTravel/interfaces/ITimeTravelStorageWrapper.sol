@@ -203,39 +203,6 @@
 
 */
 
-<<<<<<<< HEAD:contracts/scripts/results/DeployContractResult.ts
-import { Contract, ContractReceipt } from 'ethers'
-import { ContractName } from '@configuration'
-import DeployContractWithFactoryResult from './DeployContractWithFactoryResult'
-
-export default class DeployContractResult extends DeployContractWithFactoryResult<Contract> {
-    public readonly name: ContractName
-
-    constructor({
-        name,
-        address,
-        contract,
-        proxyAddress,
-        proxyAdminAddress,
-        receipt,
-    }: {
-        name: ContractName
-        address: string
-        contract: Contract
-        proxyAddress?: string
-        proxyAdminAddress?: string
-        receipt?: ContractReceipt
-    }) {
-        super({
-            address,
-            contract,
-            proxyAddress,
-            proxyAdminAddress,
-            receipt,
-        })
-        this.name = name
-    }
-========
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 pragma solidity ^0.8.18;
 
@@ -269,5 +236,4 @@ interface ITimeTravelStorageWrapper {
      * @notice Emitted when the system timestamp is reset
      */
     event SystemTimestampReset();
->>>>>>>> refs/heads/feat/BBND-461-layer0:contracts/contracts/test/testTimeTravel/interfaces/ITimeTravelStorageWrapper.sol
 }

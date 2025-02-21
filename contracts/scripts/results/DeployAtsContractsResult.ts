@@ -205,61 +205,6 @@
 
 import { Signer } from 'ethers'
 import {
-<<<<<<<< HEAD:contracts/contracts/layer_2/ERC1400/ERC1594/ERC1594StorageWrapper_2.sol
-    ERC1594StorageWrapper
-} from '../../../layer_1/ERC1400/ERC1594/ERC1594StorageWrapper.sol';
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
-import {
-    _IS_PAUSED_ERROR_ID,
-    _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_BLOCKED_ERROR_ID,
-    _FROM_ACCOUNT_NULL_ERROR_ID,
-    _TO_ACCOUNT_BLOCKED_ERROR_ID,
-    _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID,
-    _TO_ACCOUNT_NULL_ERROR_ID,
-    _ALLOWANCE_REACHED_ERROR_ID,
-    _SUCCESS
-} from '../../../layer_1/constants/values.sol';
-import {ERC20StorageWrapper_2} from '../ERC20/ERC20StorageWrapper_2.sol';
-import {
-    ERC20StorageWrapper_2_Read
-} from '../ERC20/ERC20StorageWrapper_2_Read.sol';
-import {
-    ERC20StorageWrapper
-} from '../../../layer_1/ERC1400/ERC20/ERC20StorageWrapper.sol';
-import {CapStorageWrapper} from '../../../layer_1/cap/CapStorageWrapper.sol';
-import {
-    ERC1410BasicStorageWrapperRead
-} from '../../../layer_1/ERC1400/ERC1410/ERC1410BasicStorageWrapperRead.sol';
-// TODO: Remove _ in contract name
-// solhint-disable-next-line
-abstract contract ERC1594StorageWrapper_2 is
-    ERC1594StorageWrapper,
-    ERC20StorageWrapper_2
-{
-    function _canTransfer(
-        address _to,
-        uint256 _value,
-        bytes calldata _data // solhint-disable-line no-unused-vars
-    ) internal view virtual override returns (bool, bytes1, bytes32) {
-        if (_isPaused()) {
-            return (false, _IS_PAUSED_ERROR_ID, bytes32(0));
-        }
-        if (_to == address(0)) {
-            return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_msgSender())) {
-            return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (!_checkControlList(_to)) {
-            return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
-        }
-        if (_balanceOfAdjusted(_msgSender()) < _value) {
-            return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
-        }
-========
     BusinessLogicResolver,
     AccessControlFacet,
     AdjustBalances,
@@ -318,7 +263,6 @@ export interface DeployAtsContractsResultParams {
     timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     deployer?: Signer
 }
->>>>>>>> refs/heads/feat/BBND-461-layer0:contracts/scripts/results/DeployAtsContractsResult.ts
 
 export default class DeployAtsContractsResult {
     public readonly businessLogicResolver: DeployContractWithFactoryResult<BusinessLogicResolver>
