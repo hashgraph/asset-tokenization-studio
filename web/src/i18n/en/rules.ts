@@ -216,5 +216,6 @@ export default {
   maxlength: "Too many characters",
   required: "Field is mandatory",
   isISINValid: "Length should be {{length}}.",
+  isISINValidFormat: "Invalid format",
   isHederaValidAddress: "Wrong address",
 };

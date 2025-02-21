@@ -212,6 +212,9 @@ import votingRights from "./votingRight";
 import balanceAdjustment from "./balanceAdjustment";
 import locker from "./locker";
 import cap from "./cap";
+import hold from "./hold";
+import kyc from "./kyc";
+import ssiManager from "./ssiManager";
 
 export default {
   header: {
@@ -230,6 +233,9 @@ export default {
     management: "Management",
     locker: "Locker",
     cap: "Cap",
+    hold: "Hold",
+    kyc: "KYC",
+    ssiManager: "SSI Manager",
   },
   actions: {
     redeem: "Redeem",
@@ -256,6 +262,9 @@ export default {
     },
     details: {
       title: "Details",
+      availableBalance: "Available balance",
+      lockBalance: "Lock balance",
+      heldBalance: "Held balance",
     },
     error: {
       targetId: "Sorry, there was an error. Probably wrong address",
@@ -267,6 +276,9 @@ export default {
   votingRights,
   locker,
   cap,
+  hold,
+  kyc,
+  ssiManager,
   benefits: {
     dividends: "Dividends",
     balanceAdjustments: "Balance Adjustments",

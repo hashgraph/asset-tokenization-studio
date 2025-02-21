@@ -245,6 +245,9 @@ import { Management } from "./Components/Management/Management";
 import { BalanceAdjustment } from "./Components/BalanceAdjustment/BalanceAdjustment";
 import { Locker } from "./Components/Locker/Locker";
 import { Cap } from "./Components/Cap/Cap";
+import { Hold } from "./Components/Hold/Hold";
+import { KYC } from "./Components/KYC/KYC";
+import { SSIManager } from "./Components/SSIManager/SSIManager";
 
 export const DigitalSecurityDetails = () => {
   const { t: tHeader } = useTranslation("security", {
@@ -393,6 +396,21 @@ export const DigitalSecurityDetails = () => {
         header: tTabs("locker"),
       });
     }
+
+    adminTabs.push({
+      content: <Hold />,
+      header: tTabs("hold"),
+    });
+
+    adminTabs.push({
+      content: <KYC />,
+      header: tTabs("kyc"),
+    });
+
+    adminTabs.push({
+      content: <SSIManager />,
+      header: tTabs("ssiManager"),
+    });
 
     const hasCapRole = roles.find((role) => role === SecurityRole._CAP_ROLE);
 

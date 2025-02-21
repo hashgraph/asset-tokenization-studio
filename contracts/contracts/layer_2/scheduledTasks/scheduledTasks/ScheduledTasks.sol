@@ -222,7 +222,6 @@ import {
 contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    // TODO: ésto para qué?????
     // solhint-disable no-unused-vars
     function onScheduledTaskTriggered(
         uint256 _pos,

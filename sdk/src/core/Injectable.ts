@@ -248,6 +248,7 @@ import { ReleaseCommandHandler } from '../app/usecase/command/security/operation
 import { LockCountQueryHandler } from '../app/usecase/query/security/lockCount/LockCountQueryHandler.js';
 import { GetLockQueryHandler } from '../app/usecase/query/security/getLock/GetLockQueryHandler.js';
 import { LocksIdQueryHandler } from '../app/usecase/query/security/locksId/LocksIdQueryHandler.js';
+import { ExecuteHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/executeHoldByPartition/ExecuteHoldByPartitionCommandHandler.js';
 
 import { WalletEvents } from '../app/service/event/WalletEvent.js';
 import { CommandHandlerType } from './command/CommandBus.js';
@@ -307,6 +308,31 @@ import { ProtectedTransferFromByPartitionCommandHandler } from '../app/usecase/c
 import { ProtectedTransferAndLockByPartitionCommandHandler } from '../app/usecase/command/security/operations/transfer/ProtectedTransferAndLockByPartitionCommandHandler.js';
 import { PartitionsProtectedQueryHandler } from '../app/usecase/query/security/protectedPartitions/arePartitionsProtected/PartitionsProtectedQueryHandler';
 import { GetNounceQueryHandler } from '../app/usecase/query/security/protectedPartitions/getNounce/GetNounceQueryHandler';
+import { CreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/createHoldByPartition/CreateHoldByPartitionCommandHandler.js';
+import { CreateHoldFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/createHoldFromByPartition/CreateHoldFromByPartitionCommandHandler.js';
+import { ControllerCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/controllerCreateHoldByPartition/ControllerCreateHoldByPartitionCommandHandler.js';
+import { ProtectedCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/protectedCreateHoldByPartition/ProtectedCreateHoldByPartitionCommandHandler.js';
+import { GetHeldAmountForQueryHandler } from '../app/usecase/query/security/hold/getHeldAmountFor/GetHeldAmountForQueryHandler.js';
+import { GetHeldAmountForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHeldAmountForByPartition/GetHeldAmountForByPartitionQueryHandler.js';
+import { GetHoldCountForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldCountForByPartition/GetHoldCountForByPartitionQueryHandler.js';
+import { GetHoldsIdForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldsIdForByPartition/GetHoldsIdForByPartitionQueryHandler.js';
+import { GetHoldForByPartitionQueryHandler } from '../app/usecase/query/security/hold/getHoldForByPartition/GetHoldForByPartitionQueryHandler.js';
+import { ReleaseHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/releaseHoldByPartition/ReleaseHoldByPartitionCommandHandler.js';
+import { ReclaimHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommandHandler.js';
+import { GetIssuerListCountQueryHandler } from '../app/usecase/query/security/ssi/getIssuerListCount/GetIssuerListCountQueryHandler.js';
+import { GetIssuerListMembersQueryHandler } from '../app/usecase/query/security/ssi/getIssuerListMembers/GetIssuerListMembersQueryHandler.js';
+import { GetRevocationRegistryAddressQueryHandler } from '../app/usecase/query/security/ssi/getRevocationRegistryAddress/GetRevocationRegistryAddressQueryHandler.js';
+import { IsIssuerQueryHandler } from '../app/usecase/query/security/ssi/isIssuer/IsIssuerQueryHandler.js';
+import { GetKYCForQueryHandler } from '../app/usecase/query/security/kyc/getKycFor/GetKYCForQueryHandler.js';
+import { GetKYCAccountsCountQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsCount/GetKYCAccountsCountQueryHandler.js';
+import { GetKYCAccountsQueryHandler } from '../app/usecase/query/security/kyc/getKycAccounts/GetKYCAccountsQueryHandler.js';
+import { GrantKYCCommandHandler } from '../app/usecase/command/security/kyc/grantKyc/GrantKYCCommandHandler.js';
+import { RevokeKYCCommandHandler } from '../app/usecase/command/security/kyc/revokeKyc/RevokeKYCCommandHandler.js';
+import { AddIssuerCommandHandler } from '../app/usecase/command/security/ssi/addIssuer/AddIssuerCommandHandler.js';
+import { RemoveIssuerCommandHandler } from '../app/usecase/command/security/ssi/removeIssuer/RemoveIssuerCommandHandler.js';
+import { SetRevocationRegistryAddressCommandHandler } from '../app/usecase/command/security/ssi/setRevocationRegistryAddress/SetRevocationRegistryAddressCommandHandler.js';
+import { GetKYCStatusForQueryHandler } from '../app/usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQueryHandler.js';
+import { GetKYCAccountsDataQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsData/GetKYCAccountsDataQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -410,6 +436,31 @@ const COMMAND_HANDLERS = [
     token: TOKENS.COMMAND_HANDLER,
     useClass: ProtectedTransferAndLockByPartitionCommandHandler,
   },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CreateHoldFromByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ControllerCreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedCreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: GrantKYCCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RevokeKYCCommandHandler,
+  },
+
   // Bond Operations
   {
     token: TOKENS.COMMAND_HANDLER,
@@ -465,6 +516,30 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: SetScheduledBalanceAdjustmentCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ReleaseHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ReclaimHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ExecuteHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: AddIssuerCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: RemoveIssuerCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: SetRevocationRegistryAddressCommandHandler,
   },
 ];
 
@@ -641,6 +716,62 @@ const QUERY_HANDLERS = [
     token: TOKENS.QUERY_HANDLER,
     useClass:
       GetLastAggregatedBalanceAdjustmentFactorForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetHeldAmountForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetHeldAmountForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetHoldCountForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetHoldsIdForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetHoldForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetIssuerListCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetIssuerListMembersQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetRevocationRegistryAddressQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsIssuerQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCAccountsCountQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCAccountsQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCAccountsDataQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetKYCStatusForQueryHandler,
   },
 ];
 

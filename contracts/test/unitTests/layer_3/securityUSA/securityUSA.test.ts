@@ -264,6 +264,7 @@ describe('Security USA Tests', () => {
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
                     useDeployed: false,
+                    timeTravelEnabled: true,
                 })
             )
 

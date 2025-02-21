@@ -244,6 +244,42 @@ abstract contract DiamondCutManager is
         );
     }
 
+    function createBatchConfiguration(
+        bytes32 _configurationId,
+        FacetConfiguration[] calldata _facetConfigurations,
+        bool _isLastBatch
+    )
+        external
+        override
+        validConfigurationIdFormat(_configurationId)
+        onlyRole(_DEFAULT_ADMIN_ROLE)
+        onlyUnpaused
+    {
+        emit DiamondBatchConfigurationCreated(
+            _configurationId,
+            _facetConfigurations,
+            _isLastBatch,
+            _createBatchConfiguration(
+                _configurationId,
+                _facetConfigurations,
+                _isLastBatch
+            )
+        );
+    }
+
+    function cancelBatchConfiguration(
+        bytes32 _configurationId
+    )
+        external
+        override
+        validConfigurationIdFormat(_configurationId)
+        onlyRole(_DEFAULT_ADMIN_ROLE)
+        onlyUnpaused
+    {
+        _cancelBatchConfiguration(_configurationId);
+        emit DiamondBatchConfigurationCanceled(_configurationId);
+    }
+
     function resolveResolverProxyCall(
         bytes32 _configurationId,
         uint256 _version,
