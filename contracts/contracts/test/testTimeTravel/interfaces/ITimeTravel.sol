@@ -204,7 +204,7 @@
 */
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-pragma solidity ^0.8.18;
+pragma solidity 0.8.18;
 
 /**
  * @title Time Travel Controller interface

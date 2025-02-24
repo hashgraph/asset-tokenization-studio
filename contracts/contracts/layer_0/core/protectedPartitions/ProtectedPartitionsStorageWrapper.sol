@@ -33,9 +33,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
 
     // modifiers
     modifier onlyProtectedPartitions() {
-        if (!_arePartitionsProtected()) {
-            revert PartitionsAreUnProtected();
-        }
+        _checkProtectedPartitions();
         _;
     }
 
@@ -46,10 +44,19 @@ abstract contract ProtectedPartitionsStorageWrapper is
         _;
     }
 
+    function _checkProtectedPartitions() internal {
+        if (!_arePartitionsProtected()) {
+            revert PartitionsAreUnProtected();
+        }
+    }
+
     function _setProtectedPartitions(bool _protected) internal {
         _protectedPartitionsStorage().arePartitionsProtected = _protected;
-        if (_protected) emit PartitionsProtected(_msgSender());
-        else emit PartitionsUnProtected(_msgSender());
+        if (_protected) {
+            emit PartitionsProtected(_msgSender());
+            return;
+        }
+        emit PartitionsUnProtected(_msgSender());
     }
 
     function _setNounce(uint256 _nounce, address _account) internal {

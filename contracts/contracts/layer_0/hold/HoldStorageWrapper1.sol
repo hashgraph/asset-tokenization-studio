@@ -221,8 +221,13 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
 
     modifier onlyWithValidHoldId(IHold.HoldIdentifier calldata _holdIdentifier)
     {
-        if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
+        _checkHoldId(_holdIdentifier);
         _;
+    }
+
+    function _checkHoldId(IHold.HoldIdentifier calldata _holdIdentifier) internal
+    {
+        if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
     }
 
     function _isHoldIdValid(
@@ -238,38 +243,6 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
             _holdStorage().holdsByAccountPartitionAndId[
                 _holdIdentifier.tokenHolder
             ][_holdIdentifier.partition][_holdIdentifier.holdId];
-    }
-
-    function _getHoldByIndex(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _holdIndex
-    ) internal view returns (IHold.HoldData memory) {
-        IHold.HoldDataStorage storage holdStorage = _holdStorage();
-
-        if (_holdIndex == 0)
-            return
-                IHold.HoldData(
-                    0,
-                    IHold.Hold(0, 0, address(0), address(0), ''),
-                    ''
-                );
-
-        _holdIndex--;
-
-        assert(
-            _holdIndex <
-                holdStorage
-                .holdIdsByAccountAndPartition[_tokenHolder][_partition].length()
-        );
-
-        uint256 holdId = holdStorage
-        .holdIdsByAccountAndPartition[_tokenHolder][_partition].at(_holdIndex);
-
-        return
-            holdStorage.holdsByAccountPartitionAndId[_tokenHolder][_partition][
-                holdId
-            ];
     }
 
     function _getHeldAmountFor(

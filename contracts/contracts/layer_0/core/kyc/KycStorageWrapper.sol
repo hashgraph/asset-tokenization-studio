@@ -236,14 +236,18 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
     }
 
     modifier onlyValidKycStatus(IKyc.KycStatus _kycStatus, address _account) {
-        if (!_checkKycStatus(_kycStatus, _account))
-            revert IKyc.InvalidKycStatus();
+        _checkValidKycStatus(_kycStatus, _account);
         _;
     }
 
     modifier checkAddress(address _account) {
         if (_account == address(0)) revert IKyc.InvalidZeroAddress();
         _;
+    }
+
+    function _checkValidKycStatus(IKyc.KycStatus _kycStatus, address _account) internal {
+        if (!_hasSameKycStatus(_kycStatus, _account))
+            revert IKyc.InvalidKycStatus();
     }
 
     function _grantKyc(
@@ -253,23 +257,23 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
         uint256 _validTo,
         address _issuer
     ) internal returns (bool success_) {
-        _KycStorage().kyc[_account] = IKyc.KycData(
+        _kycStorage().kyc[_account] = IKyc.KycData(
             _validFrom,
             _validTo,
             _vcId,
             _issuer,
             IKyc.KycStatus.GRANTED
         );
-        _KycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(
+        _kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].add(
             _account
         );
         success_ = true;
     }
 
     function _revokeKyc(address _account) internal returns (bool success_) {
-        delete _KycStorage().kyc[_account];
+        delete _kycStorage().kyc[_account];
 
-        _KycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].remove(
+        _kycStorage().kycAddressesByStatus[IKyc.KycStatus.GRANTED].remove(
             _account
         );
         success_ = true;
@@ -302,13 +306,13 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
     function _getKycFor(
         address _account
     ) internal view virtual returns (IKyc.KycData memory) {
-        return _KycStorage().kyc[_account];
+        return _kycStorage().kyc[_account];
     }
 
     function _getKycAccountsCount(
         IKyc.KycStatus _kycStatus
     ) internal view virtual returns (uint256 kycAccountsCount_) {
-        kycAccountsCount_ = _KycStorage()
+        kycAccountsCount_ = _kycStorage()
             .kycAddressesByStatus[_kycStatus]
             .length();
     }
@@ -318,7 +322,7 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (address[] memory accounts_) {
-        accounts_ = _KycStorage().kycAddressesByStatus[_kycStatus].getFromSet(
+        accounts_ = _kycStorage().kycAddressesByStatus[_kycStatus].getFromSet(
             _pageIndex,
             _pageLength
         );
@@ -329,7 +333,7 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
         uint256 _pageIndex,
         uint256 _pageLength
     ) internal view virtual returns (IKyc.KycData[] memory kycData_) {
-        address[] memory accounts = _KycStorage()
+        address[] memory accounts = _kycStorage()
             .kycAddressesByStatus[_kycStatus]
             .getFromSet(_pageIndex, _pageLength);
 
@@ -345,14 +349,14 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
         }
     }
 
-    function _checkKycStatus(
+    function _hasSameKycStatus(
         IKyc.KycStatus _kycStatus,
         address _account
     ) internal view virtual returns (bool) {
         return _getKycStatusFor(_account) == _kycStatus;
     }
 
-    function _KycStorage() internal pure returns (KycStorage storage kyc_) {
+    function _kycStorage() internal pure returns (KycStorage storage kyc_) {
         bytes32 position = _KYC_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly
         assembly {

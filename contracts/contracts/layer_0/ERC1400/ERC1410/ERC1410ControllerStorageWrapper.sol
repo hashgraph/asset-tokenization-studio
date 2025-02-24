@@ -242,19 +242,19 @@ abstract contract ERC1410ControllerStorageWrapper is ERC1644StorageWrapper {
         if (_to == address(0)) {
             return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_msgSender())) {
+        if (!_isInControlList(_msgSender())) {
             return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_from)) {
+        if (!_isInControlList(_from)) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_to)) {
+        if (!_isInControlList(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _from)) {
             return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
-        if (!_checkKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _to)) {
             return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
         if (!_validPartition(_partition, _from)) {

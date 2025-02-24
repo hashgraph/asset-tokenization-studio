@@ -223,13 +223,13 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyValidAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
+        _checkUnpaused();
+        _checkValidAddress(_hold.escrow);
+        _checkDefaultPartitionWithSinglePartition(_partition);
+        _checkExpirationTimestamp(_hold.expirationTimestamp);
+        _checkUnProtectedPartitionsOrWildCardRole();
         (success_, holdId_) = _createHoldByPartition(
             _partition,
             _msgSender(),
@@ -255,14 +255,14 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyValidAddress(_from)
-        onlyValidAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
+        _checkUnpaused();
+        _checkValidAddress(_from);
+        _checkValidAddress(_hold.escrow);
+        _checkDefaultPartitionWithSinglePartition(_partition);
+        _checkExpirationTimestamp(_hold.expirationTimestamp);
+        _checkUnProtectedPartitionsOrWildCardRole();
         (success_, holdId_) = _createHoldFromByPartition(
             _partition,
             _from,
@@ -288,15 +288,15 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyValidAddress(_from)
-        onlyValidAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyOperator(_partition, _from)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 holdId_)
     {
+        _checkUnpaused();
+        _checkValidAddress(_from);
+        _checkValidAddress(_hold.escrow);
+        _checkDefaultPartitionWithSinglePartition(_partition);
+        _checkOperator(_partition, _from);
+        _checkExpirationTimestamp(_hold.expirationTimestamp);
+        _checkUnProtectedPartitionsOrWildCardRole();
         (success_, holdId_) = _createHoldByPartition(
             _partition,
             _from,
@@ -322,15 +322,16 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyValidAddress(_from)
-        onlyValidAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyRole(_CONTROLLER_ROLE)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyControllable
         returns (bool success_, uint256 holdId_)
     {
+        _checkUnpaused();
+        _checkValidAddress(_from);
+        _checkValidAddress(_hold.escrow);
+        _checkDefaultPartitionWithSinglePartition(_partition);
+        _checkRole(_CONTROLLER_ROLE, _msgSender());
+        _checkExpirationTimestamp(_hold.expirationTimestamp);
+        _checkControllable();
         (success_, holdId_) = _createHoldByPartition(
             _partition,
             _from,
@@ -356,16 +357,14 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyValidAddress(_from)
-        onlyValidAddress(_protectedHold.hold.escrow)
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyWithValidExpirationTimestamp(
-            _protectedHold.hold.expirationTimestamp
-        )
-        onlyProtectedPartitions
         returns (bool success_, uint256 holdId_)
     {
+        _checkUnpaused();
+        _checkValidAddress(_from);
+        _checkValidAddress(_protectedHold.hold.escrow);
+        _checkRole(_protectedPartitionsRole(_partition), _msgSender());
+        _checkExpirationTimestamp(_protectedHold.hold.expirationTimestamp);
+        _checkProtectedPartitions();
         (success_, holdId_) = _protectedCreateHoldByPartition(
             _partition,
             _from,
@@ -390,14 +389,14 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
-        onlyWithValidHoldId(_holdIdentifier)
-        checkControlList(_to)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _holdIdentifier.tokenHolder)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         returns (bool success_)
     {
+        _checkUnpaused();
+        _checkDefaultPartitionWithSinglePartition(_holdIdentifier.partition);
+        _checkHoldId(_holdIdentifier);
+        _checkControlList(_to);
+        _checkValidKycStatus(IKyc.KycStatus.GRANTED, _holdIdentifier.tokenHolder);
+        _checkValidKycStatus(IKyc.KycStatus.GRANTED, _to);
         success_ = _executeHoldByPartition(_holdIdentifier, _to, _amount);
 
         emit HoldByPartitionExecuted(
@@ -415,11 +414,11 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
-        onlyWithValidHoldId(_holdIdentifier)
         returns (bool success_)
     {
+        _checkUnpaused();
+        _checkDefaultPartitionWithSinglePartition(_holdIdentifier.partition);
+        _checkHoldId(_holdIdentifier);
         success_ = _releaseHoldByPartition(_holdIdentifier, _amount);
         emit HoldByPartitionReleased(
             _holdIdentifier.tokenHolder,
@@ -434,11 +433,11 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
-        onlyWithValidHoldId(_holdIdentifier)
         returns (bool success_)
     {
+        _checkUnpaused();
+        _checkDefaultPartitionWithSinglePartition(_holdIdentifier.partition);
+        _checkHoldId(_holdIdentifier);
         uint256 amount_;
         (success_, amount_) = _reclaimHoldByPartition(_holdIdentifier);
         emit HoldByPartitionReclaimed(

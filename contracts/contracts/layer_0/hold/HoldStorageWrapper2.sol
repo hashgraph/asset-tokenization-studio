@@ -385,7 +385,7 @@ abstract contract HoldStorageWrapper2 is
         IHold.HoldData memory holdData = _getHold(_holdIdentifier);
 
         if (_operation == IHold.OperationType.Execute) {
-            if (!_checkControlList(_holdIdentifier.tokenHolder)) {
+            if (!_isInControlList(_holdIdentifier.tokenHolder)) {
                 revert AccountIsBlocked(_holdIdentifier.tokenHolder);
             }
 
