@@ -247,7 +247,6 @@ import SSIManagement from '../../../src/port/in/SSIManagement';
 import { SecurityRole } from '../../../src/domain/context/security/SecurityRole';
 import createVcT3 from '../../utils/verifiableCredentials';
 import { Terminal3VC } from '../../../src/domain/context/kyc/terminal3.js';
-import axios from 'axios';
 import { HederaId } from '../../../src/domain/context/shared/HederaId.js';
 
 SDK.log = { level: 'ERROR', transports: new LoggerTransports.Console() };
@@ -409,20 +408,14 @@ describe('🧪 Kyc tests', () => {
     const issuer = Terminal3VC.extractIssuer(vcDecoded);
     vcDecoded = Terminal3VC.checkValidDates(vcDecoded);
 
+    const issuerId = CLIENT_ACCOUNT_ECDSA.id.toString();
+    const accountId = CLIENT_ACCOUNT_ECDSA_A.id.toString();
+
     // Override mock for this test to get issuer Id from EVM address
     jest
       .spyOn(mirrorNodeAdapter, 'getAccountInfo')
-      .mockImplementation(
-        async (accountId: HederaId | string): Promise<Account> => {
-          const res = await axios.get(
-            mirrorNode.baseUrl + 'accounts/' + accountId,
-          );
-          const account: Account = {
-            id: HederaId.from(res.data.account),
-          };
-          return account;
-        },
-      );
+      .mockResolvedValueOnce({ id: HederaId.from(issuerId) })
+      .mockResolvedValueOnce({ id: HederaId.from(accountId) })
 
     expect(
       await Kyc.getKYCAccountsData(
