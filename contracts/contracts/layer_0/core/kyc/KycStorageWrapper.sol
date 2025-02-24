@@ -333,7 +333,7 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
         kycData_ = new IKyc.KycData[](totalAccounts);
 
         for (uint256 index; index < totalAccounts; ) {
-            kycData_[index] = _getKycFor(accounts[index]);
+            kycData_[index] = _getKycFor(accounts_[index]);
             unchecked {
                 ++index;
             }
