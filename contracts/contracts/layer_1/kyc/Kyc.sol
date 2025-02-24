@@ -270,20 +270,22 @@ contract Kyc is IKyc, IStaticFunctionSelectors, Common {
         kycAccountsCount_ = _getKycAccountsCount(_kycStatus);
     }
 
-    function getKycAccounts(
-        KycStatus _kycStatus,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view virtual override returns (address[] memory accounts_) {
-        accounts_ = _getKycAccounts(_kycStatus, _pageIndex, _pageLength);
-    }
-
     function getKycAccountsData(
         KycStatus _kycStatus,
         uint256 _pageIndex,
         uint256 _pageLength
-    ) external view virtual override returns (KycData[] memory kycData_) {
-        kycData_ = _getKycAccountsData(_kycStatus, _pageIndex, _pageLength);
+    )
+        external
+        view
+        virtual
+        override
+        returns (address[] memory accounts_, KycData[] memory kycData_)
+    {
+        (accounts_, kycData_) = _getKycAccountsData(
+            _kycStatus,
+            _pageIndex,
+            _pageLength
+        );
     }
 
     function getStaticResolverKey()
@@ -303,7 +305,7 @@ contract Kyc is IKyc, IStaticFunctionSelectors, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_ = new bytes4[](6);
         staticFunctionSelectors_[selectorIndex++] = this.grantKyc.selector;
         staticFunctionSelectors_[selectorIndex++] = this.revokeKyc.selector;
         staticFunctionSelectors_[selectorIndex++] = this.getKycFor.selector;
@@ -312,9 +314,6 @@ contract Kyc is IKyc, IStaticFunctionSelectors, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getKycAccountsCount
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getKycAccounts
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getKycAccountsData

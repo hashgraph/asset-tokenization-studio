@@ -203,56 +203,13 @@
 
 */
 
-import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
-import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
-import TransactionService from '../../../../../service/TransactionService.js';
-import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
-import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
-import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
-import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
-import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
-import {
-  GetKYCAccountsQuery,
-  GetKYCAccountsQueryResponse,
-} from './GetKYCAccountsQuery.js';
+import { QueryResponse } from 'core/query/QueryResponse';
 
-@QueryHandler(GetKYCAccountsQuery)
-export class GetKYCAccountsQueryHandler
-  implements IQueryHandler<GetKYCAccountsQuery>
-{
-  constructor(
-    @lazyInject(TransactionService)
-    public readonly transactionService: TransactionService,
-    @lazyInject(RPCQueryAdapter)
-    public readonly queryAdapter: RPCQueryAdapter,
-    @lazyInject(MirrorNodeAdapter)
-    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
-  ) {}
-
-  async execute(
-    query: GetKYCAccountsQuery,
-  ): Promise<GetKYCAccountsQueryResponse> {
-    const { securityId, kycStatus, start, end } = query;
-
-    const securityEvmAddress: EvmAddress = new EvmAddress(
-      HEDERA_FORMAT_ID_REGEX.test(securityId)
-        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
-        : securityId.toString(),
-    );
-
-    const res = await this.queryAdapter.getKYCAccounts(
-      securityEvmAddress,
-      kycStatus,
-      start,
-      end,
-    );
-
-    const hederaIds = await Promise.all(
-      res.map(async (t) =>
-        (await this.mirrorNodeAdapter.getAccountInfo(t)).id.toString(),
-      ),
-    );
-
-    return new GetKYCAccountsQueryResponse(hederaIds);
-  }
+export default interface KycAccountDataViewModel extends QueryResponse {
+  account: string;
+  validFrom: string;
+  validTo: string;
+  VCid: string;
+  issuer: string;
+  status: number;
 }

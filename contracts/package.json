@@ -124,5 +124,8 @@
   "overrides": {
     "ws": "7.5.10",
     "elliptic": "6.5.7"
+  },
+  "dependencies": {
+    "@terminal3/ecdsa_vc": "^0.1.19"
   }
 }

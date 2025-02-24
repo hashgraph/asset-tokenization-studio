@@ -225,6 +225,11 @@ export interface Keccak256Args {
     input: string
 }
 
+export interface CreateVcArgs {
+    holder: string
+    privatekey: string
+}
+
 // * Deploy
 export interface DeployArgs extends WithSigner {
     contractName: string
