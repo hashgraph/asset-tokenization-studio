@@ -271,3 +271,6 @@ bytes32 constant _SSI_MANAGEMENT_STORAGE_POSITION = 0xdbde0b1f7457f92983806323b8
 
 // keccak256('security.token.standard.kyc.storage');
 bytes32 constant _KYC_STORAGE_POSITION = 0x589d3365cb6f9141f65f568666d0e4cb837c3b1edc1527dd31a1aa423ad940c7;
+
+// keccak256('security.token.standard.clearing.storage');
+bytes32 constant _CLEARING_STORAGE_POSITION = 0xf5d5af29c37f2085b9f37cfb2259d4e3b957777d47ffc1949a7596cb1d37ba90;

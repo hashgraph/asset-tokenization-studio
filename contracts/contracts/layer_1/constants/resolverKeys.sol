@@ -267,3 +267,6 @@ bytes32 constant _SSI_MANAGEMENT_RESOLVER_KEY = 0x46df6aaf3742e0cbad136a74fb679b
 
 // keccak256("security.token.standard.kyc.resolverKey")
 bytes32 constant _KYC_RESOLVER_KEY = 0xf516a0f6b4726244ae916c590cd26c2b593d7d448e46e43714fb9f9435c46e32;
+
+// keccak256("security.token.standard.kyc.clearingKey")
+bytes32 constant _CLEARING_RESOLVER_KEY = 0x7f02f72b346bf2b912ced77e463203bb2d3dfe291413aba06d2f20124f96f6eb;
