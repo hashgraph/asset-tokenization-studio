@@ -203,58 +203,12 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {_CLEARING_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {HoldStorageWrapper1} from '../hold/HoldStorageWrapper1.sol';
-import {
-    IClearingStorageWrapper
-} from '../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol';
+import {IHold} from '../hold/IHold.sol';
 
-// solhint-disable no-unused-vars, custom-errors
-abstract contract ClearingStorageWrapper1 is
-    IClearingStorageWrapper,
-    HoldStorageWrapper1
-{
-    struct ClearingDataStorage {
-        bool initialized;
-        bool activated;
-    }
-
-    function _activateClearing() internal returns (bool success_) {
-        ClearingDataStorage storage clearingStorage = _clearingStorage();
-        if (!clearingStorage.activated) {
-            clearingStorage.activated = true;
-            emit ClearingActivated(_msgSender());
-        }
-        success_ = true;
-    }
-
-    function _deactivateClearing() internal returns (bool success_) {
-        ClearingDataStorage storage clearingStorage = _clearingStorage();
-        if (!clearingStorage.activated) {
-            clearingStorage.activated = false;
-            emit ClearingDeactivated(_msgSender());
-        }
-        success_ = true;
-    }
-
-    function _isClearingActivated() internal view returns (bool) {
-        ClearingDataStorage storage clearingStorage = _clearingStorage();
-        return clearingStorage.activated;
-    }
-
-    function _clearingStorage()
-        internal
-        pure
-        returns (ClearingDataStorage storage clearing_)
-    {
-        bytes32 position = _CLEARING_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            clearing_.slot := position
-        }
-    }
+interface IClearingStorageWrapper {
+    event ClearingActivated(address indexed operator);
+    event ClearingDeactivated(address indexed operator);
 }
-// solhint-enable no-unused-vars, custom-errors
