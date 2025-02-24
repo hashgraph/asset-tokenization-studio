@@ -233,7 +233,7 @@ abstract contract ClearingStorageWrapper1 is
 
     function _deactivateClearing() internal returns (bool success_) {
         ClearingDataStorage storage clearingStorage = _clearingStorage();
-        if (!clearingStorage.activated) {
+        if (clearingStorage.activated) {
             clearingStorage.activated = false;
             emit ClearingDeactivated(_msgSender());
         }
