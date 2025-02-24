@@ -216,7 +216,7 @@ import {
 import {_CLEARING_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 
 // solhint-disable no-unused-vars, custom-errors
-contract Clearing is IStaticFunctionSelectors, IClearing, Common {
+contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
     function initialize_Clearing(
         bool _clearingActive
     ) external onlyUninitialized(_clearingStorage().initialized) {

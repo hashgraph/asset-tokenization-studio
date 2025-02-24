@@ -206,8 +206,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IHold} from '../hold/IHold.sol';
-
 interface IClearingStorageWrapper {
     event ClearingActivated(address indexed operator);
     event ClearingDeactivated(address indexed operator);
