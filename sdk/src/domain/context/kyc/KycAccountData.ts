@@ -203,20 +203,27 @@
 
 */
 
-import { Query } from '../../../../../../core/query/Query.js';
-import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
+export class KycAccountData {
+  account: string;
+  validFrom: string;
+  validTo: string;
+  VCid: string;
+  issuer: string;
+  status: number;
 
-export class GetKYCAccountsQueryResponse implements QueryResponse {
-  constructor(public readonly payload: string[]) {}
-}
-
-export class GetKYCAccountsQuery extends Query<GetKYCAccountsQueryResponse> {
   constructor(
-    public readonly securityId: string,
-    public readonly kycStatus: number,
-    public readonly start: number,
-    public readonly end: number,
+    account: string,
+    validFrom: string,
+    validTo: string,
+    VCid: string,
+    issuer: string,
+    status: number,
   ) {
-    super();
+    this.account = account;
+    this.validFrom = validFrom;
+    this.validTo = validTo;
+    this.VCid = VCid;
+    this.issuer = issuer;
+    this.status = status;
   }
 }

@@ -220,7 +220,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     function initialize_ERC1594()
         external
         override
-        onlyUninitialized(_getErc1594Storage().initialized)
+        onlyUninitialized(_erc1594Storage().initialized)
     {
         super._initialize_ERC1594();
     }

@@ -224,10 +224,14 @@ abstract contract ERC1644StorageWrapper is
     }
 
     modifier onlyControllable() {
+        _checkControllable();
+        _;
+    }
+
+    function _checkControllable() internal {
         if (!_isControllable()) {
             revert TokenIsNotControllable();
         }
-        _;
     }
 
     function _controllerTransfer(
@@ -269,9 +273,9 @@ abstract contract ERC1644StorageWrapper is
      * @dev It only be called by the `owner/issuer` of the token
      */
     function _finalizeControllable() internal {
-        if (!_getErc1644Storage().isControllable) return;
+        if (!_erc1644Storage().isControllable) return;
 
-        _getErc1644Storage().isControllable = false;
+        _erc1644Storage().isControllable = false;
         emit FinalizedControllerFeature(_msgSender());
     }
 
@@ -281,10 +285,10 @@ abstract contract ERC1644StorageWrapper is
      * @return bool `true` when controller address is non-zero otherwise return `false`.
      */
     function _isControllable() internal view returns (bool) {
-        return _getErc1644Storage().isControllable;
+        return _erc1644Storage().isControllable;
     }
 
-    function _getErc1644Storage()
+    function _erc1644Storage()
         internal
         pure
         returns (ERC1644Storage storage erc1644Storage_)

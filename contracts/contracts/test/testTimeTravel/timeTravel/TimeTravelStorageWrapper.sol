@@ -218,9 +218,9 @@ abstract contract TimeTravelStorageWrapper is
     /* solhint-disable state-visibility */
 
     // keccak256("security.token.standard.timeTravel.resolverKey")
-    bytes32 constant _TIME_TRAVEL_RESOLVER_KEY =
+    bytes32 internal constant _TIME_TRAVEL_RESOLVER_KEY =
         0xba344464ddfb79287323340a7abdc770d353bd7dfd2695345419903dbb9918c8;
-    uint256 _timestamp;
+    uint256 internal _timestamp;
 
     constructor() {
         _checkBlockChainid(_blockChainid());

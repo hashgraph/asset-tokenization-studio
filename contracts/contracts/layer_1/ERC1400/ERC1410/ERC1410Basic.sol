@@ -214,13 +214,9 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410_Basic(
         bool _multiPartition
-    )
-        external
-        override
-        onlyUninitialized(_getERC1410BasicStorage().initialized)
-    {
-        _getERC1410BasicStorage().multiPartition = _multiPartition;
-        _getERC1410BasicStorage().initialized = true;
+    ) external override onlyUninitialized(_erc1410BasicStorage().initialized) {
+        _erc1410BasicStorage().multiPartition = _multiPartition;
+        _erc1410BasicStorage().initialized = true;
     }
 
     /// @notice Transfers the ownership of tokens from a specified partition from one address to another address

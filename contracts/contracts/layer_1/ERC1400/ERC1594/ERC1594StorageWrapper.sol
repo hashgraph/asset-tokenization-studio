@@ -241,8 +241,8 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
 
     // solhint-disable-next-line func-name-mixedcase
     function _initialize_ERC1594() internal {
-        _getErc1594Storage().issuance = true;
-        _getErc1594Storage().initialized = true;
+        _erc1594Storage().issuance = true;
+        _erc1594Storage().initialized = true;
     }
 
     /**
@@ -305,7 +305,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
      * @return bool `true` signifies the minting is allowed. While `false` denotes the end of minting
      */
     function _isIssuable() internal view returns (bool) {
-        return _getErc1594Storage().issuance;
+        return _erc1594Storage().issuance;
     }
 
     /**
@@ -330,19 +330,19 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (_to == address(0)) {
             return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_msgSender())) {
+        if (!_isAbleToAccess(_msgSender())) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_to)) {
+        if (!_isAbleToAccess(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
         if (_balanceOfAdjusted(_msgSender()) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
+        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _msgSender())) {
             return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
-        if (!_checkKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _to)) {
             return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
 
@@ -376,13 +376,13 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (_from == address(0)) {
             return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_msgSender())) {
+        if (!_isAbleToAccess(_msgSender())) {
             return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_from)) {
+        if (!_isAbleToAccess(_from)) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_to)) {
+        if (!_isAbleToAccess(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
         if (_allowanceAdjusted(_from, _msgSender()) < _value) {
@@ -391,17 +391,17 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (_balanceOfAdjusted(_from) < _value) {
             return (false, _NOT_ENOUGH_BALANCE_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _from)) {
             return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
-        if (!_checkKycStatus(IKyc.KycStatus.GRANTED, _to)) {
+        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _to)) {
             return (false, _TO_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
 
         return (true, _SUCCESS, bytes32(0));
     }
 
-    function _getErc1594Storage()
+    function _erc1594Storage()
         internal
         pure
         returns (ERC1594Storage storage erc1594Storage_)

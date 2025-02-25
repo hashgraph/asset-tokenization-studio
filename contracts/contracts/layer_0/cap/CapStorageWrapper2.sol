@@ -218,23 +218,21 @@ abstract contract CapStorageWrapper2 is
 {
     // modifiers
     modifier checkMaxSupply(uint256 _amount) {
-        uint256 newTotalSupply = _totalSupply() + _amount;
         uint256 maxSupply = _getMaxSupply();
-
-        if (!_checkMaxSupply(newTotalSupply, maxSupply)) {
+        if (!_isCorrectMaxSupply(_totalSupply() + _amount, maxSupply)) {
             revert ICapStorageWrapper.MaxSupplyReached(maxSupply);
         }
         _;
     }
 
     modifier checkMaxSupplyForPartition(bytes32 _partition, uint256 _amount) {
-        uint256 newTotalSupplyForPartition = _totalSupplyByPartition(
-            _partition
-        ) + _amount;
         uint256 maxSupplyForPartition = _getMaxSupplyByPartition(_partition);
 
         if (
-            !_checkMaxSupply(newTotalSupplyForPartition, maxSupplyForPartition)
+            !_isCorrectMaxSupply(
+                _totalSupplyByPartition(_partition) + _amount,
+                maxSupplyForPartition
+            )
         ) {
             revert ICapStorageWrapper.MaxSupplyReachedForPartition(
                 _partition,
@@ -270,8 +268,8 @@ abstract contract CapStorageWrapper2 is
     function _checkNewMaxSupplyForPartition(
         bytes32 _partition,
         uint256 _newMaxSupply
-    ) internal view returns (bool) {
-        if (_newMaxSupply == 0) return true;
+    ) internal view {
+        if (_newMaxSupply == 0) return;
         uint256 totalSupplyForPartition = _totalSupplyByPartitionAdjusted(
             _partition
         );
@@ -290,43 +288,6 @@ abstract contract CapStorageWrapper2 is
                 maxSupplyOverall
             );
         }
-        return true;
-    }
-
-    function _checkNewTotalSupply(uint256 _amount) internal {
-        uint256 newTotalSupply = _totalSupplyAdjusted() + _amount;
-        if (!_checkMaxSupply(newTotalSupply)) {
-            revert MaxSupplyReached(_getMaxSupplyAdjusted());
-        }
-    }
-
-    function _checkNewTotalSupplyForPartition(
-        bytes32 _partition,
-        uint256 _amount
-    ) internal {
-        uint256 newTotalSupply = _totalSupplyByPartitionAdjusted(_partition) +
-            _amount;
-        if (!_checkMaxSupplyForPartition(_partition, newTotalSupply)) {
-            revert MaxSupplyReachedForPartition(
-                _partition,
-                _getMaxSupplyByPartitionAdjusted(_partition)
-            );
-        }
-    }
-
-    function _checkMaxSupply(uint256 _amount) internal view returns (bool) {
-        return _checkMaxSupply(_amount, _getMaxSupplyAdjusted());
-    }
-
-    function _checkMaxSupplyForPartition(
-        bytes32 _partition,
-        uint256 _amount
-    ) internal view returns (bool) {
-        return
-            _checkMaxSupply(
-                _amount,
-                _getMaxSupplyByPartitionAdjusted(_partition)
-            );
     }
 
     // Internal

@@ -283,13 +283,11 @@ contract CapStorageWrapper1 is AdjustBalancesStorageWrapper1 {
         return _getMaxSupplyByPartition(partition) * factor;
     }
 
-    function _checkMaxSupply(
+    function _isCorrectMaxSupply(
         uint256 _amount,
         uint256 _maxSupply
     ) internal pure returns (bool) {
-        if (_maxSupply == 0) return true;
-        if (_amount <= _maxSupply) return true;
-        return false;
+        return (_maxSupply == 0) || (_amount <= _maxSupply);
     }
 
     function _capStorage() internal pure returns (CapDataStorage storage cap_) {

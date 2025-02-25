@@ -256,9 +256,11 @@ contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
         bytes32 _actionId,
         uint256 _snapshotId
     ) internal {
-        bytes memory result = abi.encodePacked(_snapshotId);
-
-        _updateCorporateActionResult(_actionId, SNAPSHOT_RESULT_ID, result);
+        _updateCorporateActionResult(
+            _actionId,
+            SNAPSHOT_RESULT_ID,
+            abi.encodePacked(_snapshotId)
+        );
     }
 
     function _updateCorporateActionResult(
@@ -279,7 +281,7 @@ contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
             return;
         }
 
-        for (uint256 i = results.length; i < resultId; i++) {
+        for (uint256 i = results.length; i < resultId; ++i) {
             corporateActions_.actionsData[actionId].results.push('');
         }
 
@@ -335,13 +337,9 @@ contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
     function _getResult(
         bytes32 actionId,
         uint256 resultId
-    ) internal view returns (bytes memory) {
-        bytes memory result;
-
+    ) internal view returns (bytes memory result_) {
         if (_getCorporateActionResultCount(actionId) > resultId)
-            result = _getCorporateActionResult(actionId, resultId);
-
-        return result;
+            result_ = _getCorporateActionResult(actionId, resultId);
     }
 
     function _getCorporateActionResultCount(
@@ -367,18 +365,6 @@ contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
         bytes32 actionId
     ) internal view returns (bytes memory) {
         return _corporateActionsStorage().actionsData[actionId].data;
-    }
-
-    function _isSnapshotTaskType(
-        bytes memory data
-    ) internal pure returns (bool) {
-        return abi.decode(data, (bytes32)) == SNAPSHOT_TASK_TYPE;
-    }
-
-    function _isBalanceAdjustmentTaskType(
-        bytes memory data
-    ) internal pure returns (bool) {
-        return abi.decode(data, (bytes32)) == BALANCE_ADJUSTMENT_TASK_TYPE;
     }
 
     function _corporateActionsStorage()
