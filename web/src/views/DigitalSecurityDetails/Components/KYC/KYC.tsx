@@ -5,16 +5,43 @@ import { useTranslation } from "react-i18next";
 import { KYCModal } from "./KYCModal";
 import { Trash } from "@phosphor-icons/react";
 import { useMemo, useState } from "react";
-import { useGetKYCList } from "../../../../hooks/queries/useKYC";
 import {
-  KYCViewModel,
-  GetKYCAccountsRequest,
+  KycAccountDataViewModelResponse,
+  useGetKYCList,
+} from "../../../../hooks/queries/useKYC";
+import {
+  GetKYCAccountsDataRequest,
   RevokeKYCRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useParams } from "react-router-dom";
 import { useRevokeKYC } from "../../../../hooks/mutations/useKYC";
 import { useRolesStore } from "../../../../store/rolesStore";
 import { SecurityRole } from "../../../../utils/SecurityRole";
+
+const STATUS = {
+  VALID: { status: "Valid", color: "green" },
+  EXPIRED: { status: "Expired", color: "red" },
+  PENDING: { status: "Pending", color: "orange" },
+  UNTRUSTED: { status: "Untrusted", color: "red" },
+  REVOKED: { status: "Revoked", color: "red" },
+};
+
+const getStatus = ({ kyc }: { kyc: KycAccountDataViewModelResponse }) => {
+  const validToDate = new Date(Number(kyc.validTo));
+  const validFromDate = new Date(Number(kyc.validFrom));
+  const currentDate = new Date();
+
+  if (!kyc.isIssuer) return STATUS.UNTRUSTED;
+  if (currentDate < validFromDate) return STATUS.PENDING;
+  if (currentDate >= validToDate) return STATUS.EXPIRED;
+  if (
+    Number(kyc.validTo) > 1e13 ||
+    (currentDate >= validFromDate && currentDate < validToDate)
+  )
+    return STATUS.VALID;
+
+  return STATUS.REVOKED;
+};
 
 export const KYC = () => {
   const { id: securityId = "" } = useParams();
@@ -43,7 +70,7 @@ export const KYC = () => {
 
   const { mutate: revokeKYC } = useRevokeKYC();
   const { data: KYCList, isLoading: isLoadingKYCList } = useGetKYCList(
-    new GetKYCAccountsRequest({
+    new GetKYCAccountsDataRequest({
       securityId,
       kycStatus: 1,
       start: 0,
@@ -51,7 +78,7 @@ export const KYC = () => {
     }),
   );
 
-  const columnsHelper = createColumnHelper<KYCViewModel>();
+  const columnsHelper = createColumnHelper<KycAccountDataViewModelResponse>();
 
   const hasKYCRole = useMemo(
     () =>
@@ -61,6 +88,10 @@ export const KYC = () => {
 
   const columns = [
     columnsHelper.accessor("issuer", {
+      header: tTable("fields.issuerId"),
+      enableSorting: false,
+    }),
+    columnsHelper.accessor("account", {
       header: tTable("fields.accountId"),
       enableSorting: false,
     }),
@@ -89,7 +120,7 @@ export const KYC = () => {
           return "-";
         }
 
-        const formatDate = new Date(Number(date));
+        const formatDate = new Date(date);
 
         return <Box>{formatDate.toLocaleString()}</Box>;
       },
@@ -97,6 +128,21 @@ export const KYC = () => {
     columnsHelper.accessor("VCid", {
       header: tTable("fields.vcId"),
       enableSorting: false,
+    }),
+    columnsHelper.accessor("status", {
+      header: tTable("fields.status"),
+      enableSorting: false,
+      cell({ row }) {
+        const { color, status } = getStatus({
+          kyc: row.original,
+        });
+
+        return (
+          <Box color={color}>
+            <Text>{status}</Text>
+          </Box>
+        );
+      },
     }),
     ...(hasKYCRole
       ? [
