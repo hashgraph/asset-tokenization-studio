@@ -330,10 +330,10 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (_to == address(0)) {
             return (false, _TO_ACCOUNT_NULL_ERROR_ID, bytes32(0));
         }
-        if (!_isInControlList(_msgSender())) {
+        if (!_isAbleToAccess(_msgSender())) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_isInControlList(_to)) {
+        if (!_isAbleToAccess(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
         if (_balanceOfAdjusted(_msgSender()) < _value) {
@@ -376,13 +376,13 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         if (_from == address(0)) {
             return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
         }
-        if (!_isInControlList(_msgSender())) {
+        if (!_isAbleToAccess(_msgSender())) {
             return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_isInControlList(_from)) {
+        if (!_isAbleToAccess(_from)) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_isInControlList(_to)) {
+        if (!_isAbleToAccess(_to)) {
             return (false, _TO_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
         if (_allowanceAdjusted(_from, _msgSender()) < _value) {

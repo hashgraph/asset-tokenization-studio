@@ -403,10 +403,10 @@ abstract contract ERC1410StandardStorageWrapper is
         if (_from == address(0)) {
             return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
         }
-        if (!_isInControlList(_msgSender())) {
+        if (!_isAbleToAccess(_msgSender())) {
             return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_isInControlList(_from)) {
+        if (!_isAbleToAccess(_from)) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
         if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _from)) {
