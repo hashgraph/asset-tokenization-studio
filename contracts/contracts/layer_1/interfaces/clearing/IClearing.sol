@@ -209,6 +209,11 @@ pragma solidity 0.8.18;
 import {IHold} from '../hold/IHold.sol';
 
 interface IClearing {
+    enum ClearingOperationType {
+        Transfer,
+        Redeem,
+        HoldCreation
+    }
     struct ClearingOperation {
         bytes32 partition;
         uint256 expirationTimestamp;
