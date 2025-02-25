@@ -296,6 +296,7 @@ interface IClearing {
             uint256 amount_,
             uint256 expirationTimestamp_,
             address destination_,
+            ClearingOperationType clearingOperationType_,
             bytes memory data_,
             bytes memory operatorData_,
             IHold.Hold memory hold_

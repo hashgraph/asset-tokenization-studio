@@ -225,7 +225,7 @@ abstract contract ClearingStorageWrapper1 is
 {
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
-    
+
     function _setClearing(bool _activated) internal returns (bool success_) {
         _clearingStorage().activated = _activated;
         if (_activated) emit ClearingActivated(_msgSender());
@@ -282,6 +282,7 @@ abstract contract ClearingStorageWrapper1 is
             uint256 amount_,
             uint256 expirationTimestamp_,
             address destination_,
+            IClearing.ClearingOperationType clearingOperationType_,
             bytes memory data_,
             bytes memory operatorData_,
             IHold.Hold memory hold_
@@ -291,26 +292,25 @@ abstract contract ClearingStorageWrapper1 is
             _clearingOperationIdentifier
         );
 
-        (amount_, expirationTimestamp_, destination_, data_, operatorData_) = (
-            clearingData.amount,
-            clearingData.expirationTimestamp,
-            clearingData.destination,
-            clearingData.data,
-            clearingData.operatorData
-        );
-
         if (
             _clearingOperationIdentifier.clearingOperationType ==
             IClearing.ClearingOperationType.HoldCreation
         ) {
             hold_ = IHold.Hold(
-                amount_,
+                clearingData.amount,
                 clearingData.holdExpirationTimestamp,
                 clearingData.escrow,
-                destination_,
-                data_
+                clearingData.destination,
+                clearingData.data
             );
+        } else {
+            amount_ = clearingData.amount;
+            expirationTimestamp_ = clearingData.expirationTimestamp;
+            destination_ = clearingData.destination;
+            data_ = clearingData.data;
+            operatorData_ = clearingData.operatorData;
         }
+        clearingOperationType_ = clearingData.clearingOperationType;
     }
 
     function _clearingStorage()
