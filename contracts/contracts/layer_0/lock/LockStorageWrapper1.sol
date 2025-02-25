@@ -237,8 +237,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     }
 
     modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp) {
-        if (_expirationTimestamp < _blockTimestamp())
-            revert WrongExpirationTimestamp();
+        _checkExpirationTimestamp(_expirationTimestamp);
         _;
     }
 
@@ -260,6 +259,11 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         if (!_isLockedExpirationTimestamp(_partition, _tokenHolder, _lockId))
             revert LockExpirationNotReached();
         _;
+    }
+
+    function _checkExpirationTimestamp(uint256 _expirationTimestamp) internal {
+        if (_expirationTimestamp < _blockTimestamp())
+            revert WrongExpirationTimestamp();
     }
 
     function _getLockedAmountForByPartition(
@@ -390,18 +394,6 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
             ];
     }
 
-    function _lockStorage()
-        internal
-        pure
-        returns (LockDataStorage storage lock_)
-    {
-        bytes32 position = _LOCK_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            lock_.slot := position
-        }
-    }
-
     function _isLockedExpirationTimestamp(
         bytes32 _partition,
         address _tokenHolder,
@@ -424,5 +416,17 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
             .lockIdsByAccountAndPartition[_tokenHolder][_partition].contains(
                     _lockId
                 );
+    }
+
+    function _lockStorage()
+        internal
+        pure
+        returns (LockDataStorage storage lock_)
+    {
+        bytes32 position = _LOCK_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            lock_.slot := position
+        }
     }
 }

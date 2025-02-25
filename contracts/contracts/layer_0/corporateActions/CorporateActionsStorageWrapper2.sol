@@ -282,15 +282,26 @@ abstract contract CorporateActionsStorageWrapper2 is
         corporateActionIndexByType_ = _getCorporateActionCountByType(
             _actionType
         );
+        _initByActionType(_actionType, success_, corporateActionId_, _data);
+    }
 
+    function _initByActionType(
+        bytes32 _actionType,
+        bool _success,
+        bytes32 _corporateActionId,
+        bytes memory _data
+    ) private {
         if (_actionType == DIVIDEND_CORPORATE_ACTION_TYPE) {
-            _initDividend(success_, corporateActionId_, _data);
-        } else if (_actionType == VOTING_RIGHTS_CORPORATE_ACTION_TYPE) {
-            _initVotingRights(success_, corporateActionId_, _data);
-        } else if (_actionType == COUPON_CORPORATE_ACTION_TYPE) {
-            _initCoupon(success_, corporateActionId_, _data);
-        } else if (_actionType == BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE) {
-            _initBalanceAdjustment(success_, corporateActionId_, _data);
+            return _initDividend(_success, _corporateActionId, _data);
+        }
+        if (_actionType == VOTING_RIGHTS_CORPORATE_ACTION_TYPE) {
+            return _initVotingRights(_success, _corporateActionId, _data);
+        }
+        if (_actionType == COUPON_CORPORATE_ACTION_TYPE) {
+            return _initCoupon(_success, _corporateActionId, _data);
+        }
+        if (_actionType == BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE) {
+            return _initBalanceAdjustment(_success, _corporateActionId, _data);
         }
     }
 
@@ -368,37 +379,28 @@ abstract contract CorporateActionsStorageWrapper2 is
     }
 
     function _onScheduledTaskTriggered(bytes memory _data) internal {
-        if (_data.length > 0) {
-            bytes32 taskType = abi.decode(_data, (bytes32));
-            if (taskType == SNAPSHOT_TASK_TYPE) {
-                _triggerScheduledSnapshots(1);
-            } else if (taskType == BALANCE_ADJUSTMENT_TASK_TYPE) {
-                _triggerScheduledBalanceAdjustments(1);
-            }
+        if (_data.length == 0) return;
+        if (abi.decode(_data, (bytes32)) == SNAPSHOT_TASK_TYPE) {
+            _triggerScheduledSnapshots(1);
+            return;
         }
+        _triggerScheduledBalanceAdjustments(1);
     }
 
     function _onScheduledBalanceAdjustmentTriggered(
         bytes memory _data
     ) internal {
-        if (_data.length > 0) {
-            bytes32 actionId = abi.decode(_data, (bytes32));
-            (, bytes memory balanceAdjustmentData) = _getCorporateAction(
-                actionId
+        if (_data.length == 0) return;
+        (, bytes memory balanceAdjustmentData) = _getCorporateAction(
+            abi.decode(_data, (bytes32))
+        );
+        if (balanceAdjustmentData.length == 0) return;
+        IEquity.ScheduledBalanceAdjustment memory balanceAdjustment = abi
+            .decode(
+                balanceAdjustmentData,
+                (IEquity.ScheduledBalanceAdjustment)
             );
-
-            if (balanceAdjustmentData.length > 0) {
-                IEquity.ScheduledBalanceAdjustment
-                    memory balanceAdjustment = abi.decode(
-                        balanceAdjustmentData,
-                        (IEquity.ScheduledBalanceAdjustment)
-                    );
-                _adjustBalances(
-                    balanceAdjustment.factor,
-                    balanceAdjustment.decimals
-                );
-            }
-        }
+        _adjustBalances(balanceAdjustment.factor, balanceAdjustment.decimals);
     }
 
     function _getSnapshotID(bytes32 _actionId) internal view returns (uint256) {

@@ -285,12 +285,12 @@ abstract contract ERC1410StandardStorageWrapper is
     ) internal override {
         _pushLabafUserPartition(_account, _getAbaf());
 
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
 
         erc1410Storage.partitions[_account].push(Partition(_value, _partition));
         erc1410Storage.partitionToIndex[_account][
             _partition
-        ] = _getERC1410BasicStorage().partitions[_account].length;
+        ] = _erc1410BasicStorage().partitions[_account].length;
 
         if (_value != 0) erc1410Storage.balances[_account] += _value;
     }
@@ -365,7 +365,7 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32 _partition,
         uint256 _value
     ) internal {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
 
         erc1410Storage.totalSupply -= _value;
         erc1410Storage.totalSupplyByPartition[_partition] -= _value;
@@ -375,7 +375,7 @@ abstract contract ERC1410StandardStorageWrapper is
         bytes32 _partition,
         uint256 _value
     ) internal {
-        ERC1410BasicStorage storage erc1410Storage = _getERC1410BasicStorage();
+        ERC1410BasicStorage storage erc1410Storage = _erc1410BasicStorage();
 
         erc1410Storage.totalSupply += _value;
         erc1410Storage.totalSupplyByPartition[_partition] += _value;
@@ -403,13 +403,13 @@ abstract contract ERC1410StandardStorageWrapper is
         if (_from == address(0)) {
             return (false, _FROM_ACCOUNT_NULL_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_msgSender())) {
+        if (!_isAbleToAccess(_msgSender())) {
             return (false, _OPERATOR_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkControlList(_from)) {
+        if (!_isAbleToAccess(_from)) {
             return (false, _FROM_ACCOUNT_BLOCKED_ERROR_ID, bytes32(0));
         }
-        if (!_checkKycStatus(IKyc.KycStatus.GRANTED, _from)) {
+        if (!_hasSameKycStatus(IKyc.KycStatus.GRANTED, _from)) {
             return (false, _FROM_ACCOUNT_KYC_ERROR_ID, bytes32(0));
         }
         if (!_validPartition(_partition, _from)) {
