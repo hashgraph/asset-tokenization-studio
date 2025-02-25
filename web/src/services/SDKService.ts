@@ -301,12 +301,12 @@ import {
   AddIssuerRequest,
   RemoveIssuerRequest,
   IsIssuerRequest,
-  GetKYCAccountsRequest,
   GetKYCForRequest,
   GrantKYCRequest,
   RevokeKYCRequest,
   Kyc,
   KYCViewModel,
+  KycAccountDataViewModel,
   GetKYCAccountsDataRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
@@ -874,19 +874,13 @@ export class SDKService {
   }
 
   // KYC ////////////////////////////////////////////
-  public static async getKYCAccounts(
-    req: GetKYCAccountsRequest,
-  ): Promise<string[]> {
-    return await Kyc.getKYCAccounts(req);
-  }
-
   public static async getKYCFor(req: GetKYCForRequest): Promise<KYCViewModel> {
     return await Kyc.getKYCFor(req);
   }
 
   public static async getKYCAccountsData(
     req: GetKYCAccountsDataRequest,
-  ): Promise<KYCViewModel[]> {
+  ): Promise<KycAccountDataViewModel[]> {
     return await Kyc.getKYCAccountsData(req);
   }
 
