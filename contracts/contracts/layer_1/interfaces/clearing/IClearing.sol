@@ -211,7 +211,9 @@ import {IHold} from '../hold/IHold.sol';
 interface IClearing {
     function initialize_Clearing(bool _activateClearing) external;
 
-    function setClearing(bool _activated) external returns (bool success_);
+    function activateClearing() external returns (bool success_);
+
+    function deactivateClearing() external returns (bool success_);
 
     function isClearingActivated() external view returns (bool);
 
