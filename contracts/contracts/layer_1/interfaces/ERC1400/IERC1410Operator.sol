@@ -207,13 +207,16 @@
 pragma solidity 0.8.18;
 
 interface IERC1410Operator {
+    struct OperatorTransferData {
+        bytes32 partition;
+        address from;
+        address to;
+        uint256 value;
+        bytes data;
+        bytes operatorData;
+    }
     function operatorTransferByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
+        OperatorTransferData calldata _operatorTransferData
     ) external returns (bytes32);
 
     // Operator Management

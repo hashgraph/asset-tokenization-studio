@@ -215,18 +215,20 @@ import {
     type ERC1410ScheduledTasks,
     type AccessControl,
     TimeTravel,
-    Hold_2,
+    Hold,
     Equity,
-    Cap_2,
+    Cap,
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
     ERC1410ScheduledTasks__factory,
     AdjustBalances__factory,
-    Cap_2__factory,
-    Hold_2__factory,
+    Cap__factory,
+    Hold__factory,
     Equity__factory,
     TimeTravel__factory,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -234,6 +236,8 @@ import {
     ISSUER_ROLE,
     CAP_ROLE,
     CONTROLLER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     CORPORATE_ACTION_ROLE,
     deployEquityFromFactory,
     Rbac,
@@ -243,8 +247,10 @@ import {
     deployAtsFullInfrastructure,
     MAX_UINT256,
     ADDRESS_ZERO,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
+import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const amount = 1
 const balanceOf_A_Original = [10 * amount, 100 * amount]
@@ -260,6 +266,8 @@ const maxSupply_Original = 1000000 * amount
 const maxSupply_Partition_1_Original = 50000 * amount
 const maxSupply_Partition_2_Original = 0
 const ONE_SECOND = 1
+const EMPTY_VC_ID = EMPTY_STRING
+let holdIdentifier: any
 
 describe('Holds Layer 2 Tests', () => {
     let diamond: ResolverProxy
@@ -276,10 +284,12 @@ describe('Holds Layer 2 Tests', () => {
     let erc1410Facet: ERC1410ScheduledTasks
     let adjustBalancesFacet: AdjustBalances
     let accessControlFacet: AccessControl
-    let capFacet: Cap_2
+    let capFacet: Cap
     let equityFacet: Equity
-    let holdFacet: Hold_2
+    let holdFacet: Hold
     let timeTravelFacet: TimeTravel
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     async function deployAsset(multiPartition: boolean) {
         const init_rbacs: Rbac[] = set_initRbacs()
@@ -337,12 +347,18 @@ describe('Holds Layer 2 Tests', () => {
             diamond.address,
             defaultSigner
         )
-        capFacet = Cap_2__factory.connect(diamond.address, defaultSigner)
-        holdFacet = Hold_2__factory.connect(diamond.address, defaultSigner)
+        capFacet = Cap__factory.connect(diamond.address, defaultSigner)
+        holdFacet = Hold__factory.connect(diamond.address, defaultSigner)
         equityFacet = Equity__factory.connect(diamond.address, defaultSigner)
         timeTravelFacet = TimeTravel__factory.connect(
             diamond.address,
             defaultSigner
+        )
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
         )
     }
 
@@ -355,7 +371,15 @@ describe('Holds Layer 2 Tests', () => {
             role: CORPORATE_ACTION_ROLE,
             members: [account_B],
         }
-        return [rbacPause, corporateActionPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        return [rbacPause, corporateActionPause, rbacKYC, rbacSSI]
     }
 
     async function setPreBalanceAdjustment() {
@@ -381,30 +405,53 @@ describe('Holds Layer 2 Tests', () => {
             maxSupply_Partition_2_Original
         )
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
             account_A,
-            balanceOf_A_Original[0],
-            '0x'
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
         )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_A,
-            balanceOf_A_Original[1],
-            '0x'
-        )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
+        await kycFacet.grantKyc(
             account_B,
-            balanceOf_B_Original[0],
-            '0x'
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
         )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_B,
-            balanceOf_B_Original[1],
-            '0x'
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
         )
+
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_A,
+            value: balanceOf_A_Original[0],
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_A,
+            value: balanceOf_A_Original[1],
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original[0],
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original[1],
+            data: '0x',
+        })
     }
 
     before(async () => {
@@ -428,6 +475,11 @@ describe('Holds Layer 2 Tests', () => {
 
         factory = deployedContracts.factory.contract
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
+        holdIdentifier = {
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_A,
+            holdId: 1,
+        }
     })
 
     beforeEach(async () => {
@@ -466,9 +518,7 @@ describe('Holds Layer 2 Tests', () => {
                 account_A
             )
         const hold_Before = await holdFacet.getHoldForByPartition(
-            _PARTITION_ID_1,
-            account_A,
-            1
+            holdIdentifier
         )
 
         // adjustBalances
@@ -500,18 +550,16 @@ describe('Holds Layer 2 Tests', () => {
             dateToUnixTimestamp('2030-01-01T00:00:03Z')
         )
 
-        const hold_TotalAmount_After = await holdFacet.getHeldAmountFor(
+        const hold_TotalAmount_After = await holdFacet.getHeldAmountForAdjusted(
             account_A
         )
         const hold_TotalAmount_After_Partition_1 =
-            await holdFacet.getHeldAmountForByPartition(
+            await holdFacet.getHeldAmountForByPartitionAdjusted(
                 _PARTITION_ID_1,
                 account_A
             )
-        const hold_After = await holdFacet.getHoldForByPartition(
-            _PARTITION_ID_1,
-            account_A,
-            1
+        const hold_After = await holdFacet.getHoldForByPartitionAdjusted(
+            holdIdentifier
         )
         const balance_After = await erc1410Facet.balanceOf(account_A)
         const balance_After_Partition_1 =
@@ -580,9 +628,7 @@ describe('Holds Layer 2 Tests', () => {
         await holdFacet
             .connect(signer_B)
             .executeHoldByPartition(
-                _PARTITION_ID_1,
-                account_A,
-                1,
+                holdIdentifier,
                 account_C,
                 hold.amount * adjustFactor
             )
@@ -670,12 +716,7 @@ describe('Holds Layer 2 Tests', () => {
         // RELEASE HOLD
         await holdFacet
             .connect(signer_B)
-            .releaseHoldByPartition(
-                _PARTITION_ID_1,
-                account_A,
-                1,
-                hold.amount * adjustFactor
-            )
+            .releaseHoldByPartition(holdIdentifier, hold.amount * adjustFactor)
 
         const balance_After_Release = await erc1410Facet.balanceOf(account_A)
         const balance_After_Release_Partition_1 =
@@ -746,7 +787,7 @@ describe('Holds Layer 2 Tests', () => {
             (await ethers.provider.getBlock('latest')).timestamp +
                 2 * ONE_SECOND
         )
-        await holdFacet.reclaimHoldByPartition(_PARTITION_ID_1, account_A, 1)
+        await holdFacet.reclaimHoldByPartition(holdIdentifier)
 
         const balance_After_Release = await erc1410Facet.balanceOf(account_A)
         const balance_After_Release_Partition_1 =
@@ -862,7 +903,7 @@ describe('Holds Layer 2 Tests', () => {
         await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
 
         const TotalHoldLABAF_Before =
-            await adjustBalancesFacet.getTotalHeldLABAFByPartition(
+            await adjustBalancesFacet.getTotalHeldLabafByPartition(
                 _PARTITION_ID_1,
                 account_A
             )
@@ -875,7 +916,7 @@ describe('Holds Layer 2 Tests', () => {
         await holdFacet.createHoldByPartition(_PARTITION_ID_1, hold)
 
         const HoldLABAF_Before =
-            await adjustBalancesFacet.getHoldLABAFByPartition(
+            await adjustBalancesFacet.getHoldLabafByPartition(
                 _PARTITION_ID_1,
                 2,
                 account_A
@@ -884,21 +925,15 @@ describe('Holds Layer 2 Tests', () => {
         // EXECUTE HOLD
         await holdFacet
             .connect(signer_B)
-            .executeHoldByPartition(
-                _PARTITION_ID_1,
-                account_A,
-                1,
-                account_C,
-                hold.amount
-            )
+            .executeHoldByPartition(holdIdentifier, account_C, hold.amount)
 
         const TotalHoldLABAF_After =
-            await adjustBalancesFacet.getTotalHeldLABAFByPartition(
+            await adjustBalancesFacet.getTotalHeldLabafByPartition(
                 _PARTITION_ID_1,
                 account_A
             )
         const HoldLABAF_After =
-            await adjustBalancesFacet.getHoldLABAFByPartition(
+            await adjustBalancesFacet.getHoldLabafByPartition(
                 _PARTITION_ID_1,
                 2,
                 account_A

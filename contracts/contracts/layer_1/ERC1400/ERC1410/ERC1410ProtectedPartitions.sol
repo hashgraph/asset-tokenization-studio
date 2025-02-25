@@ -209,13 +209,12 @@ pragma solidity 0.8.18;
 import {
     IERC1410ProtectedPartitions
 } from '../../interfaces/ERC1400/IERC1410ProtectedPartitions.sol';
-import {
-    ERC1410ProtectedPartitionsStorageWrapper
-} from './ERC1410ProtectedPartitionsStorageWrapper.sol';
+import {Common} from '../../common/Common.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410ProtectedPartitions is
     IERC1410ProtectedPartitions,
-    ERC1410ProtectedPartitionsStorageWrapper
+    Common
 {
     function protectedTransferFromByPartition(
         bytes32 _partition,
@@ -227,12 +226,13 @@ abstract contract ERC1410ProtectedPartitions is
         bytes calldata _signature
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_protectedPartitionsRole(_partition))
         checkControlList(_from)
         checkControlList(_to)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         onlyProtectedPartitions
     {
         _protectedTransferFromByPartition(
@@ -255,12 +255,12 @@ abstract contract ERC1410ProtectedPartitions is
         bytes calldata _signature
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_protectedPartitionsRole(_partition))
         checkControlList(_from)
         onlyProtectedPartitions
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
     {
         _protectedRedeemFromByPartition(
             _partition,

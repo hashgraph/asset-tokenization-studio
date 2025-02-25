@@ -213,18 +213,20 @@ import {
     type Pause,
     type AccessControl,
     TimeTravel,
-    Lock_2,
-    Hold_2,
+    Lock,
+    Hold,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
     AccessControl__factory,
     EquityUSATimeTravel__factory,
     Pause__factory,
-    Lock_2__factory,
-    Hold_2__factory,
+    Lock__factory,
+    Hold__factory,
     ERC1410ScheduledTasks__factory,
     TimeTravel__factory,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -232,6 +234,8 @@ import {
     ISSUER_ROLE,
     LOCKER_ROLE,
     PAUSER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
@@ -241,7 +245,7 @@ import {
     ADDRESS_ZERO,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
+import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const DECIMALS = 7
 let dividendsRecordDateInSeconds = 0
@@ -289,10 +293,12 @@ describe('Equity Tests', () => {
     let equityFacet: EquityUSA
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let lockFacet: Lock_2
-    let holdFacet: Hold_2
+    let lockFacet: Lock
+    let holdFacet: Hold
     let erc1410Facet: ERC1410ScheduledTasks
     let timeTravelFacet: TimeTravel
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     before(async () => {
         // mute | mock console.log
@@ -322,7 +328,15 @@ describe('Equity Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        const init_rbacs: Rbac[] = [rbacPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -364,13 +378,23 @@ describe('Equity Tests', () => {
             signer_A
         )
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
-        lockFacet = Lock_2__factory.connect(diamond.address, signer_A)
-        holdFacet = Hold_2__factory.connect(diamond.address, signer_A)
+        lockFacet = Lock__factory.connect(diamond.address, signer_A)
+        holdFacet = Hold__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
         )
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+        rbacSSI
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(account_A, '', 0, 9999999999, account_A)
 
         dividendsRecordDateInSeconds = dateToUnixTimestamp(
             '2030-01-01T00:00:10Z'
@@ -453,7 +477,7 @@ describe('Equity Tests', () => {
 
             await expect(
                 equityFacet.setDividends(wrongDividendData_1)
-            ).to.be.rejectedWith('WrongDates')
+            ).to.be.revertedWithCustomError(equityFacet, 'WrongDates')
 
             const wrongDividendData_2 = {
                 recordDate: dateToUnixTimestamp(
@@ -465,7 +489,7 @@ describe('Equity Tests', () => {
 
             await expect(
                 equityFacet.setDividends(wrongDividendData_2)
-            ).to.be.rejectedWith('WrongTimestamp')
+            ).to.be.revertedWithCustomError(equityFacet, 'WrongTimestamp')
         })
 
         it('GIVEN an account with corporateActions role WHEN setDividends THEN transaction succeeds', async () => {
@@ -532,12 +556,13 @@ describe('Equity Tests', () => {
             const TotalAmount = number_Of_Shares
             const LockedAmount = TotalAmount - 5n
 
-            await erc1410Facet.issueByPartition(
-                DEFAULT_PARTITION,
-                account_A,
-                TotalAmount,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
+
             await lockFacet.lock(LockedAmount, account_A, 99999999999)
 
             // set dividend
@@ -575,12 +600,12 @@ describe('Equity Tests', () => {
             const TotalAmount = number_Of_Shares
             const HeldAmount = TotalAmount - 5n
 
-            await erc1410Facet.issueByPartition(
-                DEFAULT_PARTITION,
-                account_A,
-                TotalAmount,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
 
             let hold = {
                 amount: HeldAmount,
@@ -698,12 +723,12 @@ describe('Equity Tests', () => {
             const TotalAmount = number_Of_Shares
             const LockedAmount = TotalAmount - 5n
 
-            await erc1410Facet.issueByPartition(
-                DEFAULT_PARTITION,
-                account_A,
-                TotalAmount,
-                '0x'
-            )
+            await erc1410Facet.issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
             await lockFacet.lock(LockedAmount, account_A, 99999999999)
 
             // set dividend

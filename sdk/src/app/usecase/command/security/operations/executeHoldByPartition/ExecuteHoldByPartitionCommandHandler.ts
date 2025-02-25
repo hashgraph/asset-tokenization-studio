@@ -222,6 +222,7 @@ import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.
 import { SecurityPaused } from '../../error/SecurityPaused.js';
 import { InsufficientHoldBalance } from '../../error/InsufficientHoldBalance.js';
 import { EVM_ZERO_ADDRESS } from '../../../../../../core/Constants.js';
+import ValidationService from '../../../../../../app/service/ValidationService.js';
 
 @CommandHandler(ExecuteHoldByPartitionCommand)
 export class ExecuteHoldByPartitionCommandHandler
@@ -236,6 +237,8 @@ export class ExecuteHoldByPartitionCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
 
   async execute(
@@ -243,6 +246,12 @@ export class ExecuteHoldByPartitionCommandHandler
   ): Promise<ExecuteHoldByPartitionCommandResponse> {
     const { securityId, sourceId, amount, holdId, targetId, partitionId } =
       command;
+
+    await this.validationService.validateKycAddresses(securityId, [
+      sourceId,
+      targetId,
+    ]);
+
     const handler = this.transactionService.getHandler();
     const security = await this.securityService.get(securityId);
 

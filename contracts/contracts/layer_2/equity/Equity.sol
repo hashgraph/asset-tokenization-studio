@@ -251,7 +251,6 @@ abstract contract Equity is
         Dividend calldata _newDividend
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
@@ -283,7 +282,6 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
         checkIndexForCorporateActionByType(
             DIVIDEND_CORPORATE_ACTION_TYPE,
@@ -306,7 +304,6 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
         checkIndexForCorporateActionByType(
             DIVIDEND_CORPORATE_ACTION_TYPE,
@@ -324,7 +321,6 @@ abstract contract Equity is
     function getDividendsCount()
         external
         view
-        virtual
         override
         returns (uint256 dividendCount_)
     {
@@ -335,7 +331,6 @@ abstract contract Equity is
         Voting calldata _newVoting
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
@@ -358,7 +353,6 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
         checkIndexForCorporateActionByType(
             VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
@@ -375,7 +369,6 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
         checkIndexForCorporateActionByType(
             VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
@@ -389,7 +382,6 @@ abstract contract Equity is
     function getVotingCount()
         external
         view
-        virtual
         override
         returns (uint256 votingCount_)
     {
@@ -400,7 +392,6 @@ abstract contract Equity is
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
@@ -429,7 +420,6 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
         checkIndexForCorporateActionByType(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
@@ -443,7 +433,6 @@ abstract contract Equity is
     function getScheduledBalanceAdjustmentCount()
         external
         view
-        virtual
         override
         returns (uint256 balanceAdjustmentCount_)
     {

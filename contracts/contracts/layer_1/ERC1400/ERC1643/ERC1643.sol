@@ -242,7 +242,7 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
         bytes32 _name,
         string calldata _uri,
         bytes32 _documentHash
-    ) external virtual override onlyRole(_DOCUMENTER_ROLE) onlyUnpaused {
+    ) external override onlyRole(_DOCUMENTER_ROLE) onlyUnpaused {
         if (_name == bytes32(0)) {
             revert EmptyName();
         }
@@ -272,7 +272,7 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
      */
     function removeDocument(
         bytes32 _name
-    ) external virtual override onlyRole(_DOCUMENTER_ROLE) onlyUnpaused {
+    ) external override onlyRole(_DOCUMENTER_ROLE) onlyUnpaused {
         ERC1643Storage storage erc1643Storage = _getERC1643Storage();
         if (erc1643Storage.documents[_name].lastModified == uint256(0)) {
             revert DocumentDoesNotExist(_name);
@@ -304,7 +304,7 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
      */
     function getDocument(
         bytes32 _name
-    ) external view virtual override returns (string memory, bytes32, uint256) {
+    ) external view override returns (string memory, bytes32, uint256) {
         ERC1643Storage storage erc1643Storage = _getERC1643Storage();
         return (
             erc1643Storage.documents[_name].uri,
@@ -320,7 +320,6 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
     function getAllDocuments()
         external
         view
-        virtual
         override
         returns (bytes32[] memory)
     {
@@ -330,7 +329,6 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -340,7 +338,6 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -359,7 +356,6 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {
@@ -371,7 +367,6 @@ contract ERC1643 is IERC1643, IStaticFunctionSelectors, Common {
     function _getERC1643Storage()
         internal
         pure
-        virtual
         returns (ERC1643Storage storage erc1643Storage)
     {
         bytes32 position = _ERC1643_STORAGE_POSITION;

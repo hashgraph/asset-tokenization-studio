@@ -223,7 +223,7 @@ import {_DEFAULT_ADMIN_ROLE} from '../../../layer_1/constants/roles.sol';
 contract DiamondCutFacet is IDiamondCut, ResolverProxyUnstructured {
     function updateConfigVersion(
         uint256 _newVersion
-    ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
         ResolverProxyStorage storage ds = _getResolverProxyStorage();
         ds.resolver.checkResolverProxyConfigurationRegistered(
             ds.resolverProxyConfigurationId,
@@ -235,7 +235,7 @@ contract DiamondCutFacet is IDiamondCut, ResolverProxyUnstructured {
     function updateConfig(
         bytes32 _newConfigurationId,
         uint256 _newVersion
-    ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
         ResolverProxyStorage storage ds = _getResolverProxyStorage();
         ds.resolver.checkResolverProxyConfigurationRegistered(
             _newConfigurationId,
@@ -249,7 +249,7 @@ contract DiamondCutFacet is IDiamondCut, ResolverProxyUnstructured {
         IBusinessLogicResolver _newResolver,
         bytes32 _newConfigurationId,
         uint256 _newVersion
-    ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
         _newResolver.checkResolverProxyConfigurationRegistered(
             _newConfigurationId,
             _newVersion

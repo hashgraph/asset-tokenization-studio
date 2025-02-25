@@ -232,7 +232,6 @@ contract EquityUSA is IEquityUSA, Equity, Security {
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -242,7 +241,6 @@ contract EquityUSA is IEquityUSA, Equity, Security {
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -285,7 +283,6 @@ contract EquityUSA is IEquityUSA, Equity, Security {
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {
