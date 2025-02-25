@@ -215,6 +215,7 @@ import {
   GetKYCAccountsDataQuery,
   GetKYCAccountsDataQueryResponse,
 } from './GetKYCAccountsDataQuery.js';
+import { KycAccountData } from '../../../../../../domain/context/kyc/KycAccountData.js';
 
 @QueryHandler(GetKYCAccountsDataQuery)
 export class GetKYCAccountsDataQueryHandler
@@ -240,22 +241,25 @@ export class GetKYCAccountsDataQueryHandler
         : securityId.toString(),
     );
 
-    const res = await this.queryAdapter.getKYCAccountsData(
+    const kycAccountsData = await this.queryAdapter.getKYCAccountsData(
       securityEvmAddress,
       kycStatus,
       start,
       end,
     );
 
-    const hederaIdFormat = await Promise.all(
-      res.map(async (item) => ({
+    const kycDataHederaIdFormat = (await Promise.all(
+      kycAccountsData.map(async (item) => ({
         ...item,
         issuer: (
           await this.mirrorNodeAdapter.getAccountInfo(item.issuer)
         ).id.toString(),
+        account: (
+          await this.mirrorNodeAdapter.getAccountInfo(item.account)
+        ).id.toString(),
       })),
-    );
+    )) as KycAccountData[];
 
-    return new GetKYCAccountsDataQueryResponse(hederaIdFormat);
+    return new GetKYCAccountsDataQueryResponse(kycDataHederaIdFormat);
   }
 }
