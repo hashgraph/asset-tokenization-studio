@@ -237,12 +237,12 @@ interface IClearing {
 
     struct ClearingData {
         ClearingOperationType clearingOperationType;
-        uint256 amount_;
-        uint256 expirationTimestamp_;
-        address destination_;
+        uint256 amount;
+        uint256 expirationTimestamp;
+        address destination;
         address escrow;
-        bytes memory data_;
-        bytes memory operatorData_;
+        bytes data;
+        bytes operatorData;
     }
 
     struct ClearingDataStorage {
