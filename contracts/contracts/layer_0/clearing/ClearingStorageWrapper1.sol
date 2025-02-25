@@ -222,27 +222,15 @@ abstract contract ClearingStorageWrapper1 is
         bool activated;
     }
 
-    function _activateClearing() internal returns (bool success_) {
-        ClearingDataStorage storage clearingStorage = _clearingStorage();
-        if (!clearingStorage.activated) {
-            clearingStorage.activated = true;
-            emit ClearingActivated(_msgSender());
-        }
-        success_ = true;
-    }
-
-    function _deactivateClearing() internal returns (bool success_) {
-        ClearingDataStorage storage clearingStorage = _clearingStorage();
-        if (clearingStorage.activated) {
-            clearingStorage.activated = false;
-            emit ClearingDeactivated(_msgSender());
-        }
+    function _setClearing(bool _activated) internal returns (bool success_) {
+        _clearingStorage().activated = _activated;
+        if (_activated) emit ClearingActivated(_msgSender());
+        else emit ClearingDeactivated(_msgSender());
         success_ = true;
     }
 
     function _isClearingActivated() internal view returns (bool) {
-        ClearingDataStorage storage clearingStorage = _clearingStorage();
-        return clearingStorage.activated;
+        return _clearingStorage().activated;
     }
 
     function _clearingStorage()

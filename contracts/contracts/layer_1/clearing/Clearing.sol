@@ -225,20 +225,10 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         clearingStorage.activated = _clearingActive;
     }
 
-    function activateClearing()
-        external
-        onlyRole(_CLEARING_ROLE)
-        returns (bool success_)
-    {
-        success_ = _activateClearing();
-    }
-
-    function deactivateClearing()
-        external
-        onlyRole(_CLEARING_ROLE)
-        returns (bool success_)
-    {
-        success_ = _deactivateClearing();
+    function setClearing(
+        bool _activated
+    ) external onlyRole(_CLEARING_ROLE) returns (bool success_) {
+        success_ = _setClearing(_activated);
     }
 
     function isClearingActivated() external view returns (bool) {
@@ -261,16 +251,11 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_ = new bytes4[](2);
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_Clearing
             .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .activateClearing
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .deactivateClearing
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.setClearing.selector;
     }
 
     function getStaticInterfaceIds()
