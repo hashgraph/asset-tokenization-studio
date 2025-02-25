@@ -207,17 +207,17 @@
 pragma solidity 0.8.18;
 
 import {IHold} from '../hold/IHold.sol';
+import {
+    EnumerableSet
+} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 interface IClearing {
-    function initialize_Clearing(bool _activateClearing) external;
-
-    function activateClearing() external returns (bool success_);
-
-    function deactivateClearing() external returns (bool success_);
-
-    function isClearingActivated() external view returns (bool);
-
-    /*     struct ClearingOperation {
+    enum ClearingOperationType {
+        Transfer,
+        Redeem,
+        HoldCreation
+    }
+    struct ClearingOperation {
         bytes32 partition;
         uint256 expirationTimestamp;
         bytes data;
@@ -236,12 +236,6 @@ interface IClearing {
         uint256 nonce;
     }
 
-    enum ClearingOperationType {
-        Transfer,
-        Redeem,
-        HoldCreation
-    }
-
     struct ClearingOperationIdentifier {
         bytes32 partition;
         address tokenHolder;
@@ -249,6 +243,67 @@ interface IClearing {
         uint256 clearingId;
     }
 
+    struct ClearingData {
+        ClearingOperationType clearingOperationType;
+        uint256 amount;
+        uint256 expirationTimestamp;
+        address destination;
+        address escrow;
+        bytes data;
+        bytes operatorData;
+    }
+
+    struct ClearingDataStorage {
+        bool initialized;
+        bool activated;
+        mapping(address => uint256) totalClearedAmountByAccount;
+        mapping(address => mapping(bytes32 => uint256)) totalClearedAmountByAccountAndPartition;
+        mapping(address => mapping(bytes32 => mapping(uint256 => ClearingData))) clearingByAccountPartitionAndId;
+        mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) clearingIdsByAccountAndPartition;
+        mapping(address => mapping(bytes32 => uint256)) nextClearingIdByAccountAndPartition;
+        mapping(address => mapping(bytes32 => mapping(ClearingOperationType => EnumerableSet.UintSet))) clearingIdsByAccountAndPartitionAndTypes;
+    }
+
+    function initialize_Clearing(bool _activateClearing) external;
+
+    function activateClearing() external returns (bool success_);
+
+    function deactivateClearing() external returns (bool success_);
+
+    function isClearingActivated() external view returns (bool);
+
+    // function getClearingCountForByPartition(
+    //     bytes32 _partition,
+    //     address _tokenHolder,
+    //     ClearingOperationType _clearingOperationType
+    // ) external view returns (uint256 clearingCount_);
+
+    // function getClearingsIdForByPartition(
+    //     bytes32 _partition,
+    //     address _tokenHolder,
+    //     ClearingOperationType _clearingOperationType,
+    //     uint256 _pageIndex,
+    //     uint256 _pageLength
+    // ) external view returns (uint256[] memory clearingsId_);
+
+    // function getClearingForByPartition(
+    //     bytes32 _partition,
+    //     address _tokenHolder,
+    //     ClearingOperationType _clearingOperationType,
+    //     uint256 _clearingId
+    // )
+    //     external
+    //     view
+    //     returns (
+    //         uint256 amount_,
+    //         uint256 expirationTimestamp_,
+    //         address destination_,
+    //         bytes memory data_,
+    //         bytes memory operatorData_,
+    //         IHold.Hold memory hold_
+    //     );
+
+    /* 
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount,
@@ -327,36 +382,5 @@ interface IClearing {
     function reclaimClearingOperationByPartition(
         ClearingOperationIdentifier memory _clearingOperationIdentifier
     ) external returns (bool success_);
-
-    function getClearingCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        ClearingOperationType _clearingOperationType
-    ) external view returns (uint256 clearingCount_);
-
-    function getClearingsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        ClearingOperationType _clearingOperationType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view returns (uint256[] memory clearingsId_);
-
-    function getClearingForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        ClearingOperationType _clearingOperationType,
-        uint256 _clearingId
-    )
-        external
-        view
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_,
-            IHold.Hold memory hold_
-        );
  */
 }
