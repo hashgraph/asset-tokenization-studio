@@ -234,7 +234,11 @@ contract ScheduledBalanceAdjustments is
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    ) external override onlyAutoCalling(_scheduledBalanceAdjustmentStorage()) {
+    )
+        external
+        override
+        onlyAutoCalling(_scheduledBalanceAdjustmentStorage().autoCalling)
+    {
         _onScheduledBalanceAdjustmentTriggered(_data);
     } // solhint-enable no-unused-vars
 

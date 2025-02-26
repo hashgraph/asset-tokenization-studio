@@ -306,7 +306,7 @@ abstract contract ERC20StorageWrapper1 is ERC1410BasicStorageWrapperRead {
 
     function _erc20Storage()
         internal
-        view
+        pure
         returns (ERC20Storage storage erc20Storage_)
     {
         bytes32 position = _ERC20_STORAGE_POSITION;

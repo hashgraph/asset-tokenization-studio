@@ -252,9 +252,7 @@ abstract contract AccessControlStorageWrapper is
         uint256 _rolesLength,
         uint256 _activesLength
     ) {
-        if (_rolesLength != _activesLength) {
-            revert RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
-        }
+        _checkSameRolesAndActivesLength(_rolesLength, _activesLength);
         _;
     }
 
@@ -385,6 +383,15 @@ abstract contract AccessControlStorageWrapper is
         address _account
     ) internal view returns (bool hasRole_) {
         hasRole_ = _rolesStorageData.memberRoles[_account].contains(_role);
+    }
+
+    function _checkSameRolesAndActivesLength(
+        uint256 _rolesLength,
+        uint256 _activesLength
+    ) private pure {
+        if (_rolesLength != _activesLength) {
+            revert RolesAndActivesLengthMismatch(_rolesLength, _activesLength);
+        }
     }
 
     function _rolesStorage()

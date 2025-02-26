@@ -214,17 +214,13 @@ abstract contract Common is CapStorageWrapper2 {
     error AlreadyInitialized();
     error OnlyDelegateAllowed();
 
-    modifier onlyUninitialized(bool initialized) {
-        if (initialized) {
-            revert AlreadyInitialized();
-        }
+    modifier onlyUninitialized(bool _initialized) {
+        _checkUninitialized(_initialized);
         _;
     }
 
     modifier onlyDelegate() {
-        if (_msgSender() != address(this)) {
-            revert OnlyDelegateAllowed();
-        }
+        _checkDelegate();
         _;
     }
 
@@ -233,7 +229,15 @@ abstract contract Common is CapStorageWrapper2 {
         _;
     }
 
-    function _checkUnProtectedPartitionsOrWildCardRole() internal {
+    function _checkUninitialized(bool _initialized) private pure {
+        if (_initialized) revert AlreadyInitialized();
+    }
+
+    function _checkDelegate() private view {
+        if (_msgSender() != address(this)) revert OnlyDelegateAllowed();
+    }
+
+    function _checkUnProtectedPartitionsOrWildCardRole() private view {
         if (
             _arePartitionsProtected() &&
             !_hasRole(_WILD_CARD_ROLE, _msgSender())

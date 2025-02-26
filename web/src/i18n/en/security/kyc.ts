@@ -210,10 +210,12 @@ export default {
   },
   table: {
     fields: {
-      accountId: "Issuer ID",
+      accountId: "Account ID",
+      issuerId: "Issuer ID",
       validFrom: "Valid From",
       validTo: "Valid To",
       vcId: "VC ID",
+      status: "Status",
       actions: "Actions",
       revoke: "Remove",
     },

@@ -228,12 +228,6 @@ abstract contract ERC1644StorageWrapper is
         _;
     }
 
-    function _checkControllable() internal {
-        if (!_isControllable()) {
-            revert TokenIsNotControllable();
-        }
-    }
-
     function _controllerTransfer(
         address _from,
         address _to,
@@ -286,6 +280,10 @@ abstract contract ERC1644StorageWrapper is
      */
     function _isControllable() internal view returns (bool) {
         return _erc1644Storage().isControllable;
+    }
+
+    function _checkControllable() private view {
+        if (!_isControllable()) revert TokenIsNotControllable();
     }
 
     function _erc1644Storage()

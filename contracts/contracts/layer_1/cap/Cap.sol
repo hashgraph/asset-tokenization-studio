@@ -223,7 +223,7 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
         external
         override
         onlyUninitialized(_capStorage().initialized)
-        checkNewMaxSupply(maxSupply)
+        onlyValidNewMaxSupply(maxSupply)
     {
         CapDataStorage storage capStorage = _capStorage();
 
@@ -245,7 +245,7 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
-        checkNewMaxSupply(_maxSupply)
+        onlyValidNewMaxSupply(_maxSupply)
         returns (bool success_)
     {
         _setMaxSupply(_maxSupply);
@@ -260,7 +260,7 @@ contract Cap is ICap, IStaticFunctionSelectors, Common {
         override
         onlyUnpaused
         onlyRole(_CAP_ROLE)
-        checkNewMaxSupplyForPartition(_partition, _maxSupply)
+        onlyValidNewMaxSupplyByPartition(_partition, _maxSupply)
         returns (bool success_)
     {
         _setMaxSupplyByPartition(_partition, _maxSupply);

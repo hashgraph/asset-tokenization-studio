@@ -218,10 +218,10 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
     )
         external
         override
-        checkMaxSupply(_issueData.value)
-        checkMaxSupplyForPartition(_issueData.partition, _issueData.value)
-        onlyValidAddress(_issueData.tokenHolder)
-        checkControlList(_issueData.tokenHolder)
+        onlyWithinMaxSupply(_issueData.value)
+        onlyWithinMaxSupplyByPartition(_issueData.partition, _issueData.value)
+        validateAddress(_issueData.tokenHolder)
+        onlyListedAllowed(_issueData.tokenHolder)
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_issueData.partition)
         onlyRole(_ISSUER_ROLE)
@@ -243,7 +243,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        checkControlList(_msgSender())
+        onlyListedAllowed(_msgSender())
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
     {
@@ -276,8 +276,8 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        checkControlList(_tokenHolder)
-        checkControlList(_msgSender())
+        onlyListedAllowed(_tokenHolder)
+        onlyListedAllowed(_msgSender())
         onlyOperator(_partition, _tokenHolder)
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
