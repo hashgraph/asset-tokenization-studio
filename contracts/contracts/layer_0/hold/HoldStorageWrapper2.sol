@@ -527,8 +527,8 @@ abstract contract HoldStorageWrapper2 is
         if (_factor == 1) return;
 
         _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][
-            _partition
-        ] *= _factor;
+                _partition
+            ] *= _factor;
         _setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 

@@ -238,13 +238,13 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
         _clearingStorage()
         .clearingIdsByAccountAndPartition[_from][partition].add(clearingId_);
+
         _clearingStorage()
         .clearingIdsByAccountAndPartitionAndTypes[_from][partition][
             IClearing.ClearingOperationType.Transfer
         ].add(clearingId_);
-        _clearingStorage().clearingByAccountPartitionAndId[_from][partition][
-            clearingId_
-        ] = IClearing.ClearingData({
+
+        IClearing.ClearingData memory clearingData = IClearing.ClearingData({
             clearingOperationType: IClearing.ClearingOperationType.Transfer,
             amount: _amount,
             holdExpirationTimestamp: 0,
@@ -254,6 +254,12 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             data: _clearingOperation.data,
             operatorData: _operatorData
         });
+
+        _clearingStorage().clearingByAccountPartitionAndId[_from][partition][
+                clearingId_
+            ] = clearingData;
+
+        _afterClearing(_from, partition, _amount);
 
         success_ = true;
     }
@@ -306,6 +312,17 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         _setClearedLabafById(_partition, _tokenHolder, _clearingId, abaf);
         _updateAccountSnapshot(_tokenHolder, _partition);
         _updateAccountClearedBalancesSnapshot(_tokenHolder, _partition);
+    }
+
+    function _afterClearing(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _amount
+    ) internal {
+        _clearingStorage().totalClearedAmountByAccountAndPartition[
+            _tokenHolder
+        ][_partition] += _amount;
+        _clearingStorage().totalClearedAmountByAccount[_tokenHolder] += _amount;
     }
 
     function _updateTotalCleared(
