@@ -504,25 +504,22 @@ describe('Kyc Tests', () => {
 
             let KYCStatusFor_B_After = await kycFacet.getKycStatusFor(account_B)
             let KYC_Count_After = await kycFacet.getKycAccountsCount(1)
-            let KYCAccounts = await kycFacet.getKycAccounts(1, 0, 100)
             let KYCSFor_B = await kycFacet.getKycFor(account_B)
-            let [kycAccountsData_After] = await kycFacet.getKycAccountsData(
-                1,
-                0,
-                1
-            )
+            let [kycAccounts, kycAccountsData_After] =
+                await kycFacet.getKycAccountsData(1, 0, 1)
 
             expect(KYCStatusFor_B_Before).to.equal(0)
             expect(KYCStatusFor_B_After).to.equal(1)
             expect(KYC_Count_Before).to.equal(0)
             expect(KYC_Count_After).to.equal(1)
-            expect(KYCAccounts.length).to.equal(1)
-            expect(KYCAccounts[0]).to.equal(account_B)
+            expect(kycAccounts.length).to.equal(1)
+            expect(kycAccounts[0]).to.equal(account_B)
             expect(KYCSFor_B.validFrom).to.equal(_VALID_FROM)
             expect(KYCSFor_B.validTo).to.equal(_VALID_TO)
             expect(KYCSFor_B.issuer).to.equal(account_C)
             expect(KYCSFor_B.vcId).to.equal(_VC_ID)
-            expect(kycAccountsData_After.status).to.equal(1)
+            expect(kycAccountsData_After[0].status).to.equal(1)
+            expect(kycAccountsData_After.length).to.equal(1)
         })
 
         it('GIVEN a VC WHEN revokeKyc THEN transaction succeed', async () => {
@@ -538,11 +535,13 @@ describe('Kyc Tests', () => {
 
             let KYCStatusFor_B_After = await kycFacet.getKycStatusFor(account_B)
             let KYC_Count_After = await kycFacet.getKycAccountsCount(1)
-            let KYCAccounts = await kycFacet.getKycAccounts(1, 0, 100)
+            let [kycAccounts, kycAccountsData] =
+                await kycFacet.getKycAccountsData(1, 0, 100)
 
             expect(KYCStatusFor_B_After).to.equal(0)
             expect(KYC_Count_After).to.equal(0)
-            expect(KYCAccounts.length).to.equal(0)
+            expect(kycAccounts.length).to.equal(0)
+            expect(kycAccountsData.length).to.equal(0)
         })
 
         it('Check Kyc status after expiration', async () => {

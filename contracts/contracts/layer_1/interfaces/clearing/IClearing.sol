@@ -246,10 +246,10 @@ interface IClearing {
     struct ClearingData {
         ClearingOperationType clearingOperationType;
         uint256 amount;
-        uint256 holdExpirationTimestamp;
-        uint256 clearingExpirationTimestamp;
+        uint256 expirationTimestamp;
         address destination;
         address escrow;
+        uint256 holdExpirationTimestamp;
         bytes data;
         bytes operatorData;
     }
@@ -273,45 +273,34 @@ interface IClearing {
 
     function isClearingActivated() external view returns (bool);
 
-    function getClearedAmountFor(
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
-
-    function getClearedAmountForByPartition(
+    function getClearingCountForByPartition(
         bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
+        address _tokenHolder,
+        ClearingOperationType _clearingOperationType
+    ) external view returns (uint256 clearingCount_);
 
-    // function getClearingCountForByPartition(
-    //     bytes32 _partition,
-    //     address _tokenHolder,
-    //     ClearingOperationType _clearingOperationType
-    // ) external view returns (uint256 clearingCount_);
+    function getClearingsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        ClearingOperationType _clearingOperationType,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view returns (uint256[] memory clearingsId_);
 
-    // function getClearingsIdForByPartition(
-    //     bytes32 _partition,
-    //     address _tokenHolder,
-    //     ClearingOperationType _clearingOperationType,
-    //     uint256 _pageIndex,
-    //     uint256 _pageLength
-    // ) external view returns (uint256[] memory clearingsId_);
-
-    // function getClearingForByPartition(
-    //     bytes32 _partition,
-    //     address _tokenHolder,
-    //     ClearingOperationType _clearingOperationType,
-    //     uint256 _clearingId
-    // )
-    //     external
-    //     view
-    //     returns (
-    //         uint256 amount_,
-    //         uint256 expirationTimestamp_,
-    //         address destination_,
-    //         bytes memory data_,
-    //         bytes memory operatorData_,
-    //         IHold.Hold memory hold_
-    //     );
+    function getClearingForByPartition(
+        ClearingOperationIdentifier calldata _clearingIdentifier
+    )
+        external
+        view
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address destination_,
+            ClearingOperationType clearingOperationType_,
+            bytes memory data_,
+            bytes memory operatorData_,
+            IHold.Hold memory hold_
+        );
 
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,

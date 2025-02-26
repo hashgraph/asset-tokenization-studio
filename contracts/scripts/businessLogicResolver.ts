@@ -540,40 +540,21 @@ export async function createConfigurationsForDeployedContracts(
     partialBatchDeploy: boolean,
     {
         commonFacetAddressList,
+        equityFacetAddressList,
+        bondFacetAddressList,
         businessLogicResolverProxyAddress,
-        equityUsaAddress,
-        bondUsaAddress,
         signer,
     }: CreateConfigurationsForDeployedContractsCommand
 ): Promise<CreateConfigurationsForDeployedContractsResult> {
-    let result = CreateConfigurationsForDeployedContractsResult.empty()
-    result.commonFacetIdList = await Promise.all(
-        commonFacetAddressList.map(async (address) => {
-            return await IStaticFunctionSelectors__factory.connect(
-                address,
-                signer
-            ).getStaticResolverKey()
-        })
-    )
-    // Get the resolver keys for the equities and bonds
-    const [equityResolverKey, bondResolverKey] = await Promise.all([
-        IStaticFunctionSelectors__factory.connect(
-            equityUsaAddress,
-            signer
-        ).getStaticResolverKey(),
-        IStaticFunctionSelectors__factory.connect(
-            bondUsaAddress,
-            signer
-        ).getStaticResolverKey(),
-    ])
+    const result = CreateConfigurationsForDeployedContractsResult.empty()
 
-    result.equityFacetIdList = [...result.commonFacetIdList, equityResolverKey]
-    result.bondFacetIdList = [...result.commonFacetIdList, bondResolverKey]
-
-    result.equityFacetVersionList = Array(result.equityFacetIdList.length).fill(
-        1
+    await fetchFacetResolverKeys(
+        result,
+        signer,
+        commonFacetAddressList,
+        equityFacetAddressList,
+        bondFacetAddressList
     )
-    result.bondFacetVersionList = Array(result.bondFacetIdList.length).fill(1)
 
     await processFacetLists(
         EQUITY_CONFIG_ID,
@@ -592,4 +573,50 @@ export async function createConfigurationsForDeployedContracts(
         partialBatchDeploy
     )
     return result
+}
+
+async function fetchFacetResolverKeys(
+    result: CreateConfigurationsForDeployedContractsResult,
+    signer: Signer,
+    commonFacetAddressList: string[],
+    equityFacetAddressList: string[],
+    bondFacetAddressList: string[]
+): Promise<void> {
+    const resolverKeyMap = new Map<string, string>()
+
+    result.commonFacetIdList = await Promise.all(
+        commonFacetAddressList.map((address) =>
+            getResolverKey(address, signer, resolverKeyMap)
+        )
+    )
+    result.equityFacetIdList = await Promise.all(
+        equityFacetAddressList.map((address) =>
+            getResolverKey(address, signer, resolverKeyMap)
+        )
+    )
+    result.bondFacetIdList = await Promise.all(
+        bondFacetAddressList.map((address) =>
+            getResolverKey(address, signer, resolverKeyMap)
+        )
+    )
+
+    result.equityFacetVersionList = Array(result.equityFacetIdList.length).fill(
+        1
+    )
+    result.bondFacetVersionList = Array(result.bondFacetIdList.length).fill(1)
+}
+
+async function getResolverKey(
+    address: string,
+    signer: Signer,
+    keyMap: Map<string, string>
+): Promise<string> {
+    if (!keyMap.has(address)) {
+        const key = await IStaticFunctionSelectors__factory.connect(
+            address,
+            signer
+        ).getStaticResolverKey()
+        keyMap.set(address, key)
+    }
+    return keyMap.get(address)!
 }

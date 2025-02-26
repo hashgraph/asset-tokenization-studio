@@ -257,13 +257,13 @@ abstract contract AdjustBalancesStorageWrapper2 is
         bytes32 _partition,
         address _account
     ) internal view override returns (uint256) {
-        uint256 partitionsIndex = _getERC1410BasicStorage().partitionToIndex[
+        uint256 partitionsIndex = _erc1410BasicStorage().partitionToIndex[
             _account
         ][_partition];
 
         if (partitionsIndex == 0) return 0;
         return
-            _getAdjustBalancesStorage().labafUserPartition[_account][
+            _adjustBalancesStorage().labafUserPartition[_account][
                 partitionsIndex - 1
             ];
     }

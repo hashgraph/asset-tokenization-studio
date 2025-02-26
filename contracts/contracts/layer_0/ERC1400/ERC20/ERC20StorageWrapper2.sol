@@ -241,7 +241,7 @@ abstract contract ERC20StorageWrapper2 is
 
         uint256 factor = _calculateFactor(abaf, labaf);
 
-        _getErc20Storage().allowed[_owner][_spender] *= factor;
+        _erc20Storage().allowed[_owner][_spender] *= factor;
         _updateAllowanceLabaf(_owner, _spender, abaf);
     }
 
@@ -250,7 +250,7 @@ abstract contract ERC20StorageWrapper2 is
             revert SpenderWithZeroAddress();
         }
 
-        _getErc20Storage().allowed[_msgSender()][spender] = value;
+        _erc20Storage().allowed[_msgSender()][spender] = value;
         emit Approval(_msgSender(), spender, value);
         return true;
     }
@@ -273,11 +273,11 @@ abstract contract ERC20StorageWrapper2 is
         }
         _beforeAllowanceUpdate(_msgSender(), spender);
 
-        _getErc20Storage().allowed[_msgSender()][spender] += addedValue;
+        _erc20Storage().allowed[_msgSender()][spender] += addedValue;
         emit Approval(
             _msgSender(),
             spender,
-            _getErc20Storage().allowed[_msgSender()][spender]
+            _erc20Storage().allowed[_msgSender()][spender]
         );
         return true;
     }
@@ -302,7 +302,7 @@ abstract contract ERC20StorageWrapper2 is
         emit Approval(
             _msgSender(),
             spender,
-            _getErc20Storage().allowed[_msgSender()][spender]
+            _erc20Storage().allowed[_msgSender()][spender]
         );
         return true;
     }
@@ -314,12 +314,11 @@ abstract contract ERC20StorageWrapper2 is
         uint256 value
     ) internal returns (bool) {
         _decreaseAllowedBalance(from, spender, value);
-        bytes memory data;
         _transferByPartition(
             from,
             IERC1410Basic.BasicTransferInfo(to, value),
             _DEFAULT_PARTITION,
-            data,
+            '',
             spender,
             ''
         );
@@ -343,22 +342,20 @@ abstract contract ERC20StorageWrapper2 is
     }
 
     function _mint(address to, uint256 value) internal {
-        bytes memory _data;
         _issueByPartition(
-            IERC1410Standard.IssueData(_DEFAULT_PARTITION, to, value, _data)
+            IERC1410Standard.IssueData(_DEFAULT_PARTITION, to, value, '')
         );
         _emitTransferEvent(address(0), to, value);
     }
 
     function _burn(address from, uint256 value) internal {
-        bytes memory _data;
         _redeemByPartition(
             _DEFAULT_PARTITION,
             from,
             address(0),
             value,
-            _data,
-            _data
+            '',
+            ''
         );
         _emitTransferEvent(from, address(0), value);
     }
@@ -375,7 +372,7 @@ abstract contract ERC20StorageWrapper2 is
     ) internal {
         _beforeAllowanceUpdate(from, spender);
 
-        ERC20Storage storage erc20Storage = _getErc20Storage();
+        ERC20Storage storage erc20Storage = _erc20Storage();
 
         if (value > erc20Storage.allowed[from][spender]) {
             revert InsufficientAllowance(spender, from);

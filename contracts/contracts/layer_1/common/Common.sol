@@ -229,6 +229,11 @@ abstract contract Common is CapStorageWrapper2 {
     }
 
     modifier onlyUnProtectedPartitionsOrWildCardRole() {
+        _checkUnProtectedPartitionsOrWildCardRole();
+        _;
+    }
+
+    function _checkUnProtectedPartitionsOrWildCardRole() internal {
         if (
             _arePartitionsProtected() &&
             !_hasRole(_WILD_CARD_ROLE, _msgSender())
@@ -238,6 +243,5 @@ abstract contract Common is CapStorageWrapper2 {
                 _WILD_CARD_ROLE
             );
         }
-        _;
     }
 }

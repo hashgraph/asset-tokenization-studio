@@ -220,11 +220,11 @@ abstract contract AccessControl is IAccessControl, Common {
         onlyUnpaused
         returns (bool success_)
     {
-        success_ = _grantRole(_role, _account);
-        if (!success_) {
+        if (!_grantRole(_role, _account)) {
             revert AccountAssignedToRole(_role, _account);
         }
         emit RoleGranted(_msgSender(), _account, _role);
+        return true;
     }
 
     function revokeRole(

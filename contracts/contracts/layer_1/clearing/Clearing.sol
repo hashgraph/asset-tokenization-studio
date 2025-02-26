@@ -208,7 +208,7 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 import {Common} from '../common/Common.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
 import {_CLEARING_ROLE} from '../constants/roles.sol';
 import {_CLEARING_VALIDATOR_ROLE} from '../constants/roles.sol';
 import {
@@ -240,19 +240,6 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         returns (bool success_)
     {
         success_ = _setClearing(false);
-    }
-
-    function isClearingActivated() external view returns (bool) {
-        return _isClearingActivated();
-    }
-
-    function getStaticResolverKey()
-        external
-        pure
-        override
-        returns (bytes32 staticResolverKey_)
-    {
-        staticResolverKey_ = _CLEARING_RESOLVER_KEY;
     }
 
     function clearingTransferByPartition(
@@ -384,6 +371,68 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         return _getClearedAmountForByPartition(_partition, _tokenHolder);
     }
 
+    function getClearingCountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        ClearingOperationType _clearingOperationType
+    ) external view override returns (uint256 clearingCount_) {
+        return
+            _getClearingCountForByPartition(
+                _partition,
+                _tokenHolder,
+                _clearingOperationType
+            );
+    }
+
+    function getClearingsIdForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        ClearingOperationType _clearingOperationType,
+        uint256 _pageIndex,
+        uint256 _pageLength
+    ) external view override returns (uint256[] memory clearingsId_) {
+        return
+            _getClearingsIdForByPartition(
+                _partition,
+                _tokenHolder,
+                _clearingOperationType,
+                _pageIndex,
+                _pageLength
+            );
+    }
+
+    function getClearingForByPartition(
+        ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    )
+        external
+        view
+        override
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address destination_,
+            ClearingOperationType clearingOperationType_,
+            bytes memory data_,
+            bytes memory operatorData_,
+            IHold.Hold memory hold_
+        )
+    {
+        return _getClearingForByPartition(_clearingOperationIdentifier);
+    }
+
+    function isClearingActivated() external view returns (bool) {
+        return _isClearingActivated();
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _CLEARING_RESOLVER_KEY;
+    }
+
     function getStaticFunctionSelectors()
         external
         pure
@@ -391,7 +440,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](2);
+        staticFunctionSelectors_ = new bytes4[](6);
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_Clearing
             .selector;
@@ -400,6 +449,15 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .deactivateClearing
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getClearingCountForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getClearingsIdForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getClearingForByPartition
             .selector;
     }
 

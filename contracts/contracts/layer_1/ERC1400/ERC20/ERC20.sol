@@ -219,8 +219,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(
         ERC20Metadata calldata erc20Metadata
-    ) external override onlyUninitialized(_getErc20Storage().initialized) {
-        ERC20Storage storage erc20Storage = _getErc20Storage();
+    ) external override onlyUninitialized(_erc20Storage().initialized) {
+        ERC20Storage storage erc20Storage = _erc20Storage();
         erc20Storage.name = erc20Metadata.info.name;
         erc20Storage.symbol = erc20Metadata.info.symbol;
         erc20Storage.isin = erc20Metadata.info.isin;

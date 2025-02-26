@@ -289,7 +289,6 @@ import GetRevocationRegistryAddressRequest from './GetRevocationRegistryAddressR
 import GetIssuerListCountRequest from './GetIssuerListCountRequest.js';
 import GetIssuerListMembersRequest from './GetIssuerListMembersRequest.js';
 import IsIssuerRequest from './IsIssuerRequest.js';
-import GetKYCAccountsRequest from './GetKYCAccountsRequest.js';
 import GetKYCAccountsCountRequest from './GetKYCAccountsCountRequest.js';
 import GetKYCForRequest from './GetKYCForRequest.js';
 import RevokeKYCRequest from './RevokeKYCRequest.js';
@@ -384,7 +383,6 @@ export {
   GetIssuerListCountRequest,
   GetIssuerListMembersRequest,
   IsIssuerRequest,
-  GetKYCAccountsRequest,
   GetKYCAccountsCountRequest,
   GetKYCForRequest,
   RevokeKYCRequest,

@@ -287,7 +287,7 @@ abstract contract DiamondCutManagerWrapper is
         bool _isLastBatch
     ) internal {
         if (!_isLastBatch) return;
-        DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
+        DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
         if (!_dcms.activeConfigurations[_configurationId]) {
             _dcms.configurations.push(_configurationId);
             _dcms.activeConfigurations[_configurationId] = true;
@@ -301,7 +301,7 @@ abstract contract DiamondCutManagerWrapper is
     function _startBatchConfiguration(
         bytes32 _configurationId
     ) internal returns (uint256 batchVersion_) {
-        DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
+        DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
 
         unchecked {
             _dcms.batchVersion[_configurationId] =
@@ -314,7 +314,7 @@ abstract contract DiamondCutManagerWrapper is
     function _getBatchConfigurationVersion(
         bytes32 _configurationId
     ) internal returns (uint256 batchVersion_) {
-        batchVersion_ = _getDiamondCutManagerStorage().batchVersion[
+        batchVersion_ = _diamondCutManagerStorage().batchVersion[
             _configurationId
         ];
     }
@@ -324,7 +324,7 @@ abstract contract DiamondCutManagerWrapper is
         FacetConfiguration[] calldata _facetConfigurations,
         uint256 _version
     ) internal {
-        DiamondCutManagerStorage storage _dcms = _getDiamondCutManagerStorage();
+        DiamondCutManagerStorage storage _dcms = _diamondCutManagerStorage();
         bytes32 configVersionHash = _buildHash(_configurationId, _version);
 
         uint256 facetsLength = _facetConfigurations.length;
@@ -383,7 +383,7 @@ abstract contract DiamondCutManagerWrapper is
     }
 
     function _cancelBatchConfiguration(bytes32 _configurationId) internal {
-        DiamondCutManagerStorage storage dcms = _getDiamondCutManagerStorage();
+        DiamondCutManagerStorage storage dcms = _diamondCutManagerStorage();
         uint256 batchVersion = _getBatchConfigurationVersion(_configurationId);
         bytes32 configVersionHash = _buildHash(_configurationId, batchVersion);
 
@@ -791,7 +791,7 @@ abstract contract DiamondCutManagerWrapper is
         ];
     }
 
-    function _getDiamondCutManagerStorage()
+    function _diamondCutManagerStorage()
         internal
         pure
         returns (DiamondCutManagerStorage storage ds)

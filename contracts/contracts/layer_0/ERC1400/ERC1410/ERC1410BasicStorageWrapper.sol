@@ -235,20 +235,6 @@ abstract contract ERC1410BasicStorageWrapper is
 
         _reduceBalanceByPartition(_from, _basicTransferInfo.value, _partition);
 
-        if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
-            _addPartitionTo(
-                _basicTransferInfo.value,
-                _basicTransferInfo.to,
-                _partition
-            );
-        } else {
-            _increaseBalanceByPartition(
-                _basicTransferInfo.to,
-                _basicTransferInfo.value,
-                _partition
-            );
-        }
-
         // Emit transfer event.
         emit TransferByPartition(
             _partition,
@@ -259,6 +245,19 @@ abstract contract ERC1410BasicStorageWrapper is
             _data,
             _operatorData
         );
+
+        if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
+            return _addPartitionTo(
+                _basicTransferInfo.value,
+                _basicTransferInfo.to,
+                _partition
+            );
+        }
+        _increaseBalanceByPartition(
+                _basicTransferInfo.to,
+                _basicTransferInfo.value,
+                _partition
+            );
     }
 
     function _beforeTokenTransfer(

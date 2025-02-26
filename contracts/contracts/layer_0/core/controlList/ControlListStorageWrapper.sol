@@ -239,10 +239,14 @@ abstract contract ControlListStorageWrapper is
 
     // modifiers
     modifier checkControlList(address account) {
-        if (!_checkControlList(account)) {
+        _checkControlList(account);
+        _;
+    }
+
+    function _checkControlList(address account) internal {
+        if (!_isAbleToAccess(account)) {
             revert AccountIsBlocked(account);
         }
-        _;
     }
 
     // Internal
@@ -281,7 +285,7 @@ abstract contract ControlListStorageWrapper is
         return _controlListStorage().list.contains(_account);
     }
 
-    function _checkControlList(address account) internal view returns (bool) {
+    function _isAbleToAccess(address account) internal view returns (bool) {
         return _getControlListType() == _isInControlList(account);
     }
 

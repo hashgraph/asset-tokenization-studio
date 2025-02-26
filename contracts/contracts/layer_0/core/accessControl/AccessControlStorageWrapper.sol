@@ -238,13 +238,13 @@ abstract contract AccessControlStorageWrapper is
         mapping(address => EnumerableSet.Bytes32Set) memberRoles;
     }
 
-    modifier onlyRole(bytes32 role) {
-        _checkRole(role);
+    modifier onlyRole(bytes32 _role) {
+        _checkRole(_role, _msgSender());
         _;
     }
 
-    modifier onlyRoleFor(bytes32 role, address account) {
-        _checkRole(role, account);
+    modifier onlyRoleFor(bytes32 _role, address _account) {
+        _checkRole(_role, _account);
         _;
     }
 
@@ -280,39 +280,29 @@ abstract contract AccessControlStorageWrapper is
     ) internal returns (bool success_) {
         RoleDataStorage storage roleDataStorage = _rolesStorage();
         address sender = _msgSender();
-        for (uint256 index = 0; index < _roles.length; index++) {
+        uint256 length = _roles.length;
+        for (uint256 index; index < length; ++index) {
             _checkRole(_getRoleAdmin(_roles[index]), sender);
-            if (
-                _actives[index] &&
-                !_has(roleDataStorage, _roles[index], _account)
-            ) {
-                _grant(roleDataStorage, _roles[index], _account);
+            if (_actives[index]) {
+                if (!_has(roleDataStorage, _roles[index], _account))
+                    _grant(roleDataStorage, _roles[index], _account);
+                continue;
             }
-            if (
-                !_actives[index] &&
-                _has(roleDataStorage, _roles[index], _account)
-            ) {
+            if (_has(roleDataStorage, _roles[index], _account))
                 _remove(roleDataStorage, _roles[index], _account);
-            }
         }
-        for (uint256 index2 = 0; index2 < _roles.length; index2++) {
-            if (_actives[index2]) {
-                if (!_has(roleDataStorage, _roles[index2], _account))
+        for (uint256 index; index < length; ++index) {
+            if (_actives[index]) {
+                if (!_has(roleDataStorage, _roles[index], _account))
                     revert ApplyRoleContradiction(
                         _roles,
                         _actives,
-                        _roles[index2]
-                    );
-                continue;
-            } else {
-                if (_has(roleDataStorage, _roles[index2], _account))
-                    revert ApplyRoleContradiction(
-                        _roles,
-                        _actives,
-                        _roles[index2]
+                        _roles[index]
                     );
                 continue;
             }
+            if (_has(roleDataStorage, _roles[index], _account))
+                revert ApplyRoleContradiction(_roles, _actives, _roles[index]);
         }
 
         success_ = true;
@@ -363,25 +353,9 @@ abstract contract AccessControlStorageWrapper is
         );
     }
 
-    function _checkRole(bytes32 _role) internal view {
-        _checkRole(_role, _msgSender());
-    }
-
     function _checkRole(bytes32 _role, address _account) internal view {
         if (!_hasRole(_role, _account)) {
             revert AccountHasNoRole(_account, _role);
-        }
-    }
-
-    function _rolesStorage()
-        internal
-        pure
-        returns (RoleDataStorage storage roles_)
-    {
-        bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            roles_.slot := position
         }
     }
 
@@ -411,5 +385,17 @@ abstract contract AccessControlStorageWrapper is
         address _account
     ) internal view returns (bool hasRole_) {
         hasRole_ = _rolesStorageData.memberRoles[_account].contains(_role);
+    }
+
+    function _rolesStorage()
+        internal
+        pure
+        returns (RoleDataStorage storage roles_)
+    {
+        bytes32 position = _ACCESS_CONTROL_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            roles_.slot := position
+        }
     }
 }

@@ -243,7 +243,7 @@ abstract contract ResolverProxyUnstructured is
         // AccessControl instead of owned. Only DEFAULT_ADMIN role.
     }
 
-    function _getResolverProxyStorage()
+    function _resolverProxyStorage()
         internal
         pure
         returns (ResolverProxyStorage storage ds)
@@ -265,7 +265,7 @@ abstract contract ResolverProxyUnstructured is
             _resolverProxyConfigurationId,
             _version
         );
-        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ResolverProxyStorage storage ds = _resolverProxyStorage();
         _updateResolver(ds, _resolver);
         _updateConfigId(ds, _resolverProxyConfigurationId);
         _updateVersion(ds, _version);
