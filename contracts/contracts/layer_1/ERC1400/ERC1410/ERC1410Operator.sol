@@ -226,8 +226,8 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         external
         override
         onlyUnpaused
-        checkControlList(_msgSender())
-        checkControlList(_operator)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_operator)
     {
         _authorizeOperator(_operator);
     }
@@ -236,7 +236,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
     /// @param _operator An address which is being de-authorised
     function revokeOperator(
         address _operator
-    ) external override onlyUnpaused checkControlList(_msgSender()) {
+    ) external override onlyUnpaused onlyListedAllowed(_msgSender()) {
         _revokeOperator(_operator);
     }
 
@@ -251,8 +251,8 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        checkControlList(_msgSender())
-        checkControlList(_operator)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_operator)
     {
         _authorizeOperatorByPartition(_partition, _operator);
     }
@@ -268,7 +268,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        checkControlList(_msgSender())
+        onlyListedAllowed(_msgSender())
     {
         _revokeOperatorByPartition(_partition, _operator);
     }
@@ -282,9 +282,9 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
-        checkControlList(_msgSender())
-        checkControlList(_operatorTransferData.from)
-        checkControlList(_operatorTransferData.to)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_operatorTransferData.from)
+        onlyListedAllowed(_operatorTransferData.to)
         onlyOperator(
             _operatorTransferData.partition,
             _operatorTransferData.from

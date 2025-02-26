@@ -220,10 +220,8 @@ abstract contract DiamondCutManager is
     Pause,
     DiamondCutManagerWrapper
 {
-    modifier validConfigurationIdFormat(bytes32 _configurationId) {
-        if (uint256(_configurationId) == 0) {
-            revert DefaultValueForConfigurationIdNotPermitted();
-        }
+    modifier validateConfigurationId(bytes32 _configurationId) {
+        _checkConfigurationId(_configurationId);
         _;
     }
 
@@ -233,7 +231,7 @@ abstract contract DiamondCutManager is
     )
         external
         override
-        validConfigurationIdFormat(_configurationId)
+        validateConfigurationId(_configurationId)
         onlyRole(_DEFAULT_ADMIN_ROLE)
         onlyUnpaused
     {
@@ -251,7 +249,7 @@ abstract contract DiamondCutManager is
     )
         external
         override
-        validConfigurationIdFormat(_configurationId)
+        validateConfigurationId(_configurationId)
         onlyRole(_DEFAULT_ADMIN_ROLE)
         onlyUnpaused
     {
@@ -272,7 +270,7 @@ abstract contract DiamondCutManager is
     )
         external
         override
-        validConfigurationIdFormat(_configurationId)
+        validateConfigurationId(_configurationId)
         onlyRole(_DEFAULT_ADMIN_ROLE)
         onlyUnpaused
     {
@@ -320,7 +318,7 @@ abstract contract DiamondCutManager is
     function checkResolverProxyConfigurationRegistered(
         bytes32 _configurationId,
         uint256 _version
-    ) external override {
+    ) external view override {
         _checkResolverProxyConfigurationRegistered(
             _diamondCutManagerStorage(),
             _configurationId,
@@ -481,5 +479,11 @@ abstract contract DiamondCutManager is
             _version,
             _facetId
         );
+    }
+
+    function _checkConfigurationId(bytes32 _configurationId) private pure {
+        if (uint256(_configurationId) == 0) {
+            revert DefaultValueForConfigurationIdNotPermitted();
+        }
     }
 }

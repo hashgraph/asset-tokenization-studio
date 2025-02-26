@@ -224,21 +224,13 @@ abstract contract PauseStorageWrapper is
 
     // modifiers
     modifier onlyPaused() {
-        if (!_isPaused()) {
-            revert TokenIsUnpaused();
-        }
+        _checkPaused();
         _;
     }
 
     modifier onlyUnpaused() {
         _checkUnpaused();
         _;
-    }
-
-    function _checkUnpaused() internal {
-        if (_isPaused()) {
-            revert TokenIsPaused();
-        }
     }
 
     // Internal
@@ -253,6 +245,18 @@ abstract contract PauseStorageWrapper is
 
     function _isPaused() internal view returns (bool) {
         return _pauseStorage().paused;
+    }
+
+    function _checkPaused() private view {
+        if (!_isPaused()) {
+            revert TokenIsUnpaused();
+        }
+    }
+
+    function _checkUnpaused() private view {
+        if (_isPaused()) {
+            revert TokenIsPaused();
+        }
     }
 
     function _pauseStorage()

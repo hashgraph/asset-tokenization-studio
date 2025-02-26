@@ -241,9 +241,7 @@ abstract contract ERC1410BasicStorageWrapperRead is
     }
 
     modifier onlyWithoutMultiPartition() {
-        if (_isMultiPartition()) {
-            revert NotAllowedInMultiPartitionMode();
-        }
+        _checkWithoutMultiPartition();
         _;
     }
 
@@ -252,23 +250,9 @@ abstract contract ERC1410BasicStorageWrapperRead is
         _;
     }
 
-    modifier onlyValidAddress(address account) {
+    modifier validateAddress(address account) {
         _checkValidAddress(account);
         _;
-    }
-
-    function _checkDefaultPartitionWithSinglePartition(
-        bytes32 partition
-    ) internal {
-        if (!_isMultiPartition() && partition != _DEFAULT_PARTITION) {
-            revert PartitionNotAllowedInSinglePartitionMode(partition);
-        }
-    }
-
-    function _checkValidAddress(address account) internal pure {
-        if (account == address(0)) {
-            revert ZeroAddressNotAllowed();
-        }
     }
 
     function _reduceBalanceByPartition(
@@ -437,6 +421,10 @@ abstract contract ERC1410BasicStorageWrapperRead is
         _adjustTotalBalanceFor(basicStorage, abaf, account);
     }
 
+    function _checkValidAddress(address account) internal pure {
+        if (account == address(0)) revert ZeroAddressNotAllowed();
+    }
+
     function _adjustPartitionBalanceFor(
         ERC1410BasicStorage storage basicStorage,
         uint256 abaf,
@@ -468,6 +456,17 @@ abstract contract ERC1410BasicStorageWrapperRead is
         uint256 factor = _calculateFactorByAbafAndTokenHolder(abaf, account);
         basicStorage.balances[account] *= factor;
         _updateLabafByTokenHolder(abaf, account);
+    }
+
+    function _checkWithoutMultiPartition() private view {
+        if (_isMultiPartition()) revert NotAllowedInMultiPartitionMode();
+    }
+
+    function _checkDefaultPartitionWithSinglePartition(
+        bytes32 partition
+    ) private view {
+        if (!_isMultiPartition() && partition != _DEFAULT_PARTITION)
+            revert PartitionNotAllowedInSinglePartitionMode(partition);
     }
 
     function _erc1410BasicStorage()

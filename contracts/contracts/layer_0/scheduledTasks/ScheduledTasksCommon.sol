@@ -209,26 +209,26 @@ pragma solidity 0.8.18;
 import {
     SnapshotsStorageWrapper1
 } from '../snapshots/SnapshotsStorageWrapper1.sol';
-import {
-    ScheduledTasksLib
-} from '../../layer_2/scheduledTasks/ScheduledTasksLib.sol';
 
 abstract contract ScheduledTasksCommon is SnapshotsStorageWrapper1 {
     error WrongTimestamp(uint256 timeStamp);
     error NotAutocalling();
 
-    modifier checkTimestamp(uint256 timestamp) {
-        if (timestamp <= _blockTimestamp()) {
-            revert WrongTimestamp(timestamp);
-        }
+    modifier onlyValidTimestamp(uint256 _timestamp) {
+        _checkTimestamp(_timestamp);
         _;
     }
 
-    // TODO: It is necessary right now ??? Autocalling?
-    modifier onlyAutoCalling(
-        ScheduledTasksLib.ScheduledTasksDataStorage storage _scheduledTasks
-    ) {
-        if (!_scheduledTasks.autoCalling) revert NotAutocalling();
+    modifier onlyAutoCalling(bool _autoCalling) {
+        _checkAutoCalling(_autoCalling);
         _;
+    }
+
+    function _checkTimestamp(uint256 _timestamp) private view {
+        if (_timestamp <= _blockTimestamp()) revert WrongTimestamp(_timestamp);
+    }
+
+    function _checkAutoCalling(bool _autoCalling) private pure {
+        if (!_autoCalling) revert NotAutocalling();
     }
 }

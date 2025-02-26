@@ -432,7 +432,7 @@ describe('Kyc Tests', () => {
     })
 
     describe('Kyc Wrong input data', () => {
-        it('GIVEN account ZERO WHEN grantKyc THEN transaction fails with InvalidZeroAddress', async () => {
+        it('GIVEN account ZERO WHEN grantKyc THEN transaction fails with ZeroAddressNotAllowed', async () => {
             await expect(
                 kycFacet.grantKyc(
                     ADDRESS_ZERO,
@@ -441,13 +441,13 @@ describe('Kyc Tests', () => {
                     _VALID_TO,
                     account_C
                 )
-            ).to.be.revertedWithCustomError(kycFacet, 'InvalidZeroAddress')
+            ).to.be.revertedWithCustomError(kycFacet, 'ZeroAddressNotAllowed')
         })
 
-        it('GIVEN account ZERO WHEN revokeKyc THEN transaction fails with InvalidZeroAddress', async () => {
+        it('GIVEN account ZERO WHEN revokeKyc THEN transaction fails with ZeroAddressNotAllowed', async () => {
             await expect(
                 kycFacet.revokeKyc(ADDRESS_ZERO)
-            ).to.be.revertedWithCustomError(kycFacet, 'InvalidZeroAddress')
+            ).to.be.revertedWithCustomError(kycFacet, 'ZeroAddressNotAllowed')
         })
 
         it('GIVEN wrong Valid From Date WHEN grantKyc THEN transaction fails with InvalidDates', async () => {

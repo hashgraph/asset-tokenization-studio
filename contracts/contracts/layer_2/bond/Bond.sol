@@ -225,8 +225,11 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         CouponDetailsData calldata _couponDetailsData
     )
         internal
-        checkDates(_bondDetailsData.startingDate, _bondDetailsData.maturityDate)
-        checkTimestamp(_bondDetailsData.startingDate)
+        validateDates(
+            _bondDetailsData.startingDate,
+            _bondDetailsData.maturityDate
+        )
+        onlyValidTimestamp(_bondDetailsData.startingDate)
     {
         BondDataStorage storage bondStorage = _bondStorage();
         bondStorage.initialized = true;
@@ -254,8 +257,8 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
-        checkDates(_newCoupon.recordDate, _newCoupon.executionDate)
-        checkTimestamp(_newCoupon.recordDate)
+        validateDates(_newCoupon.recordDate, _newCoupon.executionDate)
+        onlyValidTimestamp(_newCoupon.recordDate)
         returns (bool success_, uint256 couponID_)
     {
         bytes32 corporateActionID;
@@ -308,10 +311,7 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         external
         view
         override
-        checkIndexForCorporateActionByType(
-            COUPON_CORPORATE_ACTION_TYPE,
-            _couponID - 1
-        )
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
         returns (RegisteredCoupon memory registeredCoupon_)
     {
         return _getCoupon(_couponID);
@@ -324,10 +324,7 @@ abstract contract Bond is IBond, IStaticFunctionSelectors, BondStorageWrapper {
         external
         view
         override
-        checkIndexForCorporateActionByType(
-            COUPON_CORPORATE_ACTION_TYPE,
-            _couponID - 1
-        )
+        onlyMatchingActionType(COUPON_CORPORATE_ACTION_TYPE, _couponID - 1)
         returns (CouponFor memory couponFor_)
     {
         return _getCouponFor(_couponID, _account);

@@ -210,7 +210,6 @@ import {ClearingStorageWrapper2} from '../clearing/ClearingStorageWrapper2.sol';
 import {
     IAdjustBalancesStorageWrapper
 } from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 
 abstract contract AdjustBalancesStorageWrapper2 is
     IAdjustBalancesStorageWrapper,

@@ -230,12 +230,6 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         _;
     }
 
-    function _checkOperator(bytes32 _partition, address _from) internal {
-        if (!_isAuthorized(_partition, _msgSender(), _from)) {
-            revert Unauthorized(_msgSender(), _from, _partition);
-        }
-    }
-
     function _authorizeOperator(address _operator) internal {
         _erc1410operatorStorage().approvals[_msgSender()][_operator] = true;
         emit AuthorizedOperator(_operator, _msgSender());
@@ -308,6 +302,11 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         return
             _isOperator(_operator, _tokenHolder) ||
             _isOperatorForPartition(_partition, _operator, _tokenHolder);
+    }
+
+    function _checkOperator(bytes32 _partition, address _from) private view {
+        if (!_isAuthorized(_partition, _msgSender(), _from))
+            revert Unauthorized(_msgSender(), _from, _partition);
     }
 
     function _erc1410operatorStorage()
