@@ -228,6 +228,51 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         address _to,
         bytes memory _operatorData
     ) internal returns (bool success_, uint256 clearingId_) {
+        _decreaseAllowedBalance(_from, _msgSender(), _amount);
+
+        bytes32 partition = _clearingOperation.partition;
+
+        clearingId_ = ++_clearingStorage().nextClearingIdByAccountAndPartition[
+            _from
+        ][partition];
+
+        _beforeClearing(partition, _from, clearingId_, _amount);
+
+        _clearingStorage()
+        .clearingIdsByAccountAndPartition[_from][partition].add(clearingId_);
+
+        _clearingStorage()
+        .clearingIdsByAccountAndPartitionAndTypes[_from][partition][
+            IClearing.ClearingOperationType.Transfer
+        ].add(clearingId_);
+
+        IClearing.ClearingData memory clearingData = IClearing.ClearingData({
+            clearingOperationType: IClearing.ClearingOperationType.Transfer,
+            amount: _amount,
+            holdExpirationTimestamp: 0,
+            expirationTimestamp: _clearingOperation.expirationTimestamp,
+            destination: _to,
+            escrow: address(0),
+            data: _clearingOperation.data,
+            operatorData: _operatorData
+        });
+
+        _clearingStorage().clearingByAccountPartitionAndId[_from][partition][
+                clearingId_
+            ] = clearingData;
+
+        _afterClearing(_from, partition, _amount);
+
+        success_ = true;
+    }
+
+    function _clearingTransferByPartition(
+        IClearing.ClearingOperation calldata _clearingOperation,
+        uint256 _amount,
+        address _from,
+        address _to,
+        bytes memory _operatorData
+    ) internal returns (bool success_, uint256 clearingId_) {
         bytes32 partition = _clearingOperation.partition;
 
         clearingId_ = ++_clearingStorage().nextClearingIdByAccountAndPartition[
@@ -291,7 +336,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _protectedClearingOperation.from
         );
 
-        (success_, clearingId_) = _clearingTransferFromByPartition(
+        (success_, clearingId_) = _clearingTransferByPartition(
             _protectedClearingOperation.clearingOperation,
             _amount,
             _to,
