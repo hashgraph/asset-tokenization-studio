@@ -248,7 +248,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             clearingOperationType: IClearing.ClearingOperationType.Transfer,
             amount: _amount,
             holdExpirationTimestamp: 0,
-            clearingExpirationTimestamp: _clearingOperation.expirationTimestamp,
+            expirationTimestamp: _clearingOperation.expirationTimestamp,
             destination: _to,
             escrow: address(0),
             data: _clearingOperation.data,

@@ -215,6 +215,7 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CLEARING_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {

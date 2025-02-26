@@ -341,7 +341,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         uint256 _clearingId,
         uint256 _labaf
     ) internal {
-        _getAdjustBalancesStorage().labafClearedAmountByAccountPartitionAndId[
+        _adjustBalancesStorage().labafClearedAmountByAccountPartitionAndId[
             _tokenHolder
         ][_partition][_clearingId] = _labaf;
     }
@@ -350,7 +350,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         address _tokenHolder,
         uint256 _labaf
     ) internal {
-        _getAdjustBalancesStorage().labafClearedAmountByAccount[
+        _adjustBalancesStorage().labafClearedAmountByAccount[
             _tokenHolder
         ] = _labaf;
     }
@@ -360,37 +360,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         address _tokenHolder,
         uint256 _labaf
     ) internal {
-        _getAdjustBalancesStorage().labafClearedAmountByAccountAndPartition[
-            _tokenHolder
-        ][_partition] = _labaf;
-    }
-
-    function _setClearedLabafById(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _clearingId,
-        uint256 _labaf
-    ) internal {
-        _getAdjustBalancesStorage().labafClearedAmountByAccountPartitionAndId[
-            _tokenHolder
-        ][_partition][_clearingId] = _labaf;
-    }
-
-    function _setTotalClearedLabaf(
-        address _tokenHolder,
-        uint256 _labaf
-    ) internal {
-        _getAdjustBalancesStorage().labafClearedAmountByAccount[
-            _tokenHolder
-        ] = _labaf;
-    }
-
-    function _setTotalClearedLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _labaf
-    ) internal {
-        _getAdjustBalancesStorage().labafClearedAmountByAccountAndPartition[
+        _adjustBalancesStorage().labafClearedAmountByAccountAndPartition[
             _tokenHolder
         ][_partition] = _labaf;
     }
@@ -584,40 +554,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
         address _tokenHolder
     ) internal view returns (uint256 labaf_) {
         return
-            _getAdjustBalancesStorage().labafClearedAmountByAccount[
-                _tokenHolder
-            ];
-    }
-
-    function _getTotalClearedLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256 labaf_) {
-        return
-            _getAdjustBalancesStorage().labafClearedAmountByAccountAndPartition[
-                _tokenHolder
-            ][_partition];
-    }
-
-    function _getClearedLabafById(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _clearingId
-    ) internal view returns (uint256) {
-        return
-            _getAdjustBalancesStorage()
-                .labafClearedAmountByAccountPartitionAndId[_tokenHolder][
-                    _partition
-                ][_clearingId];
-    }
-
-    function _getTotalClearedLabaf(
-        address _tokenHolder
-    ) internal view returns (uint256 labaf_) {
-        return
-            _getAdjustBalancesStorage().labafClearedAmountByAccount[
-                _tokenHolder
-            ];
+            _adjustBalancesStorage().labafClearedAmountByAccount[_tokenHolder];
     }
 
     function _getTotalClearedLabafByPartition(
