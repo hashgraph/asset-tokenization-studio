@@ -224,7 +224,7 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         override
         onlyUnpaused
         onlyRole(_ADJUSTMENT_BALANCE_ROLE)
-        checkFactor(factor)
+        validateFactor(factor)
         returns (bool success_)
     {
         _triggerScheduledTasks(0);

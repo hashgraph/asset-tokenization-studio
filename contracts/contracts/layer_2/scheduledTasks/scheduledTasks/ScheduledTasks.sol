@@ -227,7 +227,7 @@ contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    ) external override onlyAutoCalling(_scheduledTaskStorage()) {
+    ) external override onlyAutoCalling(_scheduledTaskStorage().autoCalling) {
         _onScheduledTaskTriggered(_data);
     } // solhint-enable no-unused-vars
 

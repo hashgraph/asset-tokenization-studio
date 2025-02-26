@@ -220,7 +220,9 @@ import {
     _BUSINESS_LOGIC_RESOLVER_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 
-contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
+abstract contract BusinessLogicResolverWrapper is
+    IBusinessLogicResolverWrapper
+{
     struct BusinessLogicResolverDataStorage {
         uint256 latestVersion;
         // list of facetIds
@@ -398,9 +400,7 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
         if (
             _version == 0 ||
             _version > _businessLogicResolverStorage().latestVersion
-        ) {
-            revert BusinessLogicVersionDoesNotExist(_version);
-        }
+        ) revert BusinessLogicVersionDoesNotExist(_version);
     }
 
     function _checkValidKeys(
@@ -414,40 +414,36 @@ contract BusinessLogicResolverWrapper is IBusinessLogicResolverWrapper {
         // Check non duplicated keys.
         uint256 activesBusinessLogicsKeys;
         bytes32 currentKey;
-
-        for (
-            uint256 index;
-            index < _businessLogicsRegistryDatas.length;
-            index++
-        ) {
+        uint256 length = _businessLogicsRegistryDatas.length;
+        uint256 innerIndex;
+        for (uint256 index; index < length; ) {
             currentKey = _businessLogicsRegistryDatas[index].businessLogicKey;
-            if (uint256(currentKey) == 0) {
+            if (uint256(currentKey) == 0)
                 revert ZeroKeyNotValidForBusinessLogic();
-            }
+
             if (
                 businessLogicResolverDataStorage.businessLogicActive[currentKey]
-            ) {
-                activesBusinessLogicsKeys++;
+            ) ++activesBusinessLogicsKeys;
+            unchecked {
+                innerIndex = index + 1;
             }
-            for (
-                uint256 innerIndex = index + 1;
-                innerIndex < _businessLogicsRegistryDatas.length;
-                innerIndex++
-            ) {
+            for (; innerIndex < length; ) {
                 if (
                     currentKey ==
                     _businessLogicsRegistryDatas[innerIndex].businessLogicKey
-                ) {
-                    revert BusinessLogicKeyDuplicated(currentKey);
+                ) revert BusinessLogicKeyDuplicated(currentKey);
+                unchecked {
+                    ++innerIndex;
                 }
+            }
+            unchecked {
+                ++index;
             }
         }
         if (
             activesBusinessLogicsKeys !=
             businessLogicResolverDataStorage.activeBusinessLogics.length
-        ) {
-            revert AllBusinessLogicKeysMustBeenInformed();
-        }
+        ) revert AllBusinessLogicKeysMustBeenInformed();
     }
 
     function _businessLogicResolverStorage()

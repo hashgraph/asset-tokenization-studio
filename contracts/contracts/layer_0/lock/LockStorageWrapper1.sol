@@ -246,8 +246,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         address _tokenHolder,
         uint256 _lockId
     ) {
-        if (!_isLockIdValid(_partition, _tokenHolder, _lockId))
-            revert WrongLockId();
+        _checkValidLockId(_partition, _tokenHolder, _lockId);
         _;
     }
 
@@ -256,14 +255,8 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         address _tokenHolder,
         uint256 _lockId
     ) {
-        if (!_isLockedExpirationTimestamp(_partition, _tokenHolder, _lockId))
-            revert LockExpirationNotReached();
+        _checkLockedExpirationTimestamp(_partition, _tokenHolder, _lockId);
         _;
-    }
-
-    function _checkExpirationTimestamp(uint256 _expirationTimestamp) internal {
-        if (_expirationTimestamp < _blockTimestamp())
-            revert WrongExpirationTimestamp();
     }
 
     function _getLockedAmountForByPartition(
@@ -416,6 +409,31 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
             .lockIdsByAccountAndPartition[_tokenHolder][_partition].contains(
                     _lockId
                 );
+    }
+
+    function _checkExpirationTimestamp(
+        uint256 _expirationTimestamp
+    ) private view {
+        if (_expirationTimestamp < _blockTimestamp())
+            revert WrongExpirationTimestamp();
+    }
+
+    function _checkValidLockId(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) private view {
+        if (!_isLockIdValid(_partition, _tokenHolder, _lockId))
+            revert WrongLockId();
+    }
+
+    function _checkLockedExpirationTimestamp(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _lockId
+    ) private view {
+        if (!_isLockedExpirationTimestamp(_partition, _tokenHolder, _lockId))
+            revert LockExpirationNotReached();
     }
 
     function _lockStorage()

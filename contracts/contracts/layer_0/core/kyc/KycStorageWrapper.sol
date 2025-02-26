@@ -229,25 +229,13 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
     }
 
     modifier onlyValidDates(uint256 _validFrom, uint256 _validTo) {
-        if (_validFrom > _validTo || _validTo < _blockTimestamp()) {
-            revert IKyc.InvalidDates();
-        }
+        _checkValidDates(_validFrom, _validTo);
         _;
     }
 
     modifier onlyValidKycStatus(IKyc.KycStatus _kycStatus, address _account) {
         _checkValidKycStatus(_kycStatus, _account);
         _;
-    }
-
-    modifier checkAddress(address _account) {
-        if (_account == address(0)) revert IKyc.InvalidZeroAddress();
-        _;
-    }
-
-    function _checkValidKycStatus(IKyc.KycStatus _kycStatus, address _account) internal {
-        if (!_hasSameKycStatus(_kycStatus, _account))
-            revert IKyc.InvalidKycStatus();
     }
 
     function _grantKyc(
@@ -349,6 +337,22 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
         address _account
     ) internal view virtual returns (bool) {
         return _getKycStatusFor(_account) == _kycStatus;
+    }
+
+    function _checkValidKycStatus(
+        IKyc.KycStatus _kycStatus,
+        address _account
+    ) private view {
+        if (!_hasSameKycStatus(_kycStatus, _account))
+            revert IKyc.InvalidKycStatus();
+    }
+
+    function _checkValidDates(
+        uint256 _validFrom,
+        uint256 _validTo
+    ) private view {
+        if (_validFrom > _validTo || _validTo < _blockTimestamp())
+            revert IKyc.InvalidDates();
     }
 
     function _kycStorage() internal pure returns (KycStorage storage kyc_) {

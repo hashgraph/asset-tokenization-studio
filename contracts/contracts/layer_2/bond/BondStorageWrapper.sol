@@ -231,7 +231,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
      * to the current maturity date.
      */
     modifier onlyAfterCurrentMaturityDate(uint256 _maturityDate) {
-        if (_maturityDate <= _getMaturityDate()) revert BondMaturityDateWrong();
+        _checkMaturityDate(_maturityDate);
         _;
     }
 
@@ -382,6 +382,10 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
 
     function _getCouponCount() internal view returns (uint256 couponCount_) {
         return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
+    }
+
+    function _checkMaturityDate(uint256 _maturityDate) private view {
+        if (_maturityDate <= _getMaturityDate()) revert BondMaturityDateWrong();
     }
 
     function _bondStorage()

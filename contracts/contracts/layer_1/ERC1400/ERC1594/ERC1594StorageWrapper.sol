@@ -233,9 +233,7 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
     }
 
     modifier onlyIssuable() {
-        if (!_isIssuable()) {
-            revert IssuanceIsClosed();
-        }
+        _checkIssuable();
         _;
     }
 
@@ -399,6 +397,10 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         }
 
         return (true, _SUCCESS, bytes32(0));
+    }
+
+    function _checkIssuable() private view {
+        if (!_isIssuable()) revert IssuanceIsClosed();
     }
 
     function _erc1594Storage()

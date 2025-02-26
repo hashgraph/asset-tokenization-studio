@@ -37,17 +37,9 @@ abstract contract ProtectedPartitionsStorageWrapper is
         _;
     }
 
-    modifier onlyValidParticipant(bytes32 partition) {
-        if (_arePartitionsProtected()) {
-            _checkRoleForPartition(partition, _msgSender());
-        }
+    modifier onlyValidParticipant(bytes32 _partition) {
+        _checkValidPartition(_partition);
         _;
-    }
-
-    function _checkProtectedPartitions() internal {
-        if (!_arePartitionsProtected()) {
-            revert PartitionsAreUnProtected();
-        }
     }
 
     function _setProtectedPartitions(bool _protected) internal {
@@ -65,7 +57,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
 
     function _protectedPartitionsRole(
         bytes32 _partition
-    ) internal view returns (bytes32) {
+    ) internal pure returns (bytes32) {
         return
             keccak256(
                 abi.encodePacked(
@@ -232,8 +224,17 @@ abstract contract ProtectedPartitionsStorageWrapper is
     function _checkRoleForPartition(
         bytes32 partition,
         address account
-    ) internal {
+    ) internal view {
         _checkRole(_calculateRoleForPartition(partition), account);
+    }
+
+    function _checkValidPartition(bytes32 _partition) private view {
+        if (_arePartitionsProtected())
+            _checkRoleForPartition(_partition, _msgSender());
+    }
+
+    function _checkProtectedPartitions() private view {
+        if (!_arePartitionsProtected()) revert PartitionsAreUnProtected();
     }
 
     function _protectedPartitionsStorage()
