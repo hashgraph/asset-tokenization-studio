@@ -314,23 +314,23 @@ interface IClearing {
     function clearingCreateHoldByPartition(
         ClearingOperation calldata _clearingOperation,
         IHold.Hold calldata _hold
-    ) external returns (bool success_, uint256 clearingId_);
+    ) external returns (uint256 clearingId_);
 
     function clearingCreateHoldFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         IHold.Hold calldata _hold
-    ) external returns (bool success_, uint256 clearingId_);
+    ) external returns (uint256 clearingId_);
 
     function operatorClearingCreateHoldByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         IHold.Hold calldata _hold
-    ) external returns (bool success_, uint256 clearingId_);
+    ) external returns (uint256 clearingId_);
 
     function protectedClearingCreateHoldByPartition(
         ProtectedClearingOperation calldata _protectedClearingOperation,
         IHold.Hold calldata _hold,
         bytes calldata _signature
-    ) external returns (bool success_, uint256 clearingId_);
+    ) external returns (uint256 clearingId_);
 
     /* 
     function clearingTransferByPartition(

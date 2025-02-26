@@ -302,14 +302,14 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         external
         override
         onlyUnpaused
-        onlyValidAddress(_hold.escrow)
+        validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 clearingId_)
+        returns (uint256 clearingId_)
     {
-        (success_, clearingId_) = _clearingCreateHoldByPartition(
+        clearingId_ = _clearingCreateHoldByPartition(
             _clearingOperation.partition,
             _msgSender(),
             _clearingOperation.expirationTimestamp,
@@ -334,8 +334,8 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         external
         override
         onlyUnpaused
-        onlyValidAddress(_clearingOperationFrom.from)
-        onlyValidAddress(_hold.escrow)
+        validateAddress(_clearingOperationFrom.from)
+        validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         )
@@ -344,9 +344,9 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         )
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 clearingId_)
+        returns (uint256 clearingId_)
     {
-        (success_, clearingId_) = _clearingCreateHoldFromByPartition(
+        clearingId_ = _clearingCreateHoldFromByPartition(
             _clearingOperationFrom.clearingOperation.partition,
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
@@ -371,7 +371,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         external
         override
         onlyUnpaused
-        onlyValidAddress(_hold.escrow)
+        validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         )
@@ -384,13 +384,13 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         )
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 clearingId_)
+        returns (uint256 clearingId_)
     {
         {
             _checkValidAddress(_clearingOperationFrom.from);
         }
 
-        (success_, clearingId_) = _clearingCreateHoldByPartition(
+        clearingId_ = _clearingCreateHoldByPartition(
             _clearingOperationFrom.clearingOperation.partition,
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.expirationTimestamp,
@@ -416,8 +416,8 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         external
         override
         onlyUnpaused
-        onlyValidAddress(_protectedClearingOperation.from)
-        onlyValidAddress(_hold.escrow)
+        validateAddress(_protectedClearingOperation.from)
+        validateAddress(_hold.escrow)
         onlyRole(
             _protectedPartitionsRole(
                 _protectedClearingOperation.clearingOperation.partition
@@ -425,9 +425,9 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         )
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyProtectedPartitions
-        returns (bool success_, uint256 clearingId_)
+        returns (uint256 clearingId_)
     {
-        (success_, clearingId_) = _protectedClearingCreateHoldByPartition(
+        clearingId_ = _protectedClearingCreateHoldByPartition(
             _protectedClearingOperation,
             _hold,
             _signature

@@ -225,33 +225,32 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         uint256 _expirationTimestamp,
         IHold.Hold memory _hold,
         bytes memory _operatorData
-    ) internal returns (bool success_, uint256 clearingId_) {
+    ) internal returns (uint256 clearingId_) {
         _triggerAndSyncAll(_partition, _from, address(0));
-
-        uint256 abaf = _updateTotalClearing(_partition, _from);
-
         _beforeClearing(_partition, _from);
         _reduceBalanceByPartition(_from, _hold.amount, _partition);
 
         IClearing.ClearingDataStorage
             storage clearingStorage = _clearingStorage();
 
-        clearingId_ = ++clearingStorage.nextClearingIdByAccountAndPartition[
-            _from
-        ][_partition];
+        unchecked {
+            clearingId_ = ++clearingStorage.nextClearingIdByAccountAndPartition[
+                _from
+            ][_partition];
+        }
 
-        IClearing.ClearingData memory clearing = IClearing.ClearingData(
-            IClearing.ClearingOperationType.HoldCreation,
-            _hold.amount,
+        IClearing.ClearingData memory clearing = _buildClearingData(
+            _hold,
             _expirationTimestamp,
-            _hold.to,
-            _hold.escrow,
-            _hold.expirationTimestamp,
-            _hold.data,
             _operatorData
         );
 
-        _setClearedLabafById(_partition, _from, clearingId_, abaf);
+        _setClearedLabafById(
+            _partition,
+            _from,
+            clearingId_,
+            _updateTotalClearing(_partition, _from)
+        );
 
         clearingStorage.clearingByAccountPartitionAndId[_from][_partition][
             clearingId_
@@ -270,8 +269,24 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _partition
         ] += _hold.amount;
         clearingStorage.totalClearedAmountByAccount[_from] += _hold.amount;
+    }
 
-        success_ = true;
+    function _buildClearingData(
+        IHold.Hold memory _hold,
+        uint256 _expirationTimestamp,
+        bytes memory _operatorData
+    ) internal pure returns (IClearing.ClearingData memory) {
+        return
+            IClearing.ClearingData(
+                IClearing.ClearingOperationType.HoldCreation,
+                _hold.amount,
+                _expirationTimestamp,
+                _hold.to,
+                _hold.escrow,
+                _hold.expirationTimestamp,
+                _hold.data,
+                _operatorData
+            );
     }
 
     function _clearingCreateHoldFromByPartition(
@@ -280,7 +295,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         uint256 _expirationTimestamp,
         IHold.Hold memory _hold,
         bytes memory _operatorData
-    ) internal returns (bool success_, uint256 clearingId_) {
+    ) internal returns (uint256 clearingId_) {
         _decreaseAllowedBalance(_from, _msgSender(), _hold.amount);
 
         return
@@ -297,7 +312,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
         IHold.Hold memory _hold,
         bytes calldata _signature
-    ) internal returns (bool success_, uint256 clearingId_) {
+    ) internal returns (uint256 clearingId_) {
         checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
@@ -325,7 +340,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                     .clearingOperation
                     .expirationTimestamp,
                 _hold,
-                '0x'
+                ''
             );
     }
 
