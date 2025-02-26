@@ -228,8 +228,13 @@ abstract contract ProtectedPartitionsStorageWrapper is
         IHold.Hold memory _hold,
         bytes calldata _signature
     ) internal view {
-        if (!_isClearingCreateHoldSignatureValid(_protectedClearingOperation, _hold, _signature))
-            revert WrongSignature();
+        if (
+            !_isClearingCreateHoldSignatureValid(
+                _protectedClearingOperation,
+                _hold,
+                _signature
+            )
+        ) revert WrongSignature();
     }
 
     function _isClearingCreateHoldSignatureValid(

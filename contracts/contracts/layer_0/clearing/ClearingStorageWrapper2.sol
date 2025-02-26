@@ -236,9 +236,9 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         IClearing.ClearingDataStorage
             storage clearingStorage = _clearingStorage();
 
-        clearingId_ = ++clearingStorage.nextClearingIdByAccountAndPartition[_from][
-            _partition
-        ];
+        clearingId_ = ++clearingStorage.nextClearingIdByAccountAndPartition[
+            _from
+        ][_partition];
 
         IClearing.ClearingData memory clearing = IClearing.ClearingData(
             IClearing.ClearingOperationType.HoldCreation,
