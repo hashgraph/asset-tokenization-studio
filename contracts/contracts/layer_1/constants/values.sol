@@ -263,9 +263,9 @@ bytes32 constant _HOLD_TYPEHASH = 0x638791043a42aa7472ccb18a7ede86b9baf01fb2d212
 bytes32 constant _PROTECTED_HOLD_TYPEHASH = 0x432ede4c9f6d06cc57be0d75da5dce179cd5f56db988520d5b77795a69b0dc2e;
 
 //keccak256(
-//'protectedClearingTransferByPartition(ProtectedClearingOperation _protectedClearingOperation,uint256 _amount,address _to,bytes signature)ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)ClearingOperation(bytes partition,uint256 expirationTimestamp,bytes data)'
+//'protectedClearingTransferByPartition(ProtectedClearingOperation _protectedClearingOperation,uint256 _amount,address _to,bytes signature)ClearingOperation(bytes partition,uint256 expirationTimestamp,bytes data)ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)'
 //);
-bytes32 constant _PROTECTED_CLEARING_TRANSFER_FROM_PARTITION_TYPEHASH = 0xfa1bc71da021bc35e017b9edf5c8e62338c990040ebbaf40f1ed6d63b5b514d0;
+bytes32 constant _PROTECTED_CLEARING_TRANSFER_FROM_PARTITION_TYPEHASH = 0x6b0d63975f3d2b1cd9d25908645c662987e4aead4eb168b65d3ac3779469a4d7;
 
 //keccak256(
 //'ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)ClearingOperation(bytes partition,uint256 expirationTimestamp,bytes data)'
