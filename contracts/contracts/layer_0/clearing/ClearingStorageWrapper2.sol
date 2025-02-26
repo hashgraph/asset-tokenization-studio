@@ -243,8 +243,8 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             IClearing.ClearingOperationType.Transfer
         ].add(clearingId_);
         _clearingStorage().clearingByAccountPartitionAndId[_from][partition][
-                clearingId_
-            ] = IClearing.ClearingData({
+            clearingId_
+        ] = IClearing.ClearingData({
             clearingOperationType: IClearing.ClearingOperationType.Transfer,
             amount: _amount,
             holdExpirationTimestamp: 0,

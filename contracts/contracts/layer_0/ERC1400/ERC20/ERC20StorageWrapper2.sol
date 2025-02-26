@@ -349,14 +349,7 @@ abstract contract ERC20StorageWrapper2 is
     }
 
     function _burn(address from, uint256 value) internal {
-        _redeemByPartition(
-            _DEFAULT_PARTITION,
-            from,
-            address(0),
-            value,
-            '',
-            ''
-        );
+        _redeemByPartition(_DEFAULT_PARTITION, from, address(0), value, '', '');
         _emitTransferEvent(from, address(0), value);
     }
 

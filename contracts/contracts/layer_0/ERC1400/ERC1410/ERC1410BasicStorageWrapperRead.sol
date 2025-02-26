@@ -257,7 +257,9 @@ abstract contract ERC1410BasicStorageWrapperRead is
         _;
     }
 
-    function  _checkDefaultPartitionWithSinglePartition(bytes32 partition) internal {
+    function _checkDefaultPartitionWithSinglePartition(
+        bytes32 partition
+    ) internal {
         if (!_isMultiPartition() && partition != _DEFAULT_PARTITION) {
             revert PartitionNotAllowedInSinglePartitionMode(partition);
         }

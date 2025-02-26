@@ -247,17 +247,18 @@ abstract contract ERC1410BasicStorageWrapper is
         );
 
         if (!_validPartitionForReceiver(_partition, _basicTransferInfo.to)) {
-            return _addPartitionTo(
-                _basicTransferInfo.value,
-                _basicTransferInfo.to,
-                _partition
-            );
+            return
+                _addPartitionTo(
+                    _basicTransferInfo.value,
+                    _basicTransferInfo.to,
+                    _partition
+                );
         }
         _increaseBalanceByPartition(
-                _basicTransferInfo.to,
-                _basicTransferInfo.value,
-                _partition
-            );
+            _basicTransferInfo.to,
+            _basicTransferInfo.value,
+            _partition
+        );
     }
 
     function _beforeTokenTransfer(

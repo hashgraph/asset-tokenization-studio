@@ -205,7 +205,7 @@
 
 import { subtask, task, types } from 'hardhat/config'
 import { Signer, Wallet } from 'ethers'
-import { ethers } from "ethers"
+import { ethers } from 'ethers'
 import { keccak256 } from 'ethers/lib/utils'
 import {
     GetSignerResult,
