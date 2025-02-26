@@ -8,9 +8,13 @@ import {
     _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH,
     _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
     _PROTECTED_HOLD_TYPEHASH,
-    _HOLD_TYPEHASH
+    _HOLD_TYPEHASH,
+    _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
+    _PROTECTED_CLEARING_OPERATION_TYPEHASH,
+    _CLEARING_OPERATION_TYPEHASH
 } from '../constants/values.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
+import {IClearing} from '../interfaces/clearing/IClearing.sol';
 
 error WrongSignatureLength();
 error WrongNounce(uint256 nounce, address account);
@@ -84,6 +88,52 @@ function getMessageHashCreateHold(
                         ),
                         _protectedHold.deadline,
                         _protectedHold.nonce
+                    )
+                )
+            )
+        );
+}
+
+function getMessageHashClearingCreateHold(
+    IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
+    IHold.Hold memory _hold
+) pure returns (bytes32) {
+    return
+        keccak256(
+            abi.encode(
+                _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
+                keccak256(
+                    abi.encode(
+                        _PROTECTED_CLEARING_OPERATION_TYPEHASH,
+                        keccak256(
+                            abi.encode(
+                                _CLEARING_OPERATION_TYPEHASH,
+                                _protectedClearingOperation
+                                    .clearingOperation
+                                    .partition,
+                                _protectedClearingOperation
+                                    .clearingOperation
+                                    .expirationTimestamp,
+                                keccak256(
+                                    _protectedClearingOperation
+                                        .clearingOperation
+                                        .data
+                                )
+                            )
+                        ),
+                        _protectedClearingOperation.from,
+                        _protectedClearingOperation.deadline,
+                        _protectedClearingOperation.nonce
+                    )
+                ),
+                keccak256(
+                    abi.encode(
+                        _HOLD_TYPEHASH,
+                        _hold.amount,
+                        _hold.expirationTimestamp,
+                        _hold.escrow,
+                        _hold.to,
+                        keccak256(_hold.data)
                     )
                 )
             )

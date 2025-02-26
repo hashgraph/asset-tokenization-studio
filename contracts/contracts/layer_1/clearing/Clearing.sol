@@ -295,6 +295,154 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         return _isClearingActivated();
     }
 
+    function clearingCreateHoldByPartition(
+        ClearingOperation calldata _clearingOperation,
+        IHold.Hold calldata _hold
+    )
+        external
+        override
+        onlyUnpaused
+        onlyValidAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
+        onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 clearingId_)
+    {
+        (success_, clearingId_) = _clearingCreateHoldByPartition(
+            _clearingOperation.partition,
+            _msgSender(),
+            _clearingOperation.expirationTimestamp,
+            _hold,
+            ''
+        );
+
+        emit ClearedHoldByPartition(
+            _msgSender(),
+            _msgSender(),
+            _clearingOperation.partition,
+            clearingId_,
+            _hold,
+            ''
+        );
+    }
+
+    function clearingCreateHoldFromByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        IHold.Hold calldata _hold
+    )
+        external
+        override
+        onlyUnpaused
+        onlyValidAddress(_clearingOperationFrom.from)
+        onlyValidAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
+        onlyWithValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        )
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 clearingId_)
+    {
+        (success_, clearingId_) = _clearingCreateHoldFromByPartition(
+            _clearingOperationFrom.clearingOperation.partition,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            _hold,
+            _clearingOperationFrom.operatorData
+        );
+
+        emit ClearedHoldByPartition(
+            _msgSender(),
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            _hold,
+            _clearingOperationFrom.operatorData
+        );
+    }
+
+    function operatorClearingCreateHoldByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        IHold.Hold calldata _hold
+    )
+        external
+        override
+        onlyUnpaused
+        onlyValidAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
+        onlyOperator(
+            _clearingOperationFrom.clearingOperation.partition,
+            _clearingOperationFrom.from
+        )
+        onlyWithValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        )
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 clearingId_)
+    {
+        {
+            _checkValidAddress(_clearingOperationFrom.from);
+        }
+
+        (success_, clearingId_) = _clearingCreateHoldByPartition(
+            _clearingOperationFrom.clearingOperation.partition,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+            _hold,
+            _clearingOperationFrom.operatorData
+        );
+
+        emit ClearedHoldByPartition(
+            _msgSender(),
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            _hold,
+            _clearingOperationFrom.operatorData
+        );
+    }
+
+    function protectedClearingCreateHoldByPartition(
+        ProtectedClearingOperation calldata _protectedClearingOperation,
+        IHold.Hold calldata _hold,
+        bytes calldata _signature
+    )
+        external
+        override
+        onlyUnpaused
+        onlyValidAddress(_protectedClearingOperation.from)
+        onlyValidAddress(_hold.escrow)
+        onlyRole(
+            _protectedPartitionsRole(
+                _protectedClearingOperation.clearingOperation.partition
+            )
+        )
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyProtectedPartitions
+        returns (bool success_, uint256 clearingId_)
+    {
+        (success_, clearingId_) = _protectedClearingCreateHoldByPartition(
+            _protectedClearingOperation,
+            _hold,
+            _signature
+        );
+
+        emit ClearedHoldByPartition(
+            _msgSender(),
+            _protectedClearingOperation.from,
+            _protectedClearingOperation.clearingOperation.partition,
+            clearingId_,
+            _hold,
+            ''
+        );
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -311,7 +459,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](6);
+        staticFunctionSelectors_ = new bytes4[](10);
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_Clearing
             .selector;
@@ -329,6 +477,18 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getClearingForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearingCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearingCreateHoldFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorClearingCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedClearingCreateHoldByPartition
             .selector;
     }
 

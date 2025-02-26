@@ -253,9 +253,24 @@ bytes32 constant _PROTECTED_REDEEM_FROM_PARTITION_TYPEHASH = 0x5075effccf2d386f2
 bytes32 constant _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH = 0xfd0d74766e5201a669a9197ba674709a23bc9c94c38a9ed40649836def3747eb;
 
 //keccak256(
+//'protectedClearingCreateHoldByPartition(ProtectedClearingOperation _protectedClearingOperation,Hold _hold)ProtectedClearingOperation(ClearingOperation clearingOperation,address from,uint256 deadline,uint256 nonce)ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'
+//);
+bytes32 constant _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH = 0xd32ead793e63fb17cd4da19ab3ef4a6dafb32d71554815c439a6fd0e5f04a843;
+
+//keccak256(
 //'Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'
 //);
 bytes32 constant _HOLD_TYPEHASH = 0x638791043a42aa7472ccb18a7ede86b9baf01fb2d2128a743cf5dc473057d7bc;
+
+//keccak256(
+//'ProtectedClearingOperation(ClearingOperation clearingOperation,address from,uint256 deadline,uint256 nonce)ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)'
+//);
+bytes32 constant _PROTECTED_CLEARING_OPERATION_TYPEHASH = 0x1e3a71820115912522e83d52ecad9fb4b7753a55d2d3d24c1c4e3047f9eb2e1f;
+
+//keccak256(
+//'ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)'
+//);
+bytes32 constant _CLEARING_OPERATION_TYPEHASH = 0x6b1a3eed3300b58d08c0db9042a291c5c816c5891e585aad19ad1b2723d147bc;
 
 //keccak256(
 //'ProtectedHold(Hold hold,uint256 deadline,uint256 nonce)Hold(uint256 amount,uint256 expirationTimestamp,address escrow,address to,bytes data)'

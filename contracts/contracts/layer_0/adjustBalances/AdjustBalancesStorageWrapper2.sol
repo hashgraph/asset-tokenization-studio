@@ -206,7 +206,7 @@
 pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-import {HoldStorageWrapper2} from '../hold/HoldStorageWrapper2.sol';
+import {ClearingStorageWrapper2} from '../clearing/ClearingStorageWrapper2.sol';
 import {
     IAdjustBalancesStorageWrapper
 } from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
@@ -214,7 +214,7 @@ import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 
 abstract contract AdjustBalancesStorageWrapper2 is
     IAdjustBalancesStorageWrapper,
-    HoldStorageWrapper2
+    ClearingStorageWrapper2
 {
     // solhint-disable no-unused-vars
     function _adjustBalances(uint256 _factor, uint8 _decimals) internal {
