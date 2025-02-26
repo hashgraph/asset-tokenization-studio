@@ -265,6 +265,14 @@ interface IClearing {
         mapping(address => mapping(bytes32 => mapping(ClearingOperationType => EnumerableSet.UintSet))) clearingIdsByAccountAndPartitionAndTypes;
     }
 
+    event ClearedTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        bytes operatorData
+    );
+
     function initialize_Clearing(bool _activateClearing) external;
 
     function activateClearing() external returns (bool success_);

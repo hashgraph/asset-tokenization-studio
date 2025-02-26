@@ -267,6 +267,14 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _msgSender(),
             new bytes(0)
         );
+
+        emit ClearedTransferByPartition(
+            _msgSender(),
+            _msgSender(),
+            _clearingOperation.partition,
+            clearingId_,
+            new bytes(0)
+        );
     }
 
     function clearingTransferFromByPartition(
@@ -291,6 +299,14 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _amount,
             _to,
             _clearingOperationFrom.from,
+            new bytes(0)
+        );
+
+        emit ClearedTransferByPartition(
+            _msgSender(),
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
             new bytes(0)
         );
     }
@@ -328,6 +344,14 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _clearingOperationFrom.from,
             _clearingOperationFrom.operatorData
         );
+
+        emit ClearedTransferByPartition(
+            _msgSender(),
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            _clearingOperationFrom.operatorData
+        );
     }
 
     function protectedClearingTransferByPartition(
@@ -359,6 +383,14 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _amount,
             _to,
             _signature
+        );
+
+        emit ClearedTransferByPartition(
+            _msgSender(),
+            _protectedClearingOperation.from,
+            _protectedClearingOperation.clearingOperation.partition,
+            clearingId_,
+            new bytes(0)
         );
     }
 
