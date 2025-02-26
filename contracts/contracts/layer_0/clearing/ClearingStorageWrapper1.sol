@@ -211,17 +211,13 @@ import {HoldStorageWrapper1} from '../hold/HoldStorageWrapper1.sol';
 import {
     IClearingStorageWrapper
 } from '../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol';
+import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 abstract contract ClearingStorageWrapper1 is
     IClearingStorageWrapper,
     HoldStorageWrapper1
 {
-    struct ClearingDataStorage {
-        bool initialized;
-        bool activated;
-    }
-
     function _setClearing(bool _activated) internal returns (bool success_) {
         _clearingStorage().activated = _activated;
         if (_activated) emit ClearingActivated(_msgSender());
@@ -233,10 +229,26 @@ abstract contract ClearingStorageWrapper1 is
         return _clearingStorage().activated;
     }
 
+    function _getClearedAmountFor(
+        address _tokenHolder
+    ) internal view returns (uint256 amount_) {
+        return _clearingStorage().totalClearedAmountByAccount[_tokenHolder];
+    }
+
+    function _getClearedAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view returns (uint256 amount_) {
+        return
+            _clearingStorage().totalClearedAmountByAccountAndPartition[
+                _tokenHolder
+            ][_partition];
+    }
+
     function _clearingStorage()
         internal
         pure
-        returns (ClearingDataStorage storage clearing_)
+        returns (IClearing.ClearingDataStorage storage clearing_)
     {
         bytes32 position = _CLEARING_STORAGE_POSITION;
         // solhint-disable-next-line no-inline-assembly

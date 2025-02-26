@@ -208,6 +208,7 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 import {Common} from '../common/Common.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
 import {_CLEARING_ROLE} from '../constants/roles.sol';
 import {_CLEARING_VALIDATOR_ROLE} from '../constants/roles.sol';
 import {
@@ -252,6 +253,135 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         returns (bytes32 staticResolverKey_)
     {
         staticResolverKey_ = _CLEARING_RESOLVER_KEY;
+    }
+
+    function clearingTransferByPartition(
+        ClearingOperation calldata _clearingOperation,
+        uint256 _amount,
+        address _to
+    )
+        external
+        override
+        onlyUnpaused
+        onlyValidAddress(_to)
+        checkControlList(_msgSender())
+        checkControlList(_to)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        returns (bool success_, uint256 clearingId_)
+    {
+        (success_, clearingId_) = _clearingTransferFromByPartition(
+            _clearingOperation,
+            _amount,
+            _to,
+            _msgSender(),
+            new bytes(0)
+        );
+    }
+
+    function clearingTransferFromByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount,
+        address _to
+    )
+        external
+        override
+        onlyUnpaused
+        checkControlList(_msgSender())
+        checkControlList(_to)
+        checkControlList(_clearingOperationFrom.from)
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _clearingOperationFrom.from)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        returns (bool success_, uint256 clearingId_)
+    {
+        (success_, clearingId_) = _clearingTransferFromByPartition(
+            _clearingOperationFrom.clearingOperation,
+            _amount,
+            _to,
+            _clearingOperationFrom.from,
+            new bytes(0)
+        );
+    }
+
+    function operatorClearingTransferByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount,
+        address _to
+    )
+        external
+        override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
+        checkControlList(_msgSender())
+        checkControlList(_clearingOperationFrom.from)
+        checkControlList(_to)
+        onlyOperator(
+            _clearingOperationFrom.clearingOperation.partition,
+            _clearingOperationFrom.from
+        )
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _clearingOperationFrom.from)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        returns (bool success_, uint256 clearingId_)
+    {
+        (success_, clearingId_) = _clearingTransferFromByPartition(
+            _clearingOperationFrom.clearingOperation,
+            _amount,
+            _to,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.operatorData
+        );
+    }
+
+    function protectedClearingTransferByPartition(
+        ProtectedClearingOperation calldata _protectedClearingOperation,
+        uint256 _amount,
+        address _to,
+        bytes calldata _signature
+    )
+        external
+        override
+        onlyUnpaused
+        onlyRole(
+            _protectedPartitionsRole(
+                _protectedClearingOperation.clearingOperation.partition
+            )
+        )
+        checkControlList(_protectedClearingOperation.from)
+        checkControlList(_to)
+        onlyProtectedPartitions
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _protectedClearingOperation.from
+        )
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        returns (bool success_, uint256 clearingId_)
+    {
+        (success_, clearingId_) = _protectedClearingTransferFromByPartition(
+            _protectedClearingOperation,
+            _amount,
+            _to,
+            _signature
+        );
+    }
+
+    function getClearedAmountFor(
+        address _tokenHolder
+    ) external view returns (uint256 amount_) {
+        return _getClearedAmountFor(_tokenHolder);
+    }
+
+    function getClearedAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 amount_) {
+        return _getClearedAmountForByPartition(_partition, _tokenHolder);
     }
 
     function getStaticFunctionSelectors()
