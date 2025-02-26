@@ -476,7 +476,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](6);
+        staticFunctionSelectors_ = new bytes4[](10);
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_Clearing
             .selector;
@@ -494,6 +494,18 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getClearingForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearingTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearingTransferFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorClearingTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedClearingTransferByPartition
             .selector;
     }
 
