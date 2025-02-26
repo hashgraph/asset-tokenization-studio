@@ -232,7 +232,11 @@ contract ScheduledSnapshots is
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    ) external override onlyAutoCalling(_scheduledSnapshotStorage()) {
+    )
+        external
+        override
+        onlyAutoCalling(_scheduledSnapshotStorage().autoCalling)
+    {
         uint256 newSnapShotID;
         if (_pos == _scheduledTasksLength - 1) {
             newSnapShotID = _snapshot();

@@ -245,8 +245,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         override
         onlyUnpaused
-        checkControlList(_msgSender())
-        checkControlList(_to)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
@@ -278,9 +278,9 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         override
         onlyUnpaused
-        checkControlList(_msgSender())
-        checkControlList(_to)
-        checkControlList(_from)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_to)
+        onlyListedAllowed(_from)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
@@ -306,10 +306,10 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
     )
         external
         override
-        checkMaxSupply(_value)
+        onlyWithinMaxSupply(_value)
         onlyUnpaused
         onlyRole(_ISSUER_ROLE)
-        checkControlList(_tokenHolder)
+        onlyListedAllowed(_tokenHolder)
         onlyWithoutMultiPartition
         onlyIssuable
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
@@ -331,7 +331,7 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         override
         onlyUnpaused
-        checkControlList(_msgSender())
+        onlyListedAllowed(_msgSender())
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
@@ -356,8 +356,8 @@ contract ERC1594 is IERC1594, IStaticFunctionSelectors, ERC1594StorageWrapper {
         external
         override
         onlyUnpaused
-        checkControlList(_msgSender())
-        checkControlList(_tokenHolder)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_tokenHolder)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)

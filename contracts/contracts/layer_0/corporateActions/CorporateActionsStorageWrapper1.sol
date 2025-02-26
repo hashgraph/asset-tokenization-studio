@@ -222,23 +222,14 @@ import {
     _CORPORATE_ACTION_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
 import {HoldStorageWrapper1} from '../hold/HoldStorageWrapper1.sol';
-import {
-    SNAPSHOT_TASK_TYPE,
-    BALANCE_ADJUSTMENT_TASK_TYPE,
-    SNAPSHOT_RESULT_ID
-} from '../constants/values.sol';
+import {SNAPSHOT_RESULT_ID} from '../constants/values.sol';
 
-contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
+abstract contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    modifier checkDates(uint256 firstDate, uint256 secondDate) {
-        if (secondDate < firstDate) {
-            revert ICorporateActionsStorageWrapper.WrongDates(
-                firstDate,
-                secondDate
-            );
-        }
+    modifier validateDates(uint256 _firstDate, uint256 _secondDate) {
+        _checkDates(_firstDate, _secondDate);
         _;
     }
 
@@ -365,6 +356,15 @@ contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
         bytes32 actionId
     ) internal view returns (bytes memory) {
         return _corporateActionsStorage().actionsData[actionId].data;
+    }
+
+    function _checkDates(uint256 _firstDate, uint256 _secondDate) private pure {
+        if (_secondDate < _firstDate) {
+            revert ICorporateActionsStorageWrapper.WrongDates(
+                _firstDate,
+                _secondDate
+            );
+        }
     }
 
     function _corporateActionsStorage()

@@ -217,17 +217,42 @@ abstract contract CapStorageWrapper2 is
     LockStorageWrapper2
 {
     // modifiers
-    modifier checkMaxSupply(uint256 _amount) {
+    modifier onlyWithinMaxSupply(uint256 _amount) {
+        _checkWithinMaxSupply(_amount);
+        _;
+    }
+
+    modifier onlyWithinMaxSupplyByPartition(bytes32 _partition, uint256 _amount)
+    {
+        _checkWithinMaxSupplyByPartition(_partition, _amount);
+        _;
+    }
+
+    modifier onlyValidNewMaxSupply(uint256 _newMaxSupply) {
+        _checkNewMaxSupply(_newMaxSupply);
+        _;
+    }
+
+    modifier onlyValidNewMaxSupplyByPartition(
+        bytes32 _partition,
+        uint256 _newMaxSupply
+    ) {
+        _checkNewMaxSupplyByPartition(_partition, _newMaxSupply);
+        _;
+    }
+
+    function _checkWithinMaxSupply(uint256 _amount) private view {
         uint256 maxSupply = _getMaxSupply();
         if (!_isCorrectMaxSupply(_totalSupply() + _amount, maxSupply)) {
             revert ICapStorageWrapper.MaxSupplyReached(maxSupply);
         }
-        _;
     }
 
-    modifier checkMaxSupplyForPartition(bytes32 _partition, uint256 _amount) {
+    function _checkWithinMaxSupplyByPartition(
+        bytes32 _partition,
+        uint256 _amount
+    ) private view {
         uint256 maxSupplyForPartition = _getMaxSupplyByPartition(_partition);
-
         if (
             !_isCorrectMaxSupply(
                 _totalSupplyByPartition(_partition) + _amount,
@@ -239,23 +264,9 @@ abstract contract CapStorageWrapper2 is
                 maxSupplyForPartition
             );
         }
-        _;
     }
 
-    modifier checkNewMaxSupply(uint256 _newMaxSupply) {
-        _checkNewMaxSupply(_newMaxSupply);
-        _;
-    }
-
-    modifier checkNewMaxSupplyForPartition(
-        bytes32 _partition,
-        uint256 _newMaxSupply
-    ) {
-        _checkNewMaxSupplyForPartition(_partition, _newMaxSupply);
-        _;
-    }
-
-    function _checkNewMaxSupply(uint256 _newMaxSupply) internal {
+    function _checkNewMaxSupply(uint256 _newMaxSupply) private view {
         if (_newMaxSupply == 0) {
             revert NewMaxSupplyCannotBeZero();
         }
@@ -265,7 +276,7 @@ abstract contract CapStorageWrapper2 is
         }
     }
 
-    function _checkNewMaxSupplyForPartition(
+    function _checkNewMaxSupplyByPartition(
         bytes32 _partition,
         uint256 _newMaxSupply
     ) internal view {

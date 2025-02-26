@@ -241,16 +241,8 @@ abstract contract CorporateActionsStorageWrapper2 is
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
-    modifier checkIndexForCorporateActionByType(
-        bytes32 actionType,
-        uint256 index
-    ) {
-        if (_getCorporateActionCountByType(actionType) <= index) {
-            revert ICorporateActionsStorageWrapper.WrongIndexForAction(
-                index,
-                actionType
-            );
-        }
+    modifier onlyMatchingActionType(bytes32 _actionType, uint256 _index) {
+        _checkMatchingActionType(_actionType, _index);
         _;
     }
 
@@ -418,5 +410,16 @@ abstract contract CorporateActionsStorageWrapper2 is
         }
 
         return snapshotId;
+    }
+
+    function _checkMatchingActionType(
+        bytes32 _actionType,
+        uint256 _index
+    ) private view {
+        if (_getCorporateActionCountByType(_actionType) <= _index)
+            revert ICorporateActionsStorageWrapper.WrongIndexForAction(
+                _index,
+                _actionType
+            );
     }
 }

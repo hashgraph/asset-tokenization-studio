@@ -229,8 +229,8 @@ abstract contract ERC1410ProtectedPartitions is
         override
         onlyUnpaused
         onlyRole(_protectedPartitionsRole(_partition))
-        checkControlList(_from)
-        checkControlList(_to)
+        onlyListedAllowed(_from)
+        onlyListedAllowed(_to)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         onlyProtectedPartitions
@@ -258,7 +258,7 @@ abstract contract ERC1410ProtectedPartitions is
         override
         onlyUnpaused
         onlyRole(_protectedPartitionsRole(_partition))
-        checkControlList(_from)
+        onlyListedAllowed(_from)
         onlyProtectedPartitions
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
     {

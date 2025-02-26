@@ -225,11 +225,6 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
         _;
     }
 
-    function _checkHoldId(IHold.HoldIdentifier calldata _holdIdentifier) internal
-    {
-        if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
-    }
-
     function _isHoldIdValid(
         IHold.HoldIdentifier memory _holdIdentifier
     ) internal view returns (bool) {
@@ -312,25 +307,28 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
     function _isHoldExpired(
         IHold.Hold memory _hold
     ) internal view returns (bool) {
-        if (_blockTimestamp() > _hold.expirationTimestamp) return true;
-        return false;
+        return _blockTimestamp() > _hold.expirationTimestamp;
     }
 
     function _isEscrow(
         IHold.Hold memory _hold,
         address _escrow
     ) internal pure returns (bool) {
-        if (_escrow == _hold.escrow) return true;
-        return false;
+        return _escrow == _hold.escrow;
     }
 
     function _checkHoldAmount(
         uint256 _amount,
         IHold.HoldData memory holdData
     ) internal pure {
-        if (_amount > holdData.hold.amount) {
+        if (_amount > holdData.hold.amount)
             revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
-        }
+    }
+
+    function _checkHoldId(
+        IHold.HoldIdentifier calldata _holdIdentifier
+    ) private view {
+        if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
     }
 
     function _holdStorage()

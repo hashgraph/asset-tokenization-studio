@@ -232,9 +232,9 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
         external
         override
         onlyUnpaused
-        onlyValidAddress(_basicTransferInfo.to)
-        checkControlList(_msgSender())
-        checkControlList(_basicTransferInfo.to)
+        validateAddress(_basicTransferInfo.to)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_basicTransferInfo.to)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
