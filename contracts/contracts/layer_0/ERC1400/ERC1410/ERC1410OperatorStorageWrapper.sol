@@ -251,8 +251,8 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         address _operator
     ) internal {
         _erc1410operatorStorage().partitionApprovals[_msgSender()][_partition][
-            _operator
-        ] = true;
+                _operator
+            ] = true;
         emit AuthorizedOperatorByPartition(_partition, _operator, _msgSender());
     }
 
@@ -261,8 +261,8 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         address _operator
     ) internal {
         _erc1410operatorStorage().partitionApprovals[_msgSender()][_partition][
-            _operator
-        ] = false;
+                _operator
+            ] = false;
         emit RevokedOperatorByPartition(_partition, _operator, _msgSender());
     }
 

@@ -258,7 +258,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         success_ = true;
     }
 
-    function _protectedClearingTransferFromByPartition(
+    function _protectedClearingTransferByPartition(
         IClearing.ProtectedClearingOperation
             calldata _protectedClearingOperation,
         uint256 _amount,
@@ -273,13 +273,10 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _blockTimestamp()
         );
 
-        _checkTransferSignature(
-            _protectedClearingOperation.clearingOperation.partition,
-            _protectedClearingOperation.from,
+        _checkClearingTransferSignature(
+            _protectedClearingOperation,
             _to,
             _amount,
-            _protectedClearingOperation.deadline,
-            _protectedClearingOperation.nonce,
             _signature
         );
 

@@ -15,9 +15,11 @@ import {
     getMessageHashTransfer,
     getMessageHashRedeem,
     getMessageHashCreateHold,
+    getMessageHashClearingTransfer,
     verify
 } from '../../../layer_1/protectedPartitions/signatureVerification.sol';
 import {IHold} from '../../../layer_1/interfaces/hold/IHold.sol';
+import {IClearing} from '../../../layer_1/interfaces/clearing/IClearing.sol';
 
 abstract contract ProtectedPartitionsStorageWrapper is
     IProtectedPartitionsStorageWrapper,
@@ -212,6 +214,48 @@ abstract contract ProtectedPartitionsStorageWrapper is
         return
             verify(
                 _from,
+                functionHash,
+                _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
+            );
+    }
+
+    function _checkClearingTransferSignature(
+        IClearing.ProtectedClearingOperation
+            calldata _protectedClearingOperation,
+        address _to,
+        uint256 _amount,
+        bytes calldata _signature
+    ) internal view {
+        if (
+            !_isClearingTransferSignatureValid(
+                _protectedClearingOperation,
+                _to,
+                _amount,
+                _signature
+            )
+        ) revert WrongSignature();
+    }
+
+    function _isClearingTransferSignatureValid(
+        IClearing.ProtectedClearingOperation
+            calldata _protectedClearingOperation,
+        address _to,
+        uint256 _amount,
+        bytes calldata _signature
+    ) internal view returns (bool) {
+        bytes32 functionHash = getMessageHashClearingTransfer(
+            _protectedClearingOperation,
+            _to,
+            _amount
+        );
+
+        return
+            verify(
+                _protectedClearingOperation.from,
                 functionHash,
                 _signature,
                 _protectedPartitionsStorage().contractName,

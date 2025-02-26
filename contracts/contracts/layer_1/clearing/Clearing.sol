@@ -318,6 +318,9 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         returns (bool success_, uint256 clearingId_)
     {
+        {
+            _checkValidAddress(_to);
+        }
         (success_, clearingId_) = _clearingTransferFromByPartition(
             _clearingOperationFrom.clearingOperation,
             _amount,
@@ -351,7 +354,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         returns (bool success_, uint256 clearingId_)
     {
-        (success_, clearingId_) = _protectedClearingTransferFromByPartition(
+        (success_, clearingId_) = _protectedClearingTransferByPartition(
             _protectedClearingOperation,
             _amount,
             _to,
