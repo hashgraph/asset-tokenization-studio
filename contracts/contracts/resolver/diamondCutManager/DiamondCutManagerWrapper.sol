@@ -313,7 +313,7 @@ abstract contract DiamondCutManagerWrapper is
 
     function _getBatchConfigurationVersion(
         bytes32 _configurationId
-    ) internal returns (uint256 batchVersion_) {
+    ) internal view returns (uint256 batchVersion_) {
         batchVersion_ = _diamondCutManagerStorage().batchVersion[
             _configurationId
         ];

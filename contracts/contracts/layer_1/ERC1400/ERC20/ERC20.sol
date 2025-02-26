@@ -254,8 +254,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        checkControlList(_msgSender())
-        checkControlList(spender)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(spender)
         onlyWithoutMultiPartition
         returns (bool)
     {
@@ -269,8 +269,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        checkControlList(_msgSender())
-        checkControlList(to)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
@@ -288,9 +288,9 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        checkControlList(_msgSender())
-        checkControlList(from)
-        checkControlList(to)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(from)
+        onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, from)
@@ -306,8 +306,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     )
         external
         onlyUnpaused
-        checkControlList(_msgSender())
-        checkControlList(spender)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(spender)
         onlyWithoutMultiPartition
         returns (bool)
     {
@@ -320,8 +320,8 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
     )
         external
         onlyUnpaused
-        checkControlList(_msgSender())
-        checkControlList(spender)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(spender)
         onlyWithoutMultiPartition
         returns (bool)
     {

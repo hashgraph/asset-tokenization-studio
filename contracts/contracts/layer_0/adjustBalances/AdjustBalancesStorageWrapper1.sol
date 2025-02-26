@@ -220,8 +220,8 @@ abstract contract AdjustBalancesStorageWrapper1 is
     IAdjustBalancesStorageWrapper,
     ScheduledBalanceAdjustmentsStorageWrapper
 {
-    modifier checkFactor(uint256 _factor) {
-        if (_factor == 0) revert FactorIsZero();
+    modifier validateFactor(uint256 _factor) {
+        _checkFactor(_factor);
         _;
     }
 
@@ -244,6 +244,10 @@ abstract contract AdjustBalancesStorageWrapper1 is
         mapping(address => uint256) labafHeldAmountByAccount;
         mapping(address => mapping(bytes32 => uint256)) labafHeldAmountByAccountAndPartition;
         mapping(address => mapping(bytes32 => mapping(uint256 => uint256))) labafHeldAmountByAccountPartitionAndId;
+    }
+
+    function _checkFactor(uint256 _factor) private pure {
+        if (_factor == 0) revert FactorIsZero();
     }
 
     function _updateAbaf(uint256 factor) internal {

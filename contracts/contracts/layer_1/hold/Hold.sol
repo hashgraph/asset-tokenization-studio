@@ -224,7 +224,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        onlyValidAddress(_hold.escrow)
+        validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
@@ -256,8 +256,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        onlyValidAddress(_from)
-        onlyValidAddress(_hold.escrow)
+        validateAddress(_from)
+        validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
@@ -289,8 +289,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        onlyValidAddress(_from)
-        onlyValidAddress(_hold.escrow)
+        validateAddress(_from)
+        validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyOperator(_partition, _from)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
@@ -323,8 +323,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        onlyValidAddress(_from)
-        onlyValidAddress(_hold.escrow)
+        validateAddress(_from)
+        validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_CONTROLLER_ROLE)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
@@ -357,8 +357,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        onlyValidAddress(_from)
-        onlyValidAddress(_protectedHold.hold.escrow)
+        validateAddress(_from)
+        validateAddress(_protectedHold.hold.escrow)
         onlyRole(_protectedPartitionsRole(_partition))
         onlyWithValidExpirationTimestamp(
             _protectedHold.hold.expirationTimestamp
@@ -393,7 +393,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
         onlyWithValidHoldId(_holdIdentifier)
-        checkControlList(_to)
+        onlyListedAllowed(_to)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _holdIdentifier.tokenHolder)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         returns (bool success_)
