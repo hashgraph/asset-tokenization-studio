@@ -250,20 +250,15 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             IClearing.ClearingOperationType.Transfer
         ].add(clearingId_);
 
-        IClearing.ClearingData memory clearingData = _buildClearingData(
-            IClearing.ClearingOperationType.Transfer,
+        _setClearingData(
+            _clearingOperation,
             _amount,
-            0,
-            _clearingOperation.expirationTimestamp,
+            _from,
             _to,
-            address(0),
-            _clearingOperation.data,
-            _operatorData
+            _operatorData,
+            IClearing.ClearingOperationType.Transfer,
+            clearingId_
         );
-
-        clearingDataStorage.clearingByAccountPartitionAndId[_from][partition][
-                clearingId_
-            ] = clearingData;
 
         _afterClearing(_from, partition, _amount);
 
@@ -297,20 +292,15 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             IClearing.ClearingOperationType.Transfer
         ].add(clearingId_);
 
-        IClearing.ClearingData memory clearingData = _buildClearingData(
-            IClearing.ClearingOperationType.Transfer,
+        _setClearingData(
+            _clearingOperation,
             _amount,
-            0,
-            _clearingOperation.expirationTimestamp,
+            _from,
             _to,
-            address(0),
-            _clearingOperation.data,
-            _operatorData
+            _operatorData,
+            IClearing.ClearingOperationType.Transfer,
+            clearingId_
         );
-
-        clearingDataStorage.clearingByAccountPartitionAndId[_from][partition][
-                clearingId_
-            ] = clearingData;
 
         _afterClearing(_from, partition, _amount);
 
@@ -437,26 +427,31 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         _setTotalClearedLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 
-    function _buildClearingData(
-        IClearing.ClearingOperationType _operationType,
+    function _setClearingData(
+        IClearing.ClearingOperation memory _clearingOperation,
         uint256 _amount,
-        uint256 _holdExpirationTimestamp,
-        uint256 _expirationTimestamp,
-        address _destination,
-        address _escrow,
-        bytes memory _data,
-        bytes memory _operatorData
-    ) internal pure returns (IClearing.ClearingData memory clearingData_) {
-        clearingData_ = IClearing.ClearingData({
-            clearingOperationType: _operationType,
-            amount: _amount,
-            holdExpirationTimestamp: _holdExpirationTimestamp,
-            expirationTimestamp: _expirationTimestamp,
-            destination: _destination,
-            escrow: _escrow,
-            data: _data,
-            operatorData: _operatorData
-        });
+        address _from,
+        address _to,
+        bytes memory _operatorData,
+        IClearing.ClearingOperationType _operationType,
+        uint256 _clearingId
+    ) internal {
+        IClearing.ClearingData memory clearingData;
+        if (_operationType == IClearing.ClearingOperationType.Transfer) {
+            clearingData = IClearing.ClearingData({
+                clearingOperationType: _operationType,
+                amount: _amount,
+                holdExpirationTimestamp: 0,
+                expirationTimestamp: _clearingOperation.expirationTimestamp,
+                destination: _to,
+                escrow: address(0),
+                data: _clearingOperation.data,
+                operatorData: _operatorData
+            });
+        }
+        _clearingStorage().clearingByAccountPartitionAndId[_from][
+            _clearingOperation.partition
+        ][_clearingId] = clearingData;
     }
 }
 // solhint-enable no-unused-vars, custom-errors

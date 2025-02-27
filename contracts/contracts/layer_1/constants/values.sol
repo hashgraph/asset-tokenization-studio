@@ -263,16 +263,16 @@ bytes32 constant _HOLD_TYPEHASH = 0x638791043a42aa7472ccb18a7ede86b9baf01fb2d212
 bytes32 constant _PROTECTED_HOLD_TYPEHASH = 0x432ede4c9f6d06cc57be0d75da5dce179cd5f56db988520d5b77795a69b0dc2e;
 
 //keccak256(
-//'protectedClearingTransferByPartition(ProtectedClearingOperation _protectedClearingOperation,uint256 _amount,address _to)ClearingOperation(byte32 partition,uint256 expirationTimestamp,bytes data)ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)'
+//'protectedClearingTransferByPartition(ProtectedClearingOperation _protectedClearingOperation,uint256 _amount,address _to)ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)'
 //);
-bytes32 constant _PROTECTED_CLEARING_TRANSFER_FROM_PARTITION_TYPEHASH = 0xffef74a7bfefb2d33b3d78c7e2845c5a27a565f1cb11c812c2edf2fdfed9a188;
+bytes32 constant _PROTECTED_CLEARING_TRANSFER_FROM_PARTITION_TYPEHASH = 0xf6002360a0d016a1d9ddacedb69cf68c14ae4f12e2896065a417e70d33de7969;
 
 //keccak256(
-//'ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)ClearingOperation(byte32 partition,uint256 expirationTimestamp,bytes data)'
+//'ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)'
 //);
-bytes32 constant _PROTECTED_CLEARING_OPERATION_TYPEHASH = 0xfb0a1147ba36a6d881706792dc6206c4aa5a5da2eb76b07d48954945ea5800ab;
+bytes32 constant _PROTECTED_CLEARING_OPERATION_TYPEHASH = 0x7a3628501c4a1c0e58e7976208b8038a90db89ab16bbe7c01df81a9d6ade6a94;
 
 //keccak256(
-//'ClearingOperation(byte32 partition,uint256 expirationTimestamp,bytes data)'
+//'ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)'
 //);
-bytes32 constant _CLEARING_OPERATION_TYPEHASH = 0x2c0359f66e1dff8bf7a90d42a5e3966436196e7ebd29bd7a0d99051dc1316bc9;
+bytes32 constant _CLEARING_OPERATION_TYPEHASH = 0x6b1a3eed3300b58d08c0db9042a291c5c816c5891e585aad19ad1b2723d147bc;
