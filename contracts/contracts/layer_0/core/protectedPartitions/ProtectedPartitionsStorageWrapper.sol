@@ -16,6 +16,7 @@ import {
     getMessageHashRedeem,
     getMessageHashCreateHold,
     getMessageHashClearingTransfer,
+    getMessageHashClearingRedeem,
     verify
 } from '../../../layer_1/protectedPartitions/signatureVerification.sol';
 import {IHold} from '../../../layer_1/interfaces/hold/IHold.sol';
@@ -242,6 +243,44 @@ abstract contract ProtectedPartitionsStorageWrapper is
         bytes32 functionHash = getMessageHashClearingTransfer(
             _protectedClearingOperation,
             _to,
+            _amount
+        );
+
+        return
+            verify(
+                _protectedClearingOperation.from,
+                functionHash,
+                _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
+            );
+    }
+
+    function _checkClearingRedeemSignature(
+        IClearing.ProtectedClearingOperation
+            calldata _protectedClearingOperation,
+        uint256 _amount,
+        bytes calldata _signature
+    ) internal view {
+        if (
+            !_isClearingRedeemSignatureValid(
+                _protectedClearingOperation,
+                _amount,
+                _signature
+            )
+        ) revert WrongSignature();
+    }
+
+    function _isClearingRedeemSignatureValid(
+        IClearing.ProtectedClearingOperation
+            calldata _protectedClearingOperation,
+        uint256 _amount,
+        bytes calldata _signature
+    ) internal view returns (bool) {
+        bytes32 functionHash = getMessageHashClearingRedeem(
+            _protectedClearingOperation,
             _amount
         );
 

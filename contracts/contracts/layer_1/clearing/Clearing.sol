@@ -273,6 +273,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         emit ClearedTransferByPartition(
             _msgSender(),
             _msgSender(),
+            _to,
             _clearingOperation.partition,
             clearingId_,
             ''
@@ -307,6 +308,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         emit ClearedTransferByPartition(
             _msgSender(),
             _clearingOperationFrom.from,
+            _to,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
             ''
@@ -336,7 +338,10 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _checkControlList(_msgSender());
             _checkControlList(_clearingOperationFrom.from);
             _checkControlList(_to);
-            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _clearingOperationFrom.from);
+            _checkValidKycStatus(
+                IKyc.KycStatus.GRANTED,
+                _clearingOperationFrom.from
+            );
             _checkValidKycStatus(IKyc.KycStatus.GRANTED, _to);
         }
         (success_, clearingId_) = _clearingTransferFromByPartition(
@@ -350,6 +355,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         emit ClearedTransferByPartition(
             _msgSender(),
             _clearingOperationFrom.from,
+            _to,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
             _clearingOperationFrom.operatorData
@@ -390,6 +396,86 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         );
 
         emit ClearedTransferByPartition(
+            _msgSender(),
+            _protectedClearingOperation.from,
+            _to,
+            _protectedClearingOperation.clearingOperation.partition,
+            clearingId_,
+            ''
+        );
+    }
+
+    function clearingRedeemByPartition(
+        ClearingOperation calldata _clearingOperation,
+        uint256 _amount
+    ) external returns (bool success_, uint256 clearingId_) {
+        (success_, clearingId_) = _clearingRedeemByPartition(
+            _clearingOperation,
+            _amount,
+            _msgSender()
+        );
+
+        emit ClearedRedeemByPartition(
+            _msgSender(),
+            _msgSender(),
+            _clearingOperation.partition,
+            clearingId_,
+            ''
+        );
+    }
+
+    function clearingRedeemFromByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount
+    ) external returns (bool success_, uint256 clearingId_) {
+        (success_, clearingId_) = _clearingRedeemFromByPartition(
+            _clearingOperationFrom.clearingOperation,
+            _amount,
+            _clearingOperationFrom.from,
+            ''
+        );
+
+        emit ClearedRedeemByPartition(
+            _msgSender(),
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ''
+        );
+    }
+
+    function operatorClearingRedeemByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount
+    ) external returns (bool success_, uint256 clearingId_) {
+        (success_, clearingId_) = _clearingRedeemFromByPartition(
+            _clearingOperationFrom.clearingOperation,
+            _amount,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.operatorData
+        );
+
+        emit ClearedRedeemByPartition(
+            _msgSender(),
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ''
+        );
+    }
+
+    function protectedClearingRedeemByPartition(
+        ProtectedClearingOperation calldata _protectedClearingOperation,
+        uint256 _amount,
+        bytes calldata _signature
+    ) external returns (bool success_, uint256 clearingId_) {
+        (success_, clearingId_) = _protectedClearingRedeemByPartition(
+            _protectedClearingOperation,
+            _amount,
+            _signature
+        );
+
+        emit ClearedRedeemByPartition(
             _msgSender(),
             _protectedClearingOperation.from,
             _protectedClearingOperation.clearingOperation.partition,
