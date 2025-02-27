@@ -441,18 +441,17 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         uint256 _clearingId
     ) internal {
         IClearing.ClearingData memory clearingData;
-        if (_operationType == IClearing.ClearingOperationType.Transfer) {
-            clearingData = IClearing.ClearingData({
-                clearingOperationType: _operationType,
-                amount: _amount,
-                holdExpirationTimestamp: _holdExpirationtimestamp,
-                expirationTimestamp: _clearingOperation.expirationTimestamp,
-                destination: _to,
-                escrow: _escrow,
-                data: _clearingOperation.data,
-                operatorData: _operatorData
-            });
-        }
+        clearingData = IClearing.ClearingData({
+            clearingOperationType: _operationType,
+            amount: _amount,
+            holdExpirationTimestamp: _holdExpirationtimestamp,
+            expirationTimestamp: _clearingOperation.expirationTimestamp,
+            destination: _to,
+            escrow: _escrow,
+            data: _clearingOperation.data,
+            operatorData: _operatorData
+        });
+
         _clearingStorage().clearingByAccountPartitionAndId[_from][
             _clearingOperation.partition
         ][_clearingId] = clearingData;
