@@ -237,7 +237,7 @@ abstract contract Common is CapStorageWrapper2 {
         if (_msgSender() != address(this)) revert OnlyDelegateAllowed();
     }
 
-    function _checkUnProtectedPartitionsOrWildCardRole() private view {
+    function _checkUnProtectedPartitionsOrWildCardRole() internal view {
         if (
             _arePartitionsProtected() &&
             !_hasRole(_WILD_CARD_ROLE, _msgSender())
