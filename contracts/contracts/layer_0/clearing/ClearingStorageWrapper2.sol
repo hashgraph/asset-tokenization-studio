@@ -269,8 +269,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         IClearing.ClearingOperation calldata _clearingOperation,
         uint256 _amount,
         address _from,
-        address _to,
-        bytes memory _operatorData
+        address _to
     ) internal returns (bool success_, uint256 clearingId_) {
         bytes32 partition = _clearingOperation.partition;
 
@@ -297,7 +296,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _amount,
             _from,
             _to,
-            _operatorData,
+            '',
             IClearing.ClearingOperationType.Transfer,
             clearingId_
         );
@@ -338,8 +337,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _protectedClearingOperation.clearingOperation,
             _amount,
             _to,
-            _protectedClearingOperation.from,
-            ''
+            _protectedClearingOperation.from
         );
     }
 

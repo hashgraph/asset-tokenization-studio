@@ -267,8 +267,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _clearingOperation,
             _amount,
             _to,
-            _msgSender(),
-            ''
+            _msgSender()
         );
 
         emit ClearedTransferByPartition(
