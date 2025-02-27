@@ -212,6 +212,23 @@ import {
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
 interface IClearing {
+    event ClearedHoldByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        IHold.Hold hold,
+        bytes operatorData
+    );
+
+    event ClearedTransferByPartition(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 partition,
+        uint256 clearingId,
+        bytes operatorData
+    );
+
     enum ClearingOperationType {
         Transfer,
         Redeem,
@@ -319,10 +336,50 @@ interface IClearing {
             IHold.Hold memory hold_
         );
 
+    function clearingCreateHoldByPartition(
+        ClearingOperation calldata _clearingOperation,
+        IHold.Hold calldata _hold
+    ) external returns (bool success_, uint256 clearingId_);
+
+    function clearingCreateHoldFromByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        IHold.Hold calldata _hold
+    ) external returns (bool success_, uint256 clearingId_);
+
+    function operatorClearingCreateHoldByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        IHold.Hold calldata _hold
+    ) external returns (bool success_, uint256 clearingId_);
+
+    function protectedClearingCreateHoldByPartition(
+        ProtectedClearingOperation calldata _protectedClearingOperation,
+        IHold.Hold calldata _hold,
+        bytes calldata _signature
+    ) external returns (bool success_, uint256 clearingId_);
+
     function clearingTransferByPartition(
         ClearingOperation calldata _clearingOperation,
         uint256 _amount,
         address _to
+    ) external returns (bool success_, uint256 clearingId_);
+
+    function clearingTransferFromByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount,
+        address _to
+    ) external returns (bool success_, uint256 clearingId_);
+
+    function operatorClearingTransferByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount,
+        address _to
+    ) external returns (bool success_, uint256 clearingId_);
+
+    function protectedClearingTransferByPartition(
+        ProtectedClearingOperation calldata _protectedClearingOperation,
+        uint256 _amount,
+        address _to,
+        bytes calldata _signature
     ) external returns (bool success_, uint256 clearingId_);
 
     function clearingRedeemByPartition(
@@ -335,12 +392,6 @@ interface IClearing {
     //     IHold.Hold calldata _hold
     // ) external returns (bool success_, uint256 clearingId_);
 
-    function clearingTransferFromByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        uint256 _amount,
-        address _to
-    ) external returns (bool success_, uint256 clearingId_);
-
     function clearingRedeemFromByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount
@@ -351,12 +402,6 @@ interface IClearing {
     //     IHold.Hold calldata _hold
     // ) external returns (bool success_, uint256 clearingId_);
 
-    function operatorClearingTransferByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        uint256 _amount,
-        address _to
-    ) external returns (bool success_, uint256 clearingId_);
-
     function operatorClearingRedeemByPartition(
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount
@@ -366,13 +411,6 @@ interface IClearing {
     //     ClearingOperationFrom calldata _clearingOperationFrom,
     //     IHold.Hold calldata _hold
     // ) external returns (bool success_, uint256 clearingId_);
-
-    function protectedClearingTransferByPartition(
-        ProtectedClearingOperation calldata _protectedClearingOperation,
-        uint256 _amount,
-        address _to,
-        bytes calldata _signature
-    ) external returns (bool success_, uint256 clearingId_);
 
     function protectedClearingRedeemByPartition(
         ProtectedClearingOperation calldata _protectedClearingOperation,
