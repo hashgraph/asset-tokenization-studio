@@ -398,5 +398,4 @@ interface IClearing {
         address _to,
         bytes calldata _signature
     ) external returns (bool success_, uint256 clearingId_);
-
 }

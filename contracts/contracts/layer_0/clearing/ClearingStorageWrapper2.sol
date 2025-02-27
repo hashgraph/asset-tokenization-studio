@@ -206,7 +206,6 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {_CLEARING_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {HoldStorageWrapper2} from '../hold/HoldStorageWrapper2.sol';
 import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 import {
