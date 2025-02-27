@@ -207,351 +207,20 @@ pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 import {Common} from '../common/Common.sol';
+import {IClearingOperation} from '../interfaces/clearing/IClearingOperation.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
-import {_CLEARING_ROLE} from '../constants/roles.sol';
 import {_CLEARING_VALIDATOR_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CLEARING_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {_CLEARING_OPERATION_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
-contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
-    function initialize_Clearing(
-        bool _clearingActive
-    ) external onlyUninitialized(_clearingStorage().initialized) {
-        ClearingDataStorage storage clearingStorage = _clearingStorage();
-        clearingStorage.initialized = true;
-        clearingStorage.activated = _clearingActive;
-    }
-
-    function activateClearing()
-        external
-        onlyRole(_CLEARING_ROLE)
-        returns (bool success_)
-    {
-        success_ = _setClearing(true);
-    }
-
-    function deactivateClearing()
-        external
-        onlyRole(_CLEARING_ROLE)
-        returns (bool success_)
-    {
-        success_ = _setClearing(false);
-    }
-
-    function clearingTransferByPartition(
-        ClearingOperation calldata _clearingOperation,
-        uint256 _amount,
-        address _to
-    )
-        external
-        override
-        onlyUnpaused
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_to)
-        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-        returns (bool success_, uint256 clearingId_)
-    {
-        {
-            _checkValidAddress(_to);
-        }
-
-        (success_, clearingId_) = _clearingTransferByPartition(
-            _clearingOperation,
-            _amount,
-            _to,
-            _msgSender(),
-            ''
-        );
-
-        emit ClearedTransferByPartition(
-            _msgSender(),
-            _msgSender(),
-            _clearingOperation.partition,
-            clearingId_,
-            ''
-        );
-    }
-
-    function clearingTransferFromByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        uint256 _amount,
-        address _to
-    )
-        external
-        override
-        onlyUnpaused
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_to)
-        onlyListedAllowed(_clearingOperationFrom.from)
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _clearingOperationFrom.from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-        returns (bool success_, uint256 clearingId_)
-    {
-        (success_, clearingId_) = _clearingTransferFromByPartition(
-            _clearingOperationFrom.clearingOperation,
-            _amount,
-            _to,
-            _clearingOperationFrom.from,
-            ''
-        );
-
-        emit ClearedTransferByPartition(
-            _msgSender(),
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
-            ''
-        );
-    }
-
-    function operatorClearingTransferByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        uint256 _amount,
-        address _to
-    )
-        external
-        override
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
-        onlyOperator(
-            _clearingOperationFrom.clearingOperation.partition,
-            _clearingOperationFrom.from
-        )
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 clearingId_)
-    {
-        {
-            _checkUnpaused();
-            _checkValidAddress(_to);
-            _checkControlList(_msgSender());
-            _checkControlList(_clearingOperationFrom.from);
-            _checkControlList(_to);
-            _checkValidKycStatus(
-                IKyc.KycStatus.GRANTED,
-                _clearingOperationFrom.from
-            );
-            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _to);
-        }
-        (success_, clearingId_) = _clearingTransferByPartition(
-            _clearingOperationFrom.clearingOperation,
-            _amount,
-            _to,
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.operatorData
-        );
-
-        emit ClearedTransferByPartition(
-            _msgSender(),
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
-            _clearingOperationFrom.operatorData
-        );
-    }
-
-    function protectedClearingTransferByPartition(
-        ProtectedClearingOperation calldata _protectedClearingOperation,
-        uint256 _amount,
-        address _to,
-        bytes calldata _signature
-    )
-        external
-        override
-        onlyRole(
-            _protectedPartitionsRole(
-                _protectedClearingOperation.clearingOperation.partition
-            )
-        )
-        onlyValidKycStatus(
-            IKyc.KycStatus.GRANTED,
-            _protectedClearingOperation.from
-        )
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
-        returns (bool success_, uint256 clearingId_)
-    {
-        {
-            _checkUnpaused();
-            _checkProtectedPartitions();
-            _checkControlList(_protectedClearingOperation.from);
-            _checkControlList(_to);
-        }
-        (success_, clearingId_) = _protectedClearingTransferByPartition(
-            _protectedClearingOperation,
-            _amount,
-            _to,
-            _signature
-        );
-
-        emit ClearedTransferByPartition(
-            _msgSender(),
-            _protectedClearingOperation.from,
-            _protectedClearingOperation.clearingOperation.partition,
-            clearingId_,
-            ''
-        );
-    }
-
-    function clearingCreateHoldByPartition(
-        ClearingOperation calldata _clearingOperation,
-        IHold.Hold calldata _hold
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
-        onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 clearingId_)
-    {
-        (success_, clearingId_) = _clearingCreateHoldByPartition(
-            _clearingOperation.partition,
-            _msgSender(),
-            _clearingOperation.expirationTimestamp,
-            _hold,
-            ''
-        );
-
-        emit ClearedHoldByPartition(
-            _msgSender(),
-            _msgSender(),
-            _clearingOperation.partition,
-            clearingId_,
-            _hold,
-            ''
-        );
-    }
-
-    function clearingCreateHoldFromByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        IHold.Hold calldata _hold
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_clearingOperationFrom.from)
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 clearingId_)
-    {
-        (success_, clearingId_) = _clearingCreateHoldFromByPartition(
-            _clearingOperationFrom.clearingOperation.partition,
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.clearingOperation.expirationTimestamp,
-            _hold,
-            _clearingOperationFrom.operatorData
-        );
-
-        emit ClearedHoldByPartition(
-            _msgSender(),
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
-            _hold,
-            _clearingOperationFrom.operatorData
-        );
-    }
-
-    function operatorClearingCreateHoldByPartition(
-        ClearingOperationFrom calldata _clearingOperationFrom,
-        IHold.Hold calldata _hold
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
-        onlyOperator(
-            _clearingOperationFrom.clearingOperation.partition,
-            _clearingOperationFrom.from
-        )
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        returns (bool success_, uint256 clearingId_)
-    {
-        {
-            _checkValidAddress(_clearingOperationFrom.from);
-        }
-
-        (success_, clearingId_) = _clearingCreateHoldByPartition(
-            _clearingOperationFrom.clearingOperation.partition,
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.clearingOperation.expirationTimestamp,
-            _hold,
-            _clearingOperationFrom.operatorData
-        );
-
-        emit ClearedHoldByPartition(
-            _msgSender(),
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.clearingOperation.partition,
-            clearingId_,
-            _hold,
-            _clearingOperationFrom.operatorData
-        );
-    }
-
-    function protectedClearingCreateHoldByPartition(
-        ProtectedClearingOperation calldata _protectedClearingOperation,
-        IHold.Hold calldata _hold,
-        bytes calldata _signature
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_protectedClearingOperation.from)
-        validateAddress(_hold.escrow)
-        onlyRole(
-            _protectedPartitionsRole(
-                _protectedClearingOperation.clearingOperation.partition
-            )
-        )
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyProtectedPartitions
-        returns (bool success_, uint256 clearingId_)
-    {
-        (success_, clearingId_) = _protectedClearingCreateHoldByPartition(
-            _protectedClearingOperation,
-            _hold,
-            _signature
-        );
-
-        emit ClearedHoldByPartition(
-            _msgSender(),
-            _protectedClearingOperation.from,
-            _protectedClearingOperation.clearingOperation.partition,
-            clearingId_,
-            _hold,
-            ''
-        );
-    }
-
+contract ClearingOperationFacet is IStaticFunctionSelectors, IClearingOperation, Common {
     function approveClearingOperationByPartition(
-        ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
     )
         external
         override
@@ -581,7 +250,8 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
     }
 
     function cancelClearingOperationByPartition(
-        ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
     )
         external
         override
@@ -610,7 +280,8 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
     }
 
     function reclaimClearingOperationByPartition(
-        ClearingOperationIdentifier calldata _clearingOperationIdentifier
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
     )
         external
         override
@@ -638,79 +309,13 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         );
     }
 
-    function getClearedAmountFor(
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return _getClearedAmountFor(_tokenHolder);
-    }
-
-    function getClearedAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return _getClearedAmountForByPartition(_partition, _tokenHolder);
-    }
-
-    function getClearingCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        ClearingOperationType _clearingOperationType
-    ) external view override returns (uint256 clearingCount_) {
-        return
-            _getClearingCountForByPartition(
-                _partition,
-                _tokenHolder,
-                _clearingOperationType
-            );
-    }
-
-    function getClearingsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        ClearingOperationType _clearingOperationType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (uint256[] memory clearingsId_) {
-        return
-            _getClearingsIdForByPartition(
-                _partition,
-                _tokenHolder,
-                _clearingOperationType,
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function getClearingForByPartition(
-        ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    )
-        external
-        view
-        override
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address destination_,
-            ClearingOperationType clearingOperationType_,
-            bytes memory data_,
-            bytes memory operatorData_,
-            IHold.Hold memory hold_
-        )
-    {
-        return _getClearingForByPartition(_clearingOperationIdentifier);
-    }
-
-    function isClearingActivated() external view returns (bool) {
-        return _isClearingActivated();
-    }
-
     function getStaticResolverKey()
         external
         pure
         override
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _CLEARING_RESOLVER_KEY;
+        staticResolverKey_ = _CLEARING_OPERATION_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
@@ -720,48 +325,15 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](14);
+        staticFunctionSelectors_ = new bytes4[](3);
         staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_Clearing
+            .approveClearingOperationByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .activateClearing
+            .cancelClearingOperationByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .deactivateClearing
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearingCountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearingsIdForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearingForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearingTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearingTransferFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorClearingTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedClearingTransferByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearingCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .clearingCreateHoldFromByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .operatorClearingCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedClearingCreateHoldByPartition
+            .reclaimClearingOperationByPartition
             .selector;
     }
 

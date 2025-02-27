@@ -215,7 +215,6 @@ import {
 import {
     checkNounceAndDeadline
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {
     IERC1410Basic
@@ -680,7 +679,12 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             clearingData.amount
         );
 
-        _executeClearingOperation(_clearingOperationIdentifier, clearingData);
+        if (_operation == IClearing.OperationType.Approve) {
+            _executeClearingOperation(
+                _clearingOperationIdentifier,
+                clearingData
+            );
+        }
 
         if (clearingBalance == 0) {
             _removeClearing(_clearingOperationIdentifier);
@@ -690,6 +694,28 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
     }
 
     function _executeClearingOperation(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier,
+        IClearing.ClearingData memory clearingData
+    ) internal {
+        if (
+            _clearingOperationIdentifier.clearingOperationType ==
+            IClearing.ClearingOperationType.Redeem
+        ) {
+            _redeemByPartition(
+                _clearingOperationIdentifier.partition,
+                _clearingOperationIdentifier.tokenHolder,
+                _msgSender(),
+                clearingData.amount,
+                clearingData.data,
+                clearingData.operatorData
+            );
+            return;
+        }
+        _processHoldAndTransfer(_clearingOperationIdentifier, clearingData);
+    }
+
+    function _processHoldAndTransfer(
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier,
         IClearing.ClearingData memory clearingData
@@ -710,31 +736,19 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 ),
                 clearingData.operatorData
             );
-        } else if (
-            _clearingOperationIdentifier.clearingOperationType ==
-            IClearing.ClearingOperationType.Transfer
-        ) {
-            _transferByPartition(
-                _clearingOperationIdentifier.tokenHolder,
-                IERC1410Basic.BasicTransferInfo(
-                    clearingData.destination,
-                    clearingData.amount
-                ),
-                _clearingOperationIdentifier.partition,
-                clearingData.data,
-                _msgSender(),
-                clearingData.operatorData
-            );
-        } else {
-            _redeemByPartition(
-                _clearingOperationIdentifier.partition,
-                _clearingOperationIdentifier.tokenHolder,
-                _msgSender(),
-                clearingData.amount,
-                clearingData.data,
-                clearingData.operatorData
-            );
+            return;
         }
+        _transferByPartition(
+            _clearingOperationIdentifier.tokenHolder,
+            IERC1410Basic.BasicTransferInfo(
+                clearingData.destination,
+                clearingData.amount
+            ),
+            _clearingOperationIdentifier.partition,
+            clearingData.data,
+            _msgSender(),
+            clearingData.operatorData
+        );
     }
 
     function _transferClearingBalance(
