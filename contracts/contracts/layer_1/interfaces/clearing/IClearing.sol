@@ -229,30 +229,6 @@ interface IClearing {
         bytes operatorData
     );
 
-    event ClearingOperationApproved(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 clearingId,
-        ClearingOperationType clearingOperationType
-    );
-
-    event ClearingOperationCanceled(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 clearingId,
-        ClearingOperationType clearingOperationType
-    );
-
-    event ClearingOperationReclaimed(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 indexed partition,
-        uint256 clearingId,
-        ClearingOperationType clearingOperationType
-    );
-
     error WrongClearingId();
     error ClearingExpirationNotReached();
 
