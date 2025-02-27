@@ -205,142 +205,256 @@
 
 pragma solidity 0.8.18;
 
-import {LibCommon} from '../common/LibCommon.sol';
-import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {_CLEARING_STORAGE_POSITION} from '../constants/storagePositions.sol';
+import {HoldStorageWrapper2} from '../hold/HoldStorageWrapper2.sol';
+import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    checkNounceAndDeadline
+} from '../../layer_1/protectedPartitions/signatureVerification.sol';
+import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
-    using LibCommon for EnumerableSet.UintSet;
+// solhint-disable no-unused-vars, custom-errors
+abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
     using EnumerableSet for EnumerableSet.UintSet;
 
-    modifier onlyWithValidHoldId(
-        IHold.HoldIdentifier calldata _holdIdentifier
-    ) {
-        _checkHoldId(_holdIdentifier);
-        _;
+    function _clearingTransferFromByPartition(
+        IClearing.ClearingOperation calldata _clearingOperation,
+        uint256 _amount,
+        address _from,
+        address _to,
+        bytes memory _operatorData
+    ) internal returns (bool success_, uint256 clearingId_) {
+        _decreaseAllowedBalance(_from, _msgSender(), _amount);
+
+        bytes32 partition = _clearingOperation.partition;
+
+        unchecked {
+            clearingId_ = ++_clearingStorage()
+                .nextClearingIdByAccountAndPartition[_from][partition];
+        }
+
+        _beforeClearing(partition, _from, clearingId_, _amount);
+
+        IClearing.ClearingDataStorage
+            storage clearingDataStorage = _clearingStorage();
+
+        clearingDataStorage
+        .clearingIdsByAccountAndPartition[_from][partition].add(clearingId_);
+
+        clearingDataStorage
+        .clearingIdsByAccountAndPartitionAndTypes[_from][partition][
+            IClearing.ClearingOperationType.Transfer
+        ].add(clearingId_);
+
+        _setClearingData(
+            _clearingOperation,
+            _amount,
+            _from,
+            _to,
+            0,
+            address(0),
+            _operatorData,
+            IClearing.ClearingOperationType.Transfer,
+            clearingId_
+        );
+
+        _afterClearing(_from, partition, _amount);
+
+        success_ = true;
     }
 
-    function _isHoldIdValid(
-        IHold.HoldIdentifier memory _holdIdentifier
-    ) internal view returns (bool) {
-        return _getHold(_holdIdentifier).id != 0;
+    function _clearingTransferByPartition(
+        IClearing.ClearingOperation calldata _clearingOperation,
+        uint256 _amount,
+        address _from,
+        address _to
+    ) internal returns (bool success_, uint256 clearingId_) {
+        bytes32 partition = _clearingOperation.partition;
+
+        unchecked {
+            clearingId_ = ++_clearingStorage()
+                .nextClearingIdByAccountAndPartition[_from][partition];
+        }
+
+        _beforeClearing(partition, _from, clearingId_, _amount);
+
+        IClearing.ClearingDataStorage
+            storage clearingDataStorage = _clearingStorage();
+
+        clearingDataStorage
+        .clearingIdsByAccountAndPartition[_from][partition].add(clearingId_);
+
+        clearingDataStorage
+        .clearingIdsByAccountAndPartitionAndTypes[_from][partition][
+            IClearing.ClearingOperationType.Transfer
+        ].add(clearingId_);
+
+        _setClearingData(
+            _clearingOperation,
+            _amount,
+            _from,
+            _to,
+            0,
+            address(0),
+            '',
+            IClearing.ClearingOperationType.Transfer,
+            clearingId_
+        );
+        _afterClearing(_from, partition, _amount);
+
+        success_ = true;
     }
 
-    function _getHold(
-        IHold.HoldIdentifier memory _holdIdentifier
-    ) internal view returns (IHold.HoldData memory) {
-        return
-            _holdStorage().holdsByAccountPartitionAndId[
-                _holdIdentifier.tokenHolder
-            ][_holdIdentifier.partition][_holdIdentifier.holdId];
-    }
+    function _protectedClearingTransferByPartition(
+        IClearing.ProtectedClearingOperation
+            calldata _protectedClearingOperation,
+        uint256 _amount,
+        address _to,
+        bytes calldata _signature
+    ) internal returns (bool success_, uint256 clearingId_) {
+        checkNounceAndDeadline(
+            _protectedClearingOperation.nonce,
+            _protectedClearingOperation.from,
+            _getNounceFor(_protectedClearingOperation.from),
+            _protectedClearingOperation.deadline,
+            _blockTimestamp()
+        );
 
-    function _getHeldAmountFor(
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return _holdStorage().totalHeldAmountByAccount[_tokenHolder];
-    }
+        _checkClearingTransferSignature(
+            _protectedClearingOperation,
+            _amount,
+            _to,
+            _signature
+        );
 
-    function _getHeldAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return
-            _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][
-                _partition
-            ];
-    }
+        _setNounce(
+            _protectedClearingOperation.nonce,
+            _protectedClearingOperation.from
+        );
 
-    function _getHoldsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (uint256[] memory holdsId_) {
-        return
-            _holdStorage()
-            .holdIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(
-                    _pageIndex,
-                    _pageLength
-                );
-    }
-
-    function _getHoldForByPartition(
-        IHold.HoldIdentifier calldata _holdIdentifier
-    )
-        internal
-        view
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
-        )
-    {
-        IHold.HoldData memory holdData = _getHold(_holdIdentifier);
-        return (
-            holdData.hold.amount,
-            holdData.hold.expirationTimestamp,
-            holdData.hold.escrow,
-            holdData.hold.to,
-            holdData.hold.data,
-            holdData.operatorData
+        (success_, clearingId_) = _clearingTransferByPartition(
+            _protectedClearingOperation.clearingOperation,
+            _amount,
+            _to,
+            _protectedClearingOperation.from
         );
     }
 
-    function _getHoldCountForByPartition(
+    function _beforeClearing(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _clearingId,
+        uint256 _amount
+    ) internal {
+        _triggerAndSyncAll(_partition, _tokenHolder, address(0));
+        _reduceBalanceByPartition(_tokenHolder, _amount, _partition);
+        _setClearedLabafById(
+            _partition,
+            _tokenHolder,
+            _clearingId,
+            _updateTotalCleared(_partition, _tokenHolder)
+        );
+        _updateAccountSnapshot(_tokenHolder, _partition);
+        _updateAccountClearedBalancesSnapshot(_tokenHolder, _partition);
+    }
+
+    function _afterClearing(
+        address _tokenHolder,
+        bytes32 _partition,
+        uint256 _amount
+    ) internal {
+        _clearingStorage().totalClearedAmountByAccountAndPartition[
+            _tokenHolder
+        ][_partition] += _amount;
+        _clearingStorage().totalClearedAmountByAccount[_tokenHolder] += _amount;
+    }
+
+    function _updateTotalCleared(
         bytes32 _partition,
         address _tokenHolder
-    ) internal view returns (uint256) {
-        return
-            _holdStorage()
-            .holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
-    }
+    ) internal returns (uint256 abaf_) {
+        abaf_ = _getAbaf();
 
-    function _isHoldExpired(
-        IHold.Hold memory _hold
-    ) internal view returns (bool) {
-        return _blockTimestamp() > _hold.expirationTimestamp;
-    }
+        uint256 labaf = _getTotalClearedLabaf(_tokenHolder);
+        uint256 labafByPartition = _getTotalClearedLabafByPartition(
+            _partition,
+            _tokenHolder
+        );
 
-    function _isEscrow(
-        IHold.Hold memory _hold,
-        address _escrow
-    ) internal pure returns (bool) {
-        return _escrow == _hold.escrow;
-    }
+        if (abaf_ != labaf) {
+            _updateTotalClearedAmountAndLabaf(
+                _tokenHolder,
+                _calculateFactor(abaf_, labaf),
+                abaf_
+            );
+        }
 
-    function _checkHoldAmount(
-        uint256 _amount,
-        IHold.HoldData memory holdData
-    ) internal pure {
-        if (_amount > holdData.hold.amount)
-            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
-    }
-
-    function _checkHoldId(
-        IHold.HoldIdentifier calldata _holdIdentifier
-    ) private view {
-        if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
-    }
-
-    function _holdStorage()
-        internal
-        pure
-        returns (IHold.HoldDataStorage storage hold_)
-    {
-        bytes32 position = _HOLD_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            hold_.slot := position
+        if (abaf_ != labafByPartition) {
+            _updateTotalClearedAmountAndLabafByPartition(
+                _partition,
+                _tokenHolder,
+                _calculateFactor(abaf_, labafByPartition),
+                abaf_
+            );
         }
     }
+
+    function _updateTotalClearedAmountAndLabaf(
+        address _tokenHolder,
+        uint256 _factor,
+        uint256 _abaf
+    ) internal {
+        if (_factor == 1) return;
+
+        _clearingStorage().totalClearedAmountByAccount[_tokenHolder] *= _factor;
+        _setTotalClearedLabaf(_tokenHolder, _abaf);
+    }
+
+    function _updateTotalClearedAmountAndLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _factor,
+        uint256 _abaf
+    ) internal {
+        if (_factor == 1) return;
+
+        _clearingStorage().totalClearedAmountByAccountAndPartition[
+            _tokenHolder
+        ][_partition] *= _factor;
+        _setTotalClearedLabafByPartition(_partition, _tokenHolder, _abaf);
+    }
+
+    function _setClearingData(
+        IClearing.ClearingOperation memory _clearingOperation,
+        uint256 _amount,
+        address _from,
+        address _to,
+        uint256 _holdExpirationtimestamp,
+        address _escrow,
+        bytes memory _operatorData,
+        IClearing.ClearingOperationType _operationType,
+        uint256 _clearingId
+    ) internal {
+        IClearing.ClearingData memory clearingData;
+        clearingData = IClearing.ClearingData({
+            clearingOperationType: _operationType,
+            amount: _amount,
+            holdExpirationTimestamp: _holdExpirationtimestamp,
+            expirationTimestamp: _clearingOperation.expirationTimestamp,
+            destination: _to,
+            escrow: _escrow,
+            data: _clearingOperation.data,
+            operatorData: _operatorData
+        });
+
+        _clearingStorage().clearingByAccountPartitionAndId[_from][
+            _clearingOperation.partition
+        ][_clearingId] = clearingData;
+    }
 }
+// solhint-enable no-unused-vars, custom-errors

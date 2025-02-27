@@ -342,7 +342,7 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
     function _checkValidKycStatus(
         IKyc.KycStatus _kycStatus,
         address _account
-    ) private view {
+    ) internal view {
         if (!_hasSameKycStatus(_kycStatus, _account))
             revert IKyc.InvalidKycStatus();
     }

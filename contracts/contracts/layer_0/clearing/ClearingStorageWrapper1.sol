@@ -313,6 +313,22 @@ abstract contract ClearingStorageWrapper1 is
         clearingOperationType_ = clearingData.clearingOperationType;
     }
 
+    function _getClearedAmountFor(
+        address _tokenHolder
+    ) internal view returns (uint256 amount_) {
+        return _clearingStorage().totalClearedAmountByAccount[_tokenHolder];
+    }
+
+    function _getClearedAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view returns (uint256 amount_) {
+        return
+            _clearingStorage().totalClearedAmountByAccountAndPartition[
+                _tokenHolder
+            ][_partition];
+    }
+
     function _clearingStorage()
         internal
         pure

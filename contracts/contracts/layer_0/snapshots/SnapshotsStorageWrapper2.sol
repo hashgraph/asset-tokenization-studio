@@ -330,6 +330,22 @@ abstract contract SnapshotsStorageWrapper2 is
         );
     }
 
+    function _updateAccountClearedBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal {
+        _updateSnapshot(
+            _snapshotStorage().accountClearedBalanceSnapshots[account],
+            _getClearedAmountFor(account)
+        );
+        _updateSnapshot(
+            _snapshotStorage().accountPartitionClearedBalanceSnapshots[account][
+                partition
+            ],
+            _getClearedAmountForByPartition(partition, account)
+        );
+    }
+
     function _updateTotalSupplySnapshot(bytes32 partition) internal override {
         _updateSnapshot(
             _snapshotStorage().totalSupplySnapshots,
