@@ -215,6 +215,7 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CLEARING_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
@@ -240,6 +241,174 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         returns (bool success_)
     {
         success_ = _setClearing(false);
+    }
+
+    function clearingTransferByPartition(
+        ClearingOperation calldata _clearingOperation,
+        uint256 _amount,
+        address _to
+    )
+        external
+        override
+        onlyUnpaused
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_to)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        returns (bool success_, uint256 clearingId_)
+    {
+        {
+            _checkValidAddress(_to);
+        }
+
+        (success_, clearingId_) = _clearingTransferByPartition(
+            _clearingOperation,
+            _amount,
+            _to,
+            _msgSender()
+        );
+
+        emit ClearedTransferByPartition(
+            _msgSender(),
+            _msgSender(),
+            _clearingOperation.partition,
+            clearingId_,
+            ''
+        );
+    }
+
+    function clearingTransferFromByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount,
+        address _to
+    )
+        external
+        override
+        onlyUnpaused
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_to)
+        onlyListedAllowed(_clearingOperationFrom.from)
+        onlyWithoutMultiPartition
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _clearingOperationFrom.from)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        returns (bool success_, uint256 clearingId_)
+    {
+        (success_, clearingId_) = _clearingTransferFromByPartition(
+            _clearingOperationFrom.clearingOperation,
+            _amount,
+            _to,
+            _clearingOperationFrom.from,
+            ''
+        );
+
+        emit ClearedTransferByPartition(
+            _msgSender(),
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ''
+        );
+    }
+
+    function operatorClearingTransferByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount,
+        address _to
+    )
+        external
+        override
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
+        onlyOperator(
+            _clearingOperationFrom.clearingOperation.partition,
+            _clearingOperationFrom.from
+        )
+        onlyUnProtectedPartitionsOrWildCardRole
+        returns (bool success_, uint256 clearingId_)
+    {
+        {
+            _checkUnpaused();
+            _checkValidAddress(_to);
+            _checkControlList(_msgSender());
+            _checkControlList(_clearingOperationFrom.from);
+            _checkControlList(_to);
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _clearingOperationFrom.from);
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _to);
+        }
+        (success_, clearingId_) = _clearingTransferFromByPartition(
+            _clearingOperationFrom.clearingOperation,
+            _amount,
+            _to,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.operatorData
+        );
+
+        emit ClearedTransferByPartition(
+            _msgSender(),
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            _clearingOperationFrom.operatorData
+        );
+    }
+
+    function protectedClearingTransferByPartition(
+        ProtectedClearingOperation calldata _protectedClearingOperation,
+        uint256 _amount,
+        address _to,
+        bytes calldata _signature
+    )
+        external
+        override
+        onlyRole(
+            _protectedPartitionsRole(
+                _protectedClearingOperation.clearingOperation.partition
+            )
+        )
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _protectedClearingOperation.from
+        )
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        returns (bool success_, uint256 clearingId_)
+    {
+        {
+            _checkUnpaused();
+            _checkProtectedPartitions();
+            _checkControlList(_protectedClearingOperation.from);
+            _checkControlList(_to);
+        }
+        (success_, clearingId_) = _protectedClearingTransferByPartition(
+            _protectedClearingOperation,
+            _amount,
+            _to,
+            _signature
+        );
+
+        emit ClearedTransferByPartition(
+            _msgSender(),
+            _protectedClearingOperation.from,
+            _protectedClearingOperation.clearingOperation.partition,
+            clearingId_,
+            ''
+        );
+    }
+
+    function getClearedAmountFor(
+        address _tokenHolder
+    ) external view returns (uint256 amount_) {
+        return _getClearedAmountFor(_tokenHolder);
+    }
+
+    function getClearedAmountForByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 amount_) {
+        return _getClearedAmountForByPartition(_partition, _tokenHolder);
     }
 
     function getClearingCountForByPartition(
@@ -459,7 +628,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](10);
+        staticFunctionSelectors_ = new bytes4[](14);
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_Clearing
             .selector;
@@ -477,6 +646,18 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getClearingForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearingTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearingTransferFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorClearingTransferByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedClearingTransferByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .clearingCreateHoldByPartition

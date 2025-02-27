@@ -219,8 +219,9 @@ abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
-    modifier onlyWithValidHoldId(IHold.HoldIdentifier calldata _holdIdentifier)
-    {
+    modifier onlyWithValidHoldId(
+        IHold.HoldIdentifier calldata _holdIdentifier
+    ) {
         _checkHoldId(_holdIdentifier);
         _;
     }

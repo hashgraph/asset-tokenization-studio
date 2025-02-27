@@ -15,6 +15,7 @@ import {
     getMessageHashTransfer,
     getMessageHashRedeem,
     getMessageHashCreateHold,
+    getMessageHashClearingTransfer,
     getMessageHashClearingCreateHold,
     verify
 } from '../../../layer_1/protectedPartitions/signatureVerification.sol';
@@ -251,6 +252,48 @@ abstract contract ProtectedPartitionsStorageWrapper is
             );
     }
 
+    function _checkClearingTransferSignature(
+        IClearing.ProtectedClearingOperation
+            calldata _protectedClearingOperation,
+        uint256 _amount,
+        address _to,
+        bytes calldata _signature
+    ) internal view {
+        if (
+            !_isClearingTransferSignatureValid(
+                _protectedClearingOperation,
+                _to,
+                _amount,
+                _signature
+            )
+        ) revert WrongSignature();
+    }
+
+    function _isClearingTransferSignatureValid(
+        IClearing.ProtectedClearingOperation
+            calldata _protectedClearingOperation,
+        address _to,
+        uint256 _amount,
+        bytes calldata _signature
+    ) internal view returns (bool) {
+        bytes32 functionHash = getMessageHashClearingTransfer(
+            _protectedClearingOperation,
+            _to,
+            _amount
+        );
+
+        return
+            verify(
+                _protectedClearingOperation.from,
+                functionHash,
+                _signature,
+                _protectedPartitionsStorage().contractName,
+                _protectedPartitionsStorage().contractVersion,
+                _blockChainid(),
+                address(this)
+            );
+    }
+
     function _calculateRoleForPartition(
         bytes32 partition
     ) internal pure returns (bytes32 role) {
@@ -271,7 +314,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
             _checkRoleForPartition(_partition, _msgSender());
     }
 
-    function _checkProtectedPartitions() private view {
+    function _checkProtectedPartitions() internal view {
         if (!_arePartitionsProtected()) revert PartitionsAreUnProtected();
     }
 

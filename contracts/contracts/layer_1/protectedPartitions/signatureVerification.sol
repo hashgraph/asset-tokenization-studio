@@ -9,9 +9,11 @@ import {
     _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
     _PROTECTED_HOLD_TYPEHASH,
     _HOLD_TYPEHASH,
-    _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
+    _PROTECTED_CLEARING_TRANSFER_FROM_PARTITION_TYPEHASH,
+    _CLEARING_OPERATION_TYPEHASH,
     _PROTECTED_CLEARING_OPERATION_TYPEHASH,
-    _CLEARING_OPERATION_TYPEHASH
+    _PROTECTED_CLEARING_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
+    _PROTECTED_CLEARING_OPERATION_TYPEHASH
 } from '../constants/values.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
@@ -90,6 +92,41 @@ function getMessageHashCreateHold(
                         _protectedHold.nonce
                     )
                 )
+            )
+        );
+}
+
+function getMessageHashClearingTransfer(
+    IClearing.ProtectedClearingOperation memory _protectedClearing,
+    address _to,
+    uint256 _amount
+) pure returns (bytes32) {
+    return
+        keccak256(
+            abi.encode(
+                _PROTECTED_CLEARING_TRANSFER_FROM_PARTITION_TYPEHASH,
+                keccak256(
+                    abi.encode(
+                        _PROTECTED_CLEARING_OPERATION_TYPEHASH,
+                        keccak256(
+                            abi.encode(
+                                _CLEARING_OPERATION_TYPEHASH,
+                                _protectedClearing.clearingOperation.partition,
+                                _protectedClearing
+                                    .clearingOperation
+                                    .expirationTimestamp,
+                                keccak256(
+                                    _protectedClearing.clearingOperation.data
+                                )
+                            )
+                        ),
+                        _protectedClearing.from,
+                        _protectedClearing.deadline,
+                        _protectedClearing.nonce
+                    )
+                ),
+                _to,
+                _amount
             )
         );
 }
