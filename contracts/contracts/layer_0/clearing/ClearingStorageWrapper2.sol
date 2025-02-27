@@ -242,6 +242,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         IClearing.ClearingData memory clearing = _buildClearingData(
             _hold,
             _expirationTimestamp,
+             IClearing.ClearingOperationType.HoldCreation,
             _operatorData
         );
 
@@ -274,11 +275,12 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
     function _buildClearingData(
         IHold.Hold memory _hold,
         uint256 _expirationTimestamp,
+        IClearing.ClearingOperationType _clearingOperationType,
         bytes memory _operatorData
     ) internal pure returns (IClearing.ClearingData memory) {
         return
             IClearing.ClearingData(
-                IClearing.ClearingOperationType.HoldCreation,
+                _clearingOperationType,
                 _hold.amount,
                 _expirationTimestamp,
                 _hold.to,
