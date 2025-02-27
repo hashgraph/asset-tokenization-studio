@@ -312,15 +312,6 @@ abstract contract AdjustBalancesStorageWrapper1 is
         ][_partition][_lockId] = _labaf;
     }
 
-    function _setClearedLabafById(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _lockId,
-        uint256 _labaf
-    ) internal {
-        // TODO: Implement this function later
-    }
-
     function _setHeldLabafById(
         bytes32 _partition,
         address _tokenHolder,

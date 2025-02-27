@@ -230,18 +230,34 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         bytes memory _operatorData
     ) internal returns (bool success_, uint256 clearingId_) {
         _decreaseAllowedBalance(_from, _msgSender(), _amount);
+        return
+            _clearingTransferByPartition(
+                _clearingOperation,
+                _amount,
+                _from,
+                _to,
+                _operatorData
+            );
+    }
 
+    function _clearingTransferByPartition(
+        IClearing.ClearingOperation calldata _clearingOperation,
+        uint256 _amount,
+        address _from,
+        address _to,
+        bytes memory _operatorData
+    ) internal returns (bool success_, uint256 clearingId_) {
         bytes32 partition = _clearingOperation.partition;
 
+        IClearing.ClearingDataStorage
+            storage clearingDataStorage = _clearingStorage();
+
         unchecked {
-            clearingId_ = ++_clearingStorage()
+            clearingId_ = ++clearingDataStorage
                 .nextClearingIdByAccountAndPartition[_from][partition];
         }
 
         _beforeClearing(partition, _from, clearingId_, _amount);
-
-        IClearing.ClearingDataStorage
-            storage clearingDataStorage = _clearingStorage();
 
         clearingDataStorage
         .clearingIdsByAccountAndPartition[_from][partition].add(clearingId_);
@@ -259,49 +275,6 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             0,
             address(0),
             _operatorData,
-            IClearing.ClearingOperationType.Transfer,
-            clearingId_
-        );
-
-        _afterClearing(_from, partition, _amount);
-
-        success_ = true;
-    }
-
-    function _clearingTransferByPartition(
-        IClearing.ClearingOperation calldata _clearingOperation,
-        uint256 _amount,
-        address _from,
-        address _to
-    ) internal returns (bool success_, uint256 clearingId_) {
-        bytes32 partition = _clearingOperation.partition;
-
-        unchecked {
-            clearingId_ = ++_clearingStorage()
-                .nextClearingIdByAccountAndPartition[_from][partition];
-        }
-
-        _beforeClearing(partition, _from, clearingId_, _amount);
-
-        IClearing.ClearingDataStorage
-            storage clearingDataStorage = _clearingStorage();
-
-        clearingDataStorage
-        .clearingIdsByAccountAndPartition[_from][partition].add(clearingId_);
-
-        clearingDataStorage
-        .clearingIdsByAccountAndPartitionAndTypes[_from][partition][
-            IClearing.ClearingOperationType.Transfer
-        ].add(clearingId_);
-
-        _setClearingData(
-            _clearingOperation,
-            _amount,
-            _from,
-            _to,
-            0,
-            address(0),
-            '',
             IClearing.ClearingOperationType.Transfer,
             clearingId_
         );
@@ -341,7 +314,8 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _protectedClearingOperation.clearingOperation,
             _amount,
             _to,
-            _protectedClearingOperation.from
+            _protectedClearingOperation.from,
+            ''
         );
     }
 
@@ -351,37 +325,17 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         uint256 _expirationTimestamp,
         IHold.Hold memory _hold,
         bytes memory _operatorData
-    ) internal returns (uint256 clearingId_) {
-        _triggerAndSyncAll(_partition, _from, address(0));
-        _beforeClearing(_partition, _from);
-        _reduceBalanceByPartition(_from, _hold.amount, _partition);
-
+    ) internal returns (bool success_, uint256 clearingId_) {
         IClearing.ClearingDataStorage
-        storage clearingStorage = _clearingStorage();
+            storage clearingStorage = _clearingStorage();
 
         unchecked {
             clearingId_ = ++clearingStorage.nextClearingIdByAccountAndPartition[
-                        _from
-                ][_partition];
+                _from
+            ][_partition];
         }
 
-        IClearing.ClearingData memory clearing = _buildClearingData(
-            _hold,
-            _expirationTimestamp,
-            IClearing.ClearingOperationType.HoldCreation,
-            _operatorData
-        );
-
-        _setClearedLabafById(
-            _partition,
-            _from,
-            clearingId_,
-            _updateTotalClearing(_partition, _from)
-        );
-
-        clearingStorage.clearingByAccountPartitionAndId[_from][_partition][
-        clearingId_
-        ] = clearing;
+        _beforeClearing(_partition, _from, clearingId_, _hold.amount);
 
         clearingStorage.clearingIdsByAccountAndPartition[_from][_partition].add(
             clearingId_
@@ -389,32 +343,27 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
         clearingStorage
         .clearingIdsByAccountAndPartitionAndTypes[_from][_partition][
-        IClearing.ClearingOperationType.HoldCreation
+            IClearing.ClearingOperationType.HoldCreation
         ].add(clearingId_);
 
-        clearingStorage.totalClearedAmountByAccountAndPartition[_from][
-        _partition
-        ] += _hold.amount;
-        clearingStorage.totalClearedAmountByAccount[_from] += _hold.amount;
-    }
-
-    function _buildClearingData(
-        IHold.Hold memory _hold,
-        uint256 _expirationTimestamp,
-        IClearing.ClearingOperationType _clearingOperationType,
-        bytes memory _operatorData
-    ) internal pure returns (IClearing.ClearingData memory) {
-        return
-            IClearing.ClearingData(
-            _clearingOperationType,
+        _setClearingData(
+            IClearing.ClearingOperation(
+                _partition,
+                _expirationTimestamp,
+                _hold.data
+            ),
             _hold.amount,
-            _expirationTimestamp,
+            _from,
             _hold.to,
-            _hold.escrow,
-            _hold.expirationTimestamp,
-            _hold.data,
-            _operatorData
+            0,
+            address(0),
+            '',
+            IClearing.ClearingOperationType.Transfer,
+            clearingId_
         );
+        _afterClearing(_from, _partition, _hold.amount);
+
+        success_ = true;
     }
 
     function _clearingCreateHoldFromByPartition(
@@ -423,24 +372,24 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         uint256 _expirationTimestamp,
         IHold.Hold memory _hold,
         bytes memory _operatorData
-    ) internal returns (uint256 clearingId_) {
+    ) internal returns (bool success_, uint256 clearingId_) {
         _decreaseAllowedBalance(_from, _msgSender(), _hold.amount);
 
         return
             _clearingCreateHoldByPartition(
-            _partition,
-            _from,
-            _expirationTimestamp,
-            _hold,
-            _operatorData
-        );
+                _partition,
+                _from,
+                _expirationTimestamp,
+                _hold,
+                _operatorData
+            );
     }
 
     function _protectedClearingCreateHoldByPartition(
         IClearing.ProtectedClearingOperation memory _protectedClearingOperation,
         IHold.Hold memory _hold,
         bytes calldata _signature
-    ) internal returns (uint256 clearingId_) {
+    ) internal returns (bool success_, uint256 clearingId_) {
         checkNounceAndDeadline(
             _protectedClearingOperation.nonce,
             _protectedClearingOperation.from,
@@ -462,14 +411,14 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
         return
             _clearingCreateHoldByPartition(
-            _protectedClearingOperation.clearingOperation.partition,
-            _protectedClearingOperation.from,
-            _protectedClearingOperation
-            .clearingOperation
-            .expirationTimestamp,
-            _hold,
-            ''
-        );
+                _protectedClearingOperation.clearingOperation.partition,
+                _protectedClearingOperation.from,
+                _protectedClearingOperation
+                    .clearingOperation
+                    .expirationTimestamp,
+                _hold,
+                ''
+            );
     }
 
     function _beforeClearing(
