@@ -320,24 +320,24 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
     )
         external
         override
-        onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         )
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_clearingOperationFrom.from)
-        onlyListedAllowed(_to)
         onlyOperator(
             _clearingOperationFrom.clearingOperation.partition,
             _clearingOperationFrom.from
         )
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _clearingOperationFrom.from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         returns (bool success_, uint256 clearingId_)
     {
         {
+            _checkUnpaused();
             _checkValidAddress(_to);
+            _checkControlList(_msgSender());
+            _checkControlList(_clearingOperationFrom.from);
+            _checkControlList(_to);
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _clearingOperationFrom.from);
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _to);
         }
         (success_, clearingId_) = _clearingTransferFromByPartition(
             _clearingOperationFrom.clearingOperation,
@@ -364,15 +364,11 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
     )
         external
         override
-        onlyUnpaused
         onlyRole(
             _protectedPartitionsRole(
                 _protectedClearingOperation.clearingOperation.partition
             )
         )
-        onlyListedAllowed(_protectedClearingOperation.from)
-        onlyListedAllowed(_to)
-        onlyProtectedPartitions
         onlyValidKycStatus(
             IKyc.KycStatus.GRANTED,
             _protectedClearingOperation.from
@@ -380,6 +376,12 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         returns (bool success_, uint256 clearingId_)
     {
+        {
+            _checkUnpaused();
+            _checkProtectedPartitions();
+            _checkControlList(_protectedClearingOperation.from);
+            _checkControlList(_to);
+        }
         (success_, clearingId_) = _protectedClearingTransferByPartition(
             _protectedClearingOperation,
             _amount,

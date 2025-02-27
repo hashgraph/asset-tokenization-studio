@@ -283,7 +283,7 @@ abstract contract ControlListStorageWrapper is
         return _getControlListType() == _isInControlList(account);
     }
 
-    function _checkControlList(address _account) private view {
+    function _checkControlList(address _account) internal view {
         if (!_isAbleToAccess(_account)) {
             revert AccountIsBlocked(_account);
         }

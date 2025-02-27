@@ -277,7 +277,7 @@ abstract contract ProtectedPartitionsStorageWrapper is
             _checkRoleForPartition(_partition, _msgSender());
     }
 
-    function _checkProtectedPartitions() private view {
+    function _checkProtectedPartitions() internal view {
         if (!_arePartitionsProtected()) revert PartitionsAreUnProtected();
     }
 

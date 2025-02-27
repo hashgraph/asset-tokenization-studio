@@ -253,7 +253,7 @@ abstract contract PauseStorageWrapper is
         }
     }
 
-    function _checkUnpaused() private view {
+    function _checkUnpaused() internal view {
         if (_isPaused()) {
             revert TokenIsPaused();
         }
