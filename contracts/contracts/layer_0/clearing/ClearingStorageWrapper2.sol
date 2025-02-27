@@ -232,32 +232,36 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
         bytes32 partition = _clearingOperation.partition;
 
-        clearingId_ = ++_clearingStorage().nextClearingIdByAccountAndPartition[
-            _from
-        ][partition];
+        unchecked {
+            clearingId_ = ++_clearingStorage()
+                .nextClearingIdByAccountAndPartition[_from][partition];
+        }
 
         _beforeClearing(partition, _from, clearingId_, _amount);
 
-        _clearingStorage()
+        IClearing.ClearingDataStorage
+            storage clearingDataStorage = _clearingStorage();
+
+        clearingDataStorage
         .clearingIdsByAccountAndPartition[_from][partition].add(clearingId_);
 
-        _clearingStorage()
+        clearingDataStorage
         .clearingIdsByAccountAndPartitionAndTypes[_from][partition][
             IClearing.ClearingOperationType.Transfer
         ].add(clearingId_);
 
-        IClearing.ClearingData memory clearingData = IClearing.ClearingData({
-            clearingOperationType: IClearing.ClearingOperationType.Transfer,
-            amount: _amount,
-            holdExpirationTimestamp: 0,
-            expirationTimestamp: _clearingOperation.expirationTimestamp,
-            destination: _to,
-            escrow: address(0),
-            data: _clearingOperation.data,
-            operatorData: _operatorData
-        });
+        IClearing.ClearingData memory clearingData = _buildClearingData(
+            IClearing.ClearingOperationType.Transfer,
+            _amount,
+            0,
+            _clearingOperation.expirationTimestamp,
+            _to,
+            address(0),
+            _clearingOperation.data,
+            _operatorData
+        );
 
-        _clearingStorage().clearingByAccountPartitionAndId[_from][partition][
+        clearingDataStorage.clearingByAccountPartitionAndId[_from][partition][
                 clearingId_
             ] = clearingData;
 
@@ -275,32 +279,36 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
     ) internal returns (bool success_, uint256 clearingId_) {
         bytes32 partition = _clearingOperation.partition;
 
-        clearingId_ = ++_clearingStorage().nextClearingIdByAccountAndPartition[
-            _from
-        ][partition];
+        unchecked {
+            clearingId_ = ++_clearingStorage()
+                .nextClearingIdByAccountAndPartition[_from][partition];
+        }
 
         _beforeClearing(partition, _from, clearingId_, _amount);
 
-        _clearingStorage()
+        IClearing.ClearingDataStorage
+            storage clearingDataStorage = _clearingStorage();
+
+        clearingDataStorage
         .clearingIdsByAccountAndPartition[_from][partition].add(clearingId_);
 
-        _clearingStorage()
+        clearingDataStorage
         .clearingIdsByAccountAndPartitionAndTypes[_from][partition][
             IClearing.ClearingOperationType.Transfer
         ].add(clearingId_);
 
-        IClearing.ClearingData memory clearingData = IClearing.ClearingData({
-            clearingOperationType: IClearing.ClearingOperationType.Transfer,
-            amount: _amount,
-            holdExpirationTimestamp: 0,
-            expirationTimestamp: _clearingOperation.expirationTimestamp,
-            destination: _to,
-            escrow: address(0),
-            data: _clearingOperation.data,
-            operatorData: _operatorData
-        });
+        IClearing.ClearingData memory clearingData = _buildClearingData(
+            IClearing.ClearingOperationType.Transfer,
+            _amount,
+            0,
+            _clearingOperation.expirationTimestamp,
+            _to,
+            address(0),
+            _clearingOperation.data,
+            _operatorData
+        );
 
-        _clearingStorage().clearingByAccountPartitionAndId[_from][partition][
+        clearingDataStorage.clearingByAccountPartitionAndId[_from][partition][
                 clearingId_
             ] = clearingData;
 
@@ -326,8 +334,8 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
         _checkClearingTransferSignature(
             _protectedClearingOperation,
-            _to,
             _amount,
+            _to,
             _signature
         );
 
@@ -341,7 +349,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _amount,
             _to,
             _protectedClearingOperation.from,
-            new bytes(0)
+            ''
         );
     }
 
@@ -352,9 +360,13 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         uint256 _amount
     ) internal {
         _triggerAndSyncAll(_partition, _tokenHolder, address(0));
-        uint256 abaf = _updateTotalCleared(_partition, _tokenHolder);
         _reduceBalanceByPartition(_tokenHolder, _amount, _partition);
-        _setClearedLabafById(_partition, _tokenHolder, _clearingId, abaf);
+        _setClearedLabafById(
+            _partition,
+            _tokenHolder,
+            _clearingId,
+            _updateTotalCleared(_partition, _tokenHolder)
+        );
         _updateAccountSnapshot(_tokenHolder, _partition);
         _updateAccountClearedBalancesSnapshot(_tokenHolder, _partition);
     }
@@ -383,21 +395,18 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         );
 
         if (abaf_ != labaf) {
-            uint256 factor = _calculateFactor(abaf_, labaf);
-
-            _updateTotalClearedAmountAndLabaf(_tokenHolder, factor, abaf_);
+            _updateTotalClearedAmountAndLabaf(
+                _tokenHolder,
+                _calculateFactor(abaf_, labaf),
+                abaf_
+            );
         }
 
         if (abaf_ != labafByPartition) {
-            uint256 factorByPartition = _calculateFactor(
-                abaf_,
-                labafByPartition
-            );
-
             _updateTotalClearedAmountAndLabafByPartition(
                 _partition,
                 _tokenHolder,
-                factorByPartition,
+                _calculateFactor(abaf_, labafByPartition),
                 abaf_
             );
         }
@@ -426,6 +435,28 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _tokenHolder
         ][_partition] *= _factor;
         _setTotalClearedLabafByPartition(_partition, _tokenHolder, _abaf);
+    }
+
+    function _buildClearingData(
+        IClearing.ClearingOperationType _operationType,
+        uint256 _amount,
+        uint256 _holdExpirationTimestamp,
+        uint256 _expirationTimestamp,
+        address _destination,
+        address _escrow,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) internal pure returns (IClearing.ClearingData memory clearingData_) {
+        clearingData_ = IClearing.ClearingData({
+            clearingOperationType: _operationType,
+            amount: _amount,
+            holdExpirationTimestamp: _holdExpirationTimestamp,
+            expirationTimestamp: _expirationTimestamp,
+            destination: _destination,
+            escrow: _escrow,
+            data: _data,
+            operatorData: _operatorData
+        });
     }
 }
 // solhint-enable no-unused-vars, custom-errors

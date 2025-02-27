@@ -218,8 +218,8 @@ abstract contract ProtectedPartitionsStorageWrapper is
     function _checkClearingTransferSignature(
         IClearing.ProtectedClearingOperation
             calldata _protectedClearingOperation,
-        address _to,
         uint256 _amount,
+        address _to,
         bytes calldata _signature
     ) internal view {
         if (

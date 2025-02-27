@@ -251,21 +251,24 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         external
         override
         onlyUnpaused
-        onlyValidAddress(_to)
-        checkControlList(_msgSender())
-        checkControlList(_to)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_to)
         onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         returns (bool success_, uint256 clearingId_)
     {
+        {
+            _checkValidAddress(_to);
+        }
+
         (success_, clearingId_) = _clearingTransferByPartition(
             _clearingOperation,
             _amount,
             _to,
             _msgSender(),
-            new bytes(0)
+            ''
         );
 
         emit ClearedTransferByPartition(
@@ -273,7 +276,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _msgSender(),
             _clearingOperation.partition,
             clearingId_,
-            new bytes(0)
+            ''
         );
     }
 
@@ -285,9 +288,9 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         external
         override
         onlyUnpaused
-        checkControlList(_msgSender())
-        checkControlList(_to)
-        checkControlList(_clearingOperationFrom.from)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_to)
+        onlyListedAllowed(_clearingOperationFrom.from)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _clearingOperationFrom.from)
@@ -299,7 +302,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _amount,
             _to,
             _clearingOperationFrom.from,
-            new bytes(0)
+            ''
         );
 
         emit ClearedTransferByPartition(
@@ -307,7 +310,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
-            new bytes(0)
+            ''
         );
     }
 
@@ -322,9 +325,9 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         onlyDefaultPartitionWithSinglePartition(
             _clearingOperationFrom.clearingOperation.partition
         )
-        checkControlList(_msgSender())
-        checkControlList(_clearingOperationFrom.from)
-        checkControlList(_to)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_clearingOperationFrom.from)
+        onlyListedAllowed(_to)
         onlyOperator(
             _clearingOperationFrom.clearingOperation.partition,
             _clearingOperationFrom.from
@@ -368,8 +371,8 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
                 _protectedClearingOperation.clearingOperation.partition
             )
         )
-        checkControlList(_protectedClearingOperation.from)
-        checkControlList(_to)
+        onlyListedAllowed(_protectedClearingOperation.from)
+        onlyListedAllowed(_to)
         onlyProtectedPartitions
         onlyValidKycStatus(
             IKyc.KycStatus.GRANTED,
@@ -390,7 +393,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _protectedClearingOperation.from,
             _protectedClearingOperation.clearingOperation.partition,
             clearingId_,
-            new bytes(0)
+            ''
         );
     }
 
