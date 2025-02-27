@@ -216,6 +216,7 @@ import {
     checkNounceAndDeadline
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
 import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
@@ -255,6 +256,8 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _amount,
             _from,
             _to,
+            0,
+            address(0),
             _operatorData,
             IClearing.ClearingOperationType.Transfer,
             clearingId_
@@ -296,11 +299,12 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _amount,
             _from,
             _to,
+            0,
+            address(0),
             '',
             IClearing.ClearingOperationType.Transfer,
             clearingId_
         );
-
         _afterClearing(_from, partition, _amount);
 
         success_ = true;
@@ -430,6 +434,8 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         uint256 _amount,
         address _from,
         address _to,
+        uint256 _holdExpirationtimestamp,
+        address _escrow,
         bytes memory _operatorData,
         IClearing.ClearingOperationType _operationType,
         uint256 _clearingId
@@ -439,10 +445,10 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             clearingData = IClearing.ClearingData({
                 clearingOperationType: _operationType,
                 amount: _amount,
-                holdExpirationTimestamp: 0,
+                holdExpirationTimestamp: _holdExpirationtimestamp,
                 expirationTimestamp: _clearingOperation.expirationTimestamp,
                 destination: _to,
-                escrow: address(0),
+                escrow: _escrow,
                 data: _clearingOperation.data,
                 operatorData: _operatorData
             });
