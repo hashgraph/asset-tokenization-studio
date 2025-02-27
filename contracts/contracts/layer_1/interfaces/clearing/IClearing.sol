@@ -229,10 +229,43 @@ interface IClearing {
         bytes operatorData
     );
 
+    event ClearingOperationApproved(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 clearingId,
+        ClearingOperationType clearingOperationType
+    );
+
+    event ClearingOperationCanceled(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 clearingId,
+        ClearingOperationType clearingOperationType
+    );
+
+    event ClearingOperationReclaimed(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 clearingId,
+        ClearingOperationType clearingOperationType
+    );
+
+    error WrongClearingId();
+    error ClearingExpirationNotReached();
+
     enum ClearingOperationType {
         Transfer,
         Redeem,
         HoldCreation
+    }
+
+    enum OperationType {
+        Approve,
+        Cancel,
+        Reclaim
     }
     struct ClearingOperation {
         bytes32 partition;
@@ -261,6 +294,7 @@ interface IClearing {
     }
 
     struct ClearingData {
+        uint256 id;
         ClearingOperationType clearingOperationType;
         uint256 amount;
         uint256 expirationTimestamp;
@@ -365,14 +399,21 @@ interface IClearing {
         bytes calldata _signature
     ) external returns (bool success_, uint256 clearingId_);
 
+    function approveClearingOperationByPartition(
+        ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    ) external returns (bool success_);
+
+    function cancelClearingOperationByPartition(
+        ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    ) external returns (bool success_);
+
+    function reclaimClearingOperationByPartition(
+        ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    ) external returns (bool success_);
+
     // function clearingRedeemByPartition(
     //     ClearingOperation calldata _clearingOperation,
     //     uint256 _amount
-    // ) external returns (bool success_, uint256 clearingId_);
-
-    // function clearingCreateHoldByPartition(
-    //     ClearingOperation calldata _clearingOperation,
-    //     IHold.Hold calldata _hold
     // ) external returns (bool success_, uint256 clearingId_);
 
     // function clearingRedeemFromByPartition(
@@ -390,32 +431,9 @@ interface IClearing {
     //     uint256 _amount
     // ) external returns (bool success_, uint256 clearingId_);
 
-    // function operatorClearingCreateHoldByPartition(
-    //     ClearingOperationFrom calldata _clearingOperationFrom,
-    //     IHold.Hold calldata _hold
-    // ) external returns (bool success_, uint256 clearingId_);
-
     // function protectedClearingRedeemByPartition(
     //     ProtectedClearingOperation calldata _protectedClearingOperation,
     //     uint256 _amount,
     //     bytes calldata _signature
     // ) external returns (bool success_, uint256 clearingId_);
-
-    // function protectedClearingCreateHoldByPartition(
-    //     ProtectedClearingOperation calldata _protectedClearingOperation,
-    //     IHold.Hold calldata _hold,
-    //     bytes calldata _signature
-    // ) external returns (bool success_, uint256 clearingId_);
-
-    // function approveClearingOperationByPartition(
-    //     ClearingOperationIdentifier memory _clearingOperationIdentifier
-    // ) external returns (bool success_);
-
-    // function cancelClearingOperationByPartition(
-    //     ClearingOperationIdentifier memory _clearingOperationIdentifier
-    // ) external returns (bool success_);
-
-    // function reclaimClearingOperationByPartition(
-    //     ClearingOperationIdentifier memory _clearingOperationIdentifier
-    // ) external returns (bool success_);
 }

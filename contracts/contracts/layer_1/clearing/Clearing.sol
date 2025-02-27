@@ -550,6 +550,94 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         );
     }
 
+    function approveClearingOperationByPartition(
+        ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    )
+        external
+        override
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationIdentifier.partition
+        )
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _clearingOperationIdentifier.tokenHolder
+        )
+        returns (bool success_)
+    {
+        success_ = _approveClearingOperationByPartition(
+            _clearingOperationIdentifier
+        );
+
+        emit ClearingOperationApproved(
+            _msgSender(),
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingId,
+            _clearingOperationIdentifier.clearingOperationType
+        );
+    }
+
+    function cancelClearingOperationByPartition(
+        ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    )
+        external
+        override
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationIdentifier.partition
+        )
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _clearingOperationIdentifier.tokenHolder
+        )
+        returns (bool success_)
+    {
+        success_ = _cancelClearingOperationByPartition(
+            _clearingOperationIdentifier
+        );
+        emit ClearingOperationCanceled(
+            _msgSender(),
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingId,
+            _clearingOperationIdentifier.clearingOperationType
+        );
+    }
+
+    function reclaimClearingOperationByPartition(
+        ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    )
+        external
+        override
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationIdentifier.partition
+        )
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _clearingOperationIdentifier.tokenHolder
+        )
+        returns (bool success_)
+    {
+        success_ = _reclaimClearingOperationByPartition(
+            _clearingOperationIdentifier
+        );
+        emit ClearingOperationReclaimed(
+            _msgSender(),
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingId,
+            _clearingOperationIdentifier.clearingOperationType
+        );
+    }
+
     function getClearedAmountFor(
         address _tokenHolder
     ) external view returns (uint256 amount_) {
