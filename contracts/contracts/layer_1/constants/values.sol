@@ -265,7 +265,7 @@ bytes32 constant _PROTECTED_HOLD_TYPEHASH = 0x432ede4c9f6d06cc57be0d75da5dce179c
 //keccak256(
 //'protectedClearingTransferByPartition(ProtectedClearingOperation _protectedClearingOperation,uint256 _amount,address _to)ClearingOperation(byte32 partition,uint256 expirationTimestamp,bytes data)ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)'
 //);
-bytes32 constant _PROTECTED_CLEARING_TRANSFER_FROM_PARTITION_TYPEHASH = 0x6b0d63975f3d2b1cd9d25908645c662987e4aead4eb168b65d3ac3779469a4d7;
+bytes32 constant _PROTECTED_CLEARING_TRANSFER_FROM_PARTITION_TYPEHASH = 0xffef74a7bfefb2d33b3d78c7e2845c5a27a565f1cb11c812c2edf2fdfed9a188;
 
 //keccak256(
 //'ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)ClearingOperation(byte32 partition,uint256 expirationTimestamp,bytes data)'
