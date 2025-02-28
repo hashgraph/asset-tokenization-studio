@@ -223,6 +223,11 @@ import { PauseRequest } from "@hashgraph/asset-tokenization-sdk";
 import { useGetIsPaused } from "../../../hooks/queries/useGetSecurityDetails";
 import { useRolesStore } from "../../../store/rolesStore";
 import { SecurityRole } from "../../../utils/SecurityRole";
+import { useGetIsClearingActivated } from "../../../hooks/queries/useClearingOperations";
+import {
+  useActivateClearing,
+  useDeactivateClearing,
+} from "../../../hooks/mutations/useClearingOperations";
 
 export const AdminActionsButtons = () => {
   const { t: tButtons } = useTranslation("security", {
@@ -232,19 +237,42 @@ export const AdminActionsButtons = () => {
   const { data: isPaused, refetch } = useGetIsPaused(
     new PauseRequest({ securityId: id }),
   );
+  const { data: isClearingActivated, refetch: refetchIsClearingActivated } =
+    useGetIsClearingActivated(
+      {},
+      // new isClearingActivatedRequest({ securityId: id }),
+    );
   const { roles } = useRolesStore();
 
   const { mutate: pauseSecurity, isLoading: isPauseLoading } = usePauseSecurity(
     { onSettled: () => refetch() },
   );
+
   const { mutate: unpauseSecurity, isLoading: isUnpauseLoading } =
     useUnpauseSecurity({ onSettled: () => refetch() });
+
+  const { mutate: activateClearing, isLoading: isActivateClearingLoading } =
+    useActivateClearing({ onSettled: () => refetchIsClearingActivated() });
+
+  const { mutate: deactivateClearing, isLoading: isDeactivateClearingLoading } =
+    useDeactivateClearing({ onSettled: () => refetchIsClearingActivated() });
+
   const handlePauseToggle = async () => {
     const pauseRequest = new PauseRequest({ securityId: id });
     if (isPaused) {
       unpauseSecurity(pauseRequest);
     } else {
       pauseSecurity(pauseRequest);
+    }
+  };
+
+  const handleClearingModeToggle = async () => {
+    const clearingModeRequest = {};
+    // const clearingModeRequest = new ClearingModeRequest({ securityId: id });
+    if (isPaused) {
+      deactivateClearing(clearingModeRequest);
+    } else {
+      activateClearing(clearingModeRequest);
     }
   };
 
@@ -259,6 +287,14 @@ export const AdminActionsButtons = () => {
   const hasPauserRole = roles.find(
     (role) => role === SecurityRole._PAUSER_ROLE,
   );
+
+  // TODO: change when SDK will ready
+  const hasClearingRole = true;
+  // const hasClearing = roles.find(
+  //   (role) => role === SecurityRole._CLEARING_ROLE,
+  // );
+
+  const showDangerZone = hasPauserRole || hasClearingRole;
 
   // TODO get from SDK the buttons to show depending of account's roles
   return (
@@ -318,7 +354,7 @@ export const AdminActionsButtons = () => {
             ) : (
               <></>
             )}
-            {hasPauserRole ? (
+            {showDangerZone ? (
               <VStack mt={2} w="full" align="flex-start" pb="2px">
                 <HStack
                   w="full"
@@ -334,21 +370,47 @@ export const AdminActionsButtons = () => {
                     {tButtons("dangerZone.title")}
                   </Text>
                 </HStack>
-                <Text textStyle="ElementsRegularXS">
-                  {tButtons("dangerZone.subtitle")}
-                </Text>
-                <HStack w="full" mt="10px">
-                  <Toggle
-                    data-testid="pauser-button"
-                    label={tButtons(
-                      `dangerZone.${
-                        isPaused ? "buttonInactive" : "buttonActive"
-                      }`,
-                    )}
-                    onChange={() => handlePauseToggle()}
-                    isDisabled={isPauseLoading || isUnpauseLoading}
-                  />
-                </HStack>
+                {hasPauserRole && (
+                  <>
+                    <Text textStyle="ElementsRegularXS">
+                      {tButtons("dangerZone.subtitle")}
+                    </Text>
+                    <HStack w="full" mt="10px">
+                      <Toggle
+                        data-testid="pauser-button"
+                        label={tButtons(
+                          `dangerZone.${
+                            isPaused ? "buttonInactive" : "buttonActive"
+                          }`,
+                        )}
+                        onChange={() => handlePauseToggle()}
+                        isDisabled={isPauseLoading || isUnpauseLoading}
+                      />
+                    </HStack>
+                  </>
+                )}
+                {hasClearingRole && (
+                  <>
+                    <Text textStyle="ElementsRegularXS">
+                      {tButtons("dangerZone.clearingMode")}
+                    </Text>
+                    <HStack w="full" mt="10px">
+                      <Toggle
+                        data-testid="clearing-mode-button"
+                        label={tButtons(
+                          `dangerZone.${
+                            isClearingActivated ? "deactivate" : "activate"
+                          }`,
+                        )}
+                        onChange={() => handleClearingModeToggle()}
+                        isDisabled={
+                          isActivateClearingLoading ||
+                          isDeactivateClearingLoading
+                        }
+                      />
+                    </HStack>
+                  </>
+                )}
               </VStack>
             ) : (
               <></>
