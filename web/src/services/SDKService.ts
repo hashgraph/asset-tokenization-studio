@@ -893,6 +893,67 @@ export class SDKService {
     const response = await Kyc.revokeKYC(req);
     return response.payload;
   }
+
+  // CLEARING OPERATIONS ////////////////////////////////////////////
+  public static async getClearingsIdForByPartition(
+    req: unknown,
+  ): Promise<unknown> {
+    return req;
+  }
+
+  public static async getClearingForByPartition(
+    req: unknown,
+  ): Promise<unknown> {
+    return req;
+  }
+
+  public static async clearingTransferByPartition(
+    req: unknown,
+  ): Promise<unknown> {
+    return req;
+  }
+
+  public static async clearingRedeemByPartition(
+    req: unknown,
+  ): Promise<unknown> {
+    return req;
+  }
+
+  public static async clearingCreateHoldByPartition(
+    req: unknown,
+  ): Promise<unknown> {
+    return req;
+  }
+
+  public static async approveClearingOperationByPartition(
+    req: unknown,
+  ): Promise<unknown> {
+    return req;
+  }
+
+  public static async cancelClearingOperationByPartition(
+    req: unknown,
+  ): Promise<unknown> {
+    return req;
+  }
+
+  public static async reclaimClearingOperationByPartition(
+    req: unknown,
+  ): Promise<unknown> {
+    return req;
+  }
+
+  public static async activateClearing(req: unknown): Promise<unknown> {
+    return req;
+  }
+
+  public static async deactivateClearing(req: unknown): Promise<unknown> {
+    return req;
+  }
+
+  public static async isClearingActivated(req: unknown): Promise<unknown> {
+    return req;
+  }
 }
 
 export default SDKService;
