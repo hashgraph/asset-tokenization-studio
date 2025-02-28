@@ -582,7 +582,7 @@ abstract contract AdjustBalancesStorageWrapper1 is
             ][_partition];
     }
 
-    function _getClearedLabafById(
+    function _getClearingLabafById(
         bytes32 _partition,
         address _tokenHolder,
         uint256 _clearingId

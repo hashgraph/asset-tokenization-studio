@@ -257,7 +257,7 @@ abstract contract AdjustBalancesStorageWrapper2 is
         uint256 _clearingId,
         address _tokenHolder
     ) internal view override returns (uint256) {
-        return _getClearedLabafById(_partition, _tokenHolder, _clearingId);
+        return _getClearingLabafById(_partition, _tokenHolder, _clearingId);
     }
 
     function _getLabafByUserAndPartition(

@@ -247,7 +247,7 @@ abstract contract ClearingStorageWrapper1 is
         IClearing.ClearingOperationIdentifier
             memory _clearingOperationIdentifier
     ) internal view returns (bool) {
-        return _getClearing(_clearingOperationIdentifier).id != 0;
+        return _getClearing(_clearingOperationIdentifier).clearingId != 0;
     }
 
     function _setClearing(bool _activated) internal returns (bool success_) {
