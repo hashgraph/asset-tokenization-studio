@@ -207,21 +207,19 @@ pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 import {Common} from '../common/Common.sol';
-import {
-    IClearingOperation
-} from '../interfaces/clearing/IClearingOperation.sol';
+import {IClearingActions} from '../interfaces/clearing/IClearingActions.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
 import {_CLEARING_VALIDATOR_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {_CLEARING_OPERATION_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {_CLEARING_ACTIONS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
-contract ClearingOperationFacet is
+contract ClearingActionsFacet is
     IStaticFunctionSelectors,
-    IClearingOperation,
+    IClearingActions,
     Common
 {
     function approveClearingOperationByPartition(
@@ -324,7 +322,7 @@ contract ClearingOperationFacet is
         override
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _CLEARING_OPERATION_RESOLVER_KEY;
+        staticResolverKey_ = _CLEARING_ACTIONS_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()

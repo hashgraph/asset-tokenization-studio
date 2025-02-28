@@ -376,11 +376,12 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             address(0)
         );
 
-        _setClearingIdByPartition(
+        _setClearingIdByPartitionAndType(
             clearingDataStorage,
             _from,
             partition,
-            clearingId_
+            clearingId_,
+            _operationType
         );
 
         _setClearingData(
@@ -392,7 +393,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             clearingId_
         );
 
-        _afterClearingOperation(_from, partition, _amount);
+        _afterClearingCreation(_from, partition, _amount);
 
         success_ = true;
     }
@@ -558,6 +559,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         _addPartitionTo(_amount, _to, _clearingOperationIdentifier.partition);
     }
 
+    //TODO: discuss remove labaf from total cleared
     function _removeClearing(
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier,
@@ -671,7 +673,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             .amount *= _factor;
     }
 
-    function _afterClearingOperation(
+    function _afterClearingCreation(
         address _tokenHolder,
         bytes32 _partition,
         uint256 _amount
@@ -756,11 +758,12 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         );
     }
 
-    function _setClearingIdByPartition(
+    function _setClearingIdByPartitionAndType(
         IClearing.ClearingDataStorage storage _clearingDataStorage,
         address _tokenHolder,
         bytes32 _partition,
-        uint256 _clearingId
+        uint256 _clearingId,
+        IClearing.ClearingOperationType _operationType
     ) internal {
         _clearingDataStorage
         .clearingIdsByAccountAndPartition[_tokenHolder][_partition].add(
@@ -769,7 +772,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
         _clearingDataStorage
         .clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][
-            IClearing.ClearingOperationType.Transfer
+            _operationType
         ].add(_clearingId);
     }
 
@@ -830,7 +833,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
     ) internal view virtual override returns (uint256 amount_) {
         uint256 factor = _calculateFactor(
             _getAbafAdjusted(),
-            _getTotalHeldLabafByPartition(_partition, _tokenHolder)
+            _getTotalClearedLabafByPartition(_partition, _tokenHolder)
         );
         return
             _getClearedAmountForByPartition(_partition, _tokenHolder) * factor;

@@ -208,7 +208,7 @@ pragma solidity 0.8.18;
 
 import {IClearing} from './IClearing.sol';
 
-interface IClearingOperation {
+interface IClearingActions {
     event ClearingOperationApproved(
         address indexed operator,
         address indexed tokenHolder,

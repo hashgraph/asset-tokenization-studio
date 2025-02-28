@@ -271,5 +271,5 @@ bytes32 constant _KYC_RESOLVER_KEY = 0xf516a0f6b4726244ae916c590cd26c2b593d7d448
 // keccak256("security.token.standard.clearing.resolverKey")
 bytes32 constant _CLEARING_RESOLVER_KEY = 0x43432f8c1c15888e9f2825356efbd94b604920165ac59da52595f66b1adbbc9f;
 
-// keccak256("security.token.standard.clearing.operation.resolverKey")
-bytes32 constant _CLEARING_OPERATION_RESOLVER_KEY = 0x2d3fade9083a6c58d8e6e46e828d866866e5a8944ee6103aa6863603a16c02c8;
+// keccak256("security.token.standard.clearing.actions.resolverKey")
+bytes32 constant _CLEARING_ACTIONS_RESOLVER_KEY = 0x5472dfc5c92ad7a8651518ea7d3854d3b6494e5bcaa19f91cd61bf93bf6f2a74;
