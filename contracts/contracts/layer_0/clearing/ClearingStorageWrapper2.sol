@@ -469,15 +469,16 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _tokenHolder
         );
 
-        if (_abaf != clearingLabaf) {
-            _updateClearingAmountById(
-                _partition,
-                _clearingId,
-                _tokenHolder,
-                _calculateFactor(_abaf, clearingLabaf)
-            );
-            _setClearedLabafById(_partition, _tokenHolder, _clearingId, _abaf);
+        if (_abaf == clearingLabaf) {
+            return;
         }
+        _updateClearingAmountById(
+            _partition,
+            _clearingId,
+            _tokenHolder,
+            _calculateFactor(_abaf, clearingLabaf)
+        );
+        _setClearedLabafById(_partition, _tokenHolder, _clearingId, _abaf);
     }
 
     function _updateClearingAmountById(
