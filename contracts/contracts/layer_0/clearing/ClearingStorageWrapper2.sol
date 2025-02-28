@@ -701,15 +701,15 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _clearingOperationIdentifier.clearingOperationType ==
             IClearing.ClearingOperationType.Redeem
         ) {
-            _redeemByPartition(
-                _clearingOperationIdentifier.partition,
-                _clearingOperationIdentifier.tokenHolder,
-                _msgSender(),
-                clearingData.amount,
-                clearingData.data,
-                clearingData.operatorData
-            );
-            return;
+            return
+                _redeemByPartition(
+                    _clearingOperationIdentifier.partition,
+                    _clearingOperationIdentifier.tokenHolder,
+                    _msgSender(),
+                    clearingData.amount,
+                    clearingData.data,
+                    clearingData.operatorData
+                );
         }
         _processHoldAndTransfer(_clearingOperationIdentifier, clearingData);
     }
@@ -721,31 +721,31 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
     ) internal {
         if (
             _clearingOperationIdentifier.clearingOperationType ==
-            IClearing.ClearingOperationType.HoldCreation
+            IClearing.ClearingOperationType.Transfer
         ) {
-            _createHoldByPartition(
-                _clearingOperationIdentifier.partition,
-                _clearingOperationIdentifier.tokenHolder,
-                IHold.Hold(
-                    clearingData.amount,
-                    clearingData.holdExpirationTimestamp,
-                    clearingData.escrow,
-                    clearingData.destination,
-                    clearingData.data
-                ),
-                clearingData.operatorData
-            );
-            return;
+            return
+                _transferByPartition(
+                    _clearingOperationIdentifier.tokenHolder,
+                    IERC1410Basic.BasicTransferInfo(
+                        clearingData.destination,
+                        clearingData.amount
+                    ),
+                    _clearingOperationIdentifier.partition,
+                    clearingData.data,
+                    _msgSender(),
+                    clearingData.operatorData
+                );
         }
-        _transferByPartition(
-            _clearingOperationIdentifier.tokenHolder,
-            IERC1410Basic.BasicTransferInfo(
-                clearingData.destination,
-                clearingData.amount
-            ),
+        _createHoldByPartition(
             _clearingOperationIdentifier.partition,
-            clearingData.data,
-            _msgSender(),
+            _clearingOperationIdentifier.tokenHolder,
+            IHold.Hold(
+                clearingData.amount,
+                clearingData.holdExpirationTimestamp,
+                clearingData.escrow,
+                clearingData.destination,
+                clearingData.data
+            ),
             clearingData.operatorData
         );
     }
