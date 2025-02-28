@@ -252,12 +252,6 @@ abstract contract ClearingStorageWrapper1 is
         return _clearingStorage().activated;
     }
 
-    function _isClearingExpired(
-        uint256 _expirationTimestamp
-    ) internal view returns (bool) {
-        return _blockTimestamp() > _expirationTimestamp;
-    }
-
     function _getClearing(
         IClearing.ClearingOperationIdentifier memory _clearingIdentifier
     ) internal view returns (IClearing.ClearingData memory) {

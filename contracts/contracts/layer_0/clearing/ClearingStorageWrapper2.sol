@@ -665,11 +665,9 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         if (!_isAbleToAccess(_clearingOperationIdentifier.tokenHolder)) {
             revert AccountIsBlocked(_clearingOperationIdentifier.tokenHolder);
         }
-        if (
-            _operation == IClearing.OperationType.Reclaim &&
-            !_isClearingExpired(clearingData.expirationTimestamp)
-        ) {
-            revert IClearing.ClearingExpirationNotReached();
+
+        if (_operation == IClearing.OperationType.Reclaim) {
+            _checkExpirationReached(clearingData.expirationTimestamp);
         }
 
         uint256 clearingBalance = _transferClearingBalance(
