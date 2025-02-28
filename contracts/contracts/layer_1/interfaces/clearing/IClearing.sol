@@ -229,10 +229,18 @@ interface IClearing {
         bytes operatorData
     );
 
+    error WrongClearingId();
+
     enum ClearingOperationType {
         Transfer,
         Redeem,
         HoldCreation
+    }
+
+    enum OperationType {
+        Approve,
+        Cancel,
+        Reclaim
     }
     struct ClearingOperation {
         bytes32 partition;
@@ -261,6 +269,7 @@ interface IClearing {
     }
 
     struct ClearingData {
+        uint256 id;
         ClearingOperationType clearingOperationType;
         uint256 amount;
         uint256 expirationTimestamp;
@@ -364,58 +373,4 @@ interface IClearing {
         address _to,
         bytes calldata _signature
     ) external returns (bool success_, uint256 clearingId_);
-
-    // function clearingRedeemByPartition(
-    //     ClearingOperation calldata _clearingOperation,
-    //     uint256 _amount
-    // ) external returns (bool success_, uint256 clearingId_);
-
-    // function clearingCreateHoldByPartition(
-    //     ClearingOperation calldata _clearingOperation,
-    //     IHold.Hold calldata _hold
-    // ) external returns (bool success_, uint256 clearingId_);
-
-    // function clearingRedeemFromByPartition(
-    //     ClearingOperationFrom calldata _clearingOperationFrom,
-    //     uint256 _amount
-    // ) external returns (bool success_, uint256 clearingId_);
-
-    // function clearingCreateHoldFromByPartition(
-    //     ClearingOperationFrom calldata _clearingOperationFrom,
-    //     IHold.Hold calldata _hold
-    // ) external returns (bool success_, uint256 clearingId_);
-
-    // function operatorClearingRedeemByPartition(
-    //     ClearingOperationFrom calldata _clearingOperationFrom,
-    //     uint256 _amount
-    // ) external returns (bool success_, uint256 clearingId_);
-
-    // function operatorClearingCreateHoldByPartition(
-    //     ClearingOperationFrom calldata _clearingOperationFrom,
-    //     IHold.Hold calldata _hold
-    // ) external returns (bool success_, uint256 clearingId_);
-
-    // function protectedClearingRedeemByPartition(
-    //     ProtectedClearingOperation calldata _protectedClearingOperation,
-    //     uint256 _amount,
-    //     bytes calldata _signature
-    // ) external returns (bool success_, uint256 clearingId_);
-
-    // function protectedClearingCreateHoldByPartition(
-    //     ProtectedClearingOperation calldata _protectedClearingOperation,
-    //     IHold.Hold calldata _hold,
-    //     bytes calldata _signature
-    // ) external returns (bool success_, uint256 clearingId_);
-
-    // function approveClearingOperationByPartition(
-    //     ClearingOperationIdentifier memory _clearingOperationIdentifier
-    // ) external returns (bool success_);
-
-    // function cancelClearingOperationByPartition(
-    //     ClearingOperationIdentifier memory _clearingOperationIdentifier
-    // ) external returns (bool success_);
-
-    // function reclaimClearingOperationByPartition(
-    //     ClearingOperationIdentifier memory _clearingOperationIdentifier
-    // ) external returns (bool success_);
 }

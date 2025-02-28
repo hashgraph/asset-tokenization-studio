@@ -210,7 +210,6 @@ import {Common} from '../common/Common.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
 import {_CLEARING_ROLE} from '../constants/roles.sol';
-import {_CLEARING_VALIDATOR_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';

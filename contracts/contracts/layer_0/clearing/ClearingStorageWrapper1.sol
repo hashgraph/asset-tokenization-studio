@@ -226,6 +226,21 @@ abstract contract ClearingStorageWrapper1 is
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
+    modifier onlyWithValidClearingId(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
+    ) {
+        _checkClearingId(_clearingOperationIdentifier);
+        _;
+    }
+
+    function _isClearingIdValid(
+        IClearing.ClearingOperationIdentifier
+            memory _clearingOperationIdentifier
+    ) internal view returns (bool) {
+        return _getClearing(_clearingOperationIdentifier).id != 0;
+    }
+
     function _setClearing(bool _activated) internal returns (bool success_) {
         _clearingStorage().activated = _activated;
         if (_activated) emit ClearingActivated(_msgSender());
@@ -327,6 +342,14 @@ abstract contract ClearingStorageWrapper1 is
             _clearingStorage().totalClearedAmountByAccountAndPartition[
                 _tokenHolder
             ][_partition];
+    }
+
+    function _checkClearingId(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
+    ) private view {
+        if (!_isClearingIdValid(_clearingOperationIdentifier))
+            revert IClearing.WrongClearingId();
     }
 
     function _clearingStorage()

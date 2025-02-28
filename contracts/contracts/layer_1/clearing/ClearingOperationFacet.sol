@@ -204,74 +204,154 @@
 */
 
 pragma solidity 0.8.18;
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-import {ClearingStorageWrapper2} from '../clearing/ClearingStorageWrapper2.sol';
+import {Common} from '../common/Common.sol';
 import {
-    IAdjustBalancesStorageWrapper
-} from '../../layer_2/interfaces/adjustBalances/IAdjustBalancesStorageWrapper.sol';
+    IClearingOperation
+} from '../interfaces/clearing/IClearingOperation.sol';
+import {IClearing} from '../interfaces/clearing/IClearing.sol';
+import {_CLEARING_VALIDATOR_ROLE} from '../constants/roles.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_CLEARING_OPERATION_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
-abstract contract AdjustBalancesStorageWrapper2 is
-    IAdjustBalancesStorageWrapper,
-    ClearingStorageWrapper2
+// solhint-disable no-unused-vars, custom-errors
+contract ClearingOperationFacet is
+    IStaticFunctionSelectors,
+    IClearingOperation,
+    Common
 {
-    // solhint-disable no-unused-vars
-    function _adjustBalances(uint256 _factor, uint8 _decimals) internal {
-        _updateDecimalsSnapshot();
-        _updateAbafSnapshot();
-        _updateAssetTotalSupplySnapshot();
-        _adjustTotalSupply(_factor);
-        _adjustDecimals(_decimals);
-        _adjustMaxSupply(_factor);
-        _updateAbaf(_factor);
-        emit AdjustmentBalanceSet(_msgSender(), _factor, _decimals);
+    function approveClearingOperationByPartition(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
+    )
+        external
+        override
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationIdentifier.partition
+        )
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _clearingOperationIdentifier.tokenHolder
+        )
+        returns (bool success_)
+    {
+        success_ = _approveClearingOperationByPartition(
+            _clearingOperationIdentifier
+        );
+
+        emit ClearingOperationApproved(
+            _msgSender(),
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingId,
+            _clearingOperationIdentifier.clearingOperationType
+        );
     }
 
-    function _adjustTotalAndMaxSupplyForPartition(
-        bytes32 _partition
-    ) internal override {
-        uint256 abaf = _getAbaf();
-        uint256 labaf = _getLabafByPartition(_partition);
-
-        if (abaf == labaf) return;
-
-        uint256 factor = _calculateFactor(abaf, labaf);
-
-        _adjustTotalSupplyByPartition(_partition, factor);
-
-        _adjustMaxSupplyByPartition(_partition, factor);
-
-        _updateLabafByPartition(_partition);
+    function cancelClearingOperationByPartition(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
+    )
+        external
+        override
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationIdentifier.partition
+        )
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _clearingOperationIdentifier.tokenHolder
+        )
+        returns (bool success_)
+    {
+        success_ = _cancelClearingOperationByPartition(
+            _clearingOperationIdentifier
+        );
+        emit ClearingOperationCanceled(
+            _msgSender(),
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingId,
+            _clearingOperationIdentifier.clearingOperationType
+        );
     }
 
-    function _getHoldLabafByPartition(
-        bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) internal view override returns (uint256) {
-        return _getHoldLabafById(_partition, _tokenHolder, _holdId);
+    function reclaimClearingOperationByPartition(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
+    )
+        external
+        override
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationIdentifier.partition
+        )
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _clearingOperationIdentifier.tokenHolder
+        )
+        returns (bool success_)
+    {
+        success_ = _reclaimClearingOperationByPartition(
+            _clearingOperationIdentifier
+        );
+        emit ClearingOperationReclaimed(
+            _msgSender(),
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingId,
+            _clearingOperationIdentifier.clearingOperationType
+        );
     }
 
-    function _getClearingLabafByPartition(
-        bytes32 _partition,
-        uint256 _clearingId,
-        address _tokenHolder
-    ) internal view override returns (uint256) {
-        return _getClearedLabafById(_partition, _tokenHolder, _clearingId);
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _CLEARING_OPERATION_RESOLVER_KEY;
     }
 
-    function _getLabafByUserAndPartition(
-        bytes32 _partition,
-        address _account
-    ) internal view override returns (uint256) {
-        uint256 partitionsIndex = _erc1410BasicStorage().partitionToIndex[
-            _account
-        ][_partition];
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .approveClearingOperationByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .cancelClearingOperationByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .reclaimClearingOperationByPartition
+            .selector;
+    }
 
-        if (partitionsIndex == 0) return 0;
-        return
-            _adjustBalancesStorage().labafUserPartition[_account][
-                partitionsIndex - 1
-            ];
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IClearing).interfaceId;
     }
 }
+// solhint-enable no-unused-vars, custom-errors
