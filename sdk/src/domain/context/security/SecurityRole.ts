@@ -224,6 +224,8 @@ export enum SecurityRole {
   _WILD_CARD_ROLE = '0x96658f163b67573bbf1e3f9e9330b199b3ac2f6ec0139ea95f622e20a5df2f46',
   _SSI_MANAGER_ROLE = '0x0995a089e16ba792fdf9ec5a4235cba5445a9fb250d6e96224c586678b81ebd0',
   _KYC_ROLE = '0x6fbd421e041603fa367357d79ffc3b2f9fd37a6fc4eec661aa5537a9ae75f93d',
+  _CLEARING_ROLE = '0x2292383e7bb988fb281e5195ab88da11e62fec74cf43e8685cff613d6b906450',
+  _CLEARING_VALIDATOR_ROLE = '0x7b688898673e16c47810f5da9ce1262a3d7d022dfe27c8ff9305371cd435c619',
 }
 
 export function getProtectedPartitionRole(partitionId: string): string {
@@ -266,4 +268,6 @@ export const SecurityRoleLabel = new Map<SecurityRole, string>([
   [SecurityRole._WILD_CARD_ROLE, 'Wild Card'],
   [SecurityRole._SSI_MANAGER_ROLE, 'SSI Manager'],
   [SecurityRole._KYC_ROLE, 'KYC'],
+  [SecurityRole._CLEARING_ROLE, 'Clearing'],
+  [SecurityRole._CLEARING_VALIDATOR_ROLE, 'Clearing Validator'],
 ]);

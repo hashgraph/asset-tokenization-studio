@@ -415,7 +415,7 @@ describe('🧪 Kyc tests', () => {
     jest
       .spyOn(mirrorNodeAdapter, 'getAccountInfo')
       .mockResolvedValueOnce({ id: HederaId.from(issuerId) })
-      .mockResolvedValueOnce({ id: HederaId.from(accountId) })
+      .mockResolvedValueOnce({ id: HederaId.from(accountId) });
 
     expect(
       await Kyc.getKYCAccountsData(
