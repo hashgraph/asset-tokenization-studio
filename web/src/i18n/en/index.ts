@@ -236,6 +236,8 @@ export default {
     submit: "Submit",
     send: "Send",
     sending: "Sending",
+    execute: "Execute",
+    executing: "Executing",
     tokenDetails: "Token details",
     check: " Check",
     error: "The operation has failed",
