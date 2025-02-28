@@ -240,6 +240,7 @@ contract ClearingOperationFacet is
             IKyc.KycStatus.GRANTED,
             _clearingOperationIdentifier.tokenHolder
         )
+        onlyClearingActivated
         returns (bool success_)
     {
         success_ = _approveClearingOperationByPartition(
@@ -271,6 +272,7 @@ contract ClearingOperationFacet is
             IKyc.KycStatus.GRANTED,
             _clearingOperationIdentifier.tokenHolder
         )
+        onlyClearingActivated
         returns (bool success_)
     {
         success_ = _cancelClearingOperationByPartition(
@@ -301,6 +303,7 @@ contract ClearingOperationFacet is
             IKyc.KycStatus.GRANTED,
             _clearingOperationIdentifier.tokenHolder
         )
+        onlyClearingActivated
         returns (bool success_)
     {
         success_ = _reclaimClearingOperationByPartition(

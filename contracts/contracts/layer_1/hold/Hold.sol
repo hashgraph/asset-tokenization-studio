@@ -228,6 +228,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldByPartition(
@@ -261,6 +262,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldFromByPartition(
@@ -295,6 +297,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyOperator(_partition, _from)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldByPartition(
@@ -329,6 +332,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyRole(_CONTROLLER_ROLE)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyControllable
+        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldByPartition(
@@ -364,6 +368,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _protectedHold.hold.expirationTimestamp
         )
         onlyProtectedPartitions
+        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _protectedCreateHoldByPartition(

@@ -230,6 +230,8 @@ interface IClearing {
     );
 
     error WrongClearingId();
+    error ClearingIsDisabled();
+    error ClearingIsActivated();
 
     enum ClearingOperationType {
         Transfer,

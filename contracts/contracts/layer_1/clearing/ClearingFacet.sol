@@ -256,6 +256,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
@@ -294,6 +295,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         onlyUnProtectedPartitionsOrWildCardRole
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _clearingOperationFrom.from)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         (success_, clearingId_) = _clearingTransferFromByPartition(
@@ -328,6 +330,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _clearingOperationFrom.from
         )
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
@@ -377,6 +380,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _protectedClearingOperation.from
         )
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
@@ -413,6 +417,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         (success_, clearingId_) = _clearingCreateHoldByPartition(
@@ -450,6 +455,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         )
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         (success_, clearingId_) = _clearingCreateHoldFromByPartition(
@@ -490,6 +496,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         )
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
@@ -531,6 +538,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         )
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyProtectedPartitions
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         (success_, clearingId_) = _protectedClearingCreateHoldByPartition(
