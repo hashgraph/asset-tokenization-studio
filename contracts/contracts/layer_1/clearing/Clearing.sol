@@ -261,8 +261,10 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _checkValidKycStatus(IKyc.KycStatus.GRANTED, _to);
         }
 
+        bytes memory encodedClearingData = abi.encode(_to, '');
+
         (success_, clearingId_) = _operateClearing(
-            '',
+            encodedClearingData,
             _clearingOperation,
             _msgSender(),
             _amount,
@@ -583,8 +585,11 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _checkUnProtectedPartitionsOrWildCardRole();
             _checkValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender());
         }
+
+        bytes memory encodedClearingData = abi.encode('');
+
         (success_, clearingId_) = _operateClearing(
-            '',
+            encodedClearingData,
             _clearingOperation,
             _msgSender(),
             _amount,
@@ -620,8 +625,11 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
                 _clearingOperationFrom.from
             );
         }
+
+        bytes memory encodedClearingData = abi.encode('');
+
         (success_, clearingId_) = _operateClearing(
-            '',
+            encodedClearingData,
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
             _amount,

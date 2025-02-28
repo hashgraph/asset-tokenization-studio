@@ -306,8 +306,10 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _protectedClearingOperation.from
         );
 
+        bytes memory encodedClearingData = abi.encode(_to, '');
+
         (success_, clearingId_) = _operateClearing(
-            '',
+            encodedClearingData,
             _protectedClearingOperation.clearingOperation,
             _protectedClearingOperation.from,
             _amount,
@@ -339,7 +341,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _protectedClearingOperation.from
         );
 
-        bytes memory encodedClearingData = abi.encode(_hold);
+        bytes memory encodedClearingData = abi.encode(_hold, '');
 
         (success_, clearingId_) = _operateClearing(
             encodedClearingData,
@@ -375,8 +377,10 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _protectedClearingOperation.from
         );
 
+        bytes memory encodedClearingData = abi.encode('');
+
         (success_, clearingId_) = _operateClearing(
-            '',
+            encodedClearingData,
             _protectedClearingOperation.clearingOperation,
             _protectedClearingOperation.from,
             _amount,
