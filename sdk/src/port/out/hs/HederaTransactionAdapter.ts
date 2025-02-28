@@ -285,6 +285,7 @@ import {
   EXECUTE_HOLD_BY_PARTITION_GAS,
   GRANT_KYC_GAS,
   REVOKE_KYC_GAS,
+  ACTIVATE_CLEARING_GAS,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -2282,6 +2283,42 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       .setContractId(securityId)
       .setGas(REVOKE_KYC_GAS)
       .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async activateClearing(
+    security: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'activateClearing';
+    LogService.logTrace(`Activate Clearing to address ${security.toString()}`);
+
+    const functionParameters = new ContractFunctionParameters();
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(ACTIVATE_CLEARING_GAS)
+      .setFunction(FUNCTION_NAME, functionParameters);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async deactivateClearing(
+    security: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'deactivateClearing';
+    LogService.logTrace(
+      `Deactivate Clearing to address ${security.toString()}`,
+    );
+
+    const functionParameters = new ContractFunctionParameters();
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(ACTIVATE_CLEARING_GAS)
+      .setFunction(FUNCTION_NAME, functionParameters);
 
     return this.signAndSendTransaction(transaction);
   }
