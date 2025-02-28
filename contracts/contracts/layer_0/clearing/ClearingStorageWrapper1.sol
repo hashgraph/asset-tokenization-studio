@@ -234,6 +234,15 @@ abstract contract ClearingStorageWrapper1 is
         _;
     }
 
+    modifier onlyClearingActivated() {
+        _checkClearingActivated();
+        _;
+    }
+
+    function _checkClearingActivated() internal view {
+        if (!_isClearingActivated()) revert IClearing.ClearingIsDisabled();
+    }
+
     function _isClearingIdValid(
         IClearing.ClearingOperationIdentifier
             memory _clearingOperationIdentifier

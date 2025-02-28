@@ -273,6 +273,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
         returns (bool)
@@ -293,6 +294,7 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, from)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
         returns (bool)
