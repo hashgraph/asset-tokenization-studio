@@ -649,6 +649,17 @@ interface IKYCTransactionAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface IClearingAdapter {
+  activateClearing(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  deactivateClearing(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -656,7 +667,8 @@ export default abstract class TransactionAdapter
     IManagementTransactionAdapter,
     IHoldTransactionAdapter,
     ISSIManagementTransactionAdapter,
-    IKYCTransactionAdapter
+    IKYCTransactionAdapter,
+    IClearingAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -1193,6 +1205,18 @@ export default abstract class TransactionAdapter
   revokeKYC(
     security: EvmAddress,
     targetId: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  activateClearing(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  deactivateClearing(
+    security: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');

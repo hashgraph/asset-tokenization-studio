@@ -290,6 +290,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
             _operatorTransferData.from
         )
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.from)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.to)
         returns (bytes32)
