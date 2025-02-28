@@ -229,10 +229,18 @@ interface IClearing {
         bytes operatorData
     );
 
+    error WrongClearingId();
+
     enum ClearingOperationType {
         Transfer,
         Redeem,
         HoldCreation
+    }
+
+    enum ClearingActionType {
+        Approve,
+        Cancel,
+        Reclaim
     }
     struct ClearingOperation {
         bytes32 partition;
@@ -437,16 +445,4 @@ interface IClearing {
         uint256 _amount,
         bytes calldata _signature
     ) external returns (bool success_, uint256 clearingId_);
-
-    // function approveClearingOperationByPartition(
-    //     ClearingOperationIdentifier memory _clearingOperationIdentifier
-    // ) external returns (bool success_);
-
-    // function cancelClearingOperationByPartition(
-    //     ClearingOperationIdentifier memory _clearingOperationIdentifier
-    // ) external returns (bool success_);
-
-    // function reclaimClearingOperationByPartition(
-    //     ClearingOperationIdentifier memory _clearingOperationIdentifier
-    // ) external returns (bool success_);
 }

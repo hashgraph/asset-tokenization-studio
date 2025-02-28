@@ -301,6 +301,17 @@ abstract contract AdjustBalancesStorageWrapper1 is
             ];
     }
 
+    function _removeLabafClearing(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _clearingId
+    ) internal {
+        delete _adjustBalancesStorage()
+            .labafClearedAmountByAccountPartitionAndId[_tokenHolder][
+                _partition
+            ][_clearingId];
+    }
+
     function _setLockLabafById(
         bytes32 _partition,
         address _tokenHolder,

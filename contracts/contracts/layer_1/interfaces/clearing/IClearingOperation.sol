@@ -203,165 +203,48 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {_CLEARING_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {HoldStorageWrapper1} from '../hold/HoldStorageWrapper1.sol';
-import {
-    IClearingStorageWrapper
-} from '../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol';
-import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
-import {LibCommon} from '../common/LibCommon.sol';
-import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {IClearing} from './IClearing.sol';
 
-// solhint-disable no-unused-vars, custom-errors
-abstract contract ClearingStorageWrapper1 is
-    IClearingStorageWrapper,
-    HoldStorageWrapper1
-{
-    using LibCommon for EnumerableSet.UintSet;
-    using EnumerableSet for EnumerableSet.UintSet;
+interface IClearingOperation {
+    event ClearingOperationApproved(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 clearingId,
+        IClearing.ClearingOperationType clearingOperationType
+    );
 
-    modifier onlyWithValidClearingId(
+    event ClearingOperationCanceled(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 clearingId,
+        IClearing.ClearingOperationType clearingOperationType
+    );
+
+    event ClearingOperationReclaimed(
+        address indexed operator,
+        address indexed tokenHolder,
+        bytes32 indexed partition,
+        uint256 clearingId,
+        IClearing.ClearingOperationType clearingOperationType
+    );
+
+    function approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier
-    ) {
-        _checkClearingId(_clearingOperationIdentifier);
-        _;
-    }
+    ) external returns (bool success_);
 
-    function _isClearingIdValid(
-        IClearing.ClearingOperationIdentifier
-            memory _clearingOperationIdentifier
-    ) internal view returns (bool) {
-        return _getClearing(_clearingOperationIdentifier).clearingId != 0;
-    }
-
-    function _setClearing(bool _activated) internal returns (bool success_) {
-        _clearingStorage().activated = _activated;
-        if (_activated) emit ClearingActivated(_msgSender());
-        else emit ClearingDeactivated(_msgSender());
-        success_ = true;
-    }
-
-    function _isClearingActivated() internal view returns (bool) {
-        return _clearingStorage().activated;
-    }
-
-    function _getClearing(
-        IClearing.ClearingOperationIdentifier memory _clearingIdentifier
-    ) internal view returns (IClearing.ClearingData memory) {
-        return
-            _clearingStorage().clearingByAccountPartitionAndId[
-                _clearingIdentifier.tokenHolder
-            ][_clearingIdentifier.partition][_clearingIdentifier.clearingId];
-    }
-
-    function _getClearingCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        IClearing.ClearingOperationType _clearingOperationType
-    ) internal view returns (uint256) {
-        return
-            _clearingStorage()
-            .clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][
-                _clearingOperationType
-            ].length();
-    }
-
-    function _getClearingsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        IClearing.ClearingOperationType _clearingOperationType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (uint256[] memory clearingsId_) {
-        return
-            _clearingStorage()
-            .clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][
-                _clearingOperationType
-            ].getFromSet(_pageIndex, _pageLength);
-    }
-
-    function _getClearingForByPartition(
+    function cancelClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier
-    )
-        internal
-        view
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address destination_,
-            IClearing.ClearingOperationType clearingOperationType_,
-            bytes memory data_,
-            bytes memory operatorData_,
-            IHold.Hold memory hold_
-        )
-    {
-        IClearing.ClearingData memory clearingData = _getClearing(
-            _clearingOperationIdentifier
-        );
+    ) external returns (bool success_);
 
-        if (
-            _clearingOperationIdentifier.clearingOperationType ==
-            IClearing.ClearingOperationType.HoldCreation
-        ) {
-            hold_ = IHold.Hold(
-                clearingData.amount,
-                clearingData.holdExpirationTimestamp,
-                clearingData.escrow,
-                clearingData.destination,
-                clearingData.data
-            );
-        } else {
-            amount_ = clearingData.amount;
-            expirationTimestamp_ = clearingData.expirationTimestamp;
-            destination_ = clearingData.destination;
-            data_ = clearingData.data;
-            operatorData_ = clearingData.operatorData;
-        }
-        clearingOperationType_ = clearingData.clearingOperationType;
-    }
-
-    function _getClearedAmountFor(
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return _clearingStorage().totalClearedAmountByAccount[_tokenHolder];
-    }
-
-    function _getClearedAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return
-            _clearingStorage().totalClearedAmountByAccountAndPartition[
-                _tokenHolder
-            ][_partition];
-    }
-
-    function _checkClearingId(
+    function reclaimClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier
-    ) private view {
-        if (!_isClearingIdValid(_clearingOperationIdentifier))
-            revert IClearing.WrongClearingId();
-    }
-
-    function _clearingStorage()
-        internal
-        pure
-        returns (IClearing.ClearingDataStorage storage clearing_)
-    {
-        bytes32 position = _CLEARING_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            clearing_.slot := position
-        }
-    }
+    ) external returns (bool success_);
 }
-// solhint-enable no-unused-vars, custom-errors

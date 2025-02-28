@@ -206,162 +206,152 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {_CLEARING_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {HoldStorageWrapper1} from '../hold/HoldStorageWrapper1.sol';
+import {Common} from '../common/Common.sol';
 import {
-    IClearingStorageWrapper
-} from '../../layer_1/interfaces/clearing/IClearingStorageWrapper.sol';
-import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
-import {LibCommon} from '../common/LibCommon.sol';
+    IClearingOperation
+} from '../interfaces/clearing/IClearingOperation.sol';
+import {IClearing} from '../interfaces/clearing/IClearing.sol';
+import {_CLEARING_VALIDATOR_ROLE} from '../constants/roles.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {_CLEARING_OPERATION_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
-abstract contract ClearingStorageWrapper1 is
-    IClearingStorageWrapper,
-    HoldStorageWrapper1
+contract ClearingOperationFacet is
+    IStaticFunctionSelectors,
+    IClearingOperation,
+    Common
 {
-    using LibCommon for EnumerableSet.UintSet;
-    using EnumerableSet for EnumerableSet.UintSet;
-
-    modifier onlyWithValidClearingId(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
-    ) {
-        _checkClearingId(_clearingOperationIdentifier);
-        _;
-    }
-
-    function _isClearingIdValid(
-        IClearing.ClearingOperationIdentifier
-            memory _clearingOperationIdentifier
-    ) internal view returns (bool) {
-        return _getClearing(_clearingOperationIdentifier).clearingId != 0;
-    }
-
-    function _setClearing(bool _activated) internal returns (bool success_) {
-        _clearingStorage().activated = _activated;
-        if (_activated) emit ClearingActivated(_msgSender());
-        else emit ClearingDeactivated(_msgSender());
-        success_ = true;
-    }
-
-    function _isClearingActivated() internal view returns (bool) {
-        return _clearingStorage().activated;
-    }
-
-    function _getClearing(
-        IClearing.ClearingOperationIdentifier memory _clearingIdentifier
-    ) internal view returns (IClearing.ClearingData memory) {
-        return
-            _clearingStorage().clearingByAccountPartitionAndId[
-                _clearingIdentifier.tokenHolder
-            ][_clearingIdentifier.partition][_clearingIdentifier.clearingId];
-    }
-
-    function _getClearingCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        IClearing.ClearingOperationType _clearingOperationType
-    ) internal view returns (uint256) {
-        return
-            _clearingStorage()
-            .clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][
-                _clearingOperationType
-            ].length();
-    }
-
-    function _getClearingsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        IClearing.ClearingOperationType _clearingOperationType,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (uint256[] memory clearingsId_) {
-        return
-            _clearingStorage()
-            .clearingIdsByAccountAndPartitionAndTypes[_tokenHolder][_partition][
-                _clearingOperationType
-            ].getFromSet(_pageIndex, _pageLength);
-    }
-
-    function _getClearingForByPartition(
+    function approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier
     )
-        internal
-        view
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address destination_,
-            IClearing.ClearingOperationType clearingOperationType_,
-            bytes memory data_,
-            bytes memory operatorData_,
-            IHold.Hold memory hold_
+        external
+        override
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationIdentifier.partition
         )
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _clearingOperationIdentifier.tokenHolder
+        )
+        returns (bool success_)
     {
-        IClearing.ClearingData memory clearingData = _getClearing(
+        success_ = _approveClearingOperationByPartition(
             _clearingOperationIdentifier
         );
 
-        if (
-            _clearingOperationIdentifier.clearingOperationType ==
-            IClearing.ClearingOperationType.HoldCreation
-        ) {
-            hold_ = IHold.Hold(
-                clearingData.amount,
-                clearingData.holdExpirationTimestamp,
-                clearingData.escrow,
-                clearingData.destination,
-                clearingData.data
-            );
-        } else {
-            amount_ = clearingData.amount;
-            expirationTimestamp_ = clearingData.expirationTimestamp;
-            destination_ = clearingData.destination;
-            data_ = clearingData.data;
-            operatorData_ = clearingData.operatorData;
-        }
-        clearingOperationType_ = clearingData.clearingOperationType;
+        emit ClearingOperationApproved(
+            _msgSender(),
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingId,
+            _clearingOperationIdentifier.clearingOperationType
+        );
     }
 
-    function _getClearedAmountFor(
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return _clearingStorage().totalClearedAmountByAccount[_tokenHolder];
-    }
-
-    function _getClearedAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return
-            _clearingStorage().totalClearedAmountByAccountAndPartition[
-                _tokenHolder
-            ][_partition];
-    }
-
-    function _checkClearingId(
+    function cancelClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier
-    ) private view {
-        if (!_isClearingIdValid(_clearingOperationIdentifier))
-            revert IClearing.WrongClearingId();
+    )
+        external
+        override
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationIdentifier.partition
+        )
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _clearingOperationIdentifier.tokenHolder
+        )
+        returns (bool success_)
+    {
+        success_ = _cancelClearingOperationByPartition(
+            _clearingOperationIdentifier
+        );
+        emit ClearingOperationCanceled(
+            _msgSender(),
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingId,
+            _clearingOperationIdentifier.clearingOperationType
+        );
     }
 
-    function _clearingStorage()
-        internal
-        pure
-        returns (IClearing.ClearingDataStorage storage clearing_)
+    function reclaimClearingOperationByPartition(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
+    )
+        external
+        override
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationIdentifier.partition
+        )
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _clearingOperationIdentifier.tokenHolder
+        )
+        returns (bool success_)
     {
-        bytes32 position = _CLEARING_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            clearing_.slot := position
-        }
+        success_ = _reclaimClearingOperationByPartition(
+            _clearingOperationIdentifier
+        );
+        emit ClearingOperationReclaimed(
+            _msgSender(),
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingId,
+            _clearingOperationIdentifier.clearingOperationType
+        );
+    }
+
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _CLEARING_OPERATION_RESOLVER_KEY;
+    }
+
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .approveClearingOperationByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .cancelClearingOperationByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .reclaimClearingOperationByPartition
+            .selector;
+    }
+
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IClearing).interfaceId;
     }
 }
 // solhint-enable no-unused-vars, custom-errors

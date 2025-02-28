@@ -210,7 +210,6 @@ import {Common} from '../common/Common.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
 import {_CLEARING_ROLE} from '../constants/roles.sol';
-import {_CLEARING_VALIDATOR_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
@@ -263,7 +262,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
 
         bytes memory encodedClearingData = abi.encode(_to, '');
 
-        (success_, clearingId_) = _operateClearing(
+        (success_, clearingId_) = _operateClearingCreation(
             encodedClearingData,
             _clearingOperation,
             _msgSender(),
@@ -304,11 +303,11 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         }
         bytes memory encodedClearingData = abi.encode(_to, '');
 
-        (success_, clearingId_) = _operateClearing(
+        (success_, clearingId_) = _operateClearingCreationFrom(
             encodedClearingData,
-            _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
             _amount,
+            _clearingOperationFrom.clearingOperation,
             ClearingOperationType.Transfer
         );
 
@@ -356,7 +355,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _clearingOperationFrom.operatorData
         );
 
-        (success_, clearingId_) = _operateClearing(
+        (success_, clearingId_) = _operateClearingCreation(
             encodedClearingData,
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
@@ -433,7 +432,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
     {
         bytes memory encodedClearingData = abi.encode(_hold, '');
 
-        (success_, clearingId_) = _operateClearing(
+        (success_, clearingId_) = _operateClearingCreation(
             encodedClearingData,
             _clearingOperation,
             _msgSender(),
@@ -474,11 +473,11 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
     {
         bytes memory encodedClearingData = abi.encode(_hold, '');
 
-        (success_, clearingId_) = _operateClearing(
+        (success_, clearingId_) = _operateClearingCreationFrom(
             encodedClearingData,
-            _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
             _hold.amount,
+            _clearingOperationFrom.clearingOperation,
             ClearingOperationType.HoldCreation
         );
 
@@ -519,7 +518,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _clearingOperationFrom.operatorData
         );
 
-        (success_, clearingId_) = _operateClearing(
+        (success_, clearingId_) = _operateClearingCreation(
             encodedClearingData,
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
@@ -588,7 +587,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
 
         bytes memory encodedClearingData = abi.encode('');
 
-        (success_, clearingId_) = _operateClearing(
+        (success_, clearingId_) = _operateClearingCreation(
             encodedClearingData,
             _clearingOperation,
             _msgSender(),
@@ -628,11 +627,11 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
 
         bytes memory encodedClearingData = abi.encode('');
 
-        (success_, clearingId_) = _operateClearing(
+        (success_, clearingId_) = _operateClearingCreationFrom(
             encodedClearingData,
-            _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
             _amount,
+            _clearingOperationFrom.clearingOperation,
             ClearingOperationType.Redeem
         );
 
@@ -670,7 +669,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         bytes memory encodedClearingData = abi.encode(
             _clearingOperationFrom.operatorData
         );
-        (success_, clearingId_) = _operateClearing(
+        (success_, clearingId_) = _operateClearingCreation(
             encodedClearingData,
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
