@@ -256,35 +256,23 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 .nextClearingIdByAccountAndPartition[_from][partition];
         }
 
-        {
-            _beforeClearing(partition, _from, clearingId_, _amount);
+        _beforeClearing(partition, _from, clearingId_, _amount);
 
-            _setClearingIdByPartition(
-                clearingDataStorage,
-                _from,
-                partition,
-                clearingId_
-            );
-        }
+        _setClearingIdByPartition(
+            clearingDataStorage,
+            _from,
+            partition,
+            clearingId_
+        );
 
-        {
-            (
-                address to_,
-                bytes memory operatorData_,
-                IHold.Hold memory hold_
-            ) = _decodeClearingData(_encodedClearingData, _operationType);
-
-            _setClearingData(
-                _clearingOperation,
-                _amount,
-                _from,
-                to_,
-                hold_,
-                operatorData_,
-                _operationType,
-                clearingId_
-            );
-        }
+        _setClearingData(
+            _encodedClearingData,
+            _clearingOperation,
+            _amount,
+            _from,
+            _operationType,
+            clearingId_
+        );
 
         _afterClearing(_from, partition, _amount);
 
@@ -485,32 +473,22 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
     }
 
     function _setClearingData(
+        bytes memory _encodedClearingData,
         IClearing.ClearingOperation memory _clearingOperation,
         uint256 _amount,
         address _from,
-        address _to,
-        IHold.Hold memory _hold,
-        bytes memory _operatorData,
         IClearing.ClearingOperationType _operationType,
         uint256 _clearingId
     ) internal {
-        IClearing.ClearingData memory clearingData;
-        clearingData = IClearing.ClearingData({
-            clearingOperationType: _operationType,
-            amount: _amount,
-            holdExpirationTimestamp: _hold.expirationTimestamp,
-            expirationTimestamp: _clearingOperation.expirationTimestamp,
-            destination: _to,
-            escrow: _hold.escrow,
-            holdData: _hold.data,
-            data: _clearingOperation.data,
-            operatorData: _operatorData,
-            clearingId: _clearingId
-        });
-
         _clearingStorage().clearingByAccountPartitionAndId[_from][
             _clearingOperation.partition
-        ][_clearingId] = clearingData;
+        ][_clearingId] = _buildClearingData(
+            _encodedClearingData,
+            _clearingOperation,
+            _amount,
+            _operationType,
+            _clearingId
+        );
     }
 
     function _setClearingIdByPartition(
@@ -530,18 +508,13 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         ].add(_clearingId);
     }
 
-    function _decodeClearingData(
-        bytes memory _encodedData,
-        IClearing.ClearingOperationType _operationType
-    )
-        private
-        pure
-        returns (
-            address to_,
-            bytes memory operatorData_,
-            IHold.Hold memory hold_
-        )
-    {
+    function _buildClearingData(
+        bytes memory _encodedClearingData,
+        IClearing.ClearingOperation memory _clearingOperation,
+        uint256 _amount,
+        IClearing.ClearingOperationType _operationType,
+        uint256 _clearingId
+    ) private pure returns (IClearing.ClearingData memory clearingData_) {
         IHold.Hold memory hold = IHold.Hold({
             amount: 0,
             expirationTimestamp: 0,
@@ -550,19 +523,101 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             data: ''
         });
 
+        address _to;
+        bytes memory operatorData;
+
         if (_operationType == IClearing.ClearingOperationType.HoldCreation) {
-            hold = abi.decode(_encodedData, (IHold.Hold));
-            return (hold.to, '', hold);
-        }
-        if (_operationType == IClearing.ClearingOperationType.Transfer) {
-            (address to, bytes memory operatorData) = abi.decode(
-                _encodedData,
+            (hold, operatorData) = abi.decode(
+                _encodedClearingData,
+                (IHold.Hold, bytes)
+            );
+            _to = hold.to;
+        } else if (_operationType == IClearing.ClearingOperationType.Transfer) {
+            (_to, operatorData) = abi.decode(
+                _encodedClearingData,
                 (address, bytes)
             );
-            return (to, operatorData, hold);
+        } else {
+            operatorData = abi.decode(_encodedClearingData, (bytes));
         }
-        bytes memory operatorData = abi.decode(_encodedData, (bytes));
-        return (address(0), operatorData, hold);
+
+        clearingData_ = IClearing.ClearingData({
+            clearingOperationType: _operationType,
+            amount: _amount,
+            holdExpirationTimestamp: hold.expirationTimestamp,
+            expirationTimestamp: _clearingOperation.expirationTimestamp,
+            destination: _to,
+            escrow: hold.escrow,
+            holdData: hold.data,
+            data: _clearingOperation.data,
+            operatorData: operatorData,
+            clearingId: _clearingId
+        });
     }
+
+    function _getClearedAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 amount_) {
+        uint256 factor = _calculateFactor(
+            _getAbafAdjusted(),
+            _getTotalClearedLabaf(_tokenHolder)
+        );
+
+        return _getClearedAmountFor(_tokenHolder) * factor;
+    }
+
+    function _getClearedAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual override returns (uint256 amount_) {
+        uint256 factor = _calculateFactor(
+            _getAbafAdjusted(),
+            _getTotalHeldLabafByPartition(_partition, _tokenHolder)
+        );
+        return
+            _getClearedAmountForByPartition(_partition, _tokenHolder) * factor;
+    }
+
+    function _getClearingForByPartitionAdjusted(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
+    )
+        internal
+        view
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address destination_,
+            IClearing.ClearingOperationType clearingOperationType_,
+            bytes memory data_,
+            bytes memory operatorData_,
+            IHold.Hold memory hold_
+        )
+    {
+        uint256 factor = _calculateFactor(
+            _getAbafAdjusted(),
+            _getClearingLabafByPartition(
+                _clearingOperationIdentifier.partition,
+                _clearingOperationIdentifier.clearingId,
+                _clearingOperationIdentifier.tokenHolder
+            )
+        );
+        (
+            amount_,
+            expirationTimestamp_,
+            destination_,
+            clearingOperationType_,
+            data_,
+            operatorData_,
+            hold_
+        ) = _getClearingForByPartition(_clearingOperationIdentifier);
+        amount_ *= factor;
+    }
+
+    function _getClearingLabafByPartition(
+        bytes32 _partition,
+        uint256 _holdId,
+        address _tokenHolder
+    ) internal view virtual returns (uint256);
 }
 // solhint-enable no-unused-vars, custom-errors
