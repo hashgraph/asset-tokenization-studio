@@ -306,10 +306,8 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _protectedClearingOperation.from
         );
 
-        bytes memory encodedClearingData = abi.encode(_to, '');
-
         (success_, clearingId_) = _operateClearing(
-            encodedClearingData,
+            '',
             _protectedClearingOperation.clearingOperation,
             _protectedClearingOperation.from,
             _amount,
@@ -377,10 +375,8 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _protectedClearingOperation.from
         );
 
-        bytes memory encodedClearingData = abi.encode('');
-
         (success_, clearingId_) = _operateClearing(
-            encodedClearingData,
+            '',
             _protectedClearingOperation.clearingOperation,
             _protectedClearingOperation.from,
             _amount,
@@ -515,42 +511,35 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         IClearing.ClearingOperationType _operationType,
         uint256 _clearingId
     ) private pure returns (IClearing.ClearingData memory clearingData_) {
-        IHold.Hold memory hold = IHold.Hold({
-            amount: 0,
-            expirationTimestamp: 0,
-            escrow: address(0),
-            to: address(0),
-            data: ''
-        });
-
-        address _to;
-        bytes memory operatorData;
+        IHold.Hold memory hold_;
+        address to_;
+        bytes memory operatorData_;
 
         if (_operationType == IClearing.ClearingOperationType.HoldCreation) {
-            (hold, operatorData) = abi.decode(
+            (hold_, operatorData_) = abi.decode(
                 _encodedClearingData,
                 (IHold.Hold, bytes)
             );
-            _to = hold.to;
+            to_ = hold_.to;
         } else if (_operationType == IClearing.ClearingOperationType.Transfer) {
-            (_to, operatorData) = abi.decode(
+            (to_, operatorData_) = abi.decode(
                 _encodedClearingData,
                 (address, bytes)
             );
         } else {
-            operatorData = abi.decode(_encodedClearingData, (bytes));
+            operatorData_ = abi.decode(_encodedClearingData, (bytes));
         }
 
         clearingData_ = IClearing.ClearingData({
             clearingOperationType: _operationType,
             amount: _amount,
-            holdExpirationTimestamp: hold.expirationTimestamp,
+            holdExpirationTimestamp: hold_.expirationTimestamp,
             expirationTimestamp: _clearingOperation.expirationTimestamp,
-            destination: _to,
-            escrow: hold.escrow,
-            holdData: hold.data,
+            destination: to_,
+            escrow: hold_.escrow,
+            holdData: hold_.data,
             data: _clearingOperation.data,
-            operatorData: operatorData,
+            operatorData: operatorData_,
             clearingId: _clearingId
         });
     }
