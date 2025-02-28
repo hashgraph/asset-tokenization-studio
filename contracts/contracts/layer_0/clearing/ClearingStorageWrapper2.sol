@@ -772,13 +772,9 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 _amount,
                 _clearingOperationIdentifier.partition
             );
-        } else {
-            _addPartitionTo(
-                _amount,
-                _to,
-                _clearingOperationIdentifier.partition
-            );
+            return remainingBalance_;
         }
+        _addPartitionTo(_amount, _to, _clearingOperationIdentifier.partition);
     }
 
     function _decreaseClearedAmount(
