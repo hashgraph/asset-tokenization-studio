@@ -297,6 +297,9 @@ import GetKYCAccountsDataRequest from './GetKYCAccountsDataRequest.js';
 import GetKYCStatusForRequest from './GetKYCStatusForRequest.js';
 import ActivateClearingRequest from './ActivateClearingRequest.js';
 import DeactivateClearingRequest from './DeactivateClearingRequest.js';
+import ClearingTransferByPartitionRequest from './ClearingTransferByPartitionRequest.js';
+import ClearingTransferFromByPartitionRequest from './ClearingTransferFromByPartitionRequest.js';
+import ProtectedClearingTransferByPartitionRequest from './ProtectedClearingTransferByPartitionRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -393,4 +396,7 @@ export {
   GetKYCStatusForRequest,
   ActivateClearingRequest,
   DeactivateClearingRequest,
+  ClearingTransferByPartitionRequest,
+  ClearingTransferFromByPartitionRequest,
+  ProtectedClearingTransferByPartitionRequest,
 };

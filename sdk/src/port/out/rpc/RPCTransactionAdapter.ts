@@ -310,6 +310,9 @@ import {
   REVOKE_KYC_GAS,
   ACTIVATE_CLEARING_GAS,
   DEACTIVATE_CLEARING_GAS,
+  CLEARING_TRANSFER_BY_PARTITION,
+  CLEARING_TRANSFER_FROM_BY_PARTITION,
+  PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -374,6 +377,11 @@ import {
   IssueData,
   OperatorTransferData,
 } from '../../../domain/context/factory/ERC1410Metadata.js';
+import {
+  ClearingOperation,
+  ClearingOperationFrom,
+  ProtectedClearingOperation,
+} from '../../../domain/context/security/Clearing.js';
 
 declare const ethereum: MetaMaskInpageProvider;
 
@@ -2202,6 +2210,120 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       ).deactivateClearing({
         gasLimit: DEACTIVATE_CLEARING_GAS,
       }),
+      this.networkService.environment,
+    );
+  }
+
+  async clearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Clearing Transfer By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: expirationDate.toBigNumber(),
+      data: '',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).clearingTransferByPartition(
+        clearingOperation,
+        amount.toBigNumber(),
+        targetId.toString(),
+        {
+          gasLimit: CLEARING_TRANSFER_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async clearingTransferFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Clearing Transfer From By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '',
+      },
+      from: sourceId.toString(),
+      operatorData: '',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).clearingTransferFromByPartition(
+        clearingOperationFrom,
+        amount.toBigNumber(),
+        targetId.toString(),
+        {
+          gasLimit: CLEARING_TRANSFER_FROM_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async protectedClearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Protected Clearing Transfer By Partition to address ${security.toString()}`,
+    );
+
+    const protectedClearingOperation: ProtectedClearingOperation = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '',
+      },
+      from: sourceId.toString(),
+      deadline: deadline.toBigNumber(),
+      nonce: nonce.toBigNumber(),
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).protectedClearingTransferByPartition(
+        protectedClearingOperation,
+        amount.toBigNumber(),
+        targetId.toString(),
+        signature,
+        {
+          gasLimit: PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
+        },
+      ),
       this.networkService.environment,
     );
   }

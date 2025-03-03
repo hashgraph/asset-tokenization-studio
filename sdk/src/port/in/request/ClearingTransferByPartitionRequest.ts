@@ -203,18 +203,47 @@
 
 */
 
-import { Command } from '../../../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../../../core/command/CommandResponse.js';
+import { SecurityDate } from '../../../domain/context/shared/SecurityDate.js';
+import ValidatedRequest from './validation/ValidatedRequest.js';
+import Validation from './validation/Validation.js';
 
-export class DeactivateClearingCommandResponse implements CommandResponse {
-  constructor(
-    public readonly payload: boolean,
-    public readonly transactionId: string,
-  ) {}
-}
+export default class ClearingTransferByPartitionRequest extends ValidatedRequest<ClearingTransferByPartitionRequest> {
+  securityId: string;
+  partitionId: string;
+  amount: string;
+  targetId: string;
+  expirationDate: string;
 
-export class DeactivateClearingCommand extends Command<DeactivateClearingCommandResponse> {
-  constructor(public readonly securityId: string) {
-    super();
+  constructor({
+    securityId,
+    partitionId,
+    amount,
+    targetId,
+    expirationDate,
+  }: {
+    securityId: string;
+    partitionId: string;
+    amount: string;
+    targetId: string;
+    expirationDate: string;
+  }) {
+    super({
+      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: Validation.checkBytes32Format(),
+      amount: Validation.checkAmount(),
+      targetId: Validation.checkHederaIdFormatOrEvmAddress(),
+      expirationDate: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          Math.ceil(new Date().getTime() / 1000),
+        );
+      },
+    });
+
+    this.securityId = securityId;
+    this.partitionId = partitionId;
+    this.amount = amount;
+    this.targetId = targetId;
+    this.expirationDate = expirationDate;
   }
 }
