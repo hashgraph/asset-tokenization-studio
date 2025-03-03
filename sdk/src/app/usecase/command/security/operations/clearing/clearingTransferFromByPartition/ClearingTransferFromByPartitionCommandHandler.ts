@@ -338,10 +338,7 @@ export class ClearingTransferFromByPartitionCommandHandler
     if (
       account.evmAddress &&
       (
-        await this.queryAdapter.balanceOf(
-          securityEvmAddress,
-          sourceEvmAddress,
-        )
+        await this.queryAdapter.balanceOf(securityEvmAddress, sourceEvmAddress)
       ).lt(amountBd.toBigNumber())
     ) {
       throw new InsufficientBalance();
