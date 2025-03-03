@@ -230,7 +230,7 @@ import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
 import {
   getProtectedPartitionRole,
   SecurityRole,
-} from 'domain/context/security/SecurityRole.js';
+} from '../../../../../../../domain/context/security/SecurityRole.js';
 import { PartitionsUnProtected } from '../../../error/PartitionsUnprotected.js';
 import { BigNumber } from 'ethers';
 import { NounceAlreadyUsed } from '../../../error/NounceAlreadyUsed.js';
