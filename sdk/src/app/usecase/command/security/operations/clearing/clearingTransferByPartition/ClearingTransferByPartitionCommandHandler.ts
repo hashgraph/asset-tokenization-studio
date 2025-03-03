@@ -222,7 +222,7 @@ import {
   ClearingTransferByPartitionCommandResponse,
 } from './ClearingTransferByPartitionCommand.js';
 import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
-import { SecurityControlListType } from 'domain/context/security/SecurityControlListType.js';
+import { SecurityControlListType } from '../../../../../../../domain/context/security/SecurityControlListType.js';
 import { AccountInBlackList } from '../../../error/AccountInBlackList.js';
 import { AccountNotInWhiteList } from '../../../error/AccountNotInWhiteList.js';
 import ValidationService from '../../../../../../../app/service/ValidationService.js';
