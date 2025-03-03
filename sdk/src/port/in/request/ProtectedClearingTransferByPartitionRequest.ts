@@ -203,18 +203,72 @@
 
 */
 
-import { Command } from '../../../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../../../core/command/CommandResponse.js';
+import { SecurityDate } from '../../../domain/context/shared/SecurityDate.js';
+import ValidatedRequest from './validation/ValidatedRequest.js';
+import Validation from './validation/Validation.js';
 
-export class DeactivateClearingCommandResponse implements CommandResponse {
-  constructor(
-    public readonly payload: boolean,
-    public readonly transactionId: string,
-  ) {}
-}
+export default class ProtectedClearingTransferByPartitionRequest extends ValidatedRequest<ProtectedClearingTransferByPartitionRequest> {
+  securityId: string;
+  partitionId: string;
+  amount: string;
+  sourceId: string;
+  targetId: string;
+  expirationDate: string;
+  deadline: string;
+  nonce: number;
+  signature: string;
 
-export class DeactivateClearingCommand extends Command<DeactivateClearingCommandResponse> {
-  constructor(public readonly securityId: string) {
-    super();
+  constructor({
+    securityId,
+    partitionId,
+    amount,
+    sourceId,
+    targetId,
+    expirationDate,
+    deadline,
+    nonce,
+    signature,
+  }: {
+    securityId: string;
+    partitionId: string;
+    amount: string;
+
+    sourceId: string;
+    targetId: string;
+    expirationDate: string;
+    deadline: string;
+    nonce: number;
+    signature: string;
+  }) {
+    super({
+      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: Validation.checkBytes32Format(),
+      amount: Validation.checkAmount(),
+      sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
+      targetId: Validation.checkHederaIdFormatOrEvmAddress(true),
+      nonce: Validation.checkNumber({ min: 0 }),
+      expirationDate: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          Math.ceil(new Date().getTime() / 1000),
+        );
+      },
+      deadline: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          Math.ceil(new Date().getTime() / 1000),
+        );
+      },
+    });
+
+    this.securityId = securityId;
+    this.partitionId = partitionId;
+    this.amount = amount;
+    this.sourceId = sourceId;
+    this.targetId = targetId;
+    this.expirationDate = expirationDate;
+    this.deadline = deadline;
+    this.nonce = nonce;
+    this.signature = signature;
   }
 }

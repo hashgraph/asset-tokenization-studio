@@ -334,6 +334,9 @@ import { GetKYCStatusForQueryHandler } from '../app/usecase/query/security/kyc/g
 import { GetKYCAccountsDataQueryHandler } from '../app/usecase/query/security/kyc/getKycAccountsData/GetKYCAccountsDataQueryHandler.js';
 import { ActivateClearingCommandHandler } from '../app/usecase/command/security/operations/clearing/activateClearing/ActivateClearingCommandHandler.js';
 import { DeactivateClearingCommandHandler } from '../app/usecase/command/security/operations/clearing/deactivateClearing/DeactivateClearingCommandHandler.js';
+import { ClearingTransferByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommandHandler.js';
+import { ClearingTransferFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommandHandler.js';
+import { ProtectedClearingTransferByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -549,6 +552,18 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: DeactivateClearingCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ClearingTransferByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ClearingTransferFromByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedClearingTransferByPartitionCommandHandler,
   },
 ];
 

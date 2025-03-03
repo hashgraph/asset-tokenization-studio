@@ -203,18 +203,23 @@
 
 */
 
-import { Command } from '../../../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../../../core/command/CommandResponse.js';
+import { BigNumber } from 'ethers';
 
-export class DeactivateClearingCommandResponse implements CommandResponse {
-  constructor(
-    public readonly payload: boolean,
-    public readonly transactionId: string,
-  ) {}
+export class ClearingOperation {
+  partition: string;
+  expirationTimestamp: BigNumber;
+  data: string;
 }
 
-export class DeactivateClearingCommand extends Command<DeactivateClearingCommandResponse> {
-  constructor(public readonly securityId: string) {
-    super();
-  }
+export class ClearingOperationFrom {
+  clearingOperation: ClearingOperation;
+  from: string;
+  operatorData: string;
+}
+
+export class ProtectedClearingOperation {
+  clearingOperation: ClearingOperation;
+  from: string;
+  deadline: BigNumber;
+  nonce: BigNumber;
 }

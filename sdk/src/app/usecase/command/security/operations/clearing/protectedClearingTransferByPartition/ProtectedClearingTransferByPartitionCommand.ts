@@ -206,15 +206,27 @@
 import { Command } from '../../../../../../../core/command/Command.js';
 import { CommandResponse } from '../../../../../../../core/command/CommandResponse.js';
 
-export class DeactivateClearingCommandResponse implements CommandResponse {
+export class ProtectedClearingTransferByPartitionCommandResponse
+  implements CommandResponse
+{
   constructor(
-    public readonly payload: boolean,
+    public readonly payload: number,
     public readonly transactionId: string,
   ) {}
 }
 
-export class DeactivateClearingCommand extends Command<DeactivateClearingCommandResponse> {
-  constructor(public readonly securityId: string) {
+export class ProtectedClearingTransferByPartitionCommand extends Command<ProtectedClearingTransferByPartitionCommandResponse> {
+  constructor(
+    public readonly securityId: string,
+    public readonly partitionId: string,
+    public readonly amount: string,
+    public readonly sourceId: string,
+    public readonly targetId: string,
+    public readonly expirationDate: string,
+    public readonly deadline: string,
+    public readonly nonce: number,
+    public readonly signature: string,
+  ) {
     super();
   }
 }
