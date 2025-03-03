@@ -2348,7 +2348,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const clearingOperation: ClearingOperation = {
       partition: partitionId,
       expirationTimestamp: expirationDate.toBigNumber(),
-      data: '',
+      data: '0x',
     };
 
     const factoryInstance = new ClearingFacet__factory().attach(
@@ -2390,10 +2390,10 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       clearingOperation: {
         partition: partitionId,
         expirationTimestamp: expirationDate.toBigNumber(),
-        data: '',
+        data: '0x',
       },
       from: sourceId.toString(),
-      operatorData: '',
+      operatorData: '0x',
     };
 
     const factoryInstance = new ClearingFacet__factory().attach(
@@ -2438,7 +2438,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
       clearingOperation: {
         partition: partitionId,
         expirationTimestamp: expirationDate.toBigNumber(),
-        data: '',
+        data: '0x',
       },
       from: sourceId.toString(),
       deadline: deadline.toBigNumber(),

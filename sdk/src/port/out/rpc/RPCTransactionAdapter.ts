@@ -2228,7 +2228,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const clearingOperation: ClearingOperation = {
       partition: partitionId,
       expirationTimestamp: expirationDate.toBigNumber(),
-      data: '',
+      data: '0x',
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
@@ -2263,10 +2263,10 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       clearingOperation: {
         partition: partitionId,
         expirationTimestamp: expirationDate.toBigNumber(),
-        data: '',
+        data: '0x',
       },
       from: sourceId.toString(),
-      operatorData: '',
+      operatorData: '0x',
     };
 
     return RPCTransactionResponseAdapter.manageResponse(
@@ -2304,7 +2304,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       clearingOperation: {
         partition: partitionId,
         expirationTimestamp: expirationDate.toBigNumber(),
-        data: '',
+        data: '0x',
       },
       from: sourceId.toString(),
       deadline: deadline.toBigNumber(),
