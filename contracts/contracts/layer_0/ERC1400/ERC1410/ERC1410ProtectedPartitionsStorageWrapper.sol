@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {CommonFacetLib} from "../../common/CommonFacetLib.sol";
+import {CommonFacetLib} from '../../common/CommonFacetLib.sol';
 import {
     ERC1410ControllerStorageWrapper
 } from './ERC1410ControllerStorageWrapper.sol';
@@ -285,6 +285,13 @@ abstract contract ERC1410ProtectedPartitionsStorageWrapper is
         );
         _setNounce(_nounce, _from);
 
-        CommonFacetLib.redeemByPartition(_partition, _from, _msgSender(), _amount, '', '');
+        CommonFacetLib.redeemByPartition(
+            _partition,
+            _from,
+            _msgSender(),
+            _amount,
+            '',
+            ''
+        );
     }
 }

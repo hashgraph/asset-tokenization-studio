@@ -204,11 +204,15 @@
 */
 
 pragma solidity 0.8.18;
-import {CommonStorage, CommonFacetLib} from "./CommonFacetLib.sol";
-import {CapStorageWrapper2} from "../cap/CapStorageWrapper2.sol";
-import {IERC1410Basic} from "../../layer_1/interfaces/ERC1400/IERC1410Basic.sol";
-import {IERC1410Standard} from "../../layer_1/interfaces/ERC1400/IERC1410Standard.sol";
-import {IHold} from "../../layer_1/interfaces/hold/IHold.sol";
+import {CommonFacetLib} from './CommonFacetLib.sol';
+import {CapStorageWrapper2} from '../cap/CapStorageWrapper2.sol';
+import {
+    IERC1410Basic
+} from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import {
+    IERC1410Standard
+} from '../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 contract CommonFacet is CapStorageWrapper2 {
@@ -226,7 +230,7 @@ contract CommonFacet is CapStorageWrapper2 {
         bytes memory _data,
         address _operator,
         bytes memory _operatorData
-    ) external onlyInternalDelegateCall() {
+    ) external onlyInternalDelegateCall {
         _transferByPartition(
             _from,
             _basicTransferInfo,
@@ -244,7 +248,7 @@ contract CommonFacet is CapStorageWrapper2 {
         uint256 _value,
         bytes memory _data,
         bytes memory _operatorData
-    ) external onlyInternalDelegateCall() {
+    ) external onlyInternalDelegateCall {
         _redeemByPartition(
             _partition,
             _from,
@@ -257,7 +261,7 @@ contract CommonFacet is CapStorageWrapper2 {
 
     function issueByPartition(
         IERC1410Standard.IssueData memory _issueData
-    ) external onlyInternalDelegateCall() {
+    ) external onlyInternalDelegateCall {
         _issueByPartition(_issueData);
     }
 
@@ -266,7 +270,11 @@ contract CommonFacet is CapStorageWrapper2 {
         address _from,
         IHold.Hold memory _hold,
         bytes memory _operatorData
-    ) external onlyInternalDelegateCall() returns (bool success_, uint256 holdId_) {
+    )
+        external
+        onlyInternalDelegateCall
+        returns (bool success_, uint256 holdId_)
+    {
         return _createHoldByPartition(_partition, _from, _hold, _operatorData);
     }
 
@@ -274,7 +282,7 @@ contract CommonFacet is CapStorageWrapper2 {
         IHold.HoldIdentifier calldata _holdIdentifier,
         address _to,
         uint256 _amount
-    ) external onlyInternalDelegateCall() returns (bool success_) {
+    ) external onlyInternalDelegateCall returns (bool success_) {
         return _executeHoldByPartition(_holdIdentifier, _to, _amount);
     }
 
@@ -282,7 +290,7 @@ contract CommonFacet is CapStorageWrapper2 {
         bytes32 _partition,
         address _from,
         address _to
-    ) external onlyInternalDelegateCall() {
+    ) external onlyInternalDelegateCall {
         _triggerAndSyncAll(_partition, _from, _to);
     }
 

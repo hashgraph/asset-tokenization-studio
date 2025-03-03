@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {CommonFacetLib} from "../../common/CommonFacetLib.sol";
+import {CommonFacetLib} from '../../common/CommonFacetLib.sol';
 import {ERC1410BasicStorageWrapper} from './ERC1410BasicStorageWrapper.sol';
 import {
     _ERC1410_OPERATOR_STORAGE_POSITION
@@ -246,8 +246,8 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         address _operator
     ) internal {
         _erc1410operatorStorage().partitionApprovals[_msgSender()][_partition][
-                _operator
-            ] = true;
+            _operator
+        ] = true;
         emit AuthorizedOperatorByPartition(_partition, _operator, _msgSender());
     }
 
@@ -256,8 +256,8 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
         address _operator
     ) internal {
         _erc1410operatorStorage().partitionApprovals[_msgSender()][_partition][
-                _operator
-            ] = false;
+            _operator
+        ] = false;
         emit RevokedOperatorByPartition(_partition, _operator, _msgSender());
     }
 

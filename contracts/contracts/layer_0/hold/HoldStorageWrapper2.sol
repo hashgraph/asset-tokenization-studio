@@ -206,9 +206,7 @@
 
 pragma solidity 0.8.18;
 
-import {
-    CommonFacetLib
-} from '../common/CommonFacetLib.sol';
+import {CommonFacetLib} from '../common/CommonFacetLib.sol';
 import {
     ERC1410ProtectedPartitionsStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ProtectedPartitionsStorageWrapper.sol';
@@ -273,7 +271,13 @@ abstract contract HoldStorageWrapper2 is
     ) internal returns (bool success_, uint256 holdId_) {
         _decreaseAllowedBalance(_from, _msgSender(), _hold.amount);
 
-        return CommonFacetLib.createHoldByPartition(_partition, _from, _hold, _operatorData);
+        return
+            CommonFacetLib.createHoldByPartition(
+                _partition,
+                _from,
+                _hold,
+                _operatorData
+            );
     }
 
     function _protectedCreateHoldByPartition(
@@ -530,8 +534,8 @@ abstract contract HoldStorageWrapper2 is
         if (_factor == 1) return;
 
         _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][
-                _partition
-            ] *= _factor;
+            _partition
+        ] *= _factor;
         _setTotalHeldLabafByPartition(_partition, _tokenHolder, _abaf);
     }
 

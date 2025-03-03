@@ -208,7 +208,7 @@ pragma solidity 0.8.18;
 
 import {IERC1410Standard} from '../../interfaces/ERC1400/IERC1410Standard.sol';
 import {Common} from '../../common/Common.sol';
-import {CommonFacetLib} from "../../../layer_0/common/CommonFacetLib.sol";
+import {CommonFacetLib} from '../../../layer_0/common/CommonFacetLib.sol';
 
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';

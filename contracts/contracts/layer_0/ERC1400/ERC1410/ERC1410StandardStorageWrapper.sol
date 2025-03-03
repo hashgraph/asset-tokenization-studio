@@ -206,7 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {CommonFacetLib} from "../../common/CommonFacetLib.sol";
+import {CommonFacetLib} from '../../common/CommonFacetLib.sol';
 import {
     ERC1410OperatorStorageWrapper
 } from './ERC1410OperatorStorageWrapper.sol';

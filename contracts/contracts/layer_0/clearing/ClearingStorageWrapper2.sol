@@ -206,9 +206,7 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
-import {
-CommonFacetLib
-} from '../common/CommonFacetLib.sol';
+import {CommonFacetLib} from '../common/CommonFacetLib.sol';
 import {HoldStorageWrapper2} from '../hold/HoldStorageWrapper2.sol';
 import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 import {

@@ -205,16 +205,19 @@
 
 pragma solidity 0.8.18;
 
-import {IERC1410Basic} from "../../layer_1/interfaces/ERC1400/IERC1410Basic.sol";
-import {IERC1410Standard} from "../../layer_1/interfaces/ERC1400/IERC1410Standard.sol";
-import {IHold} from "../../layer_1/interfaces/hold/IHold.sol";
+import {
+    IERC1410Basic
+} from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import {
+    IERC1410Standard
+} from '../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 struct CommonStorage {
     bool isInInternalDelegateCall;
 }
 
 library CommonFacetLib {
-
     function transferByPartition(
         address _from,
         IERC1410Basic.BasicTransferInfo memory _basicTransferInfo,
@@ -225,7 +228,17 @@ library CommonFacetLib {
     ) internal {
         CommonStorage storage _commonStorage = commonStorage();
         _commonStorage.isInInternalDelegateCall = true;
-        address(this).delegatecall(abi.encodeWithSignature("transferByPartition(address,(address,uint256),bytes32,bytes,address,bytes)", _from, _basicTransferInfo, _partition, _data, _operator, _operatorData));
+        address(this).delegatecall(
+            abi.encodeWithSignature(
+                'transferByPartition(address,(address,uint256),bytes32,bytes,address,bytes)',
+                _from,
+                _basicTransferInfo,
+                _partition,
+                _data,
+                _operator,
+                _operatorData
+            )
+        );
         _commonStorage.isInInternalDelegateCall = false;
     }
 
@@ -239,14 +252,17 @@ library CommonFacetLib {
     ) internal {
         CommonStorage storage _commonStorage = commonStorage();
         _commonStorage.isInInternalDelegateCall = true;
-        address(this).delegatecall(abi.encodeWithSignature("redeemByPartition(bytes32,address,address,uint256,bytes,bytes)",
-            _partition,
-            _from,
-            _operator,
-            _value,
-            _data,
-            _operatorData
-        ));
+        address(this).delegatecall(
+            abi.encodeWithSignature(
+                'redeemByPartition(bytes32,address,address,uint256,bytes,bytes)',
+                _partition,
+                _from,
+                _operator,
+                _value,
+                _data,
+                _operatorData
+            )
+        );
         _commonStorage.isInInternalDelegateCall = false;
     }
 
@@ -257,9 +273,9 @@ library CommonFacetLib {
         _commonStorage.isInInternalDelegateCall = true;
         address(this).delegatecall(
             abi.encodeWithSignature(
-            "issueByPartition((bytes32,address,uint256,bytes))",
-            _issueData
-        )
+                'issueByPartition((bytes32,address,uint256,bytes))',
+                _issueData
+            )
         );
         _commonStorage.isInInternalDelegateCall = false;
     }
@@ -275,7 +291,7 @@ library CommonFacetLib {
         bytes memory result;
         (success_, result) = address(this).delegatecall(
             abi.encodeWithSignature(
-                "createHoldByPartition(bytes32,address,(uint256,uint256,address,address,bytes),bytes)",
+                'createHoldByPartition(bytes32,address,(uint256,uint256,address,address,bytes),bytes)',
                 _partition,
                 _from,
                 _hold,
@@ -296,7 +312,7 @@ library CommonFacetLib {
         bytes memory result;
         (success_, result) = address(this).delegatecall(
             abi.encodeWithSignature(
-                "executeHoldByPartition((bytes32,address,uint256),address,uint256)",
+                'executeHoldByPartition((bytes32,address,uint256),address,uint256)',
                 _holdIdentifier,
                 _to,
                 _amount
@@ -314,7 +330,7 @@ library CommonFacetLib {
         _commonStorage.isInInternalDelegateCall = true;
         address(this).delegatecall(
             abi.encodeWithSignature(
-                "_triggerAndSyncAll(bytes32,address,address)",
+                '_triggerAndSyncAll(bytes32,address,address)',
                 _partition,
                 _from,
                 _to
@@ -323,7 +339,11 @@ library CommonFacetLib {
         _commonStorage.isInInternalDelegateCall = false;
     }
 
-    function commonStorage() internal pure returns (CommonStorage storage commonStorage_) {
+    function commonStorage()
+        internal
+        pure
+        returns (CommonStorage storage commonStorage_)
+    {
         bytes32 position = keccak256('security.token.standard.common.storage');
         // solhint-disable-next-line no-inline-assembly
         assembly {

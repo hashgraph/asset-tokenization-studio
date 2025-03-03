@@ -205,9 +205,7 @@
 
 pragma solidity 0.8.18;
 
-import {
-CommonFacetLib
-} from '../common/CommonFacetLib.sol';
+import {CommonFacetLib} from '../common/CommonFacetLib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
