@@ -214,9 +214,7 @@ export class ActivateClearingCommandResponse implements CommandResponse {
 }
 
 export class ActivateClearingCommand extends Command<ActivateClearingCommandResponse> {
-  constructor(
-    public readonly securityId: string,
-  ) {
+  constructor(public readonly securityId: string) {
     super();
   }
 }

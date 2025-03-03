@@ -302,6 +302,12 @@ import ActivateClearingRequest from './request/ActivateClearingRequest.js';
 import DeactivateClearingRequest from './request/DeactivateClearingRequest.js';
 import { ActivateClearingCommand } from '../../app/usecase/command/security/operations/clearing/activateClearing/ActivateClearingCommand.js';
 import { DeactivateClearingCommand } from '../../app/usecase/command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand.js';
+import ClearingTransferByPartitionRequest from './request/ClearingTransferByPartitionRequest.js';
+import ClearingTransferFromByPartitionRequest from './request/ClearingTransferFromByPartitionRequest.js';
+import ProtectedClearingTransferByPartitionRequest from './request/ProtectedClearingTransferByPartitionRequest.js';
+import { ClearingTransferByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommand.js';
+import { ClearingTransferFromByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommand.js';
+import { ProtectedClearingTransferByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -400,6 +406,15 @@ interface ISecurityInPort {
   deactivateClearing(
     request: DeactivateClearingRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  clearingTransferByPartition(
+    request: ClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  clearingTransferFromByPartition(
+    request: ClearingTransferFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  protectedClearingTransferByPartition(
+    request: ProtectedClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -1182,6 +1197,59 @@ class SecurityInPort implements ISecurityInPort {
 
     return await this.commandBus.execute(
       new DeactivateClearingCommand(request.securityId),
+    );
+  }
+
+  @LogError
+  async clearingTransferByPartition(
+    request: ClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ClearingTransferByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ClearingTransferByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.targetId,
+        request.expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async clearingTransferFromByPartition(
+    request: ClearingTransferFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ClearingTransferFromByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ClearingTransferFromByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedClearingTransferByPartition(
+    request: ProtectedClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ProtectedClearingTransferByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ProtectedClearingTransferByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.expirationDate,
+        request.deadline,
+        request.nonce,
+        request.signature,
+      ),
     );
   }
 }
