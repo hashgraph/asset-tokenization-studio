@@ -263,6 +263,8 @@ import {
     TransferAndLockTimeTravel__factory,
     TransparentUpgradeableProxy__factory,
     TimeTravel__factory,
+ClearingFacet__factory,
+ClearingFacetTimeTravel__factory,
 } from '@typechain'
 import Configuration from '@configuration'
 import {
@@ -691,6 +693,19 @@ export async function deployAtsContracts({
                 : undefined,
             overrides,
         }),
+        clearingFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ClearingFacet__factory(),
+                new ClearingFacetTimeTravel__factory(),
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ClearingFacet.addresses?.[
+                      network
+                  ]
+                : undefined,
+            overrides,
+        }),
         timeTravel:
             timeTravelEnabled == true
                 ? new DeployContractWithFactoryCommand({
@@ -862,6 +877,14 @@ export async function deployAtsContracts({
             ).then((result) => {
                 console.log(
                     'ProtectedPartitions has been deployed successfully'
+                )
+                return result
+            }),
+            clearingFacet: await deployContractWithFactory(
+                commands.clearingFacet
+            ).then((result) => {
+                console.log(
+                    'ClearingFacet has been deployed successfully'
                 )
                 return result
             }),
