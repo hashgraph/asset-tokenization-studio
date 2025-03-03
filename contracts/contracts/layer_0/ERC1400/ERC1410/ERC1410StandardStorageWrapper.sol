@@ -206,6 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {CommonFacetLib} from "../../common/CommonFacetLib.sol";
 import {
     ERC1410OperatorStorageWrapper
 } from './ERC1410OperatorStorageWrapper.sol';
@@ -235,7 +236,7 @@ abstract contract ERC1410StandardStorageWrapper is
         address to,
         uint256 amount
     ) internal override {
-        _triggerAndSyncAll(partition, from, to);
+        CommonFacetLib.triggerAndSyncAll(partition, from, to);
 
         if (from == address(0)) {
             // mint

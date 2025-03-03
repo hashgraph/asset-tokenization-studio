@@ -207,6 +207,9 @@
 pragma solidity 0.8.18;
 
 import {
+    CommonFacetLib
+} from '../common/CommonFacetLib.sol';
+import {
     ERC1410ProtectedPartitionsStorageWrapper
 } from '../ERC1400/ERC1410/ERC1410ProtectedPartitionsStorageWrapper.sol';
 import {
@@ -228,7 +231,7 @@ abstract contract HoldStorageWrapper2 is
         IHold.Hold memory _hold,
         bytes memory _operatorData
     ) internal returns (bool success_, uint256 holdId_) {
-        _triggerAndSyncAll(_partition, _from, address(0));
+        CommonFacetLib.triggerAndSyncAll(_partition, _from, address(0));
 
         uint256 abaf = _updateTotalHold(_partition, _from);
 
@@ -270,7 +273,7 @@ abstract contract HoldStorageWrapper2 is
     ) internal returns (bool success_, uint256 holdId_) {
         _decreaseAllowedBalance(_from, _msgSender(), _hold.amount);
 
-        return _createHoldByPartition(_partition, _from, _hold, _operatorData);
+        return CommonFacetLib.createHoldByPartition(_partition, _from, _hold, _operatorData);
     }
 
     function _protectedCreateHoldByPartition(
@@ -297,7 +300,7 @@ abstract contract HoldStorageWrapper2 is
         _setNounce(_protectedHold.nonce, _from);
 
         return
-            _createHoldByPartition(
+            CommonFacetLib.createHoldByPartition(
                 _partition,
                 _from,
                 _protectedHold.hold,
@@ -567,7 +570,7 @@ abstract contract HoldStorageWrapper2 is
         IHold.HoldIdentifier calldata _holdIdentifier,
         address _to
     ) internal {
-        _triggerAndSyncAll(
+        CommonFacetLib.triggerAndSyncAll(
             _holdIdentifier.partition,
             _holdIdentifier.tokenHolder,
             _to

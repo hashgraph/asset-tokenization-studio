@@ -206,6 +206,9 @@
 pragma solidity 0.8.18;
 
 import {
+CommonFacetLib
+} from '../common/CommonFacetLib.sol';
+import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {
@@ -222,7 +225,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         address _tokenHolder,
         uint256 _expirationTimestamp
     ) internal returns (bool success_, uint256 lockId_) {
-        _triggerAndSyncAll(_partition, _tokenHolder, address(0));
+        CommonFacetLib.triggerAndSyncAll(_partition, _tokenHolder, address(0));
 
         uint256 abaf = _updateTotalLock(_partition, _tokenHolder);
 
@@ -262,7 +265,7 @@ abstract contract LockStorageWrapper2 is CorporateActionsStorageWrapper2 {
         uint256 _lockId,
         address _tokenHolder
     ) internal returns (bool success_) {
-        _triggerAndSyncAll(_partition, address(0), _tokenHolder);
+        CommonFacetLib.triggerAndSyncAll(_partition, address(0), _tokenHolder);
 
         uint256 abaf = _updateTotalLock(_partition, _tokenHolder);
 

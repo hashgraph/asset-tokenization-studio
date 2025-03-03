@@ -208,6 +208,8 @@
 
 pragma solidity 0.8.18;
 
+
+import {CommonFacetLib} from "../../../layer_0/common/CommonFacetLib.sol";
 import {
     IERC1410ScheduledTasks
 } from '../../interfaces/ERC1400/IERC1410ScheduledTasks.sol';
@@ -223,7 +225,7 @@ contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
         address _from,
         address _to
     ) external onlyUnpaused {
-        _triggerAndSyncAll(_partition, _from, _to);
+        CommonFacetLib.triggerAndSyncAll(_partition, _from, _to);
     }
 
     function totalSupplyAdjusted() external view returns (uint256) {

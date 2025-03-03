@@ -204,217 +204,93 @@
 */
 
 pragma solidity 0.8.18;
-
-import {CommonFacetLib} from "../../layer_0/common/CommonFacetLib.sol";
-import {
-    IERC1410Basic
-} from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
-import {
-    checkNounceAndDeadline,
-    verify
-} from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {
-    getMessageHashTransferAndLockByPartition,
-    getMessageHashTransferAndLock
-} from './signatureVerification.sol';
-import {Common} from '../../layer_1/common/Common.sol';
-import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
-
+import {CommonStorage, CommonFacetLib} from "./CommonFacetLib.sol";
+import {CapStorageWrapper2} from "../cap/CapStorageWrapper2.sol";
+import {IERC1410Basic} from "../../layer_1/interfaces/ERC1400/IERC1410Basic.sol";
+import {IERC1410Standard} from "../../layer_1/interfaces/ERC1400/IERC1410Standard.sol";
+import {IHold} from "../../layer_1/interfaces/hold/IHold.sol";
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
-    function _protectedTransferAndLockByPartition(
+contract CommonFacet is CapStorageWrapper2 {
+    error NotInInternalDelegateCall();
+
+    modifier onlyInternalDelegateCall() {
+        _checkIsInInternalDelegateCall();
+        _;
+    }
+
+    function transferByPartition(
+        address _from,
+        IERC1410Basic.BasicTransferInfo memory _basicTransferInfo,
         bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal returns (bool success_, uint256 lockId_) {
-        checkNounceAndDeadline(
-            _nounce,
-            _transferAndLock.from,
-            _getNounceFor(_transferAndLock.from),
-            _deadline,
-            _blockTimestamp()
-        );
-
-        _checkTransferAndLockByPartitionSignature(
+        bytes memory _data,
+        address _operator,
+        bytes memory _operatorData
+    ) external onlyInternalDelegateCall() {
+        _transferByPartition(
+            _from,
+            _basicTransferInfo,
             _partition,
-            _transferAndLock,
-            _deadline,
-            _nounce,
-            _signature
-        );
-
-        _setNounce(_nounce, _transferAndLock.from);
-
-        CommonFacetLib.transferByPartition(
-            _msgSender(),
-            IERC1410Basic.BasicTransferInfo(
-                _transferAndLock.to,
-                _transferAndLock.amount
-            ),
-            _partition,
-            _transferAndLock.data,
-            _msgSender(),
-            ''
-        );
-        (success_, lockId_) = _lockByPartition(
-            _partition,
-            _transferAndLock.amount,
-            _transferAndLock.to,
-            _transferAndLock.expirationTimestamp
-        );
-        emit PartitionTransferredAndLocked(
-            _partition,
-            _msgSender(),
-            _transferAndLock.to,
-            _transferAndLock.amount,
-            _transferAndLock.data,
-            _transferAndLock.expirationTimestamp,
-            lockId_
+            _data,
+            _operator,
+            _operatorData
         );
     }
 
-    function _protectedTransferAndLock(
-        TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal returns (bool success_, uint256 lockId_) {
-        checkNounceAndDeadline(
-            _nounce,
-            _transferAndLock.from,
-            _getNounceFor(_transferAndLock.from),
-            _deadline,
-            _blockTimestamp()
-        );
-
-        _checkTransferAndLockSignature(
-            _transferAndLock,
-            _deadline,
-            _nounce,
-            _signature
-        );
-
-        _setNounce(_nounce, _transferAndLock.from);
-
-        CommonFacetLib.transferByPartition(
-            _msgSender(),
-            IERC1410Basic.BasicTransferInfo(
-                _transferAndLock.to,
-                _transferAndLock.amount
-            ),
-            _DEFAULT_PARTITION,
-            _transferAndLock.data,
-            _msgSender(),
-            ''
-        );
-        (success_, lockId_) = _lockByPartition(
-            _DEFAULT_PARTITION,
-            _transferAndLock.amount,
-            _transferAndLock.to,
-            _transferAndLock.expirationTimestamp
-        );
-        emit PartitionTransferredAndLocked(
-            _DEFAULT_PARTITION,
-            _msgSender(),
-            _transferAndLock.to,
-            _transferAndLock.amount,
-            _transferAndLock.data,
-            _transferAndLock.expirationTimestamp,
-            lockId_
-        );
-    }
-
-    function _checkTransferAndLockByPartitionSignature(
+    function redeemByPartition(
         bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view {
-        if (
-            !_isTransferAndLockByPartitionSignatureValid(
-                _partition,
-                _transferAndLock,
-                _deadline,
-                _nounce,
-                _signature
-            )
-        ) revert WrongSignature();
-    }
-
-    function _isTransferAndLockByPartitionSignatureValid(
-        bytes32 _partition,
-        TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashTransferAndLockByPartition(
+        address _from,
+        address _operator,
+        uint256 _value,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) external onlyInternalDelegateCall() {
+        _redeemByPartition(
             _partition,
-            _transferAndLock.from,
-            _transferAndLock.to,
-            _transferAndLock.amount,
-            _transferAndLock.data,
-            _transferAndLock.expirationTimestamp,
-            _deadline,
-            _nounce
+            _from,
+            _operator,
+            _value,
+            _data,
+            _operatorData
         );
-        return
-            verify(
-                _transferAndLock.from,
-                functionHash,
-                _signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
-                _blockChainid(),
-                address(this)
-            );
     }
 
-    function _checkTransferAndLockSignature(
-        TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view {
-        if (
-            !_isTransferAndLockSignatureValid(
-                _transferAndLock,
-                _deadline,
-                _nounce,
-                _signature
-            )
-        ) revert WrongSignature();
+    function issueByPartition(
+        IERC1410Standard.IssueData memory _issueData
+    ) external onlyInternalDelegateCall() {
+        _issueByPartition(_issueData);
     }
 
-    function _isTransferAndLockSignatureValid(
-        TransferAndLockStruct calldata _transferAndLock,
-        uint256 _deadline,
-        uint256 _nounce,
-        bytes calldata _signature
-    ) internal view returns (bool) {
-        bytes32 functionHash = getMessageHashTransferAndLock(
-            _transferAndLock.from,
-            _transferAndLock.to,
-            _transferAndLock.amount,
-            _transferAndLock.data,
-            _transferAndLock.expirationTimestamp,
-            _deadline,
-            _nounce
-        );
-        return
-            verify(
-                _transferAndLock.from,
-                functionHash,
-                _signature,
-                _protectedPartitionsStorage().contractName,
-                _protectedPartitionsStorage().contractVersion,
-                _blockChainid(),
-                address(this)
-            );
+    function createHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        IHold.Hold memory _hold,
+        bytes memory _operatorData
+    ) external onlyInternalDelegateCall() returns (bool success_, uint256 holdId_) {
+        return _createHoldByPartition(_partition, _from, _hold, _operatorData);
+    }
+
+    function executeHoldByPartition(
+        IHold.HoldIdentifier calldata _holdIdentifier,
+        address _to,
+        uint256 _amount
+    ) external onlyInternalDelegateCall() returns (bool success_) {
+        return _executeHoldByPartition(_holdIdentifier, _to, _amount);
+    }
+
+    function triggerAndSyncAll(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) external onlyInternalDelegateCall() {
+        _triggerAndSyncAll(_partition, _from, _to);
+    }
+
+    function _checkIsInInternalDelegateCall() private view {
+        if (!_isInInternalDelegateCall()) revert NotInInternalDelegateCall();
+    }
+
+    function _isInInternalDelegateCall() private view returns (bool) {
+        return CommonFacetLib.commonStorage().isInInternalDelegateCall;
     }
 }

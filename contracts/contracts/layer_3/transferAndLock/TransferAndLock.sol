@@ -206,6 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {CommonFacetLib} from "../../layer_0/common/CommonFacetLib.sol";
 import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
 import {
     IStaticFunctionSelectors
@@ -240,7 +241,7 @@ contract TransferAndLock is
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 lockId_)
     {
-        _transferByPartition(
+        CommonFacetLib.transferByPartition(
             _msgSender(),
             IERC1410Basic.BasicTransferInfo(_to, _amount),
             _partition,
@@ -280,7 +281,7 @@ contract TransferAndLock is
         onlyUnProtectedPartitionsOrWildCardRole
         returns (bool success_, uint256 lockId_)
     {
-        _transferByPartition(
+        CommonFacetLib.transferByPartition(
             _msgSender(),
             IERC1410Basic.BasicTransferInfo(_to, _amount),
             _DEFAULT_PARTITION,

@@ -208,6 +208,7 @@ pragma solidity 0.8.18;
 
 import {IERC1410Standard} from '../../interfaces/ERC1400/IERC1410Standard.sol';
 import {Common} from '../../common/Common.sol';
+import {CommonFacetLib} from "../../../layer_0/common/CommonFacetLib.sol";
 
 import {_ISSUER_ROLE} from '../../constants/roles.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
@@ -227,7 +228,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyRole(_ISSUER_ROLE)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _issueData.tokenHolder)
     {
-        _issueByPartition(_issueData);
+        CommonFacetLib.issueByPartition(_issueData);
     }
 
     /// @notice Decreases totalSupply and the corresponding amount of the specified partition of _msgSender()
@@ -249,7 +250,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
     {
         // Add the function to validate the `_data` parameter
-        _redeemByPartition(
+        CommonFacetLib.redeemByPartition(
             _partition,
             _msgSender(),
             address(0),
@@ -284,7 +285,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
     {
-        _redeemByPartition(
+        CommonFacetLib.redeemByPartition(
             _partition,
             _tokenHolder,
             _msgSender(),

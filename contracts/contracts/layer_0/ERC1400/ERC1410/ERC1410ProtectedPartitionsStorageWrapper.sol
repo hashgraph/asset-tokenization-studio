@@ -206,15 +206,16 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {CommonFacetLib} from "../../common/CommonFacetLib.sol";
 import {
     ERC1410ControllerStorageWrapper
 } from './ERC1410ControllerStorageWrapper.sol';
 import {
-    checkNounceAndDeadline
-} from '../../../layer_1/protectedPartitions/signatureVerification.sol';
-import {
     IERC1410Basic
 } from '../../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import {
+    checkNounceAndDeadline
+} from '../../../layer_1/protectedPartitions/signatureVerification.sol';
 
 abstract contract ERC1410ProtectedPartitionsStorageWrapper is
     ERC1410ControllerStorageWrapper
@@ -248,7 +249,7 @@ abstract contract ERC1410ProtectedPartitionsStorageWrapper is
 
         _setNounce(_nounce, _from);
 
-        _transferByPartition(
+        CommonFacetLib.transferByPartition(
             _from,
             IERC1410Basic.BasicTransferInfo(_to, _amount),
             _partition,
@@ -284,6 +285,6 @@ abstract contract ERC1410ProtectedPartitionsStorageWrapper is
         );
         _setNounce(_nounce, _from);
 
-        _redeemByPartition(_partition, _from, _msgSender(), _amount, '', '');
+        CommonFacetLib.redeemByPartition(_partition, _from, _msgSender(), _amount, '', '');
     }
 }

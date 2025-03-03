@@ -206,6 +206,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import {CommonFacetLib} from "../../common/CommonFacetLib.sol";
 import {ERC1410BasicStorageWrapper} from './ERC1410BasicStorageWrapper.sol';
 import {
     _ERC1410_OPERATOR_STORAGE_POSITION
@@ -263,7 +264,7 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
     function _operatorTransferByPartition(
         IERC1410Operator.OperatorTransferData calldata _operatorTransferData
     ) internal returns (bytes32) {
-        _transferByPartition(
+        CommonFacetLib.transferByPartition(
             _operatorTransferData.from,
             IERC1410Basic.BasicTransferInfo(
                 _operatorTransferData.to,

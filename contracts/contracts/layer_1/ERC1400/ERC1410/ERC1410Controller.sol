@@ -207,7 +207,7 @@
 pragma solidity 0.8.18;
 
 import {Common} from '../../common/Common.sol';
-
+import {CommonFacetLib} from '../../../layer_0/common/CommonFacetLib.sol';
 import {_CONTROLLER_ROLE} from '../../constants/roles.sol';
 import {
     IERC1410Controller
@@ -230,7 +230,7 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
         onlyRole(_CONTROLLER_ROLE)
         onlyControllable
     {
-        _transferByPartition(
+        CommonFacetLib.transferByPartition(
             _from,
             IERC1410Basic.BasicTransferInfo(_to, _value),
             _partition,
@@ -254,7 +254,7 @@ abstract contract ERC1410Controller is IERC1410Controller, Common {
         onlyRole(_CONTROLLER_ROLE)
         onlyControllable
     {
-        _redeemByPartition(
+        CommonFacetLib.redeemByPartition(
             _partition,
             _tokenHolder,
             _msgSender(),

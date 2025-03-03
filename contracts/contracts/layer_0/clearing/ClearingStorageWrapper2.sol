@@ -206,6 +206,9 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {
+CommonFacetLib
+} from '../common/CommonFacetLib.sol';
 import {HoldStorageWrapper2} from '../hold/HoldStorageWrapper2.sol';
 import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 import {
@@ -490,7 +493,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             IClearing.ClearingOperationType.Redeem
         ) {
             return
-                _redeemByPartition(
+                CommonFacetLib.redeemByPartition(
                     _clearingOperationIdentifier.partition,
                     _clearingOperationIdentifier.tokenHolder,
                     _msgSender(),
@@ -512,7 +515,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             IClearing.ClearingOperationType.Transfer
         ) {
             return
-                _transferByPartition(
+                CommonFacetLib.transferByPartition(
                     _clearingOperationIdentifier.tokenHolder,
                     IERC1410Basic.BasicTransferInfo(
                         clearingData.destination,
@@ -524,7 +527,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                     clearingData.operatorData
                 );
         }
-        _createHoldByPartition(
+        CommonFacetLib.createHoldByPartition(
             _clearingOperationIdentifier.partition,
             _clearingOperationIdentifier.tokenHolder,
             IHold.Hold(
@@ -620,7 +623,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             memory _clearingOperationIdentifier,
         address _to
     ) internal {
-        _triggerAndSyncAll(
+        CommonFacetLib.triggerAndSyncAll(
             _clearingOperationIdentifier.partition,
             _clearingOperationIdentifier.tokenHolder,
             _to

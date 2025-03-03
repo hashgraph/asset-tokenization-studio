@@ -206,8 +206,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
+import {CommonFacetLib} from "../../../layer_0/common/CommonFacetLib.sol";
 import {Common} from '../../common/Common.sol';
+import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
 import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 
 abstract contract ERC1410Basic is IERC1410Basic, Common {
@@ -250,7 +251,7 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
         // out of bound error).
         // Note- There is no operator used for the execution of this call so `_operator` value in
         // in event is address(0) same for the `_operatorData`
-        _transferByPartition(
+        CommonFacetLib.transferByPartition(
             msg.sender,
             _basicTransferInfo,
             _partition,

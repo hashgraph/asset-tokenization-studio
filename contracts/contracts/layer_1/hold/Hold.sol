@@ -210,6 +210,7 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
 import {Common} from '../common/Common.sol';
+import {CommonFacetLib} from "../../layer_0/common/CommonFacetLib.sol";
 import {_CONTROLLER_ROLE} from '../constants/roles.sol';
 import {_HOLD_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
@@ -231,7 +232,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
-        (success_, holdId_) = _createHoldByPartition(
+        (success_, holdId_) = CommonFacetLib.createHoldByPartition(
             _partition,
             _msgSender(),
             _hold,
@@ -300,7 +301,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
-        (success_, holdId_) = _createHoldByPartition(
+        (success_, holdId_) = CommonFacetLib.createHoldByPartition(
             _partition,
             _from,
             _hold,
@@ -335,7 +336,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
-        (success_, holdId_) = _createHoldByPartition(
+        (success_, holdId_) = CommonFacetLib.createHoldByPartition(
             _partition,
             _from,
             _hold,
@@ -403,7 +404,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         returns (bool success_)
     {
-        success_ = _executeHoldByPartition(_holdIdentifier, _to, _amount);
+        success_ = CommonFacetLib.executeHoldByPartition(_holdIdentifier, _to, _amount);
 
         emit HoldByPartitionExecuted(
             _holdIdentifier.tokenHolder,
