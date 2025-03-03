@@ -205,337 +205,115 @@
 
 pragma solidity 0.8.18;
 
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {Common} from '../common/Common.sol';
+import {IClearingActions} from '../interfaces/clearing/IClearingActions.sol';
+import {IClearing} from '../interfaces/clearing/IClearing.sol';
+import {_CLEARING_VALIDATOR_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
-import {IHold} from '../interfaces/hold/IHold.sol';
-import {Common} from '../common/Common.sol';
-import {_CONTROLLER_ROLE} from '../constants/roles.sol';
-import {_HOLD_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
+import {_CLEARING_ACTIONS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-contract Hold is IHold, IStaticFunctionSelectors, Common {
-    function createHoldByPartition(
-        bytes32 _partition,
-        Hold calldata _hold
+// solhint-disable no-unused-vars, custom-errors
+contract ClearingActionsFacet is
+    IStaticFunctionSelectors,
+    IClearingActions,
+    Common
+{
+    function approveClearingOperationByPartition(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
     )
         external
         override
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
         onlyUnpaused
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _msgSender(),
-            _hold,
-            ''
-        );
-
-        emit HeldByPartition(
-            _msgSender(),
-            _msgSender(),
-            _partition,
-            holdId_,
-            _hold,
-            ''
-        );
-    }
-
-    function createHoldFromByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_from)
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _createHoldFromByPartition(
-            _partition,
-            _from,
-            _hold,
-            _operatorData
-        );
-
-        emit HeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
-    }
-
-    function operatorCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_from)
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyOperator(_partition, _from)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _from,
-            _hold,
-            _operatorData
-        );
-
-        emit HeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
-    }
-
-    function controllerCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        Hold calldata _hold,
-        bytes calldata _operatorData
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_from)
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyRole(_CONTROLLER_ROLE)
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyControllable
-        onlyClearingDisabled
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _createHoldByPartition(
-            _partition,
-            _from,
-            _hold,
-            _operatorData
-        );
-
-        emit HeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _hold,
-            _operatorData
-        );
-    }
-
-    function protectedCreateHoldByPartition(
-        bytes32 _partition,
-        address _from,
-        ProtectedHold memory _protectedHold,
-        bytes calldata _signature
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_from)
-        validateAddress(_protectedHold.hold.escrow)
-        onlyRole(_protectedPartitionsRole(_partition))
-        onlyWithValidExpirationTimestamp(
-            _protectedHold.hold.expirationTimestamp
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationIdentifier.partition
         )
-        onlyProtectedPartitions
-        onlyClearingDisabled
-        returns (bool success_, uint256 holdId_)
-    {
-        (success_, holdId_) = _protectedCreateHoldByPartition(
-            _partition,
-            _from,
-            _protectedHold,
-            _signature
-        );
-
-        emit HeldByPartition(
-            _msgSender(),
-            _from,
-            _partition,
-            holdId_,
-            _protectedHold.hold,
-            ''
-        );
-    }
-
-    function executeHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
-        address _to,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
-        onlyWithValidHoldId(_holdIdentifier)
-        onlyListedAllowed(_to)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _holdIdentifier.tokenHolder)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _clearingOperationIdentifier.tokenHolder
+        )
+        onlyClearingActivated
         returns (bool success_)
     {
-        success_ = _executeHoldByPartition(_holdIdentifier, _to, _amount);
-
-        emit HoldByPartitionExecuted(
-            _holdIdentifier.tokenHolder,
-            _holdIdentifier.partition,
-            _holdIdentifier.holdId,
-            _amount,
-            _to
+        success_ = _approveClearingOperationByPartition(
+            _clearingOperationIdentifier
         );
-    }
 
-    function releaseHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier,
-        uint256 _amount
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
-        onlyWithValidHoldId(_holdIdentifier)
-        returns (bool success_)
-    {
-        success_ = _releaseHoldByPartition(_holdIdentifier, _amount);
-        emit HoldByPartitionReleased(
-            _holdIdentifier.tokenHolder,
-            _holdIdentifier.partition,
-            _holdIdentifier.holdId,
-            _amount
-        );
-    }
-
-    function reclaimHoldByPartition(
-        HoldIdentifier calldata _holdIdentifier
-    )
-        external
-        override
-        onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_holdIdentifier.partition)
-        onlyWithValidHoldId(_holdIdentifier)
-        returns (bool success_)
-    {
-        uint256 amount_;
-        (success_, amount_) = _reclaimHoldByPartition(_holdIdentifier);
-        emit HoldByPartitionReclaimed(
+        emit ClearingOperationApproved(
             _msgSender(),
-            _holdIdentifier.tokenHolder,
-            _holdIdentifier.partition,
-            _holdIdentifier.holdId,
-            amount_
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingId,
+            _clearingOperationIdentifier.clearingOperationType
         );
     }
 
-    function getHeldAmountFor(
-        address _tokenHolder
-    ) external view override returns (uint256 amount_) {
-        return _getHeldAmountFor(_tokenHolder);
-    }
-
-    function getHeldAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 amount_) {
-        return _getHeldAmountForByPartition(_partition, _tokenHolder);
-    }
-
-    function getHoldCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view override returns (uint256 holdCount_) {
-        return _getHoldCountForByPartition(_partition, _tokenHolder);
-    }
-
-    function getHoldsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) external view override returns (uint256[] memory holdsId_) {
-        return
-            _getHoldsIdForByPartition(
-                _partition,
-                _tokenHolder,
-                _pageIndex,
-                _pageLength
-            );
-    }
-
-    function getHoldForByPartition(
-        HoldIdentifier calldata _holdIdentifier
+    function cancelClearingOperationByPartition(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
     )
         external
-        view
         override
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationIdentifier.partition
         )
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _clearingOperationIdentifier.tokenHolder
+        )
+        onlyClearingActivated
+        returns (bool success_)
     {
-        return _getHoldForByPartition(_holdIdentifier);
+        success_ = _cancelClearingOperationByPartition(
+            _clearingOperationIdentifier
+        );
+        emit ClearingOperationCanceled(
+            _msgSender(),
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingId,
+            _clearingOperationIdentifier.clearingOperationType
+        );
     }
 
-    function getHeldAmountForAdjusted(
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return _getHeldAmountForAdjusted(_tokenHolder);
-    }
-
-    function getHeldAmountForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return _getHeldAmountForByPartitionAdjusted(_partition, _tokenHolder);
-    }
-
-    function getHoldForByPartitionAdjusted(
-        IHold.HoldIdentifier calldata _holdIdentifier
+    function reclaimClearingOperationByPartition(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
     )
         external
-        view
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
+        override
+        onlyRole(_CLEARING_VALIDATOR_ROLE)
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationIdentifier.partition
         )
+        onlyWithValidClearingId(_clearingOperationIdentifier)
+        onlyValidKycStatus(
+            IKyc.KycStatus.GRANTED,
+            _clearingOperationIdentifier.tokenHolder
+        )
+        onlyClearingActivated
+        returns (bool success_)
     {
-        return _getHoldForByPartitionAdjusted(_holdIdentifier);
+        success_ = _reclaimClearingOperationByPartition(
+            _clearingOperationIdentifier
+        );
+        emit ClearingOperationReclaimed(
+            _msgSender(),
+            _clearingOperationIdentifier.tokenHolder,
+            _clearingOperationIdentifier.partition,
+            _clearingOperationIdentifier.clearingId,
+            _clearingOperationIdentifier.clearingOperationType
+        );
     }
 
     function getStaticResolverKey()
@@ -544,7 +322,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         override
         returns (bytes32 staticResolverKey_)
     {
-        staticResolverKey_ = _HOLD_RESOLVER_KEY;
+        staticResolverKey_ = _CLEARING_ACTIONS_RESOLVER_KEY;
     }
 
     function getStaticFunctionSelectors()
@@ -554,54 +332,15 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](16);
+        staticFunctionSelectors_ = new bytes4[](3);
         staticFunctionSelectors_[selectorIndex++] = this
-            .createHoldByPartition
+            .approveClearingOperationByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .createHoldFromByPartition
+            .cancelClearingOperationByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .operatorCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .controllerCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .protectedCreateHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .executeHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .releaseHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .reclaimHoldByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHeldAmountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldCountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldsIdForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHeldAmountForAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHeldAmountForByPartitionAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHeldAmountFor
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getHoldForByPartitionAdjusted
+            .reclaimClearingOperationByPartition
             .selector;
     }
 
@@ -613,6 +352,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
     {
         staticInterfaceIds_ = new bytes4[](1);
         uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IHold).interfaceId;
+        staticInterfaceIds_[selectorsIndex++] = type(IClearing).interfaceId;
     }
 }
+// solhint-enable no-unused-vars, custom-errors

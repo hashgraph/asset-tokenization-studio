@@ -208,6 +208,7 @@ pragma solidity 0.8.18;
 
 import {CapStorageWrapper2} from '../../layer_0/cap/CapStorageWrapper2.sol';
 import {_WILD_CARD_ROLE} from '../constants/roles.sol';
+import {IClearing} from '../interfaces/clearing/IClearing.sol';
 
 // solhint-disable no-empty-blocks
 abstract contract Common is CapStorageWrapper2 {
@@ -229,6 +230,11 @@ abstract contract Common is CapStorageWrapper2 {
         _;
     }
 
+    modifier onlyClearingDisabled() {
+        _checkClearingDisabled();
+        _;
+    }
+
     function _checkUninitialized(bool _initialized) private pure {
         if (_initialized) revert AlreadyInitialized();
     }
@@ -237,7 +243,13 @@ abstract contract Common is CapStorageWrapper2 {
         if (_msgSender() != address(this)) revert OnlyDelegateAllowed();
     }
 
-    function _checkUnProtectedPartitionsOrWildCardRole() private view {
+    function _checkClearingDisabled() private view {
+        if (_isClearingActivated()) {
+            revert IClearing.ClearingIsActivated();
+        }
+    }
+
+    function _checkUnProtectedPartitionsOrWildCardRole() internal view {
         if (
             _arePartitionsProtected() &&
             !_hasRole(_WILD_CARD_ROLE, _msgSender())

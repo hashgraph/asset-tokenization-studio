@@ -210,7 +210,6 @@ import {Common} from '../common/Common.sol';
 import {IClearing} from '../interfaces/clearing/IClearing.sol';
 import {IHold} from '../interfaces/hold/IHold.sol';
 import {_CLEARING_ROLE} from '../constants/roles.sol';
-import {_CLEARING_VALIDATOR_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
@@ -250,30 +249,35 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_to)
-        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
             _checkValidAddress(_to);
+            _checkControlList(_msgSender());
+            _checkControlList(_to);
+            _checkDefaultPartitionWithSinglePartition(
+                _clearingOperation.partition
+            );
+            _checkUnProtectedPartitionsOrWildCardRole();
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender());
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _to);
         }
 
-        (success_, clearingId_) = _clearingTransferByPartition(
+        bytes memory encodedClearingData = abi.encode(_to, '');
+
+        (success_, clearingId_) = _operateClearingCreation(
+            encodedClearingData,
             _clearingOperation,
-            _amount,
-            _to,
             _msgSender(),
-            ''
+            _amount,
+            ClearingOperationType.Transfer
         );
 
         emit ClearedTransferByPartition(
             _msgSender(),
             _msgSender(),
+            _to,
             _clearingOperation.partition,
             clearingId_,
             ''
@@ -287,27 +291,23 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
     )
         external
         override
-        onlyUnpaused
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_to)
-        onlyListedAllowed(_clearingOperationFrom.from)
-        onlyWithoutMultiPartition
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _clearingOperationFrom.from)
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        (success_, clearingId_) = _clearingTransferFromByPartition(
-            _clearingOperationFrom.clearingOperation,
-            _amount,
-            _to,
+        bytes memory encodedClearingData = abi.encode(_to, '');
+
+        (success_, clearingId_) = _operateClearingCreationFrom(
+            encodedClearingData,
             _clearingOperationFrom.from,
-            ''
+            _amount,
+            _clearingOperationFrom.clearingOperation,
+            ClearingOperationType.Transfer
         );
 
         emit ClearedTransferByPartition(
             _msgSender(),
             _clearingOperationFrom.from,
+            _to,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
             ''
@@ -329,6 +329,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _clearingOperationFrom.from
         )
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
@@ -343,17 +344,23 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             );
             _checkValidKycStatus(IKyc.KycStatus.GRANTED, _to);
         }
-        (success_, clearingId_) = _clearingTransferByPartition(
-            _clearingOperationFrom.clearingOperation,
-            _amount,
+        bytes memory encodedClearingData = abi.encode(
             _to,
-            _clearingOperationFrom.from,
             _clearingOperationFrom.operatorData
+        );
+
+        (success_, clearingId_) = _operateClearingCreation(
+            encodedClearingData,
+            _clearingOperationFrom.clearingOperation,
+            _clearingOperationFrom.from,
+            _amount,
+            ClearingOperationType.Transfer
         );
 
         emit ClearedTransferByPartition(
             _msgSender(),
             _clearingOperationFrom.from,
+            _to,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
             _clearingOperationFrom.operatorData
@@ -378,6 +385,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _protectedClearingOperation.from
         )
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
@@ -396,6 +404,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         emit ClearedTransferByPartition(
             _msgSender(),
             _protectedClearingOperation.from,
+            _to,
             _protectedClearingOperation.clearingOperation.partition,
             clearingId_,
             ''
@@ -414,19 +423,24 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        (success_, clearingId_) = _clearingCreateHoldByPartition(
-            _clearingOperation.partition,
+        bytes memory encodedClearingData = abi.encode(_hold, '');
+
+        (success_, clearingId_) = _operateClearingCreation(
+            encodedClearingData,
+            _clearingOperation,
             _msgSender(),
-            _clearingOperation.expirationTimestamp,
-            _hold,
-            ''
+            _hold.amount,
+            ClearingOperationType.HoldCreation
         );
 
+        address sender_ = _msgSender();
+
         emit ClearedHoldByPartition(
-            _msgSender(),
-            _msgSender(),
+            sender_,
+            sender_,
             _clearingOperation.partition,
             clearingId_,
             _hold,
@@ -451,14 +465,17 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         )
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        (success_, clearingId_) = _clearingCreateHoldFromByPartition(
-            _clearingOperationFrom.clearingOperation.partition,
+        bytes memory encodedClearingData = abi.encode(_hold, '');
+
+        (success_, clearingId_) = _operateClearingCreationFrom(
+            encodedClearingData,
             _clearingOperationFrom.from,
-            _clearingOperationFrom.clearingOperation.expirationTimestamp,
-            _hold,
-            _clearingOperationFrom.operatorData
+            _hold.amount,
+            _clearingOperationFrom.clearingOperation,
+            ClearingOperationType.HoldCreation
         );
 
         emit ClearedHoldByPartition(
@@ -477,32 +494,37 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
     )
         external
         override
-        onlyUnpaused
-        validateAddress(_hold.escrow)
-        onlyDefaultPartitionWithSinglePartition(
-            _clearingOperationFrom.clearingOperation.partition
-        )
-        onlyOperator(
-            _clearingOperationFrom.clearingOperation.partition,
-            _clearingOperationFrom.from
-        )
-        onlyWithValidExpirationTimestamp(
-            _clearingOperationFrom.clearingOperation.expirationTimestamp
-        )
-        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
-        onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
             _checkValidAddress(_clearingOperationFrom.from);
+            _checkValidAddress(_hold.escrow);
+            _checkDefaultPartitionWithSinglePartition(
+                _clearingOperationFrom.clearingOperation.partition
+            );
+            _checkOperator(
+                _clearingOperationFrom.clearingOperation.partition,
+                _clearingOperationFrom.from
+            );
+            _checkExpirationTimestamp(
+                _clearingOperationFrom.clearingOperation.expirationTimestamp
+            );
+            _checkExpirationTimestamp(_hold.expirationTimestamp);
+            _checkUnProtectedPartitionsOrWildCardRole();
         }
 
-        (success_, clearingId_) = _clearingCreateHoldByPartition(
-            _clearingOperationFrom.clearingOperation.partition,
-            _clearingOperationFrom.from,
-            _clearingOperationFrom.clearingOperation.expirationTimestamp,
+        bytes memory encodedClearingData = abi.encode(
             _hold,
             _clearingOperationFrom.operatorData
+        );
+
+        (success_, clearingId_) = _operateClearingCreation(
+            encodedClearingData,
+            _clearingOperationFrom.clearingOperation,
+            _clearingOperationFrom.from,
+            _hold.amount,
+            ClearingOperationType.HoldCreation
         );
 
         emit ClearedHoldByPartition(
@@ -532,6 +554,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         )
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyProtectedPartitions
+        onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         (success_, clearingId_) = _protectedClearingCreateHoldByPartition(
@@ -550,10 +573,168 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         );
     }
 
+    function clearingRedeemByPartition(
+        ClearingOperation calldata _clearingOperation,
+        uint256 _amount
+    )
+        external
+        override
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
+        {
+            _checkUnpaused();
+            _checkDefaultPartitionWithSinglePartition(
+                _clearingOperation.partition
+            );
+            _checkControlList(_msgSender());
+            _checkUnProtectedPartitionsOrWildCardRole();
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender());
+        }
+
+        bytes memory encodedClearingData = abi.encode('');
+
+        (success_, clearingId_) = _operateClearingCreation(
+            encodedClearingData,
+            _clearingOperation,
+            _msgSender(),
+            _amount,
+            ClearingOperationType.Redeem
+        );
+
+        address sender_ = _msgSender();
+
+        emit ClearedRedeemByPartition(
+            sender_,
+            sender_,
+            _clearingOperation.partition,
+            clearingId_,
+            ''
+        );
+    }
+
+    function clearingRedeemFromByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount
+    )
+        external
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
+        {
+            _checkUnpaused();
+            _checkDefaultPartitionWithSinglePartition(
+                _clearingOperationFrom.clearingOperation.partition
+            );
+            _checkControlList(_msgSender());
+            _checkControlList(_clearingOperationFrom.from);
+            _checkUnProtectedPartitionsOrWildCardRole();
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender());
+            _checkValidKycStatus(
+                IKyc.KycStatus.GRANTED,
+                _clearingOperationFrom.from
+            );
+        }
+
+        bytes memory encodedClearingData = abi.encode('');
+
+        (success_, clearingId_) = _operateClearingCreationFrom(
+            encodedClearingData,
+            _clearingOperationFrom.from,
+            _amount,
+            _clearingOperationFrom.clearingOperation,
+            ClearingOperationType.Redeem
+        );
+
+        emit ClearedRedeemByPartition(
+            _msgSender(),
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ''
+        );
+    }
+
+    function operatorClearingRedeemByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        uint256 _amount
+    )
+        external
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
+        {
+            _checkUnpaused();
+            _checkControlList(_msgSender());
+            _checkControlList(_clearingOperationFrom.from);
+            _checkValidKycStatus(
+                IKyc.KycStatus.GRANTED,
+                _clearingOperationFrom.from
+            );
+            _checkDefaultPartitionWithSinglePartition(
+                _clearingOperationFrom.clearingOperation.partition
+            );
+            _checkOperator(
+                _clearingOperationFrom.clearingOperation.partition,
+                _clearingOperationFrom.from
+            );
+            _checkUnProtectedPartitionsOrWildCardRole();
+        }
+
+        bytes memory encodedClearingData = abi.encode(
+            _clearingOperationFrom.operatorData
+        );
+        (success_, clearingId_) = _operateClearingCreation(
+            encodedClearingData,
+            _clearingOperationFrom.clearingOperation,
+            _clearingOperationFrom.from,
+            _amount,
+            ClearingOperationType.Redeem
+        );
+
+        emit ClearedRedeemByPartition(
+            _msgSender(),
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            ''
+        );
+    }
+
+    function protectedClearingRedeemByPartition(
+        ProtectedClearingOperation calldata _protectedClearingOperation,
+        uint256 _amount,
+        bytes calldata _signature
+    )
+        external
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
+        (success_, clearingId_) = _protectedClearingRedeemByPartition(
+            _protectedClearingOperation,
+            _amount,
+            _signature
+        );
+
+        emit ClearedRedeemByPartition(
+            _msgSender(),
+            _protectedClearingOperation.from,
+            _protectedClearingOperation.clearingOperation.partition,
+            clearingId_,
+            ''
+        );
+    }
+
     function getClearedAmountFor(
         address _tokenHolder
     ) external view returns (uint256 amount_) {
         return _getClearedAmountFor(_tokenHolder);
+    }
+
+    function getClearedAmountForAdjusted(
+        address _tokenHolder
+    ) external view returns (uint256 amount_) {
+        return _getClearedAmountForAdjusted(_tokenHolder);
     }
 
     function getClearedAmountForByPartition(
@@ -561,6 +742,14 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         address _tokenHolder
     ) external view returns (uint256 amount_) {
         return _getClearedAmountForByPartition(_partition, _tokenHolder);
+    }
+
+    function getClearedAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 amount_) {
+        return
+            _getClearedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function getClearingCountForByPartition(
@@ -612,6 +801,25 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         return _getClearingForByPartition(_clearingOperationIdentifier);
     }
 
+    function getClearingForByPartitionAdjusted(
+        ClearingOperationIdentifier calldata _clearingOperationIdentifier
+    )
+        external
+        view
+        override
+        returns (
+            uint256 amount_,
+            uint256 expirationTimestamp_,
+            address destination_,
+            ClearingOperationType clearingOperationType_,
+            bytes memory data_,
+            bytes memory operatorData_,
+            IHold.Hold memory hold_
+        )
+    {
+        return _getClearingForByPartitionAdjusted(_clearingOperationIdentifier);
+    }
+
     function isClearingActivated() external view returns (bool) {
         return _isClearingActivated();
     }
@@ -632,7 +840,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](14);
+        staticFunctionSelectors_ = new bytes4[](23);
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_Clearing
             .selector;
@@ -650,6 +858,21 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getClearingForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getClearingForByPartitionAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getClearedAmountFor
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getClearedAmountForAdjusted
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getClearedAmountForByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getClearedAmountForByPartitionAdjusted
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .clearingTransferByPartition
@@ -674,6 +897,18 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .protectedClearingCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearingRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearingRedeemFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorClearingRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedClearingRedeemByPartition
             .selector;
     }
 

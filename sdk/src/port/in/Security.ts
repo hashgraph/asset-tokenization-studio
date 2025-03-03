@@ -298,6 +298,10 @@ import ReclaimHoldByPartitionRequest from './request/ReclaimHoldByPartitionReque
 import { ReclaimHoldByPartitionCommand } from '../../app/usecase/command/security/operations/hold/reclaimHoldByPartition/ReclaimHoldByPartitionCommand.js';
 import { ExecuteHoldByPartitionCommand } from '../../app/usecase/command/security/operations/executeHoldByPartition/ExecuteHoldByPartitionCommand.js';
 import ExecuteHoldByPartitionRequest from './request/ExecuteHoldByPartitionRequest.js';
+import ActivateClearingRequest from './request/ActivateClearingRequest.js';
+import DeactivateClearingRequest from './request/DeactivateClearingRequest.js';
+import { ActivateClearingCommand } from '../../app/usecase/command/security/operations/clearing/activateClearing/ActivateClearingCommand.js';
+import { DeactivateClearingCommand } from '../../app/usecase/command/security/operations/clearing/deactivateClearing/DeactivateClearingCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -389,6 +393,12 @@ interface ISecurityInPort {
   ): Promise<{ payload: boolean; transactionId: string }>;
   executeHoldByPartition(
     request: ExecuteHoldByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  activateClearing(
+    request: ActivateClearingRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  deactivateClearing(
+    request: DeactivateClearingRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
@@ -1150,6 +1160,28 @@ class SecurityInPort implements ISecurityInPort {
         targetId,
         partitionId,
       ),
+    );
+  }
+
+  @LogError
+  async activateClearing(
+    request: ActivateClearingRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('ActivateClearingRequest', request);
+
+    return await this.commandBus.execute(
+      new ActivateClearingCommand(request.securityId),
+    );
+  }
+
+  @LogError
+  async deactivateClearing(
+    request: DeactivateClearingRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('DeactivateClearingRequest', request);
+
+    return await this.commandBus.execute(
+      new DeactivateClearingCommand(request.securityId),
     );
   }
 }

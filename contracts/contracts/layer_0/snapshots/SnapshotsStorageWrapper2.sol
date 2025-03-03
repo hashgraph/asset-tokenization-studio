@@ -553,5 +553,14 @@ abstract contract SnapshotsStorageWrapper2 is
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_);
+
+    function _getClearedAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_);
+
+    function _getClearedAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_);
 }
 // solhint-enable no-unused-vars, custom-errors

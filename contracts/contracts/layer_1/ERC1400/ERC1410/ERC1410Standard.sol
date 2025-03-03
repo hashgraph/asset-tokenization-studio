@@ -245,6 +245,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyListedAllowed(_msgSender())
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
     {
         // Add the function to validate the `_data` parameter
@@ -280,6 +281,7 @@ abstract contract ERC1410Standard is IERC1410Standard, Common {
         onlyListedAllowed(_msgSender())
         onlyOperator(_partition, _tokenHolder)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _tokenHolder)
     {
         _redeemByPartition(

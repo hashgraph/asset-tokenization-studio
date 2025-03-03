@@ -281,3 +281,8 @@ bytes32 constant _PROTECTED_HOLD_TYPEHASH = 0x432ede4c9f6d06cc57be0d75da5dce179c
 //'protectedClearingTransferByPartition(ProtectedClearingOperation _protectedClearingOperation,uint256 _amount,address _to)ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)'
 //);
 bytes32 constant _PROTECTED_CLEARING_TRANSFER_FROM_PARTITION_TYPEHASH = 0xf6002360a0d016a1d9ddacedb69cf68c14ae4f12e2896065a417e70d33de7969;
+
+//keccak256(
+//'protectedClearingRedeem(ProtectedClearingOperation _protectedClearingOperation,uint256 _amount)ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)'
+//);
+bytes32 constant _PROTECTED_CLEARING_REDEEM_TYPEHASH = 0xf2e6717ac24481054d8b74bd2f5aebc3097ff6521ee8a1fc24e93a31e731a4c1;
