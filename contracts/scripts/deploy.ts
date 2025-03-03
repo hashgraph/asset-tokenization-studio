@@ -263,8 +263,10 @@ import {
     TransferAndLockTimeTravel__factory,
     TransparentUpgradeableProxy__factory,
     TimeTravel__factory,
-ClearingFacet__factory,
-ClearingFacetTimeTravel__factory,
+    ClearingFacet__factory,
+    ClearingFacetTimeTravel__factory,
+    ClearingActionsFacet__factory,
+    ClearingActionsFacetTimeTravel__factory,
 } from '@typechain'
 import Configuration from '@configuration'
 import {
@@ -696,11 +698,22 @@ export async function deployAtsContracts({
         clearingFacet: new DeployContractWithFactoryCommand({
             factory: getFactory(
                 new ClearingFacet__factory(),
-                new ClearingFacetTimeTravel__factory(),
+                new ClearingFacetTimeTravel__factory()
             ),
             signer,
             deployedContract: useDeployed
-                ? Configuration.contracts.ClearingFacet.addresses?.[
+                ? Configuration.contracts.ClearingFacet.addresses?.[network]
+                : undefined,
+            overrides,
+        }),
+        clearingActionsFacet: new DeployContractWithFactoryCommand({
+            factory: getFactory(
+                new ClearingActionsFacet__factory(),
+                new ClearingActionsFacetTimeTravel__factory()
+            ),
+            signer,
+            deployedContract: useDeployed
+                ? Configuration.contracts.ClearingActionsFacet.addresses?.[
                       network
                   ]
                 : undefined,
@@ -883,8 +896,14 @@ export async function deployAtsContracts({
             clearingFacet: await deployContractWithFactory(
                 commands.clearingFacet
             ).then((result) => {
+                console.log('ClearingFacet has been deployed successfully')
+                return result
+            }),
+            clearingActionsFacet: await deployContractWithFactory(
+                commands.clearingActionsFacet
+            ).then((result) => {
                 console.log(
-                    'ClearingFacet has been deployed successfully'
+                    'ClearingActionsFacet has been deployed successfully'
                 )
                 return result
             }),

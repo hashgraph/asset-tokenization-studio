@@ -203,143 +203,27 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {LibCommon} from '../common/LibCommon.sol';
-import {_HOLD_STORAGE_POSITION} from '../constants/storagePositions.sol';
-import {PauseStorageWrapper} from '../core/pause/PauseStorageWrapper.sol';
-import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {
-    EnumerableSet
-} from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+    ClearingActionsFacet
+} from '../../../layer_1/clearing/ClearingActionsFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
-
-abstract contract HoldStorageWrapper1 is PauseStorageWrapper {
-    using LibCommon for EnumerableSet.UintSet;
-    using EnumerableSet for EnumerableSet.UintSet;
-
-    modifier onlyWithValidHoldId(IHold.HoldIdentifier calldata _holdIdentifier)
-    {
-        _checkHoldId(_holdIdentifier);
-        _;
-    }
-
-    function _isHoldIdValid(
-        IHold.HoldIdentifier memory _holdIdentifier
-    ) internal view returns (bool) {
-        return _getHold(_holdIdentifier).id != 0;
-    }
-
-    function _getHold(
-        IHold.HoldIdentifier memory _holdIdentifier
-    ) internal view returns (IHold.HoldData memory) {
-        return
-            _holdStorage().holdsByAccountPartitionAndId[
-                _holdIdentifier.tokenHolder
-            ][_holdIdentifier.partition][_holdIdentifier.holdId];
-    }
-
-    function _getHeldAmountFor(
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return _holdStorage().totalHeldAmountByAccount[_tokenHolder];
-    }
-
-    function _getHeldAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256 amount_) {
-        return
-            _holdStorage().totalHeldAmountByAccountAndPartition[_tokenHolder][
-                _partition
-            ];
-    }
-
-    function _getHoldsIdForByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _pageIndex,
-        uint256 _pageLength
-    ) internal view returns (uint256[] memory holdsId_) {
-        return
-            _holdStorage()
-            .holdIdsByAccountAndPartition[_tokenHolder][_partition].getFromSet(
-                    _pageIndex,
-                    _pageLength
-                );
-    }
-
-    function _getHoldForByPartition(
-        IHold.HoldIdentifier calldata _holdIdentifier
-    )
+contract ClearingActionsFacetTimeTravel is
+    ClearingActionsFacet,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
         internal
         view
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address escrow_,
-            address destination_,
-            bytes memory data_,
-            bytes memory operatorData_
-        )
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
     {
-        IHold.HoldData memory holdData = _getHold(_holdIdentifier);
-        return (
-            holdData.hold.amount,
-            holdData.hold.expirationTimestamp,
-            holdData.hold.escrow,
-            holdData.hold.to,
-            holdData.hold.data,
-            holdData.operatorData
-        );
-    }
-
-    function _getHoldCountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) internal view returns (uint256) {
-        return
-            _holdStorage()
-            .holdIdsByAccountAndPartition[_tokenHolder][_partition].length();
-    }
-
-    function _isHoldExpired(
-        IHold.Hold memory _hold
-    ) internal view returns (bool) {
-        return _blockTimestamp() > _hold.expirationTimestamp;
-    }
-
-    function _isEscrow(
-        IHold.Hold memory _hold,
-        address _escrow
-    ) internal pure returns (bool) {
-        return _escrow == _hold.escrow;
-    }
-
-    function _checkHoldAmount(
-        uint256 _amount,
-        IHold.HoldData memory holdData
-    ) internal pure {
-        if (_amount > holdData.hold.amount)
-            revert IHold.InsufficientHoldBalance(holdData.hold.amount, _amount);
-    }
-
-    function _checkHoldId(
-        IHold.HoldIdentifier calldata _holdIdentifier
-    ) private view {
-        if (!_isHoldIdValid(_holdIdentifier)) revert IHold.WrongHoldId();
-    }
-
-    function _holdStorage()
-        internal
-        pure
-        returns (IHold.HoldDataStorage storage hold_)
-    {
-        bytes32 position = _HOLD_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            hold_.slot := position
-        }
+        return TimeTravelStorageWrapper._blockTimestamp();
     }
 }

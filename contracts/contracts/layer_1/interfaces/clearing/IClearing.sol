@@ -221,14 +221,6 @@ interface IClearing {
         bytes operatorData
     );
 
-    event ClearedTransferByPartition(
-        address indexed operator,
-        address indexed tokenHolder,
-        bytes32 partition,
-        uint256 clearingId,
-        bytes operatorData
-    );
-
     error WrongClearingId();
     error ClearingIsDisabled();
     error ClearingIsActivated();

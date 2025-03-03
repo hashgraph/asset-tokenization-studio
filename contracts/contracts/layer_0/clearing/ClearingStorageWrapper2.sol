@@ -218,6 +218,7 @@ import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {
     IERC1410Basic
 } from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
@@ -507,6 +508,11 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             calldata _clearingOperationIdentifier,
         IClearing.ClearingData memory clearingData
     ) internal {
+        (, , address destination, , , , ) = _getClearingForByPartition(
+            _clearingOperationIdentifier
+        );
+        _checkValidKycStatus(IKyc.KycStatus.GRANTED, destination);
+        _checkControlList(destination);
         if (
             _clearingOperationIdentifier.clearingOperationType ==
             IClearing.ClearingOperationType.Transfer
