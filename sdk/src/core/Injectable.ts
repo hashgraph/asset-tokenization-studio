@@ -337,6 +337,9 @@ import { DeactivateClearingCommandHandler } from '../app/usecase/command/securit
 import { ClearingTransferByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommandHandler.js';
 import { ClearingTransferFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommandHandler.js';
 import { ProtectedClearingTransferByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommandHandler.js';
+import { ApproveClearingOperationByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommandHandler.js';
+import { CancelClearingOperationByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommandHandler.js';
+import { ReclaimClearingOperationByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -564,6 +567,18 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: ProtectedClearingTransferByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ApproveClearingOperationByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: CancelClearingOperationByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ReclaimClearingOperationByPartitionCommandHandler,
   },
 ];
 

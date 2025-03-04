@@ -222,6 +222,7 @@ import { ContractId } from '@hashgraph/sdk';
 import DfnsSettings from '../../domain/context/custodialWalletSettings/DfnsSettings.js';
 import FireblocksSettings from '../../domain/context/custodialWalletSettings/FireblocksSettings.js';
 import AWSKMSSettings from '../../domain/context/custodialWalletSettings/AWSKMSSettings.js';
+import { ClearingOperationType } from '../../domain/context/security/Clearing.js';
 
 export interface InitializationData {
   account?: Account;
@@ -685,6 +686,30 @@ interface IClearingAdapter {
     deadline: BigDecimal,
     nonce: BigDecimal,
     signature: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  approveClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  cancelClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  reclaimClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
 }
@@ -1281,6 +1306,36 @@ export default abstract class TransactionAdapter
     deadline: BigDecimal,
     nonce: BigDecimal,
     signature: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  approveClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  cancelClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  reclaimClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');

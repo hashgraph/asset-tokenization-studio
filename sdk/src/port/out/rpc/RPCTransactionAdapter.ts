@@ -313,6 +313,9 @@ import {
   CLEARING_TRANSFER_BY_PARTITION,
   CLEARING_TRANSFER_FROM_BY_PARTITION,
   PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
+  APPROVE_CLEARING_TRANSFER_BY_PARTITION,
+  CANCEL_CLEARING_TRANSFER_BY_PARTITION,
+  RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -346,6 +349,7 @@ import {
   SsiManagement__factory,
   Kyc__factory,
   ClearingFacet__factory,
+  ClearingActionsFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   EnvironmentResolver,
@@ -380,6 +384,8 @@ import {
 import {
   ClearingOperation,
   ClearingOperationFrom,
+  ClearingOperationIdentifier,
+  ClearingOperationType,
   ProtectedClearingOperation,
 } from '../../../domain/context/security/Clearing.js';
 
@@ -2324,6 +2330,93 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           gasLimit: PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
         },
       ),
+      this.networkService.environment,
+    );
+  }
+
+  async approveClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Approve Clearing Operation By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationIdentifier: ClearingOperationIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      clearingOperationType: clearingOperationType,
+      clearingId: clearingId,
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingActionsFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).approveClearingOperationByPartition(clearingOperationIdentifier, {
+        gasLimit: APPROVE_CLEARING_TRANSFER_BY_PARTITION,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async cancelClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Cancel Clearing Operation By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationIdentifier: ClearingOperationIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      clearingOperationType: clearingOperationType,
+      clearingId: clearingId,
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingActionsFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).cancelClearingOperationByPartition(clearingOperationIdentifier, {
+        gasLimit: CANCEL_CLEARING_TRANSFER_BY_PARTITION,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async reclaimClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Reclaim Clearing Operation By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationIdentifier: ClearingOperationIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      clearingOperationType: clearingOperationType,
+      clearingId: clearingId,
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingActionsFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).reclaimClearingOperationByPartition(clearingOperationIdentifier, {
+        gasLimit: RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
+      }),
       this.networkService.environment,
     );
   }

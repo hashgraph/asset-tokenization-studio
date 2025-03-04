@@ -300,6 +300,9 @@ import DeactivateClearingRequest from './DeactivateClearingRequest.js';
 import ClearingTransferByPartitionRequest from './ClearingTransferByPartitionRequest.js';
 import ClearingTransferFromByPartitionRequest from './ClearingTransferFromByPartitionRequest.js';
 import ProtectedClearingTransferByPartitionRequest from './ProtectedClearingTransferByPartitionRequest.js';
+import ApproveClearingOperationByPartitionRequest from './ApproveClearingOperationByPartitionRequest.js';
+import CancelClearingOperationByPartitionRequest from './CancelClearingOperationByPartitionRequest.js';
+import ReclaimClearingOperationByPartitionRequest from './ReclaimClearingOperationByPartitionRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -399,4 +402,7 @@ export {
   ClearingTransferByPartitionRequest,
   ClearingTransferFromByPartitionRequest,
   ProtectedClearingTransferByPartitionRequest,
+  ApproveClearingOperationByPartitionRequest,
+  CancelClearingOperationByPartitionRequest,
+  ReclaimClearingOperationByPartitionRequest,
 };

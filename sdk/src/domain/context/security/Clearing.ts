@@ -223,3 +223,16 @@ export class ProtectedClearingOperation {
   deadline: BigNumber;
   nonce: BigNumber;
 }
+
+export class ClearingOperationIdentifier {
+  partition: string;
+  tokenHolder: string;
+  clearingOperationType: ClearingOperationType;
+  clearingId: number;
+}
+
+export enum ClearingOperationType {
+  Transfer,
+  Redeem,
+  HoldCreation,
+}

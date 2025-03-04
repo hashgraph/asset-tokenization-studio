@@ -308,6 +308,12 @@ import ProtectedClearingTransferByPartitionRequest from './request/ProtectedClea
 import { ClearingTransferByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingTransferByPartition/ClearingTransferByPartitionCommand.js';
 import { ClearingTransferFromByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingTransferFromByPartition/ClearingTransferFromByPartitionCommand.js';
 import { ProtectedClearingTransferByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/protectedClearingTransferByPartition/ProtectedClearingTransferByPartitionCommand.js';
+import ApproveClearingOperationByPartitionRequest from './request/ApproveClearingOperationByPartitionRequest.js';
+import CancelClearingOperationByPartitionRequest from './request/CancelClearingOperationByPartitionRequest.js';
+import ReclaimClearingOperationByPartitionRequest from './request/ReclaimClearingOperationByPartitionRequest.js';
+import { ApproveClearingOperationByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand.js';
+import { CancelClearingOperationByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommand.js';
+import { ReclaimClearingOperationByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -415,6 +421,15 @@ interface ISecurityInPort {
   protectedClearingTransferByPartition(
     request: ProtectedClearingTransferByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }>;
+  approveClearingOperationByPartition(
+    request: ApproveClearingOperationByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  cancelClearingOperationByPartition(
+    request: CancelClearingOperationByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
+  reclaimClearingOperationByPartition(
+    request: ReclaimClearingOperationByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -1249,6 +1264,54 @@ class SecurityInPort implements ISecurityInPort {
         request.deadline,
         request.nonce,
         request.signature,
+      ),
+    );
+  }
+
+  @LogError
+  async approveClearingOperationByPartition(
+    request: ApproveClearingOperationByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('ApproveClearingOperationByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ApproveClearingOperationByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.targetId,
+        request.clearingId,
+        request.clearingOperationType,
+      ),
+    );
+  }
+
+  @LogError
+  async cancelClearingOperationByPartition(
+    request: CancelClearingOperationByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('CancelClearingOperationByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new CancelClearingOperationByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.targetId,
+        request.clearingId,
+        request.clearingOperationType,
+      ),
+    );
+  }
+
+  @LogError
+  async reclaimClearingOperationByPartition(
+    request: ReclaimClearingOperationByPartitionRequest,
+  ): Promise<{ payload: boolean; transactionId: string }> {
+    handleValidation('ReclaimClearingOperationByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ReclaimClearingOperationByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.targetId,
+        request.clearingId,
+        request.clearingOperationType,
       ),
     );
   }
