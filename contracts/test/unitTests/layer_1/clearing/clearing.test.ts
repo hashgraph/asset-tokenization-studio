@@ -2317,7 +2317,15 @@ describe('Clearing Tests', () => {
     })
 
     describe('Create clearing success', () => {
-        it('GIVEN a Token WHEN Activate and Deactive clearing THEN transaction succeeds', async () => {})
+        it('GIVEN a Token WHEN Activate and Deactive clearing THEN transaction succeeds', async () => {
+            await expect(clearingFacet.connect(signer_A).deactivateClearing())
+                .to.emit(clearingFacet, 'ClearingDeactivated')
+                .withArgs(account_A)
+
+            await expect(clearingFacet.connect(signer_A).activateClearing())
+                .to.emit(clearingFacet, 'ClearingActivated')
+                .withArgs(account_A)
+        })
         it('GIVEN a Token WHEN creating clearing transfer THEN transaction succeeds', async () => {
             await expect(
                 clearingFacet.clearingTransferByPartition(
