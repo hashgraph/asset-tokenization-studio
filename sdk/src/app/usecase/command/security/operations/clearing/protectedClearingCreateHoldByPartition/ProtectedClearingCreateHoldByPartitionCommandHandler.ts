@@ -231,6 +231,7 @@ import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
 import { BigNumber } from 'ethers';
 import { NounceAlreadyUsed } from '../../../error/NounceAlreadyUsed.js';
 import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
+import ValidationService from '../../../../../../../app/service/ValidationService.js';
 
 @CommandHandler(ProtectedClearingCreateHoldByPartitionCommand)
 export class ProtectedClearingCreateHoldByPartitionCommandHandler
@@ -247,6 +248,8 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
 
   async execute(
@@ -275,6 +278,7 @@ export class ProtectedClearingCreateHoldByPartitionCommandHandler
         : securityId.toString(),
     );
 
+    await this.validationService.validateClearingActivated(securityId);
     if (await this.queryAdapter.isPaused(securityEvmAddress)) {
       throw new SecurityPaused();
     }

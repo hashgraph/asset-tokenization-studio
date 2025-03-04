@@ -346,6 +346,12 @@ import { ProtectedClearingRedeemByPartitionCommandHandler } from '../app/usecase
 import { ClearingCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommandHandler.js';
 import { ClearingCreateHoldFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommandHandler.js';
 import { ProtectedClearingCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommandHandler.js';
+import { IsClearingActivatedQueryHandler } from '../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQueryHandler.js';
+import { GetClearingsIdForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQueryHandler.js';
+import { GetClearingForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingForByPartition/GetClearingForByPartitionQueryHandler.js';
+import { GetClearingCountForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQueryHandler.js';
+import { GetClearedAmountForByPartitionQueryHandler } from '../app/usecase/query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQueryHandler.js';
+import { GetClearedAmountForQueryHandler } from '../app/usecase/query/security/clearing/getClearedAmountFor/GetClearedAmountForQueryHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -837,6 +843,30 @@ const QUERY_HANDLERS = [
   {
     token: TOKENS.QUERY_HANDLER,
     useClass: GetKYCStatusForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearedAmountForQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearedAmountForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearingCountForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearingForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: GetClearingsIdForByPartitionQueryHandler,
+  },
+  {
+    token: TOKENS.QUERY_HANDLER,
+    useClass: IsClearingActivatedQueryHandler,
   },
 ];
 

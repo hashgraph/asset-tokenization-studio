@@ -223,6 +223,7 @@ import {
 } from './ClearingCreateHoldByPartitionCommand.js';
 import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
 import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
+import ValidationService from '../../../../../../../app/service/ValidationService.js';
 
 @CommandHandler(ClearingCreateHoldByPartitionCommand)
 export class ClearingCreateHoldByPartitionCommandHandler
@@ -239,6 +240,8 @@ export class ClearingCreateHoldByPartitionCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
 
   async execute(
@@ -266,6 +269,8 @@ export class ClearingCreateHoldByPartitionCommandHandler
     if (await this.queryAdapter.isPaused(securityEvmAddress)) {
       throw new SecurityPaused();
     }
+
+    await this.validationService.validateClearingActivated(securityId);
 
     if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
       throw new DecimalsOverRange(security.decimals);

@@ -265,6 +265,7 @@ export class ClearingTransferByPartitionCommandHandler
       throw new SecurityPaused();
     }
 
+    await this.validationService.validateClearingActivated(securityId);
     await this.validationService.validateKycAddresses(securityId, [
       account.id.toString(),
       targetId,

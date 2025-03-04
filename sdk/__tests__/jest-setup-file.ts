@@ -1144,6 +1144,12 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       return issuerList.findIndex((item) => item == account) !== -1;
     },
   );
+
+  singletonInstance.isClearingActivated = jest.fn(
+    async (address: EvmAddress) => {
+      return false;
+    },
+  );
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
   };

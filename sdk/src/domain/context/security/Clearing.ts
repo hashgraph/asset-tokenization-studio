@@ -204,6 +204,12 @@
 */
 
 import { BigNumber } from 'ethers';
+import BigDecimal from '../shared/BigDecimal';
+import { Hold } from './Hold';
+import {
+  InvalidClearingOperationType,
+  InvalidClearingOperationTypeNumber,
+} from './error/InvalidClearingOperationType';
 
 export class ClearingOperation {
   partition: string;
@@ -235,4 +241,58 @@ export enum ClearingOperationType {
   Transfer,
   Redeem,
   HoldCreation,
+}
+
+export class CastClearingOperationType {
+  static fromNumber(id: number): ClearingOperationType {
+    switch (id) {
+      case 0:
+        return ClearingOperationType.Transfer;
+      case 1:
+        return ClearingOperationType.Redeem;
+      case 2:
+        return ClearingOperationType.HoldCreation;
+      default:
+        throw new InvalidClearingOperationTypeNumber(id);
+    }
+  }
+
+  static toNumber(value: ClearingOperationType): number {
+    switch (value) {
+      case ClearingOperationType.Transfer:
+        return 0;
+      case ClearingOperationType.Redeem:
+        return 1;
+      case ClearingOperationType.HoldCreation:
+        return 2;
+      default:
+        throw new InvalidClearingOperationType(value);
+    }
+  }
+}
+export class Clearing {
+  expirationTimeStamp: number;
+  amount: BigDecimal;
+  destination: string;
+  clearingOperationType: ClearingOperationType;
+  data: string;
+  operatorData: string;
+  hold: Hold<BigDecimal>;
+  constructor(
+    executionTimeStamp: number,
+    amount: BigDecimal,
+    destination: string,
+    clearingOperationType: ClearingOperationType,
+    data: string,
+    operatorData: string,
+    hold: Hold<BigDecimal>,
+  ) {
+    this.expirationTimeStamp = executionTimeStamp;
+    this.amount = amount;
+    this.destination = destination;
+    this.clearingOperationType = clearingOperationType;
+    this.data = data;
+    this.operatorData = operatorData;
+    this.hold = hold;
+  }
 }
