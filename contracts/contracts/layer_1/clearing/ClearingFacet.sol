@@ -654,7 +654,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
-            ''
+            _clearingOperationFrom.operatorData
         );
     }
 
@@ -698,7 +698,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _clearingOperationFrom.from,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
-            ''
+            _clearingOperationFrom.operatorData
         );
     }
 
@@ -858,7 +858,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](23);
+        staticFunctionSelectors_ = new bytes4[](24);
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_Clearing
             .selector;
@@ -927,6 +927,9 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .protectedClearingRedeemByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .isClearingActivated
             .selector;
     }
 
