@@ -376,6 +376,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             }),
             address(0)
         );
+        _reduceBalanceByPartition(_from, _amount, partition);
 
         _setClearingIdByPartitionAndType(
             clearingDataStorage,

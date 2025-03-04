@@ -328,7 +328,12 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         ClearingOperationFrom calldata _clearingOperationFrom,
         uint256 _amount,
         address _to
-    ) external override returns (bool success_, uint256 clearingId_) {
+    )
+        external
+        override
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
         {
             _checkUnpaused();
             _checkValidAddress(_clearingOperationFrom.from);
@@ -666,6 +671,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _checkDefaultPartitionWithSinglePartition(
                 _clearingOperationFrom.clearingOperation.partition
             );
+            _checkValidAddress(_clearingOperationFrom.from);
             _checkOperator(
                 _clearingOperationFrom.clearingOperation.partition,
                 _clearingOperationFrom.from
@@ -674,7 +680,6 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _checkExpirationTimestamp(
                 _clearingOperationFrom.clearingOperation.expirationTimestamp
             );
-            _checkValidAddress(_clearingOperationFrom.from);
         }
 
         bytes memory encodedClearingData = abi.encode(

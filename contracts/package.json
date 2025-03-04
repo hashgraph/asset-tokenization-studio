@@ -65,7 +65,6 @@
     "test:kyc": "NETWORK=hardhat npx hardhat test test/unitTests/layer_1/kyc/kyc.test.ts",
     "test:ssi": "npx hardhat test test/unitTests/layer_1/ssi/ssi.test.ts",
     "test:clearing": "npx hardhat test test/unitTests/layer_1/clearing/clearing.test.ts",
-    "test:Clearing": "npx hardhat test test/unitTests/layer_2/clearing/clearing.test.ts",
     "size": "npx hardhat size-contracts",
     "build": "rimraf build && npm run compile && npx tsc -p tsconfig.json",
     "keccak256": "npx hardhat keccak256",
