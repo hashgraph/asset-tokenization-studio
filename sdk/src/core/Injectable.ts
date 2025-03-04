@@ -343,6 +343,9 @@ import { ReclaimClearingOperationByPartitionCommandHandler } from '../app/usecas
 import { ClearingRedeemByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommandHandler.js';
 import { ClearingRedeemFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommandHandler.js';
 import { ProtectedClearingRedeemByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommandHandler.js';
+import { ClearingCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommandHandler.js';
+import { ClearingCreateHoldFromByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommandHandler.js';
+import { ProtectedClearingCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),
@@ -594,6 +597,18 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: ProtectedClearingRedeemByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ClearingCreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ClearingCreateHoldFromByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: ProtectedClearingCreateHoldByPartitionCommandHandler,
   },
 ];
 

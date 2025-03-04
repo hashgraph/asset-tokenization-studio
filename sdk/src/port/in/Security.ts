@@ -320,6 +320,12 @@ import ProtectedClearingRedeemByPartitionRequest from './request/ProtectedCleari
 import { ClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommand.js';
 import { ClearingRedeemFromByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommand.js';
 import { ProtectedClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand.js';
+import ClearingCreateHoldByPartitionRequest from './request/ClearingCreateHoldByPartitionRequest.js';
+import ProtectedClearingCreateHoldByPartitionRequest from './request/ProtectedClearingCreateHoldByPartitionRequest.js';
+import ClearingCreateHoldFromByPartitionRequest from './request/ClearingCreateHoldFromByPartitionRequest.js';
+import { ClearingCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommand.js';
+import { ClearingCreateHoldFromByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommand.js';
+import { ProtectedClearingCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -444,6 +450,15 @@ interface ISecurityInPort {
   ): Promise<{ payload: number; transactionId: string }>;
   protectedClearingRedeemByPartition(
     request: ProtectedClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  clearingCreateHoldByPartition(
+    request: ClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  clearingCreateHoldFromByPartition(
+    request: ClearingCreateHoldFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  protectedClearingCreateHoldByPartition(
+    request: ProtectedClearingCreateHoldByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }>;
 }
 
@@ -1374,6 +1389,65 @@ class SecurityInPort implements ISecurityInPort {
         request.amount,
         request.sourceId,
         request.expirationDate,
+        request.deadline,
+        request.nonce,
+        request.signature,
+      ),
+    );
+  }
+
+  @LogError
+  async clearingCreateHoldByPartition(
+    request: ClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ClearingCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ClearingCreateHoldByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.escrow,
+        request.amount,
+        request.targetId,
+        request.clearingExpirationDate,
+        request.holdExpirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async clearingCreateHoldFromByPartition(
+    request: ClearingCreateHoldFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ClearingCreateHoldFromByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ClearingCreateHoldFromByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.escrow,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.clearingExpirationDate,
+        request.holdExpirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedClearingCreateHoldByPartition(
+    request: ProtectedClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ProtectedClearingCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ProtectedClearingCreateHoldByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.escrow,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.clearingExpirationDate,
+        request.holdExpirationDate,
         request.deadline,
         request.nonce,
         request.signature,

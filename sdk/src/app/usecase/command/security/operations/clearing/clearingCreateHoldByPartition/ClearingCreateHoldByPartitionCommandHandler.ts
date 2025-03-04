@@ -203,126 +203,137 @@
 
 */
 
-export const COMMAND_METADATA = '__command__';
-export const COMMAND_HANDLER_METADATA = '__commandHandler__';
-export const QUERY_METADATA = '__query__';
-export const QUERY_HANDLER_METADATA = '__queryHandler__';
-export const TOKEN_CREATION_COST_HBAR = 80;
-export const EVM_ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
-export const HBAR_DECIMALS = 8;
-export const CREATE_EQUITY_ST_GAS = 15000000;
-export const CREATE_BOND_ST_GAS = 15000000;
-export const CASHIN_GAS = 1200000;
-export const BURN_GAS = 700000;
-export const WIPE_GAS = 700000;
-export const RESCUE_GAS = 700000;
-export const RESCUE_HBAR_GAS = 700000;
-export const FREEZE_GAS = 650000;
-export const UNFREEZE_GAS = 650000;
-export const GRANT_KYC_GAS = 650000;
-export const REVOKE_KYC_GAS = 650000;
-export const REDEEM_GAS = 650000;
-export const PROTECTED_REDEEM_GAS = 7000000;
-export const PAUSE_GAS = 15000000;
-export const UNPAUSE_GAS = 650000;
-export const TAKE_SNAPSHOT_GAS = 2000000;
-export const DELETE_GAS = 650000;
-export const GRANT_ROLES_GAS = 2000000;
-export const REVOKE_ROLES_GAS = 2000000;
-export const RENOUNCE_ROLES_GAS = 2000000;
-export const MAX_ROLES_GAS = 15000000;
-export const INCREASE_SUPPLY_GAS = 500000;
-export const DECREASE_SUPPLY_GAS = 500000;
-export const RESET_SUPPLY_GAS = 450000;
-export const UPDATE_RESERVE_ADDRESS_GAS = 450000;
-export const UPDATE_TOKEN_GAS = 1400000;
-export const UPDATE_RESERVE_AMOUNT_GAS = 400000;
-export const CHANGE_PROXY_OWNER_GAS = 500000;
-export const ACCEPT_PROXY_OWNER_GAS = 400000;
-export const UPDATE_PROXY_IMPLEMENTATION_GAS = 400000;
-export const ISSUE_GAS = 7000000;
-export const CONTROLLER_TRANSFER_GAS = 7000000;
-export const CONTROLLER_REDEEM_GAS = 7000000;
-export const SET_DIVIDENDS_GAS = 7000000;
-export const SET_VOTING_RIGHTS_GAS = 7000000;
-export const SET_COUPON_GAS = 7000000;
-export const SET_DOCUMENT_GAS = 7000000;
-export const REMOVE_DOCUMENT_GAS = 7000000;
-export const AUTHORIZE_OPERATOR_GAS = 7000000;
-export const REVOKE_OPERATOR_GAS = 7000000;
-export const TRANSFER_OPERATOR_GAS = 7000000;
-export const TRIGGER_PENDING_SCHEDULED_SNAPSHOTS_GAS = 7000000;
-export const SET_MAX_SUPPLY_GAS = 7000000;
-export const PROTECT_PARTITION_GAS = 15000000;
-export const UNPROTECT_PARTITION_GAS = 650000;
+import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
+import AccountService from '../../../../../../service/AccountService.js';
+import SecurityService from '../../../../../../service/SecurityService.js';
+import TransactionService from '../../../../../../service/TransactionService.js';
+import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
+import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
+import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
+import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { SecurityPaused } from '../../../error/SecurityPaused.js';
+import {
+  ClearingCreateHoldByPartitionCommand,
+  ClearingCreateHoldByPartitionCommandResponse,
+} from './ClearingCreateHoldByPartitionCommand.js';
+import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
+import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
 
-export const BALANCE_OF_GAS = 1200000;
-export const GET_RESERVE_ADDRESS_GAS = 1200000;
-export const GET_RESERVE_AMOUNT_GAS = 1200000;
-export const GET_ROLES_GAS = 1200000;
-export const HAS_ROLE_GAS = 1200000;
-export const GET_SUPPLY_ALLOWANCE_GAS = 1200000;
-export const IS_UNLIMITED_ALLOWANCE_GAS = 1200000;
+@CommandHandler(ClearingCreateHoldByPartitionCommand)
+export class ClearingCreateHoldByPartitionCommandHandler
+  implements ICommandHandler<ClearingCreateHoldByPartitionCommand>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+  ) {}
 
-export const TRANSFER_GAS = 1200000;
-export const PROTECTED_TRANSFER_GAS = 7000000;
-export const TRANSFER_AND_LOCK_GAS = 1200000;
-export const PROTECTED_TRANSFER_AND_LOCK_GAS = 7000000;
+  async execute(
+    command: ClearingCreateHoldByPartitionCommand,
+  ): Promise<ClearingCreateHoldByPartitionCommandResponse> {
+    const {
+      securityId,
+      partitionId,
+      escrow,
+      amount,
+      targetId,
+      clearingExpirationDate,
+      holdExpirationDate
+    } = command;
+    const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
+    const security = await this.securityService.get(securityId);
 
-export const ADD_TO_CONTROL_LIST_GAS = 1200000;
-export const REMOVE_FROM_CONTROL_LIST_GAS = 1200000;
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
 
-export const LOCK_GAS = 7000000;
-export const RELEASE_GAS = 7000000;
+    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
+      throw new SecurityPaused();
+    }
 
-export const EXECUTE_HOLD_BY_PARTITION_GAS = 7000000;
+    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
+      throw new DecimalsOverRange(security.decimals);
+    }
 
-export const UPDATE_CONFIG_VERSION_GAS = 9000000;
-export const UPDATE_CONFIG_GAS = 9000000;
-export const UPDATE_RESOLVER_GAS = 9000000;
+    const escrowEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(escrow)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(escrow)
+      : new EvmAddress(escrow);
 
-export const UPDATE_MATURITY_DATE_GAS = 7000000;
+    const targetEvmAddress: EvmAddress =
+      targetId === '0.0.0'
+        ? new EvmAddress(EVM_ZERO_ADDRESS)
+        : HEDERA_FORMAT_ID_REGEX.exec(targetId)
+          ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
+          : new EvmAddress(targetId);
 
-export const SET_SCHEDULED_BALANCE_ADJUSTMENT_GAS = 7000000;
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
 
-export const CREATE_HOLD_GAS = 7000000;
-export const CREATE_HOLD_FROM_GAS = 7000000;
-export const CONTROLLER_CREATE_HOLD_GAS = 7000000;
-export const PROTECTED_CREATE_HOLD_GAS = 7000000;
-export const RELEASE_HOLD_GAS = 7000000;
-export const RECLAIM_HOLD_GAS = 7000000;
+    if (
+      account.evmAddress &&
+      (
+        await this.queryAdapter.balanceOf(
+          securityEvmAddress,
+          new EvmAddress(account.evmAddress),
+        )
+      ).lt(amountBd.toBigNumber())
+    ) {
+      throw new InsufficientBalance();
+    }
 
-export const ADD_ISSUER_GAS = 7000000;
-export const SET_REVOCATION_REGISTRY_GAS = 7000000;
-export const REMOVE_ISSUER_GAS = 7000000;
+    const res = await handler.clearingCreateHoldByPartition(
+      securityEvmAddress,
+      partitionId,
+      escrowEvmAddress,
+      amountBd,
+      targetEvmAddress,
+      BigDecimal.fromString(clearingExpirationDate),
+      BigDecimal.fromString(holdExpirationDate),
+      securityId,
+    );
 
-export const ACTIVATE_CLEARING_GAS = 7000000;
-export const DEACTIVATE_CLEARING_GAS = 7000000;
-export const CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const CLEARING_TRANSFER_FROM_BY_PARTITION = 7000000;
-export const PROTECTED_CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const APPROVE_CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const CANCEL_CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const RECLAIM_CLEARING_TRANSFER_BY_PARTITION = 7000000;
-export const CLEARING_REDEEM_BY_PARTITION = 7000000;
-export const CLEARING_REDEEM_FROM_BY_PARTITION = 7000000;
-export const PROTECTED_CLEARING_REDEEM_BY_PARTITION = 7000000;
-export const CLEARING_CREATE_HOLD_BY_PARTITION = 7000000;
-export const CLEARING_CREATE_HOLD_FROM_BY_PARTITION = 7000000;
-export const PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION = 7000000;
+    if (!res.id)
+      throw new Error(
+        'Clearing Create Hold By Partition Command Handler response id empty',
+      );
 
-export const _PARTITION_ID_1 =
-  '0x0000000000000000000000000000000000000000000000000000000000000001';
+    let clearingId: string;
 
-export const SET_DIVIDEND_EVENT = 'DividendSet';
-export const SET_VOTING_RIGHTS_EVENT = 'VotingSet';
-export const SET_COUPON_EVENT = 'CouponSet';
-export const SET_SCHEDULED_BALANCE_ADJUSTMENT_EVENT =
-  'ScheduledBalanceAdjustmentSet';
+    if (res.response && res.response.clearingId) {
+      clearingId = res.response.clearingId;
+    } else {
+      const numberOfResultsItems = 2;
 
-// * Generic
-export const BYTES_32_LENGTH = 32 * 2;
-export const ADDRESS_LENGTH = 40;
+      // * Recover the new contract ID from Event data from the Mirror Node
+      const results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        numberOfResultsItems,
+      );
 
-// * Events from creation
-export const TOPICS_IN_FACTORY_RESULT = 6;
+      if (!results || results.length !== numberOfResultsItems) {
+        throw new Error('Invalid data structure');
+      }
+
+      clearingId = results[1];
+    }
+
+    return Promise.resolve(
+      new ClearingCreateHoldByPartitionCommandResponse(parseInt(clearingId, 16), res.id!),
+    );
+  }
+}
