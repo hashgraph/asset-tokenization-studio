@@ -475,6 +475,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           ? securityInfo.maxSupply.toString()
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
+        clearingActive: securityInfo.clearingActive,
       };
 
       const equityDetails: EquityDetailsData = {
@@ -588,6 +589,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
           ? securityInfo.maxSupply.toString()
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
+        clearingActive: securityInfo.clearingActive,
       };
 
       const bondDetails: BondDetailsData = {
