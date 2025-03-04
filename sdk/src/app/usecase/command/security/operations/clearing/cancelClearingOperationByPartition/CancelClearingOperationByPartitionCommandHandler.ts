@@ -218,7 +218,7 @@ import {
   CancelClearingOperationByPartitionCommandResponse,
 } from './CancelClearingOperationByPartitionCommand.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from 'domain/context/security/SecurityRole.js';
+import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
 import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
 
 @CommandHandler(CancelClearingOperationByPartitionCommand)

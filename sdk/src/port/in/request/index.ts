@@ -303,6 +303,9 @@ import ProtectedClearingTransferByPartitionRequest from './ProtectedClearingTran
 import ApproveClearingOperationByPartitionRequest from './ApproveClearingOperationByPartitionRequest.js';
 import CancelClearingOperationByPartitionRequest from './CancelClearingOperationByPartitionRequest.js';
 import ReclaimClearingOperationByPartitionRequest from './ReclaimClearingOperationByPartitionRequest.js';
+import ClearingRedeemByPartitionRequest from './ClearingRedeemByPartitionRequest.js';
+import ClearingRedeemFromByPartitionRequest from './ClearingRedeemFromByPartitionRequest.js';
+import ProtectedClearingRedeemByPartitionRequest from './ProtectedClearingRedeemByPartitionRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -405,4 +408,7 @@ export {
   ApproveClearingOperationByPartitionRequest,
   CancelClearingOperationByPartitionRequest,
   ReclaimClearingOperationByPartitionRequest,
+  ClearingRedeemByPartitionRequest,
+  ClearingRedeemFromByPartitionRequest,
+  ProtectedClearingRedeemByPartitionRequest,
 };
