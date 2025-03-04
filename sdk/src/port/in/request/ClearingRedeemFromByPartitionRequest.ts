@@ -213,7 +213,7 @@ export default class ClearingRedeemFromByPartitionRequest extends ValidatedReque
   amount: string;
   sourceId: string;
   expirationDate: string;
-  
+
   constructor({
     securityId,
     partitionId,
