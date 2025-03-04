@@ -320,7 +320,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _to,
             _clearingOperationFrom.clearingOperation.partition,
             clearingId_,
-            ''
+            _clearingOperationFrom.operatorData
         );
     }
 
