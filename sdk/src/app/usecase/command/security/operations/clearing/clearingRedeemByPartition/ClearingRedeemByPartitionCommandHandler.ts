@@ -206,26 +206,34 @@
 import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
 import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
 import AccountService from '../../../../../../service/AccountService.js';
+import SecurityService from '../../../../../../service/SecurityService.js';
 import TransactionService from '../../../../../../service/TransactionService.js';
 import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
+import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
+import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
+import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
 import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
 import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
 import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
 import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
 import { SecurityPaused } from '../../../error/SecurityPaused.js';
 import {
-  ApproveClearingOperationByPartitionCommand,
-  ApproveClearingOperationByPartitionCommandResponse,
-} from './ApproveClearingOperationByPartitionCommand.js';
+  ClearingRedeemByPartitionCommand,
+  ClearingRedeemByPartitionCommandResponse,
+} from './ClearingRedeemByPartitionCommand.js';
+import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
+import { SecurityControlListType } from '../../../../../../../domain/context/security/SecurityControlListType.js';
+import { AccountInBlackList } from '../../../error/AccountInBlackList.js';
+import { AccountNotInWhiteList } from '../../../error/AccountNotInWhiteList.js';
 import ValidationService from '../../../../../../service/ValidationService.js';
-import { SecurityRole } from '../../../../../../../domain/context/security/SecurityRole.js';
-import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
 
-@CommandHandler(ApproveClearingOperationByPartitionCommand)
-export class ApproveClearingOperationByPartitionCommandHandler
-  implements ICommandHandler<ApproveClearingOperationByPartitionCommand>
+@CommandHandler(ClearingRedeemByPartitionCommand)
+export class ClearingRedeemByPartitionCommandHandler
+  implements ICommandHandler<ClearingRedeemByPartitionCommand>
 {
   constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
     @lazyInject(AccountService)
     public readonly accountService: AccountService,
     @lazyInject(TransactionService)
@@ -239,17 +247,12 @@ export class ApproveClearingOperationByPartitionCommandHandler
   ) {}
 
   async execute(
-    command: ApproveClearingOperationByPartitionCommand,
-  ): Promise<ApproveClearingOperationByPartitionCommandResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-      clearingOperationType,
-    } = command;
+    command: ClearingRedeemByPartitionCommand,
+  ): Promise<ClearingRedeemByPartitionCommandResponse> {
+    const { securityId, partitionId, amount, expirationDate } = command;
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
+    const security = await this.securityService.get(securityId);
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
       HEDERA_FORMAT_ID_REGEX.test(securityId)
@@ -261,35 +264,95 @@ export class ApproveClearingOperationByPartitionCommandHandler
       throw new SecurityPaused();
     }
 
-    await this.validationService.validateKycAddresses(securityId, [targetId]);
+    await this.validationService.validateKycAddresses(securityId, [
+      account.id.toString(),
+    ]);
 
-    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
-      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
-      : new EvmAddress(targetId);
+    const controListType = (await this.queryAdapter.getControlListType(
+      securityEvmAddress,
+    ))
+      ? SecurityControlListType.WHITELIST
+      : SecurityControlListType.BLACKLIST;
+    const controlListCount =
+      await this.queryAdapter.getControlListCount(securityEvmAddress);
+    const controlListMembers = (
+      await this.queryAdapter.getControlListMembers(
+        securityEvmAddress,
+        0,
+        controlListCount,
+      )
+    ).map(function (x) {
+      return x.toUpperCase();
+    });
+
+    if (
+      controListType === SecurityControlListType.BLACKLIST &&
+      controlListMembers.includes(account.evmAddress!.toString().toUpperCase())
+    ) {
+      throw new AccountInBlackList(account.evmAddress!.toString());
+    }
+
+    if (
+      controListType === SecurityControlListType.WHITELIST &&
+      !controlListMembers.includes(account.evmAddress!.toString().toUpperCase())
+    ) {
+      throw new AccountNotInWhiteList(account.evmAddress!.toString());
+    }
+
+    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
+      throw new DecimalsOverRange(security.decimals);
+    }
+
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
 
     if (
       account.evmAddress &&
-      !(await this.queryAdapter.hasRole(
-        securityEvmAddress,
-        new EvmAddress(account.evmAddress!),
-        SecurityRole._CLEARING_VALIDATOR_ROLE,
-      ))
+      (
+        await this.queryAdapter.balanceOf(
+          securityEvmAddress,
+          new EvmAddress(account.evmAddress),
+        )
+      ).lt(amountBd.toBigNumber())
     ) {
-      throw new NotGrantedRole(SecurityRole._CLEARING_VALIDATOR_ROLE);
+      throw new InsufficientBalance();
     }
 
-    const res = await handler.approveClearingOperationByPartition(
+    const res = await handler.clearingRedeemByPartition(
       securityEvmAddress,
       partitionId,
-      targetEvmAddress,
-      clearingId,
-      clearingOperationType,
+      amountBd,
+      BigDecimal.fromString(expirationDate),
       securityId,
     );
 
+    if (!res.id)
+      throw new Error(
+        'Clearing Redeem By Partition Command Handler response id empty',
+      );
+
+    let clearingId: string;
+
+    if (res.response && res.response.clearingId) {
+      clearingId = res.response.clearingId;
+    } else {
+      const numberOfResultsItems = 2;
+
+      // * Recover the new contract ID from Event data from the Mirror Node
+      const results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        numberOfResultsItems,
+      );
+
+      if (!results || results.length !== numberOfResultsItems) {
+        throw new Error('Invalid data structure');
+      }
+
+      clearingId = results[1];
+    }
+
     return Promise.resolve(
-      new ApproveClearingOperationByPartitionCommandResponse(
-        res.error === undefined,
+      new ClearingRedeemByPartitionCommandResponse(
+        parseInt(clearingId, 16),
         res.id!,
       ),
     );

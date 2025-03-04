@@ -314,6 +314,12 @@ import ReclaimClearingOperationByPartitionRequest from './request/ReclaimClearin
 import { ApproveClearingOperationByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/approveClearingOperationByPartition/ApproveClearingOperationByPartitionCommand.js';
 import { CancelClearingOperationByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/cancelClearingOperationByPartition/CancelClearingOperationByPartitionCommand.js';
 import { ReclaimClearingOperationByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/reclaimClearingOperationByPartition/ReclaimClearingOperationByPartitionCommand.js';
+import ClearingRedeemByPartitionRequest from './request/ClearingRedeemByPartitionRequest.js';
+import ClearingRedeemFromByPartitionRequest from './request/ClearingRedeemFromByPartitionRequest.js';
+import ProtectedClearingRedeemByPartitionRequest from './request/ProtectedClearingRedeemByPartitionRequest.js';
+import { ClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingRedeemByPartition/ClearingRedeemByPartitionCommand.js';
+import { ClearingRedeemFromByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingRedeemFromByPartition/ClearingRedeemFromByPartitionCommand.js';
+import { ProtectedClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/protectedClearingRedeemByPartition/ProtectedClearingRedeemByPartitionCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -430,6 +436,15 @@ interface ISecurityInPort {
   reclaimClearingOperationByPartition(
     request: ReclaimClearingOperationByPartitionRequest,
   ): Promise<{ payload: boolean; transactionId: string }>;
+  clearingRedeemByPartition(
+    request: ClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  clearingRedeemFromByPartition(
+    request: ClearingRedeemFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  protectedClearingRedeemByPartition(
+    request: ProtectedClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -1312,6 +1327,56 @@ class SecurityInPort implements ISecurityInPort {
         request.targetId,
         request.clearingId,
         request.clearingOperationType,
+      ),
+    );
+  }
+
+  @LogError
+  async clearingRedeemByPartition(
+    request: ClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ClearingRedeemByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ClearingRedeemByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async clearingRedeemFromByPartition(
+    request: ClearingRedeemFromByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ClearingRedeemFromByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ClearingRedeemFromByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async protectedClearingRedeemByPartition(
+    request: ProtectedClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('ProtectedClearingRedeemByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new ProtectedClearingRedeemByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.expirationDate,
+        request.deadline,
+        request.nonce,
+        request.signature,
       ),
     );
   }

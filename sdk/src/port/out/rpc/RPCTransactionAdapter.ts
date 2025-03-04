@@ -316,6 +316,9 @@ import {
   APPROVE_CLEARING_TRANSFER_BY_PARTITION,
   CANCEL_CLEARING_TRANSFER_BY_PARTITION,
   RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
+  CLEARING_REDEEM_BY_PARTITION,
+  CLEARING_REDEEM_FROM_BY_PARTITION,
+  PROTECTED_CLEARING_REDEEM_BY_PARTITION,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -2417,6 +2420,110 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       ).reclaimClearingOperationByPartition(clearingOperationIdentifier, {
         gasLimit: RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
       }),
+      this.networkService.environment,
+    );
+  }
+
+  async clearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Clearing Redeem By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: expirationDate.toBigNumber(),
+      data: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).clearingRedeemByPartition(clearingOperation, amount.toBigNumber(), {
+        gasLimit: CLEARING_REDEEM_BY_PARTITION,
+      }),
+      this.networkService.environment,
+    );
+  }
+
+  async clearingRedeemFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Clearing Redeem From By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).clearingRedeemFromByPartition(
+        clearingOperationFrom,
+        amount.toBigNumber(),
+        {
+          gasLimit: CLEARING_REDEEM_FROM_BY_PARTITION,
+        },
+      ),
+      this.networkService.environment,
+    );
+  }
+
+  async protectedClearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+  ): Promise<TransactionResponse> {
+    LogService.logTrace(
+      `Protected Clearing Redeem By Partition to address ${security.toString()}`,
+    );
+
+    const protectedClearingOperation: ProtectedClearingOperation = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      deadline: deadline.toBigNumber(),
+      nonce: nonce.toBigNumber(),
+    };
+
+    return RPCTransactionResponseAdapter.manageResponse(
+      await ClearingFacet__factory.connect(
+        security.toString(),
+        this.signerOrProvider,
+      ).protectedClearingRedeemByPartition(
+        protectedClearingOperation,
+        amount.toBigNumber(),
+        signature,
+        {
+          gasLimit: PROTECTED_CLEARING_REDEEM_BY_PARTITION,
+        },
+      ),
       this.networkService.environment,
     );
   }
