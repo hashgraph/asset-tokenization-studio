@@ -206,7 +206,9 @@
 import { Query } from '../../../../../../core/query/Query.js';
 import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
 
-export class GetClearedAmountForByPartitionQueryResponse implements QueryResponse {
+export class GetClearedAmountForByPartitionQueryResponse
+  implements QueryResponse
+{
   constructor(public readonly payload: number) {}
 }
 

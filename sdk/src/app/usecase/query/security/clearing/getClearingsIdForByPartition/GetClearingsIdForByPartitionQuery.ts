@@ -207,7 +207,9 @@ import { ClearingOperationType } from '../../../../../../domain/context/security
 import { Query } from '../../../../../../core/query/Query.js';
 import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
 
-export class GetClearingsIdForByPartitionQueryResponse implements QueryResponse {
+export class GetClearingsIdForByPartitionQueryResponse
+  implements QueryResponse
+{
   constructor(public readonly payload: number[]) {}
 }
 

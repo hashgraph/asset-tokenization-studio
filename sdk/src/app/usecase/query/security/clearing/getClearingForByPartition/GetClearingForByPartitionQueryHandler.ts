@@ -233,7 +233,13 @@ export class GetClearingForByPartitionQueryHandler
   async execute(
     query: GetClearingForByPartitionQuery,
   ): Promise<GetClearingForByPartitionQueryResponse> {
-    const { securityId, partitionId, targetId, clearingOperationType, clearingId } = query;
+    const {
+      securityId,
+      partitionId,
+      targetId,
+      clearingOperationType,
+      clearingId,
+    } = query;
     const security = await this.securityService.get(securityId);
     if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
@@ -259,7 +265,7 @@ export class GetClearingForByPartitionQueryHandler
       clearing.amount.toString(),
       security.decimals,
     );
-    
+
     clearing.hold.amount = BigDecimal.fromStringFixed(
       clearing.hold.amount.toString(),
       security.decimals,

@@ -205,7 +205,10 @@
 
 import { Query } from '../../../../../../core/query/Query.js';
 import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import { Clearing, ClearingOperationType } from '../../../../../../domain/context/security/Clearing.js';
+import {
+  Clearing,
+  ClearingOperationType,
+} from '../../../../../../domain/context/security/Clearing.js';
 
 export class GetClearingForByPartitionQueryResponse implements QueryResponse {
   constructor(public readonly payload: Clearing) {}

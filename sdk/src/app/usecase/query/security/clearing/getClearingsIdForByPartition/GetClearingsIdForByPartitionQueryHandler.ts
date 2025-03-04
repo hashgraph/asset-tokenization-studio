@@ -232,7 +232,14 @@ export class GetClearingsIdForByPartitionQueryHandler
   async execute(
     query: GetClearingsIdForByPartitionQuery,
   ): Promise<GetClearingsIdForByPartitionQueryResponse> {
-    const { securityId, partitionId, targetId, clearingOperationType, start, end } = query;
+    const {
+      securityId,
+      partitionId,
+      targetId,
+      clearingOperationType,
+      start,
+      end,
+    } = query;
     const security = await this.securityService.get(securityId);
     if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
