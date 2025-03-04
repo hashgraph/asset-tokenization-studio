@@ -251,7 +251,7 @@ export class ClearingCreateHoldByPartitionCommandHandler
       amount,
       targetId,
       clearingExpirationDate,
-      holdExpirationDate
+      holdExpirationDate,
     } = command;
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
@@ -333,7 +333,10 @@ export class ClearingCreateHoldByPartitionCommandHandler
     }
 
     return Promise.resolve(
-      new ClearingCreateHoldByPartitionCommandResponse(parseInt(clearingId, 16), res.id!),
+      new ClearingCreateHoldByPartitionCommandResponse(
+        parseInt(clearingId, 16),
+        res.id!,
+      ),
     );
   }
 }

@@ -2530,7 +2530,7 @@ export class RPCTransactionAdapter extends TransactionAdapter {
       this.networkService.environment,
     );
   }
-  
+
   async clearingCreateHoldByPartition(
     security: EvmAddress,
     partitionId: string,
