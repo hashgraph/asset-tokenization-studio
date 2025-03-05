@@ -1984,7 +1984,7 @@ describe('ProtectedPartitions Tests', () => {
                 protectedClearingOperation.nonce = 3
                 const messageRedeem = {
                     _protectedClearingOperation: protectedClearingOperation,
-                    _amount: amount
+                    _amount: amount,
                 }
                 // Sign the message hash
                 const signatureRedeem = await signer_A._signTypedData(
