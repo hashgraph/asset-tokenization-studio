@@ -323,6 +323,7 @@ export class CreateEquityCommandHandler
       configId,
       configVersion,
       diamondOwnerAccountEvmAddress,
+      factory.toString(),
     );
 
     if (!res.id) throw new Error('Create Command Handler response id empty');

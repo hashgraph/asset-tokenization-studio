@@ -379,6 +379,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     configId: string,
     configVersion: number,
     diamondOwnerAccount?: EvmAddress,
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'deployEquity';
     try {
@@ -472,7 +473,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         }}`,
       );
       const transaction = new ContractExecuteTransaction()
-        .setContractId(factory.toContractId().toString())
+        .setContractId(factoryId!)
         .setGas(CREATE_EQUITY_ST_GAS)
         .setFunctionParameters(functionDataEncoded);
 
@@ -494,6 +495,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     configId: string,
     configVersion: number,
     diamondOwnerAccount?: EvmAddress,
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'deployBond';
     try {
@@ -586,7 +588,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         }}`,
       );
       const transaction = new ContractExecuteTransaction()
-        .setContractId(factory.toContractId().toString())
+        .setContractId(factoryId!)
         .setGas(CREATE_BOND_ST_GAS)
         .setFunctionParameters(functionDataEncoded);
 
