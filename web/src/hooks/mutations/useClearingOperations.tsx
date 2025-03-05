@@ -7,6 +7,16 @@ import SDKService from "../../services/SDKService";
 import { useTranslation } from "react-i18next";
 import { useToast } from "io-bricks-ui";
 import { GET_CLEARING_OPERATIONS_LIST } from "../queries/useClearingOperations";
+import {
+  ActivateClearingRequest,
+  ApproveClearingOperationByPartitionRequest,
+  CancelClearingOperationByPartitionRequest,
+  ClearingCreateHoldByPartitionRequest,
+  ClearingRedeemByPartitionRequest,
+  ClearingTransferByPartitionRequest,
+  DeactivateClearingRequest,
+  ReclaimClearingOperationByPartitionRequest,
+} from "@hashgraph/asset-tokenization-sdk";
 
 export const useCreateClearingTransferByPartition = () => {
   const queryClient = useQueryClient();
@@ -16,16 +26,12 @@ export const useCreateClearingTransferByPartition = () => {
   });
 
   return useMutation(
-    (req: unknown) => SDKService.clearingTransferByPartition(req),
+    (req: ClearingTransferByPartitionRequest) =>
+      SDKService.clearingTransferByPartition(req),
     {
       onSuccess(data, variables) {
         queryClient.invalidateQueries({
-          queryKey: [
-            GET_CLEARING_OPERATIONS_LIST(
-              variables.securityId,
-              variables.targetId,
-            ),
-          ],
+          queryKey: [GET_CLEARING_OPERATIONS_LIST(variables.securityId)],
         });
 
         console.log(
@@ -71,16 +77,12 @@ export const useCreateClearingRedeemByPartition = () => {
   });
 
   return useMutation(
-    (req: unknown) => SDKService.clearingRedeemByPartition(req),
+    (req: ClearingRedeemByPartitionRequest) =>
+      SDKService.clearingRedeemByPartition(req),
     {
       onSuccess(data, variables) {
         queryClient.invalidateQueries({
-          queryKey: [
-            GET_CLEARING_OPERATIONS_LIST(
-              variables.securityId,
-              variables.targetId,
-            ),
-          ],
+          queryKey: [GET_CLEARING_OPERATIONS_LIST(variables.securityId)],
         });
 
         console.log(
@@ -126,16 +128,12 @@ export const useCreateClearingHoldByPartition = () => {
   });
 
   return useMutation(
-    (req: unknown) => SDKService.clearingCreateHoldByPartition(req),
+    (req: ClearingCreateHoldByPartitionRequest) =>
+      SDKService.clearingCreateHoldByPartition(req),
     {
       onSuccess(data, variables) {
         queryClient.invalidateQueries({
-          queryKey: [
-            GET_CLEARING_OPERATIONS_LIST(
-              variables.securityId,
-              variables.targetId,
-            ),
-          ],
+          queryKey: [GET_CLEARING_OPERATIONS_LIST(variables.securityId)],
         });
 
         console.log(
@@ -181,16 +179,12 @@ export const useApproveClearingByPartition = () => {
   });
 
   return useMutation(
-    (req: unknown) => SDKService.approveClearingOperationByPartition(req),
+    (req: ApproveClearingOperationByPartitionRequest) =>
+      SDKService.approveClearingOperationByPartition(req),
     {
       onSuccess(data, variables) {
         queryClient.invalidateQueries({
-          queryKey: [
-            GET_CLEARING_OPERATIONS_LIST(
-              variables.securityId,
-              variables.targetId,
-            ),
-          ],
+          queryKey: [GET_CLEARING_OPERATIONS_LIST(variables.securityId)],
         });
 
         console.log(
@@ -236,16 +230,12 @@ export const useCancelClearingByPartition = () => {
   });
 
   return useMutation(
-    (req: unknown) => SDKService.cancelClearingOperationByPartition(req),
+    (req: CancelClearingOperationByPartitionRequest) =>
+      SDKService.cancelClearingOperationByPartition(req),
     {
       onSuccess(data, variables) {
         queryClient.invalidateQueries({
-          queryKey: [
-            GET_CLEARING_OPERATIONS_LIST(
-              variables.securityId,
-              variables.targetId,
-            ),
-          ],
+          queryKey: [GET_CLEARING_OPERATIONS_LIST(variables.securityId)],
         });
 
         console.log(
@@ -291,16 +281,12 @@ export const useReclaimClearingByPartition = () => {
   });
 
   return useMutation(
-    (req: unknown) => SDKService.reclaimClearingOperationByPartition(req),
+    (req: ReclaimClearingOperationByPartitionRequest) =>
+      SDKService.reclaimClearingOperationByPartition(req),
     {
       onSuccess(data, variables) {
         queryClient.invalidateQueries({
-          queryKey: [
-            GET_CLEARING_OPERATIONS_LIST(
-              variables.securityId,
-              variables.targetId,
-            ),
-          ],
+          queryKey: [GET_CLEARING_OPERATIONS_LIST(variables.securityId)],
         });
 
         console.log(
@@ -347,50 +333,48 @@ export const useActivateClearing = (
     keyPrefix: "details.clearingOperations.messages",
   });
 
-  return useMutation((req: unknown) => SDKService.activateClearing(req), {
-    onSuccess(data, variables) {
-      queryClient.invalidateQueries({
-        queryKey: [
-          GET_CLEARING_OPERATIONS_LIST(
-            variables.securityId,
-            variables.targetId,
-          ),
-        ],
-      });
+  return useMutation(
+    (req: ActivateClearingRequest) => SDKService.activateClearing(req),
+    {
+      onSuccess(data, variables) {
+        queryClient.invalidateQueries({
+          queryKey: [GET_CLEARING_OPERATIONS_LIST(variables.securityId)],
+        });
 
-      console.log(
-        "SDK message --> Clearing Operation operation success: ",
-        data,
-      );
+        console.log(
+          "SDK message --> Clearing Operation operation success: ",
+          data,
+        );
 
-      if (!data) {
-        return;
-      }
+        if (!data) {
+          return;
+        }
 
-      toast.show({
-        duration: 3000,
-        title: t("success"),
-        description: t("descriptionSuccess"),
-        variant: "subtle",
-        status: "success",
-      });
+        toast.show({
+          duration: 3000,
+          title: t("success"),
+          description: t("descriptionSuccess"),
+          variant: "subtle",
+          status: "success",
+        });
+      },
+      onError: (error) => {
+        console.log(
+          "SDK message --> Clearing Operation operation error: ",
+          error,
+        );
+
+        toast.show({
+          duration: 3000,
+          title: t("error"),
+          description: t("descriptionFailed"),
+          variant: "subtle",
+          status: "error",
+        });
+      },
+      ...options,
     },
-    onError: (error) => {
-      console.log(
-        "SDK message --> Clearing Operation operation error: ",
-        error,
-      );
-
-      toast.show({
-        duration: 3000,
-        title: t("error"),
-        description: t("descriptionFailed"),
-        variant: "subtle",
-        status: "error",
-      });
-    },
-    ...options,
-  });
+  );
 };
 
 export const useDeactivateClearing = (
@@ -402,48 +386,46 @@ export const useDeactivateClearing = (
     keyPrefix: "details.clearingOperations.messages",
   });
 
-  return useMutation((req: unknown) => SDKService.deactivateClearing(req), {
-    onSuccess(data, variables) {
-      queryClient.invalidateQueries({
-        queryKey: [
-          GET_CLEARING_OPERATIONS_LIST(
-            variables.securityId,
-            variables.targetId,
-          ),
-        ],
-      });
+  return useMutation(
+    (req: DeactivateClearingRequest) => SDKService.deactivateClearing(req),
+    {
+      onSuccess(data, variables) {
+        queryClient.invalidateQueries({
+          queryKey: [GET_CLEARING_OPERATIONS_LIST(variables.securityId)],
+        });
 
-      console.log(
-        "SDK message --> Clearing Operation operation success: ",
-        data,
-      );
+        console.log(
+          "SDK message --> Clearing Operation operation success: ",
+          data,
+        );
 
-      if (!data) {
-        return;
-      }
+        if (!data) {
+          return;
+        }
 
-      toast.show({
-        duration: 3000,
-        title: t("success"),
-        description: t("descriptionSuccess"),
-        variant: "subtle",
-        status: "success",
-      });
+        toast.show({
+          duration: 3000,
+          title: t("success"),
+          description: t("descriptionSuccess"),
+          variant: "subtle",
+          status: "success",
+        });
+      },
+      onError: (error) => {
+        console.log(
+          "SDK message --> Clearing Operation operation error: ",
+          error,
+        );
+
+        toast.show({
+          duration: 3000,
+          title: t("error"),
+          description: t("descriptionFailed"),
+          variant: "subtle",
+          status: "error",
+        });
+      },
+      ...options,
     },
-    onError: (error) => {
-      console.log(
-        "SDK message --> Clearing Operation operation error: ",
-        error,
-      );
-
-      toast.show({
-        duration: 3000,
-        title: t("error"),
-        description: t("descriptionFailed"),
-        variant: "subtle",
-        status: "error",
-      });
-    },
-    ...options,
-  });
+  );
 };

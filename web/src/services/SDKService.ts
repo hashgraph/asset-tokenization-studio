@@ -308,6 +308,14 @@ import {
   KYCViewModel,
   KycAccountDataViewModel,
   GetKYCAccountsDataRequest,
+  ActivateClearingRequest,
+  DeactivateClearingRequest,
+  ReclaimClearingOperationByPartitionRequest,
+  CancelClearingOperationByPartitionRequest,
+  ApproveClearingOperationByPartitionRequest,
+  ClearingCreateHoldByPartitionRequest,
+  ClearingRedeemByPartitionRequest,
+  ClearingTransferByPartitionRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -896,59 +904,73 @@ export class SDKService {
 
   // CLEARING OPERATIONS ////////////////////////////////////////////
   public static async getClearingsIdForByPartition(
-    req: unknown,
+    request: unknown,
   ): Promise<unknown> {
-    return req;
+    return request;
   }
 
   public static async getClearingForByPartition(
-    req: unknown,
+    request: unknown,
   ): Promise<unknown> {
-    return req;
+    return request;
   }
 
   public static async clearingTransferByPartition(
-    req: unknown,
-  ): Promise<unknown> {
-    return req;
+    request: ClearingTransferByPartitionRequest,
+  ): Promise<number> {
+    const response = await Security.clearingTransferByPartition(request);
+    return response.payload;
   }
 
   public static async clearingRedeemByPartition(
-    req: unknown,
-  ): Promise<unknown> {
-    return req;
+    request: ClearingRedeemByPartitionRequest,
+  ): Promise<number> {
+    const response = await Security.clearingRedeemByPartition(request);
+    return response.payload;
   }
 
   public static async clearingCreateHoldByPartition(
-    req: unknown,
-  ): Promise<unknown> {
-    return req;
+    request: ClearingCreateHoldByPartitionRequest,
+  ): Promise<number> {
+    const response = await Security.clearingCreateHoldByPartition(request);
+    return response.payload;
   }
 
   public static async approveClearingOperationByPartition(
-    req: unknown,
-  ): Promise<unknown> {
-    return req;
+    request: ApproveClearingOperationByPartitionRequest,
+  ): Promise<boolean> {
+    const response =
+      await Security.approveClearingOperationByPartition(request);
+    return response.payload;
   }
 
   public static async cancelClearingOperationByPartition(
-    req: unknown,
-  ): Promise<unknown> {
-    return req;
+    request: CancelClearingOperationByPartitionRequest,
+  ): Promise<boolean> {
+    const response = await Security.cancelClearingOperationByPartition(request);
+    return response.payload;
   }
 
   public static async reclaimClearingOperationByPartition(
-    req: unknown,
-  ): Promise<unknown> {
-    return req;
+    request: ReclaimClearingOperationByPartitionRequest,
+  ): Promise<boolean> {
+    const response =
+      await Security.reclaimClearingOperationByPartition(request);
+    return response.payload;
   }
 
-  public static async activateClearing(req: unknown): Promise<unknown> {
-    return req;
+  public static async activateClearing(
+    request: ActivateClearingRequest,
+  ): Promise<boolean> {
+    const response = await Security.activateClearing(request);
+    return response.payload;
   }
 
-  public static async deactivateClearing(req: unknown): Promise<unknown> {
-    return req;
+  public static async deactivateClearing(
+    request: DeactivateClearingRequest,
+  ): Promise<boolean> {
+    const response = await Security.deactivateClearing(request);
+    return response.payload;
   }
 
   public static async isClearingActivated(req: unknown): Promise<unknown> {

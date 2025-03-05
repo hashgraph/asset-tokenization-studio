@@ -312,6 +312,8 @@ export default {
     cap: "Cap role",
     kyc: "KYC role",
     ssiManager: "SSI Manager role",
+    clearing: "Clearing role",
+    clearingValidator: "Clearing Validator role",
   },
   landing,
   routes,

@@ -219,7 +219,11 @@ import { RouterManager } from "../../../router/RouterManager";
 import { DotsThreeVertical } from "@phosphor-icons/react";
 import { usePauseSecurity } from "../../../hooks/queries/usePauseSecurity";
 import { useUnpauseSecurity } from "../../../hooks/queries/useUnpauseSecurity";
-import { PauseRequest } from "@hashgraph/asset-tokenization-sdk";
+import {
+  ActivateClearingRequest,
+  DeactivateClearingRequest,
+  PauseRequest,
+} from "@hashgraph/asset-tokenization-sdk";
 import { useGetIsPaused } from "../../../hooks/queries/useGetSecurityDetails";
 import { useRolesStore } from "../../../store/rolesStore";
 import { SecurityRole } from "../../../utils/SecurityRole";
@@ -267,12 +271,16 @@ export const AdminActionsButtons = () => {
   };
 
   const handleClearingModeToggle = async () => {
-    const clearingModeRequest = {};
-    // const clearingModeRequest = new ClearingModeRequest({ securityId: id });
-    if (isPaused) {
-      deactivateClearing(clearingModeRequest);
+    if (isClearingActivated) {
+      const deactivateClearingRequest = new DeactivateClearingRequest({
+        securityId: id,
+      });
+      deactivateClearing(deactivateClearingRequest);
     } else {
-      activateClearing(clearingModeRequest);
+      const activateClearingRequest = new ActivateClearingRequest({
+        securityId: id,
+      });
+      activateClearing(activateClearingRequest);
     }
   };
 
