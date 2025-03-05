@@ -295,7 +295,7 @@ export default {
   },
   messages: {
     success: "Success: ",
-    descriptionSuccess: "The Clearing Operation has been executed successfully",
+    descriptionSuccess: "The Clearing Operation has been reclaim successfully",
     error: "Error: ",
     descriptionFailed: "The Clearing Operation has failed",
   },

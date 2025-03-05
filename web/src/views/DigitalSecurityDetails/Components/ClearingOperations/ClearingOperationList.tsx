@@ -5,51 +5,43 @@ import {
   Heading,
   PhosphorIcon,
   PopUp,
+  useToast,
 } from "io-bricks-ui";
 import { useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { WarningCircle } from "@phosphor-icons/react";
 import { useState } from "react";
-import { DATE_TIME_FORMAT } from "../../../../utils/constants";
+import {
+  DATE_TIME_FORMAT,
+  DEFAULT_PARTITION,
+} from "../../../../utils/constants";
 import { formatDate } from "../../../../utils/format";
 import { useSecurityStore } from "../../../../store/securityStore";
-
-const CLEARING_OPERATIONS_MOCK = [
-  {
-    id: 1,
-    operationType: "Transfer",
-    amount: "10",
-    expirationDate: new Date("10/01/2025"),
-    targetId: "0.0.1234567",
-  },
-  {
-    id: 2,
-    operationType: "Redeem",
-    amount: "15",
-    expirationDate: new Date(),
-  },
-  {
-    id: 3,
-    operationType: "Hold",
-    amount: "20",
-    expirationDate: new Date(),
-    holdExpirationDate: new Date(),
-    sourceId: "0.0.1234567",
-    escrowAddress: "0.0.1234567",
-    targetId: "0.0.1234567",
-  },
-];
+import {
+  GET_CLEARING_OPERATIONS_LIST,
+  useGetClearingOperations,
+} from "../../../../hooks/queries/useClearingOperations";
+import {
+  ClearingViewModel,
+  ReclaimClearingOperationByPartitionRequest,
+} from "@hashgraph/asset-tokenization-sdk";
+import { useWalletStore } from "../../../../store/walletStore";
+import { useReclaimClearingByPartition } from "../../../../hooks/mutations/useClearingOperations";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const ClearingOperationsList = () => {
+  const queryClient = useQueryClient();
+  const toast = useToast();
+
   const { isOpen, onClose, onOpen } = useDisclosure();
 
-  const { id: _securityId = "" } = useParams();
+  const { id: securityId = "" } = useParams();
 
   const { details } = useSecurityStore();
-
+  const { address } = useWalletStore();
   const [_isMutating, setIsMutating] = useState(false);
   const [clearOperationSelected, setClearOperationSelected] =
-    useState(undefined);
+    useState<ClearingViewModel>();
   const [isReclaiming, setIsReclaiming] = useState(false);
 
   const { t: tList } = useTranslation("security", {
@@ -58,12 +50,62 @@ export const ClearingOperationsList = () => {
   const { t: tActions } = useTranslation("security", {
     keyPrefix: "details.clearingOperations.actions.confirmReclaimPopUp",
   });
+  const { t: tMessages } = useTranslation("security", {
+    keyPrefix: "details.clearingOperations.messages",
+  });
+
+  const { mutate } = useReclaimClearingByPartition();
 
   const onSubmit = () => {
     setIsMutating(true);
 
+    const request = new ReclaimClearingOperationByPartitionRequest({
+      clearingId: Number(clearOperationSelected?.id),
+      clearingOperationType: Number(
+        clearOperationSelected?.clearingOperationType,
+      ),
+      partitionId: DEFAULT_PARTITION,
+      securityId,
+      targetId: address,
+    });
+
+    mutate(request, {
+      onSettled() {
+        setIsMutating(false);
+      },
+      onSuccess(_data, variables) {
+        const queryKey = [GET_CLEARING_OPERATIONS_LIST(variables.securityId)];
+
+        queryClient.setQueryData(
+          queryKey,
+          (oldData: ClearingViewModel[] | undefined) => {
+            if (!oldData) return [];
+            return oldData.filter((op) => op.id !== variables.clearingId);
+          },
+        );
+
+        toast.show({
+          duration: 3000,
+          title: tMessages("success"),
+          description: tMessages("descriptionSuccess"),
+          variant: "subtle",
+          status: "success",
+        });
+      },
+    });
+
     setIsMutating(false);
   };
+
+  const request = {
+    securityId,
+    targetId: address,
+    partitionId: DEFAULT_PARTITION,
+    start: 0,
+    end: 50,
+  };
+
+  const { data } = useGetClearingOperations(request);
 
   return (
     <Stack w="full" h="full" layerStyle="container">
@@ -91,7 +133,7 @@ export const ClearingOperationsList = () => {
           <VStack w={600} align="center" gap={4}>
             <Heading textStyle="HeadingMediumLG">{tList("title")}</Heading>
             <VStack gap={4} w={"full"}>
-              {CLEARING_OPERATIONS_MOCK.map((op, index) => {
+              {data?.map((op, index) => {
                 const isExpirationDateResearch =
                   Number(op.expirationDate) < Date.now();
 
@@ -114,6 +156,10 @@ export const ClearingOperationsList = () => {
                         },
                         {
                           title: tList("amount"),
+                          description: op.clearingOperationType,
+                        },
+                        {
+                          title: tList("amount"),
                           description: op.amount + " " + details?.symbol,
                         },
                         {
@@ -123,28 +169,38 @@ export const ClearingOperationsList = () => {
                             DATE_TIME_FORMAT,
                           ),
                         },
-                        ...(op.targetId
+                        ...(op.destinationAddress
                           ? [
                               {
                                 title: tList("targetId"),
-                                description: op.targetId,
+                                description: op.destinationAddress,
                               },
                             ]
                           : []),
-                        ...(op.escrowAddress
+                        ...(op.data
                           ? [
                               {
-                                title: tList("escrowAddress"),
-                                description: op.escrowAddress,
+                                title: tList("data"),
+                                description: op.data,
                               },
                             ]
                           : []),
-
-                        ...(op.sourceId
+                        ...(op.hold.expirationDate
                           ? [
                               {
-                                title: tList("sourceAccount"),
-                                description: op.sourceId,
+                                title: tList("holdExpirationDate"),
+                                description: formatDate(
+                                  Number(op.hold.expirationDate),
+                                  DATE_TIME_FORMAT,
+                                ),
+                              },
+                            ]
+                          : []),
+                        ...(op.hold.escrow
+                          ? [
+                              {
+                                title: tList("holdExpirationDate"),
+                                description: op.hold.escrow,
                               },
                             ]
                           : []),
@@ -154,17 +210,14 @@ export const ClearingOperationsList = () => {
                       <Button
                         size={"md"}
                         onClick={() => {
-                          // @ts-ignore TODO: waiting SDK integration
                           setClearOperationSelected(op);
                           onOpen();
                         }}
                         alignSelf={"end"}
                         disabled={
-                          // @ts-ignore TODO: waiting SDK integration
                           isReclaiming && clearOperationSelected?.id === op.id
                         }
                         isLoading={
-                          // @ts-ignore TODO: waiting SDK integration
                           isReclaiming && clearOperationSelected?.id === op.id
                         }
                       >

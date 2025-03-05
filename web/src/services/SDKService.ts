@@ -316,6 +316,10 @@ import {
   ClearingCreateHoldByPartitionRequest,
   ClearingRedeemByPartitionRequest,
   ClearingTransferByPartitionRequest,
+  GetClearingForByPartitionRequest,
+  ClearingViewModel,
+  GetClearingsIdForByPartitionRequest,
+  IsClearingActivatedRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -904,15 +908,17 @@ export class SDKService {
 
   // CLEARING OPERATIONS ////////////////////////////////////////////
   public static async getClearingsIdForByPartition(
-    request: unknown,
-  ): Promise<unknown> {
-    return request;
+    request: GetClearingsIdForByPartitionRequest,
+  ): Promise<number[]> {
+    const response = await Security.getClearingsIdForByPartition(request);
+    return response;
   }
 
   public static async getClearingForByPartition(
-    request: unknown,
-  ): Promise<unknown> {
-    return request;
+    request: GetClearingForByPartitionRequest,
+  ): Promise<ClearingViewModel> {
+    const response = await Security.getClearingForByPartition(request);
+    return response;
   }
 
   public static async clearingTransferByPartition(
@@ -973,8 +979,11 @@ export class SDKService {
     return response.payload;
   }
 
-  public static async isClearingActivated(req: unknown): Promise<unknown> {
-    return req;
+  public static async isClearingActivated(
+    request: IsClearingActivatedRequest,
+  ): Promise<boolean> {
+    const response = await Security.isClearingActivated(request);
+    return response;
   }
 }
 
