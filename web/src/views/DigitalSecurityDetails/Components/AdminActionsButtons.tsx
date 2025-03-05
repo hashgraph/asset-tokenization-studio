@@ -222,6 +222,7 @@ import { useUnpauseSecurity } from "../../../hooks/queries/useUnpauseSecurity";
 import {
   ActivateClearingRequest,
   DeactivateClearingRequest,
+  IsClearingActivatedRequest,
   PauseRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 import { useGetIsPaused } from "../../../hooks/queries/useGetSecurityDetails";
@@ -243,8 +244,7 @@ export const AdminActionsButtons = () => {
   );
   const { data: isClearingActivated, refetch: refetchIsClearingActivated } =
     useGetIsClearingActivated(
-      {},
-      // new isClearingActivatedRequest({ securityId: id }),
+      new IsClearingActivatedRequest({ securityId: id }),
     );
   const { roles } = useRolesStore();
 
@@ -296,11 +296,9 @@ export const AdminActionsButtons = () => {
     (role) => role === SecurityRole._PAUSER_ROLE,
   );
 
-  // TODO: change when SDK will ready
-  const hasClearingRole = true;
-  // const hasClearing = roles.find(
-  //   (role) => role === SecurityRole._CLEARING_ROLE,
-  // );
+  const hasClearingRole = roles.find(
+    (role) => role === SecurityRole._CLEARING_ROLE,
+  );
 
   const showDangerZone = hasPauserRole || hasClearingRole;
 
