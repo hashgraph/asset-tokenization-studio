@@ -212,6 +212,9 @@ import { SecurityRole } from '../../domain/context/security/SecurityRole.js';
 import { NotGrantedRole } from '../usecase/command/security/error/NotGrantedRole.js';
 import { IsIssuerQuery } from '../usecase/query/security/ssi/isIssuer/IsIssuerQuery.js';
 import { GetKYCStatusForQuery } from '../usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQuery.js';
+import { IsClearingActivatedQuery } from '../usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
+import { ClearingDeactivated } from '../usecase/command/security/error/ClearingDeactivated.js';
+import { ClearingActivated } from '../usecase/command/security/error/ClearingActivated.js';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -247,5 +250,29 @@ export default class ValidationService extends Service {
       }
     }
     return true;
+  }
+
+  async validateClearingActivated(securityId: string): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const result = (
+      await this.queryBus.execute(new IsClearingActivatedQuery(securityId))
+    ).payload;
+
+    if (!result) {
+      throw new ClearingDeactivated();
+    }
+    return result;
+  }
+
+  async validateClearingDeactivated(securityId: string): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const result = (
+      await this.queryBus.execute(new IsClearingActivatedQuery(securityId))
+    ).payload;
+
+    if (result) {
+      throw new ClearingActivated();
+    }
+    return result;
   }
 }
