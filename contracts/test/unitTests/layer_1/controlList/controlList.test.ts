@@ -265,7 +265,7 @@ describe('Control List Tests', () => {
                 await DeployAtsFullInfrastructureCommand.newInstance({
                     signer: signer_A,
                     useDeployed: false,
-                    useEnvironment: true,
+                    useEnvironment: false,
                 })
             )
 

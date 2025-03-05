@@ -462,6 +462,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           ? securityInfo.maxSupply.toString()
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
+        clearingActive: securityInfo.clearingActive,
       };
 
       const equityDetails: EquityDetailsData = {
@@ -577,6 +578,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           ? securityInfo.maxSupply.toString()
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
+        clearingActive: securityInfo.clearingActive,
       };
 
       const bondDetails: BondDetailsData = {

@@ -327,13 +327,12 @@ abstract contract ClearingStorageWrapper1 is
                 clearingData.destination,
                 clearingData.data
             );
-        } else {
-            amount_ = clearingData.amount;
-            expirationTimestamp_ = clearingData.expirationTimestamp;
-            destination_ = clearingData.destination;
-            data_ = clearingData.data;
-            operatorData_ = clearingData.operatorData;
         }
+        amount_ = clearingData.amount;
+        expirationTimestamp_ = clearingData.expirationTimestamp;
+        destination_ = clearingData.destination;
+        data_ = clearingData.data;
+        operatorData_ = clearingData.operatorData;
         clearingOperationType_ = clearingData.clearingOperationType;
     }
 
