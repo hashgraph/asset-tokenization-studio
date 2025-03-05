@@ -4,25 +4,38 @@ import { useTranslation } from "react-i18next";
 import { ClearingOperationsList } from "./ClearingOperationList";
 import { ClearingOperationsCreate } from "./ClearingOperationCreate";
 import { ClearingOperationsManage } from "./ClearingOperationManage";
+import { useRolesStore } from "../../../../store/rolesStore";
+import { SecurityRole } from "../../../../utils/SecurityRole";
 
 export const ClearingOperations = () => {
   const { t: tTabs } = useTranslation("security", {
     keyPrefix: "details.clearingOperations.tabs",
   });
 
+  const { roles } = useRolesStore();
+
+  const hasClearingRole = roles.find(
+    (role) => role === SecurityRole._CLEARING_ROLE,
+  );
+
+  const tabs = [
+    {
+      content: <ClearingOperationsList />,
+      header: tTabs("list"),
+    },
+    { content: <ClearingOperationsCreate />, header: tTabs("create") },
+  ];
+
+  if (hasClearingRole) {
+    tabs.push({
+      content: <ClearingOperationsManage />,
+      header: tTabs("manage"),
+    });
+  }
+
   return (
     <Stack w="full" h="full" layerStyle="container">
-      <Tabs
-        tabs={[
-          {
-            content: <ClearingOperationsList />,
-            header: tTabs("list"),
-          },
-          { content: <ClearingOperationsCreate />, header: tTabs("create") },
-          { content: <ClearingOperationsManage />, header: tTabs("manage") },
-        ]}
-        isFitted
-      />
+      <Tabs tabs={tabs} isFitted />
     </Stack>
   );
 };
