@@ -261,6 +261,7 @@ export class ClearingRedeemFromByPartitionCommandHandler
         : securityId.toString(),
     );
 
+    await this.validationService.validateClearingActivated(securityId);
     if (await this.queryAdapter.isPaused(securityEvmAddress)) {
       throw new SecurityPaused();
     }

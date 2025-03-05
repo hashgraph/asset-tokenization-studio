@@ -309,6 +309,12 @@ import ProtectedClearingRedeemByPartitionRequest from './ProtectedClearingRedeem
 import ClearingCreateHoldByPartitionRequest from './ClearingCreateHoldByPartitionRequest.js';
 import ClearingCreateHoldFromByPartitionRequest from './ClearingCreateHoldFromByPartitionRequest.js';
 import ProtectedClearingCreateHoldByPartitionRequest from './ProtectedClearingCreateHoldByPartitionRequest.js';
+import GetClearedAmountForByPartitionRequest from './GetClearedAmountForByPartitionRequest.js';
+import GetClearedAmountForRequest from './GetClearedAmountForRequest.js';
+import GetClearingCountForByPartitionRequest from './GetClearingCountForByPartitionRequest.js';
+import GetClearingForByPartitionRequest from './GetClearingForByPartitionRequest.js';
+import GetClearingsIdForByPartitionRequest from './GetClearingsIdForByPartitionRequest.js';
+import IsClearingActivatedRequest from './IsClearingActivatedRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -417,4 +423,10 @@ export {
   ClearingCreateHoldByPartitionRequest,
   ClearingCreateHoldFromByPartitionRequest,
   ProtectedClearingCreateHoldByPartitionRequest,
+  GetClearedAmountForByPartitionRequest,
+  GetClearedAmountForRequest,
+  GetClearingCountForByPartitionRequest,
+  GetClearingForByPartitionRequest,
+  GetClearingsIdForByPartitionRequest,
+  IsClearingActivatedRequest,
 };

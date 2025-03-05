@@ -281,6 +281,7 @@ export class ProtectedClearingRedeemByPartitionCommandHandler
       throw new SecurityPaused();
     }
 
+    await this.validationService.validateClearingActivated(securityId);
     await this.validationService.validateKycAddresses(securityId, [
       sourceId,
       account.id.toString(),

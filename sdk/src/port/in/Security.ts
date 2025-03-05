@@ -326,6 +326,19 @@ import ClearingCreateHoldFromByPartitionRequest from './request/ClearingCreateHo
 import { ClearingCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingCreateHoldByPartition/ClearingCreateHoldByPartitionCommand.js';
 import { ClearingCreateHoldFromByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/clearingCreateHoldFromByPartition/ClearingCreateHoldFromByPartitionCommand.js';
 import { ProtectedClearingCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/protectedClearingCreateHoldByPartition/ProtectedClearingCreateHoldByPartitionCommand.js';
+import GetClearedAmountForByPartitionRequest from './request/GetClearedAmountForByPartitionRequest.js';
+import GetClearingCountForByPartitionRequest from './request/GetClearingCountForByPartitionRequest.js';
+import GetClearingForByPartitionRequest from './request/GetClearingForByPartitionRequest.js';
+import GetClearingsIdForByPartitionRequest from './request/GetClearingsIdForByPartitionRequest.js';
+import IsClearingActivatedRequest from './request/IsClearingActivatedRequest.js';
+import ClearingViewModel from './response/ClearingViewModel.js';
+import GetClearedAmountForRequest from './request/GetClearedAmountForRequest.js';
+import { GetClearedAmountForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearedAmountForByPartition/GetClearedAmountForByPartitionQuery.js';
+import { GetClearedAmountForQuery } from '../../app/usecase/query/security/clearing/getClearedAmountFor/GetClearedAmountForQuery.js';
+import { GetClearingCountForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingCountForByPartition/GetClearingCountForByPartitionQuery.js';
+import { GetClearingForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingForByPartition/GetClearingForByPartitionQuery.js';
+import { GetClearingsIdForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery.js';
+import { IsClearingActivatedQuery } from '../../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -460,6 +473,20 @@ interface ISecurityInPort {
   protectedClearingCreateHoldByPartition(
     request: ProtectedClearingCreateHoldByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }>;
+  getClearedAmountFor(request: GetClearedAmountForRequest): Promise<number>;
+  getClearedAmountForByPartition(
+    request: GetClearedAmountForByPartitionRequest,
+  ): Promise<number>;
+  getClearingCountForByPartition(
+    request: GetClearingCountForByPartitionRequest,
+  ): Promise<number>;
+  getClearingForByPartition(
+    request: GetClearingForByPartitionRequest,
+  ): Promise<ClearingViewModel>;
+  getClearingsIdForByPartition(
+    request: GetClearingsIdForByPartitionRequest,
+  ): Promise<number[]>;
+  isClearingActivated(request: IsClearingActivatedRequest): Promise<boolean>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -1453,6 +1480,122 @@ class SecurityInPort implements ISecurityInPort {
         request.signature,
       ),
     );
+  }
+
+  @LogError
+  async getClearedAmountFor(
+    request: GetClearedAmountForRequest,
+  ): Promise<number> {
+    handleValidation('GetClearedAmountForByPartitionRequest', request);
+    return (
+      await this.queryBus.execute(
+        new GetClearedAmountForQuery(request.securityId, request.targetId),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getClearedAmountForByPartition(
+    request: GetClearedAmountForByPartitionRequest,
+  ): Promise<number> {
+    handleValidation('GetClearedAmountForByPartitionRequest', request);
+    return (
+      await this.queryBus.execute(
+        new GetClearedAmountForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getClearingCountForByPartition(
+    request: GetClearingCountForByPartitionRequest,
+  ): Promise<number> {
+    handleValidation('GetClearingCountForByPartitionRequest', request);
+    return (
+      await this.queryBus.execute(
+        new GetClearingCountForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.clearingOperationType,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async getClearingForByPartition(
+    request: GetClearingForByPartitionRequest,
+  ): Promise<ClearingViewModel> {
+    handleValidation('GetClearingForByPartitionRequest', request);
+
+    const res = (
+      await this.queryBus.execute(
+        new GetClearingForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.clearingOperationType,
+          request.clearingId,
+        ),
+      )
+    ).payload;
+
+    const clearing: ClearingViewModel = {
+      id: request.clearingId,
+      amount: res.amount.toString(),
+      expirationDate: new Date(res.expirationTimeStamp * ONE_THOUSAND),
+      destinationAddress: res.destination,
+      clearingOperationType: res.clearingOperationType,
+      data: res.data,
+      operatorData: res.operatorData,
+      hold: {
+        amount: res.hold.amount.toString(),
+        expirationDate: new Date(
+          res.hold.expirationTimestamp.toBigNumber().toNumber() * ONE_THOUSAND,
+        ),
+        escrow: res.hold.escrow,
+        to: res.hold.to,
+        data: res.hold.data,
+      },
+    };
+
+    return clearing;
+  }
+
+  @LogError
+  async getClearingsIdForByPartition(
+    request: GetClearingsIdForByPartitionRequest,
+  ): Promise<number[]> {
+    handleValidation('GetClearingsIdForByPartitionRequest', request);
+    return (
+      await this.queryBus.execute(
+        new GetClearingsIdForByPartitionQuery(
+          request.securityId,
+          request.partitionId,
+          request.targetId,
+          request.clearingOperationType,
+          request.start,
+          request.end,
+        ),
+      )
+    ).payload;
+  }
+
+  @LogError
+  async isClearingActivated(
+    request: IsClearingActivatedRequest,
+  ): Promise<boolean> {
+    handleValidation('IsClearingActivatedRequest', request);
+    return (
+      await this.queryBus.execute(
+        new IsClearingActivatedQuery(request.securityId),
+      )
+    ).payload;
   }
 }
 

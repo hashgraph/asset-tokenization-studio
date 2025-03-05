@@ -388,6 +388,7 @@ import {
   OperatorTransferData,
 } from '../../../domain/context/factory/ERC1410Metadata.js';
 import {
+  CastClearingOperationType,
   ClearingOperation,
   ClearingOperationFrom,
   ClearingOperationIdentifier,
@@ -2354,7 +2355,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const clearingOperationIdentifier: ClearingOperationIdentifier = {
       partition: partitionId,
       tokenHolder: targetId.toString(),
-      clearingOperationType: clearingOperationType,
+      clearingOperationType: CastClearingOperationType.toNumber(
+        clearingOperationType,
+      ),
       clearingId: clearingId,
     };
 
@@ -2383,7 +2386,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const clearingOperationIdentifier: ClearingOperationIdentifier = {
       partition: partitionId,
       tokenHolder: targetId.toString(),
-      clearingOperationType: clearingOperationType,
+      clearingOperationType: CastClearingOperationType.toNumber(
+        clearingOperationType,
+      ),
       clearingId: clearingId,
     };
 
@@ -2412,7 +2417,9 @@ export class RPCTransactionAdapter extends TransactionAdapter {
     const clearingOperationIdentifier: ClearingOperationIdentifier = {
       partition: partitionId,
       tokenHolder: targetId.toString(),
-      clearingOperationType: clearingOperationType,
+      clearingOperationType: CastClearingOperationType.toNumber(
+        clearingOperationType,
+      ),
       clearingId: clearingId,
     };
 

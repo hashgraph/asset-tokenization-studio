@@ -231,6 +231,8 @@ export enum ErrorCode {
   InvalidValue = '10021',
   PublicKeyInvalid = '10004',
   ValidationChecks = '10022',
+  InvalidClearingOperationType = '10032',
+  InvalidClearingOperationTypeNumber = '10033',
 
   // Error codes for Logic Errors (Prefix: 2XXXX)
   AccountAlreadyInControlList = '20013',
@@ -254,6 +256,8 @@ export enum ErrorCode {
   UnlistedIssuer = '20021',
   InvalidVCHolder = '20022',
   InvalidVC = '20023',
+  ClearingActivated = '20024',
+  ClearingDeactivated = '20025',
 
   // Error codes for System Errors (Prefix: 3XXXX)
   ContractNotFound = '30002',

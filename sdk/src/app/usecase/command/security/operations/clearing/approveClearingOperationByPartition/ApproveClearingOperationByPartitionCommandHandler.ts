@@ -261,6 +261,7 @@ export class ApproveClearingOperationByPartitionCommandHandler
       throw new SecurityPaused();
     }
 
+    await this.validationService.validateClearingActivated(securityId);
     await this.validationService.validateKycAddresses(securityId, [targetId]);
 
     const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
