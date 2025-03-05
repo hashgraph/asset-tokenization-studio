@@ -209,8 +209,8 @@ pragma solidity 0.8.18;
 import {Context} from '@openzeppelin/contracts/utils/Context.sol';
 
 abstract contract LocalContext is Context {
-   error ExpirationNotReached();
-   
+    error ExpirationNotReached();
+
     function _checkExpirationReached(
         uint256 _expirationTimestamp
     ) internal view {

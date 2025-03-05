@@ -218,6 +218,7 @@ import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {
     IERC1410Basic
 } from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import {IKyc} from '../../layer_1/interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
@@ -375,6 +376,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             }),
             address(0)
         );
+        _reduceBalanceByPartition(_from, _amount, partition);
 
         _setClearingIdByPartitionAndType(
             clearingDataStorage,
@@ -456,7 +458,14 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _clearingOperationIdentifier
         );
 
-        _checkControlList(_clearingOperationIdentifier.tokenHolder);
+        if (
+            clearingData.clearingOperationType !=
+            _clearingOperationIdentifier.clearingOperationType
+        )
+            revert IClearing.OperationsTypeMismatch(
+                _clearingOperationIdentifier.clearingOperationType,
+                clearingData.clearingOperationType
+            );
 
         if (_operation == IClearing.ClearingActionType.Reclaim) {
             _checkExpirationReached(clearingData.expirationTimestamp);
@@ -489,6 +498,11 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _clearingOperationIdentifier.clearingOperationType ==
             IClearing.ClearingOperationType.Redeem
         ) {
+            _checkValidKycStatus(
+                IKyc.KycStatus.GRANTED,
+                _clearingOperationIdentifier.tokenHolder
+            );
+            _checkControlList(_clearingOperationIdentifier.tokenHolder);
             return
                 _redeemByPartition(
                     _clearingOperationIdentifier.partition,
@@ -511,6 +525,16 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _clearingOperationIdentifier.clearingOperationType ==
             IClearing.ClearingOperationType.Transfer
         ) {
+            (, , address destination, , , , ) = _getClearingForByPartition(
+                _clearingOperationIdentifier
+            );
+            _checkValidKycStatus(IKyc.KycStatus.GRANTED, destination);
+            _checkControlList(destination);
+            _checkValidKycStatus(
+                IKyc.KycStatus.GRANTED,
+                _clearingOperationIdentifier.tokenHolder
+            );
+            _checkControlList(_clearingOperationIdentifier.tokenHolder);
             return
                 _transferByPartition(
                     _clearingOperationIdentifier.tokenHolder,
@@ -555,8 +579,13 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 _amount,
                 _clearingOperationIdentifier.partition
             );
+        } else {
+            _addPartitionTo(
+                _amount,
+                _to,
+                _clearingOperationIdentifier.partition
+            );
         }
-        _addPartitionTo(_amount, _to, _clearingOperationIdentifier.partition);
     }
 
     //TODO: discuss remove labaf from total cleared

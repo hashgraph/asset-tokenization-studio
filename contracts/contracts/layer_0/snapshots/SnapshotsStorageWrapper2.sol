@@ -512,6 +512,36 @@ abstract contract SnapshotsStorageWrapper2 is
             );
     }
 
+    function _clearedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            _balanceOfAtAdjusted(
+                _snapshotID,
+                _snapshotStorage().accountClearedBalanceSnapshots[_tokenHolder],
+                _getClearedAmountForAdjusted(_tokenHolder)
+            );
+    }
+
+    function _clearedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            _balanceOfAtAdjusted(
+                _snapshotID,
+                _snapshotStorage().accountPartitionClearedBalanceSnapshots[
+                    _tokenHolder
+                ][_partition],
+                _getClearedAmountForByPartitionAdjusted(
+                    _partition,
+                    _tokenHolder
+                )
+            );
+    }
+
     function _balanceOfAtAdjusted(
         uint256 _snapshotId,
         Snapshots storage _snapshots,

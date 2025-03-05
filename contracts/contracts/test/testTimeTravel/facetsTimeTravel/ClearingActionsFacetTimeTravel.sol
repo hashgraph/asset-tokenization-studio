@@ -203,82 +203,27 @@
 
 */
 
+// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-// SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {
+    ClearingActionsFacet
+} from '../../../layer_1/clearing/ClearingActionsFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
 
-interface IAdjustBalances {
-    function adjustBalances(
-        uint256 factor,
-        uint8 decimals
-    ) external returns (bool success_);
-
-    function getAbaf() external view returns (uint256);
-
-    function getAbafAdjusted() external view returns (uint256);
-
-    function getAbafAdjustedAt(
-        uint256 _timestamp
-    ) external view returns (uint256);
-
-    function getLabafByUser(address _account) external view returns (uint256);
-
-    function getLabafByPartition(
-        bytes32 _partition
-    ) external view returns (uint256);
-
-    function getLabafByUserAndPartition(
-        bytes32 _partition,
-        address _account
-    ) external view returns (uint256);
-
-    function getAllowanceLabaf(
-        address _owner,
-        address _spender
-    ) external view returns (uint256);
-
-    function getTotalLockLabaf(
-        address _tokenHolder
-    ) external view returns (uint256 labaf_);
-
-    function getTotalLockLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 labaf_);
-
-    function getLockLabafByPartition(
-        bytes32 _partition,
-        uint256 _lockId,
-        address _tokenHolder
-    ) external view returns (uint256 labaf_);
-
-    function getTotalHeldLabaf(
-        address _tokenHolder
-    ) external view returns (uint256 labaf_);
-
-    function getTotalHeldLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 labaf_);
-
-    function getHoldLabafByPartition(
-        bytes32 _partition,
-        uint256 _holdId,
-        address _tokenHolder
-    ) external view returns (uint256 labaf_);
-
-    function getTotalClearedLabaf(
-        address _tokenHolder
-    ) external view returns (uint256 labaf_);
-
-    function getTotalClearedLabafByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 labaf_);
-
-    function getClearingLabafByPartition(
-        bytes32 _partition,
-        uint256 _clearingId,
-        address _tokenHolder
-    ) external view returns (uint256 labaf_);
+contract ClearingActionsFacetTimeTravel is
+    ClearingActionsFacet,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
+    }
 }

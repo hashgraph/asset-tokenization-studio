@@ -230,6 +230,8 @@ import {
     ProtectedPartitions,
     Kyc,
     SsiManagement,
+    ClearingFacet,
+    ClearingActionsFacet,
     TimeTravel,
 } from '@typechain'
 import { DeployContractWithFactoryResult } from '../index'
@@ -260,6 +262,8 @@ export interface DeployAtsContractsResultParams {
     hold: DeployContractWithFactoryResult<Hold>
     adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
     protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
+    clearingFacet: DeployContractWithFactoryResult<ClearingFacet>
+    clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
     timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     deployer?: Signer
 }
@@ -290,6 +294,8 @@ export default class DeployAtsContractsResult {
     public readonly hold: DeployContractWithFactoryResult<Hold>
     public readonly adjustBalances: DeployContractWithFactoryResult<AdjustBalances>
     public readonly protectedPartitions: DeployContractWithFactoryResult<ProtectedPartitions>
+    public readonly clearingFacet: DeployContractWithFactoryResult<ClearingFacet>
+    public readonly clearingActionsFacet: DeployContractWithFactoryResult<ClearingActionsFacet>
     public readonly timeTravel?: DeployContractWithFactoryResult<TimeTravel>
     public readonly deployer?: Signer
 
@@ -319,6 +325,8 @@ export default class DeployAtsContractsResult {
         hold,
         adjustBalances,
         protectedPartitions,
+        clearingFacet,
+        clearingActionsFacet,
         timeTravel,
         deployer,
     }: DeployAtsContractsResultParams) {
@@ -347,6 +355,8 @@ export default class DeployAtsContractsResult {
         this.hold = hold
         this.adjustBalances = adjustBalances
         this.protectedPartitions = protectedPartitions
+        this.clearingFacet = clearingFacet
+        this.clearingActionsFacet = clearingActionsFacet
         this.timeTravel = timeTravel
         // Deployer
         this.deployer = deployer
