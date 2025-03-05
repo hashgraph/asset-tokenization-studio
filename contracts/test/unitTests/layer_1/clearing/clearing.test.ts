@@ -2448,6 +2448,7 @@ describe('Clearing Tests', () => {
                 'WrongClearingId'
             )*/
         })
+
     })
 
     describe('Create clearing success', () => {
