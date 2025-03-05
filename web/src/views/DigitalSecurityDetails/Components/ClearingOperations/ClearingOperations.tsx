@@ -14,8 +14,8 @@ export const ClearingOperations = () => {
 
   const { roles } = useRolesStore();
 
-  const hasClearingRole = roles.find(
-    (role) => role === SecurityRole._CLEARING_ROLE,
+  const hasClearingValidatorRole = roles.find(
+    (role) => role === SecurityRole._CLEARING_VALIDATOR_ROLE,
   );
 
   const tabs = [
@@ -26,7 +26,7 @@ export const ClearingOperations = () => {
     { content: <ClearingOperationsCreate />, header: tTabs("create") },
   ];
 
-  if (hasClearingRole) {
+  if (hasClearingValidatorRole) {
     tabs.push({
       content: <ClearingOperationsManage />,
       header: tTabs("manage"),
