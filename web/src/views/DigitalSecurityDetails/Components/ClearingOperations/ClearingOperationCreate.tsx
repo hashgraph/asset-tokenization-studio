@@ -16,7 +16,21 @@ import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { WarningCircle } from "@phosphor-icons/react";
 import { useState } from "react";
-import { DATE_TIME_FORMAT } from "../../../../utils/constants";
+import {
+  DATE_TIME_FORMAT,
+  DEFAULT_PARTITION,
+} from "../../../../utils/constants";
+import {
+  useCreateClearingHoldByPartition,
+  useCreateClearingRedeemByPartition,
+  useCreateClearingTransferByPartition,
+} from "../../../../hooks/mutations/useClearingOperations";
+import {
+  ClearingCreateHoldByPartitionRequest,
+  ClearingRedeemByPartitionRequest,
+  ClearingTransferByPartitionRequest,
+} from "@hashgraph/asset-tokenization-sdk";
+import { dateToUnixTimestamp } from "../../../../utils/format";
 
 enum ClearingOperationType {
   TRANSFER = "Transfer",
@@ -56,6 +70,13 @@ export const ClearingOperationsCreate = () => {
     mode: "onChange",
   });
 
+  const { mutate: createClearingTransferByPartition } =
+    useCreateClearingTransferByPartition();
+  const { mutate: createClearingRedeemByPartition } =
+    useCreateClearingRedeemByPartition();
+  const { mutate: createClearingHoldByPartition } =
+    useCreateClearingHoldByPartition();
+
   const onSubmit = () => {
     setIsMutating(true);
 
@@ -70,39 +91,63 @@ export const ClearingOperationsCreate = () => {
     } = getValues();
 
     if (operationType === ClearingOperationType.TRANSFER.valueOf()) {
-      // @ts-ignore TODO: waiting SDK integration
-      const _transferRequest = {
+      const transferRequest = new ClearingTransferByPartitionRequest({
         securityId,
-        amount,
-        expirationDate,
+        amount: amount.toString(),
+        expirationDate: dateToUnixTimestamp(expirationDate),
         targetId,
-      };
+        partitionId: DEFAULT_PARTITION,
+      });
+
+      createClearingTransferByPartition(transferRequest, {
+        onSettled() {
+          setIsMutating(false);
+        },
+        onSuccess() {
+          reset();
+        },
+      });
     }
 
     if (operationType === ClearingOperationType.REDEEM.valueOf()) {
-      // @ts-ignore TODO: waiting SDK integration
-      const _redeemRequest = {
+      const redeemRequest = new ClearingRedeemByPartitionRequest({
         securityId,
-        amount,
-        expirationDate,
-      };
+        amount: amount.toString(),
+        expirationDate: dateToUnixTimestamp(expirationDate),
+        partitionId: DEFAULT_PARTITION,
+      });
+
+      createClearingRedeemByPartition(redeemRequest, {
+        onSettled() {
+          setIsMutating(false);
+        },
+        onSuccess() {
+          reset();
+        },
+      });
     }
 
     if (operationType === ClearingOperationType.HOLD.valueOf()) {
-      // @ts-ignore TODO: waiting SDK integration
-      const _holdRequest = {
+      const holdRequest = new ClearingCreateHoldByPartitionRequest({
         securityId,
-        amount,
-        expirationDate,
-        holdExpirationDate,
-        escrowAccount,
-        sourceId,
+        amount: amount.toString(),
+        clearingExpirationDate: dateToUnixTimestamp(expirationDate),
+        holdExpirationDate: dateToUnixTimestamp(holdExpirationDate),
+        escrow: escrowAccount,
+        // TODO: check with SDK: sourceId,
         targetId,
-      };
-    }
+        partitionId: DEFAULT_PARTITION,
+      });
 
-    setIsMutating(false);
-    reset();
+      createClearingHoldByPartition(holdRequest, {
+        onSettled() {
+          setIsMutating(false);
+        },
+        onSuccess() {
+          reset();
+        },
+      });
+    }
   };
 
   return (
