@@ -204,6 +204,7 @@
 */
 
 pragma solidity 0.8.18;
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 interface IAdjustBalances {
@@ -263,6 +264,21 @@ interface IAdjustBalances {
     function getHoldLabafByPartition(
         bytes32 _partition,
         uint256 _holdId,
+        address _tokenHolder
+    ) external view returns (uint256 labaf_);
+
+    function getTotalClearedLabaf(
+        address _tokenHolder
+    ) external view returns (uint256 labaf_);
+
+    function getTotalClearedLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view returns (uint256 labaf_);
+
+    function getClearingLabafByPartition(
+        bytes32 _partition,
+        uint256 _clearingId,
         address _tokenHolder
     ) external view returns (uint256 labaf_);
 }

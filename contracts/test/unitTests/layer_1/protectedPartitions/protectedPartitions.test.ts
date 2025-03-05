@@ -222,6 +222,7 @@ import {
     Kyc,
     SsiManagement,
     Hold,
+    ClearingFacet,
 } from '@typechain'
 import {
     DEFAULT_PARTITION,
@@ -241,6 +242,8 @@ import {
     MAX_UINT256,
     SSI_MANAGER_ROLE,
     KYC_ROLE,
+    CLEARING_ROLE,
+    CLEARING_VALIDATOR_ROLE,
     ZERO,
     EMPTY_STRING,
     ADDRESS_ZERO,
@@ -307,8 +310,84 @@ const holdType = {
     ],
 }
 
+const clearingTransferType = {
+    ClearingOperation: [
+        { name: 'partition', type: 'bytes32' },
+        { name: 'expirationTimestamp', type: 'uint256' },
+        { name: 'data', type: 'bytes' },
+    ],
+    ProtectedClearingOperation: [
+        { name: 'clearingOperation', type: 'ClearingOperation' },
+        { name: 'from', type: 'address' },
+        { name: 'deadline', type: 'uint256' },
+        { name: 'nonce', type: 'uint256' },
+    ],
+    protectedClearingTransferByPartition: [
+        {
+            name: '_protectedClearingOperation',
+            type: 'ProtectedClearingOperation',
+        },
+        { name: '_amount', type: 'uint256' },
+        { name: '_to', type: 'address' },
+    ],
+}
+
+const clearingCreateHoldType = {
+    ClearingOperation: [
+        { name: 'partition', type: 'bytes32' },
+        { name: 'expirationTimestamp', type: 'uint256' },
+        { name: 'data', type: 'bytes' },
+    ],
+    ProtectedClearingOperation: [
+        { name: 'clearingOperation', type: 'ClearingOperation' },
+        { name: 'from', type: 'address' },
+        { name: 'deadline', type: 'uint256' },
+        { name: 'nonce', type: 'uint256' },
+    ],
+    Hold: [
+        { name: 'amount', type: 'uint256' },
+        { name: 'expirationTimestamp', type: 'uint256' },
+        { name: 'escrow', type: 'address' },
+        { name: 'to', type: 'address' },
+        { name: 'data', type: 'bytes' },
+    ],
+    protectedClearingCreateHoldByPartition: [
+        {
+            name: '_protectedClearingOperation',
+            type: 'ProtectedClearingOperation',
+        },
+        { name: '_hold', type: 'Hold' },
+    ],
+}
+
+const clearingRedeemType = {
+    ClearingOperation: [
+        { name: 'partition', type: 'bytes32' },
+        { name: 'expirationTimestamp', type: 'uint256' },
+        { name: 'data', type: 'bytes' },
+    ],
+    ProtectedClearingOperation: [
+        { name: 'clearingOperation', type: 'ClearingOperation' },
+        { name: 'from', type: 'address' },
+        { name: 'deadline', type: 'uint256' },
+        { name: 'nonce', type: 'uint256' },
+    ],
+    protectedClearingRedeemByPartition: [
+        {
+            name: '_protectedClearingOperation',
+            type: 'ProtectedClearingOperation',
+        },
+        { name: '_amount', type: 'uint256' },
+    ],
+}
+
 let basicTransferInfo: any
 let operatorTransferData: any
+enum ClearingOperationType {
+    Transfer,
+    Redeem,
+    HoldCreation,
+}
 
 describe('ProtectedPartitions Tests', () => {
     let diamond_UnprotectedPartitions: ResolverProxy
@@ -334,9 +413,14 @@ describe('ProtectedPartitions Tests', () => {
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
     let holdFacet: Hold
+    let clearingFacet: ClearingFacet
 
     let protectedHold: any
     let hold: any
+    let clearingOperation: any
+    let clearingOperationFrom: any
+    let clearingIdentifier: any
+    let protectedClearingOperation: any
 
     async function grant_WILD_CARD_ROLE_and_issue_tokens(
         wildCard_Account: string,
@@ -384,6 +468,7 @@ describe('ProtectedPartitions Tests', () => {
             'SsiManagement',
             address
         )
+        clearingFacet = await ethers.getContractAt('ClearingFacet', address)
     }
 
     async function grantKyc() {
@@ -467,6 +552,14 @@ describe('ProtectedPartitions Tests', () => {
             role: SSI_MANAGER_ROLE,
             members: [account_A],
         }
+        const rbacClearing: Rbac = {
+            role: CLEARING_ROLE,
+            members: [account_A],
+        }
+        const rbacClearingValidator: Rbac = {
+            role: CLEARING_VALIDATOR_ROLE,
+            members: [account_A],
+        }
         const init_rbacs: Rbac[] = [
             rbacPause,
             rbacControlList,
@@ -476,6 +569,8 @@ describe('ProtectedPartitions Tests', () => {
             rbacLocker,
             rbacKYC,
             rbacSSI,
+            rbacClearing,
+            rbacClearingValidator,
         ]
 
         diamond_UnprotectedPartitions = await deployEquityFromFactory({
@@ -568,6 +663,32 @@ describe('ProtectedPartitions Tests', () => {
             value: amount,
             data: '0x1234',
             operatorData: '0x1234',
+        }
+
+        clearingOperation = {
+            partition: DEFAULT_PARTITION,
+            expirationTimestamp: expirationTimestamp,
+            data: '0x1234',
+        }
+
+        clearingOperationFrom = {
+            clearingOperation: clearingOperation,
+            from: account_A,
+            operatorData: '0x1234',
+        }
+
+        clearingIdentifier = {
+            partition: DEFAULT_PARTITION,
+            tokenHolder: account_A,
+            clearingId: 1,
+            clearingOperationType: ClearingOperationType.Transfer,
+        }
+
+        protectedClearingOperation = {
+            clearingOperation: clearingOperation,
+            from: account_A,
+            deadline: MAX_UINT256,
+            nonce: 1,
         }
     })
 
@@ -1585,6 +1706,304 @@ describe('ProtectedPartitions Tests', () => {
                         account_A,
                         protectedHold,
                         signature
+                    )
+            })
+        })
+        describe('Clearing Tests', () => {
+            beforeEach(async () => {
+                await clearingFacet.activateClearing()
+            })
+            it('GIVEN a protected token WHEN performing a create clearing THEN transaction fails with PartitionsAreProtected', async () => {
+                // TRANSFERS
+                await expect(
+                    clearingFacet
+                        .connect(signer_A)
+                        .clearingTransferByPartition(
+                            clearingOperation,
+                            amount,
+                            account_C
+                        )
+                ).to.be.rejectedWith('PartitionsAreProtected')
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .clearingTransferFromByPartition(
+                            clearingOperationFrom,
+                            amount,
+                            account_C
+                        )
+                ).to.be.rejectedWith('PartitionsAreProtected')
+                await erc1410Facet.authorizeOperator(account_B)
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .operatorClearingTransferByPartition(
+                            clearingOperationFrom,
+                            amount,
+                            account_C
+                        )
+                ).to.be.rejectedWith('PartitionsAreProtected')
+                // CLEARING CREATE HOLD
+                await expect(
+                    clearingFacet
+                        .connect(signer_A)
+                        .clearingCreateHoldByPartition(clearingOperation, hold)
+                ).to.be.rejectedWith('PartitionsAreProtected')
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .clearingCreateHoldFromByPartition(
+                            clearingOperationFrom,
+                            hold
+                        )
+                ).to.be.rejectedWith('PartitionsAreProtected')
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .operatorClearingCreateHoldByPartition(
+                            clearingOperationFrom,
+                            hold
+                        )
+                ).to.be.rejectedWith('PartitionsAreProtected')
+                // CLEARING REDEEM
+                await expect(
+                    clearingFacet
+                        .connect(signer_A)
+                        .clearingRedeemByPartition(clearingOperation, amount)
+                ).to.be.rejectedWith('PartitionsAreProtected')
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .clearingRedeemFromByPartition(
+                            clearingOperationFrom,
+                            amount
+                        )
+                ).to.be.rejectedWith('PartitionsAreProtected')
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .operatorClearingRedeemByPartition(
+                            clearingOperationFrom,
+                            amount
+                        )
+                ).to.be.rejectedWith('PartitionsAreProtected')
+            })
+
+            it('GIVEN a wrong deadline WHEN performing a protected clearing THEN transaction fails with ExpiredDeadline', async () => {
+                protectedClearingOperation.deadline = 1
+                //TRANSFER
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .protectedClearingTransferByPartition(
+                            protectedClearingOperation,
+                            amount,
+                            account_C,
+                            '0x1234'
+                        )
+                ).to.be.rejectedWith('ExpiredDeadline')
+                // HOLD
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .protectedClearingCreateHoldByPartition(
+                            protectedClearingOperation,
+                            hold,
+                            '0x1234'
+                        )
+                ).to.be.rejectedWith('ExpiredDeadline')
+                //REDEEM
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .protectedClearingRedeemByPartition(
+                            protectedClearingOperation,
+                            amount,
+                            '0x1234'
+                        )
+                ).to.be.rejectedWith('ExpiredDeadline')
+            })
+
+            it('GIVEN a wrong signature length WHEN performing a protected clearing THEN transaction fails with WrongSignatureLength', async () => {
+                //TRANSFER
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .protectedClearingTransferByPartition(
+                            protectedClearingOperation,
+                            amount,
+                            account_C,
+                            '0x1234'
+                        )
+                ).to.be.rejectedWith('WrongSignatureLength')
+                // HOLD
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .protectedClearingCreateHoldByPartition(
+                            protectedClearingOperation,
+                            hold,
+                            '0x1234'
+                        )
+                ).to.be.rejectedWith('WrongSignatureLength')
+                //REDEEM
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .protectedClearingRedeemByPartition(
+                            protectedClearingOperation,
+                            amount,
+                            '0x1234'
+                        )
+                ).to.be.rejectedWith('WrongSignatureLength')
+            })
+
+            it('GIVEN a wrong signature WHEN performing a protected clearing THEN transaction fails with WrongSignature', async () => {
+                //TRANSFER
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .protectedClearingTransferByPartition(
+                            protectedClearingOperation,
+                            amount,
+                            account_C,
+                            '0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344'
+                        )
+                ).to.be.rejectedWith('WrongSignature')
+                // HOLD
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .protectedClearingCreateHoldByPartition(
+                            protectedClearingOperation,
+                            hold,
+                            '0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344'
+                        )
+                ).to.be.rejectedWith('WrongSignature')
+                //REDEEM
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .protectedClearingRedeemByPartition(
+                            protectedClearingOperation,
+                            amount,
+                            '0x0011223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344112233441122334411223344'
+                        )
+                ).to.be.rejectedWith('WrongSignature')
+            })
+
+            it('GIVEN a wrong nounce WHEN performing a protected clearing THEN transaction fails with WrongNounce', async () => {
+                protectedClearingOperation.nonce = 0
+
+                //TRANSFER
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .protectedClearingTransferByPartition(
+                            protectedClearingOperation,
+                            amount,
+                            account_C,
+                            '0x1234'
+                        )
+                ).to.be.rejectedWith('WrongNounce')
+                // HOLD
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .protectedClearingCreateHoldByPartition(
+                            protectedClearingOperation,
+                            hold,
+                            '0x1234'
+                        )
+                ).to.be.rejectedWith('WrongNounce')
+                //REDEEM
+                await expect(
+                    clearingFacet
+                        .connect(signer_B)
+                        .protectedClearingRedeemByPartition(
+                            protectedClearingOperation,
+                            amount,
+                            '0x1234'
+                        )
+                ).to.be.rejectedWith('WrongNounce')
+            })
+
+            it('GIVEN a correct signature WHEN performing a protected clearing THEN transaction succeeds', async () => {
+                // TRANSFERS
+                const message = {
+                    _protectedClearingOperation: protectedClearingOperation,
+                    _amount: amount,
+                    _to: account_C,
+                }
+                // Sign the message hash
+                const signature = await signer_A._signTypedData(
+                    domain,
+                    clearingTransferType,
+                    message
+                )
+                await erc1410Facet.connect(signer_B).issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: amount,
+                    data: '0x',
+                })
+                await clearingFacet
+                    .connect(signer_B)
+                    .protectedClearingTransferByPartition(
+                        protectedClearingOperation,
+                        amount,
+                        account_C,
+                        signature
+                    )
+                // HOLDS
+                protectedClearingOperation.nonce = 2
+                const messageHold = {
+                    _protectedClearingOperation: protectedClearingOperation,
+                    _hold: hold,
+                }
+                // Sign the message hash
+                const signatureHold = await signer_A._signTypedData(
+                    domain,
+                    clearingCreateHoldType,
+                    messageHold
+                )
+                await erc1410Facet.connect(signer_B).issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: amount,
+                    data: '0x',
+                })
+                await clearingFacet
+                    .connect(signer_B)
+                    .protectedClearingCreateHoldByPartition(
+                        protectedClearingOperation,
+                        hold,
+                        signatureHold
+                    )
+                // REDEEMS
+                protectedClearingOperation.nonce = 3
+                const messageRedeem = {
+                    _protectedClearingOperation: protectedClearingOperation,
+                    _amount: amount
+                }
+                // Sign the message hash
+                const signatureRedeem = await signer_A._signTypedData(
+                    domain,
+                    clearingRedeemType,
+                    messageRedeem
+                )
+                await erc1410Facet.connect(signer_B).issueByPartition({
+                    partition: DEFAULT_PARTITION,
+                    tokenHolder: account_A,
+                    value: amount,
+                    data: '0x',
+                })
+                await clearingFacet
+                    .connect(signer_B)
+                    .protectedClearingRedeemByPartition(
+                        protectedClearingOperation,
+                        amount,
+                        signatureRedeem
                     )
             })
         })

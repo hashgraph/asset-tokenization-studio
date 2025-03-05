@@ -261,6 +261,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             );
             _checkUnProtectedPartitionsOrWildCardRole();
             _checkExpirationTimestamp(_clearingOperation.expirationTimestamp);
+            _checkValidAddress(_to);
         }
 
         bytes memory encodedClearingData = abi.encode(_to, '');
@@ -303,6 +304,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
                 _clearingOperationFrom.clearingOperation.expirationTimestamp
             );
             _checkValidAddress(_clearingOperationFrom.from);
+            _checkValidAddress(_to);
         }
         bytes memory encodedClearingData = abi.encode(_to, '');
 
@@ -348,6 +350,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
                 _clearingOperationFrom.clearingOperation.partition,
                 _clearingOperationFrom.from
             );
+            _checkValidAddress(_to);
         }
         bytes memory encodedClearingData = abi.encode(
             _to,
@@ -398,6 +401,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
                 ),
                 _msgSender()
             );
+            _checkValidAddress(_to);
         }
         (success_, clearingId_) = _protectedClearingTransferByPartition(
             _protectedClearingOperation,
@@ -593,7 +597,6 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             _checkDefaultPartitionWithSinglePartition(
                 _clearingOperation.partition
             );
-            _checkControlList(_msgSender());
             _checkUnProtectedPartitionsOrWildCardRole();
             _checkExpirationTimestamp(_clearingOperation.expirationTimestamp);
         }

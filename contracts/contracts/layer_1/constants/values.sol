@@ -265,7 +265,7 @@ bytes32 constant _HOLD_TYPEHASH = 0x638791043a42aa7472ccb18a7ede86b9baf01fb2d212
 //keccak256(
 //'ProtectedClearingOperation(ClearingOperation clearingOperation,address from,uint256 deadline,uint256 nonce)ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)'
 //);
-bytes32 constant _PROTECTED_CLEARING_OPERATION_TYPEHASH = 0x7a3628501c4a1c0e58e7976208b8038a90db89ab16bbe7c01df81a9d6ade6a94;
+bytes32 constant _PROTECTED_CLEARING_OPERATION_TYPEHASH = 0x1e3a71820115912522e83d52ecad9fb4b7753a55d2d3d24c1c4e3047f9eb2e1f;
 
 //keccak256(
 //'ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)'
@@ -278,11 +278,11 @@ bytes32 constant _CLEARING_OPERATION_TYPEHASH = 0x6b1a3eed3300b58d08c0db9042a291
 bytes32 constant _PROTECTED_HOLD_TYPEHASH = 0x432ede4c9f6d06cc57be0d75da5dce179cd5f56db988520d5b77795a69b0dc2e;
 
 //keccak256(
-//'protectedClearingTransferByPartition(ProtectedClearingOperation _protectedClearingOperation,uint256 _amount,address _to)ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)'
+//'protectedClearingTransferByPartition(ProtectedClearingOperation _protectedClearingOperation,uint256 _amount,address _to)ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)ProtectedClearingOperation(ClearingOperation clearingOperation,address from,uint256 deadline,uint256 nonce)'
 //);
-bytes32 constant _PROTECTED_CLEARING_TRANSFER_FROM_PARTITION_TYPEHASH = 0xf6002360a0d016a1d9ddacedb69cf68c14ae4f12e2896065a417e70d33de7969;
+bytes32 constant _PROTECTED_CLEARING_TRANSFER_PARTITION_TYPEHASH = 0x9ac8bf58d69dcdeba1416569ae4a5e8aef8b8bd1517e584211c6f3b149ef7989;
 
 //keccak256(
-//'protectedClearingRedeem(ProtectedClearingOperation _protectedClearingOperation,uint256 _amount)ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)ProtectedClearingOperation(ClearingOperation clearingOpeartion,address from,uint256 deadline,uint256 nonce)'
+//'protectedClearingRedeemByPartition(ProtectedClearingOperation _protectedClearingOperation,uint256 _amount)ClearingOperation(bytes32 partition,uint256 expirationTimestamp,bytes data)ProtectedClearingOperation(ClearingOperation clearingOperation,address from,uint256 deadline,uint256 nonce)'
 //);
-bytes32 constant _PROTECTED_CLEARING_REDEEM_TYPEHASH = 0xf2e6717ac24481054d8b74bd2f5aebc3097ff6521ee8a1fc24e93a31e731a4c1;
+bytes32 constant _PROTECTED_CLEARING_REDEEM_TYPEHASH = 0x9800252304972e5a6e126479147b31373237346ee6c2c4cdbfd4ee18a138477e;

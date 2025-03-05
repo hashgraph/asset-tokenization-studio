@@ -9,7 +9,7 @@ import {
     _PROTECTED_CREATE_HOLD_FROM_PARTITION_TYPEHASH,
     _PROTECTED_HOLD_TYPEHASH,
     _HOLD_TYPEHASH,
-    _PROTECTED_CLEARING_TRANSFER_FROM_PARTITION_TYPEHASH,
+    _PROTECTED_CLEARING_TRANSFER_PARTITION_TYPEHASH,
     _PROTECTED_CLEARING_REDEEM_TYPEHASH,
     _CLEARING_OPERATION_TYPEHASH,
     _PROTECTED_CLEARING_OPERATION_TYPEHASH,
@@ -105,7 +105,7 @@ function getMessageHashClearingTransfer(
     return
         keccak256(
             abi.encode(
-                _PROTECTED_CLEARING_TRANSFER_FROM_PARTITION_TYPEHASH,
+                _PROTECTED_CLEARING_TRANSFER_PARTITION_TYPEHASH,
                 keccak256(
                     abi.encode(
                         _PROTECTED_CLEARING_OPERATION_TYPEHASH,
@@ -126,8 +126,8 @@ function getMessageHashClearingTransfer(
                         _protectedClearing.nonce
                     )
                 ),
-                _to,
-                _amount
+                _amount,
+                _to
             )
         );
 }

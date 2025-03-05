@@ -314,6 +314,28 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         return _getHoldLabafByPartition(_partition, _holdId, _tokenHolder);
     }
 
+    function getTotalClearedLabaf(
+        address _tokenHolder
+    ) external view override returns (uint256 labaf_) {
+        return _getTotalClearedLabaf(_tokenHolder);
+    }
+
+    function getTotalClearedLabafByPartition(
+        bytes32 _partition,
+        address _tokenHolder
+    ) external view override returns (uint256 labaf_) {
+        return _getTotalClearedLabafByPartition(_partition, _tokenHolder);
+    }
+
+    function getClearingLabafByPartition(
+        bytes32 _partition,
+        uint256 _clearingId,
+        address _tokenHolder
+    ) external view override returns (uint256 labaf_) {
+        return
+            _getClearingLabafByPartition(_partition, _clearingId, _tokenHolder);
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -330,7 +352,7 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](15);
+        staticFunctionSelectors_ = new bytes4[](18);
         staticFunctionSelectors_[selectorIndex++] = this
             .adjustBalances
             .selector;
@@ -370,6 +392,15 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .getHoldLabafByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalClearedLabaf
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getTotalClearedLabafByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getClearingLabafByPartition
             .selector;
     }
 

@@ -224,6 +224,10 @@ interface IClearing {
     error WrongClearingId();
     error ClearingIsDisabled();
     error ClearingIsActivated();
+    error OperationsTypeMismatch(
+        ClearingOperationType inputType,
+        ClearingOperationType systemType
+    );
 
     enum ClearingOperationType {
         Transfer,
