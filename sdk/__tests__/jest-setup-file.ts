@@ -2253,7 +2253,13 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       deadline: BigDecimal,
       nonce: BigDecimal,
       signature: string,
-    ) => createClearing(expirationDate, amount, ClearingOperationType.Redeem, sourceId),
+    ) =>
+      createClearing(
+        expirationDate,
+        amount,
+        ClearingOperationType.Redeem,
+        sourceId,
+      ),
   );
 
   singletonInstance.clearingTransferByPartition = jest.fn(
