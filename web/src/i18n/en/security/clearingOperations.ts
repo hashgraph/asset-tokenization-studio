@@ -203,220 +203,100 @@
 
 */
 
-import { task, types } from 'hardhat/config'
-import { CONTRACT_NAMES, ContractName, Network } from '@configuration'
-import { DeployAllArgs, DeployArgs, GetSignerResult } from './Arguments'
-
-task(
-    'deployAll',
-    'Deploy new factory, new facet implementation, new resolver and initialize it with the new facet implementations'
-)
-    .addOptionalPositionalParam(
-        'account',
-        'The Hedera account to use for deployment. 0.0.XXXX format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'useDeployed',
-        'Use already deployed contracts',
-        true,
-        types.boolean
-    )
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account in raw hexadecimal format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerAddress',
-        'The address of the signer to select from the Hardhat signers array',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerPosition',
-        'The index of the signer in the Hardhat signers array',
-        undefined,
-        types.int
-    )
-    .setAction(async (args: DeployAllArgs, hre) => {
-        // Inlined to avoid circular dependency
-        const {
-            deployAtsFullInfrastructure,
-            DeployAtsFullInfrastructureCommand,
-            addresstoHederaId,
-        } = await import('@scripts')
-        const network = hre.network.name as Network
-        console.log(`Executing deployAll on ${hre.network.name} ...`)
-        const { signer }: GetSignerResult = await hre.run('getSigner', {
-            privateKey: args.privateKey,
-            signerAddress: args.signerAddress,
-            signerPosition: args.signerPosition,
-        })
-
-        // * Deploy the full infrastructure
-        const {
-            factory,
-            businessLogicResolver,
-            accessControl,
-            cap,
-            controlList,
-            kyc,
-            ssiManagement,
-            pause,
-            erc20,
-            erc1410ScheduledTasks,
-            erc1594,
-            erc1643,
-            erc1644,
-            snapshots,
-            diamondFacet,
-            equityUsa,
-            bondUsa,
-            scheduledSnapshots,
-            scheduledBalanceAdjustments,
-            scheduledTasks,
-            corporateActions,
-            lock,
-            hold,
-            transferAndLock,
-            adjustBalances,
-            clearingActionsFacet,
-            clearingFacet,
-        } = await deployAtsFullInfrastructure(
-            new DeployAtsFullInfrastructureCommand({
-                signer: signer,
-                network: hre.network.name as Network,
-                useDeployed: args.useDeployed,
-                useEnvironment: false,
-            })
-        )
-
-        // * Display the deployed addresses
-        const addressList = {
-            'Business Logic Resolver Proxy': businessLogicResolver.proxyAddress,
-            'Business Logic Resolver Proxy Admin':
-                businessLogicResolver.proxyAdminAddress,
-            'Business Logic Resolver': businessLogicResolver.address,
-            'Factory Proxy': factory.proxyAddress,
-            'Factory Proxy Admin': factory.proxyAdminAddress,
-            Factory: factory.address,
-            'Access Control': accessControl.address,
-            Cap: cap.address,
-            'Control List': controlList.address,
-            Kyc: kyc.address,
-            SsiManagement: ssiManagement.address,
-            Pause: pause.address,
-            ERC20: erc20.address,
-            ERC1410: erc1410ScheduledTasks.address,
-            ERC1594: erc1594.address,
-            ERC1643: erc1643.address,
-            ERC1644: erc1644.address,
-            Snapshots: snapshots.address,
-            'Diamond Facet': diamondFacet.address,
-            Equity: equityUsa.address,
-            Bond: bondUsa.address,
-            'Scheduled Snapshots': scheduledSnapshots.address,
-            'Scheduled Balance Adjustments':
-                scheduledBalanceAdjustments.address,
-            'Scheduled Tasks': scheduledTasks.address,
-            'Corporate Actions': corporateActions.address,
-            Lock: lock.address,
-            Hold: hold.address,
-            'Transfer and Lock': transferAndLock.address,
-            'Adjust Balances': adjustBalances.address,
-            'Clearing Action Facet': clearingActionsFacet.address,
-            'Clearing Facet': clearingFacet.address,
-        }
-
-        console.log('\n 🟢 Deployed ATS Contract List:')
-        for (const [key, address] of Object.entries(addressList)) {
-            if (!address) {
-                continue
-            }
-            const contractId = await addresstoHederaId({
-                address,
-                network,
-            })
-            console.log(`   --> ${key}: ${address} (${contractId})`)
-        }
-    })
-
-task('deploy', 'Deploy new contract')
-    .addPositionalParam(
-        'contractName',
-        'The name of the contract to deploy',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'privateKey',
-        'The private key of the account in raw hexadecimal format',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerAddress',
-        'The address of the signer to select from the Hardhat signers array',
-        undefined,
-        types.string
-    )
-    .addOptionalParam(
-        'signerPosition',
-        'The index of the signer in the Hardhat signers array',
-        undefined,
-        types.int
-    )
-    .setAction(async (args: DeployArgs, hre) => {
-        // Inlined to avoid circular dependency
-        const {
-            deployContract,
-            DeployContractCommand,
-            addressListToHederaIdList,
-        } = await import('@scripts')
-        const network = hre.network.name as Network
-        console.log(`Executing deploy on ${network} ...`)
-        if (!CONTRACT_NAMES.includes(args.contractName as ContractName)) {
-            throw new Error(
-                `Contract name ${args.contractName} is not in the list of deployable contracts`
-            )
-        }
-        const contractName = args.contractName as ContractName
-        const { signer }: GetSignerResult = await hre.run('getSigner', {
-            privateKey: args.privateKey,
-            signerAddress: args.signerAddress,
-            signerPosition: args.signerPosition,
-        })
-        console.log(`Using signer: ${signer.address}`)
-        // * Deploy the contract
-        const { proxyAdminAddress, proxyAddress, address } =
-            await deployContract(
-                new DeployContractCommand({
-                    name: contractName,
-                    signer,
-                })
-            )
-
-        const [contractId, proxyContractId, proxyAdminContractId] =
-            await addressListToHederaIdList({
-                addressList: [address, proxyAddress, proxyAdminAddress].filter(
-                    (addr): addr is string => !!addr
-                ),
-                network,
-            })
-
-        console.log('\n 🟢 Deployed Contract:')
-        if (proxyAdminAddress) {
-            console.log(
-                `Proxy Admin: ${proxyAdminAddress} (${proxyAdminContractId})`
-            )
-        }
-        if (proxyAddress) {
-            console.log(`Proxy: ${proxyAddress} (${proxyContractId})`)
-        }
-        console.log(
-            `Implementation: ${address} (${contractId}) for ${contractName}`
-        )
-    })
+export default {
+  tabs: {
+    create: "Create",
+    list: "List",
+    manage: "Manage",
+  },
+  list: {
+    title: "Clearing Operations List",
+    add: "Add",
+    transfer: "Transfer",
+    redeem: "Redeem",
+    hold: "Hold",
+    id: "ID",
+    amount: "Amount",
+    expirationDate: "Expiration Date",
+    escrowAddress: "Escrow Address",
+    sourceAccount: "Source Account",
+    targetId: "Target ID",
+  },
+  create: {
+    title: "Create Clearing Operation",
+    form: {
+      operationType: {
+        label: "Operation Type",
+        placeholder: "Select a operation type",
+      },
+      amount: {
+        label: "Amount",
+        placeholder: "0",
+      },
+      expirationDate: {
+        label: "Expiration Date",
+        placeholder: "Expiration Date",
+      },
+      holdExpirationDate: {
+        label: "Hold Expiration Date",
+        placeholder: "Hold Expiration Date",
+      },
+      targetId: {
+        label: "Target ID",
+        placeholder: "0.0.1234567",
+      },
+      escrowAccount: {
+        label: "Escrow Account",
+        placeholder: "0.0.1234567",
+      },
+      sourceId: {
+        label: "Source ID",
+        placeholder: "0.0.1234567",
+      },
+    },
+  },
+  manage: {
+    title: "Manage Clearing Operation",
+    form: {
+      operationType: {
+        label: "Operation Type",
+        placeholder: "Select a operation type",
+      },
+      clearingOperationId: {
+        label: "Clearing Operation ID",
+        placeholder: "0.0.1234567",
+      },
+      sourceId: {
+        label: "Source ID",
+        placeholder: "0.0.1234567",
+      },
+    },
+    execute: "Execute",
+  },
+  actions: {
+    confirmReclaimPopUp: {
+      title: "Reclaim",
+      description: "Are you sure you want to reclaim the hold?",
+      confirmText: "Confirm",
+      cancelText: "Cancel",
+    },
+    confirmCreate: {
+      title: "Confirmation",
+      description: "Are you sure you want to create this clear operation?",
+      confirmText: "Confirm",
+      cancelText: "Cancel",
+    },
+    confirmManage: {
+      title: "Confirmation",
+      description: "Are you sure you want to proceed with this operation?",
+      confirmText: "Confirm",
+      cancelText: "Cancel",
+    },
+  },
+  messages: {
+    success: "Success: ",
+    descriptionSuccess: "The Clearing Operation has been reclaim successfully",
+    error: "Error: ",
+    descriptionFailed: "The Clearing Operation has failed",
+  },
+};
