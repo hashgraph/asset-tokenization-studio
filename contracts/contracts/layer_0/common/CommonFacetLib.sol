@@ -203,86 +203,151 @@
 
 */
 
-// SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-import {CommonFacetLib} from '../../../layer_0/common/CommonFacetLib.sol';
-import {Common} from '../../common/Common.sol';
-import {IERC1410Basic} from '../../interfaces/ERC1400/IERC1410Basic.sol';
-import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
+import {
+    IERC1410Basic
+} from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import {
+    IERC1410Standard
+} from '../../layer_1/interfaces/ERC1400/IERC1410Standard.sol';
+import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
+// SPDX-License-Identifier: BSD-3-Clause-Attribution
+struct CommonStorage {
+    bool isInInternalDelegateCall;
+}
 
-abstract contract ERC1410Basic is IERC1410Basic, Common {
-    // solhint-disable-next-line func-name-mixedcase
-    function initialize_ERC1410_Basic(
-        bool _multiPartition
-    ) external override onlyUninitialized(_erc1410BasicStorage().initialized) {
-        _erc1410BasicStorage().multiPartition = _multiPartition;
-        _erc1410BasicStorage().initialized = true;
-    }
-
-    /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
-    /// @param _partition The partition from which to transfer tokens
-    /// @param _basicTransferInfo The address to which to transfer tokens to and the amountn`
-    /// @param _data Additional data attached to the transfer of tokens
-    /// @return The partition to which the transferred tokens were allocated for the _to address
+library CommonFacetLib {
     function transferByPartition(
+        address _from,
+        IERC1410Basic.BasicTransferInfo memory _basicTransferInfo,
         bytes32 _partition,
-        BasicTransferInfo calldata _basicTransferInfo,
-        bytes calldata _data
-    )
-        external
-        override
-        onlyUnpaused
-        validateAddress(_basicTransferInfo.to)
-        onlyListedAllowed(_msgSender())
-        onlyListedAllowed(_basicTransferInfo.to)
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
-        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _basicTransferInfo.to)
-        returns (bytes32)
-    {
-        // Add a function to verify the `_data` parameter
-        // TODO: Need to create the bytes division of the `_partition` so it can be easily findout in which receiver's
-        // partition token will transfered. For current implementation we are assuming that the receiver's partition
-        // will be same as sender's as well as it also pass the `_validPartition()` check. In this particular case we
-        // are also assuming that reciever has the some tokens of the same partition as well (To avoid the array index
-        // out of bound error).
-        // Note- There is no operator used for the execution of this call so `_operator` value in
-        // in event is address(0) same for the `_operatorData`
-        CommonFacetLib.transferByPartition(
-            msg.sender,
-            _basicTransferInfo,
-            _partition,
-            _data,
-            address(0),
-            ''
+        bytes memory _data,
+        address _operator,
+        bytes memory _operatorData
+    ) internal {
+        CommonStorage storage _commonStorage = commonStorage();
+        _commonStorage.isInInternalDelegateCall = true;
+        address(this).delegatecall(
+            abi.encodeWithSignature(
+                'transferByPartition(address,(address,uint256),bytes32,bytes,address,bytes)',
+                _from,
+                _basicTransferInfo,
+                _partition,
+                _data,
+                _operator,
+                _operatorData
+            )
         );
+        _commonStorage.isInInternalDelegateCall = false;
     }
 
-    /**
-     * @dev Total number of tokens in existence
-     */
-    function totalSupply() external view override returns (uint256) {
-        return _totalSupply();
+    function redeemByPartition(
+        bytes32 _partition,
+        address _from,
+        address _operator,
+        uint256 _value,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) internal {
+        CommonStorage storage _commonStorage = commonStorage();
+        _commonStorage.isInInternalDelegateCall = true;
+        address(this).delegatecall(
+            abi.encodeWithSignature(
+                'redeemByPartition(bytes32,address,address,uint256,bytes,bytes)',
+                _partition,
+                _from,
+                _operator,
+                _value,
+                _data,
+                _operatorData
+            )
+        );
+        _commonStorage.isInInternalDelegateCall = false;
     }
 
-    /**
-     * @return
-     *  true : the token allows multiple partitions to be set and managed
-     *  false : the token contains only one partition, the default one
-     */
-    function isMultiPartition() external view returns (bool) {
-        return _isMultiPartition();
+    function issueByPartition(
+        IERC1410Standard.IssueData memory _issueData
+    ) internal {
+        CommonStorage storage _commonStorage = commonStorage();
+        _commonStorage.isInInternalDelegateCall = true;
+        address(this).delegatecall(
+            abi.encodeWithSignature(
+                'issueByPartition((bytes32,address,uint256,bytes))',
+                _issueData
+            )
+        );
+        _commonStorage.isInInternalDelegateCall = false;
     }
 
-    /// @notice Use to get the list of partitions `_tokenHolder` is associated with
-    /// @param _tokenHolder An address corresponds whom partition list is queried
-    /// @return List of partitions
-    function partitionsOf(
-        address _tokenHolder
-    ) external view override returns (bytes32[] memory) {
-        return _partitionsOf(_tokenHolder);
+    function createHoldByPartition(
+        bytes32 _partition,
+        address _from,
+        IHold.Hold memory _hold,
+        bytes memory _operatorData
+    ) internal returns (bool success_, uint256 holdId_) {
+        CommonStorage storage _commonStorage = commonStorage();
+        _commonStorage.isInInternalDelegateCall = true;
+        bytes memory result;
+        (success_, result) = address(this).delegatecall(
+            abi.encodeWithSignature(
+                'createHoldByPartition(bytes32,address,(uint256,uint256,address,address,bytes),bytes)',
+                _partition,
+                _from,
+                _hold,
+                _operatorData
+            )
+        );
+        holdId_ = abi.decode(result, (uint256));
+        _commonStorage.isInInternalDelegateCall = false;
+    }
+
+    function executeHoldByPartition(
+        IHold.HoldIdentifier calldata _holdIdentifier,
+        address _to,
+        uint256 _amount
+    ) internal returns (bool success_) {
+        CommonStorage storage _commonStorage = commonStorage();
+        _commonStorage.isInInternalDelegateCall = true;
+        bytes memory result;
+        (success_, result) = address(this).delegatecall(
+            abi.encodeWithSignature(
+                'executeHoldByPartition((bytes32,address,uint256),address,uint256)',
+                _holdIdentifier,
+                _to,
+                _amount
+            )
+        );
+        _commonStorage.isInInternalDelegateCall = false;
+    }
+
+    function triggerAndSyncAll(
+        bytes32 _partition,
+        address _from,
+        address _to
+    ) internal {
+        CommonStorage storage _commonStorage = commonStorage();
+        _commonStorage.isInInternalDelegateCall = true;
+        address(this).delegatecall(
+            abi.encodeWithSignature(
+                '_triggerAndSyncAll(bytes32,address,address)',
+                _partition,
+                _from,
+                _to
+            )
+        );
+        _commonStorage.isInInternalDelegateCall = false;
+    }
+
+    function commonStorage()
+        internal
+        pure
+        returns (CommonStorage storage commonStorage_)
+    {
+        bytes32 position = keccak256('security.token.standard.common.storage');
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            commonStorage_.slot := position
+        }
     }
 }

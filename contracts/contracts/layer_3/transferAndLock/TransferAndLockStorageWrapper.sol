@@ -205,20 +205,21 @@
 
 pragma solidity 0.8.18;
 
-import {Common} from '../../layer_1/common/Common.sol';
+import {CommonFacetLib} from '../../layer_0/common/CommonFacetLib.sol';
+import {
+    IERC1410Basic
+} from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 import {
     checkNounceAndDeadline,
     verify
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
-import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
-import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {
     getMessageHashTransferAndLockByPartition,
     getMessageHashTransferAndLock
 } from './signatureVerification.sol';
-import {
-    IERC1410Basic
-} from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
@@ -248,7 +249,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
 
         _setNounce(_nounce, _transferAndLock.from);
 
-        _transferByPartition(
+        CommonFacetLib.transferByPartition(
             _msgSender(),
             IERC1410Basic.BasicTransferInfo(
                 _transferAndLock.to,
@@ -299,7 +300,7 @@ abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
 
         _setNounce(_nounce, _transferAndLock.from);
 
-        _transferByPartition(
+        CommonFacetLib.transferByPartition(
             _msgSender(),
             IERC1410Basic.BasicTransferInfo(
                 _transferAndLock.to,
