@@ -86,7 +86,6 @@ export const ClearingOperationsCreate = () => {
       expirationDate,
       escrowAccount,
       holdExpirationDate,
-      sourceId,
       targetId,
     } = getValues();
 
