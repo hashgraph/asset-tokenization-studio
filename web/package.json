@@ -3,15 +3,19 @@
   "version": "1.10.0",
   "license": "Apache-2.0",
   "scripts": {
+    "clean:node": "npx --yes rimraf node_modules",
+    "clean:build": "npx --yes rimraf build",
+    "clean:lock": "npx --yes rimraf package-lock.json yarn.lock",
+    "clean": "npx --yes npm-run-all --parallel clean:node clean:build",
+    "lint": "eslint src --ext ts,tsx",
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,html,md,json}\" --ignore-path .gitignore --ignore-path .prettierignore",
     "dev": "vite",
     "build": "tsc && vite build",
-    "lint": "eslint src --ext ts,tsx",
     "test": "NODE_ENV=test jest --ci --runInBand",
     "test:update": "NODE_ENV=test jest --ci --runInBand --updateSnapshot",
+    "test:clear:cache": "npx jest --clearCache",
     "theme": "chakra-cli tokens src/theme/index.ts",
-    "cleanCache": "npx jest --clearCache",
-    "start": "vite preview",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,html,md,json}\" --ignore-path .gitignore --ignore-path .prettierignore"
+    "start": "vite preview"
   },
   "dependencies": {
     "@chakra-ui/react": "2.6.1",
@@ -65,8 +69,10 @@
     "history": "^5.3.0",
     "jest": "^29.5.0",
     "jest-environment-jsdom": "^29.5.0",
+    "npm-run-all": "^4.1.5",
     "prettier": "^3.0.3",
     "react-select-event": "^5.5.1",
+    "rimraf": "^6.0.1",
     "ts-jest": "^29.1.0",
     "ts-xor": "^1.1.0",
     "typescript": "4.9.5",
@@ -78,7 +84,7 @@
   },
   "overrides": {
     "ws": "7.5.10",
-    "elliptic": "6.5.7",
+    "elliptic": "6.6.1",
     "path-to-regexp": "6.3.0"
   },
   "resolutions": {
