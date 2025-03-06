@@ -301,7 +301,7 @@ export class GrantKYCCommandHandler
         (signedCredential.validFrom as string).substring(0, 10),
       ),
       BigDecimal.fromString(
-        (signedCredential.validFrom as string).substring(0, 10),
+        (signedCredential.validUntil as string).substring(0, 10),
       ),
       issuerEvmAddress,
     );
