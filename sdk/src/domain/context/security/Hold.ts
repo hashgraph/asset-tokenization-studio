@@ -218,3 +218,9 @@ export class ProtectedHold {
   public deadline: BigNumber;
   public nonce: BigNumber;
 }
+
+export class HoldIdentifier {
+  public partition: string;
+  public tokenHolder: string;
+  public holdId: number;
+}

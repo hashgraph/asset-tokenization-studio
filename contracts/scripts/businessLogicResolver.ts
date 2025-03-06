@@ -230,6 +230,7 @@ import {
 import { BOND_CONFIG_ID, EQUITY_CONFIG_ID, EVENTS } from './constants'
 import { getContractFactory } from '@nomiclabs/hardhat-ethers/types'
 import { FacetConfiguration } from './resolverDiamondCut'
+import { Signer } from 'ethers'
 
 export interface BusinessLogicRegistryData {
     businessLogicKey: string
@@ -242,25 +243,27 @@ export interface DeployedBusinessLogics {
     diamondFacet: IStaticFunctionSelectors
     accessControl: IStaticFunctionSelectors
     controlList: IStaticFunctionSelectors
-    corporateActionsSecurity: IStaticFunctionSelectors
+    kyc: IStaticFunctionSelectors
+    ssiManagement: IStaticFunctionSelectors
+    corporateActions: IStaticFunctionSelectors
     pause: IStaticFunctionSelectors
-    eRC20_2: IStaticFunctionSelectors
-    eRC1644_2: IStaticFunctionSelectors
+    ERC20: IStaticFunctionSelectors
+    ERC1644: IStaticFunctionSelectors
     eRC1410ScheduledTasks: IStaticFunctionSelectors
-    eRC1594_2: IStaticFunctionSelectors
+    ERC1594: IStaticFunctionSelectors
     eRC1643: IStaticFunctionSelectors
     equityUSA: IStaticFunctionSelectors
     bondUSA: IStaticFunctionSelectors
-    snapshots_2: IStaticFunctionSelectors
+    Snapshots: IStaticFunctionSelectors
     scheduledSnapshots: IStaticFunctionSelectors
     scheduledBalanceAdjustments: IStaticFunctionSelectors
     scheduledTasks: IStaticFunctionSelectors
-    cap_2: IStaticFunctionSelectors
-    lock_2: IStaticFunctionSelectors
+    Cap: IStaticFunctionSelectors
+    Lock: IStaticFunctionSelectors
     transferAndLock: IStaticFunctionSelectors
     adjustBalances: IStaticFunctionSelectors
     protectedPartitions: IStaticFunctionSelectors
-    hold_2: IStaticFunctionSelectors
+    Hold: IStaticFunctionSelectors
 }
 
 export let businessLogicResolver: IBusinessLogicResolver
@@ -467,13 +470,82 @@ export async function registerBusinessLogics({
     )
 }
 
-export async function createConfigurationsForDeployedContracts({
-    commonFacetAddressList,
-    businessLogicResolverProxyAddress,
-    equityUsaAddress,
-    bondUsaAddress,
-    signer,
-}: CreateConfigurationsForDeployedContractsCommand): Promise<CreateConfigurationsForDeployedContractsResult> {
+function createFacetConfigurations(
+    ids: string[],
+    versions: number[]
+): FacetConfiguration[] {
+    return ids.map((id, index) => ({ id, version: versions[index] }))
+}
+
+async function sendBatchConfiguration(
+    configId: string,
+    configurations: FacetConfiguration[],
+    isFinalBatch: boolean,
+    businessLogicResolverProxyAddress: string,
+    signer: Signer
+): Promise<void> {
+    const txResponse = await IDiamondCutManager__factory.connect(
+        businessLogicResolverProxyAddress,
+        signer
+    ).createBatchConfiguration(configId, configurations, isFinalBatch, {
+        gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
+    })
+
+    await validateTxResponse(
+        new ValidateTxResponseCommand({
+            txResponse,
+            confirmationEvent:
+                EVENTS.businessLogicResolver.configurationCreated,
+            errorMessage:
+                MESSAGES.businessLogicResolver.error.creatingConfigurations,
+        })
+    )
+}
+
+async function processFacetLists(
+    configId: string,
+    facetIdList: string[],
+    facetVersionList: number[],
+    businessLogicResolverProxyAddress: string,
+    signer: Signer,
+    partialBatchDeploy: boolean
+): Promise<void> {
+    if (facetIdList.length !== facetVersionList.length) {
+        throw new Error(
+            'facetIdList and facetVersionList must have the same length'
+        )
+    }
+    const batchSize = Math.ceil(facetIdList.length / 2)
+
+    for (let i = 0; i < facetIdList.length; i += batchSize) {
+        const batchIds = facetIdList.slice(i, i + batchSize)
+        const batchVersions = facetVersionList.slice(i, i + batchSize)
+        const batch = createFacetConfigurations(batchIds, batchVersions)
+
+        const isLastBatch = partialBatchDeploy
+            ? false
+            : i + batchSize >= facetIdList.length
+
+        await sendBatchConfiguration(
+            configId,
+            batch,
+            isLastBatch,
+            businessLogicResolverProxyAddress,
+            signer
+        )
+    }
+}
+
+export async function createConfigurationsForDeployedContracts(
+    partialBatchDeploy: boolean,
+    {
+        commonFacetAddressList,
+        businessLogicResolverProxyAddress,
+        equityUsaAddress,
+        bondUsaAddress,
+        signer,
+    }: CreateConfigurationsForDeployedContractsCommand
+): Promise<CreateConfigurationsForDeployedContractsResult> {
     let result = CreateConfigurationsForDeployedContractsResult.empty()
     result.commonFacetIdList = await Promise.all(
         commonFacetAddressList.map(async (address) => {
@@ -503,52 +575,21 @@ export async function createConfigurationsForDeployedContracts({
     )
     result.bondFacetVersionList = Array(result.bondFacetIdList.length).fill(1)
 
-    // Create configuration for equities
-    let equityTxResponse = await IDiamondCutManager__factory.connect(
-        businessLogicResolverProxyAddress,
-        signer
-    ).createConfiguration(
+    await processFacetLists(
         EQUITY_CONFIG_ID,
-        result.equityFacetIdList.map((id, index) => ({
-            id,
-            version: result.equityFacetVersionList[index],
-        })) as FacetConfiguration[],
-        {
-            gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
-        }
-    )
-    await validateTxResponse(
-        new ValidateTxResponseCommand({
-            txResponse: equityTxResponse,
-            confirmationEvent:
-                EVENTS.businessLogicResolver.configurationCreated,
-            errorMessage:
-                MESSAGES.businessLogicResolver.error.creatingConfigurations,
-        })
-    )
-
-    // Create configuration for bonds
-    const bondTxResponse = await IDiamondCutManager__factory.connect(
+        result.equityFacetIdList,
+        result.equityFacetVersionList,
         businessLogicResolverProxyAddress,
-        signer
-    ).createConfiguration(
-        BOND_CONFIG_ID,
-        result.bondFacetIdList.map((id, index) => ({
-            id,
-            version: result.bondFacetVersionList[index],
-        })),
-        {
-            gasLimit: GAS_LIMIT.businessLogicResolver.createConfiguration,
-        }
+        signer,
+        partialBatchDeploy
     )
-    await validateTxResponse(
-        new ValidateTxResponseCommand({
-            txResponse: bondTxResponse,
-            confirmationEvent:
-                EVENTS.businessLogicResolver.configurationCreated,
-            errorMessage:
-                MESSAGES.businessLogicResolver.error.creatingConfigurations,
-        })
+    await processFacetLists(
+        BOND_CONFIG_ID,
+        result.bondFacetIdList,
+        result.bondFacetVersionList,
+        businessLogicResolverProxyAddress,
+        signer,
+        partialBatchDeploy
     )
     return result
 }

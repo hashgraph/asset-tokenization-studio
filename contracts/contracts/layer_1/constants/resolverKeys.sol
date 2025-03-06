@@ -261,3 +261,9 @@ bytes32 constant _PROTECTED_PARTITIONS_RESOLVER_KEY = 0x6d65d2938c05a4d952aff084
 
 // keccak256("security.token.standard.hold.resolverKey")
 bytes32 constant _HOLD_RESOLVER_KEY = 0x49c539aaa7273888cd36649dc1b9a58a0bc7f54b639f84f2a7074d99b0754f6d;
+
+// keccak256("security.token.standard.ssi.management.resolverKey")
+bytes32 constant _SSI_MANAGEMENT_RESOLVER_KEY = 0x46df6aaf3742e0cbad136a74fb679b686e087dcc3a3d92d1c4ce2f3ef1b508a0;
+
+// keccak256("security.token.standard.kyc.resolverKey")
+bytes32 constant _KYC_RESOLVER_KEY = 0xf516a0f6b4726244ae916c590cd26c2b593d7d448e46e43714fb9f9435c46e32;

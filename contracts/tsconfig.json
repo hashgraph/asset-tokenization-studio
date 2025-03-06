@@ -12,7 +12,6 @@
       "strict": true,
       "outDir": "./build",
       "resolveJsonModule": true,
-      "baseUrl": "./",
       "paths": {
             "@configuration": ["./Configuration"],
             "@typechain": ["./typechain-types/*", "./typechain-types/index.ts"],

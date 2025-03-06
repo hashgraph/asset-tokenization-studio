@@ -217,11 +217,15 @@ import {
     BusinessLogicResolver,
     IFactory,
     TimeTravel,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
     PAUSER_ROLE,
     ISSUER_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     CORPORATE_ACTION_ROLE,
     deployEquityFromFactory,
     Rbac,
@@ -229,9 +233,12 @@ import {
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
+    MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
+import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const amount = 1
 const balanceOf_B_Original = [20 * amount, 200 * amount]
@@ -241,6 +248,7 @@ const adjustFactor = 253
 const adjustDecimals = 2
 const decimals_Original = 6
 const maxSupply_Original = 1000000 * amount
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Adjust Balances Tests', () => {
     let diamond: ResolverProxy
@@ -261,6 +269,8 @@ describe('Adjust Balances Tests', () => {
     let equityFacet: Equity
     let scheduledTasksFacet: ScheduledTasks
     let timeTravelFacet: TimeTravel
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     async function deployAsset({
         multiPartition,
@@ -336,6 +346,12 @@ describe('Adjust Balances Tests', () => {
             'TimeTravel',
             diamond.address
         )
+
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address
+        )
     }
 
     function set_initRbacs(): Rbac[] {
@@ -343,7 +359,15 @@ describe('Adjust Balances Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        return [rbacPause]
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        return [rbacPause, rbacKYC, rbacSSI]
     }
 
     before(async () => {
@@ -432,16 +456,21 @@ describe('Adjust Balances Tests', () => {
         await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
 
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet
+            .connect(signer_B)
+            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
+
         erc1410Facet = erc1410Facet.connect(signer_A)
         equityFacet = equityFacet.connect(signer_A)
         adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_B,
-            balanceOf_B_Original,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_B,
+            value: balanceOf_B_Original,
+            data: '0x',
+        })
 
         // schedule tasks
         const dividendsRecordDateInSeconds_1 =

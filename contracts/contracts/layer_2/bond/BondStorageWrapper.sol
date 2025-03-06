@@ -209,21 +209,13 @@ pragma solidity 0.8.18;
 import {_BOND_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {COUPON_CORPORATE_ACTION_TYPE} from '../constants/values.sol';
 import {IBond} from '../interfaces/bond/IBond.sol';
-import {
-    CorporateActionsStorageWrapperSecurity
-} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
+import {Common} from '../../layer_1/common/Common.sol';
+import {IBondStorageWrapper} from '../interfaces/bond/IBondStorageWrapper.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
-import {ERC20_2_CD_Lib} from '../ERC1400/ERC20/ERC20_2_CD_Lib.sol';
-import {Snapshots_CD_Lib} from '../../layer_1/snapshots/Snapshots_CD_Lib.sol';
-import {
-    ERC1410Basic_CD_Lib
-} from '../../layer_1/ERC1400/ERC1410/ERC1410Basic_CD_Lib.sol';
-import {Lock_CD_Lib} from '../../layer_1/lock/Lock_CD_Lib.sol';
-import {Hold_CD_Lib} from '../../layer_1/hold/Hold_CD_Lib.sol';
 
-abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
+abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     struct BondDataStorage {
@@ -301,7 +293,6 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
         IBond.Coupon memory _newCoupon
     )
         internal
-        virtual
         returns (bool success_, bytes32 corporateActionId_, uint256 couponID_)
     {
         (success_, corporateActionId_, couponID_) = _addCorporateAction(
@@ -344,12 +335,7 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
 
     function _getCoupon(
         uint256 _couponID
-    )
-        internal
-        view
-        virtual
-        returns (IBond.RegisteredCoupon memory registeredCoupon_)
-    {
+    ) internal view returns (IBond.RegisteredCoupon memory registeredCoupon_) {
         bytes32 actionId = _corporateActionsStorage()
             .actionsByType[COUPON_CORPORATE_ACTION_TYPE]
             .at(_couponID - 1);
@@ -366,7 +352,7 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
     function _getCouponFor(
         uint256 _couponID,
         address _account
-    ) internal view virtual returns (IBond.CouponFor memory couponFor_) {
+    ) internal view returns (IBond.CouponFor memory couponFor_) {
         IBond.RegisteredCoupon memory registeredCoupon = _getCoupon(_couponID);
 
         couponFor_.rate = registeredCoupon.coupon.rate;
@@ -377,39 +363,30 @@ abstract contract BondStorageWrapper is CorporateActionsStorageWrapperSecurity {
             couponFor_.recordDateReached = true;
 
             couponFor_.tokenBalance = (registeredCoupon.snapshotId != 0)
-                ? (Snapshots_CD_Lib.balanceOfAtSnapshot(
-                    registeredCoupon.snapshotId,
-                    _account
-                ) +
-                    Snapshots_CD_Lib.lockedBalanceOfAtSnapshot(
+                ? (_balanceOfAtSnapshot(registeredCoupon.snapshotId, _account) +
+                    _lockedBalanceOfAtSnapshot(
                         registeredCoupon.snapshotId,
                         _account
                     ) +
-                    Snapshots_CD_Lib.heldBalanceOfAtSnapshot(
+                    _heldBalanceOfAtSnapshot(
                         registeredCoupon.snapshotId,
                         _account
                     ))
-                : (ERC1410Basic_CD_Lib.balanceOf(_account) +
-                    Lock_CD_Lib.getLockedAmountFor(_account) +
-                    Hold_CD_Lib.getHeldAmountFor(_account));
+                : (_balanceOf(_account) +
+                    _getLockedAmountFor(_account) +
+                    _getHeldAmountFor(_account));
 
-            couponFor_.decimals = ERC20_2_CD_Lib.decimalsAdjusted();
+            couponFor_.decimals = _decimalsAdjusted();
         }
     }
 
-    function _getCouponCount()
-        internal
-        view
-        virtual
-        returns (uint256 couponCount_)
-    {
+    function _getCouponCount() internal view returns (uint256 couponCount_) {
         return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
     }
 
     function _bondStorage()
         internal
         pure
-        virtual
         returns (BondDataStorage storage bondData_)
     {
         bytes32 position = _BOND_STORAGE_POSITION;

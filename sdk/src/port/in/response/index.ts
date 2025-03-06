@@ -223,6 +223,7 @@ import LockViewModel from './LockViewModel.js';
 import ConfigInfoViewModel from './ConfigInfoViewModel.js';
 import ScheduledBalanceAdjustmentViewModel from './ScheduledBalanceAdjustmentViewModel.js';
 import HoldViewModel from './HoldViewModel.js';
+import KYCViewModel from './KYCViewModel.js';
 
 export {
   AccountViewModel,
@@ -245,4 +246,5 @@ export {
   ConfigInfoViewModel,
   ScheduledBalanceAdjustmentViewModel,
   HoldViewModel,
+  KYCViewModel,
 };

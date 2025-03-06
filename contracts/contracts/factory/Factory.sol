@@ -221,7 +221,7 @@ import {IERC1594} from '../layer_1/interfaces/ERC1400/IERC1594.sol';
 import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {LocalContext} from '../layer_1/context/LocalContext.sol';
+import {LocalContext} from '../layer_0/context/LocalContext.sol';
 import {
     FactoryRegulationData,
     buildRegulationData,

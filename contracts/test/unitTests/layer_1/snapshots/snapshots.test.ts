@@ -209,14 +209,16 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type Snapshots_2,
+    type Snapshots,
     type Pause,
     type ERC1410ScheduledTasks,
     type AccessControl,
-    type Lock_2,
-    type Hold_2,
+    type Lock,
+    type Hold,
     IFactory,
     BusinessLogicResolver,
+    SsiManagement,
+    Kyc,
 } from '@typechain'
 import {
     SNAPSHOT_ROLE,
@@ -230,6 +232,10 @@ import {
     DeployAtsFullInfrastructureCommand,
     deployAtsFullInfrastructure,
     MAX_UINT256,
+    SSI_MANAGER_ROLE,
+    KYC_ROLE,
+    ZERO,
+    EMPTY_STRING,
     ADDRESS_ZERO,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
@@ -246,6 +252,7 @@ const lockedAmountOf_C_Partition_1 = 3
 const heldAmountOf_A_Partition_1 = 4
 const heldAmountOf_A_Partition_2 = 5
 const heldAmountOf_C_Partition_1 = 6
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('Snapshots Tests', () => {
     let diamond: ResolverProxy
@@ -260,11 +267,13 @@ describe('Snapshots Tests', () => {
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
     let erc1410Facet: ERC1410ScheduledTasks
-    let snapshotFacet: Snapshots_2
+    let snapshotFacet: Snapshots
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let lockFacet: Lock_2
-    let holdFacet: Hold_2
+    let lockFacet: Lock
+    let holdFacet: Hold
+    let kycFacet: Kyc
+    let ssiManagementFacet: SsiManagement
 
     before(async () => {
         // mute | mock console.log
@@ -340,16 +349,18 @@ describe('Snapshots Tests', () => {
             diamond.address
         )
 
-        snapshotFacet = await ethers.getContractAt(
-            'Snapshots_2',
-            diamond.address
-        )
+        snapshotFacet = await ethers.getContractAt('Snapshots', diamond.address)
 
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
 
-        lockFacet = await ethers.getContractAt('Lock_2', diamond.address)
-
-        holdFacet = await ethers.getContractAt('Hold_2', diamond.address)
+        lockFacet = await ethers.getContractAt('Lock', diamond.address)
+        holdFacet = await ethers.getContractAt('Hold', diamond.address)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
     })
 
     it('GIVEN an account without snapshot role WHEN takeSnapshot THEN transaction fails with AccountHasNoRole', async () => {
@@ -423,41 +434,64 @@ describe('Snapshots Tests', () => {
         accessControlFacet = accessControlFacet.connect(signer_A)
         await accessControlFacet.grantRole(SNAPSHOT_ROLE, account_C)
         await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+        await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
+        await accessControlFacet.grantRole(KYC_ROLE, account_B)
+
+        await ssiManagementFacet.addIssuer(account_A)
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
         // Using account C (with role)
         snapshotFacet = snapshotFacet.connect(signer_C)
         erc1410Facet = erc1410Facet.connect(signer_A)
         lockFacet = lockFacet.connect(signer_B)
         holdFacet = holdFacet.connect(signer_B)
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_C,
-            balanceOf_C_Original,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_C,
+            value: balanceOf_C_Original,
+            data: '0x',
+        })
 
         // snapshot
         await expect(snapshotFacet.takeSnapshot())
             .to.emit(snapshotFacet, 'SnapshotTaken')
             .withArgs(account_C, 1)
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_A,
-            amount,
-            '0x'
-        )
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_2,
-            account_A,
-            amount,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_A,
+            value: amount,
+            data: '0x',
+        })
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_2,
+            tokenHolder: account_A,
+            value: amount,
+            data: '0x',
+        })
         erc1410Facet = erc1410Facet.connect(signer_C)
+
+        let basicTransferInfo = {
+            to: account_A,
+            value: amount,
+        }
+
         await erc1410Facet.transferByPartition(
             _PARTITION_ID_1,
-            account_A,
-            amount,
+            basicTransferInfo,
             '0x'
         )
 

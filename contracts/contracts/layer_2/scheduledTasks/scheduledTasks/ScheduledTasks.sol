@@ -212,9 +212,6 @@ import {
 import {Common} from '../../../layer_1/common/Common.sol';
 import {_SCHEDULED_TASKS_RESOLVER_KEY} from '../../constants/resolverKeys.sol';
 import {
-    CorporateActionsStorageWrapperSecurity
-} from '../../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
-import {
     IScheduledTasks
 } from '../../interfaces/scheduledTasks/scheduledTasks/IScheduledTasks.sol';
 import {ScheduledTasksLib} from '../ScheduledTasksLib.sol';
@@ -222,12 +219,7 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 
-contract ScheduledTasks is
-    IStaticFunctionSelectors,
-    IScheduledTasks,
-    Common,
-    CorporateActionsStorageWrapperSecurity
-{
+contract ScheduledTasks is IStaticFunctionSelectors, IScheduledTasks, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     // solhint-disable no-unused-vars
@@ -235,13 +227,12 @@ contract ScheduledTasks is
         uint256 _pos,
         uint256 _scheduledTasksLength,
         bytes memory _data
-    ) external virtual override onlyAutoCalling(_scheduledTaskStorage()) {
+    ) external override onlyAutoCalling(_scheduledTaskStorage()) {
         _onScheduledTaskTriggered(_data);
     } // solhint-enable no-unused-vars
 
     function triggerPendingScheduledTasks()
         external
-        virtual
         override
         onlyUnpaused
         returns (uint256)
@@ -251,17 +242,11 @@ contract ScheduledTasks is
 
     function triggerScheduledTasks(
         uint256 _max
-    ) external virtual override onlyUnpaused returns (uint256) {
+    ) external override onlyUnpaused returns (uint256) {
         return _triggerScheduledTasks(_max);
     }
 
-    function scheduledTaskCount()
-        external
-        view
-        virtual
-        override
-        returns (uint256)
-    {
+    function scheduledTaskCount() external view override returns (uint256) {
         return _getScheduledTaskCount();
     }
 
@@ -271,7 +256,6 @@ contract ScheduledTasks is
     )
         external
         view
-        virtual
         override
         returns (ScheduledTasksLib.ScheduledTask[] memory scheduledTask_)
     {
@@ -281,7 +265,6 @@ contract ScheduledTasks is
     function getStaticResolverKey()
         external
         pure
-        virtual
         override
         returns (bytes32 staticResolverKey_)
     {
@@ -291,7 +274,6 @@ contract ScheduledTasks is
     function getStaticFunctionSelectors()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
@@ -317,7 +299,6 @@ contract ScheduledTasks is
     function getStaticInterfaceIds()
         external
         pure
-        virtual
         override
         returns (bytes4[] memory staticInterfaceIds_)
     {

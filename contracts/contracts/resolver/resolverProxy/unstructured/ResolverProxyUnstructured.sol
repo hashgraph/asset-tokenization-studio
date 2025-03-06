@@ -217,10 +217,10 @@ import {
 } from '../../../interfaces/resolver/resolverProxy/IDiamondLoupe.sol';
 import {
     AccessControlStorageWrapper
-} from '../../../layer_1/accessControl/AccessControlStorageWrapper.sol';
+} from '../../../layer_0/core/accessControl/AccessControlStorageWrapper.sol';
 import {
     PauseStorageWrapper
-} from '../../../layer_1/pause/PauseStorageWrapper.sol';
+} from '../../../layer_0/core/pause/PauseStorageWrapper.sol';
 import {
     _RESOLVER_PROXY_STORAGE_POSITION
 } from '../../../layer_1/constants/storagePositions.sol';
