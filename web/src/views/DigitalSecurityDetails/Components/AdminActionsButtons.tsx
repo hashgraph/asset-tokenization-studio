@@ -329,7 +329,7 @@ export const AdminActionsButtons = () => {
           {tButtons("forceTransfer")}
         </Button>
       )}
-      {(hasControllerRole || hasPauserRole) && (
+      {(hasControllerRole || hasPauserRole || hasClearingRole) && (
         <Menu>
           <MenuButton
             data-testid="dropdown-actions-button"
