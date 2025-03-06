@@ -297,8 +297,12 @@ export class GrantKYCCommandHandler
       securityEvmAddress,
       targetEvmAddress,
       signedCredential.id,
-      BigDecimal.fromString(signedCredential.validFrom as string),
-      BigDecimal.fromString(signedCredential.validUntil as string),
+      BigDecimal.fromString(
+        (signedCredential.validFrom as string).substring(0, 10),
+      ),
+      BigDecimal.fromString(
+        (signedCredential.validFrom as string).substring(0, 10),
+      ),
       issuerEvmAddress,
     );
 
