@@ -540,6 +540,196 @@ Can only be executed by the escrow account. Transfers all or part of the held as
   - `payload`: `true` (success) or `false` (failed).
   - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
 
+### Clearing
+
+#### Clearing Create Hold by Partition
+
+Creates a new clearing hold for a specific partition by the token holder.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `escrow`: Address of the escrow account.
+  - `amount`: Amount to be held.
+  - `targetId`: Identifier of the target account.
+  - `clearingExpirationDate`: Date when the clearing expires.
+  - `holdExpirationDate`: Date when the hold expires.
+- **Response**:
+
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Clearing Create Hold From by Partition
+
+Similar to "Clearing Create Hold by Partition", but can only be executed by an authorized ERC20 account on behalf of the token holder.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `escrow`: Address of the escrow account.
+  - `amount`: Amount to be held.
+  - `sourceId`: Identifier of the source account.
+  - `targetId`: Identifier of the target account.
+  - `clearingExpirationDate`: Date when the clearing expires.
+  - `holdExpirationDate`: Date when the hold expires.
+- **Response**:
+
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Protected Create Hold by Partition
+
+Similar to "Clearing Create Hold by Partition", but can only be executed when partitions are protected. Only one of these two methods can be used depending on the partition protection status. Additional fields are required.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `escrow`: Address of the escrow account.
+  - `amount`: Amount to be held.
+  - `sourceId`: Identifier of the source account.
+  - `targetId`: Identifier of the target account.
+  - `clearingExpirationDate`: Date when the clearing expires.
+  - `holdExpirationDate`: Date when the hold expires.
+  - `deadline`: Deadline for the hold execution.
+  - `nonce`: Unique identifier for the request.
+  - `signature`: Digital signature verifying the request.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Clearing Transfer by Partition
+
+Creates a new clearing transfer for a specific partition by the token holder.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `amount`: Amount to be held.
+  - `targetId`: Identifier of the target account.
+  - `expirationDate`: Date when the clearing expires.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Clearing Transfer From by Partition
+
+Similar to "Clearing Transfer by Partition", but can only be executed by an authorized ERC20 account on behalf of the token holder.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `amount`: Amount to be held.
+  - `sourceId`: Identifier of the source account.
+  - `targetId`: Identifier of the target account.
+  - `expirationDate`: Date when the clearing expires.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Protected Clearing Transfer by Partition
+
+Similar to "Clearing Transfer by Partition", but can only be executed when partitions are protected. Only one of these two methods can be used depending on the partition protection status. Additional fields are required.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `amount`: Amount to be held.
+  - `sourceId`: Identifier of the source account.
+  - `targetId`: Identifier of the target account.
+  - `expirationDate`: Date when the clearing expires.
+  - `deadline`: Deadline for the hold execution.
+  - `nonce`: Unique identifier for the request.
+  - `signature`: Digital signature verifying the request.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Clearing Redeem by Partition
+
+Creates a new clearing redeem for a specific partition by the token holder.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `amount`: Amount to be held.
+  - `expirationDate`: Date when the clearing expires.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Clearing Redeem From by Partition
+
+Similar to "Clearing Redeem by Partition", but can only be executed by an authorized ERC20 account on behalf of the token holder.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `sourceId`: Identifier of the source account.
+  - `amount`: Amount to be held.
+  - `expirationDate`: Date when the clearing expires.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Protected Clearing Redeem by Partition
+
+Similar to "Clearing Redeem by Partition", but can only be executed when partitions are protected. Only one of these two methods can be used depending on the partition protection status. Additional fields are required.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `amount`: Amount to be held.
+  - `sourceId`: Identifier of the source account.
+  - `expirationDate`: Date when the clearing expires.
+  - `deadline`: Deadline for the hold execution.
+  - `nonce`: Unique identifier for the request.
+  - `signature`: Digital signature verifying the request.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Approve Clearing Operation by Partition
+
+Approve the execution of a clearing transaction. Depending on the operation type, a hold will be created or a transfer or redemption will be made.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `targetId`: Identifier of the target account.
+  - `clearingId`: Identifier of the clearing.
+  - `clearingOperationType`: Type of operation to perform.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Cancel Clearing Operation by Partition
+
+Cancel the execution of a clearing operation. Transfers all assets back to the original account.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `targetId`: Identifier of the target account.
+  - `clearingId`: Identifier of the clearing.
+  - `clearingOperationType`: Type of operation to perform.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
+#### Reclaim Clearing Operation by Partition
+
+Can be executed by anyone, but only after the expiration date. Transfers all assets back to the original account.
+
+- **Request**:
+  - `securityId`: Identifier of the security token.
+  - `partitionId`: Identifier of the token partition.
+  - `targetId`: Identifier of the target account.
+  - `clearingId`: Identifier of the clearing.
+  - `clearingOperationType`: Type of operation to perform.
+- **Response**:
+  - `payload`: `true` (success) or `false` (failed).
+  - `transactionId`: ID of the Hedera transaction, which can be used for tracking in any Hedera block explorer.
+
 ### KYC
 
 #### Grant KYC
