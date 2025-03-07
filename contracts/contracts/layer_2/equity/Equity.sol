@@ -251,12 +251,11 @@ abstract contract Equity is
         Dividend calldata _newDividend
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
-        checkDates(_newDividend.recordDate, _newDividend.executionDate)
-        checkTimestamp(_newDividend.recordDate)
+        validateDates(_newDividend.recordDate, _newDividend.executionDate)
+        onlyValidTimestamp(_newDividend.recordDate)
         returns (bool success_, uint256 dividendID_)
     {
         bytes32 corporateActionID;
@@ -283,12 +282,8 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
-        checkIndexForCorporateActionByType(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
-            _dividendID - 1
-        )
+        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
         returns (RegisteredDividend memory registeredDividend_)
     {
         return _getDividends(_dividendID);
@@ -306,12 +301,8 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
-        checkIndexForCorporateActionByType(
-            DIVIDEND_CORPORATE_ACTION_TYPE,
-            _dividendID - 1
-        )
+        onlyMatchingActionType(DIVIDEND_CORPORATE_ACTION_TYPE, _dividendID - 1)
         returns (DividendFor memory dividendFor_)
     {
         return _getDividendsFor(_dividendID, _account);
@@ -324,7 +315,6 @@ abstract contract Equity is
     function getDividendsCount()
         external
         view
-        virtual
         override
         returns (uint256 dividendCount_)
     {
@@ -335,11 +325,10 @@ abstract contract Equity is
         Voting calldata _newVoting
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
-        checkTimestamp(_newVoting.recordDate)
+        onlyValidTimestamp(_newVoting.recordDate)
         returns (bool success_, uint256 voteID_)
     {
         bytes32 corporateActionID;
@@ -358,12 +347,8 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
-        checkIndexForCorporateActionByType(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            _voteID - 1
-        )
+        onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
         returns (RegisteredVoting memory registeredVoting_)
     {
         return _getVoting(_voteID);
@@ -375,12 +360,8 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
-        checkIndexForCorporateActionByType(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            _voteID - 1
-        )
+        onlyMatchingActionType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE, _voteID - 1)
         returns (VotingFor memory votingFor_)
     {
         return _getVotingFor(_voteID, _account);
@@ -389,7 +370,6 @@ abstract contract Equity is
     function getVotingCount()
         external
         view
-        virtual
         override
         returns (uint256 votingCount_)
     {
@@ -400,12 +380,11 @@ abstract contract Equity is
         ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyRole(_CORPORATE_ACTION_ROLE)
-        checkTimestamp(_newBalanceAdjustment.executionDate)
-        checkFactor(_newBalanceAdjustment.factor)
+        onlyValidTimestamp(_newBalanceAdjustment.executionDate)
+        validateFactor(_newBalanceAdjustment.factor)
         returns (bool success_, uint256 balanceAdjustmentID_)
     {
         bytes32 corporateActionID;
@@ -429,9 +408,8 @@ abstract contract Equity is
     )
         external
         view
-        virtual
         override
-        checkIndexForCorporateActionByType(
+        onlyMatchingActionType(
             BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
             _balanceAdjustmentID - 1
         )
@@ -443,7 +421,6 @@ abstract contract Equity is
     function getScheduledBalanceAdjustmentCount()
         external
         view
-        virtual
         override
         returns (uint256 balanceAdjustmentCount_)
     {

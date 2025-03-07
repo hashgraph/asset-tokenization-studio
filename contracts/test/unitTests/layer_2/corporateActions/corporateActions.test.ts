@@ -209,14 +209,14 @@ import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type CorporateActionsSecurity,
+    type CorporateActions,
     type Pause,
     type AccessControl,
     IFactory,
     BusinessLogicResolver,
-    AccessControl__factory,
-    CorporateActionsSecurity__factory,
-    Pause__factory,
+    AccessControlFacet__factory,
+    CorporateActions__factory,
+    PauseFacet__factory,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
@@ -249,7 +249,7 @@ describe('Corporate Actions Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let corporateActionsFacet: CorporateActionsSecurity
+    let corporateActionsFacet: CorporateActions
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
@@ -313,15 +313,15 @@ describe('Corporate Actions Tests', () => {
             factory,
         })
 
-        accessControlFacet = AccessControl__factory.connect(
+        accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
         )
-        corporateActionsFacet = CorporateActionsSecurity__factory.connect(
+        corporateActionsFacet = CorporateActions__factory.connect(
             diamond.address,
             signer_A
         )
-        pauseFacet = Pause__factory.connect(diamond.address, signer_A)
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
     })
 
     it('GIVEN an account without corporateActions role WHEN addCorporateAction THEN transaction fails with AccountHasNoRole', async () => {

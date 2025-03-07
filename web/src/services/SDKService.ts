@@ -293,6 +293,33 @@ import {
   ReleaseHoldByPartitionRequest,
   ExecuteHoldByPartitionRequest,
   GetHeldAmountForRequest,
+  SSIManagement,
+  GetRevocationRegistryAddressRequest,
+  SetRevocationRegistryAddressRequest,
+  GetIssuerListCountRequest,
+  GetIssuerListMembersRequest,
+  AddIssuerRequest,
+  RemoveIssuerRequest,
+  IsIssuerRequest,
+  GetKYCForRequest,
+  GrantKYCRequest,
+  RevokeKYCRequest,
+  Kyc,
+  KYCViewModel,
+  KycAccountDataViewModel,
+  GetKYCAccountsDataRequest,
+  ActivateClearingRequest,
+  DeactivateClearingRequest,
+  ReclaimClearingOperationByPartitionRequest,
+  CancelClearingOperationByPartitionRequest,
+  ApproveClearingOperationByPartitionRequest,
+  ClearingCreateHoldByPartitionRequest,
+  ClearingRedeemByPartitionRequest,
+  ClearingTransferByPartitionRequest,
+  GetClearingForByPartitionRequest,
+  ClearingViewModel,
+  GetClearingsIdForByPartitionRequest,
+  IsClearingActivatedRequest,
 } from "@hashgraph/asset-tokenization-sdk";
 
 export class SDKService {
@@ -816,6 +843,147 @@ export class SDKService {
   ): Promise<boolean> {
     const response = await Management.updateResolver(req);
     return response.payload;
+  }
+
+  // DID MANAGEMENT ////////////////////////////////////////////
+  public static async getRevocationRegistryAddress(
+    req: GetRevocationRegistryAddressRequest,
+  ): Promise<string> {
+    return await SSIManagement.getRevocationRegistryAddress(req);
+  }
+
+  public static async setRevocationRegistryAddress(
+    req: SetRevocationRegistryAddressRequest,
+  ): Promise<boolean> {
+    const response = await SSIManagement.setRevocationRegistryAddress(req);
+    return response.payload;
+  }
+
+  public static async getIssuerListCount(
+    req: GetIssuerListCountRequest,
+  ): Promise<number> {
+    return await SSIManagement.getIssuerListCount(req);
+  }
+
+  public static async getIssuerListMembers(
+    req: GetIssuerListMembersRequest,
+  ): Promise<string[]> {
+    return await SSIManagement.getIssuerListMembers(req);
+  }
+
+  public static async addIssuer(req: AddIssuerRequest): Promise<boolean> {
+    const response = await SSIManagement.addIssuer(req);
+    return response.payload;
+  }
+
+  public static async removeIssuer(req: RemoveIssuerRequest): Promise<boolean> {
+    const response = await SSIManagement.removeIssuer(req);
+    return response.payload;
+  }
+
+  public static async isIssuer(req: IsIssuerRequest): Promise<boolean> {
+    return await SSIManagement.isIssuer(req);
+  }
+
+  // KYC ////////////////////////////////////////////
+  public static async getKYCFor(req: GetKYCForRequest): Promise<KYCViewModel> {
+    return await Kyc.getKYCFor(req);
+  }
+
+  public static async getKYCAccountsData(
+    req: GetKYCAccountsDataRequest,
+  ): Promise<KycAccountDataViewModel[]> {
+    return await Kyc.getKYCAccountsData(req);
+  }
+
+  public static async grantKYC(req: GrantKYCRequest): Promise<boolean> {
+    const response = await Kyc.grantKYC(req);
+    return response.payload;
+  }
+
+  public static async revokeKYC(req: RevokeKYCRequest): Promise<boolean> {
+    const response = await Kyc.revokeKYC(req);
+    return response.payload;
+  }
+
+  // CLEARING OPERATIONS ////////////////////////////////////////////
+  public static async getClearingsIdForByPartition(
+    request: GetClearingsIdForByPartitionRequest,
+  ): Promise<number[]> {
+    const response = await Security.getClearingsIdForByPartition(request);
+    return response;
+  }
+
+  public static async getClearingForByPartition(
+    request: GetClearingForByPartitionRequest,
+  ): Promise<ClearingViewModel> {
+    const response = await Security.getClearingForByPartition(request);
+    return response;
+  }
+
+  public static async clearingTransferByPartition(
+    request: ClearingTransferByPartitionRequest,
+  ): Promise<number> {
+    const response = await Security.clearingTransferByPartition(request);
+    return response.payload;
+  }
+
+  public static async clearingRedeemByPartition(
+    request: ClearingRedeemByPartitionRequest,
+  ): Promise<number> {
+    const response = await Security.clearingRedeemByPartition(request);
+    return response.payload;
+  }
+
+  public static async clearingCreateHoldByPartition(
+    request: ClearingCreateHoldByPartitionRequest,
+  ): Promise<number> {
+    const response = await Security.clearingCreateHoldByPartition(request);
+    return response.payload;
+  }
+
+  public static async approveClearingOperationByPartition(
+    request: ApproveClearingOperationByPartitionRequest,
+  ): Promise<boolean> {
+    const response =
+      await Security.approveClearingOperationByPartition(request);
+    return response.payload;
+  }
+
+  public static async cancelClearingOperationByPartition(
+    request: CancelClearingOperationByPartitionRequest,
+  ): Promise<boolean> {
+    const response = await Security.cancelClearingOperationByPartition(request);
+    return response.payload;
+  }
+
+  public static async reclaimClearingOperationByPartition(
+    request: ReclaimClearingOperationByPartitionRequest,
+  ): Promise<boolean> {
+    const response =
+      await Security.reclaimClearingOperationByPartition(request);
+    return response.payload;
+  }
+
+  public static async activateClearing(
+    request: ActivateClearingRequest,
+  ): Promise<boolean> {
+    const response = await Security.activateClearing(request);
+    return response.payload;
+  }
+
+  public static async deactivateClearing(
+    request: DeactivateClearingRequest,
+  ): Promise<boolean> {
+    const response = await Security.deactivateClearing(request);
+    return response.payload;
+  }
+
+  public static async isClearingActivated(
+    request: IsClearingActivatedRequest,
+  ): Promise<boolean> {
+    const response = await Security.isClearingActivated(request);
+    return response;
   }
 }
 

@@ -211,17 +211,19 @@ import {
     AccessControl,
     AccessControl__factory,
     BusinessLogicResolver,
-    type Cap_2,
+    type Cap,
     TimeTravel,
-    Cap_2__factory,
+    Cap__factory,
     Equity,
     Equity__factory,
     ERC1410ScheduledTasks,
     ERC1410ScheduledTasks__factory,
     IFactory,
-    Snapshots_2,
-    Snapshots_2__factory,
+    Snapshots,
+    Snapshots__factory,
     TimeTravel__factory,
+    Kyc,
+    SsiManagement,
 } from '@typechain'
 import {
     CAP_ROLE,
@@ -229,14 +231,18 @@ import {
     ISSUER_ROLE,
     PAUSER_ROLE,
     SNAPSHOT_ROLE,
+    KYC_ROLE,
+    SSI_MANAGER_ROLE,
     deployEquityFromFactory,
     RegulationSubType,
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
+    ZERO,
+    EMPTY_STRING,
 } from '@scripts'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
+import { dateToUnixTimestamp } from '../../../dateFormatter'
 
 const maxSupply = 3
 const maxSupplyByPartition = 2
@@ -246,17 +252,21 @@ const _PARTITION_ID_1 =
 const _PARTITION_ID_2 =
     '0x0000000000000000000000000000000000000000000000000000000000000002'
 const TIME = 6000
+const EMPTY_VC_ID = EMPTY_STRING
 
 describe('CAP Layer 2 Tests', () => {
     let factory: IFactory,
         businessLogicResolver: BusinessLogicResolver,
         diamond: Equity,
-        capFacet: Cap_2,
+        capFacet: Cap,
         accessControlFacet: AccessControl,
         equityFacet: Equity,
-        snapshotFacet: Snapshots_2,
+        snapshotFacet: Snapshots,
         erc1410Facet: ERC1410ScheduledTasks,
-        timeTravelFacet: TimeTravel
+        timeTravelFacet: TimeTravel,
+        kycFacet: Kyc,
+        ssiManagementFacet: SsiManagement
+
     let signer_A: SignerWithAddress,
         signer_B: SignerWithAddress,
         signer_C: SignerWithAddress
@@ -271,7 +281,15 @@ describe('CAP Layer 2 Tests', () => {
     const setupEnvironment = async () => {
         const rbacPause = { role: PAUSER_ROLE, members: [account_B] }
         const rbaCap = { role: CAP_ROLE, members: [account_B] }
-        const init_rbacs = [rbacPause, rbaCap]
+        const rbacKyc = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSsi = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const init_rbacs = [rbacPause, rbaCap, rbacKyc, rbacSsi]
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -304,18 +322,32 @@ describe('CAP Layer 2 Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        capFacet = Cap_2__factory.connect(diamond.address, signer_A)
+        capFacet = Cap__factory.connect(diamond.address, signer_A)
         accessControlFacet = AccessControl__factory.connect(
             diamond.address,
             signer_A
         )
         equityFacet = Equity__factory.connect(diamond.address, signer_A)
-        snapshotFacet = Snapshots_2__factory.connect(diamond.address, signer_A)
+        snapshotFacet = Snapshots__factory.connect(diamond.address, signer_A)
         erc1410Facet = ERC1410ScheduledTasks__factory.connect(
             diamond.address,
             signer_A
         )
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
     }
 
     const setupScheduledBalanceAdjustments = async (
@@ -446,12 +478,12 @@ describe('CAP Layer 2 Tests', () => {
             maxSupplyByPartition
         )
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_C,
-            issueAmount,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_C,
+            value: issueAmount,
+            data: '0x',
+        })
 
         const currentTime = dateToUnixTimestamp(`2030-01-01T00:00:00Z`)
         const adjustments = createAdjustmentData(
@@ -485,12 +517,12 @@ describe('CAP Layer 2 Tests', () => {
         snapshotFacet = snapshotFacet.connect(signer_A)
         erc1410Facet = erc1410Facet.connect(signer_C)
 
-        await erc1410Facet.issueByPartition(
-            _PARTITION_ID_1,
-            account_C,
-            issueAmount,
-            '0x'
-        )
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_C,
+            value: issueAmount,
+            data: '0x',
+        })
 
         await capFacet.setMaxSupply(maxSupply)
         await capFacet.setMaxSupplyByPartition(

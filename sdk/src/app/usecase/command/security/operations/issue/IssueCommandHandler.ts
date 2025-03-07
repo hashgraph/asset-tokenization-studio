@@ -222,6 +222,7 @@ import { AccountInBlackList } from '../../error/AccountInBlackList.js';
 import { AccountNotInWhiteList } from '../../error/AccountNotInWhiteList.js';
 import { SecurityPaused } from '../../error/SecurityPaused.js';
 import { MaxSupplyReached } from '../../error/MaxSupplyReached.js';
+import ValidationService from '../../../../../../app/service/ValidationService.js';
 
 @CommandHandler(IssueCommand)
 export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
@@ -236,10 +237,15 @@ export class IssueCommandHandler implements ICommandHandler<IssueCommand> {
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
     @lazyInject(RPCQueryAdapter)
     public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
 
   async execute(command: IssueCommand): Promise<IssueCommandResponse> {
     const { securityId, targetId, amount } = command;
+
+    await this.validationService.validateKycAddresses(securityId, [targetId]);
+
     const handler = this.transactionService.getHandler();
     const security = await this.securityService.get(securityId);
 

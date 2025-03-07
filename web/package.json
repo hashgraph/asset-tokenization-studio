@@ -76,6 +76,11 @@
     "vite-plugin-rewrite-all": "^1.0.1",
     "vite-tsconfig-paths": "^4.2.1"
   },
+  "overrides": {
+    "ws": "7.5.10",
+    "elliptic": "6.5.7",
+    "path-to-regexp": "6.3.0"
+  },
   "resolutions": {
     "nwsapi": "2.2.2",
     "@tanstack/react-table": "8.9.1"

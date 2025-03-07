@@ -233,7 +233,7 @@ import {
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
 } from '@scripts'
-import { dateToUnixTimestamp } from 'test/dateFormatter'
+import { dateToUnixTimestamp } from '../../../../dateFormatter'
 
 describe('Scheduled Snapshots Tests', () => {
     let diamond: ResolverProxy

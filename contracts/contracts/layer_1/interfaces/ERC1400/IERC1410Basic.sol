@@ -207,13 +207,17 @@
 pragma solidity 0.8.18;
 
 interface IERC1410Basic {
+    struct BasicTransferInfo {
+        address to;
+        uint256 value;
+    }
+
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC1410_Basic(bool _multiPartition) external;
 
     function transferByPartition(
         bytes32 _partition,
-        address _to,
-        uint256 _value,
+        BasicTransferInfo calldata _basicTransferInfo,
         bytes calldata _data
     ) external returns (bytes32);
 
