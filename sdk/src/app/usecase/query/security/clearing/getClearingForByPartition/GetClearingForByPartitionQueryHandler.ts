@@ -271,6 +271,11 @@ export class GetClearingForByPartitionQueryHandler
       security.decimals,
     );
 
+    clearing.hold.expirationTimestamp = BigDecimal.fromStringFixed(
+      clearing.hold.expirationTimestamp.toString(),
+      10,
+    );
+
     return new GetClearingForByPartitionQueryResponse(clearing);
   }
 }
