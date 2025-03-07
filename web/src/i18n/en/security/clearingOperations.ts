@@ -266,7 +266,7 @@ export default {
       },
       clearingOperationId: {
         label: "Clearing Operation ID",
-        placeholder: "0.0.1234567",
+        placeholder: "1",
       },
       clearingOperationType: {
         label: "Clearing Operation Type",

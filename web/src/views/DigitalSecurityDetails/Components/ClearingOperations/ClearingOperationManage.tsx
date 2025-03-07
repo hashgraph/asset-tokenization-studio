@@ -35,10 +35,16 @@ enum ClearingOperationType {
   HOLD = "Hold",
 }
 
+const clearingOperationTypeToNumber = {
+  [ClearingOperationType.TRANSFER]: 1,
+  [ClearingOperationType.REDEEM]: 2,
+  [ClearingOperationType.HOLD]: 3,
+};
+
 interface FormValues {
   operationType: keyof typeof ManageOperationType;
   clearingOperationId: string;
-  clearingOperationType: keyof typeof ClearingOperationType;
+  clearingOperationType: ClearingOperationType;
   sourceId: string;
 }
 
@@ -77,9 +83,8 @@ export const ClearingOperationsManage = () => {
       clearingOperationType,
     } = getValues();
 
-    const clearingOperationTypeIndex = Object.keys(
-      ClearingOperationType,
-    ).indexOf(clearingOperationType);
+    const clearingOperationTypeIndex =
+      clearingOperationTypeToNumber[clearingOperationType];
 
     if (operationType === ManageOperationType.APPROVE.valueOf()) {
       const request = new ApproveClearingOperationByPartitionRequest({
