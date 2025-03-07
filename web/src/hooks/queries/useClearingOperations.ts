@@ -36,21 +36,22 @@ export const useGetClearingOperations = (
       try {
         const clearingOperationTypes = [0, 1, 2];
 
-        const clearingsIds = await Promise.all(
-          clearingOperationTypes.flatMap(async (operationType) => {
+        const clearingsIdsByType = await Promise.all(
+          clearingOperationTypes.map(async (operationType) => {
             const partitionRequest = new GetClearingsIdForByPartitionRequest({
               ...request,
               clearingOperationType: operationType,
             });
-            return await SDKService.getClearingsIdForByPartition(
-              partitionRequest,
-            );
+
+            const clearingIds =
+              await SDKService.getClearingsIdForByPartition(partitionRequest);
+            return { operationType, clearingIds };
           }),
-        ).then((results) => results.flat());
+        );
 
         const clearingsDetails = await Promise.all(
-          clearingsIds.flatMap((clearingId) =>
-            clearingOperationTypes.map(async (operationType) => {
+          clearingsIdsByType.flatMap(({ operationType, clearingIds }) =>
+            clearingIds.map(async (clearingId) => {
               const clearingRequest = new GetClearingForByPartitionRequest({
                 securityId: request.securityId,
                 targetId: request.targetId,
