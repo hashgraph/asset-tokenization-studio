@@ -268,6 +268,10 @@ export default {
         label: "Clearing Operation ID",
         placeholder: "0.0.1234567",
       },
+      clearingOperationType: {
+        label: "Clearing Operation Type",
+        placeholder: "Select clearing operation type",
+      },
       sourceId: {
         label: "Source ID",
         placeholder: "0.0.1234567",

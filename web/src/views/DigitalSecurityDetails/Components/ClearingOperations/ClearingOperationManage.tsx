@@ -14,16 +14,32 @@ import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { WarningCircle } from "@phosphor-icons/react";
 import { useState } from "react";
+import {
+  useApproveClearingByPartition,
+  useCancelClearingByPartition,
+} from "../../../../hooks/mutations/useClearingOperations";
+import {
+  ApproveClearingOperationByPartitionRequest,
+  CancelClearingOperationByPartitionRequest,
+} from "@hashgraph/asset-tokenization-sdk";
+import { DEFAULT_PARTITION } from "../../../../utils/constants";
 
-enum ClearingOperationType {
+enum ManageOperationType {
   APPROVE = "Approve",
   CANCEL = "Cancel",
 }
 
+enum ClearingOperationType {
+  TRANSFER = "Transfer",
+  REDEEM = "Redeem",
+  HOLD = "Hold",
+}
+
 interface FormValues {
+  operationType: keyof typeof ManageOperationType;
   clearingOperationId: string;
+  clearingOperationType: number;
   sourceId: string;
-  operationType: keyof ClearingOperationType;
 }
 
 export const ClearingOperationsManage = () => {
@@ -44,19 +60,64 @@ export const ClearingOperationsManage = () => {
   });
   const { t: tGlobal } = useTranslation("globals");
 
-  const { control, formState, getValues } = useForm<FormValues>({
+  const { control, formState, getValues, reset } = useForm<FormValues>({
     mode: "onChange",
   });
+
+  const { mutate: approveClearing } = useApproveClearingByPartition();
+  const { mutate: cancelClearing } = useCancelClearingByPartition();
 
   const onSubmit = () => {
     setIsMutating(true);
 
-    const { clearingOperationId, sourceId } = getValues();
+    const {
+      clearingOperationId,
+      sourceId,
+      operationType,
+      clearingOperationType,
+    } = getValues();
 
-    // @ts-ignore TODO: waiting SDK integration
-    const _defaultRequest = { securityId, clearingOperationId, sourceId };
+    if (operationType === ManageOperationType.APPROVE.valueOf()) {
+      const request = new ApproveClearingOperationByPartitionRequest({
+        clearingId: Number(clearingOperationId),
+        clearingOperationType,
+        partitionId: DEFAULT_PARTITION,
+        securityId,
+        targetId: sourceId,
+      });
 
-    setIsMutating(false);
+      approveClearing(request, {
+        onSettled() {
+          setIsMutating(false);
+        },
+        onSuccess() {
+          reset();
+        },
+      });
+
+      return;
+    }
+
+    if (operationType === ManageOperationType.CANCEL.valueOf()) {
+      const request = new CancelClearingOperationByPartitionRequest({
+        clearingId: Number(clearingOperationId),
+        clearingOperationType,
+        partitionId: DEFAULT_PARTITION,
+        securityId,
+        targetId: sourceId,
+      });
+
+      cancelClearing(request, {
+        onSettled() {
+          setIsMutating(false);
+        },
+        onSuccess() {
+          reset();
+        },
+      });
+
+      return;
+    }
   };
 
   return (
@@ -104,8 +165,14 @@ export const ClearingOperationsManage = () => {
                 control={control}
                 rules={{ required }}
                 options={[
-                  { value: "Approve", label: ClearingOperationType.APPROVE },
-                  { value: "Cancel", label: ClearingOperationType.CANCEL },
+                  {
+                    value: ManageOperationType.APPROVE,
+                    label: ManageOperationType.APPROVE,
+                  },
+                  {
+                    value: ManageOperationType.CANCEL,
+                    label: ManageOperationType.CANCEL,
+                  },
                 ]}
               />
             </Stack>
@@ -122,8 +189,24 @@ export const ClearingOperationsManage = () => {
                 isRequired={true}
                 rules={{
                   required,
-                  validate: { isHederaValidAddress },
                 }}
+              />
+            </Stack>
+            <Stack w="full">
+              <HStack justifySelf="flex-start">
+                <Text textStyle="BodyTextRegularSM">
+                  {tForm("clearingOperationType.label")}*
+                </Text>
+              </HStack>
+              <SelectController
+                id="clearingOperationType"
+                control={control}
+                rules={{ required }}
+                options={[
+                  { value: 0, label: ClearingOperationType.TRANSFER },
+                  { value: 1, label: ClearingOperationType.REDEEM },
+                  { value: 2, label: ClearingOperationType.HOLD },
+                ]}
               />
             </Stack>
             <Stack w="full">
