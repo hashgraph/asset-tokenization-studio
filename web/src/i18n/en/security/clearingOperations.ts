@@ -282,13 +282,13 @@ export default {
   actions: {
     confirmReclaimPopUp: {
       title: "Reclaim",
-      description: "Are you sure you want to reclaim the hold?",
+      description: "Are you sure you want to reclaim the clearing operation?",
       confirmText: "Confirm",
       cancelText: "Cancel",
     },
     confirmCreate: {
       title: "Confirmation",
-      description: "Are you sure you want to create this clear operation?",
+      description: "Are you sure you want to create this clearing operation?",
       confirmText: "Confirm",
       cancelText: "Cancel",
     },
@@ -301,7 +301,7 @@ export default {
   },
   messages: {
     success: "Success: ",
-    descriptionSuccess: "The Clearing Operation has been reclaim successfully",
+    descriptionSuccess: "The Clearing Operation has been executed successfully",
     error: "Error: ",
     descriptionFailed: "The Clearing Operation has failed",
   },
