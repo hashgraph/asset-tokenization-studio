@@ -36,9 +36,9 @@ enum ClearingOperationType {
 }
 
 const clearingOperationTypeToNumber = {
-  [ClearingOperationType.TRANSFER]: 1,
-  [ClearingOperationType.REDEEM]: 2,
-  [ClearingOperationType.HOLD]: 3,
+  [ClearingOperationType.TRANSFER]: 0,
+  [ClearingOperationType.REDEEM]: 1,
+  [ClearingOperationType.HOLD]: 2,
 };
 
 interface FormValues {
