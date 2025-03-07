@@ -23,7 +23,6 @@
     "@emotion/styled": "^11.11.0",
     "@hashgraph/asset-tokenization-sdk": "file:./../sdk",
     "@tanstack/react-query": "^4.35.3",
-    "ethers": "^6.0.0",
     "framer-motion": "^10.16.4",
     "i18next": "^23.5.1",
     "i18next-browser-languagedetector": "^7.1.0",
