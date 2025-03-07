@@ -29,6 +29,12 @@ import { useWalletStore } from "../../../../store/walletStore";
 import { useReclaimClearingByPartition } from "../../../../hooks/mutations/useClearingOperations";
 import { useQueryClient } from "@tanstack/react-query";
 
+const ClearingOperationTypeText: Record<number, string> = {
+  0: "Transfer",
+  1: "Redeem",
+  2: "Hold Creation",
+};
+
 export const ClearingOperationsList = () => {
   const queryClient = useQueryClient();
   const toast = useToast();
@@ -155,8 +161,9 @@ export const ClearingOperationsList = () => {
                           description: op.id,
                         },
                         {
-                          title: tList("amount"),
-                          description: op.clearingOperationType,
+                          title: tList("clearingOperationType"),
+                          description:
+                            ClearingOperationTypeText[op.clearingOperationType],
                         },
                         {
                           title: tList("amount"),
@@ -177,14 +184,6 @@ export const ClearingOperationsList = () => {
                               },
                             ]
                           : []),
-                        ...(op.data
-                          ? [
-                              {
-                                title: tList("data"),
-                                description: op.data,
-                              },
-                            ]
-                          : []),
                         ...(op.hold.expirationDate
                           ? [
                               {
@@ -199,7 +198,7 @@ export const ClearingOperationsList = () => {
                         ...(op.hold.escrow
                           ? [
                               {
-                                title: tList("holdExpirationDate"),
+                                title: tList("escrowAddress"),
                                 description: op.hold.escrow,
                               },
                             ]

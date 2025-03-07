@@ -218,9 +218,11 @@ export default {
     id: "ID",
     amount: "Amount",
     expirationDate: "Expiration Date",
+    holdExpirationDate: "Hold Expiration Date",
     escrowAddress: "Escrow Address",
     sourceAccount: "Source Account",
     targetId: "Target ID",
+    clearingOperationType: "Clearing Operation Type",
   },
   create: {
     title: "Create Clearing Operation",
