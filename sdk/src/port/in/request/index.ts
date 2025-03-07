@@ -295,6 +295,26 @@ import RevokeKYCRequest from './RevokeKYCRequest.js';
 import GrantKYCRequest from './GrantKYCRequest.js';
 import GetKYCAccountsDataRequest from './GetKYCAccountsDataRequest.js';
 import GetKYCStatusForRequest from './GetKYCStatusForRequest.js';
+import ActivateClearingRequest from './ActivateClearingRequest.js';
+import DeactivateClearingRequest from './DeactivateClearingRequest.js';
+import ClearingTransferByPartitionRequest from './ClearingTransferByPartitionRequest.js';
+import ClearingTransferFromByPartitionRequest from './ClearingTransferFromByPartitionRequest.js';
+import ProtectedClearingTransferByPartitionRequest from './ProtectedClearingTransferByPartitionRequest.js';
+import ApproveClearingOperationByPartitionRequest from './ApproveClearingOperationByPartitionRequest.js';
+import CancelClearingOperationByPartitionRequest from './CancelClearingOperationByPartitionRequest.js';
+import ReclaimClearingOperationByPartitionRequest from './ReclaimClearingOperationByPartitionRequest.js';
+import ClearingRedeemByPartitionRequest from './ClearingRedeemByPartitionRequest.js';
+import ClearingRedeemFromByPartitionRequest from './ClearingRedeemFromByPartitionRequest.js';
+import ProtectedClearingRedeemByPartitionRequest from './ProtectedClearingRedeemByPartitionRequest.js';
+import ClearingCreateHoldByPartitionRequest from './ClearingCreateHoldByPartitionRequest.js';
+import ClearingCreateHoldFromByPartitionRequest from './ClearingCreateHoldFromByPartitionRequest.js';
+import ProtectedClearingCreateHoldByPartitionRequest from './ProtectedClearingCreateHoldByPartitionRequest.js';
+import GetClearedAmountForByPartitionRequest from './GetClearedAmountForByPartitionRequest.js';
+import GetClearedAmountForRequest from './GetClearedAmountForRequest.js';
+import GetClearingCountForByPartitionRequest from './GetClearingCountForByPartitionRequest.js';
+import GetClearingForByPartitionRequest from './GetClearingForByPartitionRequest.js';
+import GetClearingsIdForByPartitionRequest from './GetClearingsIdForByPartitionRequest.js';
+import IsClearingActivatedRequest from './IsClearingActivatedRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -389,4 +409,24 @@ export {
   GrantKYCRequest,
   GetKYCAccountsDataRequest,
   GetKYCStatusForRequest,
+  ActivateClearingRequest,
+  DeactivateClearingRequest,
+  ClearingTransferByPartitionRequest,
+  ClearingTransferFromByPartitionRequest,
+  ProtectedClearingTransferByPartitionRequest,
+  ApproveClearingOperationByPartitionRequest,
+  CancelClearingOperationByPartitionRequest,
+  ReclaimClearingOperationByPartitionRequest,
+  ClearingRedeemByPartitionRequest,
+  ClearingRedeemFromByPartitionRequest,
+  ProtectedClearingRedeemByPartitionRequest,
+  ClearingCreateHoldByPartitionRequest,
+  ClearingCreateHoldFromByPartitionRequest,
+  ProtectedClearingCreateHoldByPartitionRequest,
+  GetClearedAmountForByPartitionRequest,
+  GetClearedAmountForRequest,
+  GetClearingCountForByPartitionRequest,
+  GetClearingForByPartitionRequest,
+  GetClearingsIdForByPartitionRequest,
+  IsClearingActivatedRequest,
 };

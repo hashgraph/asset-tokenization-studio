@@ -225,6 +225,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
   isControllable: boolean;
   arePartitionsProtected: boolean;
   isMultiPartition: boolean;
+  clearingActive: boolean;
 
   @OptionalField()
   diamondOwnerAccount?: string;
@@ -257,6 +258,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     isControllable,
     arePartitionsProtected,
     isMultiPartition,
+    clearingActive = false,
     diamondOwnerAccount,
     votingRight,
     informationRight,
@@ -284,6 +286,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     isWhiteList: boolean;
     isControllable: boolean;
     arePartitionsProtected: boolean;
+    clearingActive?: boolean;
     isMultiPartition: boolean;
     diamondOwnerAccount?: string;
     votingRight: boolean;
@@ -342,6 +345,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     this.isControllable = isControllable;
     this.arePartitionsProtected = arePartitionsProtected;
     this.isMultiPartition = isMultiPartition;
+    this.clearingActive = clearingActive;
     this.diamondOwnerAccount = diamondOwnerAccount;
     this.votingRight = votingRight;
     this.informationRight = informationRight;

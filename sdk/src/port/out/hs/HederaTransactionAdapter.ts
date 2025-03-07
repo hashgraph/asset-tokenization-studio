@@ -232,6 +232,8 @@ import {
   TransferAndLock__factory,
   SsiManagement__factory,
   Kyc__factory,
+  ClearingFacet__factory,
+  ClearingActionsFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import {
   _PARTITION_ID_1,
@@ -285,6 +287,19 @@ import {
   EXECUTE_HOLD_BY_PARTITION_GAS,
   GRANT_KYC_GAS,
   REVOKE_KYC_GAS,
+  ACTIVATE_CLEARING_GAS,
+  CLEARING_TRANSFER_FROM_BY_PARTITION,
+  CLEARING_TRANSFER_BY_PARTITION,
+  PROTECTED_CLEARING_TRANSFER_BY_PARTITION,
+  APPROVE_CLEARING_TRANSFER_BY_PARTITION,
+  RECLAIM_CLEARING_TRANSFER_BY_PARTITION,
+  CANCEL_CLEARING_TRANSFER_BY_PARTITION,
+  CLEARING_REDEEM_BY_PARTITION,
+  CLEARING_REDEEM_FROM_BY_PARTITION,
+  PROTECTED_CLEARING_REDEEM_BY_PARTITION,
+  CLEARING_CREATE_HOLD_BY_PARTITION,
+  CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
+  PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
 } from '../../../core/Constants.js';
 import TransactionAdapter from '../TransactionAdapter';
 import { MirrorNodeAdapter } from '../mirror/MirrorNodeAdapter.js';
@@ -334,7 +349,15 @@ import {
   BasicTransferInfo,
   IssueData,
   OperatorTransferData,
-} from 'domain/context/factory/ERC1410Metadata.js';
+} from '../../../domain/context/factory/ERC1410Metadata.js';
+import {
+  CastClearingOperationType,
+  ClearingOperation,
+  ClearingOperationFrom,
+  ClearingOperationIdentifier,
+  ClearingOperationType,
+  ProtectedClearingOperation,
+} from '../../../domain/context/security/Clearing.js';
 
 export abstract class HederaTransactionAdapter extends TransactionAdapter {
   mirrorNodes: MirrorNodes;
@@ -395,6 +418,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     configId: string,
     configVersion: number,
     diamondOwnerAccount?: EvmAddress,
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'deployEquity';
     try {
@@ -439,6 +463,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           ? securityInfo.maxSupply.toString()
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
+        clearingActive: securityInfo.clearingActive,
       };
 
       const equityDetails: EquityDetailsData = {
@@ -488,7 +513,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         }}`,
       );
       const transaction = new ContractExecuteTransaction()
-        .setContractId(factory.toContractId().toString())
+        .setContractId(factoryId!)
         .setGas(CREATE_EQUITY_ST_GAS)
         .setFunctionParameters(functionDataEncoded);
 
@@ -510,6 +535,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     configId: string,
     configVersion: number,
     diamondOwnerAccount?: EvmAddress,
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
     const FUNCTION_NAME = 'deployBond';
     try {
@@ -554,6 +580,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
           ? securityInfo.maxSupply.toString()
           : '0',
         erc20MetadataInfo: erc20MetadataInfo,
+        clearingActive: securityInfo.clearingActive,
       };
 
       const bondDetails: BondDetailsData = {
@@ -602,7 +629,7 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
         }}`,
       );
       const transaction = new ContractExecuteTransaction()
-        .setContractId(factory.toContractId().toString())
+        .setContractId(factoryId!)
         .setGas(CREATE_BOND_ST_GAS)
         .setFunctionParameters(functionDataEncoded);
 
@@ -2281,6 +2308,605 @@ export abstract class HederaTransactionAdapter extends TransactionAdapter {
     const transaction = new ContractExecuteTransaction()
       .setContractId(securityId)
       .setGas(REVOKE_KYC_GAS)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async activateClearing(
+    security: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'activateClearing';
+    LogService.logTrace(`Activate Clearing to address ${security.toString()}`);
+
+    const functionParameters = new ContractFunctionParameters();
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(ACTIVATE_CLEARING_GAS)
+      .setFunction(FUNCTION_NAME, functionParameters);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async deactivateClearing(
+    security: EvmAddress,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'deactivateClearing';
+    LogService.logTrace(
+      `Deactivate Clearing to address ${security.toString()}`,
+    );
+
+    const functionParameters = new ContractFunctionParameters();
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(ACTIVATE_CLEARING_GAS)
+      .setFunction(FUNCTION_NAME, functionParameters);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async clearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'clearingTransferByPartition';
+    LogService.logTrace(
+      `Clearing Transfer By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: expirationDate.toBigNumber(),
+      data: '0x',
+    };
+
+    const factoryInstance = new ClearingFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [clearingOperation, amount.toBigNumber(), targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(CLEARING_TRANSFER_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async clearingTransferFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'clearingTransferFromByPartition';
+    LogService.logTrace(
+      `Clearing Transfer From By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    const factoryInstance = new ClearingFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [clearingOperationFrom, amount.toBigNumber(), targetId.toString()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(CLEARING_TRANSFER_FROM_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async protectedClearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'protectedClearingTransferByPartition';
+    LogService.logTrace(
+      `Protected Clearing Transfer By Partition to address ${security.toString()}`,
+    );
+
+    const protectedClearingOperation: ProtectedClearingOperation = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      deadline: deadline.toBigNumber(),
+      nonce: nonce.toBigNumber(),
+    };
+
+    const factoryInstance = new ClearingFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [
+        protectedClearingOperation,
+        amount.toBigNumber(),
+        targetId.toString(),
+        signature,
+      ],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(PROTECTED_CLEARING_TRANSFER_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async approveClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'approveClearingOperationByPartition';
+    LogService.logTrace(
+      `Approve Clearing Operation By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationIdentifier: ClearingOperationIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      clearingOperationType: CastClearingOperationType.toNumber(
+        clearingOperationType,
+      ),
+      clearingId: clearingId,
+    };
+
+    const factoryInstance = new ClearingActionsFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [clearingOperationIdentifier],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(APPROVE_CLEARING_TRANSFER_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async cancelClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'cancelClearingOperationByPartition';
+    LogService.logTrace(
+      `Cancel Clearing Operation By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationIdentifier: ClearingOperationIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      clearingOperationType: CastClearingOperationType.toNumber(
+        clearingOperationType,
+      ),
+      clearingId: clearingId,
+    };
+
+    const factoryInstance = new ClearingActionsFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [clearingOperationIdentifier],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(CANCEL_CLEARING_TRANSFER_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async reclaimClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'reclaimClearingOperationByPartition';
+    LogService.logTrace(
+      `Reclaim Clearing Operation By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationIdentifier: ClearingOperationIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      clearingOperationType: CastClearingOperationType.toNumber(
+        clearingOperationType,
+      ),
+      clearingId: clearingId,
+    };
+
+    const factoryInstance = new ClearingActionsFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [clearingOperationIdentifier],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(RECLAIM_CLEARING_TRANSFER_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async clearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    expirationDate: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'clearingRedeemByPartition';
+    LogService.logTrace(
+      `Clearing Redeem By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: expirationDate.toBigNumber(),
+      data: '0x',
+    };
+
+    const factoryInstance = new ClearingFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [clearingOperation, amount.toBigNumber()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(CLEARING_REDEEM_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async clearingRedeemFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'clearingRedeemFromByPartition';
+    LogService.logTrace(
+      `Clearing Redeem From By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    const factoryInstance = new ClearingFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [clearingOperationFrom, amount.toBigNumber()],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(CLEARING_REDEEM_FROM_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async protectedClearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'protectedClearingRedeemByPartition';
+    LogService.logTrace(
+      `Protected Clearing Redeem By Partition to address ${security.toString()}`,
+    );
+
+    const protectedClearingOperation: ProtectedClearingOperation = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: expirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      deadline: deadline.toBigNumber(),
+      nonce: nonce.toBigNumber(),
+    };
+
+    const factoryInstance = new ClearingFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [protectedClearingOperation, amount.toBigNumber(), signature],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(PROTECTED_CLEARING_REDEEM_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async clearingCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'clearingCreateHoldByPartition';
+    LogService.logTrace(
+      `Clearing Create Hold By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperation: ClearingOperation = {
+      partition: partitionId,
+      expirationTimestamp: clearingExpirationDate.toBigNumber(),
+      data: '0x',
+    };
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    const factoryInstance = new ClearingFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [clearingOperation, hold],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(CLEARING_CREATE_HOLD_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async clearingCreateHoldFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse> {
+    const FUNCTION_NAME = 'clearingCreateHoldFromByPartition';
+    LogService.logTrace(
+      `Clearing Create Hold From By Partition to address ${security.toString()}`,
+    );
+
+    const clearingOperationFrom: ClearingOperationFrom = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      operatorData: '0x',
+    };
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    const factoryInstance = new ClearingFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [clearingOperationFrom, hold],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(CLEARING_CREATE_HOLD_FROM_BY_PARTITION)
+      .setFunctionParameters(functionDataEncoded);
+
+    return this.signAndSendTransaction(transaction);
+  }
+
+  async protectedClearingCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    escrow: EvmAddress,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+    securityId: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
+    const FUNCTION_NAME = 'protectedClearingCreateHoldByPartition';
+    LogService.logTrace(
+      `Protected Clearing Create Hold By Partition to address ${security.toString()}`,
+    );
+
+    const protectedClearingOperation: ProtectedClearingOperation = {
+      clearingOperation: {
+        partition: partitionId,
+        expirationTimestamp: clearingExpirationDate.toBigNumber(),
+        data: '0x',
+      },
+      from: sourceId.toString(),
+      deadline: deadline.toBigNumber(),
+      nonce: nonce.toBigNumber(),
+    };
+
+    const hold: Hold = {
+      amount: amount.toBigNumber(),
+      expirationTimestamp: holdExpirationDate.toBigNumber(),
+      escrow: escrow.toString(),
+      to: targetId.toString(),
+      data: '0x',
+    };
+
+    const factoryInstance = new ClearingFacet__factory().attach(
+      security.toString(),
+    );
+
+    const functionDataEncodedHex = factoryInstance.interface.encodeFunctionData(
+      FUNCTION_NAME,
+      [protectedClearingOperation, hold, signature],
+    );
+
+    const functionDataEncoded = new Uint8Array(
+      Buffer.from(functionDataEncodedHex.slice(2), 'hex'),
+    );
+
+    const transaction = new ContractExecuteTransaction()
+      .setContractId(securityId)
+      .setGas(PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION)
       .setFunctionParameters(functionDataEncoded);
 
     return this.signAndSendTransaction(transaction);

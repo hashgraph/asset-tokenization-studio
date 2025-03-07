@@ -205,9 +205,9 @@
 
 import { BigNumber } from 'ethers';
 
-export class Hold {
-  public amount: BigNumber;
-  public expirationTimestamp: BigNumber;
+export class Hold<T = BigNumber> {
+  public amount: T;
+  public expirationTimestamp: T;
   public escrow: string;
   public to: string;
   public data: string;

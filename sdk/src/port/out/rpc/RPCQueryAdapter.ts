@@ -245,6 +245,7 @@ import {
   Hold__factory,
   SsiManagement__factory,
   Kyc__factory,
+  ClearingFacet__factory,
 } from '@hashgraph/asset-tokenization-contracts';
 import { ScheduledSnapshot } from '../../../domain/context/security/ScheduledSnapshot.js';
 import { VotingRights } from '../../../domain/context/equity/VotingRights.js';
@@ -268,6 +269,12 @@ import { VotingFor } from '../../../domain/context/equity/VotingFor';
 import { HoldDetails } from '../../../domain/context/security/HoldDetails.js';
 import { KYC } from '../../../domain/context/kyc/KYC.js';
 import { KycAccountData } from '../../../domain/context/kyc/KycAccountData.js';
+import {
+  CastClearingOperationType,
+  Clearing,
+  ClearingOperationIdentifier,
+  ClearingOperationType,
+} from '../../../domain/context/security/Clearing.js';
 
 const LOCAL_JSON_RPC_RELAY_URL = 'http://127.0.0.1:7546/api';
 
@@ -1387,5 +1394,139 @@ export class RPCQueryAdapter {
     ).getKycAccountsCount(kycStatus);
 
     return kycAccountsCount.toNumber();
+  }
+
+  async getClearedAmountFor(
+    address: EvmAddress,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(`Getting Cleared Amount For ${targetId}`);
+
+    const clearedAmountFor = await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).getClearedAmountFor(targetId.toString());
+
+    return clearedAmountFor.toNumber();
+  }
+
+  async getClearedAmountForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting Cleared Amount For ${targetId} by partition ${partitionId}`,
+    );
+
+    const clearedAmountForByPartition = await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).getClearedAmountForByPartition(partitionId, targetId.toString());
+
+    return clearedAmountForByPartition.toNumber();
+  }
+
+  async getClearingCountForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingOperationType: ClearingOperationType,
+  ): Promise<number> {
+    LogService.logTrace(
+      `Getting Clearing Count For ${address} by partition ${partitionId}`,
+    );
+
+    const clearingCountForByPartition = await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).getClearingCountForByPartition(
+      partitionId,
+      targetId.toString(),
+      CastClearingOperationType.toNumber(clearingOperationType),
+    );
+
+    return clearingCountForByPartition.toNumber();
+  }
+
+  async getClearingsIdForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    target: EvmAddress,
+    clearingOperationType: ClearingOperationType,
+    start: number,
+    end: number,
+  ): Promise<number[]> {
+    LogService.logTrace(
+      `Getting Clearings Id For ${target} by partition ${partitionId} from ${start} to ${end}`,
+    );
+
+    const clearingsIdForByPartition = await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).getClearingsIdForByPartition(
+      partitionId,
+      target.toString(),
+      CastClearingOperationType.toNumber(clearingOperationType),
+      start,
+      end,
+    );
+
+    return clearingsIdForByPartition.map((id) => id.toNumber());
+  }
+
+  async getClearingForByPartition(
+    address: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingOperationType: ClearingOperationType,
+    clearingId: number,
+  ): Promise<Clearing> {
+    LogService.logTrace(
+      `Getting Clearing details for ${targetId} id ${clearingId} by partition ${partitionId}`,
+    );
+
+    const clearingOperationIdentifier: ClearingOperationIdentifier = {
+      partition: partitionId,
+      tokenHolder: targetId.toString(),
+      clearingOperationType: CastClearingOperationType.toNumber(
+        clearingOperationType,
+      ),
+      clearingId: clearingId,
+    };
+
+    const clearing = await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).getClearingForByPartition(clearingOperationIdentifier);
+
+    return new Clearing(
+      clearing.expirationTimestamp_.toNumber(),
+      new BigDecimal(clearing.amount_.toString()),
+      clearing.destination_,
+      CastClearingOperationType.fromNumber(clearing.clearingOperationType_),
+      clearing.data_,
+      clearing.operatorData_,
+      {
+        amount: new BigDecimal(clearing.hold_.amount.toString()),
+        expirationTimestamp: new BigDecimal(
+          clearing.hold_.expirationTimestamp.toString(),
+        ),
+        escrow: clearing.hold_.escrow,
+        to: clearing.hold_.to,
+        data: clearing.hold_.data,
+      },
+    );
+  }
+
+  async isClearingActivated(address: EvmAddress): Promise<boolean> {
+    LogService.logTrace(
+      `Getting if clearing is activated to security ${address.toString()}`,
+    );
+
+    return await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).isClearingActivated();
   }
 }

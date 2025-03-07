@@ -222,6 +222,7 @@ import { ContractId } from '@hashgraph/sdk';
 import DfnsSettings from '../../domain/context/custodialWalletSettings/DfnsSettings.js';
 import FireblocksSettings from '../../domain/context/custodialWalletSettings/FireblocksSettings.js';
 import AWSKMSSettings from '../../domain/context/custodialWalletSettings/AWSKMSSettings.js';
+import { ClearingOperationType } from '../../domain/context/security/Clearing.js';
 
 export interface InitializationData {
   account?: Account;
@@ -248,6 +249,7 @@ interface ITransactionAdapter {
     configId: string,
     configVersion: number,
     diamondOwnerAccount?: EvmAddress,
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
   createBond(
     security: Security,
@@ -258,6 +260,7 @@ interface ITransactionAdapter {
     configId: string,
     configVersion: number,
     diamondOwnerAccount?: EvmAddress,
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
   init(): Promise<Environment>;
   register(
@@ -649,6 +652,131 @@ interface IKYCTransactionAdapter {
   ): Promise<TransactionResponse>;
 }
 
+interface IClearingAdapter {
+  activateClearing(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  deactivateClearing(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  clearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  clearingTransferFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  protectedClearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  approveClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  cancelClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  reclaimClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  clearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  clearingRedeemFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  protectedClearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  clearingCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  clearingCreateHoldFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
+  protectedClearingCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    escrow: EvmAddress,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>>;
+}
+
 export default abstract class TransactionAdapter
   implements
     ITransactionAdapter,
@@ -656,7 +784,8 @@ export default abstract class TransactionAdapter
     IManagementTransactionAdapter,
     IHoldTransactionAdapter,
     ISSIManagementTransactionAdapter,
-    IKYCTransactionAdapter
+    IKYCTransactionAdapter,
+    IClearingAdapter
 {
   triggerPendingScheduledSnapshots(
     security: EvmAddress,
@@ -747,6 +876,7 @@ export default abstract class TransactionAdapter
     configId: string,
     configVersion: number,
     diamondOwnerAccount?: EvmAddress,
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
@@ -759,6 +889,7 @@ export default abstract class TransactionAdapter
     configId: string,
     configVersion: number,
     diamondOwnerAccount?: EvmAddress,
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
@@ -1195,6 +1326,156 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  activateClearing(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  deactivateClearing(
+    security: EvmAddress,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  clearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  clearingTransferFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  protectedClearingTransferByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  approveClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  cancelClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  reclaimClearingOperationByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    targetId: EvmAddress,
+    clearingId: number,
+    clearingOperationType: ClearingOperationType,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  clearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  clearingRedeemFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  protectedClearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  clearingCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  clearingCreateHoldFromByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    escrow: EvmAddress,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  protectedClearingCreateHoldByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    escrow: EvmAddress,
+    sourceId: EvmAddress,
+    targetId: EvmAddress,
+    clearingExpirationDate: BigDecimal,
+    holdExpirationDate: BigDecimal,
+    deadline: BigDecimal,
+    nonce: BigDecimal,
+    signature: string,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse<any, Error>> {
     throw new Error('Method not implemented.');
   }
 }

@@ -264,6 +264,7 @@ export class Security extends BaseEntity implements SecurityProps {
   isControllable: boolean;
   isMultiPartition: boolean;
   arePartitionsProtected: boolean;
+  clearingActive: boolean;
   isIssuable?: boolean;
   totalSupply?: BigDecimal;
   maxSupply?: BigDecimal;

@@ -204,7 +204,6 @@
 */
 
 import { SignedCredential } from '@terminal3/vc_core';
-import { MaxUint256 } from '@ethersproject/constants';
 import BigDecimal from '../shared/BigDecimal.js';
 
 export class Terminal3VC {
@@ -250,9 +249,10 @@ export class Terminal3VC {
       ? Date.parse(signedCredential.validFrom).toString()
       : Date.now().toString();
 
-    signedCredential.validUntil = signedCredential.validUntil
-      ? Date.parse(signedCredential.validUntil).toString()
-      : MaxUint256.toString();
+    signedCredential.validUntil =
+      signedCredential.validUntil && signedCredential.validUntil.trim() !== ''
+        ? Date.parse(signedCredential.validUntil).toString()
+        : (Date.now() + 100 * 365 * 24 * 60 * 60 * 1000).toString();
   }
 
   private static validateDateOrder(signedCredential: SignedCredential): void {

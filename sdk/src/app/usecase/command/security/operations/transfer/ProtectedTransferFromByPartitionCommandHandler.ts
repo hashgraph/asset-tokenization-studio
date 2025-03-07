@@ -268,6 +268,7 @@ export class ProtectedTransferFromByPartitionCommandHandler
       signature,
     } = command;
 
+    await this.validationService.validateClearingDeactivated(securityId);
     await this.validationService.validateKycAddresses(securityId, [
       sourceId,
       targetId,

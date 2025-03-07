@@ -208,10 +208,12 @@ import { QueryBus } from '../../core/query/QueryBus.js';
 import { UnlistedIssuer } from '../usecase/command/security/error/UnlistedIssuer.js';
 import Service from './Service.js';
 import { singleton } from 'tsyringe';
-import { SecurityRole } from '../../domain/context/security/SecurityRole.js';
-import { NotGrantedRole } from '../usecase/command/security/error/NotGrantedRole.js';
+import { AccountNotKycd } from '../usecase/command/security/error/AccountNotKycd.js';
 import { IsIssuerQuery } from '../usecase/query/security/ssi/isIssuer/IsIssuerQuery.js';
 import { GetKYCStatusForQuery } from '../usecase/query/security/kyc/getKycStatusFor/GetKYCStatusForQuery.js';
+import { IsClearingActivatedQuery } from '../usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
+import { ClearingDeactivated } from '../usecase/command/security/error/ClearingDeactivated.js';
+import { ClearingActivated } from '../usecase/command/security/error/ClearingActivated.js';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -243,9 +245,33 @@ export default class ValidationService extends Service {
         new GetKYCStatusForQuery(securityId, address),
       );
       if (res.payload != 1) {
-        throw new NotGrantedRole(SecurityRole._KYC_ROLE);
+        throw new AccountNotKycd(address);
       }
     }
     return true;
+  }
+
+  async validateClearingActivated(securityId: string): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const result = (
+      await this.queryBus.execute(new IsClearingActivatedQuery(securityId))
+    ).payload;
+
+    if (!result) {
+      throw new ClearingDeactivated();
+    }
+    return result;
+  }
+
+  async validateClearingDeactivated(securityId: string): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+    const result = (
+      await this.queryBus.execute(new IsClearingActivatedQuery(securityId))
+    ).payload;
+
+    if (result) {
+      throw new ClearingActivated();
+    }
+    return result;
   }
 }

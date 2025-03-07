@@ -221,10 +221,10 @@ import {
 import {
     _CORPORATE_ACTION_STORAGE_POSITION
 } from '../constants/storagePositions.sol';
-import {HoldStorageWrapper1} from '../hold/HoldStorageWrapper1.sol';
+import {ClearingStorageWrapper1} from '../clearing/ClearingStorageWrapper1.sol';
 import {SNAPSHOT_RESULT_ID} from '../constants/values.sol';
 
-abstract contract CorporateActionsStorageWrapper1 is HoldStorageWrapper1 {
+abstract contract CorporateActionsStorageWrapper1 is ClearingStorageWrapper1 {
     using LibCommon for EnumerableSet.Bytes32Set;
     using EnumerableSet for EnumerableSet.Bytes32Set;
 

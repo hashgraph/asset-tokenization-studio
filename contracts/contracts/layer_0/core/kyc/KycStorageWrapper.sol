@@ -288,6 +288,14 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
             )
         ) return IKyc.KycStatus.NOT_GRANTED;
 
+        if (revocationListAddress != address(0)) {
+            if (
+                IRevocationList(revocationListAddress).revoked(
+                    kycFor.issuer,
+                    kycFor.vcId
+                )
+            ) return IKyc.KycStatus.NOT_GRANTED;
+        }
         return kycFor.status;
     }
 
@@ -342,7 +350,7 @@ abstract contract KycStorageWrapper is SsiManagementStorageWrapper {
     function _checkValidKycStatus(
         IKyc.KycStatus _kycStatus,
         address _account
-    ) private view {
+    ) internal view {
         if (!_hasSameKycStatus(_kycStatus, _account))
             revert IKyc.InvalidKycStatus();
     }

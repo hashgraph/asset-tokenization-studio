@@ -246,6 +246,7 @@ export class TransferCommandHandler
   async execute(command: TransferCommand): Promise<TransferCommandResponse> {
     const { securityId, targetId, amount } = command;
 
+    await this.validationService.validateClearingDeactivated(securityId);
     await this.validationService.validateKycAddresses(securityId, [targetId]);
 
     const handler = this.transactionService.getHandler();

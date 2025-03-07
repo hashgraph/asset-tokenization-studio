@@ -304,7 +304,7 @@ abstract contract ERC1410OperatorStorageWrapper is ERC1410BasicStorageWrapper {
             _isOperatorForPartition(_partition, _operator, _tokenHolder);
     }
 
-    function _checkOperator(bytes32 _partition, address _from) private view {
+    function _checkOperator(bytes32 _partition, address _from) internal view {
         if (!_isAuthorized(_partition, _msgSender(), _from))
             revert Unauthorized(_msgSender(), _from, _partition);
     }

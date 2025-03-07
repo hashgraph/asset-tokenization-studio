@@ -225,6 +225,7 @@ import ScheduledBalanceAdjustmentViewModel from './ScheduledBalanceAdjustmentVie
 import HoldViewModel from './HoldViewModel.js';
 import KYCViewModel from './KYCViewModel.js';
 import KycAccountDataViewModel from './KycAccountDataViewModel.js';
+import ClearingViewModel from './ClearingViewModel.js';
 
 export {
   AccountViewModel,
@@ -249,4 +250,5 @@ export {
   HoldViewModel,
   KYCViewModel,
   KycAccountDataViewModel,
+  ClearingViewModel,
 };
