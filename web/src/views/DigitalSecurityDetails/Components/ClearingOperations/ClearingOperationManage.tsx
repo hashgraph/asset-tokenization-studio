@@ -38,7 +38,7 @@ enum ClearingOperationType {
 interface FormValues {
   operationType: keyof typeof ManageOperationType;
   clearingOperationId: string;
-  clearingOperationType: number;
+  clearingOperationType: keyof typeof ClearingOperationType;
   sourceId: string;
 }
 
@@ -77,10 +77,14 @@ export const ClearingOperationsManage = () => {
       clearingOperationType,
     } = getValues();
 
+    const clearingOperationTypeIndex = Object.keys(
+      ClearingOperationType,
+    ).indexOf(clearingOperationType);
+
     if (operationType === ManageOperationType.APPROVE.valueOf()) {
       const request = new ApproveClearingOperationByPartitionRequest({
         clearingId: Number(clearingOperationId),
-        clearingOperationType,
+        clearingOperationType: clearingOperationTypeIndex,
         partitionId: DEFAULT_PARTITION,
         securityId,
         targetId: sourceId,
@@ -101,7 +105,7 @@ export const ClearingOperationsManage = () => {
     if (operationType === ManageOperationType.CANCEL.valueOf()) {
       const request = new CancelClearingOperationByPartitionRequest({
         clearingId: Number(clearingOperationId),
-        clearingOperationType,
+        clearingOperationType: clearingOperationTypeIndex,
         partitionId: DEFAULT_PARTITION,
         securityId,
         targetId: sourceId,
@@ -203,9 +207,18 @@ export const ClearingOperationsManage = () => {
                 control={control}
                 rules={{ required }}
                 options={[
-                  { value: 0, label: ClearingOperationType.TRANSFER },
-                  { value: 1, label: ClearingOperationType.REDEEM },
-                  { value: 2, label: ClearingOperationType.HOLD },
+                  {
+                    value: ClearingOperationType.TRANSFER,
+                    label: ClearingOperationType.TRANSFER,
+                  },
+                  {
+                    value: ClearingOperationType.REDEEM,
+                    label: ClearingOperationType.REDEEM,
+                  },
+                  {
+                    value: ClearingOperationType.HOLD,
+                    label: ClearingOperationType.HOLD,
+                  },
                 ]}
               />
             </Stack>
