@@ -249,6 +249,7 @@ interface ITransactionAdapter {
     configId: string,
     configVersion: number,
     diamondOwnerAccount?: EvmAddress,
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
   createBond(
     security: Security,
@@ -259,6 +260,7 @@ interface ITransactionAdapter {
     configId: string,
     configVersion: number,
     diamondOwnerAccount?: EvmAddress,
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse>;
   init(): Promise<Environment>;
   register(
@@ -874,6 +876,7 @@ export default abstract class TransactionAdapter
     configId: string,
     configVersion: number,
     diamondOwnerAccount?: EvmAddress,
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
@@ -886,6 +889,7 @@ export default abstract class TransactionAdapter
     configId: string,
     configVersion: number,
     diamondOwnerAccount?: EvmAddress,
+    factoryId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
   }
