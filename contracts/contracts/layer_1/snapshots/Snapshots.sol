@@ -320,6 +320,25 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         );
     }
 
+    function clearedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_) {
+        balance_ = _clearedBalanceOfAtSnapshot(_snapshotID, _tokenHolder);
+    }
+
+    function clearedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) external view returns (uint256 balance_) {
+        balance_ = _clearedBalanceOfAtSnapshotByPartition(
+            _partition,
+            _snapshotID,
+            _tokenHolder
+        );
+    }
+
     function getStaticResolverKey()
         external
         pure
@@ -336,7 +355,7 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](12);
+        staticFunctionSelectors_ = new bytes4[](14);
         staticFunctionSelectors_[selectorIndex++] = this.takeSnapshot.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .balanceOfAtSnapshot
@@ -364,6 +383,12 @@ contract Snapshots is IStaticFunctionSelectors, ISnapshots, Common {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .heldBalanceOfAtSnapshotByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearedBalanceOfAtSnapshot
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearedBalanceOfAtSnapshotByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .abafAtSnapshot

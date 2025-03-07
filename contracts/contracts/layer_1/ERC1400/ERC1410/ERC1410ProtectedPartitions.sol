@@ -231,6 +231,7 @@ abstract contract ERC1410ProtectedPartitions is
         onlyRole(_protectedPartitionsRole(_partition))
         onlyListedAllowed(_from)
         onlyListedAllowed(_to)
+        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _to)
         onlyProtectedPartitions
@@ -260,6 +261,7 @@ abstract contract ERC1410ProtectedPartitions is
         onlyRole(_protectedPartitionsRole(_partition))
         onlyListedAllowed(_from)
         onlyProtectedPartitions
+        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _from)
     {
         _protectedRedeemFromByPartition(

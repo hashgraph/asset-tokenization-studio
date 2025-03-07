@@ -330,6 +330,22 @@ abstract contract SnapshotsStorageWrapper2 is
         );
     }
 
+    function _updateAccountClearedBalancesSnapshot(
+        address account,
+        bytes32 partition
+    ) internal {
+        _updateSnapshot(
+            _snapshotStorage().accountClearedBalanceSnapshots[account],
+            _getClearedAmountFor(account)
+        );
+        _updateSnapshot(
+            _snapshotStorage().accountPartitionClearedBalanceSnapshots[account][
+                partition
+            ],
+            _getClearedAmountForByPartition(partition, account)
+        );
+    }
+
     function _updateTotalSupplySnapshot(bytes32 partition) internal override {
         _updateSnapshot(
             _snapshotStorage().totalSupplySnapshots,
@@ -496,6 +512,36 @@ abstract contract SnapshotsStorageWrapper2 is
             );
     }
 
+    function _clearedBalanceOfAtSnapshot(
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            _balanceOfAtAdjusted(
+                _snapshotID,
+                _snapshotStorage().accountClearedBalanceSnapshots[_tokenHolder],
+                _getClearedAmountForAdjusted(_tokenHolder)
+            );
+    }
+
+    function _clearedBalanceOfAtSnapshotByPartition(
+        bytes32 _partition,
+        uint256 _snapshotID,
+        address _tokenHolder
+    ) internal view returns (uint256 balance_) {
+        return
+            _balanceOfAtAdjusted(
+                _snapshotID,
+                _snapshotStorage().accountPartitionClearedBalanceSnapshots[
+                    _tokenHolder
+                ][_partition],
+                _getClearedAmountForByPartitionAdjusted(
+                    _partition,
+                    _tokenHolder
+                )
+            );
+    }
+
     function _balanceOfAtAdjusted(
         uint256 _snapshotId,
         Snapshots storage _snapshots,
@@ -534,6 +580,15 @@ abstract contract SnapshotsStorageWrapper2 is
     ) internal view virtual returns (uint256 amount_);
 
     function _getHeldAmountForByPartitionAdjusted(
+        bytes32 _partition,
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_);
+
+    function _getClearedAmountForAdjusted(
+        address _tokenHolder
+    ) internal view virtual returns (uint256 amount_);
+
+    function _getClearedAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
     ) internal view virtual returns (uint256 amount_);

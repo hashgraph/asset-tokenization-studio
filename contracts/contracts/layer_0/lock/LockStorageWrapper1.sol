@@ -211,6 +211,7 @@ import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
 import {CapStorageWrapper1} from '../cap/CapStorageWrapper1.sol';
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
@@ -413,7 +414,7 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
 
     function _checkExpirationTimestamp(
         uint256 _expirationTimestamp
-    ) private view {
+    ) internal view {
         if (_expirationTimestamp < _blockTimestamp())
             revert WrongExpirationTimestamp();
     }

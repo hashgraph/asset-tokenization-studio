@@ -267,6 +267,7 @@ export class ProtectedRedeemFromByPartitionCommandHandler
       signature,
     } = command;
 
+    await this.validationService.validateClearingDeactivated(securityId);
     await this.validationService.validateKycAddresses(securityId, [sourceId]);
 
     const handler = this.transactionService.getHandler();

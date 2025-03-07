@@ -248,6 +248,7 @@ import { Cap } from "./Components/Cap/Cap";
 import { Hold } from "./Components/Hold/Hold";
 import { KYC } from "./Components/KYC/KYC";
 import { SSIManager } from "./Components/SSIManager/SSIManager";
+import { ClearingOperations } from "./Components/ClearingOperations/ClearingOperations";
 
 export const DigitalSecurityDetails = () => {
   const { t: tHeader } = useTranslation("security", {
@@ -410,6 +411,11 @@ export const DigitalSecurityDetails = () => {
     adminTabs.push({
       content: <SSIManager />,
       header: tTabs("ssiManager"),
+    });
+
+    adminTabs.push({
+      content: <ClearingOperations />,
+      header: tTabs("clearingOperations"),
     });
 
     const hasCapRole = roles.find((role) => role === SecurityRole._CAP_ROLE);

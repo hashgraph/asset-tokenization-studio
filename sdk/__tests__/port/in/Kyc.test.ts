@@ -415,7 +415,7 @@ describe('🧪 Kyc tests', () => {
     jest
       .spyOn(mirrorNodeAdapter, 'getAccountInfo')
       .mockResolvedValueOnce({ id: HederaId.from(issuerId) })
-      .mockResolvedValueOnce({ id: HederaId.from(accountId) })
+      .mockResolvedValueOnce({ id: HederaId.from(accountId) });
 
     expect(
       await Kyc.getKYCAccountsData(
@@ -429,8 +429,8 @@ describe('🧪 Kyc tests', () => {
     ).toEqual([
       {
         account: CLIENT_ACCOUNT_ECDSA_A.id.toString(),
-        validFrom: vcDecoded.validFrom,
-        validTo: vcDecoded.validUntil,
+        validFrom: vcDecoded.validFrom?.substring(0, 10),
+        validTo: vcDecoded.validUntil?.substring(0, 10),
         VCid: vcDecoded.id,
         issuer: CLIENT_ACCOUNT_ECDSA.id.toString(),
         status: 1,
@@ -445,8 +445,8 @@ describe('🧪 Kyc tests', () => {
         }),
       ),
     ).toEqual({
-      validFrom: vcDecoded.validFrom,
-      validTo: vcDecoded.validUntil,
+      validFrom: vcDecoded.validFrom?.substring(0, 10),
+      validTo: vcDecoded.validUntil?.substring(0, 10),
       VCid: vcDecoded.id,
       issuer: issuer,
       status: 1,

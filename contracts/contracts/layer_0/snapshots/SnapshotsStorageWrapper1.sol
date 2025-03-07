@@ -262,6 +262,9 @@ abstract contract SnapshotsStorageWrapper1 is
         mapping(bytes32 => Snapshots) totalSupplyByPartitionSnapshots;
         mapping(address => Snapshots) accountHeldBalanceSnapshots;
         mapping(address => mapping(bytes32 => Snapshots)) accountPartitionHeldBalanceSnapshots;
+        // Clearing
+        mapping(address => Snapshots) accountClearedBalanceSnapshots;
+        mapping(address => mapping(bytes32 => Snapshots)) accountPartitionClearedBalanceSnapshots;
         Snapshots abafSnapshots;
         Snapshots decimals;
     }

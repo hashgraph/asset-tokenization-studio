@@ -237,6 +237,7 @@ abstract contract ERC1410Basic is IERC1410Basic, Common {
         onlyListedAllowed(_basicTransferInfo.to)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _basicTransferInfo.to)
         returns (bytes32)
