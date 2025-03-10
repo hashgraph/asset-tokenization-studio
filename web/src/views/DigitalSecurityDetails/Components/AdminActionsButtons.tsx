@@ -408,6 +408,7 @@ export const AdminActionsButtons = () => {
                             isClearingActivated ? "deactivate" : "activate"
                           }`,
                         )}
+                        defaultChecked={isClearingActivated}
                         onChange={() => handleClearingModeToggle()}
                         isDisabled={
                           isActivateClearingLoading ||
