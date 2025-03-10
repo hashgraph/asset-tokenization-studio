@@ -396,7 +396,11 @@ function decreaseClearedBalance(
   }
 }
 
-function processClearingOperation(targetId: EvmAddress, clearingId: number) {
+function processClearingOperation(
+  targetId: EvmAddress,
+  clearingId: number,
+  clearingOperationType: ClearingOperationType,
+) {
   const accountClearings = clearings.get(
     '0x' + targetId.toString().toUpperCase().substring(2),
   );
@@ -411,6 +415,16 @@ function processClearingOperation(targetId: EvmAddress, clearingId: number) {
   const currentAccount = new EvmAddress(identifiers(user_account.id)[1]);
   increaseBalance(currentAccount, clearedAmount);
 
+  const operationMap = clearingsIds.get(currentAccount.toString());
+  if (operationMap) {
+    const idList = operationMap.get(clearingOperationType);
+    if (idList) {
+      operationMap.set(
+        clearingOperationType,
+        idList.filter((id) => id !== clearingId),
+      );
+    }
+  }
   return {
     status: 'success',
     id: transactionId,
@@ -2340,7 +2354,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       targetId: EvmAddress,
       clearingId: number,
       clearingOperationType: ClearingOperationType,
-    ) => processClearingOperation(targetId, clearingId),
+    ) => processClearingOperation(targetId, clearingId, clearingOperationType),
   );
 
   singletonInstance.reclaimClearingOperationByPartition = jest.fn(
@@ -2350,7 +2364,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       targetId: EvmAddress,
       clearingId: number,
       clearingOperationType: ClearingOperationType,
-    ) => processClearingOperation(targetId, clearingId),
+    ) => processClearingOperation(targetId, clearingId, clearingOperationType),
   );
 
   singletonInstance.approveClearingOperationByPartition = jest.fn(
@@ -2360,7 +2374,7 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       targetId: EvmAddress,
       clearingId: number,
       clearingOperationType: ClearingOperationType,
-    ) => processClearingOperation(targetId, clearingId),
+    ) => processClearingOperation(targetId, clearingId, clearingOperationType),
   );
 
   return {

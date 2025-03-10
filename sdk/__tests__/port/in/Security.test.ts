@@ -1737,7 +1737,7 @@ describe('🧪 Security tests', () => {
               partitionId: _PARTITION_ID_1,
               targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
               clearingId: 1,
-              clearingOperationType: ClearingOperationType.Redeem,
+              clearingOperationType: ClearingOperationType.Transfer,
             }),
           )
         ).payload,
