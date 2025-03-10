@@ -386,9 +386,10 @@ export const AdminActionsButtons = () => {
                         data-testid="pauser-button"
                         label={tButtons(
                           `dangerZone.${
-                            isPaused ? "buttonInactive" : "buttonActive"
+                            !isPaused ? "buttonInactive" : "buttonActive"
                           }`,
                         )}
+                        defaultChecked={isPaused}
                         onChange={() => handlePauseToggle()}
                         isDisabled={isPauseLoading || isUnpauseLoading}
                       />
@@ -405,7 +406,7 @@ export const AdminActionsButtons = () => {
                         data-testid="clearing-mode-button"
                         label={tButtons(
                           `dangerZone.${
-                            isClearingActivated ? "deactivate" : "activate"
+                            !isClearingActivated ? "deactivate" : "activate"
                           }`,
                         )}
                         defaultChecked={isClearingActivated}
