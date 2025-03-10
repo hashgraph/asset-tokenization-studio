@@ -83,7 +83,7 @@
     "pre-commit": "npm run prettier && npm run lint",
     "prettierCheck": "prettier --check",
     "prepack": "npm run compile:force",
-    "cleanCache": "npx hardhat clean"
+    "clean": "npx hardhat clean"
   },
   "keywords": [],
   "author": "",
@@ -125,6 +125,6 @@
   },
   "overrides": {
     "ws": "7.5.10",
-    "elliptic": "6.5.7"
+    "elliptic": "6.6.1"
   }
 }
