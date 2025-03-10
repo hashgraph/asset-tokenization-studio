@@ -354,7 +354,7 @@ import { GetClearedAmountForByPartitionQueryHandler } from '../app/usecase/query
 import { GetClearedAmountForQueryHandler } from '../app/usecase/query/security/clearing/getClearedAmountFor/GetClearedAmountForQueryHandler.js';
 import { IsOperatorForPartitionQueryHandler } from '../app/usecase/query/security/operator/isOperatorForPartition/IsOperatorForPartitionQueryHandler.js';
 import { IsOperatorQueryHandler } from '../app/usecase/query/security/operator/isOperator/IsOperatorQueryHandler.js';
-import { OperatorClearingRedeemByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition /OperatorClearingRedeemByPartitionCommandHandler.js';
+import { OperatorClearingRedeemByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommandHandler.js';
 
 export const TOKENS = {
   COMMAND_HANDLER: Symbol('CommandHandler'),

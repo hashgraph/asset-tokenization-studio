@@ -340,7 +340,7 @@ import { GetClearingForByPartitionQuery } from '../../app/usecase/query/security
 import { GetClearingsIdForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery.js';
 import { IsClearingActivatedQuery } from '../../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
 import OperatorClearingRedeemByPartitionRequest from './request/OperatorClearingRedeemByPartitionRequest.js';
-import { OperatorClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition /OperatorClearingRedeemByPartitionCommand.js';
+import { OperatorClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
