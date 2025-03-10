@@ -323,8 +323,6 @@ import {
   CLEARING_CREATE_HOLD_FROM_BY_PARTITION,
   PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
   OPERATOR_CLEARING_CREATE_HOLD_BY_PARTITION,
-  OPERATOR_CLEARING_REDEEM_BY_PARTITION,
-  OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
 } from '../../../core/Constants.js';
 import { Security } from '../../../domain/context/security/Security.js';
 import { Rbac } from '../../../domain/context/factory/Rbac.js';
@@ -2670,80 +2668,6 @@ export class RPCTransactionAdapter extends TransactionAdapter {
         signature,
         {
           gasLimit: PROTECTED_CLEARING_CREATE_HOLD_BY_PARTITION,
-        },
-      ),
-      this.networkService.environment,
-    );
-  }
-
-  async operatorClearingTransferByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    targetId: EvmAddress,
-    expirationDate: BigDecimal,
-  ): Promise<TransactionResponse> {
-    LogService.logTrace(
-      `Operator Clearing Transfer By Partition to address ${security.toString()}`,
-    );
-
-    const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: {
-        partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
-        data: '0x',
-      },
-      from: sourceId.toString(),
-      operatorData: '0x',
-    };
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).clearingTransferFromByPartition(
-        clearingOperationFrom,
-        amount.toBigNumber(),
-        targetId.toString(),
-        {
-          gasLimit: OPERATOR_CLEARING_TRANSFER_BY_PARTITION,
-        },
-      ),
-      this.networkService.environment,
-    );
-  }
-
-  async operatorClearingRedeemByPartition(
-    security: EvmAddress,
-    partitionId: string,
-    amount: BigDecimal,
-    sourceId: EvmAddress,
-    expirationDate: BigDecimal,
-  ): Promise<TransactionResponse> {
-    LogService.logTrace(
-      `Operator Clearing Redeem By Partition to address ${security.toString()}`,
-    );
-
-    const clearingOperationFrom: ClearingOperationFrom = {
-      clearingOperation: {
-        partition: partitionId,
-        expirationTimestamp: expirationDate.toBigNumber(),
-        data: '0x',
-      },
-      from: sourceId.toString(),
-      operatorData: '0x',
-    };
-
-    return RPCTransactionResponseAdapter.manageResponse(
-      await ClearingFacet__factory.connect(
-        security.toString(),
-        this.signerOrProvider,
-      ).operatorClearingRedeemByPartition(
-        clearingOperationFrom,
-        amount.toBigNumber(),
-        {
-          gasLimit: OPERATOR_CLEARING_REDEEM_BY_PARTITION,
         },
       ),
       this.networkService.environment,

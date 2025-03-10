@@ -316,8 +316,6 @@ import GetClearingForByPartitionRequest from './GetClearingForByPartitionRequest
 import GetClearingsIdForByPartitionRequest from './GetClearingsIdForByPartitionRequest.js';
 import IsClearingActivatedRequest from './IsClearingActivatedRequest.js';
 import OperatorClearingCreateHoldByPartitionRequest from './OperatorClearingCreateHoldByPartitionRequest.js';
-import OperatorClearingRedeemByPartitionRequest from './OperatorClearingRedeemByPartitionRequest.js';
-import OperatorClearingTransferByPartitionRequest from './OperatorClearingTransferByPartitionRequest.js';
 
 export * from './BaseRequest.js';
 export {
@@ -433,6 +431,4 @@ export {
   GetClearingsIdForByPartitionRequest,
   IsClearingActivatedRequest,
   OperatorClearingCreateHoldByPartitionRequest,
-  OperatorClearingRedeemByPartitionRequest,
-  OperatorClearingTransferByPartitionRequest,
 };
