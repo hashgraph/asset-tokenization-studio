@@ -258,7 +258,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     isControllable,
     arePartitionsProtected,
     isMultiPartition,
-    clearingActive = false,
+    clearingActive,
     diamondOwnerAccount,
     votingRight,
     informationRight,
@@ -286,7 +286,7 @@ export default class CreateEquityRequest extends ValidatedRequest<CreateEquityRe
     isWhiteList: boolean;
     isControllable: boolean;
     arePartitionsProtected: boolean;
-    clearingActive?: boolean;
+    clearingActive: boolean;
     isMultiPartition: boolean;
     diamondOwnerAccount?: string;
     votingRight: boolean;

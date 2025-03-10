@@ -284,6 +284,7 @@ describe('Access Control Tests', () => {
             isControllable: true,
             isMultiPartition: false,
             arePartitionsProtected: false,
+            clearingActive: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: 6,
