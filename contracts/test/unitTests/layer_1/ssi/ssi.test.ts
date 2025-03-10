@@ -306,6 +306,7 @@ describe('SSI Tests', () => {
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: false,
+            clearingActive: false,
             isMultiPartition: false,
             name: 'TEST_KYC',
             symbol: 'TAC',
