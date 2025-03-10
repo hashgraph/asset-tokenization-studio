@@ -221,7 +221,7 @@ abstract contract LocalContext is Context {
 
     function _isExpired(
         uint256 _expirationTimestamp
-    ) private view returns (bool) {
+    ) internal view returns (bool) {
         return _blockTimestamp() > _expirationTimestamp;
     }
 

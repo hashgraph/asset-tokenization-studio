@@ -206,6 +206,7 @@
 pragma solidity 0.8.18;
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {IClearing} from '../../../layer_1/interfaces/clearing/IClearing.sol';
 
 interface IAdjustBalances {
     function adjustBalances(
@@ -277,8 +278,7 @@ interface IAdjustBalances {
     ) external view returns (uint256 labaf_);
 
     function getClearingLabafByPartition(
-        bytes32 _partition,
-        uint256 _clearingId,
-        address _tokenHolder
+        IClearing.ClearingOperationIdentifier
+            memory _clearingOperationIdentifier
     ) external view returns (uint256 labaf_);
 }
