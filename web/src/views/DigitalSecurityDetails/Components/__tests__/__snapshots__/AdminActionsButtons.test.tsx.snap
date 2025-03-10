@@ -195,7 +195,7 @@ exports[`AdminActionsButtons Admin has pauser role should render correctly: paus
                 <label
                   class="chakra-form__label css-1ii0m7i"
                 >
-                  Active
+                  Inactive
                 </label>
               </div>
             </div>
