@@ -296,6 +296,7 @@ describe('CAP Layer 2 Tests', () => {
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: false,
+            clearingActive: false,
             isMultiPartition: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
