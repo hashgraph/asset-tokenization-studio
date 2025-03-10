@@ -203,118 +203,67 @@
 
 */
 
-export enum ErrorCode {
-  // Error codes for Input Data (Prefix: 1XXXX)
-  AccountIdInValid = '10001',
-  AccountIdNotExists = '10026',
-  ContractKeyInvalid = '10006',
-  EmptyValue = '10017',
-  InvalidAmount = '10008',
-  InvalidBase64 = '10011',
-  InvalidBytes = '10007',
-  InvalidBytes3 = '10003',
-  InvalidBytes32 = '10002',
-  InvalidContractId = '10014',
-  InvalidDividendType = '10028',
-  InvalidEvmAddress = '10023',
-  InvalidIdFormatHedera = '10009',
-  InvalidIdFormatHederaIdOrEvmAddress = '10010',
-  InvalidLength = '10016',
-  InvalidRange = '10018',
-  InvalidRegulationSubType = '10030',
-  InvalidRegulationSubTypeForType = '10031',
-  InvalidRegulationType = '10029',
-  InvalidRequest = '10024',
-  InvalidRole = '10019',
-  InvalidSecurityType = '10020',
-  InvalidType = '10015',
-  InvalidValue = '10021',
-  PublicKeyInvalid = '10004',
-  ValidationChecks = '10022',
-  InvalidClearingOperationType = '10032',
-  InvalidClearingOperationTypeNumber = '10033',
+import { SecurityDate } from '../../../domain/context/shared/SecurityDate.js';
+import ValidatedRequest from './validation/ValidatedRequest.js';
+import Validation from './validation/Validation.js';
 
-  // Error codes for Logic Errors (Prefix: 2XXXX)
-  AccountAlreadyInControlList = '20013',
-  AccountIsAlreadyAnIssuer = '20020',
-  AccountFreeze = '20008',
-  AccountInBlackList = '20011',
-  AccountNotAssociatedToSecurity = '20001',
-  AccountNotInControlList = '20015',
-  AccountNotInWhiteList = '20012',
-  InsufficientBalance = '20009',
-  InsufficientFunds = '20005',
-  InsufficientHoldBalance = '20019',
-  MaxSupplyReached = '20002',
-  NounceAlreadyUsed = '20016',
-  OperationNotAllowed = '20004',
-  PartitionsProtected = '20017',
-  PartitionsUnprotected = '20018',
-  RoleNotAssigned = '20003',
-  SecurityPaused = '20010',
-  SecurityUnPaused = '20014',
-  UnlistedIssuer = '20021',
-  InvalidVCHolder = '20022',
-  InvalidVC = '20023',
-  ClearingActivated = '20024',
-  ClearingDeactivated = '20025',
-  AccountNotKycd = '20026',
-  AccountIsNotOperator = '20027',
+export default class OperatorClearingCreateHoldByPartitionRequest extends ValidatedRequest<OperatorClearingCreateHoldByPartitionRequest> {
+  securityId: string;
+  partitionId: string;
+  amount: string;
+  escrow: string;
+  sourceId: string;
+  targetId: string;
+  clearingExpirationDate: string;
+  holdExpirationDate: string;
 
-  // Error codes for System Errors (Prefix: 3XXXX)
-  ContractNotFound = '30002',
-  InvalidResponse = '30005',
-  NotFound = '30006',
-  ReceiptNotReceived = '30001',
-  RuntimeError = '30004',
-  Unexpected = '30003',
+  constructor({
+    securityId,
+    partitionId,
+    amount,
+    escrow,
+    sourceId,
+    targetId,
+    clearingExpirationDate,
+    holdExpirationDate,
+  }: {
+    securityId: string;
+    partitionId: string;
+    amount: string;
+    escrow: string;
+    sourceId: string;
+    targetId: string;
+    clearingExpirationDate: string;
+    holdExpirationDate: string;
+  }) {
+    super({
+      securityId: Validation.checkHederaIdFormatOrEvmAddress(),
+      partitionId: Validation.checkBytes32Format(),
+      amount: Validation.checkAmount(),
+      escrow: Validation.checkHederaIdFormatOrEvmAddress(),
+      sourceId: Validation.checkHederaIdFormatOrEvmAddress(),
+      targetId: Validation.checkHederaIdFormatOrEvmAddress(true),
+      clearingExpirationDate: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          Math.ceil(new Date().getTime() / 1000),
+        );
+      },
+      holdExpirationDate: (val) => {
+        return SecurityDate.checkDateTimestamp(
+          parseInt(val),
+          Math.ceil(new Date().getTime() / 1000),
+        );
+      },
+    });
 
-  // Error codes for Provider Errors (Prefix: 4XXXX)
-  DeploymentError = '40006', // Fixed typo here
-  InitializationError = '40001',
-  PairingError = '40002',
-  PairingRejected = '40008',
-  ProviderError = '40007',
-  SigningError = '40004',
-  TransactionCheck = '40003',
-  TransactionError = '40005',
-}
-
-export enum ErrorCategory {
-  InputData = '1',
-  Logic = '2',
-  System = '3',
-  Provider = '4',
-}
-
-export function getErrorCategory(errorCode: ErrorCode): ErrorCategory {
-  switch (true) {
-    case errorCode.startsWith(ErrorCategory.InputData):
-      return ErrorCategory.InputData;
-    case errorCode.startsWith(ErrorCategory.Logic):
-      return ErrorCategory.Logic;
-    default:
-      return ErrorCategory.System;
-  }
-}
-
-export default class BaseError extends Error {
-  message: string;
-  errorCode: ErrorCode;
-  errorCategory: ErrorCategory;
-
-  /**
-   * Generic Error Constructor
-   */
-  constructor(code: ErrorCode, msg: string) {
-    super(msg);
-    this.message = msg;
-    this.errorCode = code;
-    this.errorCategory = getErrorCategory(code);
-    Object.setPrototypeOf(this, BaseError.prototype);
-  }
-
-  toString(stack = false): string {
-    return `${this.errorCode} - ${stack ? this.stack : this.message}`;
+    this.securityId = securityId;
+    this.partitionId = partitionId;
+    this.amount = amount;
+    this.escrow = escrow;
+    this.sourceId = sourceId;
+    this.targetId = targetId;
+    this.clearingExpirationDate = clearingExpirationDate;
+    this.holdExpirationDate = holdExpirationDate;
   }
 }

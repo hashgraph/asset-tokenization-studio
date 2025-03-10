@@ -203,26 +203,53 @@
 
 */
 
-import { Command } from '../../../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../../../core/command/CommandResponse.js';
+import { IsOperatorQuery, IsOperatorQueryResponse } from './IsOperatorQuery.js';
+import { QueryHandler } from '../../../../../../core/decorator/QueryHandlerDecorator.js';
+import { IQueryHandler } from '../../../../../../core/query/QueryHandler.js';
+import { RPCQueryAdapter } from '../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { lazyInject } from '../../../../../../core/decorator/LazyInjectDecorator.js';
+import SecurityService from '../../../../../service/SecurityService.js';
+import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import EvmAddress from '../../../../../../domain/context/contract/EvmAddress.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../domain/context/shared/HederaId.js';
 
-export class OperatorClearingRedeemFromByPartitionCommandResponse
-  implements CommandResponse
-{
+@QueryHandler(IsOperatorQuery)
+export class IsOperatorQueryHandler implements IQueryHandler<IsOperatorQuery> {
   constructor(
-    public readonly payload: number,
-    public readonly transactionId: string,
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(MirrorNodeAdapter)
+    public readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
   ) {}
-}
 
-export class OperatorClearingRedeemFromByPartitionCommand extends Command<OperatorClearingRedeemFromByPartitionCommandResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly partitionId: string,
-    public readonly amount: string,
-    public readonly sourceId: string,
-    public readonly expirationDate: string,
-  ) {
-    super();
+  async execute(query: IsOperatorQuery): Promise<IsOperatorQueryResponse> {
+    const { securityId, operatorId, targetId } = query;
+    const security = await this.securityService.get(securityId);
+    if (!security.evmDiamondAddress) throw new Error('Invalid security id');
+
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
+
+    const operatorEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(
+      operatorId,
+    )
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(operatorId)
+      : new EvmAddress(operatorId);
+
+    const targetEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(targetId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
+      : new EvmAddress(targetId);
+
+    const res = await this.queryAdapter.isOperator(
+      securityEvmAddress,
+      operatorEvmAddress,
+      targetEvmAddress,
+    );
+    return new IsOperatorQueryResponse(res);
   }
 }

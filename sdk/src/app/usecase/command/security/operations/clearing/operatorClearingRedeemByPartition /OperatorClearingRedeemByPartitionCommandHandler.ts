@@ -203,118 +203,183 @@
 
 */
 
-export enum ErrorCode {
-  // Error codes for Input Data (Prefix: 1XXXX)
-  AccountIdInValid = '10001',
-  AccountIdNotExists = '10026',
-  ContractKeyInvalid = '10006',
-  EmptyValue = '10017',
-  InvalidAmount = '10008',
-  InvalidBase64 = '10011',
-  InvalidBytes = '10007',
-  InvalidBytes3 = '10003',
-  InvalidBytes32 = '10002',
-  InvalidContractId = '10014',
-  InvalidDividendType = '10028',
-  InvalidEvmAddress = '10023',
-  InvalidIdFormatHedera = '10009',
-  InvalidIdFormatHederaIdOrEvmAddress = '10010',
-  InvalidLength = '10016',
-  InvalidRange = '10018',
-  InvalidRegulationSubType = '10030',
-  InvalidRegulationSubTypeForType = '10031',
-  InvalidRegulationType = '10029',
-  InvalidRequest = '10024',
-  InvalidRole = '10019',
-  InvalidSecurityType = '10020',
-  InvalidType = '10015',
-  InvalidValue = '10021',
-  PublicKeyInvalid = '10004',
-  ValidationChecks = '10022',
-  InvalidClearingOperationType = '10032',
-  InvalidClearingOperationTypeNumber = '10033',
+import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
+import AccountService from '../../../../../../service/AccountService.js';
+import SecurityService from '../../../../../../service/SecurityService.js';
+import TransactionService from '../../../../../../service/TransactionService.js';
+import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
+import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
+import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
+import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { SecurityPaused } from '../../../error/SecurityPaused.js';
+import {
+  OperatorClearingRedeemByPartitionCommand,
+  OperatorClearingRedeemByPartitionCommandResponse,
+} from './OperatorClearingRedeemByPartitionCommand.js';
+import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
+import { SecurityControlListType } from '../../../../../../../domain/context/security/SecurityControlListType.js';
+import ValidationService from '../../../../../../service/ValidationService.js';
+import { AccountInBlackList } from '../../../error/AccountInBlackList.js';
+import { AccountNotInWhiteList } from '../../../error/AccountNotInWhiteList.js';
 
-  // Error codes for Logic Errors (Prefix: 2XXXX)
-  AccountAlreadyInControlList = '20013',
-  AccountIsAlreadyAnIssuer = '20020',
-  AccountFreeze = '20008',
-  AccountInBlackList = '20011',
-  AccountNotAssociatedToSecurity = '20001',
-  AccountNotInControlList = '20015',
-  AccountNotInWhiteList = '20012',
-  InsufficientBalance = '20009',
-  InsufficientFunds = '20005',
-  InsufficientHoldBalance = '20019',
-  MaxSupplyReached = '20002',
-  NounceAlreadyUsed = '20016',
-  OperationNotAllowed = '20004',
-  PartitionsProtected = '20017',
-  PartitionsUnprotected = '20018',
-  RoleNotAssigned = '20003',
-  SecurityPaused = '20010',
-  SecurityUnPaused = '20014',
-  UnlistedIssuer = '20021',
-  InvalidVCHolder = '20022',
-  InvalidVC = '20023',
-  ClearingActivated = '20024',
-  ClearingDeactivated = '20025',
-  AccountNotKycd = '20026',
-  AccountIsNotOperator = '20027',
+@CommandHandler(OperatorClearingRedeemByPartitionCommand)
+export class OperatorClearingRedeemByPartitionCommandHandler
+  implements ICommandHandler<OperatorClearingRedeemByPartitionCommand>
+{
+  constructor(
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
+  ) {}
 
-  // Error codes for System Errors (Prefix: 3XXXX)
-  ContractNotFound = '30002',
-  InvalidResponse = '30005',
-  NotFound = '30006',
-  ReceiptNotReceived = '30001',
-  RuntimeError = '30004',
-  Unexpected = '30003',
+  async execute(
+    command: OperatorClearingRedeemByPartitionCommand,
+  ): Promise<OperatorClearingRedeemByPartitionCommandResponse> {
+    const { securityId, partitionId, amount, sourceId, expirationDate } =
+      command;
+    const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
+    const security = await this.securityService.get(securityId);
 
-  // Error codes for Provider Errors (Prefix: 4XXXX)
-  DeploymentError = '40006', // Fixed typo here
-  InitializationError = '40001',
-  PairingError = '40002',
-  PairingRejected = '40008',
-  ProviderError = '40007',
-  SigningError = '40004',
-  TransactionCheck = '40003',
-  TransactionError = '40005',
-}
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
 
-export enum ErrorCategory {
-  InputData = '1',
-  Logic = '2',
-  System = '3',
-  Provider = '4',
-}
+    await this.validationService.validateOperator(
+      securityId,
+      partitionId,
+      account.id.toString(),
+      sourceId,
+    );
+    await this.validationService.validateClearingActivated(securityId);
+    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
+      throw new SecurityPaused();
+    }
 
-export function getErrorCategory(errorCode: ErrorCode): ErrorCategory {
-  switch (true) {
-    case errorCode.startsWith(ErrorCategory.InputData):
-      return ErrorCategory.InputData;
-    case errorCode.startsWith(ErrorCategory.Logic):
-      return ErrorCategory.Logic;
-    default:
-      return ErrorCategory.System;
-  }
-}
+    await this.validationService.validateKycAddresses(securityId, [
+      account.id.toString(),
+      sourceId,
+    ]);
 
-export default class BaseError extends Error {
-  message: string;
-  errorCode: ErrorCode;
-  errorCategory: ErrorCategory;
+    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
+      : new EvmAddress(sourceId);
 
-  /**
-   * Generic Error Constructor
-   */
-  constructor(code: ErrorCode, msg: string) {
-    super(msg);
-    this.message = msg;
-    this.errorCode = code;
-    this.errorCategory = getErrorCategory(code);
-    Object.setPrototypeOf(this, BaseError.prototype);
-  }
+    const controListType = (await this.queryAdapter.getControlListType(
+      securityEvmAddress,
+    ))
+      ? SecurityControlListType.WHITELIST
+      : SecurityControlListType.BLACKLIST;
+    const controlListCount =
+      await this.queryAdapter.getControlListCount(securityEvmAddress);
+    const controlListMembers = (
+      await this.queryAdapter.getControlListMembers(
+        securityEvmAddress,
+        0,
+        controlListCount,
+      )
+    ).map(function (x) {
+      return x.toUpperCase();
+    });
 
-  toString(stack = false): string {
-    return `${this.errorCode} - ${stack ? this.stack : this.message}`;
+    if (
+      controListType === SecurityControlListType.BLACKLIST &&
+      controlListMembers.includes(sourceEvmAddress.toString().toUpperCase())
+    ) {
+      throw new AccountInBlackList(sourceEvmAddress.toString());
+    }
+
+    if (
+      controListType === SecurityControlListType.BLACKLIST &&
+      controlListMembers.includes(account.evmAddress!.toString().toUpperCase())
+    ) {
+      throw new AccountInBlackList(account.evmAddress!.toString());
+    }
+
+    if (
+      controListType === SecurityControlListType.WHITELIST &&
+      !controlListMembers.includes(sourceEvmAddress.toString().toUpperCase())
+    ) {
+      throw new AccountNotInWhiteList(sourceEvmAddress.toString());
+    }
+
+    if (
+      controListType === SecurityControlListType.WHITELIST &&
+      !controlListMembers.includes(account.evmAddress!.toString().toUpperCase())
+    ) {
+      throw new AccountNotInWhiteList(account.evmAddress!.toString());
+    }
+
+    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
+      throw new DecimalsOverRange(security.decimals);
+    }
+
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    if (
+      account.evmAddress &&
+      (
+        await this.queryAdapter.balanceOf(securityEvmAddress, sourceEvmAddress)
+      ).lt(amountBd.toBigNumber())
+    ) {
+      throw new InsufficientBalance();
+    }
+
+    const res = await handler.operatorClearingRedeemByPartition(
+      securityEvmAddress,
+      partitionId,
+      amountBd,
+      sourceEvmAddress,
+      BigDecimal.fromString(expirationDate),
+      securityId,
+    );
+
+    if (!res.id)
+      throw new Error(
+        'Operator Create Clearing Redeem By Partition Command Handler response id empty',
+      );
+
+    let clearingId: string;
+
+    if (res.response && res.response.clearingId) {
+      clearingId = res.response.clearingId;
+    } else {
+      const numberOfResultsItems = 2;
+
+      // * Recover the new contract ID from Event data from the Mirror Node
+      const results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        numberOfResultsItems,
+      );
+
+      if (!results || results.length !== numberOfResultsItems) {
+        throw new Error('Invalid data structure');
+      }
+
+      clearingId = results[1];
+    }
+
+    return Promise.resolve(
+      new OperatorClearingRedeemByPartitionCommandResponse(
+        parseInt(clearingId, 16),
+        res.id!,
+      ),
+    );
   }
 }

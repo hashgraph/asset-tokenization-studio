@@ -339,6 +339,12 @@ import { GetClearingCountForByPartitionQuery } from '../../app/usecase/query/sec
 import { GetClearingForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingForByPartition/GetClearingForByPartitionQuery.js';
 import { GetClearingsIdForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery.js';
 import { IsClearingActivatedQuery } from '../../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
+import OperatorClearingCreateHoldByPartitionRequest from './request/OperatorClearingCreateHoldByPartitionRequest.js';
+import OperatorClearingRedeemByPartitionRequest from './request/OperatorClearingRedeemByPartitionRequest.js';
+import OperatorClearingTransferByPartitionRequest from './request/OperatorClearingTransferByPartitionRequest.js';
+import { OperatorClearingCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommand.js';
+import { OperatorClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition /OperatorClearingRedeemByPartitionCommand.js';
+import { OperatorClearingTransferByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -487,6 +493,15 @@ interface ISecurityInPort {
     request: GetClearingsIdForByPartitionRequest,
   ): Promise<number[]>;
   isClearingActivated(request: IsClearingActivatedRequest): Promise<boolean>;
+  operatorClearingCreateHoldByPartition(
+    request: OperatorClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  operatorClearingRedeemByPartition(
+    request: OperatorClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  operatorClearingTransferByPartition(
+    request: OperatorClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -1596,6 +1611,58 @@ class SecurityInPort implements ISecurityInPort {
         new IsClearingActivatedQuery(request.securityId),
       )
     ).payload;
+  }
+
+  @LogError
+  async operatorClearingCreateHoldByPartition(
+    request: OperatorClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('OperatorClearingCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new OperatorClearingCreateHoldByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.escrow,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.clearingExpirationDate,
+        request.holdExpirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async operatorClearingRedeemByPartition(
+    request: OperatorClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('OperatorClearingRedeemByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new OperatorClearingRedeemByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async operatorClearingTransferByPartition(
+    request: OperatorClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('OperatorClearingTransferByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new OperatorClearingTransferByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.expirationDate,
+      ),
+    );
   }
 }
 

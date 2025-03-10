@@ -203,27 +203,154 @@
 
 */
 
-import { Command } from '../../../../../../../core/command/Command.js';
-import { CommandResponse } from '../../../../../../../core/command/CommandResponse.js';
+import { ICommandHandler } from '../../../../../../../core/command/CommandHandler.js';
+import { CommandHandler } from '../../../../../../../core/decorator/CommandHandlerDecorator.js';
+import AccountService from '../../../../../../service/AccountService.js';
+import SecurityService from '../../../../../../service/SecurityService.js';
+import TransactionService from '../../../../../../service/TransactionService.js';
+import { lazyInject } from '../../../../../../../core/decorator/LazyInjectDecorator.js';
+import BigDecimal from '../../../../../../../domain/context/shared/BigDecimal.js';
+import CheckNums from '../../../../../../../core/checks/numbers/CheckNums.js';
+import { DecimalsOverRange } from '../../../error/DecimalsOverRange.js';
+import { HEDERA_FORMAT_ID_REGEX } from '../../../../../../../domain/context/shared/HederaId.js';
+import EvmAddress from '../../../../../../../domain/context/contract/EvmAddress.js';
+import { MirrorNodeAdapter } from '../../../../../../../port/out/mirror/MirrorNodeAdapter.js';
+import { RPCQueryAdapter } from '../../../../../../../port/out/rpc/RPCQueryAdapter.js';
+import { SecurityPaused } from '../../../error/SecurityPaused.js';
+import {
+  OperatorClearingCreateHoldByPartitionCommand,
+  OperatorClearingCreateHoldByPartitionCommandResponse,
+} from './OperatorClearingCreateHoldByPartitionCommand.js';
+import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
+import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
+import ValidationService from '../../../../../../service/ValidationService.js';
 
-export class OperatorClearingTransferFromByPartitionCommandResponse
-  implements CommandResponse
+@CommandHandler(OperatorClearingCreateHoldByPartitionCommand)
+export class OperatorClearingCreateHoldByPartitionCommandHandler
+  implements ICommandHandler<OperatorClearingCreateHoldByPartitionCommand>
 {
   constructor(
-    public readonly payload: number,
-    public readonly transactionId: string,
+    @lazyInject(SecurityService)
+    public readonly securityService: SecurityService,
+    @lazyInject(AccountService)
+    public readonly accountService: AccountService,
+    @lazyInject(TransactionService)
+    public readonly transactionService: TransactionService,
+    @lazyInject(RPCQueryAdapter)
+    public readonly queryAdapter: RPCQueryAdapter,
+    @lazyInject(MirrorNodeAdapter)
+    private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
-}
 
-export class OperatorClearingTransferFromByPartitionCommand extends Command<OperatorClearingTransferFromByPartitionCommandResponse> {
-  constructor(
-    public readonly securityId: string,
-    public readonly partitionId: string,
-    public readonly amount: string,
-    public readonly sourceId: string,
-    public readonly targetId: string,
-    public readonly expirationDate: string,
-  ) {
-    super();
+  async execute(
+    command: OperatorClearingCreateHoldByPartitionCommand,
+  ): Promise<OperatorClearingCreateHoldByPartitionCommandResponse> {
+    const {
+      securityId,
+      partitionId,
+      escrow,
+      amount,
+      sourceId,
+      targetId,
+      clearingExpirationDate,
+      holdExpirationDate,
+    } = command;
+    const handler = this.transactionService.getHandler();
+    const account = this.accountService.getCurrentAccount();
+    const security = await this.securityService.get(securityId);
+
+    const securityEvmAddress: EvmAddress = new EvmAddress(
+      HEDERA_FORMAT_ID_REGEX.test(securityId)
+        ? (await this.mirrorNodeAdapter.getContractInfo(securityId)).evmAddress
+        : securityId.toString(),
+    );
+
+    if (await this.queryAdapter.isPaused(securityEvmAddress)) {
+      throw new SecurityPaused();
+    }
+
+    await this.validationService.validateOperator(
+      securityId,
+      partitionId,
+      account.id.toString(),
+      sourceId,
+    );
+    await this.validationService.validateClearingActivated(securityId);
+
+    if (CheckNums.hasMoreDecimals(amount, security.decimals)) {
+      throw new DecimalsOverRange(security.decimals);
+    }
+
+    const escrowEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(escrow)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(escrow)
+      : new EvmAddress(escrow);
+
+    const sourceEvmAddress: EvmAddress = HEDERA_FORMAT_ID_REGEX.exec(sourceId)
+      ? await this.mirrorNodeAdapter.accountToEvmAddress(sourceId)
+      : new EvmAddress(sourceId);
+
+    const targetEvmAddress: EvmAddress =
+      targetId === '0.0.0'
+        ? new EvmAddress(EVM_ZERO_ADDRESS)
+        : HEDERA_FORMAT_ID_REGEX.exec(targetId)
+          ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
+          : new EvmAddress(targetId);
+
+    const amountBd = BigDecimal.fromString(amount, security.decimals);
+
+    if (
+      account.evmAddress &&
+      (
+        await this.queryAdapter.balanceOf(securityEvmAddress, sourceEvmAddress)
+      ).lt(amountBd.toBigNumber())
+    ) {
+      throw new InsufficientBalance();
+    }
+
+    const res = await handler.operatorClearingCreateHoldByPartition(
+      securityEvmAddress,
+      partitionId,
+      escrowEvmAddress,
+      amountBd,
+      sourceEvmAddress,
+      targetEvmAddress,
+      BigDecimal.fromString(clearingExpirationDate),
+      BigDecimal.fromString(holdExpirationDate),
+      securityId,
+    );
+
+    if (!res.id)
+      throw new Error(
+        'Operator Clearing Create Hold By Partition Command Handler response id empty',
+      );
+
+    let clearingId: string;
+
+    if (res.response && res.response.clearingId) {
+      clearingId = res.response.clearingId;
+    } else {
+      const numberOfResultsItems = 2;
+
+      // * Recover the new contract ID from Event data from the Mirror Node
+      const results = await this.mirrorNodeAdapter.getContractResults(
+        res.id.toString(),
+        numberOfResultsItems,
+      );
+
+      if (!results || results.length !== numberOfResultsItems) {
+        throw new Error('Invalid data structure');
+      }
+
+      clearingId = results[1];
+    }
+
+    return Promise.resolve(
+      new OperatorClearingCreateHoldByPartitionCommandResponse(
+        parseInt(clearingId, 16),
+        res.id!,
+      ),
+    );
   }
 }

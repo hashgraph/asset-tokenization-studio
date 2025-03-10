@@ -206,7 +206,7 @@
 import { Command } from '../../../../../../../core/command/Command.js';
 import { CommandResponse } from '../../../../../../../core/command/CommandResponse.js';
 
-export class OperatorClearingCreateHoldFromByPartitionCommandResponse
+export class OperatorClearingTransferByPartitionCommandResponse
   implements CommandResponse
 {
   constructor(
@@ -215,16 +215,14 @@ export class OperatorClearingCreateHoldFromByPartitionCommandResponse
   ) {}
 }
 
-export class OperatorClearingCreateHoldFromByPartitionCommand extends Command<OperatorClearingCreateHoldFromByPartitionCommandResponse> {
+export class OperatorClearingTransferByPartitionCommand extends Command<OperatorClearingTransferByPartitionCommandResponse> {
   constructor(
     public readonly securityId: string,
     public readonly partitionId: string,
-    public readonly escrow: string,
     public readonly amount: string,
     public readonly sourceId: string,
     public readonly targetId: string,
-    public readonly clearingExpirationDate: string,
-    public readonly holdExpirationDate: string,
+    public readonly expirationDate: string,
   ) {
     super();
   }
