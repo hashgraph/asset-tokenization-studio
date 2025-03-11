@@ -339,6 +339,8 @@ import { GetClearingCountForByPartitionQuery } from '../../app/usecase/query/sec
 import { GetClearingForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingForByPartition/GetClearingForByPartitionQuery.js';
 import { GetClearingsIdForByPartitionQuery } from '../../app/usecase/query/security/clearing/getClearingsIdForByPartition/GetClearingsIdForByPartitionQuery.js';
 import { IsClearingActivatedQuery } from '../../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
+import OperatorClearingCreateHoldByPartitionRequest from './request/OperatorClearingCreateHoldByPartitionRequest.js';
+import { OperatorClearingCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -487,6 +489,9 @@ interface ISecurityInPort {
     request: GetClearingsIdForByPartitionRequest,
   ): Promise<number[]>;
   isClearingActivated(request: IsClearingActivatedRequest): Promise<boolean>;
+  operatorClearingCreateHoldByPartition(
+    request: OperatorClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
 }
 
 class SecurityInPort implements ISecurityInPort {
@@ -1596,6 +1601,25 @@ class SecurityInPort implements ISecurityInPort {
         new IsClearingActivatedQuery(request.securityId),
       )
     ).payload;
+  }
+
+  @LogError
+  async operatorClearingCreateHoldByPartition(
+    request: OperatorClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('OperatorClearingCreateHoldByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new OperatorClearingCreateHoldByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.escrow,
+        request.amount,
+        request.sourceId,
+        request.targetId,
+        request.clearingExpirationDate,
+        request.holdExpirationDate,
+      ),
+    );
   }
 }
 
