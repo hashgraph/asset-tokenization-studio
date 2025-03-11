@@ -257,12 +257,12 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         validateAddress(_from)
         validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldFromByPartition(
@@ -291,13 +291,13 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         validateAddress(_from)
         validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyOperator(_partition, _from)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldByPartition(
@@ -326,13 +326,13 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         validateAddress(_from)
         validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
         onlyRole(_CONTROLLER_ROLE)
         onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
         onlyControllable
-        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _createHoldByPartition(

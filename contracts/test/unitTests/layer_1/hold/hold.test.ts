@@ -221,6 +221,7 @@ import {
     TimeTravel,
     Kyc,
     SsiManagement,
+    ClearingFacet,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -276,6 +277,7 @@ describe('Hold Tests', () => {
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
+    let clearingFacet: ClearingFacet
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -344,6 +346,10 @@ describe('Hold Tests', () => {
             role: SSI_MANAGER_ROLE,
             members: [account_A],
         }
+        const rbacClearing: Rbac = {
+            role: CLEARING_ROLE,
+            members: [account_A],
+        }
         const init_rbacs: Rbac[] = [
             rbacIssuer,
             rbacController,
@@ -351,6 +357,7 @@ describe('Hold Tests', () => {
             rbacControlList,
             rbacKYC,
             rbacSSI,
+            rbacClearing
         ]
 
         diamond = await deployEquityFromFactory({
@@ -421,6 +428,7 @@ describe('Hold Tests', () => {
             diamond.address,
             signer_A
         )
+        clearingFacet = await ethers.getContractAt('ClearingFacet', diamond.address, signer_A)
 
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
         await kycFacet.grantKyc(
@@ -608,7 +616,7 @@ describe('Hold Tests', () => {
                 await expect(
                     holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
                 ).to.be.revertedWithCustomError(
-                    pauseFacet,
+                    clearingFacet,
                     'ClearingIsActivated'
                 )
                 await expect(
@@ -619,7 +627,7 @@ describe('Hold Tests', () => {
                         '0x'
                     )
                 ).to.be.revertedWithCustomError(
-                    pauseFacet,
+                    clearingFacet,
                     'ClearingIsActivated'
                 )
                 await expect(
@@ -630,7 +638,7 @@ describe('Hold Tests', () => {
                         '0x'
                     )
                 ).to.be.revertedWithCustomError(
-                    pauseFacet,
+                    clearingFacet,
                     'ClearingIsActivated'
                 )
                 await expect(
@@ -641,7 +649,7 @@ describe('Hold Tests', () => {
                         '0x'
                     )
                 ).to.be.revertedWithCustomError(
-                    pauseFacet,
+                    clearingFacet,
                     'ClearingIsActivated'
                 )
             })
