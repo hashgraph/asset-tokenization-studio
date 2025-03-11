@@ -228,23 +228,19 @@ contract ClearingRedeemFacet is
     )
         external
         override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        {
-            _checkUnpaused();
-            _checkDefaultPartitionWithSinglePartition(
-                _clearingOperation.partition
-            );
-            _checkUnProtectedPartitionsOrWildCardRole();
-            _checkExpirationTimestamp(_clearingOperation.expirationTimestamp);
-        }
-
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperation,
             _amount,
             _msgSender(),
             _msgSender(),
+            false,
             ''
         );
 
@@ -263,26 +259,24 @@ contract ClearingRedeemFacet is
     )
         external
         override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyWithValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        )
+        validateAddress(_clearingOperationFrom.from)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        {
-            _checkUnpaused();
-            _checkDefaultPartitionWithSinglePartition(
-                _clearingOperationFrom.clearingOperation.partition
-            );
-            _checkUnProtectedPartitionsOrWildCardRole();
-            _checkExpirationTimestamp(
-                _clearingOperationFrom.clearingOperation.expirationTimestamp
-            );
-            _checkValidAddress(_clearingOperationFrom.from);
-        }
-
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
             _msgSender(),
+            true,
             _clearingOperationFrom.operatorData
         );
 
@@ -301,30 +295,30 @@ contract ClearingRedeemFacet is
     )
         external
         override
+        onlyUnpaused
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyWithValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        )
+        validateAddress(_clearingOperationFrom.from)
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
-            _checkUnpaused();
-            _checkValidAddress(_clearingOperationFrom.from);
-            _checkDefaultPartitionWithSinglePartition(
-                _clearingOperationFrom.clearingOperation.partition
-            );
-            _checkUnProtectedPartitionsOrWildCardRole();
-            _checkExpirationTimestamp(
-                _clearingOperationFrom.clearingOperation.expirationTimestamp
-            );
             _checkOperator(
                 _clearingOperationFrom.clearingOperation.partition,
                 _clearingOperationFrom.from
             );
         }
-
         (success_, clearingId_) = _clearingRedeemCreation(
             _clearingOperationFrom.clearingOperation,
             _amount,
             _clearingOperationFrom.from,
             _msgSender(),
+            false,
             _clearingOperationFrom.operatorData
         );
 

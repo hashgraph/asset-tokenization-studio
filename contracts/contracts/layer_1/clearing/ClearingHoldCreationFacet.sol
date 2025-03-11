@@ -232,22 +232,20 @@ contract ClearingHoldCreationFacet is
     )
         external
         override
+        onlyUnpaused
+        validateAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
+        onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        {
-            _checkUnpaused();
-            _checkDefaultPartitionWithSinglePartition(
-                _clearingOperation.partition
-            );
-            _checkUnProtectedPartitionsOrWildCardRole();
-            _checkExpirationTimestamp(_clearingOperation.expirationTimestamp);
-        }
-
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperation,
             _msgSender(),
             _msgSender(),
+            false,
             _hold,
             ''
         );
@@ -268,25 +266,25 @@ contract ClearingHoldCreationFacet is
     )
         external
         override
+        onlyUnpaused
+        validateAddress(_clearingOperationFrom.from)
+        validateAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
+        onlyWithValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        )
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
-        {
-            _checkUnpaused();
-            _checkDefaultPartitionWithSinglePartition(
-                _clearingOperationFrom.clearingOperation.partition
-            );
-            _checkUnProtectedPartitionsOrWildCardRole();
-            _checkExpirationTimestamp(
-                _clearingOperationFrom.clearingOperation.expirationTimestamp
-            );
-            _checkValidAddress(_clearingOperationFrom.from);
-        }
-
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
             _msgSender(),
+            true,
             _hold,
             _clearingOperationFrom.operatorData
         );
@@ -307,29 +305,31 @@ contract ClearingHoldCreationFacet is
     )
         external
         override
+        onlyUnpaused
+        validateAddress(_clearingOperationFrom.from)
+        validateAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
+        onlyWithValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        )
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
         onlyClearingActivated
         returns (bool success_, uint256 clearingId_)
     {
         {
-            _checkUnpaused();
-            _checkValidAddress(_clearingOperationFrom.from);
-            _checkDefaultPartitionWithSinglePartition(
-                _clearingOperationFrom.clearingOperation.partition
-            );
-            _checkUnProtectedPartitionsOrWildCardRole();
-            _checkExpirationTimestamp(
-                _clearingOperationFrom.clearingOperation.expirationTimestamp
-            );
             _checkOperator(
                 _clearingOperationFrom.clearingOperation.partition,
                 _clearingOperationFrom.from
             );
         }
-
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperationFrom.clearingOperation,
             _clearingOperationFrom.from,
             _msgSender(),
+            false,
             _hold,
             _clearingOperationFrom.operatorData
         );

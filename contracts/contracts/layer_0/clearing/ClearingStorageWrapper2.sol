@@ -263,6 +263,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _to,
             _protectedClearingOperation.from,
             _msgSender(),
+            false,
             ''
         );
     }
@@ -295,6 +296,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _protectedClearingOperation.clearingOperation,
             _protectedClearingOperation.from,
             _msgSender(),
+            false,
             _hold,
             ''
         );
@@ -330,6 +332,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _amount,
             _protectedClearingOperation.from,
             _msgSender(),
+            false,
             ''
         );
     }
@@ -338,10 +341,11 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         IClearing.ClearingOperation memory _clearingOperation,
         address _from,
         address _operator,
+        bool _reduceAllowance,
         uint256 _amount,
         IClearing.ClearingOperationType _operationType
     ) internal returns (uint256 clearingId_) {
-        if (_from != _operator) {
+        if (_reduceAllowance) {
             _decreaseAllowedBalance(_from, _operator, _amount);
         }
 
@@ -385,12 +389,14 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         address _to,
         address _from,
         address _operator,
+        bool _reduceAllowance,
         bytes memory _operatorData
     ) internal returns (bool success_, uint256 clearingId_) {
         clearingId_ = _operateClearingCreation(
             _clearingOperation,
             _from,
             _operator,
+            _reduceAllowance,
             _amount,
             IClearing.ClearingOperationType.Transfer
         );
@@ -413,12 +419,14 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         uint256 _amount,
         address _from,
         address _operator,
+        bool _reduceAllowance,
         bytes memory _operatorData
     ) internal returns (bool success_, uint256 clearingId_) {
         clearingId_ = _operateClearingCreation(
             _clearingOperation,
             _from,
             _operator,
+            _reduceAllowance,
             _amount,
             IClearing.ClearingOperationType.Redeem
         );
@@ -439,6 +447,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         IClearing.ClearingOperation memory _clearingOperation,
         address _from,
         address _operator,
+        bool _reduceAllowance,
         IHold.Hold calldata _hold,
         bytes memory _operatorData
     ) internal returns (bool success_, uint256 clearingId_) {
@@ -446,6 +455,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _clearingOperation,
             _from,
             _operator,
+            _reduceAllowance,
             _hold.amount,
             IClearing.ClearingOperationType.HoldCreation
         );
@@ -588,9 +598,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
         _removeClearing(
             IClearing.ClearingOperationIdentifier({
-                clearingOperationType: IClearing
-                    .ClearingOperationType
-                    .HoldCreation,
+                clearingOperationType: IClearing.ClearingOperationType.Transfer,
                 partition: _partition,
                 tokenHolder: _tokenHolder,
                 clearingId: _clearingId
@@ -623,9 +631,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
         _removeClearing(
             IClearing.ClearingOperationIdentifier({
-                clearingOperationType: IClearing
-                    .ClearingOperationType
-                    .HoldCreation,
+                clearingOperationType: IClearing.ClearingOperationType.Redeem,
                 partition: _partition,
                 tokenHolder: _tokenHolder,
                 clearingId: _clearingId
@@ -646,6 +652,12 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 _clearingId
             );
 
+        _transferClearingBalance(
+            _partition,
+            _tokenHolder,
+            clearingHoldCreationData.amount
+        );
+
         if (_operation == IClearingActions.ClearingActionType.Approve) {
             _createHoldByPartition(
                 _partition,
@@ -659,12 +671,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 ),
                 clearingHoldCreationData.operatorData
             );
-        } else
-            _transferClearingBalance(
-                _partition,
-                _tokenHolder,
-                clearingHoldCreationData.amount
-            );
+        }
 
         _removeClearing(
             IClearing.ClearingOperationIdentifier({
