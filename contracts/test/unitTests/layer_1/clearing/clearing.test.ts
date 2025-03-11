@@ -562,8 +562,6 @@ describe('Clearing Tests', () => {
         account: string,
         totalClearedAmountByPartition_expected: number,
         totalClearedAmount_expected: number,
-        totalClearedAmountByPartitionAdjusted_expected: number,
-        totalClearedAmountAdjusted_expected: number,
         clearingCount_Transfer_expected: number,
         clearingCount_Redeem_expected: number,
         clearingCount_HoldCreation_expected: number
@@ -574,14 +572,7 @@ describe('Clearing Tests', () => {
                 _DEFAULT_PARTITION,
                 account
             )
-        let clearedAmountByPartitionAdjusted =
-            await clearingFacet.getClearedAmountForByPartitionAdjusted(
-                _DEFAULT_PARTITION,
-                account
-            )
         let clearedAmount = await clearingFacet.getClearedAmountFor(account)
-        let clearedAmountAdjusted =
-            await clearingFacet.getClearedAmountForAdjusted(account)
 
         let clearingCount_Transfer =
             await clearingFacet.getClearingCountForByPartition(
@@ -631,13 +622,7 @@ describe('Clearing Tests', () => {
         expect(clearedAmountByPartition).to.equal(
             totalClearedAmountByPartition_expected
         )
-        expect(clearedAmountByPartitionAdjusted).to.equal(
-            totalClearedAmountByPartitionAdjusted_expected
-        )
         expect(clearedAmount).to.equal(totalClearedAmount_expected)
-        expect(clearedAmountAdjusted).to.equal(
-            totalClearedAmountAdjusted_expected
-        )
 
         expect(clearingCount_Transfer).to.equal(clearingCount_Transfer_expected)
         expect(clearingCount_Redeem).to.equal(clearingCount_Redeem_expected)
@@ -667,24 +652,9 @@ describe('Clearing Tests', () => {
         let clearing = await clearingFacet.getClearingForByPartition(
             clearingIdentifier
         )
-        let clearingAdjusted =
-            await clearingFacet.getClearingForByPartitionAdjusted(
-                clearingIdentifier
-            )
 
         checkClearingValues(
             clearing,
-            clearingIdentifier,
-            to,
-            amount,
-            expirationTimestamp,
-            data,
-            operatorData,
-            hold
-        )
-
-        checkClearingValues(
-            clearingAdjusted,
             clearingIdentifier,
             to,
             amount,
@@ -2581,8 +2551,6 @@ describe('Clearing Tests', () => {
                 account_A,
                 totalClearedAmount,
                 totalClearedAmount,
-                totalClearedAmount,
-                totalClearedAmount,
                 3,
                 0,
                 0
@@ -2687,8 +2655,6 @@ describe('Clearing Tests', () => {
             await checkCreatedClearingAmounts(
                 balance_A_original.toNumber() - totalClearedAmount,
                 account_A,
-                totalClearedAmount,
-                totalClearedAmount,
                 totalClearedAmount,
                 totalClearedAmount,
                 0,
@@ -2801,8 +2767,6 @@ describe('Clearing Tests', () => {
             await checkCreatedClearingAmounts(
                 balance_A_original.toNumber() - totalClearedAmount,
                 account_A,
-                totalClearedAmount,
-                totalClearedAmount,
                 totalClearedAmount,
                 totalClearedAmount,
                 0,
@@ -3202,14 +3166,14 @@ describe('Clearing Tests', () => {
             )
 
             const cleared_TotalAmount_After =
-                await clearingFacet.getClearedAmountForAdjusted(account_A)
+                await clearingFacet.getClearedAmountFor(account_A)
             const cleared_TotalAmount_After_Partition_1 =
-                await clearingFacet.getClearedAmountForByPartitionAdjusted(
+                await clearingFacet.getClearedAmountForByPartition(
                     _PARTITION_ID_1,
                     account_A
                 )
             const cleared_After =
-                await clearingFacet.getClearingForByPartitionAdjusted(
+                await clearingFacet.getClearingForByPartition(
                     clearingIdentifier
                 )
             const balance_After = await erc1410Facet.balanceOf(account_A)

@@ -749,12 +749,6 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
     function getClearedAmountFor(
         address _tokenHolder
     ) external view returns (uint256 amount_) {
-        return _getClearedAmountFor(_tokenHolder);
-    }
-
-    function getClearedAmountForAdjusted(
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
         return _getClearedAmountForAdjusted(_tokenHolder);
     }
 
@@ -762,15 +756,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 amount_) {
-        return _getClearedAmountForByPartition(_partition, _tokenHolder);
-    }
-
-    function getClearedAmountForByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 amount_) {
-        return
-            _getClearedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+        return _getClearedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function getClearingCountForByPartition(
@@ -819,25 +805,6 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             IHold.Hold memory hold_
         )
     {
-        return _getClearingForByPartition(_clearingOperationIdentifier);
-    }
-
-    function getClearingForByPartitionAdjusted(
-        ClearingOperationIdentifier calldata _clearingOperationIdentifier
-    )
-        external
-        view
-        override
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address destination_,
-            ClearingOperationType clearingOperationType_,
-            bytes memory data_,
-            bytes memory operatorData_,
-            IHold.Hold memory hold_
-        )
-    {
         return _getClearingForByPartitionAdjusted(_clearingOperationIdentifier);
     }
 
@@ -861,7 +828,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](24);
+        staticFunctionSelectors_ = new bytes4[](21);
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_Clearing
             .selector;
@@ -881,19 +848,10 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
             .getClearingForByPartition
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getClearingForByPartitionAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
             .getClearedAmountFor
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
-            .getClearedAmountForAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
             .getClearedAmountForByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getClearedAmountForByPartitionAdjusted
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .clearingTransferByPartition

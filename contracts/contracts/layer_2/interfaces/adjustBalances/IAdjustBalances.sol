@@ -215,9 +215,7 @@ interface IAdjustBalances {
 
     function getAbaf() external view returns (uint256);
 
-    function getAbafAdjusted() external view returns (uint256);
-
-    function getAbafAdjustedAt(
+    function getAbafAt(
         uint256 _timestamp
     ) external view returns (uint256);
 
