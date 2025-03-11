@@ -460,7 +460,6 @@ describe('Clearing Tests', () => {
             businessLogicResolver: businessLogicResolver.address,
         })
 
-        // Instantiate the contract with the merged ABI
         let clearingTransferFacet = await ethers.getContractAt(
             'ClearingTransferFacet',
             diamond.address,
