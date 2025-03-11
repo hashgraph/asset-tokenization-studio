@@ -404,12 +404,11 @@ contract ClearingTransferFacet is
         override
         returns (ClearingTransferData memory clearingTransferData_)
     {
-        return
-            _getClearingTransferForByPartitionAdjusted(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
+        clearingTransferData_ = _getClearingTransferForByPartitionAdjusted(
+            _partition,
+            _tokenHolder,
+            _clearingId
+        );
     }
 
     function getStaticResolverKey()

@@ -396,12 +396,11 @@ contract ClearingHoldCreationFacet is
         override
         returns (ClearingHoldCreationData memory clearingHoldCreationData_)
     {
-        return
-            _getClearingHoldCreationForByPartitionAdjusted(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
+        clearingHoldCreationData_ = _getClearingHoldCreationForByPartitionAdjusted(
+            _partition,
+            _tokenHolder,
+            _clearingId
+        );
     }
 
     function getStaticResolverKey()

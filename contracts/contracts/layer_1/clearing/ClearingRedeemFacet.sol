@@ -388,12 +388,11 @@ contract ClearingRedeemFacet is
         override
         returns (ClearingRedeemData memory clearingRedeemData_)
     {
-        return
-            _getClearingRedeemForByPartitionAdjusted(
-                _partition,
-                _tokenHolder,
-                _clearingId
-            );
+        clearingRedeemData_ = _getClearingRedeemForByPartitionAdjusted(
+            _partition,
+            _tokenHolder,
+            _clearingId
+        );
     }
 
     function getStaticResolverKey()
