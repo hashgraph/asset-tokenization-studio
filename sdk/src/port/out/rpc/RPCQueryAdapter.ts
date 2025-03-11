@@ -544,6 +544,10 @@ export class RPCQueryAdapter {
       ProtectedPartitions__factory,
       address.toString(),
     ).arePartitionsProtected();
+    const clearingActive = await this.connect(
+      ClearingFacet__factory,
+      address.toString(),
+    ).isClearingActivated();
     const isMultiPartition = await this.connect(
       ERC1410ScheduledTasks__factory,
       address.toString(),
@@ -596,6 +600,7 @@ export class RPCQueryAdapter {
       isWhiteList: isWhiteList,
       isControllable: isControllable,
       arePartitionsProtected: arePartitionsProtected,
+      clearingActive: clearingActive,
       isMultiPartition: isMultiPartition,
       isIssuable: isIssuable,
       totalSupply: new BigDecimal(totalSupply.toString()),

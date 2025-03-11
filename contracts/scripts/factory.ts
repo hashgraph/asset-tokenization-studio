@@ -373,7 +373,7 @@ export async function setEquityData({
     isControllable: boolean
     isMultiPartition: boolean
     arePartitionsProtected: boolean
-    clearingActive?: boolean
+    clearingActive: boolean
     name: string
     symbol: string
     decimals: number
@@ -429,7 +429,7 @@ export async function setEquityData({
         isWhiteList: isWhiteList,
         maxSupply: numberOfShares,
         erc20MetadataInfo: erc20MetadataInfo,
-        clearingActive: clearingActive!,
+        clearingActive: clearingActive,
     }
 
     const equityDetails: EquityDetailsData = {
@@ -459,7 +459,7 @@ export async function setBondData({
     isControllable,
     isMultiPartition,
     arePartitionsProtected,
-    clearingActive = false,
+    clearingActive,
     name,
     symbol,
     decimals,
@@ -481,7 +481,7 @@ export async function setBondData({
     isControllable: boolean
     isMultiPartition: boolean
     arePartitionsProtected: boolean
-    clearingActive?: boolean
+    clearingActive: boolean
     name: string
     symbol: string
     decimals: number
@@ -565,7 +565,7 @@ export async function deployEquityFromFactory({
     isControllable,
     isMultiPartition,
     arePartitionsProtected,
-    clearingActive = false,
+    clearingActive,
     name,
     symbol,
     decimals,
@@ -596,7 +596,7 @@ export async function deployEquityFromFactory({
     isControllable: boolean
     isMultiPartition: boolean
     arePartitionsProtected: boolean
-    clearingActive?: boolean
+    clearingActive: boolean
     name: string
     symbol: string
     decimals: number
@@ -677,7 +677,7 @@ export async function deployBondFromFactory({
     isControllable,
     isMultiPartition,
     arePartitionsProtected,
-    clearingActive = false,
+    clearingActive,
     name,
     symbol,
     decimals,
@@ -705,7 +705,7 @@ export async function deployBondFromFactory({
     isControllable: boolean
     isMultiPartition: boolean
     arePartitionsProtected: boolean
-    clearingActive?: boolean
+    clearingActive: boolean
     name: string
     symbol: string
     decimals: number

@@ -314,6 +314,7 @@ describe('Snapshots Tests', () => {
             isControllable: true,
             isMultiPartition: true,
             arePartitionsProtected: false,
+            clearingActive: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: 6,
