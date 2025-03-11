@@ -515,6 +515,21 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
             });
     }
 
+    function _buildClearingOperationIdentifier(
+        address _from,
+        bytes32 _partition,
+        uint256 _clearingId,
+        IClearing.ClearingOperationType _operationType
+    ) internal pure returns (IClearing.ClearingOperationIdentifier memory) {
+        return
+            IClearing.ClearingOperationIdentifier({
+                tokenHolder: _from,
+                partition: _partition,
+                clearingId: _clearingId,
+                clearingOperationType: _operationType
+            });
+    }
+
     function _clearingStorage()
         internal
         pure
