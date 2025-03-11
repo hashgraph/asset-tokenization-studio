@@ -341,6 +341,8 @@ import { GetClearingsIdForByPartitionQuery } from '../../app/usecase/query/secur
 import { IsClearingActivatedQuery } from '../../app/usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
 import OperatorClearingCreateHoldByPartitionRequest from './request/OperatorClearingCreateHoldByPartitionRequest.js';
 import { OperatorClearingCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommand.js';
+import OperatorClearingRedeemByPartitionRequest from './request/OperatorClearingRedeemByPartitionRequest.js';
+import { OperatorClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -491,6 +493,9 @@ interface ISecurityInPort {
   isClearingActivated(request: IsClearingActivatedRequest): Promise<boolean>;
   operatorClearingCreateHoldByPartition(
     request: OperatorClearingCreateHoldByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  operatorClearingRedeemByPartition(
+    request: OperatorClearingRedeemByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }>;
 }
 
@@ -1618,6 +1623,22 @@ class SecurityInPort implements ISecurityInPort {
         request.targetId,
         request.clearingExpirationDate,
         request.holdExpirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async operatorClearingRedeemByPartition(
+    request: OperatorClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('OperatorClearingRedeemByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new OperatorClearingRedeemByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.expirationDate,
       ),
     );
   }

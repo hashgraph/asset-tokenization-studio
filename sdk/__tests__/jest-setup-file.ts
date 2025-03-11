@@ -2264,6 +2264,16 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     ) => createClearing(expirationDate, amount, ClearingOperationType.Redeem),
   );
 
+  singletonInstance.operatorClearingRedeemByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      amount: BigDecimal,
+      sourceId: EvmAddress,
+      expirationDate: BigDecimal,
+    ) => createClearing(expirationDate, amount, ClearingOperationType.Redeem),
+  );
+
   singletonInstance.protectedClearingRedeemByPartition = jest.fn(
     async (
       address: EvmAddress,
