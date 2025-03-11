@@ -281,6 +281,7 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(_operatorTransferData.from)
@@ -290,7 +291,6 @@ abstract contract ERC1410Operator is IERC1410Operator, Common {
             _operatorTransferData.from
         )
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.from)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.to)
         returns (bytes32)

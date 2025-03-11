@@ -218,6 +218,7 @@ import {
     IFactory,
     Kyc,
     SsiManagement,
+    ClearingFacet
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
@@ -236,6 +237,7 @@ import {
     SSI_MANAGER_ROLE,
     ZERO,
     EMPTY_STRING,
+    CLEARING_ROLE,
 } from '@scripts'
 import { assertObject } from '../../../../common'
 
@@ -262,6 +264,7 @@ describe('ERC20 Tests', () => {
     let erc1594Facet: ERC1594
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
+    let clearingFacet: ClearingFacet
 
     const name = 'TEST_AccessControl'
     const symbol = 'TAC'
@@ -305,7 +308,11 @@ describe('ERC20 Tests', () => {
                 role: CONTROL_LIST_ROLE,
                 members: [account_A],
             }
-            const init_rbacs: Rbac[] = [rbacPause, rbacControlList]
+            const rbacClearing: Rbac = {
+                role: CLEARING_ROLE,
+                members: [account_A]
+            }
+            const init_rbacs: Rbac[] = [rbacPause, rbacControlList, rbacClearing]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -351,6 +358,11 @@ describe('ERC20 Tests', () => {
             )
             controlListFacet = await ethers.getContractAt(
                 'ControlList',
+                diamond.address,
+                signer_A
+            )
+            clearingFacet = await ethers.getContractAt(
+                'ClearingFacet',
                 diamond.address,
                 signer_A
             )
@@ -418,6 +430,17 @@ describe('ERC20 Tests', () => {
             await expect(
                 erc20Facet.decreaseAllowance(account_C, amount)
             ).to.be.rejectedWith('TokenIsPaused')
+        })
+
+        it('GIVEN an ERC20 with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
+            await clearingFacet.activateClearing()
+            await expect(
+                erc20Facet.transfer(account_E, amount)
+            ).to.be.rejectedWith('ClearingIsActivated')
+
+            await expect(
+                erc20Facet.transferFrom(account_C, account_E, amount)
+            ).to.be.rejectedWith('ClearingIsActivated')
         })
 
         it('GIVEN a initializer ERC20 WHEN try to use a non authorized account THEN transaction fails with AccountIsBlocked', async () => {

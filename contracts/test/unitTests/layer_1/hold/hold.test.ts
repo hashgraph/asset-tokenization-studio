@@ -239,6 +239,7 @@ import {
     ADDRESS_ZERO,
     ZERO,
     EMPTY_STRING,
+    CLEARING_ROLE,
 } from '@scripts'
 import { dateToUnixTimestamp } from '../../../dateFormatter'
 
@@ -597,6 +598,51 @@ describe('Hold Tests', () => {
                 await expect(
                     holdFacet.reclaimHoldByPartition(holdIdentifier)
                 ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
+            })
+        })
+
+        describe('Clearing active', () => {
+            it('GIVEN a token in clearing mode THEN hold creation fails with ClearingIsActivated', async () => {
+                await clearingFacet.activateClearing()
+                await expect(
+                    holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+                ).to.be.revertedWithCustomError(
+                    pauseFacet,
+                    'ClearingIsActivated'
+                )
+                await expect(
+                    holdFacet.createHoldFromByPartition(
+                        _DEFAULT_PARTITION,
+                        account_A,
+                        hold,
+                        '0x'
+                    )
+                ).to.be.revertedWithCustomError(
+                    pauseFacet,
+                    'ClearingIsActivated'
+                )
+                await expect(
+                    holdFacet.controllerCreateHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        account_A,
+                        hold,
+                        '0x'
+                    )
+                ).to.be.revertedWithCustomError(
+                    pauseFacet,
+                    'ClearingIsActivated'
+                )
+                await expect(
+                    holdFacet.operatorCreateHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        account_A,
+                        hold,
+                        '0x'
+                    )
+                ).to.be.revertedWithCustomError(
+                    pauseFacet,
+                    'ClearingIsActivated'
+                )
             })
         })
 

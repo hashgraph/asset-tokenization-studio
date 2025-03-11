@@ -42,7 +42,7 @@
     "test:erc1643": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC1643/erc1643.test.ts",
     "test:erc1644": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC1644/erc1644.test.ts",
     "test:erc1594": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC1594/erc1594.test.ts",
-    "test:erc1400": "npx hardhat test test/unitTests/layer_2/ERC1400/erc1400.test.ts",
+    "test:erc1410": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC1410/erc1410.test.ts",
     "test:erc20": "npx hardhat test test/unitTests/layer_1/ERC1400/ERC20/erc20.test.ts",
     "test:snapshots": "npx hardhat test test/unitTests/layer_1/snapshots/snapshots.test.ts",
     "test:Snapshots": "npx hardhat test test/unitTests/layer_2/snapshots/snapshots.test.ts",
