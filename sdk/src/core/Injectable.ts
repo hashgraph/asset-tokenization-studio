@@ -354,6 +354,8 @@ import { GetClearedAmountForByPartitionQueryHandler } from '../app/usecase/query
 import { GetClearedAmountForQueryHandler } from '../app/usecase/query/security/clearing/getClearedAmountFor/GetClearedAmountForQueryHandler.js';
 import { IsOperatorForPartitionQueryHandler } from '../app/usecase/query/security/operator/isOperatorForPartition/IsOperatorForPartitionQueryHandler.js';
 import { IsOperatorQueryHandler } from '../app/usecase/query/security/operator/isOperator/IsOperatorQueryHandler.js';
+import { OperatorClearingCreateHoldByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommandHandler.js';
+import { OperatorClearingRedeemByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommandHandler.js';
 import { OperatorClearingTransferByPartitionCommandHandler } from '../app/usecase/command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommandHandler.js';
 
 export const TOKENS = {
@@ -618,6 +620,14 @@ const COMMAND_HANDLERS = [
   {
     token: TOKENS.COMMAND_HANDLER,
     useClass: ProtectedClearingCreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: OperatorClearingCreateHoldByPartitionCommandHandler,
+  },
+  {
+    token: TOKENS.COMMAND_HANDLER,
+    useClass: OperatorClearingRedeemByPartitionCommandHandler,
   },
   {
     token: TOKENS.COMMAND_HANDLER,

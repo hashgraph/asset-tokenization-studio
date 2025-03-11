@@ -253,6 +253,8 @@ import {
   ApproveClearingOperationByPartitionRequest,
   ProtectedClearingRedeemByPartitionRequest,
   ProtectedClearingTransferByPartitionRequest,
+  OperatorClearingCreateHoldByPartitionRequest,
+  OperatorClearingRedeemByPartitionRequest,
   OperatorClearingTransferByPartitionRequest,
 } from '../../../src/index.js';
 import TransferRequest from '../../../src/port/in/request/TransferRequest.js';
@@ -1866,6 +1868,234 @@ describe('🧪 Security tests', () => {
         ),
       ).toEqual(0);
 
+      await Security.controllerRedeem(
+        new ForceRedeemRequest({
+          securityId: equity.evmDiamondAddress!,
+          amount: (+issuedAmount).toString(),
+          sourceId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        }),
+      );
+    }, 600_000);
+
+    it('Operator Clearing Create Redeem', async () => {
+      const issuedAmount = '10';
+      const clearedAmount = '2';
+      const expirationTimeStamp = '9991976120';
+
+      await Security.issue(
+        new IssueRequest({
+          amount: issuedAmount,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          securityId: equity.evmDiamondAddress!,
+        }),
+      );
+
+      expect(
+        (
+          await Security.operatorClearingRedeemByPartition(
+            new OperatorClearingRedeemByPartitionRequest({
+              securityId: equity.evmDiamondAddress!,
+              partitionId: _PARTITION_ID_1,
+              sourceId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+              amount: clearedAmount,
+              expirationDate: expirationTimeStamp,
+            }),
+          )
+        ).payload,
+      ).toBe(1);
+
+      expect(
+        (
+          await Security.getBalanceOf(
+            new GetAccountBalanceRequest({
+              securityId: equity.evmDiamondAddress!,
+              targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+            }),
+          )
+        ).value,
+      ).toEqual((+issuedAmount - +clearedAmount).toString());
+
+      expect(
+        await Security.getClearedAmountFor(
+          new GetClearedAmountForRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          }),
+        ),
+      ).toEqual(+clearedAmount);
+
+      const clearingRedeemCount = await Security.getClearingCountForByPartition(
+        new GetClearingCountForByPartitionRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          partitionId: _PARTITION_ID_1,
+          clearingOperationType: ClearingOperationType.Redeem,
+        }),
+      );
+
+      expect(clearingRedeemCount).toEqual(1);
+
+      const clearingId = await Security.getClearingsIdForByPartition(
+        new GetClearingsIdForByPartitionRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          partitionId: _PARTITION_ID_1,
+          clearingOperationType: ClearingOperationType.Redeem,
+          start: 0,
+          end: 1,
+        }),
+      );
+
+      expect(clearingId.length).toEqual(1);
+
+      expect(clearingId[0]).toEqual(1);
+
+      expect(
+        (
+          await Security.cancelClearingOperationByPartition(
+            new CancelClearingOperationByPartitionRequest({
+              securityId: equity.evmDiamondAddress!,
+              partitionId: _PARTITION_ID_1,
+              targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+              clearingId: 1,
+              clearingOperationType: ClearingOperationType.Redeem,
+            }),
+          )
+        ).payload,
+      ).toBe(true);
+
+      expect(
+        await Security.getClearedAmountFor(
+          new GetClearedAmountForRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          }),
+        ),
+      ).toEqual(0);
+
+      await Security.controllerRedeem(
+        new ForceRedeemRequest({
+          securityId: equity.evmDiamondAddress!,
+          amount: (+issuedAmount).toString(),
+          sourceId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+        }),
+      );
+    }, 600_000);
+
+    it('Operator Clearing Create Hold', async () => {
+      const issuedAmount = '10';
+      const clearedAmount = '2';
+      const expirationTimeStamp = '9991976120';
+
+      await Security.issue(
+        new IssueRequest({
+          amount: issuedAmount,
+          targetId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+          securityId: equity.evmDiamondAddress!,
+        }),
+      );
+
+      await Security.issue(
+        new IssueRequest({
+          amount: issuedAmount,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          securityId: equity.evmDiamondAddress!,
+        }),
+      );
+
+      expect(
+        (
+          await Security.operatorClearingCreateHoldByPartition(
+            new OperatorClearingCreateHoldByPartitionRequest({
+              securityId: equity.evmDiamondAddress!,
+              partitionId: _PARTITION_ID_1,
+              amount: clearedAmount,
+              sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+              escrow: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+              targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+              clearingExpirationDate: expirationTimeStamp,
+              holdExpirationDate: expirationTimeStamp,
+            }),
+          )
+        ).payload,
+      ).toBe(1);
+
+      expect(
+        (
+          await Security.getBalanceOf(
+            new GetAccountBalanceRequest({
+              securityId: equity.evmDiamondAddress!,
+              targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+            }),
+          )
+        ).value,
+      ).toEqual((+issuedAmount - +clearedAmount).toString());
+
+      expect(
+        await Security.getClearedAmountFor(
+          new GetClearedAmountForRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          }),
+        ),
+      ).toEqual(+clearedAmount);
+
+      const clearingHoldCount = await Security.getClearingCountForByPartition(
+        new GetClearingCountForByPartitionRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          partitionId: _PARTITION_ID_1,
+          clearingOperationType: ClearingOperationType.HoldCreation,
+        }),
+      );
+
+      expect(clearingHoldCount).toEqual(1);
+
+      const clearingId = await Security.getClearingsIdForByPartition(
+        new GetClearingsIdForByPartitionRequest({
+          securityId: equity.evmDiamondAddress!,
+          targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          partitionId: _PARTITION_ID_1,
+          clearingOperationType: ClearingOperationType.HoldCreation,
+          start: 0,
+          end: 1,
+        }),
+      );
+
+      expect(clearingId.length).toEqual(1);
+
+      expect(clearingId[0]).toEqual(1);
+
+      expect(
+        (
+          await Security.reclaimClearingOperationByPartition(
+            new ReclaimClearingOperationByPartitionRequest({
+              securityId: equity.evmDiamondAddress!,
+              partitionId: _PARTITION_ID_1,
+              targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+              clearingId: 1,
+              clearingOperationType: ClearingOperationType.Redeem,
+            }),
+          )
+        ).payload,
+      ).toBe(true);
+
+      expect(
+        await Security.getClearedAmountFor(
+          new GetClearedAmountForRequest({
+            securityId: equity.evmDiamondAddress!,
+            targetId: CLIENT_ACCOUNT_ECDSA.evmAddress!.toString(),
+          }),
+        ),
+      ).toEqual(0);
+
+      await Security.controllerRedeem(
+        new ForceRedeemRequest({
+          securityId: equity.evmDiamondAddress!,
+          amount: (+issuedAmount).toString(),
+          sourceId: CLIENT_ACCOUNT_ECDSA_A.evmAddress!.toString(),
+        }),
+      );
       await Security.controllerRedeem(
         new ForceRedeemRequest({
           securityId: equity.evmDiamondAddress!,
