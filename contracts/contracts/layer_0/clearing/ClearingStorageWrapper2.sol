@@ -403,14 +403,13 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
         _clearingStorage().clearingTransferByAccountPartitionAndId[_from][
             _clearingOperation.partition
-        ][clearingId_] = IClearing.ClearingTransferData({
-            amount: _amount,
-            expirationTimestamp: _clearingOperation.expirationTimestamp,
-            destination: _to,
-            data: _clearingOperation.data,
-            operatorData: _operatorData
-        });
-
+        ][clearingId_] = _buildClearingTransferData(
+            _amount,
+            _clearingOperation.expirationTimestamp,
+            _to,
+            _clearingOperation.data,
+            _operatorData
+        );
         success_ = true;
     }
 
@@ -462,16 +461,16 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
 
         _clearingStorage().clearingHoldCreationByAccountPartitionAndId[_from][
             _clearingOperation.partition
-        ][clearingId_] = IClearing.ClearingHoldCreationData({
-            amount: _hold.amount,
-            expirationTimestamp: _clearingOperation.expirationTimestamp,
-            data: _clearingOperation.data,
-            operatorData: _operatorData,
-            holdEscrow: _hold.escrow,
-            holdExpirationTimestamp: _hold.expirationTimestamp,
-            holdTo: _hold.to,
-            holdData: _hold.data
-        });
+        ][clearingId_] = _buildClearingHoldCreationData(
+            _hold.amount,
+            _clearingOperation.expirationTimestamp,
+            _hold.expirationTimestamp,
+            _clearingOperation.data,
+            _hold.data,
+            _hold.escrow,
+            _hold.to,
+            _operatorData
+        );
 
         success_ = true;
     }
@@ -697,7 +696,6 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         }
     }
 
-    //TODO: discuss remove labaf from total cleared
     function _removeClearing(
         IClearing.ClearingOperationIdentifier
             memory _clearingOperationIdentifier
