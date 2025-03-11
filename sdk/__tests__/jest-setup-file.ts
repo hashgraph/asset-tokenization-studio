@@ -994,13 +994,13 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       operator: EvmAddress,
       target: EvmAddress,
     ) => {
-      return false;
+      return true;
     },
   );
 
   singletonInstance.isOperator = jest.fn(
     async (address: EvmAddress, operator: EvmAddress, target: EvmAddress) => {
-      return false;
+      return true;
     },
   );
 
@@ -2197,6 +2197,27 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       partitionId: string,
       escrow: EvmAddress,
       amount: BigDecimal,
+      targetId: EvmAddress,
+      clearingExpirationDate: BigDecimal,
+      holdExpirationDate: BigDecimal,
+    ) =>
+      createClearing(
+        clearingExpirationDate,
+        amount,
+        ClearingOperationType.HoldCreation,
+        targetId,
+        escrow,
+        holdExpirationDate,
+      ),
+  );
+
+  singletonInstance.operatorClearingCreateHoldByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      escrow: EvmAddress,
+      amount: BigDecimal,
+      sourceId: EvmAddress,
       targetId: EvmAddress,
       clearingExpirationDate: BigDecimal,
       holdExpirationDate: BigDecimal,
