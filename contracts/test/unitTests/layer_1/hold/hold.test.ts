@@ -439,7 +439,6 @@ describe('Hold Tests', () => {
     }
 
     async function deploySecurityFixtureMultiPartition() {
-        console.log('Multi partition deployed')
         let init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
@@ -478,8 +477,6 @@ describe('Hold Tests', () => {
     }
 
     async function deploySecurityFixtureSinglePartition() {
-        console.log('Single partition deployed')
-
         let init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
@@ -520,7 +517,7 @@ describe('Hold Tests', () => {
     before(async () => {
         snapshot = await takeSnapshot()
         // mute | mock console.log
-        //console.log = () => {}
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
             await ethers.getSigners()
