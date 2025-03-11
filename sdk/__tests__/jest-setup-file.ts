@@ -2211,6 +2211,27 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       ),
   );
 
+  singletonInstance.operatorClearingCreateHoldByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      escrow: EvmAddress,
+      amount: BigDecimal,
+      sourceId: EvmAddress,
+      targetId: EvmAddress,
+      clearingExpirationDate: BigDecimal,
+      holdExpirationDate: BigDecimal,
+    ) =>
+      createClearing(
+        clearingExpirationDate,
+        amount,
+        ClearingOperationType.HoldCreation,
+        targetId,
+        escrow,
+        holdExpirationDate,
+      ),
+  );
+
   singletonInstance.protectedClearingCreateHoldByPartition = jest.fn(
     async (
       address: EvmAddress,
