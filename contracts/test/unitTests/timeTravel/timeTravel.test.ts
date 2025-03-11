@@ -238,6 +238,7 @@ describe('Time Travel Tests', () => {
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: false,
+            clearingActive: false,
             isMultiPartition: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',

@@ -358,6 +358,7 @@ describe('Hold Tests', () => {
             isWhiteList: false,
             isControllable: true,
             arePartitionsProtected: false,
+            clearingActive: false,
             isMultiPartition: isMultiPartition,
             name: 'TEST_Hold',
             symbol: 'TAC',

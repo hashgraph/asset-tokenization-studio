@@ -286,6 +286,7 @@ class BondInPort implements IBondInPort {
       isWhiteList: req.isWhiteList,
       isControllable: req.isControllable,
       arePartitionsProtected: req.arePartitionsProtected,
+      clearingActive: req.clearingActive,
       isMultiPartition: req.isMultiPartition,
       maxSupply: BigDecimal.fromString(req.numberOfUnits),
       regulationType: CastRegulationType.fromNumber(req.regulationType),
