@@ -229,6 +229,7 @@ import {
     AdjustBalances,
     Cap,
     AccessControl,
+    ClearingFacet,
 } from '@typechain'
 import {
     PAUSER_ROLE,
@@ -250,6 +251,7 @@ import {
     ADDRESS_ZERO,
     ZERO,
     EMPTY_STRING,
+    CLEARING_ROLE,
 } from '@scripts'
 import { dateToUnixTimestamp } from '../../../dateFormatter'
 
@@ -303,6 +305,7 @@ describe('Hold Tests', () => {
     let accessControlFacet: AccessControl
     let capFacet: Cap
     let adjustBalancesFacet: AdjustBalances
+    let clearingFacet: ClearingFacet
 
     const ONE_YEAR_IN_SECONDS = 365 * 24 * 60 * 60
     let currentTimestamp = 0
@@ -341,6 +344,11 @@ describe('Hold Tests', () => {
             role: CONTROLLER_ROLE,
             members: [account_C],
         }
+        const rbacClearingRole: Rbac = {
+            role: CLEARING_ROLE,
+            members: [account_A],
+        }
+
         return [
             rbacIssuer,
             rbacPausable,
@@ -349,6 +357,7 @@ describe('Hold Tests', () => {
             rbacCorporateAction,
             rbacControlList,
             rbacController,
+            rbacClearingRole,
         ]
     }
 
@@ -406,6 +415,11 @@ describe('Hold Tests', () => {
             diamond.address,
             signer_E
         )
+        clearingFacet = await ethers.getContractAt(
+            'ClearingFacet',
+            diamond.address,
+            signer_A
+        )
 
         await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
         await kycFacet.grantKyc(
@@ -439,7 +453,6 @@ describe('Hold Tests', () => {
     }
 
     async function deploySecurityFixtureMultiPartition() {
-        console.log('Multi partition deployed')
         let init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
@@ -478,8 +491,6 @@ describe('Hold Tests', () => {
     }
 
     async function deploySecurityFixtureSinglePartition() {
-        console.log('Single partition deployed')
-
         let init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
@@ -520,7 +531,7 @@ describe('Hold Tests', () => {
     before(async () => {
         snapshot = await takeSnapshot()
         // mute | mock console.log
-        //console.log = () => {}
+        console.log = () => {}
         // eslint-disable-next-line @typescript-eslint/no-extra-semi
         ;[signer_A, signer_B, signer_C, signer_D, signer_E] =
             await ethers.getSigners()
@@ -697,6 +708,51 @@ describe('Hold Tests', () => {
                 await expect(
                     holdFacet.reclaimHoldByPartition(holdIdentifier)
                 ).to.be.revertedWithCustomError(pauseFacet, 'TokenIsPaused')
+            })
+        })
+
+        describe('Clearing active', () => {
+            it('GIVEN a token in clearing mode THEN hold creation fails with ClearingIsActivated', async () => {
+                await clearingFacet.activateClearing()
+                await expect(
+                    holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
+                ).to.be.revertedWithCustomError(
+                    pauseFacet,
+                    'ClearingIsActivated'
+                )
+                await expect(
+                    holdFacet.createHoldFromByPartition(
+                        _DEFAULT_PARTITION,
+                        account_A,
+                        hold,
+                        '0x'
+                    )
+                ).to.be.revertedWithCustomError(
+                    pauseFacet,
+                    'ClearingIsActivated'
+                )
+                await expect(
+                    holdFacet.controllerCreateHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        account_A,
+                        hold,
+                        '0x'
+                    )
+                ).to.be.revertedWithCustomError(
+                    pauseFacet,
+                    'ClearingIsActivated'
+                )
+                await expect(
+                    holdFacet.operatorCreateHoldByPartition(
+                        _DEFAULT_PARTITION,
+                        account_A,
+                        hold,
+                        '0x'
+                    )
+                ).to.be.revertedWithCustomError(
+                    pauseFacet,
+                    'ClearingIsActivated'
+                )
             })
         })
 

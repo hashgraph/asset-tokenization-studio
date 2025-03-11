@@ -721,6 +721,24 @@ describe('ProtectedPartitions Tests', () => {
             ).to.be.rejectedWith('TokenIsPaused')
         })
 
+        it('GIVEN a security with clearing active WHEN performing a protected transfer THEN transaction fails with ClearingIsActivated', async () => {
+            await setProtected()
+
+            await clearingFacet.activateClearing()
+
+            await expect(
+                erc1410Facet.protectedTransferFromByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    account_B,
+                    amount,
+                    MAX_UINT256,
+                    1,
+                    '0x1234'
+                )
+            ).to.be.rejectedWith('ClearingIsActivated')
+        })
+
         it('GIVEN a account without the participant role WHEN performing a protected transfer THEN transaction fails with AccountHasNoRole', async () => {
             await setProtected()
 
@@ -838,6 +856,23 @@ describe('ProtectedPartitions Tests', () => {
             ).to.be.rejectedWith('TokenIsPaused')
         })
 
+        it('GIVEN a security with clearing active WHEN performing a protected redeem THEN transaction fails with ClearingIsActivated', async () => {
+            await setProtected()
+
+            await clearingFacet.activateClearing()
+
+            await expect(
+                erc1410Facet.protectedRedeemFromByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    amount,
+                    MAX_UINT256,
+                    1,
+                    '0x1234'
+                )
+            ).to.be.rejectedWith('ClearingIsActivated')
+        })
+
         it('GIVEN a account without the participant role WHEN performing a protected redeem THEN transaction fails with AccountHasNoRole', async () => {
             await setProtected()
 
@@ -907,6 +942,21 @@ describe('ProtectedPartitions Tests', () => {
                     '0x1234'
                 )
             ).to.be.revertedWithCustomError(holdFacet, 'TokenIsPaused')
+        })
+
+        it('GIVEN a security with clearing active WHEN performing a protected hold THEN transaction fails with ClearingIsActivated', async () => {
+            await setProtected()
+
+            await clearingFacet.activateClearing()
+
+            await expect(
+                holdFacet.protectedCreateHoldByPartition(
+                    DEFAULT_PARTITION,
+                    account_A,
+                    protectedHold,
+                    '0x1234'
+                )
+            ).to.be.revertedWithCustomError(holdFacet, 'ClearingIsActivated')
         })
 
         it('GIVEN a account without the participant role WHEN performing a protected hold THEN transaction fails with AccountHasNoRole', async () => {

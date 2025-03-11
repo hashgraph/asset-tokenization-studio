@@ -361,6 +361,7 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         validateAddress(_from)
         validateAddress(_protectedHold.hold.escrow)
         onlyRole(_protectedPartitionsRole(_partition))
@@ -368,7 +369,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _protectedHold.hold.expirationTimestamp
         )
         onlyProtectedPartitions
-        onlyClearingDisabled
         returns (bool success_, uint256 holdId_)
     {
         (success_, holdId_) = _protectedCreateHoldByPartition(

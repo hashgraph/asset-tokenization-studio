@@ -374,45 +374,7 @@ describe('Cap Tests', () => {
 
         await setFacets({ diamond })
     }
-
-    async function deploySecurityFixtureSinglePartition() {
-        let init_rbacs: Rbac[] = set_initRbacs()
-
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            isMultiPartition: false,
-            name: 'TEST_Lock',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: BigInt(maxSupply * 2),
-            nominalValue: 100,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_B,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
-        })
-
-        await setFacets({ diamond })
-    }
-
+    
     before(async () => {
         // mute | mock console.log
         console.log = () => {}
@@ -748,7 +710,6 @@ describe('Cap Tests', () => {
                 value: issueAmount,
                 data: '0x',
             })
-
         }
 
         it('GIVEN a token WHEN getMaxSupply or getMaxSupplyByPartition THEN balance adjustments are included', async () => {
