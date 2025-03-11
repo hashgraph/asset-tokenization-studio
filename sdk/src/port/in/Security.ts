@@ -343,6 +343,8 @@ import OperatorClearingCreateHoldByPartitionRequest from './request/OperatorClea
 import { OperatorClearingCreateHoldByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingCreateHoldByPartition/OperatorClearingCreateHoldByPartitionCommand.js';
 import OperatorClearingRedeemByPartitionRequest from './request/OperatorClearingRedeemByPartitionRequest.js';
 import { OperatorClearingRedeemByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingRedeemByPartition/OperatorClearingRedeemByPartitionCommand.js';
+import OperatorClearingTransferByPartitionRequest from './request/OperatorClearingTransferByPartitionRequest.js';
+import { OperatorClearingTransferByPartitionCommand } from '../../app/usecase/command/security/operations/clearing/operatorClearingTransferByPartition/OperatorClearingTransferByPartitionCommand.js';
 
 export { SecurityViewModel, SecurityControlListType };
 
@@ -496,6 +498,9 @@ interface ISecurityInPort {
   ): Promise<{ payload: number; transactionId: string }>;
   operatorClearingRedeemByPartition(
     request: OperatorClearingRedeemByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }>;
+  operatorClearingTransferByPartition(
+    request: OperatorClearingTransferByPartitionRequest,
   ): Promise<{ payload: number; transactionId: string }>;
 }
 
@@ -1638,6 +1643,23 @@ class SecurityInPort implements ISecurityInPort {
         request.partitionId,
         request.amount,
         request.sourceId,
+        request.expirationDate,
+      ),
+    );
+  }
+
+  @LogError
+  async operatorClearingTransferByPartition(
+    request: OperatorClearingTransferByPartitionRequest,
+  ): Promise<{ payload: number; transactionId: string }> {
+    handleValidation('OperatorClearingTransferByPartitionRequest', request);
+    return await this.commandBus.execute(
+      new OperatorClearingTransferByPartitionCommand(
+        request.securityId,
+        request.partitionId,
+        request.amount,
+        request.sourceId,
+        request.targetId,
         request.expirationDate,
       ),
     );
