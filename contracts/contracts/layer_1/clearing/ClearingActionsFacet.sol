@@ -215,6 +215,7 @@ import {
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CLEARING_ACTIONS_RESOLVER_KEY} from '../constants/resolverKeys.sol';
 import {IKyc} from '../interfaces/kyc/IKyc.sol';
+import {_CLEARING_ROLE} from '../constants/roles.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingActionsFacet is
@@ -222,6 +223,35 @@ contract ClearingActionsFacet is
     IClearingActions,
     Common
 {
+    function initialize_Clearing(
+        bool _clearingActive
+    ) external onlyUninitialized(_clearingStorage().initialized) {
+        IClearing.ClearingDataStorage
+            storage clearingStorage = _clearingStorage();
+        clearingStorage.initialized = true;
+        clearingStorage.activated = _clearingActive;
+    }
+
+    function activateClearing()
+        external
+        onlyRole(_CLEARING_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _setClearing(true);
+        emit ClearingActivated(_msgSender());
+    }
+
+    function deactivateClearing()
+        external
+        onlyRole(_CLEARING_ROLE)
+        onlyUnpaused
+        returns (bool success_)
+    {
+        success_ = _setClearing(false);
+        emit ClearingDeactivated(_msgSender());
+    }
+
     function approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier
@@ -235,6 +265,7 @@ contract ClearingActionsFacet is
         )
         onlyWithValidClearingId(_clearingOperationIdentifier)
         onlyClearingActivated
+        checkExpirationTimestamp(_clearingOperationIdentifier, false)
         returns (bool success_)
     {
         success_ = _approveClearingOperationByPartition(
@@ -267,6 +298,7 @@ contract ClearingActionsFacet is
             _clearingOperationIdentifier.tokenHolder
         )
         onlyClearingActivated
+        checkExpirationTimestamp(_clearingOperationIdentifier, false)
         returns (bool success_)
     {
         success_ = _cancelClearingOperationByPartition(
@@ -298,6 +330,7 @@ contract ClearingActionsFacet is
             _clearingOperationIdentifier.tokenHolder
         )
         onlyClearingActivated
+        checkExpirationTimestamp(_clearingOperationIdentifier, true)
         returns (bool success_)
     {
         success_ = _reclaimClearingOperationByPartition(
@@ -310,6 +343,10 @@ contract ClearingActionsFacet is
             _clearingOperationIdentifier.clearingId,
             _clearingOperationIdentifier.clearingOperationType
         );
+    }
+
+    function isClearingActivated() external view returns (bool) {
+        return _isClearingActivated();
     }
 
     function getStaticResolverKey()
@@ -328,7 +365,16 @@ contract ClearingActionsFacet is
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](3);
+        staticFunctionSelectors_ = new bytes4[](7);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .initialize_Clearing
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .activateClearing
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .deactivateClearing
+            .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .approveClearingOperationByPartition
             .selector;
@@ -337,6 +383,9 @@ contract ClearingActionsFacet is
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .reclaimClearingOperationByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .isClearingActivated
             .selector;
     }
 

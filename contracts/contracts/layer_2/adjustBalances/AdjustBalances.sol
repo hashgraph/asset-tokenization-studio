@@ -214,6 +214,7 @@ import {_ADJUSTMENT_BALANCE_ROLE} from '../constants/roles.sol';
 import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 
 contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
     function adjustBalances(
@@ -328,12 +329,10 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
     }
 
     function getClearingLabafByPartition(
-        bytes32 _partition,
-        uint256 _clearingId,
-        address _tokenHolder
+        IClearing.ClearingOperationIdentifier
+            memory _clearingOperationIdentifier
     ) external view override returns (uint256 labaf_) {
-        return
-            _getClearingLabafByPartition(_partition, _clearingId, _tokenHolder);
+        return _getClearingLabafByPartition(_clearingOperationIdentifier);
     }
 
     function getStaticResolverKey()

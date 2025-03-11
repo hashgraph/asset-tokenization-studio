@@ -206,7 +206,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
-interface IClearingStorageWrapper {
-    event ClearingActivated(address indexed operator);
-    event ClearingDeactivated(address indexed operator);
+import {
+    ClearingTransferFacet
+} from '../../../layer_1/clearing/ClearingTransferFacet.sol';
+import {
+    TimeTravelStorageWrapper
+} from '../timeTravel/TimeTravelStorageWrapper.sol';
+import {LocalContext} from '../../../layer_0/context/LocalContext.sol';
+
+contract ClearingTransferFacetTimeTravel is
+    ClearingTransferFacet,
+    TimeTravelStorageWrapper
+{
+    function _blockTimestamp()
+        internal
+        view
+        override(LocalContext, TimeTravelStorageWrapper)
+        returns (uint256)
+    {
+        return TimeTravelStorageWrapper._blockTimestamp();
+    }
 }
