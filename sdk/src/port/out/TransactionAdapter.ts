@@ -786,6 +786,14 @@ interface IClearingAdapter {
     holdExpirationDate: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse>;
+  operatorClearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse>;
 }
 
 export default abstract class TransactionAdapter
@@ -1498,6 +1506,16 @@ export default abstract class TransactionAdapter
     targetId: EvmAddress,
     clearingExpirationDate: BigDecimal,
     holdExpirationDate: BigDecimal,
+    securityId?: ContractId | string,
+  ): Promise<TransactionResponse> {
+    throw new Error('Method not implemented.');
+  }
+  operatorClearingRedeemByPartition(
+    security: EvmAddress,
+    partitionId: string,
+    amount: BigDecimal,
+    sourceId: EvmAddress,
+    expirationDate: BigDecimal,
     securityId?: ContractId | string,
   ): Promise<TransactionResponse> {
     throw new Error('Method not implemented.');
