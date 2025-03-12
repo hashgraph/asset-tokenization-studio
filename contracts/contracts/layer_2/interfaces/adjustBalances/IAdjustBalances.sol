@@ -212,12 +212,4 @@ interface IAdjustBalances {
         uint256 factor,
         uint8 decimals
     ) external returns (bool success_);
-
-    function getAbaf() external view returns (uint256);
-
-    function getAbafAdjusted() external view returns (uint256);
-
-    function getAbafAdjustedAt(
-        uint256 _timestamp
-    ) external view returns (uint256);
 }

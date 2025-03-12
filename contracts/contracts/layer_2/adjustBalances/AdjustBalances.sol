@@ -232,20 +232,6 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         success_ = true;
     }
 
-    function getAbaf() external view override returns (uint256) {
-        return _getAbaf();
-    }
-
-    function getAbafAdjusted() external view override returns (uint256) {
-        return _getAbafAdjusted();
-    }
-
-    function getAbafAdjustedAt(
-        uint256 _timestamp
-    ) external view override returns (uint256) {
-        return _getAbafAdjustedAt(_timestamp);
-    }
-
     function getStaticResolverKey()
         external
         pure
@@ -262,16 +248,9 @@ contract AdjustBalances is IAdjustBalances, IStaticFunctionSelectors, Common {
         returns (bytes4[] memory staticFunctionSelectors_)
     {
         uint256 selectorIndex;
-        staticFunctionSelectors_ = new bytes4[](4);
+        staticFunctionSelectors_ = new bytes4[](1);
         staticFunctionSelectors_[selectorIndex++] = this
             .adjustBalances
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this.getAbaf.selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAbafAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .getAbafAdjustedAt
             .selector;
     }
 

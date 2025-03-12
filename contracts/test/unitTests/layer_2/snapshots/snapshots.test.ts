@@ -593,16 +593,6 @@ describe('Snapshots Layer 2 Tests', () => {
         expect(decimals_At_Snapshot_3).to.be.equal(DECIMALS + decimalFactor_2)
         expect(decimals_At_Snapshot_4).to.be.equal(DECIMALS + decimalFactor_3)
 
-        const ABAF_At_Snapshot_1 = await snapshotFacet.abafAtSnapshot(1)
-        const ABAF_At_Snapshot_2 = await snapshotFacet.abafAtSnapshot(2)
-        const ABAF_At_Snapshot_3 = await snapshotFacet.abafAtSnapshot(3)
-        const ABAF_At_Snapshot_4 = await snapshotFacet.abafAtSnapshot(4)
-
-        expect(ABAF_At_Snapshot_1).to.be.equal(0)
-        expect(ABAF_At_Snapshot_2).to.be.equal(adjustmentFactor_1)
-        expect(ABAF_At_Snapshot_3).to.be.equal(adjustmentFactor_2)
-        expect(ABAF_At_Snapshot_4).to.be.equal(adjustmentFactor_3)
-
         const totalSupply_At_Snapshot_1 =
             await snapshotFacet.totalSupplyAtSnapshot(1)
         const totalSupply_At_Snapshot_2 =
