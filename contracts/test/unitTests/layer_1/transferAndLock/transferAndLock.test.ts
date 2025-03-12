@@ -272,147 +272,140 @@ describe('Transfer and lock Tests', () => {
     let currentTimestamp = 0
     let expirationTimestamp = 0
 
-        function set_initRbacs(): Rbac[] {
-            const rbacIssuer: Rbac = {
-                role: ISSUER_ROLE,
-                members: [account_B],
-            }
-            const rbacLocker: Rbac = {
-                role: LOCKER_ROLE,
-                members: [account_C],
-            }
-            const rbacPausable: Rbac = {
-                role: PAUSER_ROLE,
-                members: [account_D],
-            }
-            const rbacKYC: Rbac = {
-                role: KYC_ROLE,
-                members: [account_B],
-            }
-            const rbacSSI: Rbac = {
-                role: SSI_MANAGER_ROLE,
-                members: [account_A],
-            }
-
-            return [rbacIssuer, rbacLocker, rbacPausable, rbacKYC, rbacSSI]
+    function set_initRbacs(): Rbac[] {
+        const rbacIssuer: Rbac = {
+            role: ISSUER_ROLE,
+            members: [account_B],
         }
-    
-        async function setFacets({ diamond }: { diamond: ResolverProxy }) {
-            lockFacet = Lock__factory.connect(diamond.address, signer_C)
-            transferAndLockFacet = TransferAndLock__factory.connect(
-                diamond.address,
-                signer_C
-            )
-            pauseFacet = PauseFacet__factory.connect(diamond.address, signer_D)
-            erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-                diamond.address,
-                signer_B
-            )
-            kycFacet = await ethers.getContractAt(
-                'Kyc',
-                diamond.address,
-                signer_B
-            )
-            ssiManagementFacet = await ethers.getContractAt(
-                'SsiManagement',
-                diamond.address,
-                signer_A
-            )
-            await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-            await kycFacet.grantKyc(
-                account_A,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_A
-            )
-            await kycFacet.grantKyc(
-                account_C,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_A
-            )
-
+        const rbacLocker: Rbac = {
+            role: LOCKER_ROLE,
+            members: [account_C],
         }
-    
-        async function deploySecurityFixtureMultiPartition() {
-            let init_rbacs: Rbac[] = set_initRbacs()
-    
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                isMultiPartition: true,
-                name: 'TEST_Lock',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_B,
-                countriesControlListType: true,
-                listOfCountries: 'ES,FR,CH',
-                info: 'nothing',
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory,
-            })
-
-    
-            await setFacets({ diamond })
+        const rbacPausable: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_D],
         }
-    
-        async function deploySecurityFixtureSinglePartition() {
-            let init_rbacs: Rbac[] = set_initRbacs()
-    
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                isMultiPartition: false,
-                name: 'TEST_Lock',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_B,
-                countriesControlListType: true,
-                listOfCountries: 'ES,FR,CH',
-                info: 'nothing',
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory,
-            })
-
-    
-            await setFacets({ diamond })
+        const rbacKYC: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
         }
+        const rbacSSI: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+
+        return [rbacIssuer, rbacLocker, rbacPausable, rbacKYC, rbacSSI]
+    }
+
+    async function setFacets({ diamond }: { diamond: ResolverProxy }) {
+        lockFacet = Lock__factory.connect(diamond.address, signer_C)
+        transferAndLockFacet = TransferAndLock__factory.connect(
+            diamond.address,
+            signer_C
+        )
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_D)
+        erc1410Facet = ERC1410ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_B
+        )
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
+        ssiManagementFacet = await ethers.getContractAt(
+            'SsiManagement',
+            diamond.address,
+            signer_A
+        )
+        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
+        await kycFacet.grantKyc(
+            account_A,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_VC_ID,
+            ZERO,
+            MAX_UINT256,
+            account_A
+        )
+    }
+
+    async function deploySecurityFixtureMultiPartition() {
+        let init_rbacs: Rbac[] = set_initRbacs()
+
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            clearingActive: false,
+            isMultiPartition: true,
+            name: 'TEST_Lock',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory,
+        })
+
+        await setFacets({ diamond })
+    }
+
+    async function deploySecurityFixtureSinglePartition() {
+        let init_rbacs: Rbac[] = set_initRbacs()
+
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            clearingActive: false,
+            isMultiPartition: false,
+            name: 'TEST_Lock',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory,
+        })
+
+        await setFacets({ diamond })
+    }
 
     before(async () => {
         // mute | mock console.log

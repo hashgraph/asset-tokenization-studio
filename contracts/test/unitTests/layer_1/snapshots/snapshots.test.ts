@@ -369,7 +369,7 @@ describe('Snapshots Tests', () => {
             role: SSI_MANAGER_ROLE,
             members: [account_A],
         }
-        return [rbacPause, rbacLock,rbacKYC,rbacSSI]
+        return [rbacPause, rbacLock, rbacKYC, rbacSSI]
     }
 
     before(async () => {
@@ -387,7 +387,7 @@ describe('Snapshots Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
-                    timeTravelEnabled: true
+                    timeTravelEnabled: true,
                 })
             )
 
