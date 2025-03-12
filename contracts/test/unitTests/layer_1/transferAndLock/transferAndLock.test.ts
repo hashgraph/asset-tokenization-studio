@@ -238,6 +238,7 @@ import {
     ZERO,
     EMPTY_STRING,
 } from '@scripts'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const _NON_DEFAULT_PARTITION =
     '0x0000000000000000000000000000000000000000000000000000000000000011'
@@ -271,36 +272,7 @@ describe('Transfer and lock Tests', () => {
     let currentTimestamp = 0
     let expirationTimestamp = 0
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-        account_D = signer_D.address
-
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
-    beforeEach(async () => {
-        currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
-        expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
-    })
-
-    describe('Multi-partition enabled', () => {
-        beforeEach(async () => {
+        function set_initRbacs(): Rbac[] {
             const rbacIssuer: Rbac = {
                 role: ISSUER_ROLE,
                 members: [account_B],
@@ -321,46 +293,11 @@ describe('Transfer and lock Tests', () => {
                 role: SSI_MANAGER_ROLE,
                 members: [account_A],
             }
-            const init_rbacs: Rbac[] = [
-                rbacIssuer,
-                rbacLocker,
-                rbacPausable,
-                rbacKYC,
-                rbacSSI,
-            ]
 
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                isMultiPartition: true,
-                name: 'TEST_Lock',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_B,
-                countriesControlListType: true,
-                listOfCountries: 'ES,FR,CH',
-                info: 'nothing',
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory,
-            })
-
+            return [rbacIssuer, rbacLocker, rbacPausable, rbacKYC, rbacSSI]
+        }
+    
+        async function setFacets({ diamond }: { diamond: ResolverProxy }) {
             lockFacet = Lock__factory.connect(diamond.address, signer_C)
             transferAndLockFacet = TransferAndLock__factory.connect(
                 diamond.address,
@@ -396,6 +333,118 @@ describe('Transfer and lock Tests', () => {
                 MAX_UINT256,
                 account_A
             )
+
+        }
+    
+        async function deploySecurityFixtureMultiPartition() {
+            let init_rbacs: Rbac[] = set_initRbacs()
+    
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                clearingActive: false,
+                isMultiPartition: true,
+                name: 'TEST_Lock',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_D,
+                regulationSubType: RegulationSubType.REG_D_506_B,
+                countriesControlListType: true,
+                listOfCountries: 'ES,FR,CH',
+                info: 'nothing',
+                init_rbacs,
+                businessLogicResolver: businessLogicResolver.address,
+                factory,
+            })
+
+    
+            await setFacets({ diamond })
+        }
+    
+        async function deploySecurityFixtureSinglePartition() {
+            let init_rbacs: Rbac[] = set_initRbacs()
+    
+            diamond = await deployEquityFromFactory({
+                adminAccount: account_A,
+                isWhiteList: false,
+                isControllable: true,
+                arePartitionsProtected: false,
+                clearingActive: false,
+                isMultiPartition: false,
+                name: 'TEST_Lock',
+                symbol: 'TAC',
+                decimals: 6,
+                isin: isinGenerator(),
+                votingRight: false,
+                informationRight: false,
+                liquidationRight: false,
+                subscriptionRight: true,
+                conversionRight: true,
+                redemptionRight: true,
+                putRight: false,
+                dividendRight: 1,
+                currency: '0x345678',
+                numberOfShares: MAX_UINT256,
+                nominalValue: 100,
+                regulationType: RegulationType.REG_D,
+                regulationSubType: RegulationSubType.REG_D_506_B,
+                countriesControlListType: true,
+                listOfCountries: 'ES,FR,CH',
+                info: 'nothing',
+                init_rbacs,
+                businessLogicResolver: businessLogicResolver.address,
+                factory,
+            })
+
+    
+            await setFacets({ diamond })
+        }
+
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[signer_A, signer_B, signer_C, signer_D] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+        account_D = signer_D.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
+        currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
+        expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
+    })
+
+    describe('Multi-partition enabled', () => {
+        beforeEach(async () => {
+            await loadFixture(deploySecurityFixtureMultiPartition)
         })
 
         describe('Paused', () => {
@@ -610,111 +659,7 @@ describe('Transfer and lock Tests', () => {
 
     describe('Multi-partition disabled', () => {
         beforeEach(async () => {
-            const rbacIssuer: Rbac = {
-                role: ISSUER_ROLE,
-                members: [account_B],
-            }
-            const rbacLocker: Rbac = {
-                role: LOCKER_ROLE,
-                members: [account_C],
-            }
-            const rbacPausable: Rbac = {
-                role: PAUSER_ROLE,
-                members: [account_D],
-            }
-            const rbacKYC: Rbac = {
-                role: KYC_ROLE,
-                members: [account_B],
-            }
-            const rbacSSI: Rbac = {
-                role: SSI_MANAGER_ROLE,
-                members: [account_A],
-            }
-            const init_rbacs: Rbac[] = [
-                rbacIssuer,
-                rbacLocker,
-                rbacPausable,
-                rbacKYC,
-                rbacSSI,
-            ]
-
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                isMultiPartition: false,
-                name: 'TEST_Lock',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_B,
-                countriesControlListType: true,
-                listOfCountries: 'ES,FR,CH',
-                info: 'nothing',
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory,
-            })
-
-            lockFacet = await ethers.getContractAt(
-                'Lock',
-                diamond.address,
-                signer_C
-            )
-            transferAndLockFacet = await ethers.getContractAt(
-                'TransferAndLock',
-                diamond.address,
-                signer_C
-            )
-            pauseFacet = await ethers.getContractAt(
-                'Pause',
-                diamond.address,
-                signer_D
-            )
-            erc1410Facet = await ethers.getContractAt(
-                'ERC1410ScheduledTasks',
-                diamond.address,
-                signer_B
-            )
-            kycFacet = await ethers.getContractAt(
-                'Kyc',
-                diamond.address,
-                signer_B
-            )
-            ssiManagementFacet = await ethers.getContractAt(
-                'SsiManagement',
-                diamond.address,
-                signer_A
-            )
-            await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-            await kycFacet.grantKyc(
-                account_A,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_A
-            )
-            await kycFacet.grantKyc(
-                account_C,
-                EMPTY_VC_ID,
-                ZERO,
-                MAX_UINT256,
-                account_A
-            )
+            await loadFixture(deploySecurityFixtureSinglePartition)
         })
 
         describe('multi-partition transactions arent enabled', () => {

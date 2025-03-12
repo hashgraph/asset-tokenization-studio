@@ -230,6 +230,7 @@ import {
     MAX_UINT256,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 const actionType =
     '0x000000000000000000000000000000000000000000000000000000000000aa23'
@@ -253,34 +254,8 @@ describe('Corporate Actions Tests', () => {
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
-    beforeEach(async () => {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        const init_rbacs: Rbac[] = [rbacPause]
+    async function deploySecurityFixtureSinglePartition() {
+        let init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -314,6 +289,10 @@ describe('Corporate Actions Tests', () => {
             factory,
         })
 
+        await setFacets(diamond)
+    }
+
+    async function setFacets(diamond: ResolverProxy) {
         accessControlFacet = AccessControlFacet__factory.connect(
             diamond.address,
             signer_A
@@ -323,6 +302,40 @@ describe('Corporate Actions Tests', () => {
             signer_A
         )
         pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
+    }
+
+    function set_initRbacs(): Rbac[] {
+        const rbacPause: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_B],
+        }
+        return [rbacPause]
+    }
+
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
+        await loadFixture(deploySecurityFixtureSinglePartition)
     })
 
     it('GIVEN an account without corporateActions role WHEN addCorporateAction THEN transaction fails with AccountHasNoRole', async () => {
