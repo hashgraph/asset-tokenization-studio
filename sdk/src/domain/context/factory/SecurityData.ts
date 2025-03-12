@@ -217,4 +217,5 @@ export class SecurityData {
   public isWhiteList: boolean;
   public maxSupply: string;
   public erc20MetadataInfo: ERC20MetadataInfo;
+  public clearingActive: boolean;
 }

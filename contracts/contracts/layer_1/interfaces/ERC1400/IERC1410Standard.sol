@@ -207,6 +207,13 @@
 pragma solidity 0.8.18;
 
 interface IERC1410Standard {
+    struct IssueData {
+        bytes32 partition;
+        address tokenHolder;
+        uint256 value;
+        bytes data;
+    }
+
     function redeemByPartition(
         bytes32 _partition,
         uint256 _value,
@@ -222,10 +229,7 @@ interface IERC1410Standard {
     ) external;
 
     function issueByPartition(
-        bytes32 _partition,
-        address _tokenHolder,
-        uint256 _value,
-        bytes calldata _data
+        IERC1410Standard.IssueData calldata _issueData
     ) external;
 
     function canRedeemByPartition(

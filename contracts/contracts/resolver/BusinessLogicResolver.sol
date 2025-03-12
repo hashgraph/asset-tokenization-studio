@@ -209,21 +209,14 @@ pragma solidity 0.8.18;
 import {
     IBusinessLogicResolver
 } from '../interfaces/resolver/IBusinessLogicResolver.sol';
-import {
-    IAccessControl
-} from '../layer_1/interfaces/accessControl/IAccessControl.sol';
-import {IPause} from '../layer_1/interfaces/pause/IPause.sol';
-import {
-    IDiamondCutManager
-} from '../interfaces/resolver/diamondCutManager/IDiamondCutManager.sol';
 import {DiamondCutManager} from './diamondCutManager/DiamondCutManager.sol';
 import {_DEFAULT_ADMIN_ROLE} from '../layer_1/constants/roles.sol';
 
 contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
+    error Unimplemented();
     // solhint-disable-next-line func-name-mixedcase
     function initialize_BusinessLogicResolver()
         external
-        virtual
         override
         onlyUninitialized(_businessLogicResolverStorage().initialized)
         returns (bool success_)
@@ -238,7 +231,6 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
         BusinessLogicRegistryData[] calldata _businessLogics
     )
         external
-        virtual
         override
         onlyValidKeys(_businessLogics)
         onlyRole(_DEFAULT_ADMIN_ROLE)
@@ -254,7 +246,6 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     )
         external
         view
-        virtual
         override
         validVersion(_version)
         returns (VersionStatus status_)
@@ -265,7 +256,6 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     function getLatestVersion()
         external
         view
-        virtual
         override
         returns (uint256 latestVersion_)
     {
@@ -274,7 +264,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
 
     function resolveLatestBusinessLogic(
         bytes32 _businessLogicKey
-    ) external view virtual override returns (address businessLogicAddress_) {
+    ) external view override returns (address businessLogicAddress_) {
         businessLogicAddress_ = _resolveLatestBusinessLogic(_businessLogicKey);
     }
 
@@ -284,7 +274,6 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     )
         external
         view
-        virtual
         override
         validVersion(_version)
         returns (address businessLogicAddress_)
@@ -298,7 +287,6 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     function getBusinessLogicCount()
         external
         view
-        virtual
         override
         returns (uint256 businessLogicCount_)
     {
@@ -308,49 +296,7 @@ contract BusinessLogicResolver is IBusinessLogicResolver, DiamondCutManager {
     function getBusinessLogicKeys(
         uint256 _pageIndex,
         uint256 _pageLength
-    )
-        external
-        view
-        virtual
-        override
-        returns (bytes32[] memory businessLogicKeys_)
-    {
+    ) external view override returns (bytes32[] memory businessLogicKeys_) {
         businessLogicKeys_ = _getBusinessLogicKeys(_pageIndex, _pageLength);
     }
-
-    // solhint-disable no-empty-blocks
-    function getStaticResolverKey()
-        external
-        pure
-        virtual
-        override
-        returns (bytes32 staticResolverKey_)
-    {}
-
-    function getStaticFunctionSelectors()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticFunctionSelectors_)
-    {}
-
-    function getStaticInterfaceIds()
-        external
-        pure
-        virtual
-        override
-        returns (bytes4[] memory staticInterfaceIds_)
-    {
-        staticInterfaceIds_ = new bytes4[](4);
-        uint256 selectorsIndex;
-        staticInterfaceIds_[selectorsIndex++] = type(IBusinessLogicResolver)
-            .interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IAccessControl)
-            .interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IPause).interfaceId;
-        staticInterfaceIds_[selectorsIndex++] = type(IDiamondCutManager)
-            .interfaceId;
-    }
-    // solhint-enable no-empty-blocks
 }

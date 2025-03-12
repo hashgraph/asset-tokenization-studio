@@ -206,31 +206,22 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.18;
 
-import {Snapshots_CD_Lib} from '../../layer_1/snapshots/Snapshots_CD_Lib.sol';
-import {
-    ERC1410ScheduledTasks_CD_Lib
-} from '../ERC1400/ERC1410/ERC1410ScheduledTasks_CD_Lib.sol';
-import {ERC20_2_CD_Lib} from '../ERC1400/ERC20/ERC20_2_CD_Lib.sol';
+import {Common} from '../../layer_1/common/Common.sol';
 import {_EQUITY_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {
     DIVIDEND_CORPORATE_ACTION_TYPE,
     VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
     BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE
 } from '../constants/values.sol';
-import {
-    CorporateActionsStorageWrapperSecurity
-} from '../corporateActions/CorporateActionsStorageWrapperSecurity.sol';
 import {IEquity} from '../interfaces/equity/IEquity.sol';
-import {Lock_2_CD_Lib} from '../lock/Lock_2_CD_Lib.sol';
-import {Hold_2_CD_Lib} from '../hold/Hold_2_CD_Lib.sol';
-import {Snapshots_2_CD_Lib} from '../snapshots/Snapshots_2_CD_Lib.sol';
 import {
     EnumerableSet
 } from '@openzeppelin/contracts/utils/structs/EnumerableSet.sol';
+import {
+    IEquityStorageWrapper
+} from '../interfaces/equity/IEquityStorageWrapper.sol';
 
-abstract contract EquityStorageWrapper is
-    CorporateActionsStorageWrapperSecurity
-{
+abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     using EnumerableSet for EnumerableSet.Bytes32Set;
 
     struct EquityDataStorage {
@@ -256,7 +247,6 @@ abstract contract EquityStorageWrapper is
         IEquity.Dividend calldata _newDividend
     )
         internal
-        virtual
         returns (bool success_, bytes32 corporateActionId_, uint256 dividendId_)
     {
         (success_, corporateActionId_, dividendId_) = _addCorporateAction(
@@ -276,7 +266,6 @@ abstract contract EquityStorageWrapper is
     )
         internal
         view
-        virtual
         returns (IEquity.RegisteredDividend memory registeredDividend_)
     {
         bytes32 actionId = _corporateActionsStorage()
@@ -305,7 +294,7 @@ abstract contract EquityStorageWrapper is
     function _getDividendsFor(
         uint256 _dividendID,
         address _account
-    ) internal view virtual returns (IEquity.DividendFor memory dividendFor_) {
+    ) internal view returns (IEquity.DividendFor memory dividendFor_) {
         IEquity.RegisteredDividend memory registeredDividend = _getDividends(
             _dividendID
         );
@@ -328,7 +317,6 @@ abstract contract EquityStorageWrapper is
     function _getDividendsCount()
         internal
         view
-        virtual
         returns (uint256 dividendCount_)
     {
         return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
@@ -338,7 +326,6 @@ abstract contract EquityStorageWrapper is
         IEquity.Voting calldata _newVoting
     )
         internal
-        virtual
         returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
     {
         (success_, corporateActionId_, voteID_) = _addCorporateAction(
@@ -352,7 +339,6 @@ abstract contract EquityStorageWrapper is
     )
         internal
         view
-        virtual
         returns (IEquity.RegisteredVoting memory registeredVoting_)
     {
         bytes32 actionId = _corporateActionsStorage()
@@ -378,7 +364,7 @@ abstract contract EquityStorageWrapper is
     function _getVotingFor(
         uint256 _voteID,
         address _account
-    ) internal view virtual returns (IEquity.VotingFor memory votingFor_) {
+    ) internal view returns (IEquity.VotingFor memory votingFor_) {
         IEquity.RegisteredVoting memory registeredVoting = _getVoting(_voteID);
 
         votingFor_.recordDate = registeredVoting.voting.recordDate;
@@ -395,12 +381,7 @@ abstract contract EquityStorageWrapper is
         );
     }
 
-    function _getVotingCount()
-        internal
-        view
-        virtual
-        returns (uint256 votingCount_)
-    {
+    function _getVotingCount() internal view returns (uint256 votingCount_) {
         return
             _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
     }
@@ -409,7 +390,6 @@ abstract contract EquityStorageWrapper is
         IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
     )
         internal
-        virtual
         returns (
             bool success_,
             bytes32 corporateActionId_,
@@ -431,7 +411,6 @@ abstract contract EquityStorageWrapper is
     )
         internal
         view
-        virtual
         returns (IEquity.ScheduledBalanceAdjustment memory balanceAdjustment_)
     {
         bytes32 actionId = _corporateActionsStorage()
@@ -451,7 +430,6 @@ abstract contract EquityStorageWrapper is
     function _getScheduledBalanceAdjustmentsCount()
         internal
         view
-        virtual
         returns (uint256 balanceAdjustmentCount_)
     {
         return
@@ -467,39 +445,30 @@ abstract contract EquityStorageWrapper is
     )
         internal
         view
-        virtual
         returns (uint256 balance_, uint8 decimals_, bool dateReached_)
     {
         if (_date < _blockTimestamp()) {
             dateReached_ = true;
 
             balance_ = (_snapshotId != 0)
-                ? (Snapshots_CD_Lib.balanceOfAtSnapshot(_snapshotId, _account) +
-                    Snapshots_CD_Lib.lockedBalanceOfAtSnapshot(
-                        _snapshotId,
-                        _account
-                    ) +
-                    Snapshots_CD_Lib.heldBalanceOfAtSnapshot(
-                        _snapshotId,
-                        _account
-                    ))
-                : (ERC1410ScheduledTasks_CD_Lib.balanceOfAdjustedAt(
-                    _account,
-                    _date
-                ) +
-                    Lock_2_CD_Lib.getLockedAmountForAdjusted(_account) +
-                    Hold_2_CD_Lib.getHeldAmountForAdjusted(_account));
+                ? (_balanceOfAtSnapshot(_snapshotId, _account) +
+                    _lockedBalanceOfAtSnapshot(_snapshotId, _account) +
+                    _heldBalanceOfAtSnapshot(_snapshotId, _account) +
+                    _clearedBalanceOfAtSnapshot(_snapshotId, _account))
+                : (_balanceOfAdjustedAt(_account, _date) +
+                    _getLockedAmountForAdjustedAt(_account, _blockTimestamp()) +
+                    _getHeldAmountForAdjusted(_account) +
+                    _getClearedAmountForAdjusted(_account));
 
             decimals_ = (_snapshotId != 0)
-                ? Snapshots_2_CD_Lib.decimalsAtSnapshot(_snapshotId)
-                : ERC20_2_CD_Lib.decimalsAdjustedAt(_date);
+                ? _decimalsAtSnapshot(_snapshotId)
+                : _decimalsAdjustedAt(_date);
         }
     }
 
     function _equityStorage()
         internal
         pure
-        virtual
         returns (EquityDataStorage storage equityData_)
     {
         bytes32 position = _EQUITY_STORAGE_POSITION;

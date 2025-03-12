@@ -222,6 +222,7 @@ import { MirrorNodeAdapter } from '../../../../../../port/out/mirror/MirrorNodeA
 import { SecurityControlListType } from '../../../../../../domain/context/security/SecurityControlListType.js';
 import { AccountInBlackList } from '../../error/AccountInBlackList.js';
 import { AccountNotInWhiteList } from '../../error/AccountNotInWhiteList.js';
+import ValidationService from '../../../../../../app/service/ValidationService.js';
 
 @CommandHandler(RedeemCommand)
 export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
@@ -236,12 +237,16 @@ export class RedeemCommandHandler implements ICommandHandler<RedeemCommand> {
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
 
   async execute(command: RedeemCommand): Promise<RedeemCommandResponse> {
     const { securityId, amount } = command;
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
+
+    await this.validationService.validateClearingDeactivated(securityId);
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
       HEDERA_FORMAT_ID_REGEX.test(securityId)

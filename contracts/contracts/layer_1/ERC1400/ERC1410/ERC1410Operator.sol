@@ -207,14 +207,13 @@
 pragma solidity 0.8.18;
 
 import {IERC1410Operator} from '../../interfaces/ERC1400/IERC1410Operator.sol';
+import {Common} from '../../common/Common.sol';
+import {IKyc} from '../../../layer_1/interfaces/kyc/IKyc.sol';
 import {
-    ERC1410OperatorStorageWrapper
-} from './ERC1410OperatorStorageWrapper.sol';
+    IERC1410Operator
+} from '../../../layer_1/interfaces/ERC1400/IERC1410Operator.sol';
 
-abstract contract ERC1410Operator is
-    IERC1410Operator,
-    ERC1410OperatorStorageWrapper
-{
+abstract contract ERC1410Operator is IERC1410Operator, Common {
     ///////////////////////
     /// Operator Management
     ///////////////////////
@@ -225,11 +224,10 @@ abstract contract ERC1410Operator is
         address _operator
     )
         external
-        virtual
         override
         onlyUnpaused
-        checkControlList(_msgSender())
-        checkControlList(_operator)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_operator)
     {
         _authorizeOperator(_operator);
     }
@@ -238,7 +236,7 @@ abstract contract ERC1410Operator is
     /// @param _operator An address which is being de-authorised
     function revokeOperator(
         address _operator
-    ) external virtual override onlyUnpaused checkControlList(_msgSender()) {
+    ) external override onlyUnpaused onlyListedAllowed(_msgSender()) {
         _revokeOperator(_operator);
     }
 
@@ -250,12 +248,11 @@ abstract contract ERC1410Operator is
         address _operator
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        checkControlList(_msgSender())
-        checkControlList(_operator)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_operator)
     {
         _authorizeOperatorByPartition(_partition, _operator);
     }
@@ -268,55 +265,40 @@ abstract contract ERC1410Operator is
         address _operator
     )
         external
-        virtual
         override
         onlyUnpaused
         onlyDefaultPartitionWithSinglePartition(_partition)
-        checkControlList(_msgSender())
+        onlyListedAllowed(_msgSender())
     {
         _revokeOperatorByPartition(_partition, _operator);
     }
 
     /// @notice Transfers the ownership of tokens from a specified partition from one address to another address
-    /// @param _partition The partition from which to transfer tokens
-    /// @param _from The address from which to transfer tokens from
-    /// @param _to The address to which to transfer tokens to
-    /// @param _value The amount of tokens to transfer from `_partition`
-    /// @param _data Additional data attached to the transfer of tokens
-    /// @param _operatorData Additional data attached to the transfer of tokens by the operator
-    /// @return The partition to which the transferred tokens were allocated for the _to address
+    /// @param _operatorTransferData contains all the information about the operator transfer
     function operatorTransferByPartition(
-        bytes32 _partition,
-        address _from,
-        address _to,
-        uint256 _value,
-        bytes calldata _data,
-        bytes calldata _operatorData
+        OperatorTransferData calldata _operatorTransferData
     )
         external
-        virtual
         override
         onlyUnpaused
-        onlyDefaultPartitionWithSinglePartition(_partition)
-        checkControlList(_msgSender())
-        checkControlList(_from)
-        checkControlList(_to)
-        onlyOperator(_partition, _from)
+        onlyDefaultPartitionWithSinglePartition(_operatorTransferData.partition)
+        onlyListedAllowed(_msgSender())
+        onlyListedAllowed(_operatorTransferData.from)
+        onlyListedAllowed(_operatorTransferData.to)
+        onlyOperator(
+            _operatorTransferData.partition,
+            _operatorTransferData.from
+        )
         onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingDisabled
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.from)
+        onlyValidKycStatus(IKyc.KycStatus.GRANTED, _operatorTransferData.to)
         returns (bytes32)
     {
         {
-            _checkValidAddress(_to);
+            _checkValidAddress(_operatorTransferData.to);
         }
-        return
-            _operatorTransferByPartition(
-                _partition,
-                _from,
-                _to,
-                _value,
-                _data,
-                _operatorData
-            );
+        return _operatorTransferByPartition(_operatorTransferData);
     }
 
     /// @notice Determines whether `_operator` is an operator for all partitions of `_tokenHolder`
@@ -326,7 +308,7 @@ abstract contract ERC1410Operator is
     function isOperator(
         address _operator,
         address _tokenHolder
-    ) public view virtual override returns (bool) {
+    ) public view override returns (bool) {
         return _isOperator(_operator, _tokenHolder);
     }
 
@@ -339,7 +321,7 @@ abstract contract ERC1410Operator is
         bytes32 _partition,
         address _operator,
         address _tokenHolder
-    ) public view virtual override returns (bool) {
+    ) public view override returns (bool) {
         return _isOperatorForPartition(_partition, _operator, _tokenHolder);
     }
 }

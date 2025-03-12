@@ -239,6 +239,12 @@ import { DividendFor } from '../src/domain/context/equity/DividendFor';
 import { VotingFor } from '../src/domain/context/equity/VotingFor';
 import DfnsSettings from '../src/domain/context/custodialWalletSettings/DfnsSettings.js';
 import { HoldDetails } from '../src/domain/context/security/HoldDetails.js';
+import { KYC } from '../src/domain/context/kyc/KYC.js';
+import { KycAccountData } from '../src/domain/context/kyc/KycAccountData.js';
+import {
+  Clearing,
+  ClearingOperationType,
+} from '../src/domain/context/security/Clearing.js';
 
 //* Mock console.log() method
 global.console.log = jest.fn();
@@ -270,6 +276,7 @@ function identifiers(accountId: HederaId | string): string[] {
 type balance = Map<string, string>;
 type lock = Map<number, string[]>;
 type hold = Map<number, HoldDetails[]>;
+type clearing = Map<number, Clearing[]>;
 const securityEvmAddress = '0x0000000000000000000000000000000000000001';
 const transactionId =
   '0x0102030405060708010203040506070801020304050607080x0102030405060708';
@@ -277,6 +284,7 @@ const HBAR_balances: balance = new Map();
 const balances: balance = new Map();
 const lockedBalances: balance = new Map();
 const heldBalances: balance = new Map();
+const clearedBalances: balance = new Map();
 const coupons: Coupon[] = [];
 const couponsFor = new Map<number, balance>();
 const dividends: Dividend[] = [];
@@ -288,13 +296,19 @@ const accounts_with_roles = new Map<string, string[]>();
 const locksIds = new Map<string, number[]>();
 const locks = new Map<string, lock>();
 const holds = new Map<string, hold>();
+const clearings = new Map<string, clearing>();
 const holdsIds = new Map<string, number[]>();
+const clearingsIds = new Map<string, Map<ClearingOperationType, number[]>>();
 const lastLockIds = new Map<string, number>();
 const lastHoldIds = new Map<string, number>();
+const lastClearingIds = new Map<string, number>();
 const scheduledBalanceAdjustments: ScheduledBalanceAdjustment[] = [];
 const nonces = new Map<string, number>();
+const kycAccountsData = new Map<string, KYC>();
+const kycAccountsByStatus = new Map<number, string[]>();
 
 let controlList: string[] = [];
+let issuerList: string[] = [];
 
 let securityInfo: Security;
 let equityInfo: EquityDetails;
@@ -309,6 +323,8 @@ let user_account: Account;
 let configVersion: number;
 let configId: string;
 let resolverAddress: string;
+let revocationRegistryAddress: string;
+let isClearingActivated: boolean = false;
 
 function grantRole(account: string, newRole: SecurityRole): void {
   let r = roles.get(account);
@@ -348,6 +364,57 @@ function increaseHeldBalance(targetId: EvmAddress, amount: BigDecimal): void {
       .toString();
     heldBalances.set(account, accountHeldBalance);
   } else heldBalances.set(account, amount.toString());
+}
+
+function increaseClearedBalance(
+  targetId: EvmAddress,
+  amount: BigDecimal,
+): void {
+  const account = identifiers(targetId.toString())[1];
+  let accountClearedBalance = clearedBalances.get(account);
+  if (accountClearedBalance) {
+    accountClearedBalance = BigDecimal.fromString(accountClearedBalance)
+      .toBigNumber()
+      .add(amount.toBigNumber())
+      .toString();
+    clearedBalances.set(account, accountClearedBalance);
+  } else clearedBalances.set(account, amount.toString());
+}
+
+function decreaseClearedBalance(
+  targetId: EvmAddress,
+  amount: BigDecimal,
+): void {
+  const account = identifiers(targetId.toString())[1];
+  let accountClearedBalance = clearedBalances.get(account);
+  if (accountClearedBalance) {
+    accountClearedBalance = BigDecimal.fromString(accountClearedBalance)
+      .toBigNumber()
+      .sub(amount.toBigNumber())
+      .toString();
+    clearedBalances.set(account, accountClearedBalance);
+  }
+}
+
+function processClearingOperation(targetId: EvmAddress, clearingId: number) {
+  const accountClearings = clearings.get(
+    '0x' + targetId.toString().toUpperCase().substring(2),
+  );
+  const clearingEntry = accountClearings?.get(clearingId);
+
+  const clearedAmount =
+    clearingEntry && clearingEntry.length > 0
+      ? clearingEntry[0].amount
+      : BigDecimal.fromString('0');
+
+  decreaseClearedBalance(targetId, clearedAmount);
+  const currentAccount = new EvmAddress(identifiers(user_account.id)[1]);
+  increaseBalance(currentAccount, clearedAmount);
+
+  return {
+    status: 'success',
+    id: transactionId,
+  } as TransactionResponse;
 }
 
 function decreaseHeldBalance(targetId: EvmAddress, amount: BigDecimal): void {
@@ -497,6 +564,65 @@ const createHold = async (
   increaseHeldBalance(sourceId, amount);
   const currentAccount = new EvmAddress(identifiers(user_account.id)[1]);
   decreaseBalance(targetId ? sourceId : currentAccount, amount);
+
+  return { status: 'success', id: transactionId } as TransactionResponse;
+};
+
+const createClearing = async (
+  clearingExpirationDate: BigDecimal,
+  amount: BigDecimal,
+  clearingOperationType: ClearingOperationType,
+  targetId?: EvmAddress,
+  escrow?: EvmAddress,
+  holdExpirationDate?: BigDecimal,
+): Promise<TransactionResponse> => {
+  const currentAccount = new EvmAddress(identifiers(user_account.id)[1]);
+  const target = targetId ? targetId : currentAccount;
+
+  const account = `0x${target.toString().toUpperCase().substring(2)}`;
+
+  const accountClearings = clearings.get(account) ?? new Map();
+  const clearingIds =
+    clearingsIds.get(account)?.get(clearingOperationType) ?? [];
+  const lastClearingId = lastClearingIds.get(account) ?? 0;
+  const newLastClearingId = lastClearingId + 1;
+
+  clearingIds.push(newLastClearingId);
+  clearingsIds.set(account, new Map([[clearingOperationType, clearingIds]]));
+
+  let hold = {
+    amount: new BigDecimal('0'),
+    expirationTimestamp: new BigDecimal('0'),
+    escrow: '0',
+    to: '0',
+    data: '0x',
+  };
+
+  if (clearingOperationType == ClearingOperationType.HoldCreation) {
+    hold = {
+      amount: amount,
+      expirationTimestamp: holdExpirationDate!,
+      escrow: escrow!.toString(),
+      to: target.toString(),
+      data: '0x',
+    };
+  }
+
+  accountClearings.set(newLastClearingId, [
+    new Clearing(
+      clearingExpirationDate.toBigNumber().toNumber(),
+      amount,
+      target.toString(),
+      clearingOperationType,
+      '0x',
+      '0x',
+      hold,
+    ),
+  ]);
+  clearings.set(target.toString(), accountClearings);
+
+  increaseClearedBalance(target, amount);
+  decreaseBalance(currentAccount, amount);
 
   return { status: 'success', id: transactionId } as TransactionResponse;
 };
@@ -673,6 +799,30 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       return listMembers;
     },
   );
+
+  singletonInstance.getIssuerListMembers = jest.fn(
+    async (address: EvmAddress, start: number, end: number) => {
+      const issuerListMembers: string[] = [];
+
+      for (let i = start; i < end; i++) {
+        issuerListMembers.push(issuerList[i]);
+      }
+
+      return issuerListMembers;
+    },
+  );
+
+  singletonInstance.getIssuerListCount = jest.fn(
+    async (address: EvmAddress) => {
+      return issuerList.length;
+    },
+  );
+
+  singletonInstance.getRevocationRegistryAddress = jest.fn(async function (
+    security: EvmAddress,
+  ) {
+    return revocationRegistryAddress;
+  });
 
   singletonInstance.getControlListCount = jest.fn(
     async (address: EvmAddress) => {
@@ -992,6 +1142,60 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     },
   );
 
+  singletonInstance.getKYCStatusFor = jest.fn(
+    async (address: EvmAddress, target: EvmAddress) => {
+      const account = '0x' + target.toString().toUpperCase().substring(2);
+
+      const kycAccounts = kycAccountsByStatus.get(1) || [];
+
+      return kycAccounts.includes(account) ? 1 : 0;
+    },
+  );
+
+  singletonInstance.getKYCAccountsData = jest.fn(
+    async (
+      address: EvmAddress,
+      kycStatus: number,
+      start: number,
+      end: number,
+    ) => {
+      const accounts = kycAccountsByStatus.get(kycStatus) || [];
+
+      const kycDataArray: KycAccountData[] = accounts
+        .map((account) => {
+          const kycData = kycAccountsData.get(account);
+          return kycData
+            ? new KycAccountData(
+                account,
+                kycData.validFrom.toString(),
+                kycData.validTo.toString(),
+                kycData.VCid,
+                kycData.issuer,
+                kycData.status,
+              )
+            : null;
+        })
+        .filter((data): data is KycAccountData => data !== null)
+        .slice(start, end);
+
+      return kycDataArray;
+    },
+  );
+
+  singletonInstance.getKYCFor = jest.fn(
+    async (address: EvmAddress, target: EvmAddress) => {
+      const account = '0x' + target.toString().toUpperCase().substring(2);
+      return kycAccountsData.get(account);
+    },
+  );
+
+  singletonInstance.getKYCAccountsCount = jest.fn(
+    async (address: EvmAddress, kycStatus: number) => {
+      const kycAccounts = kycAccountsByStatus.get(1) || [];
+      return kycAccounts.length;
+    },
+  );
+
   singletonInstance.getHeldAmountFor = jest.fn(
     async (address: EvmAddress, targetId: EvmAddress) => {
       const heldBalance = heldBalances.get(
@@ -999,6 +1203,48 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
       );
       if (heldBalance) return heldBalance;
       return 0;
+    },
+  );
+
+  singletonInstance.getClearedAmountFor = jest.fn(
+    async (address: EvmAddress, targetId: EvmAddress) => {
+      const clearedBalance = clearedBalances.get(
+        '0x' + targetId.toString().toUpperCase().substring(2),
+      );
+      if (clearedBalance) return Number(clearedBalance);
+      return 0;
+    },
+  );
+
+  singletonInstance.getClearingCountForByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      targetId: EvmAddress,
+      clearingOperationType: ClearingOperationType,
+    ) => {
+      const clearingIds = clearingsIds
+        .get('0x' + targetId.toString().toUpperCase().substring(2))
+        ?.get(clearingOperationType);
+      if (clearingIds) return clearingIds.length;
+      return 0;
+    },
+  );
+
+  singletonInstance.getClearingsIdForByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      target: EvmAddress,
+      clearingOperationType: ClearingOperationType,
+      start: number,
+      end: number,
+    ) => {
+      const clearingIds = clearingsIds
+        .get('0x' + target.toString().toUpperCase().substring(2))
+        ?.get(clearingOperationType);
+      if (!clearingIds) return [];
+      return clearingIds;
     },
   );
 
@@ -1054,6 +1300,18 @@ jest.mock('../src/port/out/rpc/RPCQueryAdapter', () => {
     },
   );
 
+  singletonInstance.isIssuer = jest.fn(
+    async (address: EvmAddress, issuer: EvmAddress) => {
+      const account = identifiers(issuer.toString())[1];
+      return issuerList.findIndex((item) => item == account) !== -1;
+    },
+  );
+
+  singletonInstance.isClearingActivated = jest.fn(
+    async (address: EvmAddress) => {
+      return isClearingActivated;
+    },
+  );
   return {
     RPCQueryAdapter: jest.fn(() => singletonInstance),
   };
@@ -1245,6 +1503,48 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
       } as TransactionResponse;
     },
   );
+
+  singletonInstance.addIssuer = jest.fn(
+    async (address: EvmAddress, issuerId: EvmAddress) => {
+      const account = identifiers(issuerId.toString())[1];
+
+      if (issuerList.findIndex((item) => item == account) == -1) {
+        issuerList.push(account);
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.removeIssuer = jest.fn(
+    async (address: EvmAddress, issuerId: EvmAddress) => {
+      const account = identifiers(issuerId.toString())[1];
+
+      if (issuerList.findIndex((item) => item == account) !== -1) {
+        issuerList = issuerList.filter((item) => item !== account);
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.setRevocationRegistryAddress = jest.fn(async function (
+    security: EvmAddress,
+    revocationRegistry: EvmAddress,
+  ) {
+    revocationRegistryAddress = revocationRegistry.toString();
+
+    return {
+      status: 'success',
+      id: transactionId,
+    } as TransactionResponse;
+  });
 
   singletonInstance.addToControlList = jest.fn(
     async (address: EvmAddress, targetId: EvmAddress) => {
@@ -1746,6 +2046,77 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
     },
   );
 
+  singletonInstance.grantKYC = jest.fn(
+    async (
+      security: EvmAddress,
+      targetId: EvmAddress,
+      VCId: string,
+      validFrom: BigDecimal,
+      validTo: BigDecimal,
+      issuer: EvmAddress,
+    ) => {
+      const account = '0x' + targetId.toString().toUpperCase().substring(2);
+      const kycStatus = 1;
+
+      const kycAccounts = kycAccountsByStatus.get(kycStatus) || [];
+
+      if (!kycAccounts.includes(account)) {
+        kycAccounts.push(account);
+        kycAccountsByStatus.set(kycStatus, kycAccounts);
+        kycAccountsData.set(
+          account,
+          new KYC(
+            validFrom.toString(),
+            validTo.toString(),
+            VCId,
+            issuer.toString(),
+            kycStatus,
+          ),
+        );
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.revokeKYC = jest.fn(
+    async (security: EvmAddress, targetId: EvmAddress) => {
+      const account = '0x' + targetId.toString().toUpperCase().substring(2);
+      const kycStatus = 1;
+
+      let kycAccounts = kycAccountsByStatus.get(kycStatus) || [];
+
+      if (kycAccounts.includes(account)) {
+        kycAccounts = kycAccounts.filter(
+          (kycAccount) => kycAccount !== account,
+        );
+
+        kycAccountsByStatus.set(
+          kycStatus,
+          kycAccounts.length > 0 ? kycAccounts : [],
+        );
+
+        kycAccountsData.delete(account);
+
+        const revokedStatus = 0;
+        const revokedAccounts = kycAccountsByStatus.get(revokedStatus) || [];
+
+        if (!revokedAccounts.includes(account)) {
+          revokedAccounts.push(account);
+          kycAccountsByStatus.set(revokedStatus, revokedAccounts);
+        }
+      }
+
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
   singletonInstance.createHoldByPartition = jest.fn(
     async (
       address: EvmAddress,
@@ -1818,6 +2189,161 @@ jest.mock('../src/port/out/rpc/RPCTransactionAdapter', () => {
         id: transactionId,
       } as TransactionResponse;
     },
+  );
+
+  singletonInstance.clearingCreateHoldByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      escrow: EvmAddress,
+      amount: BigDecimal,
+      targetId: EvmAddress,
+      clearingExpirationDate: BigDecimal,
+      holdExpirationDate: BigDecimal,
+    ) =>
+      createClearing(
+        clearingExpirationDate,
+        amount,
+        ClearingOperationType.HoldCreation,
+        targetId,
+        escrow,
+        holdExpirationDate,
+      ),
+  );
+
+  singletonInstance.protectedClearingCreateHoldByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      escrow: EvmAddress,
+      amount: BigDecimal,
+      targetId: EvmAddress,
+      clearingExpirationDate: BigDecimal,
+      holdExpirationDate: BigDecimal,
+      deadline: BigDecimal,
+      nonce: BigDecimal,
+      signature: string,
+    ) =>
+      createClearing(
+        clearingExpirationDate,
+        amount,
+        ClearingOperationType.HoldCreation,
+        targetId,
+        escrow,
+        holdExpirationDate,
+      ),
+  );
+
+  singletonInstance.clearingRedeemByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      amount: BigDecimal,
+      expirationDate: BigDecimal,
+    ) => createClearing(expirationDate, amount, ClearingOperationType.Redeem),
+  );
+
+  singletonInstance.protectedClearingRedeemByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      amount: BigDecimal,
+      sourceId: EvmAddress,
+      expirationDate: BigDecimal,
+      deadline: BigDecimal,
+      nonce: BigDecimal,
+      signature: string,
+    ) =>
+      createClearing(
+        expirationDate,
+        amount,
+        ClearingOperationType.Redeem,
+        sourceId,
+      ),
+  );
+
+  singletonInstance.clearingTransferByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      amount: BigDecimal,
+      targetId: EvmAddress,
+      expirationDate: BigDecimal,
+    ) =>
+      createClearing(
+        expirationDate,
+        amount,
+        ClearingOperationType.Transfer,
+        targetId,
+      ),
+  );
+
+  singletonInstance.protectedClearingTransferByPartition = jest.fn(
+    async (
+      address: EvmAddress,
+      partitionId: string,
+      amount: BigDecimal,
+      sourceId: EvmAddress,
+      targetId: EvmAddress,
+      expirationDate: BigDecimal,
+      deadline: BigDecimal,
+      nonce: BigDecimal,
+      signature: string,
+    ) =>
+      createClearing(
+        expirationDate,
+        amount,
+        ClearingOperationType.Transfer,
+        targetId,
+      ),
+  );
+
+  singletonInstance.activateClearing = jest.fn(async (address: EvmAddress) => {
+    isClearingActivated = true;
+    return {
+      status: 'success',
+      id: transactionId,
+    } as TransactionResponse;
+  });
+
+  singletonInstance.deactivateClearing = jest.fn(
+    async (address: EvmAddress) => {
+      isClearingActivated = false;
+      return {
+        status: 'success',
+        id: transactionId,
+      } as TransactionResponse;
+    },
+  );
+
+  singletonInstance.cancelClearingOperationByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      targetId: EvmAddress,
+      clearingId: number,
+      clearingOperationType: ClearingOperationType,
+    ) => processClearingOperation(targetId, clearingId),
+  );
+
+  singletonInstance.reclaimClearingOperationByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      targetId: EvmAddress,
+      clearingId: number,
+      clearingOperationType: ClearingOperationType,
+    ) => processClearingOperation(targetId, clearingId),
+  );
+
+  singletonInstance.approveClearingOperationByPartition = jest.fn(
+    async (
+      security: EvmAddress,
+      partitionId: string,
+      targetId: EvmAddress,
+      clearingId: number,
+      clearingOperationType: ClearingOperationType,
+    ) => processClearingOperation(targetId, clearingId),
   );
 
   return {

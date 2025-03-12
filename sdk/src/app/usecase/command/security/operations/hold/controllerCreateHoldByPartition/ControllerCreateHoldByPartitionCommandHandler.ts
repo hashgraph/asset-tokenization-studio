@@ -225,6 +225,7 @@ import { SecurityRole } from '../../../../../../../domain/context/security/Secur
 import { NotGrantedRole } from '../../../error/NotGrantedRole.js';
 import { InsufficientBalance } from '../../../error/InsufficientBalance.js';
 import { EVM_ZERO_ADDRESS } from '../../../../../../../core/Constants.js';
+import ValidationService from '../../../../../../../app/service/ValidationService.js';
 
 @CommandHandler(ControllerCreateHoldByPartitionCommand)
 export class ControllerCreateHoldByPartitionCommandHandler
@@ -241,6 +242,8 @@ export class ControllerCreateHoldByPartitionCommandHandler
     public readonly queryAdapter: RPCQueryAdapter,
     @lazyInject(MirrorNodeAdapter)
     private readonly mirrorNodeAdapter: MirrorNodeAdapter,
+    @lazyInject(ValidationService)
+    public readonly validationService: ValidationService,
   ) {}
 
   async execute(
@@ -258,6 +261,8 @@ export class ControllerCreateHoldByPartitionCommandHandler
     const handler = this.transactionService.getHandler();
     const account = this.accountService.getCurrentAccount();
     const security = await this.securityService.get(securityId);
+
+    await this.validationService.validateClearingDeactivated(securityId);
 
     const securityEvmAddress: EvmAddress = new EvmAddress(
       HEDERA_FORMAT_ID_REGEX.test(securityId)

@@ -225,6 +225,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
   isControllable: boolean;
   arePartitionsProtected: boolean;
   isMultiPartition: boolean;
+  clearingActive: boolean;
 
   @OptionalField()
   diamondOwnerAccount?: string;
@@ -254,6 +255,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     isControllable,
     arePartitionsProtected,
     isMultiPartition,
+    clearingActive = false,
     diamondOwnerAccount,
     currency,
     numberOfUnits,
@@ -279,6 +281,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     isControllable: boolean;
     arePartitionsProtected: boolean;
     isMultiPartition: boolean;
+    clearingActive?: boolean;
     diamondOwnerAccount?: string;
     currency: string;
     numberOfUnits: string;
@@ -355,6 +358,7 @@ export default class CreateBondRequest extends ValidatedRequest<CreateBondReques
     this.isControllable = isControllable;
     this.arePartitionsProtected = arePartitionsProtected;
     this.isMultiPartition = isMultiPartition;
+    this.clearingActive = clearingActive;
     this.diamondOwnerAccount = diamondOwnerAccount;
     this.currency = currency;
     this.numberOfUnits = numberOfUnits;
