@@ -437,7 +437,7 @@ describe('ERC1400 Tests', () => {
             getTotalSupplyValues(),
             getBalanceValues(account_A),
             getBalanceValues(account_B),
-            erc20Facet.decimalsAdjusted(),
+            erc20Facet.decimals(),
             erc20Facet.getERC20Metadata(),
         ])
 
