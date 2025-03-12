@@ -3857,12 +3857,6 @@ describe('ERC1400 Tests', () => {
                     account_B
                 )
 
-                const LABAF_Before =
-                    await adjustBalancesFacet.getAllowanceLabaf(
-                        account_A,
-                        account_B
-                    )
-
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
                     adjustFactor,
@@ -3877,17 +3871,9 @@ describe('ERC1400 Tests', () => {
                     account_B
                 )
 
-                const LABAF_After = await adjustBalancesFacet.getAllowanceLabaf(
-                    account_A,
-                    account_B
-                )
-
                 expect(allowance_After).to.be.equal(
                     allowance_Before.mul(adjustFactor).add(amount)
                 )
-
-                expect(LABAF_Before).to.be.equal(0)
-                expect(LABAF_After).to.be.equal(adjustFactor)
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 decreaseAllowance succeeds', async () => {
@@ -3908,11 +3894,6 @@ describe('ERC1400 Tests', () => {
                     account_A,
                     account_B
                 )
-                const LABAF_Before =
-                    await adjustBalancesFacet.getAllowanceLabaf(
-                        account_A,
-                        account_B
-                    )
 
                 // adjustBalances
                 await adjustBalancesFacet.adjustBalances(
@@ -3930,18 +3911,12 @@ describe('ERC1400 Tests', () => {
                     account_A,
                     account_B
                 )
-                const LABAF_After = await adjustBalancesFacet.getAllowanceLabaf(
-                    account_A,
-                    account_B
-                )
 
                 expect(allowance_After).to.be.equal(
                     allowance_Before
                         .mul(adjustFactor)
                         .sub(allowance_Before.add(amount))
                 )
-                expect(LABAF_Before).to.be.equal(0)
-                expect(LABAF_After).to.be.equal(adjustFactor)
             })
         })
     })
