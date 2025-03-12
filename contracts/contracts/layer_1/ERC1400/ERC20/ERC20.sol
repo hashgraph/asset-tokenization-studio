@@ -269,11 +269,11 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, _msgSender())
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
         returns (bool)
@@ -289,12 +289,12 @@ contract ERC20 is IERC20, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
+        onlyClearingDisabled
         onlyListedAllowed(_msgSender())
         onlyListedAllowed(from)
         onlyListedAllowed(to)
         onlyWithoutMultiPartition
         onlyUnProtectedPartitionsOrWildCardRole
-        onlyClearingDisabled
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, from)
         onlyValidKycStatus(IKyc.KycStatus.GRANTED, to)
         returns (bool)
