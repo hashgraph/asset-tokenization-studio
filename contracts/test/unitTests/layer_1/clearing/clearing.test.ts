@@ -3172,10 +3172,9 @@ describe('Clearing Tests', () => {
                     _PARTITION_ID_1,
                     account_A
                 )
-            const cleared_After =
-                await clearingFacet.getClearingForByPartition(
-                    clearingIdentifier
-                )
+            const cleared_After = await clearingFacet.getClearingForByPartition(
+                clearingIdentifier
+            )
             const balance_After = await erc1410Facet.balanceOf(account_A)
             const balance_After_Partition_1 =
                 await erc1410Facet.balanceOfByPartition(

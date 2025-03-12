@@ -756,7 +756,8 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 amount_) {
-        return _getClearedAmountForByPartitionAdjusted(_partition, _tokenHolder);
+        return
+            _getClearedAmountForByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function getClearingCountForByPartition(

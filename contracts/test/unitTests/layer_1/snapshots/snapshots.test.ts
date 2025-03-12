@@ -756,12 +756,8 @@ describe('Snapshots Tests', () => {
                 2
             )
 
-        const current_Balance_Of_A = await erc1410Facet.balanceOf(
-            account_A
-        )
-        const current_Balance_Of_C = await erc1410Facet.balanceOf(
-            account_C
-        )
+        const current_Balance_Of_A = await erc1410Facet.balanceOf(account_A)
+        const current_Balance_Of_C = await erc1410Facet.balanceOf(account_C)
         const current_TotalSupply = await erc1410Facet.totalSupply()
 
         expect(snapshot_Balance_Of_A_1).to.equal(0)

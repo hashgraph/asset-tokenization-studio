@@ -479,8 +479,9 @@ describe('ERC1400 Tests', () => {
         const totalSupply = await erc1410Facet.totalSupply()
         const totalSupply_Partition_1 =
             await erc1410Facet.totalSupplyByPartition(_PARTITION_ID_1)
-        const totalSupply_Partition =
-            await erc1410Facet.totalSupplyByPartition(_PARTITION_ID)
+        const totalSupply_Partition = await erc1410Facet.totalSupplyByPartition(
+            _PARTITION_ID
+        )
 
         return {
             totalSupply,

@@ -285,7 +285,5 @@ interface IERC20 is IERC20StorageWrapper {
         uint256 amount
     ) external returns (bool);
 
-    function decimalsAt(
-        uint256 _timestamp
-    ) external view returns (uint8);
+    function decimalsAt(uint256 _timestamp) external view returns (uint8);
 }

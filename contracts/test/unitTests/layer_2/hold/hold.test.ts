@@ -558,9 +558,7 @@ describe('Holds Layer 2 Tests', () => {
                 _PARTITION_ID_1,
                 account_A
             )
-        const hold_After = await holdFacet.getHoldForByPartition(
-            holdIdentifier
-        )
+        const hold_After = await holdFacet.getHoldForByPartition(holdIdentifier)
         const balance_After = await erc1410Facet.balanceOf(account_A)
         const balance_After_Partition_1 =
             await erc1410Facet.balanceOfByPartition(_PARTITION_ID_1, account_A)

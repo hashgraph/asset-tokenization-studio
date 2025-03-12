@@ -273,9 +273,7 @@ contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
     {
         staticFunctionSelectors_ = new bytes4[](26);
         uint256 selectorIndex = 0;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAt
-            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this.balanceOfAt.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_ERC1410_Basic
             .selector;
