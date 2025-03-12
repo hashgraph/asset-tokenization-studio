@@ -631,17 +631,6 @@ describe('Hold Tests', () => {
                     'ClearingIsActivated'
                 )
                 await expect(
-                    holdFacet.controllerCreateHoldByPartition(
-                        _DEFAULT_PARTITION,
-                        account_A,
-                        hold,
-                        '0x'
-                    )
-                ).to.be.revertedWithCustomError(
-                    clearingFacet,
-                    'ClearingIsActivated'
-                )
-                await expect(
                     holdFacet.operatorCreateHoldByPartition(
                         _DEFAULT_PARTITION,
                         account_A,

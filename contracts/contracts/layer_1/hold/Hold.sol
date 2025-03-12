@@ -326,7 +326,6 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
         external
         override
         onlyUnpaused
-        onlyClearingDisabled
         validateAddress(_from)
         validateAddress(_hold.escrow)
         onlyDefaultPartitionWithSinglePartition(_partition)
