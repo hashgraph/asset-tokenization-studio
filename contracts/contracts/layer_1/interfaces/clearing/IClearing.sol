@@ -344,35 +344,11 @@ interface IClearing {
             IHold.Hold memory hold_
         );
 
-    function getClearingForByPartitionAdjusted(
-        ClearingOperationIdentifier calldata _clearingIdentifier
-    )
-        external
-        view
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address destination_,
-            ClearingOperationType clearingOperationType_,
-            bytes memory data_,
-            bytes memory operatorData_,
-            IHold.Hold memory hold_
-        );
-
     function getClearedAmountFor(
         address _tokenHolder
     ) external view returns (uint256 amount_);
 
-    function getClearedAmountForAdjusted(
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
-
     function getClearedAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
-
-    function getClearedAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 amount_);

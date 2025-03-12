@@ -226,34 +226,11 @@ contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
         _triggerAndSyncAll(_partition, _from, _to);
     }
 
-    function totalSupplyAdjusted() external view returns (uint256) {
-        return _totalSupplyAdjusted();
-    }
-
-    function totalSupplyByPartitionAdjusted(
-        bytes32 _partition
-    ) external view returns (uint256) {
-        return _totalSupplyByPartitionAdjusted(_partition);
-    }
-
-    function balanceOfAdjusted(
-        address _tokenHolder
-    ) external view returns (uint256) {
-        return _balanceOfAdjusted(_tokenHolder);
-    }
-
-    function balanceOfAdjustedAt(
+    function balanceOfAt(
         address _tokenHolder,
         uint256 _timestamp
     ) external view returns (uint256) {
         return _balanceOfAdjustedAt(_tokenHolder, _timestamp);
-    }
-
-    function balanceOfByPartitionAdjusted(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256) {
-        return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
     }
 
     function balanceOf(
@@ -267,6 +244,10 @@ contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
         address _tokenHolder
     ) external view override returns (uint256) {
         return _balanceOfByPartitionAdjusted(_partition, _tokenHolder);
+    }
+
+    function totalSupply() external view override returns (uint256) {
+        return _totalSupplyAdjusted();
     }
 
     function totalSupplyByPartition(
@@ -290,16 +271,10 @@ contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
         override
         returns (bytes4[] memory staticFunctionSelectors_)
     {
-        staticFunctionSelectors_ = new bytes4[](30);
+        staticFunctionSelectors_ = new bytes4[](26);
         uint256 selectorIndex = 0;
         staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAdjusted
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfAdjustedAt
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .balanceOfByPartitionAdjusted
+            .balanceOfAt
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .initialize_ERC1410_Basic
@@ -318,9 +293,6 @@ contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
         staticFunctionSelectors_[selectorIndex++] = this.totalSupply.selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .totalSupplyByPartition
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyByPartitionAdjusted
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .operatorTransferByPartition
@@ -364,9 +336,6 @@ contract ERC1410ScheduledTasks is IERC1410ScheduledTasks, ERC1410Snapshot {
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .triggerAndSyncAll
-            .selector;
-        staticFunctionSelectors_[selectorIndex++] = this
-            .totalSupplyAdjusted
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .protectedTransferFromByPartition

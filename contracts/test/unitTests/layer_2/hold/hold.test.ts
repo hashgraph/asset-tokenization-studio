@@ -550,15 +550,15 @@ describe('Holds Layer 2 Tests', () => {
             dateToUnixTimestamp('2030-01-01T00:00:03Z')
         )
 
-        const hold_TotalAmount_After = await holdFacet.getHeldAmountForAdjusted(
+        const hold_TotalAmount_After = await holdFacet.getHeldAmountFor(
             account_A
         )
         const hold_TotalAmount_After_Partition_1 =
-            await holdFacet.getHeldAmountForByPartitionAdjusted(
+            await holdFacet.getHeldAmountForByPartition(
                 _PARTITION_ID_1,
                 account_A
             )
-        const hold_After = await holdFacet.getHoldForByPartitionAdjusted(
+        const hold_After = await holdFacet.getHoldForByPartition(
             holdIdentifier
         )
         const balance_After = await erc1410Facet.balanceOf(account_A)
