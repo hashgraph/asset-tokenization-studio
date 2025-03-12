@@ -227,12 +227,6 @@ interface IERC20 is IERC20StorageWrapper {
     // solhint-disable-next-line func-name-mixedcase
     function initialize_ERC20(ERC20Metadata calldata erc1594Metadata) external;
 
-    function name() external view returns (string memory);
-
-    function symbol() external view returns (string memory);
-
-    function decimals() external view returns (uint8);
-
     /**
      * @dev Moves `amount` tokens from the caller's account to `to`.
      *
@@ -241,18 +235,6 @@ interface IERC20 is IERC20StorageWrapper {
      * Emits a {Transfer} event.
      */
     function transfer(address to, uint256 amount) external returns (bool);
-
-    /**
-     * @dev Returns the remaining number of tokens that `spender` will be
-     * allowed to spend on behalf of `owner` through {transferFrom}. This is
-     * zero by default.
-     *
-     * This value changes when {approve} or {transferFrom} are called.
-     */
-    function allowance(
-        address owner,
-        address spender
-    ) external view returns (uint256);
 
     /**
      * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
@@ -284,6 +266,24 @@ interface IERC20 is IERC20StorageWrapper {
         address to,
         uint256 amount
     ) external returns (bool);
+
+    function name() external view returns (string memory);
+
+    function symbol() external view returns (string memory);
+
+    function decimals() external view returns (uint8);
+
+    /**
+     * @dev Returns the remaining number of tokens that `spender` will be
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+     * zero by default.
+     *
+     * This value changes when {approve} or {transferFrom} are called.
+     */
+    function allowance(
+        address owner,
+        address spender
+    ) external view returns (uint256);
 
     function decimalsAdjusted() external view returns (uint8);
 

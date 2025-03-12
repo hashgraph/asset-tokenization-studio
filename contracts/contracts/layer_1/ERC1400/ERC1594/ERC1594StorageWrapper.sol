@@ -399,10 +399,6 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         return (true, _SUCCESS, bytes32(0));
     }
 
-    function _checkIssuable() private view {
-        if (!_isIssuable()) revert IssuanceIsClosed();
-    }
-
     function _erc1594Storage()
         internal
         pure
@@ -413,5 +409,9 @@ abstract contract ERC1594StorageWrapper is IERC1594StorageWrapper, Common {
         assembly {
             erc1594Storage_.slot := position
         }
+    }
+
+    function _checkIssuable() private view {
+        if (!_isIssuable()) revert IssuanceIsClosed();
     }
 }

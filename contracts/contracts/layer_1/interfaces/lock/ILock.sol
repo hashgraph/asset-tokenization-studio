@@ -236,6 +236,18 @@ interface ILock {
         address _tokenHolder
     ) external returns (bool success_);
 
+    // Uses default parititon in case Multipartition is not activated
+    function lock(
+        uint256 _amount,
+        address _tokenHolder,
+        uint256 _expirationTimestamp
+    ) external returns (bool success_, uint256 lockId_);
+
+    function release(
+        uint256 _lockId,
+        address _tokenHolder
+    ) external returns (bool success_);
+
     function getLockedAmountForByPartition(
         bytes32 _partition,
         address _tokenHolder
@@ -258,18 +270,6 @@ interface ILock {
         address _tokenHolder,
         uint256 _lockId
     ) external view returns (uint256 amount_, uint256 expirationTimestamp_);
-
-    // Uses default parititon in case Multipartition is not activated
-    function lock(
-        uint256 _amount,
-        address _tokenHolder,
-        uint256 _expirationTimestamp
-    ) external returns (bool success_, uint256 lockId_);
-
-    function release(
-        uint256 _lockId,
-        address _tokenHolder
-    ) external returns (bool success_);
 
     function getLockedAmountFor(
         address _tokenHolder

@@ -262,33 +262,6 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         );
     }
 
-    function _setFixedCoupons(
-        uint256 _firstCouponDate,
-        uint256 _couponFrequency,
-        uint256 _maturityDate,
-        uint256 _rate
-    ) private returns (bool) {
-        uint256 numberOfSubsequentCoupons = (_maturityDate - _firstCouponDate) /
-            _couponFrequency;
-        bool success;
-        for (uint256 i = 0; i <= numberOfSubsequentCoupons; i++) {
-            uint256 runDate = _firstCouponDate + i * _couponFrequency;
-
-            IBond.Coupon memory _newCoupon;
-            _newCoupon.recordDate = runDate;
-            _newCoupon.executionDate = runDate;
-            _newCoupon.rate = _rate;
-
-            (success, , ) = _setCoupon(_newCoupon);
-
-            if (!success) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     function _setCoupon(
         IBond.Coupon memory _newCoupon
     )
@@ -389,10 +362,6 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         return _getCorporateActionCountByType(COUPON_CORPORATE_ACTION_TYPE);
     }
 
-    function _checkMaturityDate(uint256 _maturityDate) private view {
-        if (_maturityDate <= _getMaturityDate()) revert BondMaturityDateWrong();
-    }
-
     function _bondStorage()
         internal
         pure
@@ -403,5 +372,36 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         assembly {
             bondData_.slot := position
         }
+    }
+
+    function _setFixedCoupons(
+        uint256 _firstCouponDate,
+        uint256 _couponFrequency,
+        uint256 _maturityDate,
+        uint256 _rate
+    ) private returns (bool) {
+        uint256 numberOfSubsequentCoupons = (_maturityDate - _firstCouponDate) /
+            _couponFrequency;
+        bool success;
+        for (uint256 i = 0; i <= numberOfSubsequentCoupons; i++) {
+            uint256 runDate = _firstCouponDate + i * _couponFrequency;
+
+            IBond.Coupon memory _newCoupon;
+            _newCoupon.recordDate = runDate;
+            _newCoupon.executionDate = runDate;
+            _newCoupon.rate = _rate;
+
+            (success, , ) = _setCoupon(_newCoupon);
+
+            if (!success) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function _checkMaturityDate(uint256 _maturityDate) private pure {
+        if (_maturityDate <= _getMaturityDate()) revert BondMaturityDateWrong();
     }
 }

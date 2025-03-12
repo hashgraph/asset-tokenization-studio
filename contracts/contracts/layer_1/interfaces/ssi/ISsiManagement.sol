@@ -207,10 +207,6 @@
 pragma solidity 0.8.18;
 
 interface ISsiManagement {
-    error ListedIssuer(address issuer);
-    error UnlistedIssuer(address issuer);
-    error AccountIsNotIssuer(address issuer);
-
     /**
      * @dev Emitted when the revocation registry address is updated
      *
@@ -240,6 +236,10 @@ interface ISsiManagement {
         address indexed operator,
         address indexed issuer
     );
+
+    error ListedIssuer(address issuer);
+    error UnlistedIssuer(address issuer);
+    error AccountIsNotIssuer(address issuer);
 
     /**
      * @dev Updates the revocation registry address

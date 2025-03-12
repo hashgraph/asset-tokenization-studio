@@ -239,6 +239,13 @@ abstract contract ClearingStorageWrapper1 is
         _;
     }
 
+    function _setClearing(bool _activated) internal returns (bool success_) {
+        _clearingStorage().activated = _activated;
+        if (_activated) emit ClearingActivated(_msgSender());
+        else emit ClearingDeactivated(_msgSender());
+        success_ = true;
+    }
+
     function _checkClearingActivated() internal view {
         if (!_isClearingActivated()) revert IClearing.ClearingIsDisabled();
     }
@@ -248,13 +255,6 @@ abstract contract ClearingStorageWrapper1 is
             memory _clearingOperationIdentifier
     ) internal view returns (bool) {
         return _getClearing(_clearingOperationIdentifier).clearingId != 0;
-    }
-
-    function _setClearing(bool _activated) internal returns (bool success_) {
-        _clearingStorage().activated = _activated;
-        if (_activated) emit ClearingActivated(_msgSender());
-        else emit ClearingDeactivated(_msgSender());
-        success_ = true;
     }
 
     function _isClearingActivated() internal view returns (bool) {
@@ -352,14 +352,6 @@ abstract contract ClearingStorageWrapper1 is
             ][_partition];
     }
 
-    function _checkClearingId(
-        IClearing.ClearingOperationIdentifier
-            calldata _clearingOperationIdentifier
-    ) private view {
-        if (!_isClearingIdValid(_clearingOperationIdentifier))
-            revert IClearing.WrongClearingId();
-    }
-
     function _clearingStorage()
         internal
         pure
@@ -370,6 +362,14 @@ abstract contract ClearingStorageWrapper1 is
         assembly {
             clearing_.slot := position
         }
+    }
+
+    function _checkClearingId(
+        IClearing.ClearingOperationIdentifier
+            calldata _clearingOperationIdentifier
+    ) private view {
+        if (!_isClearingIdValid(_clearingOperationIdentifier))
+            revert IClearing.WrongClearingId();
     }
 }
 // solhint-enable no-unused-vars, custom-errors

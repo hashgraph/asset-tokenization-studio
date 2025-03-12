@@ -235,14 +235,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
         _equityStorage().equityDetailsData = _equityDetailsData;
     }
 
-    function _getEquityDetails()
-        internal
-        view
-        returns (IEquity.EquityDetailsData memory equityDetails_)
-    {
-        equityDetails_ = _equityStorage().equityDetailsData;
-    }
-
     function _setDividends(
         IEquity.Dividend calldata _newDividend
     )
@@ -253,6 +245,46 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
             DIVIDEND_CORPORATE_ACTION_TYPE,
             abi.encode(_newDividend)
         );
+    }
+
+    function _setVoting(
+        IEquity.Voting calldata _newVoting
+    )
+        internal
+        returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
+    {
+        (success_, corporateActionId_, voteID_) = _addCorporateAction(
+            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
+            abi.encode(_newVoting)
+        );
+    }
+
+    function _setScheduledBalanceAdjustment(
+        IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    )
+        internal
+        returns (
+            bool success_,
+            bytes32 corporateActionId_,
+            uint256 balanceAdjustmentID_
+        )
+    {
+        (
+            success_,
+            corporateActionId_,
+            balanceAdjustmentID_
+        ) = _addCorporateAction(
+            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
+            abi.encode(_newBalanceAdjustment)
+        );
+    }
+
+    function _getEquityDetails()
+        internal
+        view
+        returns (IEquity.EquityDetailsData memory equityDetails_)
+    {
+        equityDetails_ = _equityStorage().equityDetailsData;
     }
 
     /**
@@ -322,18 +354,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
         return _getCorporateActionCountByType(DIVIDEND_CORPORATE_ACTION_TYPE);
     }
 
-    function _setVoting(
-        IEquity.Voting calldata _newVoting
-    )
-        internal
-        returns (bool success_, bytes32 corporateActionId_, uint256 voteID_)
-    {
-        (success_, corporateActionId_, voteID_) = _addCorporateAction(
-            VOTING_RIGHTS_CORPORATE_ACTION_TYPE,
-            abi.encode(_newVoting)
-        );
-    }
-
     function _getVoting(
         uint256 _voteID
     )
@@ -384,26 +404,6 @@ abstract contract EquityStorageWrapper is IEquityStorageWrapper, Common {
     function _getVotingCount() internal view returns (uint256 votingCount_) {
         return
             _getCorporateActionCountByType(VOTING_RIGHTS_CORPORATE_ACTION_TYPE);
-    }
-
-    function _setScheduledBalanceAdjustment(
-        IEquity.ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    )
-        internal
-        returns (
-            bool success_,
-            bytes32 corporateActionId_,
-            uint256 balanceAdjustmentID_
-        )
-    {
-        (
-            success_,
-            corporateActionId_,
-            balanceAdjustmentID_
-        ) = _addCorporateAction(
-            BALANCE_ADJUSTMENT_CORPORATE_ACTION_TYPE,
-            abi.encode(_newBalanceAdjustment)
-        );
     }
 
     function _getScheduledBalanceAdjusment(
