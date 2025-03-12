@@ -38,6 +38,7 @@
         "reentrancy": "error",
         "state-visibility": "error",
         "quotes": ["error", "single"],
-        "not-rely-on-time": "off"
+        "not-rely-on-time": "off",
+        "ordering": "error"
     }
 }

@@ -223,8 +223,8 @@ import {_DEFAULT_ADMIN_ROLE} from '../../../layer_1/constants/roles.sol';
 contract DiamondCutFacet is IDiamondCut, ResolverProxyUnstructured {
     function updateConfigVersion(
         uint256 _newVersion
-    ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {
-        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
+        ResolverProxyStorage storage ds = _resolverProxyStorage();
         ds.resolver.checkResolverProxyConfigurationRegistered(
             ds.resolverProxyConfigurationId,
             _newVersion
@@ -235,8 +235,8 @@ contract DiamondCutFacet is IDiamondCut, ResolverProxyUnstructured {
     function updateConfig(
         bytes32 _newConfigurationId,
         uint256 _newVersion
-    ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {
-        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
+        ResolverProxyStorage storage ds = _resolverProxyStorage();
         ds.resolver.checkResolverProxyConfigurationRegistered(
             _newConfigurationId,
             _newVersion
@@ -249,12 +249,12 @@ contract DiamondCutFacet is IDiamondCut, ResolverProxyUnstructured {
         IBusinessLogicResolver _newResolver,
         bytes32 _newConfigurationId,
         uint256 _newVersion
-    ) external virtual override onlyRole(_DEFAULT_ADMIN_ROLE) {
+    ) external override onlyRole(_DEFAULT_ADMIN_ROLE) {
         _newResolver.checkResolverProxyConfigurationRegistered(
             _newConfigurationId,
             _newVersion
         );
-        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ResolverProxyStorage storage ds = _resolverProxyStorage();
         _updateResolver(ds, _newResolver);
         _updateConfigId(ds, _newConfigurationId);
         _updateVersion(ds, _newVersion);
@@ -265,7 +265,7 @@ contract DiamondCutFacet is IDiamondCut, ResolverProxyUnstructured {
         view
         returns (address resolver_, bytes32 configurationId_, uint256 version_)
     {
-        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ResolverProxyStorage storage ds = _resolverProxyStorage();
         return (
             address(ds.resolver),
             ds.resolverProxyConfigurationId,

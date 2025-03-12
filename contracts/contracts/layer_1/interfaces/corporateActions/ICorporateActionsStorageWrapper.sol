@@ -224,4 +224,5 @@ struct CorporateActionDataStorage {
 
 interface ICorporateActionsStorageWrapper {
     error WrongIndexForAction(uint256 index, bytes32 actionType);
+    error WrongDates(uint256 firstDate, uint256 secondDate);
 }

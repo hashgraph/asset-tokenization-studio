@@ -232,7 +232,7 @@ contract DiamondLoupeFacet is
         override
         returns (Facet[] memory facets_)
     {
-        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ResolverProxyStorage storage ds = _resolverProxyStorage();
         facets_ = _getFacets(ds, 0, _getFacetsLength(ds));
     }
 
@@ -242,24 +242,20 @@ contract DiamondLoupeFacet is
         override
         returns (uint256 facetsLength_)
     {
-        facetsLength_ = _getFacetsLength(_getResolverProxyStorage());
+        facetsLength_ = _getFacetsLength(_resolverProxyStorage());
     }
 
     function getFacetsByPage(
         uint256 _pageIndex,
         uint256 _pageLength
     ) external view override returns (Facet[] memory facets_) {
-        facets_ = _getFacets(
-            _getResolverProxyStorage(),
-            _pageIndex,
-            _pageLength
-        );
+        facets_ = _getFacets(_resolverProxyStorage(), _pageIndex, _pageLength);
     }
 
     function getFacetSelectors(
         bytes32 _facetId
     ) external view override returns (bytes4[] memory facetSelectors_) {
-        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ResolverProxyStorage storage ds = _resolverProxyStorage();
         facetSelectors_ = _getFacetSelectors(
             ds,
             _facetId,
@@ -272,7 +268,7 @@ contract DiamondLoupeFacet is
         bytes32 _facetId
     ) external view override returns (uint256 facetSelectorsLength_) {
         facetSelectorsLength_ = _getFacetSelectorsLength(
-            _getResolverProxyStorage(),
+            _resolverProxyStorage(),
             _facetId
         );
     }
@@ -283,7 +279,7 @@ contract DiamondLoupeFacet is
         uint256 _pageLength
     ) external view override returns (bytes4[] memory facetSelectors_) {
         facetSelectors_ = _getFacetSelectors(
-            _getResolverProxyStorage(),
+            _resolverProxyStorage(),
             _facetId,
             _pageIndex,
             _pageLength
@@ -296,7 +292,7 @@ contract DiamondLoupeFacet is
         override
         returns (bytes32[] memory facetIds_)
     {
-        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ResolverProxyStorage storage ds = _resolverProxyStorage();
         facetIds_ = _getFacetIds(ds, 0, _getFacetsLength(ds));
     }
 
@@ -305,7 +301,7 @@ contract DiamondLoupeFacet is
         uint256 _pageLength
     ) external view override returns (bytes32[] memory facetIds_) {
         facetIds_ = _getFacetIds(
-            _getResolverProxyStorage(),
+            _resolverProxyStorage(),
             _pageIndex,
             _pageLength
         );
@@ -317,7 +313,7 @@ contract DiamondLoupeFacet is
         override
         returns (address[] memory facetAddresses_)
     {
-        ResolverProxyStorage storage ds = _getResolverProxyStorage();
+        ResolverProxyStorage storage ds = _resolverProxyStorage();
         facetAddresses_ = _getFacetAddresses(ds, 0, _getFacetsLength(ds));
     }
 
@@ -326,7 +322,7 @@ contract DiamondLoupeFacet is
         uint256 _pageLength
     ) external view override returns (address[] memory facetAddresses_) {
         facetAddresses_ = _getFacetAddresses(
-            _getResolverProxyStorage(),
+            _resolverProxyStorage(),
             _pageIndex,
             _pageLength
         );
@@ -335,26 +331,26 @@ contract DiamondLoupeFacet is
     function getFacetIdBySelector(
         bytes4 _selector
     ) external view returns (bytes32 facetId_) {
-        facetId_ = _getFacetIdBySelector(_getResolverProxyStorage(), _selector);
+        facetId_ = _getFacetIdBySelector(_resolverProxyStorage(), _selector);
     }
 
     function getFacet(
         bytes32 _facetId
     ) external view override returns (Facet memory facet_) {
-        facet_ = _getFacet(_getResolverProxyStorage(), _facetId);
+        facet_ = _getFacet(_resolverProxyStorage(), _facetId);
     }
 
     function getFacetAddress(
         bytes4 _selector
     ) external view override returns (address facetAddress_) {
-        facetAddress_ = _getFacetAddress(_getResolverProxyStorage(), _selector);
+        facetAddress_ = _getFacetAddress(_resolverProxyStorage(), _selector);
     }
 
     // This implements ERC-165.
     function supportsInterface(
         bytes4 _interfaceId
     ) external view override returns (bool) {
-        return _supportsInterface(_getResolverProxyStorage(), _interfaceId);
+        return _supportsInterface(_resolverProxyStorage(), _interfaceId);
     }
 
     function getStaticResolverKey()

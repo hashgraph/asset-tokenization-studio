@@ -279,8 +279,43 @@ export const lowerOrEqualThan = (max: number) => (val: number) =>
 export const lowerThan = (max: number) => (val: number) =>
   val < max || t("lowerThan", { max });
 
-export const isISINValid = (length: number) => (val: string) =>
-  val.length === length || t("isISINValid", { length });
+export const isISINValid = (val: string) => {
+  if (val.length !== 12) {
+    return t("isISINValid", { length: 12 });
+  }
+
+  const isinRegex = /^[A-Z]{2}[A-Z0-9]{10}$/;
+  if (!isinRegex.test(val)) {
+    return t("isISINValidFormat");
+  }
+
+  // Validate Luhn algorithm
+  const digits = val
+    .split("")
+    .map((char) =>
+      /[A-Z]/.test(char) ? char.charCodeAt(0) - 55 : parseInt(char, 10),
+    )
+    .join("");
+
+  let sum = 0;
+  let alternate = false;
+
+  for (let i = digits.length - 1; i >= 0; i--) {
+    let n = parseInt(digits[i], 10);
+    if (alternate) {
+      n *= 2;
+      if (n > 9) n -= 9;
+    }
+    sum += n;
+    alternate = !alternate;
+  }
+
+  if (sum % 10 !== 0) {
+    return t("isISINValidFormat");
+  }
+
+  return true;
+};
 
 export const isHederaValidAddress = (val: string) => {
   const maskRegex = /^[0-9]\.[0-9]\.[0-9]{1,7}$/;

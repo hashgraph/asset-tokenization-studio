@@ -263,6 +263,8 @@ task(
             accessControl,
             cap,
             controlList,
+            kyc,
+            ssiManagement,
             pause,
             erc20,
             erc1410ScheduledTasks,
@@ -276,11 +278,13 @@ task(
             scheduledSnapshots,
             scheduledBalanceAdjustments,
             scheduledTasks,
-            corporateActionsSecurity,
+            corporateActions,
             lock,
             hold,
             transferAndLock,
             adjustBalances,
+            clearingActionsFacet,
+            clearingFacet,
         } = await deployAtsFullInfrastructure(
             new DeployAtsFullInfrastructureCommand({
                 signer: signer,
@@ -302,6 +306,8 @@ task(
             'Access Control': accessControl.address,
             Cap: cap.address,
             'Control List': controlList.address,
+            Kyc: kyc.address,
+            SsiManagement: ssiManagement.address,
             Pause: pause.address,
             ERC20: erc20.address,
             ERC1410: erc1410ScheduledTasks.address,
@@ -316,11 +322,13 @@ task(
             'Scheduled Balance Adjustments':
                 scheduledBalanceAdjustments.address,
             'Scheduled Tasks': scheduledTasks.address,
-            'Corporate Actions': corporateActionsSecurity.address,
+            'Corporate Actions': corporateActions.address,
             Lock: lock.address,
             Hold: hold.address,
             'Transfer and Lock': transferAndLock.address,
             'Adjust Balances': adjustBalances.address,
+            'Clearing Action Facet': clearingActionsFacet.address,
+            'Clearing Facet': clearingFacet.address,
         }
 
         console.log('\n 🟢 Deployed ATS Contract List:')

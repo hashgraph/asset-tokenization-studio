@@ -213,6 +213,9 @@ import balanceAdjustment from "./balanceAdjustment";
 import locker from "./locker";
 import cap from "./cap";
 import hold from "./hold";
+import kyc from "./kyc";
+import ssiManager from "./ssiManager";
+import clearingOperations from "./clearingOperations";
 
 export default {
   header: {
@@ -232,6 +235,9 @@ export default {
     locker: "Locker",
     cap: "Cap",
     hold: "Hold",
+    kyc: "KYC",
+    ssiManager: "SSI Manager",
+    clearingOperations: "Clearing Operations",
   },
   actions: {
     redeem: "Redeem",
@@ -244,6 +250,9 @@ export default {
       subtitle: "Pause security token",
       buttonActive: "Active",
       buttonInactive: "Inactive",
+      clearingMode: "Clearing mode",
+      activate: "Activate",
+      deactivate: "Deactivate",
     },
   },
   dividends,
@@ -273,6 +282,9 @@ export default {
   locker,
   cap,
   hold,
+  kyc,
+  ssiManager,
+  clearingOperations,
   benefits: {
     dividends: "Dividends",
     balanceAdjustments: "Balance Adjustments",

@@ -205,40 +205,31 @@
 
 pragma solidity 0.8.18;
 
-import {
-    ERC1410ScheduledTasksStorageWrapper
-} from '../../layer_2/ERC1400/ERC1410/ERC1410ScheduledTasksStorageWrapper.sol';
+import {Common} from '../../layer_1/common/Common.sol';
 import {
     checkNounceAndDeadline,
     verify
 } from '../../layer_1/protectedPartitions/signatureVerification.sol';
 import {ITransferAndLock} from '../interfaces/ITransferAndLock.sol';
-import {
-    LockStorageWrapper_2
-} from '../../layer_2/lock/LockStorageWrapper_2.sol';
-import {
-    LockStorageWrapper_2_Read
-} from '../../layer_2/lock/LockStorageWrapper_2_Read.sol';
-import {_DEFAULT_PARTITION} from '../../layer_1/constants/values.sol';
+import {_DEFAULT_PARTITION} from '../../layer_0/constants/values.sol';
 import {
     getMessageHashTransferAndLockByPartition,
     getMessageHashTransferAndLock
 } from './signatureVerification.sol';
+import {
+    IERC1410Basic
+} from '../../layer_1/interfaces/ERC1400/IERC1410Basic.sol';
 
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
-abstract contract TransferAndLockStorageWrapper is
-    ITransferAndLock,
-    ERC1410ScheduledTasksStorageWrapper,
-    LockStorageWrapper_2
-{
+abstract contract TransferAndLockStorageWrapper is ITransferAndLock, Common {
     function _protectedTransferAndLockByPartition(
         bytes32 _partition,
         TransferAndLockStruct calldata _transferAndLock,
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal virtual returns (bool success_, uint256 lockId_) {
+    ) internal returns (bool success_, uint256 lockId_) {
         checkNounceAndDeadline(
             _nounce,
             _transferAndLock.from,
@@ -259,8 +250,10 @@ abstract contract TransferAndLockStorageWrapper is
 
         _transferByPartition(
             _msgSender(),
-            _transferAndLock.to,
-            _transferAndLock.amount,
+            IERC1410Basic.BasicTransferInfo(
+                _transferAndLock.to,
+                _transferAndLock.amount
+            ),
             _partition,
             _transferAndLock.data,
             _msgSender(),
@@ -288,7 +281,7 @@ abstract contract TransferAndLockStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal virtual returns (bool success_, uint256 lockId_) {
+    ) internal returns (bool success_, uint256 lockId_) {
         checkNounceAndDeadline(
             _nounce,
             _transferAndLock.from,
@@ -308,8 +301,10 @@ abstract contract TransferAndLockStorageWrapper is
 
         _transferByPartition(
             _msgSender(),
-            _transferAndLock.to,
-            _transferAndLock.amount,
+            IERC1410Basic.BasicTransferInfo(
+                _transferAndLock.to,
+                _transferAndLock.amount
+            ),
             _DEFAULT_PARTITION,
             _transferAndLock.data,
             _msgSender(),
@@ -338,7 +333,7 @@ abstract contract TransferAndLockStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual {
+    ) internal view {
         if (
             !_isTransferAndLockByPartitionSignatureValid(
                 _partition,
@@ -356,7 +351,7 @@ abstract contract TransferAndLockStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         bytes32 functionHash = getMessageHashTransferAndLockByPartition(
             _partition,
             _transferAndLock.from,
@@ -384,7 +379,7 @@ abstract contract TransferAndLockStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual {
+    ) internal view {
         if (
             !_isTransferAndLockSignatureValid(
                 _transferAndLock,
@@ -400,7 +395,7 @@ abstract contract TransferAndLockStorageWrapper is
         uint256 _deadline,
         uint256 _nounce,
         bytes calldata _signature
-    ) internal view virtual returns (bool) {
+    ) internal view returns (bool) {
         bytes32 functionHash = getMessageHashTransferAndLock(
             _transferAndLock.from,
             _transferAndLock.to,
@@ -420,21 +415,5 @@ abstract contract TransferAndLockStorageWrapper is
                 _blockChainid(),
                 address(this)
             );
-    }
-
-    function _addPartitionTo(
-        uint256 _value,
-        address _account,
-        bytes32 _partition
-    )
-        internal
-        virtual
-        override(ERC1410ScheduledTasksStorageWrapper, LockStorageWrapper_2_Read)
-    {
-        ERC1410ScheduledTasksStorageWrapper._addPartitionTo(
-            _value,
-            _account,
-            _partition
-        );
     }
 }
