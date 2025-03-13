@@ -205,11 +205,11 @@
 
 import { Query } from '../../../../../../core/query/Query.js';
 import { QueryResponse } from '../../../../../../core/query/QueryResponse.js';
-import {
-  ClearingTransfer,
-} from '../../../../../../domain/context/security/Clearing.js';
+import { ClearingTransfer } from '../../../../../../domain/context/security/Clearing.js';
 
-export class GetClearingTransferForByPartitionQueryResponse implements QueryResponse {
+export class GetClearingTransferForByPartitionQueryResponse
+  implements QueryResponse
+{
   constructor(public readonly payload: ClearingTransfer) {}
 }
 

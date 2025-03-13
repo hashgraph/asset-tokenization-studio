@@ -233,12 +233,7 @@ export class GetClearingCreateHoldForByPartitionQueryHandler
   async execute(
     query: GetClearingCreateHoldForByPartitionQuery,
   ): Promise<GetClearingCreateHoldForByPartitionQueryResponse> {
-    const {
-      securityId,
-      partitionId,
-      targetId,
-      clearingId,
-    } = query;
+    const { securityId, partitionId, targetId, clearingId } = query;
     const security = await this.securityService.get(securityId);
     if (!security.evmDiamondAddress) throw new Error('Invalid security id');
 
@@ -252,12 +247,13 @@ export class GetClearingCreateHoldForByPartitionQueryHandler
       ? await this.mirrorNodeAdapter.accountToEvmAddress(targetId)
       : new EvmAddress(targetId);
 
-    const clearing = await this.queryAdapter.getClearingCreateHoldForByPartition(
-      securityEvmAddress,
-      partitionId,
-      targetEvmAddress,
-      clearingId,
-    );
+    const clearing =
+      await this.queryAdapter.getClearingCreateHoldForByPartition(
+        securityEvmAddress,
+        partitionId,
+        targetEvmAddress,
+        clearingId,
+      );
 
     clearing.amount = BigDecimal.fromStringFixed(
       clearing.amount.toString(),
