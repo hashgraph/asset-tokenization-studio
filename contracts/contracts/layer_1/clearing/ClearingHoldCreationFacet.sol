@@ -242,7 +242,7 @@ contract ClearingHoldCreationFacet is
         returns (bool success_, uint256 clearingId_)
     {
         address sender = _msgSender();
-        
+
         (success_, clearingId_) = _clearingHoldCreationCreation(
             _clearingOperation,
             sender,

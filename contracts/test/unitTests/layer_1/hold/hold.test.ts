@@ -716,7 +716,7 @@ describe('Hold Tests', () => {
                 await expect(
                     holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
                 ).to.be.revertedWithCustomError(
-                    clearingActionsFacet,
+                    holdFacet,
                     'ClearingIsActivated'
                 )
                 await expect(
@@ -727,7 +727,7 @@ describe('Hold Tests', () => {
                         '0x'
                     )
                 ).to.be.revertedWithCustomError(
-                    clearingActionsFacet,
+                    holdFacet,
                     'ClearingIsActivated'
                 )
                 await expect(
@@ -738,7 +738,7 @@ describe('Hold Tests', () => {
                         '0x'
                     )
                 ).to.be.revertedWithCustomError(
-                    clearingActionsFacet,
+                    holdFacet,
                     'ClearingIsActivated'
                 )
             })
