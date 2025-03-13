@@ -204,81 +204,251 @@
 */
 
 pragma solidity 0.8.18;
+
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
+import {Common} from '../common/Common.sol';
+import {
+    IClearingHoldCreation
+} from '../interfaces/clearing/IClearingHoldCreation.sol';
+import {IHold} from '../interfaces/hold/IHold.sol';
+import {_CLEARING_ROLE} from '../constants/roles.sol';
+import {
+    IStaticFunctionSelectors
+} from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
+import {
+    _CLEARING_HOLDCREATION_RESOLVER_KEY
+} from '../constants/resolverKeys.sol';
+import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
-// solhint-disable max-line-length
+// solhint-disable no-unused-vars, custom-errors
+contract ClearingHoldCreationFacet is
+    IStaticFunctionSelectors,
+    IClearingHoldCreation,
+    Common
+{
+    function clearingCreateHoldByPartition(
+        ClearingOperation calldata _clearingOperation,
+        IHold.Hold calldata _hold
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(_clearingOperation.partition)
+        onlyWithValidExpirationTimestamp(_clearingOperation.expirationTimestamp)
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
+        address sender = _msgSender();
 
-// keccak256('security.token.standard.accesscontrol.resolverKey');
-bytes32 constant _ACCESS_CONTROL_RESOLVER_KEY = 0x011768a41cb4fe76a26f444eec15d81a0d84e919a36336d72c6539cf41c0fcf6;
+        (success_, clearingId_) = _clearingHoldCreationCreation(
+            _clearingOperation,
+            sender,
+            sender,
+            false,
+            _hold,
+            ''
+        );
 
-// keccak256('security.token.standard.controllist.resolverKey');
-bytes32 constant _CONTROL_LIST_RESOLVER_KEY = 0xfbb1491bfcecd95f79409bd5a4b69a4ba1e5573573372f5d2d66c11e3016414c;
+        emit ClearedHoldByPartition(
+            sender,
+            sender,
+            _clearingOperation.partition,
+            clearingId_,
+            _hold,
+            ''
+        );
+    }
 
-// keccak256('security.token.standard.pause.resolverKey');
-bytes32 constant _PAUSE_RESOLVER_KEY = 0x9429fd9ef38f89f41bd9ec33fd5c94b287ed1c27a98938da43835ac761b2f92c;
+    function clearingCreateHoldFromByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        IHold.Hold calldata _hold
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_clearingOperationFrom.from)
+        validateAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
+        onlyWithValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        )
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
+        address sender = _msgSender();
 
-// keccak256('security.token.standard.cap.resolverKey');
-bytes32 constant _CAP_RESOLVER_KEY = 0xfb3f8aac36661b5540c571d821c80dc9db7ede5ca2a4204ee562b3356f0c026b;
+        (success_, clearingId_) = _clearingHoldCreationCreation(
+            _clearingOperationFrom.clearingOperation,
+            _clearingOperationFrom.from,
+            sender,
+            true,
+            _hold,
+            _clearingOperationFrom.operatorData
+        );
 
-// keccak256('security.token.standard.erc20.resolverKey');
-bytes32 constant _ERC20_RESOLVER_KEY = 0x064c883089ba1a596d9146c7aaa73c19ef8825f374c67a9538787c3d12e68dc5;
+        emit ClearedHoldByPartition(
+            sender,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            _hold,
+            _clearingOperationFrom.operatorData
+        );
+    }
 
-// keccak256('security.token.standard.erc1594.resolverKey');
-bytes32 constant _ERC1594_RESOLVER_KEY = 0xcb70773e8163595d8bd906e277adeb3935976ad802ee8c29face3dfb0263291f;
+    function operatorClearingCreateHoldByPartition(
+        ClearingOperationFrom calldata _clearingOperationFrom,
+        IHold.Hold calldata _hold
+    )
+        external
+        override
+        onlyUnpaused
+        validateAddress(_clearingOperationFrom.from)
+        validateAddress(_hold.escrow)
+        onlyDefaultPartitionWithSinglePartition(
+            _clearingOperationFrom.clearingOperation.partition
+        )
+        onlyWithValidExpirationTimestamp(
+            _clearingOperationFrom.clearingOperation.expirationTimestamp
+        )
+        onlyWithValidExpirationTimestamp(_hold.expirationTimestamp)
+        onlyUnProtectedPartitionsOrWildCardRole
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
+        {
+            _checkOperator(
+                _clearingOperationFrom.clearingOperation.partition,
+                _clearingOperationFrom.from
+            );
+        }
+        address sender = _msgSender();
 
-// keccak256('security.token.standard.erc1643.resolverKey');
-bytes32 constant _ERC1643_RESOLVER_KEY = 0x24543637956a3076689f171d3932b10f22d40f3785d53acebb340f37bed01625;
+        (success_, clearingId_) = _clearingHoldCreationCreation(
+            _clearingOperationFrom.clearingOperation,
+            _clearingOperationFrom.from,
+            sender,
+            false,
+            _hold,
+            _clearingOperationFrom.operatorData
+        );
 
-// keccak256('security.token.standard.erc1410.resolverKey');
-bytes32 constant _ERC1410_RESOLVER_KEY = 0x0d714ae58404788b445b639b0a0bcf37eeeb2e661bfa542569f5555a9a40b5b2;
+        emit ClearedHoldByPartition(
+            sender,
+            _clearingOperationFrom.from,
+            _clearingOperationFrom.clearingOperation.partition,
+            clearingId_,
+            _hold,
+            _clearingOperationFrom.operatorData
+        );
+    }
 
-// keccak256('security.token.standard.erc1644.resolverKey');
-bytes32 constant _ERC1644_RESOLVER_KEY = 0xf1da2ed271d62ba0b6597874c96fb6ed7d929e5ec679f4ad8c2c516c72f6736d;
+    function protectedClearingCreateHoldByPartition(
+        ProtectedClearingOperation calldata _protectedClearingOperation,
+        IHold.Hold calldata _hold,
+        bytes calldata _signature
+    )
+        external
+        override
+        onlyUnpaused
+        onlyProtectedPartitions
+        validateAddress(_protectedClearingOperation.from)
+        onlyWithValidExpirationTimestamp(
+            _protectedClearingOperation.clearingOperation.expirationTimestamp
+        )
+        onlyRole(
+            _protectedPartitionsRole(
+                _protectedClearingOperation.clearingOperation.partition
+            )
+        )
+        onlyClearingActivated
+        returns (bool success_, uint256 clearingId_)
+    {
+        (success_, clearingId_) = _protectedClearingCreateHoldByPartition(
+            _protectedClearingOperation,
+            _hold,
+            _signature
+        );
 
-// keccak256('security.token.standard.snapshots.resolverKey');
-bytes32 constant _SNAPSHOTS_RESOLVER_KEY = 0x9a3fc46d83536ef6b87eb4fec37302bfd1a7c18e81ea2da853b911b44cf5b0cf;
+        emit ClearedHoldByPartition(
+            _msgSender(),
+            _protectedClearingOperation.from,
+            _protectedClearingOperation.clearingOperation.partition,
+            clearingId_,
+            _hold,
+            ''
+        );
+    }
 
-// keccak256("security.token.standard.resolver.proxy.resolverKey")
-bytes32 constant _RESOLVER_PROXY_RESOLVER_KEY = 0x6fe19cad2a96b3f5852be16d059cc4c233139891fc04dc506c03d297d5f12c1e;
+    function getClearingCreateHoldForByPartition(
+        bytes32 _partition,
+        address _tokenHolder,
+        uint256 _clearingId
+    )
+        external
+        view
+        override
+        returns (ClearingHoldCreationData memory clearingHoldCreationData_)
+    {
+        return
+            _getClearingHoldCreationForByPartitionAdjusted(
+                _partition,
+                _tokenHolder,
+                _clearingId
+            );
+    }
 
-// keccak256("security.token.standard.diamond.loupe.resolverKey")
-bytes32 constant _DIAMOND_LOUPE_RESOLVER_KEY = 0x086a1dd0b9bfa39267d1de30445a8edeb3a1f50c8a0a82c91f9dee3608e83567;
+    function getStaticResolverKey()
+        external
+        pure
+        override
+        returns (bytes32 staticResolverKey_)
+    {
+        staticResolverKey_ = _CLEARING_HOLDCREATION_RESOLVER_KEY;
+    }
 
-// keccak256("security.token.standard.diamond.cut.resolverKey")
-bytes32 constant _DIAMOND_CUT_RESOLVER_KEY = 0xb66fc45b2670ed2c4ce03061121e6c8e53bce06e161f95afad8e57671b64fca8;
+    function getStaticFunctionSelectors()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticFunctionSelectors_)
+    {
+        uint256 selectorIndex;
+        staticFunctionSelectors_ = new bytes4[](5);
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearingCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .clearingCreateHoldFromByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .operatorClearingCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .protectedClearingCreateHoldByPartition
+            .selector;
+        staticFunctionSelectors_[selectorIndex++] = this
+            .getClearingCreateHoldForByPartition
+            .selector;
+    }
 
-// keccak256("security.token.standard.diamond.resolverKey")
-bytes32 constant _DIAMOND_RESOLVER_KEY = 0x1b5212ea37fb29e99afa2812a5d7d7e662a477424d3de1a18cc3871a2ee94d78;
-
-// keccak256("security.token.standard.corporateActions.resolverKey")
-bytes32 constant _CORPORATE_ACTIONS_RESOLVER_KEY = 0x3cc74200ccfb5d585a6d170f8824979dbf1b592e0a41eef41cf6d86cf4882077;
-
-// keccak256("security.token.standard.lock.resolverKey")
-bytes32 constant _LOCK_RESOLVER_KEY = 0xf1364345b3db5ebe5808f2d2d2aaecb9cdb4fddacad1534033060ebc886fc1e9;
-
-// keccak256("security.token.standard.protected.partitions.resolverKey")
-bytes32 constant _PROTECTED_PARTITIONS_RESOLVER_KEY = 0x6d65d2938c05a4d952aff0845c1baa5bea04d4544db74f8b3b26004d1d58d58f;
-
-// keccak256("security.token.standard.hold.resolverKey")
-bytes32 constant _HOLD_RESOLVER_KEY = 0x49c539aaa7273888cd36649dc1b9a58a0bc7f54b639f84f2a7074d99b0754f6d;
-
-// keccak256("security.token.standard.ssi.management.resolverKey")
-bytes32 constant _SSI_MANAGEMENT_RESOLVER_KEY = 0x46df6aaf3742e0cbad136a74fb679b686e087dcc3a3d92d1c4ce2f3ef1b508a0;
-
-// keccak256("security.token.standard.kyc.resolverKey")
-bytes32 constant _KYC_RESOLVER_KEY = 0xf516a0f6b4726244ae916c590cd26c2b593d7d448e46e43714fb9f9435c46e32;
-
-// keccak256("security.token.standard.clearing.transfer.resolverKey")
-bytes32 constant _CLEARING_TRANSFER_RESOLVER_KEY = 0x7399d03db62430bec60ca2c3eacf98b1b7e2253f17593ef7a226d759442e0928;
-
-// keccak256("security.token.standard.clearing.redeem.resolverKey")
-bytes32 constant _CLEARING_REDEEM_RESOLVER_KEY = 0xb341e7aa749da43976c189209de51ccdf838af9f964cd27340b914d5b2aeba97;
-
-// keccak256("security.token.standard.clearing.holdCreation.resolverKey")
-bytes32 constant _CLEARING_HOLDCREATION_RESOLVER_KEY = 0x44f99a141c434fac20d69e7511932ee344d5b37b61851976c83a5df4ca468152;
-
-// keccak256("security.token.standard.clearing.read.resolverKey")
-bytes32 constant _CLEARING_READ_RESOLVER_KEY = 0xebb2e29bdf4edaf4ca66a3f9b7735087f9d0474d56d856e53c94ef00596c0b1e;
-
-// keccak256("security.token.standard.clearing.actions.resolverKey")
-bytes32 constant _CLEARING_ACTIONS_RESOLVER_KEY = 0x5472dfc5c92ad7a8651518ea7d3854d3b6494e5bcaa19f91cd61bf93bf6f2a74;
+    function getStaticInterfaceIds()
+        external
+        pure
+        override
+        returns (bytes4[] memory staticInterfaceIds_)
+    {
+        staticInterfaceIds_ = new bytes4[](1);
+        uint256 selectorsIndex;
+        staticInterfaceIds_[selectorsIndex++] = type(IClearingHoldCreation)
+            .interfaceId;
+    }
+}
+// solhint-enable no-unused-vars, custom-errors

@@ -251,7 +251,10 @@ export const CONTRACT_NAMES = [
     'TimeTravel',
     'Kyc',
     'SsiManagement',
-    'ClearingFacet',
+    'ClearingHoldCreationFacet',
+    'ClearingRedeemFacet',
+    'ClearingTransferFacet',
+    'ClearingReadFacet',
     'ClearingActionsFacet',
 ] as const
 export type ContractName = (typeof CONTRACT_NAMES)[number]

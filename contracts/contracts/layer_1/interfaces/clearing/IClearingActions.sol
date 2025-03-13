@@ -209,6 +209,9 @@ pragma solidity 0.8.18;
 import {IClearing} from './IClearing.sol';
 
 interface IClearingActions {
+    event ClearingActivated(address indexed operator);
+    event ClearingDeactivated(address indexed operator);
+
     event ClearingOperationApproved(
         address indexed operator,
         address indexed tokenHolder,
@@ -233,6 +236,18 @@ interface IClearingActions {
         IClearing.ClearingOperationType clearingOperationType
     );
 
+    enum ClearingActionType {
+        Approve,
+        Cancel,
+        Reclaim
+    }
+
+    function initializeClearing(bool _activateClearing) external;
+
+    function activateClearing() external returns (bool success_);
+
+    function deactivateClearing() external returns (bool success_);
+
     function approveClearingOperationByPartition(
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier
@@ -247,4 +262,6 @@ interface IClearingActions {
         IClearing.ClearingOperationIdentifier
             calldata _clearingOperationIdentifier
     ) external returns (bool success_);
+
+    function isClearingActivated() external view returns (bool);
 }

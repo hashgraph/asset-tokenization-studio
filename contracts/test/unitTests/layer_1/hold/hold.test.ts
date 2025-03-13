@@ -225,7 +225,7 @@ import {
     TimeTravel,
     Kyc,
     SsiManagement,
-    ClearingFacet,
+    ClearingActionsFacet,
     Equity,
     AdjustBalances,
     Cap,
@@ -301,7 +301,7 @@ describe('Hold Tests', () => {
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
-    let clearingFacet: ClearingFacet
+    let clearingActionsFacet: ClearingActionsFacet
     let equityFacet: Equity
     let accessControlFacet: AccessControl
     let capFacet: Cap
@@ -397,7 +397,11 @@ describe('Hold Tests', () => {
             diamond.address,
             signer_A
         )
-        clearingFacet = await ethers.getContractAt('ClearingFacet', diamond.address, signer_A)
+        clearingActionsFacet = await ethers.getContractAt(
+            'ClearingActionsFacet',
+            diamond.address,
+            signer_A
+        )
         capFacet = await ethers.getContractAt('Cap', diamond.address, signer_A)
 
         accessControlFacet = await ethers.getContractAt(
@@ -708,11 +712,11 @@ describe('Hold Tests', () => {
 
         describe('Clearing active', () => {
             it('GIVEN a token in clearing mode THEN hold creation fails with ClearingIsActivated', async () => {
-                await clearingFacet.activateClearing()
+                await clearingActionsFacet.activateClearing()
                 await expect(
                     holdFacet.createHoldByPartition(_DEFAULT_PARTITION, hold)
                 ).to.be.revertedWithCustomError(
-                    clearingFacet,
+                    holdFacet,
                     'ClearingIsActivated'
                 )
                 await expect(
@@ -723,7 +727,7 @@ describe('Hold Tests', () => {
                         '0x'
                     )
                 ).to.be.revertedWithCustomError(
-                    clearingFacet,
+                    holdFacet,
                     'ClearingIsActivated'
                 )
                 await expect(
@@ -734,7 +738,7 @@ describe('Hold Tests', () => {
                         '0x'
                     )
                 ).to.be.revertedWithCustomError(
-                    clearingFacet,
+                    holdFacet,
                     'ClearingIsActivated'
                 )
             })
@@ -1745,17 +1749,17 @@ describe('Hold Tests', () => {
                     dateToUnixTimestamp('2030-01-01T00:00:03Z')
                 )
 
-                const hold_TotalAmount_After =
-                    await holdFacet.getHeldAmountFor(account_A)
+                const hold_TotalAmount_After = await holdFacet.getHeldAmountFor(
+                    account_A
+                )
                 const hold_TotalAmount_After_Partition_1 =
                     await holdFacet.getHeldAmountForByPartition(
                         _PARTITION_ID_1,
                         account_A
                     )
-                const hold_After =
-                    await holdFacet.getHoldForByPartition(
-                        holdIdentifier
-                    )
+                const hold_After = await holdFacet.getHoldForByPartition(
+                    holdIdentifier
+                )
                 const balance_After = await erc1410Facet.balanceOf(account_A)
                 const balance_After_Partition_1 =
                     await erc1410Facet.balanceOfByPartition(

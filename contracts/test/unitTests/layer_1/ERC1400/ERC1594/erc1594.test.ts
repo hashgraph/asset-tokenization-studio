@@ -219,7 +219,7 @@ import {
     BusinessLogicResolver,
     Kyc,
     SsiManagement,
-    ClearingFacet
+    ClearingActionsFacet,
 } from '@typechain'
 import {
     CONTROL_LIST_ROLE,
@@ -279,7 +279,7 @@ describe('ERC1594 Tests', () => {
     let controlList: ControlList
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
-    let clearingFacet: ClearingFacet
+    let clearingActionsFacet: ClearingActionsFacet
 
     describe('Multi partition mode', () => {
         before(async () => {
@@ -318,7 +318,7 @@ describe('ERC1594 Tests', () => {
                 role: CLEARING_ROLE,
                 members: [account_B],
             }
-            const init_rbacs: Rbac[] = [rbacPause,rbacClearing]
+            const init_rbacs: Rbac[] = [rbacPause, rbacClearing]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
@@ -369,8 +369,8 @@ describe('ERC1594 Tests', () => {
                 diamond.address
             )
 
-            clearingFacet = await ethers.getContractAt(
-                'ClearingFacet',
+            clearingActionsFacet = await ethers.getContractAt(
+                'ClearingActionsFacet',
                 diamond.address,
                 signer_B
             )
@@ -450,28 +450,28 @@ describe('ERC1594 Tests', () => {
             })
         })
 
-        describe ('Clearing', () => {
+        describe('Clearing', () => {
             beforeEach(async () => {
-                await clearingFacet.activateClearing()
+                await clearingActionsFacet.activateClearing()
             })
-            it('GIVEN a token with clearing mode active WHEN transfer THEN transaction fails with ClearingIsActivated', async() =>{
-                 // Using account C (with role)
-                 erc1594Facet = erc1594Facet.connect(signer_C)
+            it('GIVEN a token with clearing mode active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
+                // Using account C (with role)
+                erc1594Facet = erc1594Facet.connect(signer_C)
 
-                 // transfer with data fails
-                 await expect(
-                     erc1594Facet.transferWithData(account_D, AMOUNT, DATA)
-                 ).to.be.rejectedWith('ClearingIsActivated')
- 
-                 // transfer from with data fails
-                 await expect(
-                     erc1594Facet.transferFromWithData(
-                         account_E,
-                         account_D,
-                         AMOUNT,
-                         DATA
-                     )
-                 ).to.be.rejectedWith('ClearingIsActivated')
+                // transfer with data fails
+                await expect(
+                    erc1594Facet.transferWithData(account_D, AMOUNT, DATA)
+                ).to.be.rejectedWith('ClearingIsActivated')
+
+                // transfer from with data fails
+                await expect(
+                    erc1594Facet.transferFromWithData(
+                        account_E,
+                        account_D,
+                        AMOUNT,
+                        DATA
+                    )
+                ).to.be.rejectedWith('ClearingIsActivated')
             })
 
             it('GIVEN a token with clearing mode active WHEN redeem THEN transaction fails with ClearingIsActivated', async () => {
