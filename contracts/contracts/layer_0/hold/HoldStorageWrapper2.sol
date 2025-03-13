@@ -383,7 +383,7 @@ abstract contract HoldStorageWrapper2 is
         IHold.HoldData memory holdData = _getHold(_holdIdentifier);
         amount_ = holdData.hold.amount;
 
-        if (holdData.operator != _holdIdentifier.tokenHolder)
+        if (holdData.operator != address(0))
             _restoreAllowance(
                 holdData.operator,
                 _holdIdentifier.tokenHolder,
