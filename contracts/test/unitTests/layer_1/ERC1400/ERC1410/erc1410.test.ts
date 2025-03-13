@@ -801,9 +801,15 @@ describe('ERC1410 Tests', () => {
         }
         const rbacClearingRole = {
             role: CLEARING_ROLE,
-            members: [account_A]
+            members: [account_A],
         }
-        return [rbacPause, corporateActionPause, rbacKyc, rbacSsi, rbacClearingRole]
+        return [
+            rbacPause,
+            corporateActionPause,
+            rbacKyc,
+            rbacSsi,
+            rbacClearingRole,
+        ]
     }
 
     describe('Multi partition ', () => {

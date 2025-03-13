@@ -270,14 +270,22 @@ interface IEquity {
         uint8 decimals;
     }
 
+    function setDividends(
+        Dividend calldata _newDividend
+    ) external returns (bool success_, uint256 dividendID_);
+
+    function setVoting(
+        Voting calldata _newVoting
+    ) external returns (bool success_, uint256 voteID_);
+
+    function setScheduledBalanceAdjustment(
+        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
+    ) external returns (bool success_, uint256 balanceAdjustmentID_);
+
     function getEquityDetails()
         external
         view
         returns (EquityDetailsData memory equityDetailsData_);
-
-    function setDividends(
-        Dividend calldata _newDividend
-    ) external returns (bool success_, uint256 dividendID_);
 
     function getDividends(
         uint256 _dividendID
@@ -290,10 +298,6 @@ interface IEquity {
 
     function getDividendsCount() external view returns (uint256 dividendCount_);
 
-    function setVoting(
-        Voting calldata _newVoting
-    ) external returns (bool success_, uint256 voteID_);
-
     function getVoting(
         uint256 _voteID
     ) external view returns (RegisteredVoting memory registeredVoting_);
@@ -304,10 +308,6 @@ interface IEquity {
     ) external view returns (VotingFor memory votingFor_);
 
     function getVotingCount() external view returns (uint256 votingCount_);
-
-    function setScheduledBalanceAdjustment(
-        ScheduledBalanceAdjustment calldata _newBalanceAdjustment
-    ) external returns (bool success_, uint256 balanceAdjustmentID_);
 
     function getScheduledBalanceAdjustment(
         uint256 _balanceAdjustmentID

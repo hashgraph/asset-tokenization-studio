@@ -3,10 +3,6 @@ pragma solidity 0.8.18;
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 interface IProtectedPartitionsStorageWrapper {
-    error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
-    error PartitionsAreUnProtected();
-    error WrongSignature();
-
     event PartitionsProtected(address indexed operator);
 
     event PartitionsUnProtected(address indexed operator);
@@ -31,4 +27,8 @@ interface IProtectedPartitionsStorageWrapper {
         uint256 nounce,
         bytes signature
     );
+
+    error PartitionsAreProtectedAndNoRole(address account, bytes32 role);
+    error PartitionsAreUnProtected();
+    error WrongSignature();
 }

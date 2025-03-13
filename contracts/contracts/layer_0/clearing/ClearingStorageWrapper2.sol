@@ -805,46 +805,6 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         ].add(_clearingId);
     }
 
-    function _buildClearingData(
-        bytes memory _encodedClearingData,
-        IClearing.ClearingOperation memory _clearingOperation,
-        uint256 _amount,
-        IClearing.ClearingOperationType _operationType,
-        uint256 _clearingId
-    ) private pure returns (IClearing.ClearingData memory clearingData_) {
-        IHold.Hold memory hold_;
-        address to_;
-        bytes memory operatorData_;
-
-        if (_operationType == IClearing.ClearingOperationType.HoldCreation) {
-            (hold_, operatorData_) = abi.decode(
-                _encodedClearingData,
-                (IHold.Hold, bytes)
-            );
-            to_ = hold_.to;
-        } else if (_operationType == IClearing.ClearingOperationType.Transfer) {
-            (to_, operatorData_) = abi.decode(
-                _encodedClearingData,
-                (address, bytes)
-            );
-        } else {
-            operatorData_ = abi.decode(_encodedClearingData, (bytes));
-        }
-
-        clearingData_ = IClearing.ClearingData({
-            clearingOperationType: _operationType,
-            amount: _amount,
-            holdExpirationTimestamp: hold_.expirationTimestamp,
-            expirationTimestamp: _clearingOperation.expirationTimestamp,
-            destination: to_,
-            escrow: hold_.escrow,
-            holdData: hold_.data,
-            data: _clearingOperation.data,
-            operatorData: operatorData_,
-            clearingId: _clearingId
-        });
-    }
-
     function _getClearedAmountForAdjusted(
         address _tokenHolder
     ) internal view virtual override returns (uint256 amount_) {
@@ -909,5 +869,45 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
         uint256 _clearingId,
         address _tokenHolder
     ) internal view virtual returns (uint256);
+
+    function _buildClearingData(
+        bytes memory _encodedClearingData,
+        IClearing.ClearingOperation memory _clearingOperation,
+        uint256 _amount,
+        IClearing.ClearingOperationType _operationType,
+        uint256 _clearingId
+    ) private pure returns (IClearing.ClearingData memory clearingData_) {
+        IHold.Hold memory hold_;
+        address to_;
+        bytes memory operatorData_;
+
+        if (_operationType == IClearing.ClearingOperationType.HoldCreation) {
+            (hold_, operatorData_) = abi.decode(
+                _encodedClearingData,
+                (IHold.Hold, bytes)
+            );
+            to_ = hold_.to;
+        } else if (_operationType == IClearing.ClearingOperationType.Transfer) {
+            (to_, operatorData_) = abi.decode(
+                _encodedClearingData,
+                (address, bytes)
+            );
+        } else {
+            operatorData_ = abi.decode(_encodedClearingData, (bytes));
+        }
+
+        clearingData_ = IClearing.ClearingData({
+            clearingOperationType: _operationType,
+            amount: _amount,
+            holdExpirationTimestamp: hold_.expirationTimestamp,
+            expirationTimestamp: _clearingOperation.expirationTimestamp,
+            destination: to_,
+            escrow: hold_.escrow,
+            holdData: hold_.data,
+            data: _clearingOperation.data,
+            operatorData: operatorData_,
+            clearingId: _clearingId
+        });
+    }
 }
 // solhint-enable no-unused-vars, custom-errors

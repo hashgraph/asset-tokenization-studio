@@ -215,11 +215,6 @@ import {CapStorageWrapper1} from '../cap/CapStorageWrapper1.sol';
 // SPDX-License-Identifier: BSD-3-Clause-Attribution
 
 abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
-    // TODO: Create interface to the errors or carry to layer 1
-    error WrongLockId();
-    error WrongExpirationTimestamp();
-    error LockExpirationNotReached();
-
     using LibCommon for EnumerableSet.UintSet;
     using EnumerableSet for EnumerableSet.UintSet;
 
@@ -236,6 +231,10 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
         mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) lockIdsByAccountAndPartition;
         mapping(address => mapping(bytes32 => uint256)) nextLockIdByAccountAndPartition;
     }
+
+    error WrongLockId();
+    error WrongExpirationTimestamp();
+    error LockExpirationNotReached();
 
     modifier onlyWithValidExpirationTimestamp(uint256 _expirationTimestamp) {
         _checkExpirationTimestamp(_expirationTimestamp);
@@ -419,6 +418,18 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
             revert WrongExpirationTimestamp();
     }
 
+    function _lockStorage()
+        internal
+        pure
+        returns (LockDataStorage storage lock_)
+    {
+        bytes32 position = _LOCK_STORAGE_POSITION;
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            lock_.slot := position
+        }
+    }
+
     function _checkValidLockId(
         bytes32 _partition,
         address _tokenHolder,
@@ -435,17 +446,5 @@ abstract contract LockStorageWrapper1 is CapStorageWrapper1 {
     ) private view {
         if (!_isLockedExpirationTimestamp(_partition, _tokenHolder, _lockId))
             revert LockExpirationNotReached();
-    }
-
-    function _lockStorage()
-        internal
-        pure
-        returns (LockDataStorage storage lock_)
-    {
-        bytes32 position = _LOCK_STORAGE_POSITION;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            lock_.slot := position
-        }
     }
 }

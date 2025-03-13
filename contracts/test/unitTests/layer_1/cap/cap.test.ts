@@ -748,7 +748,6 @@ describe('Cap Tests', () => {
                 value: issueAmount,
                 data: '0x',
             })
-
         }
 
         it('GIVEN a token WHEN getMaxSupply or getMaxSupplyByPartition THEN balance adjustments are included', async () => {

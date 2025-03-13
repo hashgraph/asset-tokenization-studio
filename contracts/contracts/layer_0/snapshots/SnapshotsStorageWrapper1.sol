@@ -286,10 +286,6 @@ abstract contract SnapshotsStorageWrapper1 is
         return currentId;
     }
 
-    function _getCurrentSnapshotId() internal view returns (uint256) {
-        return _snapshotStorage().currentSnapshotId.current();
-    }
-
     function _updateSnapshot(
         Snapshots storage snapshots,
         uint256 currentValue
@@ -321,6 +317,10 @@ abstract contract SnapshotsStorageWrapper1 is
             );
             partitionSnapshots.values.push(listOfPartitions);
         }
+    }
+
+    function _getCurrentSnapshotId() internal view returns (uint256) {
+        return _snapshotStorage().currentSnapshotId.current();
     }
 
     function _valueAt(

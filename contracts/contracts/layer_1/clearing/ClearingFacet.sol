@@ -214,10 +214,10 @@ import {
     IStaticFunctionSelectors
 } from '../../interfaces/resolver/resolverProxy/IStaticFunctionSelectors.sol';
 import {_CLEARING_RESOLVER_KEY} from '../constants/resolverKeys.sol';
-import {IKyc} from '../interfaces/kyc/IKyc.sol';
 
 // solhint-disable no-unused-vars, custom-errors
 contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
+    // solhint-disable func-name-mixedcase
     function initialize_Clearing(
         bool _clearingActive
     ) external onlyUninitialized(_clearingStorage().initialized) {
@@ -225,6 +225,7 @@ contract ClearingFacet is IStaticFunctionSelectors, IClearing, Common {
         clearingStorage.initialized = true;
         clearingStorage.activated = _clearingActive;
     }
+    // solhint-enable func-name-mixedcase
 
     function activateClearing()
         external
