@@ -742,6 +742,13 @@ describe('Clearing Tests', () => {
         }
     }
 
+    function getOpType(opTypeId: number): ClearingOperationType {
+        if (opTypeId == 1) return ClearingOperationType.Transfer
+        else if (opTypeId == 2) return ClearingOperationType.HoldCreation
+
+        return ClearingOperationType.Redeem
+    }
+
     beforeEach(async () => {
         currentTimestamp = (await ethers.provider.getBlock('latest')).timestamp
         expirationTimestamp = currentTimestamp + ONE_YEAR_IN_SECONDS
@@ -3448,23 +3455,14 @@ describe('Clearing Tests', () => {
             )
 
             // APPROVE CLEARINGS
-            for (let i = 1; i <= 9; i++) {
-                if (i <= 3) {
+            for (let opTypeId = 1; opTypeId <= 3; opTypeId++) {
+                clearingIdentifier.clearingOperationType = getOpType(opTypeId)
+                for (let i = 1; i <= 3; i++) {
                     clearingIdentifier.clearingId = i
-                    clearingIdentifier.clearingOperationType =
-                        ClearingOperationType.Transfer
-                } else if (i <= 6) {
-                    clearingIdentifier.clearingId = i - 3
-                    clearingIdentifier.clearingOperationType =
-                        ClearingOperationType.HoldCreation
-                } else {
-                    clearingIdentifier.clearingId = i - 6
-                    clearingIdentifier.clearingOperationType =
-                        ClearingOperationType.Redeem
+                    await clearingActionsFacet.approveClearingOperationByPartition(
+                        clearingIdentifier
+                    )
                 }
-                await clearingActionsFacet.approveClearingOperationByPartition(
-                    clearingIdentifier
-                )
             }
 
             const balance_After_Approve_A = await erc1410Facet.balanceOf(
@@ -3638,23 +3636,14 @@ describe('Clearing Tests', () => {
             )
 
             // CANCEL CLEARINGS
-            for (let i = 1; i <= 9; i++) {
-                if (i <= 3) {
+            for (let opTypeId = 1; opTypeId <= 3; opTypeId++) {
+                clearingIdentifier.clearingOperationType = getOpType(opTypeId)
+                for (let i = 1; i <= 3; i++) {
                     clearingIdentifier.clearingId = i
-                    clearingIdentifier.clearingOperationType =
-                        ClearingOperationType.Transfer
-                } else if (i <= 6) {
-                    clearingIdentifier.clearingId = i - 3
-                    clearingIdentifier.clearingOperationType =
-                        ClearingOperationType.HoldCreation
-                } else {
-                    clearingIdentifier.clearingId = i - 6
-                    clearingIdentifier.clearingOperationType =
-                        ClearingOperationType.Redeem
+                    await clearingActionsFacet.cancelClearingOperationByPartition(
+                        clearingIdentifier
+                    )
                 }
-                await clearingActionsFacet.cancelClearingOperationByPartition(
-                    clearingIdentifier
-                )
             }
 
             const balance_After_Cancel_A = await erc1410Facet.balanceOf(
@@ -3828,24 +3817,14 @@ describe('Clearing Tests', () => {
             )
 
             // RECLAIM CLEARINGS
-            for (let i = 1; i <= 9; i++) {
-                if (i <= 3) {
+            for (let opTypeId = 1; opTypeId <= 3; opTypeId++) {
+                clearingIdentifier.clearingOperationType = getOpType(opTypeId)
+                for (let i = 1; i <= 3; i++) {
                     clearingIdentifier.clearingId = i
-                    clearingIdentifier.clearingOperationType =
-                        ClearingOperationType.Transfer
-                } else if (i <= 6) {
-                    clearingIdentifier.clearingId = i - 3
-                    clearingIdentifier.clearingOperationType =
-                        ClearingOperationType.HoldCreation
-                } else {
-                    clearingIdentifier.clearingId = i - 6
-                    clearingIdentifier.clearingOperationType =
-                        ClearingOperationType.Redeem
+                    await clearingActionsFacet.reclaimClearingOperationByPartition(
+                        clearingIdentifier
+                    )
                 }
-
-                await clearingActionsFacet.reclaimClearingOperationByPartition(
-                    clearingIdentifier
-                )
             }
 
             const balance_After_Cancel_A = await erc1410Facet.balanceOf(
