@@ -415,7 +415,7 @@ contract Factory is IFactory, LocalContext {
             _securityData.arePartitionsProtected
         );
 
-        IClearingActions(securityAddress_).initialize_Clearing(
+        IClearingActions(securityAddress_).initializeClearing(
             _securityData.clearingActive
         );
     }

@@ -242,7 +242,7 @@ interface IClearingActions {
         Reclaim
     }
 
-    function initialize_Clearing(bool _activateClearing) external;
+    function initializeClearing(bool _activateClearing) external;
 
     function activateClearing() external returns (bool success_);
 

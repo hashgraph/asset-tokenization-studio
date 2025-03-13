@@ -661,13 +661,7 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
             _createHoldByPartition(
                 _partition,
                 _tokenHolder,
-                IHold.Hold(
-                    clearingHoldCreationData.amount,
-                    clearingHoldCreationData.holdExpirationTimestamp,
-                    clearingHoldCreationData.holdEscrow,
-                    clearingHoldCreationData.holdTo,
-                    clearingHoldCreationData.holdData
-                ),
+                _fromClearingHoldCreationDataToHold(clearingHoldCreationData),
                 clearingHoldCreationData.operatorData
             );
         }
@@ -680,6 +674,19 @@ abstract contract ClearingStorageWrapper2 is HoldStorageWrapper2 {
                 IClearing.ClearingOperationType.HoldCreation
             )
         );
+    }
+
+    function _fromClearingHoldCreationDataToHold(
+        IClearing.ClearingHoldCreationData memory _clearingHoldCreationData
+    ) private pure returns (IHold.Hold memory) {
+        return
+            IHold.Hold(
+                _clearingHoldCreationData.amount,
+                _clearingHoldCreationData.holdExpirationTimestamp,
+                _clearingHoldCreationData.holdEscrow,
+                _clearingHoldCreationData.holdTo,
+                _clearingHoldCreationData.holdData
+            );
     }
 
     function _transferClearingBalance(

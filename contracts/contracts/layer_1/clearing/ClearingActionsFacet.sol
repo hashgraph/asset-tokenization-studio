@@ -223,7 +223,7 @@ contract ClearingActionsFacet is
     IClearingActions,
     Common
 {
-    function initialize_Clearing(
+    function initializeClearing(
         bool _clearingActive
     ) external onlyUninitialized(_clearingStorage().initialized) {
         IClearing.ClearingDataStorage
@@ -367,7 +367,7 @@ contract ClearingActionsFacet is
         uint256 selectorIndex;
         staticFunctionSelectors_ = new bytes4[](7);
         staticFunctionSelectors_[selectorIndex++] = this
-            .initialize_Clearing
+            .initializeClearing
             .selector;
         staticFunctionSelectors_[selectorIndex++] = this
             .activateClearing
