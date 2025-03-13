@@ -204,7 +204,7 @@
 */
 
 import { expect } from 'chai'
-import { ethers } from 'hardhat'
+import { ethers, network } from 'hardhat'
 import { BigNumber } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
@@ -232,7 +232,6 @@ import {
     ERC1410ScheduledTasks__factory,
     Pause__factory,
     TimeTravel__factory,
-    ClearingFacet,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -245,7 +244,6 @@ import {
     ISSUER_ROLE,
     IS_NOT_OPERATOR_ERROR_ID,
     IS_PAUSED_ERROR_ID,
-    CLEARING_ACTIVE_ERROR_ID,
     LOCKER_ROLE,
     KYC_ROLE,
     SSI_MANAGER_ROLE,
@@ -267,10 +265,13 @@ import {
     TO_ACCOUNT_KYC_ERROR_ID,
     ZERO,
     EMPTY_STRING,
+    CLEARING_ACTIVE_ERROR_ID,
     CLEARING_ROLE,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../../common'
 import { dateToUnixTimestamp } from '../../../../dateFormatter'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
+import { ClearingFacet } from '@typechain'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -310,7 +311,7 @@ interface BalanceAdjustedValues {
     metadata?: IERC20.ERC20MetadataStructOutput
 }
 
-describe('ERC1400 Tests', () => {
+describe('ERC1410 Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -352,11 +353,9 @@ describe('ERC1400 Tests', () => {
     async function grantRolesToAccounts() {
         accessControlFacet = accessControlFacet.connect(signer_A)
         await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
-        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         await accessControlFacet.grantRole(CAP_ROLE, account_A)
         await accessControlFacet.grantRole(CONTROLLER_ROLE, account_A)
         await accessControlFacet.grantRole(LOCKER_ROLE, account_A)
-        await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
         await accessControlFacet.grantRole(KYC_ROLE, account_A)
     }
 
@@ -368,9 +367,6 @@ describe('ERC1400 Tests', () => {
         await kycFacet
             .connect(signer_A)
             .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
-        await kycFacet
-            .connect(signer_A)
-            .grantKyc(account_C, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
     }
 
     async function connectFacetsToSigners() {
@@ -630,15 +626,7 @@ describe('ERC1400 Tests', () => {
         expect(after.metadata?.info?.decimals).to.be.equal(after.decimals)
     }
 
-    async function deployAsset({
-        multiPartition,
-        factory,
-        businessLogicResolverAddress,
-    }: {
-        multiPartition: boolean
-        factory: IFactory
-        businessLogicResolverAddress: string
-    }) {
+    async function deploySecurityFixtureMultiPartition() {
         const init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
@@ -647,7 +635,7 @@ describe('ERC1400 Tests', () => {
             isControllable: true,
             arePartitionsProtected: false,
             clearingActive: false,
-            isMultiPartition: multiPartition,
+            isMultiPartition: true,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
             decimals: decimals_Original,
@@ -669,7 +657,45 @@ describe('ERC1400 Tests', () => {
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
-            businessLogicResolver: businessLogicResolverAddress,
+            businessLogicResolver: businessLogicResolver.address,
+            factory,
+        })
+
+        await setFacets(diamond)
+    }
+
+    async function deploySecurityFixtureSinglePartition() {
+        const init_rbacs: Rbac[] = set_initRbacs()
+
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            clearingActive: false,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: decimals_Original,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
             factory,
         })
 
@@ -686,34 +712,74 @@ describe('ERC1400 Tests', () => {
             'ERC1410ScheduledTasksTimeTravel',
             diamond.address
         )
-
         timeTravelFacet = await ethers.getContractAt(
             'TimeTravel',
             diamond.address
         )
-
         adjustBalancesFacet = await ethers.getContractAt(
             'AdjustBalances',
             diamond.address
         )
-
         pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-
         capFacet = await ethers.getContractAt('Cap', diamond.address)
-
         erc20Facet = await ethers.getContractAt('ERC20', diamond.address)
-
         erc1594Facet = await ethers.getContractAt('ERC1594', diamond.address)
-
         erc1644Facet = await ethers.getContractAt('ERC1644', diamond.address)
-
         equityFacet = await ethers.getContractAt('Equity', diamond.address)
-
-        kycFacet = await ethers.getContractAt('Kyc', diamond.address)
+        kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',
             diamond.address
         )
+        controlList = await ethers.getContractAt(
+            'ControlList',
+            diamond.address,
+            signer_A
+        )
+        clearingFacet = await ethers.getContractAt(
+            'ClearingFacet',
+            diamond.address,
+            signer_A
+        )
+
+        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
+        await ssiManagementFacet.addIssuer(account_E)
+
+        await kycFacet.grantKyc(
+            account_C,
+            EMPTY_STRING,
+            ZERO,
+            MAX_UINT256,
+            account_E
+        )
+        await kycFacet.grantKyc(
+            account_E,
+            EMPTY_STRING,
+            ZERO,
+            MAX_UINT256,
+            account_E
+        )
+        await kycFacet.grantKyc(
+            account_D,
+            EMPTY_STRING,
+            ZERO,
+            MAX_UINT256,
+            account_E
+        )
+
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_C,
+            value: balanceOf_C_Original,
+            data: '0x',
+        })
+
+        await erc1410Facet.issueByPartition({
+            partition: _PARTITION_ID_1,
+            tokenHolder: account_E,
+            value: balanceOf_E_Original,
+            data: '0x',
+        })
     }
 
     function set_initRbacs(): Rbac[] {
@@ -721,12 +787,23 @@ describe('ERC1400 Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-
         const corporateActionPause: Rbac = {
             role: CORPORATE_ACTION_ROLE,
             members: [account_B],
         }
-        return [rbacPause, corporateActionPause]
+        const rbacKyc: Rbac = {
+            role: KYC_ROLE,
+            members: [account_B],
+        }
+        const rbacSsi: Rbac = {
+            role: SSI_MANAGER_ROLE,
+            members: [account_A],
+        }
+        const rbacClearingRole = {
+            role: CLEARING_ROLE,
+            members: [account_A]
+        }
+        return [rbacPause, corporateActionPause, rbacKyc, rbacSsi, rbacClearingRole]
     }
 
     describe('Multi partition ', () => {
@@ -758,127 +835,7 @@ describe('ERC1400 Tests', () => {
         })
 
         beforeEach(async () => {
-            const rbacPause: Rbac = {
-                role: PAUSER_ROLE,
-                members: [account_B],
-            }
-            const rbacKyc: Rbac = {
-                role: KYC_ROLE,
-                members: [account_B],
-            }
-            const rbacSsi: Rbac = {
-                role: SSI_MANAGER_ROLE,
-                members: [account_A],
-            }
-            const rbacClearingRole = {
-                role: CLEARING_ROLE,
-                members: [account_A]
-            }
-            const init_rbacs: Rbac[] = [rbacPause, rbacKyc, rbacSsi,rbacClearingRole]
-
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                isMultiPartition: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                name: 'TEST_AccessControl',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_D,
-                regulationSubType: RegulationSubType.REG_D_506_B,
-                countriesControlListType: true,
-                listOfCountries: 'ES,FR,CH',
-                info: 'nothing',
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory,
-            })
-
-            accessControlFacet = AccessControl__factory.connect(
-                diamond.address,
-                signer_A
-            )
-            erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-                diamond.address,
-                signer_A
-            )
-            equityFacet = Equity__factory.connect(diamond.address, signer_A)
-            pauseFacet = Pause__factory.connect(diamond.address, signer_B)
-            controlList = ControlList__factory.connect(
-                diamond.address,
-                signer_A
-            )
-            timeTravelFacet = TimeTravel__factory.connect(
-                diamond.address,
-                signer_A
-            )
-            kycFacet = await ethers.getContractAt(
-                'Kyc',
-                diamond.address,
-                signer_B
-            )
-            ssiManagementFacet = await ethers.getContractAt(
-                'SsiManagement',
-                diamond.address,
-                signer_A
-            )
-            clearingFacet = await ethers.getContractAt(
-                'ClearingFacet',
-                diamond.address,
-                signer_A
-            )
-
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-            await ssiManagementFacet.addIssuer(account_E)
-            await kycFacet.grantKyc(
-                account_C,
-                EMPTY_STRING,
-                ZERO,
-                MAX_UINT256,
-                account_E
-            )
-            await kycFacet.grantKyc(
-                account_E,
-                EMPTY_STRING,
-                ZERO,
-                MAX_UINT256,
-                account_E
-            )
-            await kycFacet.grantKyc(
-                account_D,
-                EMPTY_STRING,
-                ZERO,
-                MAX_UINT256,
-                account_E
-            )
-
-            await erc1410Facet.issueByPartition({
-                partition: _PARTITION_ID_1,
-                tokenHolder: account_C,
-                value: balanceOf_C_Original,
-                data: '0x',
-            })
-
-            await erc1410Facet.issueByPartition({
-                partition: _PARTITION_ID_1,
-                tokenHolder: account_E,
-                value: balanceOf_E_Original,
-                data: '0x',
-            })
+            await loadFixture(deploySecurityFixtureMultiPartition)
 
             basicTransferInfo = {
                 to: account_D,
@@ -896,7 +853,7 @@ describe('ERC1400 Tests', () => {
         })
 
         afterEach(async () => {
-            timeTravelFacet.resetSystemTimestamp()
+            await timeTravelFacet.resetSystemTimestamp()
         })
 
         it('GIVEN an account WHEN authorizing and revoking operators THEN transaction succeeds', async () => {
@@ -1420,6 +1377,17 @@ describe('ERC1400 Tests', () => {
                     data: data,
                 })
             ).to.be.rejectedWith('AccountIsBlocked')
+
+            // Restore facets
+            accessControlFacet = await ethers.getContractAt(
+                'AccessControl',
+                diamond.address
+            )
+
+            erc1410Facet = await ethers.getContractAt(
+                'ERC1410ScheduledTasksTimeTravel',
+                diamond.address
+            )
         })
 
         it('GIVEN non Kyc account WHEN issue or redeem THEN transaction fails with InvalidKycStatus', async () => {
@@ -2343,6 +2311,27 @@ describe('ERC1400 Tests', () => {
                 value: amount,
                 data: data,
             })
+
+            // Restore facets
+            accessControlFacet = await ethers.getContractAt(
+                'AccessControl',
+                diamond.address
+            )
+
+            erc1410Facet = await ethers.getContractAt(
+                'ERC1410ScheduledTasksTimeTravel',
+                diamond.address
+            )
+
+            controlList = await ethers.getContractAt(
+                'ControlList',
+                diamond.address
+            )
+            kycFacet = await ethers.getContractAt('Kyc', diamond.address)
+            ssiManagementFacet = await ethers.getContractAt(
+                'SsiManagement',
+                diamond.address
+            )
         })
 
         it('GIVEN an account without controller role WHEN controllerTransfer THEN transaction fails with AccountHasNoRole', async () => {
@@ -2622,8 +2611,437 @@ describe('ERC1400 Tests', () => {
             expect(dividend_1.snapshotId.toNumber()).to.equal(1)
             expect(dividend.snapshotId.toNumber()).to.equal(2)
         })
-    })
 
+        describe('Adjust balances', () => {
+            before(async () => {
+                // mute | mock console.log
+                console.log = () => {}
+                // eslint-disable-next-line @typescript-eslint/no-extra-semi
+                ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+                account_A = signer_A.address
+                account_B = signer_B.address
+                account_C = signer_C.address
+
+                const { deployer, ...deployedContracts } =
+                    await deployAtsFullInfrastructure(
+                        await DeployAtsFullInfrastructureCommand.newInstance({
+                            signer: signer_A,
+                            useDeployed: false,
+                            useEnvironment: true,
+                            timeTravelEnabled: true,
+                        })
+                    )
+
+                factory = deployedContracts.factory.contract
+                businessLogicResolver =
+                    deployedContracts.businessLogicResolver.contract
+            })
+            beforeEach(async () => {
+                await loadFixture(deploySecurityFixtureMultiPartition)
+
+                basicTransferInfo = {
+                    to: account_D,
+                    value: amount,
+                }
+                operatorTransferData = {
+                    partition: _PARTITION_ID_1,
+                    from: account_E,
+                    to: account_D,
+                    value: amount,
+                    data: data,
+                    operatorData: operatorData,
+                }
+            })
+
+            afterEach(async () => {
+                await timeTravelFacet.resetSystemTimestamp()
+            })
+
+            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN transaction succeeds', async () => {
+                await setPreBalanceAdjustment()
+
+                // Before Values
+                const before: BalanceAdjustedValues =
+                    await getBalanceAdjustedValues()
+
+                // adjustBalances
+                await adjustBalancesFacet.adjustBalances(
+                    adjustFactor,
+                    adjustDecimals
+                )
+
+                // scheduled two balance updates
+                equityFacet = equityFacet.connect(signer_B)
+
+                const balanceAdjustmentData = {
+                    executionDate: dateToUnixTimestamp(
+                        '2030-01-01T00:00:02Z'
+                    ).toString(),
+                    factor: adjustFactor,
+                    decimals: adjustDecimals,
+                }
+
+                const balanceAdjustmentData_2 = {
+                    executionDate: dateToUnixTimestamp(
+                        '2030-01-01T00:16:40Z'
+                    ).toString(),
+                    factor: adjustFactor,
+                    decimals: adjustDecimals,
+                }
+                await equityFacet.setScheduledBalanceAdjustment(
+                    balanceAdjustmentData
+                )
+                await equityFacet.setScheduledBalanceAdjustment(
+                    balanceAdjustmentData_2
+                )
+
+                // wait for first scheduled balance adjustment only
+                await timeTravelFacet.changeSystemTimestamp(
+                    dateToUnixTimestamp('2030-01-01T00:00:03Z')
+                )
+                // After Values Before Transaction
+                const after: BalanceAdjustedValues =
+                    await getBalanceAdjustedValues()
+
+                await checkAdjustmentsAfterBalanceAdjustment(after, before)
+            })
+
+            describe('Issues', () => {
+                it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 IssueByPartition succeeds', async () => {
+                    // Granting Role to account C
+                    accessControlFacet = accessControlFacet.connect(signer_A)
+                    await accessControlFacet.grantRole(
+                        ADJUSTMENT_BALANCE_ROLE,
+                        account_C
+                    )
+                    await accessControlFacet.grantRole(CAP_ROLE, account_A)
+                    await accessControlFacet.grantRole(KYC_ROLE, account_A)
+
+                    await grantKycToAccounts()
+
+                    // Using account C (with role)
+                    adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+                    erc1410Facet = erc1410Facet.connect(signer_A)
+                    await erc1410Facet.issueByPartition({
+                        partition: _PARTITION_ID_1,
+                        tokenHolder: account_A,
+                        value: balanceOf_A_Original[0],
+                        data: '0x',
+                    })
+                    await erc1410Facet.issueByPartition({
+                        partition: _PARTITION_ID,
+                        tokenHolder: account_A,
+                        value: balanceOf_A_Original[1],
+                        data: '0x',
+                    })
+
+                    const balanceOf_A_Before = await erc1410Facet.balanceOf(
+                        account_A
+                    )
+                    const balanceOf_A_Partition_1_Before =
+                        await erc1410Facet.balanceOfByPartition(
+                            _PARTITION_ID_1,
+                            account_A
+                        )
+
+                    // adjustBalances
+                    await adjustBalancesFacet.adjustBalances(
+                        adjustFactor,
+                        adjustDecimals
+                    )
+                    // issue after adjust
+                    await erc1410Facet.issueByPartition({
+                        partition: _PARTITION_ID_1,
+                        tokenHolder: account_A,
+                        value: balanceOf_A_Original[0],
+                        data: '0x',
+                    })
+
+                    const balanceOf_A_After = await erc1410Facet.balanceOf(
+                        account_A
+                    )
+                    const balanceOf_A_Partition_1_After =
+                        await erc1410Facet.balanceOfByPartition(
+                            _PARTITION_ID_1,
+                            account_A
+                        )
+
+                    expect(balanceOf_A_After).to.be.equal(
+                        balanceOf_A_Before
+                            .mul(adjustFactor)
+                            .add(balanceOf_A_Original[0])
+                    )
+                    expect(balanceOf_A_Partition_1_After).to.be.equal(
+                        balanceOf_A_Partition_1_Before
+                            .mul(adjustFactor)
+                            .add(balanceOf_A_Original[0])
+                    )
+                })
+            })
+
+            describe('Transfers', () => {
+                it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 transferByPartition succeeds', async () => {
+                    await setPreBalanceAdjustment()
+
+                    // Before Values
+                    const before = await getBalanceAdjustedValues()
+
+                    // adjustBalances
+                    await adjustBalancesFacet.adjustBalances(
+                        adjustFactor,
+                        adjustDecimals
+                    )
+
+                    // Transaction Partition 1
+                    basicTransferInfo.to = account_B
+
+                    await erc1410Facet.transferByPartition(
+                        _PARTITION_ID_1,
+                        basicTransferInfo,
+                        '0x'
+                    )
+
+                    // After Transaction Partition 1 Values
+                    const after: BalanceAdjustedValues =
+                        await getBalanceAdjustedValues()
+
+                    await checkAdjustmentsAfterTransfer(after, before)
+                })
+
+                it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorTransferByPartition succeeds', async () => {
+                    await setPreBalanceAdjustment()
+
+                    // Before Values
+                    const before = await getBalanceAdjustedValues()
+
+                    // adjustBalances
+                    await adjustBalancesFacet.adjustBalances(
+                        adjustFactor,
+                        adjustDecimals
+                    )
+
+                    // Transaction Partition 1
+                    await erc1410Facet.authorizeOperator(account_A)
+
+                    operatorTransferData.from = account_A
+                    operatorTransferData.to = account_B
+                    operatorTransferData.data = '0x'
+                    operatorTransferData.operatorData = '0x'
+
+                    await erc1410Facet.operatorTransferByPartition(
+                        operatorTransferData
+                    )
+
+                    // After Transaction Partition 1 Values
+                    const after = await getBalanceAdjustedValues()
+
+                    await checkAdjustmentsAfterTransfer(after, before)
+                })
+
+                it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 controllerTransferByPartition succeeds', async () => {
+                    await setPreBalanceAdjustment()
+
+                    // Before Values
+                    const before = await getBalanceAdjustedValues()
+
+                    // adjustBalances
+                    await adjustBalancesFacet.adjustBalances(
+                        adjustFactor,
+                        adjustDecimals
+                    )
+
+                    // Transaction Partition 1
+                    await erc1410Facet.controllerTransferByPartition(
+                        _PARTITION_ID_1,
+                        account_A,
+                        account_B,
+                        amount,
+                        '0x',
+                        '0x'
+                    )
+
+                    // After Transaction Partition 1 Values
+                    const after = await getBalanceAdjustedValues()
+
+                    await checkAdjustmentsAfterTransfer(after, before)
+                })
+            })
+
+            describe('Redeems', () => {
+                it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 redeemByPartition succeeds', async () => {
+                    await setPreBalanceAdjustment()
+
+                    // Before Values
+                    const before = await getBalanceAdjustedValues()
+
+                    // adjustBalances
+                    await adjustBalancesFacet.adjustBalances(
+                        adjustFactor,
+                        adjustDecimals
+                    )
+
+                    // Transaction Partition 1
+                    await erc1410Facet.redeemByPartition(
+                        _PARTITION_ID_1,
+                        amount,
+                        '0x'
+                    )
+
+                    // After Transaction Partition 1 Values
+                    const after = await getBalanceAdjustedValues()
+
+                    await checkAdjustmentsAfterRedeem(after, before)
+                })
+
+                it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 redeemByPartition with the expected adjusted amount succeeds', async () => {
+                    await setPreBalanceAdjustment()
+
+                    // adjustBalances
+                    await adjustBalancesFacet.adjustBalances(
+                        adjustFactor,
+                        adjustDecimals
+                    )
+
+                    await expect(
+                        erc1410Facet.redeemByPartition(
+                            _PARTITION_ID_1,
+                            amount * adjustFactor,
+                            data
+                        )
+                    )
+                        .to.emit(erc1410Facet, 'RedeemedByPartition')
+                        .withArgs(
+                            _PARTITION_ID_1,
+                            ADDRESS_ZERO,
+                            account_A,
+                            amount * adjustFactor,
+                            data,
+                            '0x'
+                        )
+                })
+
+                it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorRedeemByPartition succeeds', async () => {
+                    await setPreBalanceAdjustment()
+
+                    // Before Values
+                    const before = await getBalanceAdjustedValues()
+
+                    // adjustBalances
+                    await adjustBalancesFacet.adjustBalances(
+                        adjustFactor,
+                        adjustDecimals
+                    )
+
+                    // Transaction Partition 1
+                    await erc1410Facet.authorizeOperator(account_A)
+                    await erc1410Facet.operatorRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_A,
+                        amount,
+                        '0x',
+                        '0x'
+                    )
+
+                    // After Transaction Partition 1 Values
+                    const after = await getBalanceAdjustedValues()
+
+                    await checkAdjustmentsAfterRedeem(after, before)
+                })
+
+                it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorRedeemByPartition with the expected adjusted amount succeeds', async () => {
+                    await setPreBalanceAdjustment()
+
+                    // adjustBalances
+                    await adjustBalancesFacet.adjustBalances(
+                        adjustFactor,
+                        adjustDecimals
+                    )
+
+                    const adjustAmount = amount * adjustFactor
+
+                    // Transaction Partition 1
+                    await erc1410Facet.authorizeOperator(account_A)
+                    await expect(
+                        erc1410Facet.operatorRedeemByPartition(
+                            _PARTITION_ID_1,
+                            account_A,
+                            adjustAmount,
+                            data,
+                            '0x'
+                        )
+                    )
+                        .to.emit(erc1410Facet, 'RedeemedByPartition')
+                        .withArgs(
+                            _PARTITION_ID_1,
+                            account_A,
+                            account_A,
+                            adjustAmount,
+                            data,
+                            '0x'
+                        )
+                })
+
+                it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 controllerRedeemByPartition succeeds', async () => {
+                    await setPreBalanceAdjustment()
+
+                    // Before Values
+                    const before = await getBalanceAdjustedValues()
+
+                    // adjustBalances
+                    await adjustBalancesFacet.adjustBalances(
+                        adjustFactor,
+                        adjustDecimals
+                    )
+
+                    // Transaction Partition 1
+                    await erc1410Facet.controllerRedeemByPartition(
+                        _PARTITION_ID_1,
+                        account_A,
+                        amount,
+                        '0x',
+                        '0x'
+                    )
+
+                    // After Transaction Partition 1 Values
+                    const after = await getBalanceAdjustedValues()
+
+                    await checkAdjustmentsAfterRedeem(after, before)
+                })
+
+                it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 controllerRedeemByPartition with the expected adjusted amount succeeds', async () => {
+                    await setPreBalanceAdjustment()
+
+                    // adjustBalances
+                    await adjustBalancesFacet.adjustBalances(
+                        adjustFactor,
+                        adjustDecimals
+                    )
+
+                    const adjustAmount = amount * adjustFactor
+
+                    // Transaction Partition 1
+                    await expect(
+                        erc1410Facet.controllerRedeemByPartition(
+                            _PARTITION_ID_1,
+                            account_A,
+                            adjustAmount,
+                            '0x',
+                            '0x'
+                        )
+                    )
+                        .to.emit(erc1410Facet, 'RedeemedByPartition')
+                        .withArgs(
+                            _PARTITION_ID_1,
+                            account_A,
+                            account_A,
+                            adjustAmount,
+                            '0x',
+                            '0x'
+                        )
+                })
+            })
+        })
+    })
     describe('Single partition ', () => {
         before(async () => {
             // mute | mock console.log
@@ -2651,107 +3069,9 @@ describe('ERC1400 Tests', () => {
             businessLogicResolver =
                 deployedContracts.businessLogicResolver.contract
         })
+
         beforeEach(async () => {
-            const rbacPause: Rbac = {
-                role: PAUSER_ROLE,
-                members: [account_B],
-            }
-            const rbacKyc: Rbac = {
-                role: KYC_ROLE,
-                members: [account_B],
-            }
-            const rbacSsi: Rbac = {
-                role: SSI_MANAGER_ROLE,
-                members: [account_A],
-            }
-            const init_rbacs: Rbac[] = [rbacPause, rbacKyc, rbacSsi]
-
-            diamond = await deployEquityFromFactory({
-                adminAccount: account_A,
-                isWhiteList: false,
-                isControllable: true,
-                arePartitionsProtected: false,
-                clearingActive: false,
-                isMultiPartition: false,
-                name: 'TEST_AccessControl',
-                symbol: 'TAC',
-                decimals: 6,
-                isin: isinGenerator(),
-                votingRight: false,
-                informationRight: false,
-                liquidationRight: false,
-                subscriptionRight: true,
-                conversionRight: true,
-                redemptionRight: true,
-                putRight: false,
-                dividendRight: 1,
-                currency: '0x345678',
-                numberOfShares: MAX_UINT256,
-                nominalValue: 100,
-                regulationType: RegulationType.REG_S,
-                regulationSubType: RegulationSubType.NONE,
-                countriesControlListType: true,
-                listOfCountries: 'ES,FR,CH',
-                info: 'nothing',
-                init_rbacs,
-                businessLogicResolver: businessLogicResolver.address,
-                factory,
-            })
-
-            accessControlFacet = AccessControl__factory.connect(
-                diamond.address,
-                signer_A
-            )
-            erc1410Facet = ERC1410ScheduledTasks__factory.connect(
-                diamond.address,
-                signer_A
-            )
-            equityFacet = Equity__factory.connect(diamond.address, signer_A)
-            pauseFacet = Pause__factory.connect(diamond.address, signer_B)
-            controlList = ControlList__factory.connect(
-                diamond.address,
-                signer_A
-            )
-            kycFacet = await ethers.getContractAt(
-                'Kyc',
-                diamond.address,
-                signer_B
-            )
-            ssiManagementFacet = await ethers.getContractAt(
-                'SsiManagement',
-                diamond.address,
-                signer_A
-            )
-
-            await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-            await ssiManagementFacet.addIssuer(account_E)
-            await kycFacet.grantKyc(
-                account_C,
-                EMPTY_STRING,
-                ZERO,
-                MAX_UINT256,
-                account_E
-            )
-            await kycFacet.grantKyc(
-                account_E,
-                EMPTY_STRING,
-                ZERO,
-                MAX_UINT256,
-                account_E
-            )
-
-            await erc1410Facet.issueByPartition({
-                partition: _PARTITION_ID_1,
-                tokenHolder: account_C,
-                value: balanceOf_C_Original,
-                data: '0x',
-            })
-            await erc1410Facet.issueByPartition({
-                partition: _PARTITION_ID_1,
-                tokenHolder: account_E,
-                value: balanceOf_E_Original,
-                data: '0x',
-            })
+            await loadFixture(deploySecurityFixtureSinglePartition)
         })
 
         it(
@@ -2874,122 +3194,16 @@ describe('ERC1400 Tests', () => {
                 // TODO canRedeemByPartition
             }
         )
-    })
 
-    describe('Adjust balances', () => {
-        before(async () => {
-            // mute | mock console.log
-            console.log = () => {}
-            // eslint-disable-next-line @typescript-eslint/no-extra-semi
-            ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-            account_A = signer_A.address
-            account_B = signer_B.address
-            account_C = signer_C.address
-
-            const { deployer, ...deployedContracts } =
-                await deployAtsFullInfrastructure(
-                    await DeployAtsFullInfrastructureCommand.newInstance({
-                        signer: signer_A,
-                        useDeployed: false,
-                        useEnvironment: true,
-                        timeTravelEnabled: true,
-                    })
-                )
-
-            factory = deployedContracts.factory.contract
-            businessLogicResolver =
-                deployedContracts.businessLogicResolver.contract
-        })
-        beforeEach(async () => {
-            await deployAsset({
-                multiPartition: true,
-                factory,
-                businessLogicResolverAddress: businessLogicResolver.address,
-            })
-            basicTransferInfo = {
-                to: account_D,
-                value: amount,
-            }
-            operatorTransferData = {
-                partition: _PARTITION_ID_1,
-                from: account_E,
-                to: account_D,
-                value: amount,
-                data: data,
-                operatorData: operatorData,
-            }
-        })
-
-        afterEach(async () => {
-            await timeTravelFacet.resetSystemTimestamp()
-        })
-
-        it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN transaction succeeds', async () => {
-            await setPreBalanceAdjustment()
-
-            // Before Values
-            const before: BalanceAdjustedValues =
-                await getBalanceAdjustedValues()
-
-            // adjustBalances
-            await adjustBalancesFacet.adjustBalances(
-                adjustFactor,
-                adjustDecimals
-            )
-
-            // scheduled two balance updates
-            equityFacet = equityFacet.connect(signer_B)
-
-            const balanceAdjustmentData = {
-                executionDate: dateToUnixTimestamp(
-                    '2030-01-01T00:00:02Z'
-                ).toString(),
-                factor: adjustFactor,
-                decimals: adjustDecimals,
-            }
-
-            const balanceAdjustmentData_2 = {
-                executionDate: dateToUnixTimestamp(
-                    '2030-01-01T00:16:40Z'
-                ).toString(),
-                factor: adjustFactor,
-                decimals: adjustDecimals,
-            }
-            await equityFacet.setScheduledBalanceAdjustment(
-                balanceAdjustmentData
-            )
-            await equityFacet.setScheduledBalanceAdjustment(
-                balanceAdjustmentData_2
-            )
-
-            // wait for first scheduled balance adjustment only
-            await timeTravelFacet.changeSystemTimestamp(
-                dateToUnixTimestamp('2030-01-01T00:00:03Z')
-            )
-            // After Values Before Transaction
-            const after: BalanceAdjustedValues =
-                await getBalanceAdjustedValues()
-
-            await checkAdjustmentsAfterBalanceAdjustment(after, before)
-        })
-
-        describe('Issues', () => {
+        describe('Issues', async () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 Issue succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
                 await accessControlFacet.grantRole(
                     ADJUSTMENT_BALANCE_ROLE,
                     account_C
                 )
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
                 await accessControlFacet.grantRole(CAP_ROLE, account_A)
-                await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
                 await accessControlFacet.grantRole(KYC_ROLE, account_A)
 
                 await grantKycToAccounts()
@@ -3049,21 +3263,13 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 Issue with max supply succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 // Granting Role to account C
                 accessControlFacet = accessControlFacet.connect(signer_A)
                 await accessControlFacet.grantRole(
                     ADJUSTMENT_BALANCE_ROLE,
                     account_C
                 )
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
                 await accessControlFacet.grantRole(CAP_ROLE, account_A)
-                await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
                 await accessControlFacet.grantRole(KYC_ROLE, account_A)
 
                 await grantKycToAccounts()
@@ -3100,175 +3306,10 @@ describe('ERC1400 Tests', () => {
                         '0x'
                     )
             })
-
-            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 IssueByPartition succeeds', async () => {
-                // Granting Role to account C
-                accessControlFacet = accessControlFacet.connect(signer_A)
-                await accessControlFacet.grantRole(
-                    ADJUSTMENT_BALANCE_ROLE,
-                    account_C
-                )
-                await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-                await accessControlFacet.grantRole(CAP_ROLE, account_A)
-                await accessControlFacet.grantRole(SSI_MANAGER_ROLE, account_A)
-                await accessControlFacet.grantRole(KYC_ROLE, account_A)
-
-                await grantKycToAccounts()
-
-                // Using account C (with role)
-                adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-                erc1410Facet = erc1410Facet.connect(signer_A)
-                await erc1410Facet.issueByPartition({
-                    partition: _PARTITION_ID_1,
-                    tokenHolder: account_A,
-                    value: balanceOf_A_Original[0],
-                    data: '0x',
-                })
-                await erc1410Facet.issueByPartition({
-                    partition: _PARTITION_ID,
-                    tokenHolder: account_A,
-                    value: balanceOf_A_Original[1],
-                    data: '0x',
-                })
-
-                const balanceOf_A_Before = await erc1410Facet.balanceOf(
-                    account_A
-                )
-                const balanceOf_A_Partition_1_Before =
-                    await erc1410Facet.balanceOfByPartition(
-                        _PARTITION_ID_1,
-                        account_A
-                    )
-
-                // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
-                // issue after adjust
-                await erc1410Facet.issueByPartition({
-                    partition: _PARTITION_ID_1,
-                    tokenHolder: account_A,
-                    value: balanceOf_A_Original[0],
-                    data: '0x',
-                })
-
-                const balanceOf_A_After = await erc1410Facet.balanceOf(
-                    account_A
-                )
-                const balanceOf_A_Partition_1_After =
-                    await erc1410Facet.balanceOfByPartition(
-                        _PARTITION_ID_1,
-                        account_A
-                    )
-
-                expect(balanceOf_A_After).to.be.equal(
-                    balanceOf_A_Before
-                        .mul(adjustFactor)
-                        .add(balanceOf_A_Original[0])
-                )
-                expect(balanceOf_A_Partition_1_After).to.be.equal(
-                    balanceOf_A_Partition_1_Before
-                        .mul(adjustFactor)
-                        .add(balanceOf_A_Original[0])
-                )
-            })
         })
 
-        describe('Transfers', () => {
-            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 transferByPartition succeeds', async () => {
-                await setPreBalanceAdjustment()
-
-                // Before Values
-                const before = await getBalanceAdjustedValues()
-
-                // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
-
-                // Transaction Partition 1
-                basicTransferInfo.to = account_B
-
-                await erc1410Facet.transferByPartition(
-                    _PARTITION_ID_1,
-                    basicTransferInfo,
-                    '0x'
-                )
-
-                // After Transaction Partition 1 Values
-                const after: BalanceAdjustedValues =
-                    await getBalanceAdjustedValues()
-
-                await checkAdjustmentsAfterTransfer(after, before)
-            })
-
-            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorTransferByPartition succeeds', async () => {
-                await setPreBalanceAdjustment()
-
-                // Before Values
-                const before = await getBalanceAdjustedValues()
-
-                // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
-
-                // Transaction Partition 1
-                await erc1410Facet.authorizeOperator(account_A)
-
-                operatorTransferData.from = account_A
-                operatorTransferData.to = account_B
-                operatorTransferData.data = '0x'
-                operatorTransferData.operatorData = '0x'
-
-                await erc1410Facet.operatorTransferByPartition(
-                    operatorTransferData
-                )
-
-                // After Transaction Partition 1 Values
-                const after = await getBalanceAdjustedValues()
-
-                await checkAdjustmentsAfterTransfer(after, before)
-            })
-
-            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 controllerTransferByPartition succeeds', async () => {
-                await setPreBalanceAdjustment()
-
-                // Before Values
-                const before = await getBalanceAdjustedValues()
-
-                // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
-
-                // Transaction Partition 1
-                await erc1410Facet.controllerTransferByPartition(
-                    _PARTITION_ID_1,
-                    account_A,
-                    account_B,
-                    amount,
-                    '0x',
-                    '0x'
-                )
-
-                // After Transaction Partition 1 Values
-                const after = await getBalanceAdjustedValues()
-
-                await checkAdjustmentsAfterTransfer(after, before)
-            })
-
+        describe('Transfers', async () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1644 controllerTransfer succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 // Before Values
@@ -3297,12 +3338,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 transferWithData succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 // Before Values
@@ -3325,12 +3360,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 transferFromWithData succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 erc20Facet = erc20Facet.connect(signer_A)
@@ -3361,12 +3390,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 transferFromWithData with expected allowance amount succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 erc20Facet = erc20Facet.connect(signer_A)
@@ -3401,12 +3424,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransfer succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 // adjustBalances
@@ -3427,12 +3444,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferByPartition succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 // adjustBalances
@@ -3454,12 +3465,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 canTransferFrom succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 erc20Facet = erc20Facet.connect(signer_A)
@@ -3484,12 +3489,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 transfer succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 // Before Values
@@ -3512,12 +3511,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 transferFrom succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 const before = await getBalanceAdjustedValues()
@@ -3550,186 +3543,8 @@ describe('ERC1400 Tests', () => {
             })
         })
 
-        describe('Redeems', () => {
-            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 redeemByPartition succeeds', async () => {
-                await setPreBalanceAdjustment()
-
-                // Before Values
-                const before = await getBalanceAdjustedValues()
-
-                // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
-
-                // Transaction Partition 1
-                await erc1410Facet.redeemByPartition(
-                    _PARTITION_ID_1,
-                    amount,
-                    '0x'
-                )
-
-                // After Transaction Partition 1 Values
-                const after = await getBalanceAdjustedValues()
-
-                await checkAdjustmentsAfterRedeem(after, before)
-            })
-
-            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 redeemByPartition with the expected adjusted amount succeeds', async () => {
-                await setPreBalanceAdjustment()
-
-                // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
-
-                await expect(
-                    erc1410Facet.redeemByPartition(
-                        _PARTITION_ID_1,
-                        amount * adjustFactor,
-                        data
-                    )
-                )
-                    .to.emit(erc1410Facet, 'RedeemedByPartition')
-                    .withArgs(
-                        _PARTITION_ID_1,
-                        ADDRESS_ZERO,
-                        account_A,
-                        amount * adjustFactor,
-                        data,
-                        '0x'
-                    )
-            })
-
-            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorRedeemByPartition succeeds', async () => {
-                await setPreBalanceAdjustment()
-
-                // Before Values
-                const before = await getBalanceAdjustedValues()
-
-                // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
-
-                // Transaction Partition 1
-                await erc1410Facet.authorizeOperator(account_A)
-                await erc1410Facet.operatorRedeemByPartition(
-                    _PARTITION_ID_1,
-                    account_A,
-                    amount,
-                    '0x',
-                    '0x'
-                )
-
-                // After Transaction Partition 1 Values
-                const after = await getBalanceAdjustedValues()
-
-                await checkAdjustmentsAfterRedeem(after, before)
-            })
-
-            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 operatorRedeemByPartition with the expected adjusted amount succeeds', async () => {
-                await setPreBalanceAdjustment()
-
-                // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
-
-                const adjustAmount = amount * adjustFactor
-
-                // Transaction Partition 1
-                await erc1410Facet.authorizeOperator(account_A)
-                await expect(
-                    erc1410Facet.operatorRedeemByPartition(
-                        _PARTITION_ID_1,
-                        account_A,
-                        adjustAmount,
-                        data,
-                        '0x'
-                    )
-                )
-                    .to.emit(erc1410Facet, 'RedeemedByPartition')
-                    .withArgs(
-                        _PARTITION_ID_1,
-                        account_A,
-                        account_A,
-                        adjustAmount,
-                        data,
-                        '0x'
-                    )
-            })
-
-            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 controllerRedeemByPartition succeeds', async () => {
-                await setPreBalanceAdjustment()
-
-                // Before Values
-                const before = await getBalanceAdjustedValues()
-
-                // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
-
-                // Transaction Partition 1
-                await erc1410Facet.controllerRedeemByPartition(
-                    _PARTITION_ID_1,
-                    account_A,
-                    amount,
-                    '0x',
-                    '0x'
-                )
-
-                // After Transaction Partition 1 Values
-                const after = await getBalanceAdjustedValues()
-
-                await checkAdjustmentsAfterRedeem(after, before)
-            })
-
-            it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1410 controllerRedeemByPartition with the expected adjusted amount succeeds', async () => {
-                await setPreBalanceAdjustment()
-
-                // adjustBalances
-                await adjustBalancesFacet.adjustBalances(
-                    adjustFactor,
-                    adjustDecimals
-                )
-
-                const adjustAmount = amount * adjustFactor
-
-                // Transaction Partition 1
-                await expect(
-                    erc1410Facet.controllerRedeemByPartition(
-                        _PARTITION_ID_1,
-                        account_A,
-                        adjustAmount,
-                        '0x',
-                        '0x'
-                    )
-                )
-                    .to.emit(erc1410Facet, 'RedeemedByPartition')
-                    .withArgs(
-                        _PARTITION_ID_1,
-                        account_A,
-                        account_A,
-                        adjustAmount,
-                        '0x',
-                        '0x'
-                    )
-            })
-
+        describe('Redeems', async () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1644 controllerRedeem succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 // Before Values
@@ -3756,12 +3571,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1644 controllerRedeem with the expected adjusted amount succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 // adjustBalances
@@ -3786,12 +3595,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeem succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 // Before Values
@@ -3815,12 +3618,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeem with the expected adjusted amount succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 // adjustBalances
@@ -3840,12 +3637,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeemFrom succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 erc20Facet = erc20Facet.connect(signer_A)
@@ -3872,12 +3663,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC1594 redeemFrom with the expected adjusted amount succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 erc20Facet = erc20Facet.connect(signer_A)
@@ -3904,12 +3689,6 @@ describe('ERC1400 Tests', () => {
 
         describe('Allowances', () => {
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 allowance succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 erc20Facet = erc20Facet.connect(signer_A)
@@ -3938,12 +3717,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 increaseAllowance succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 erc20Facet = erc20Facet.connect(signer_A)
@@ -3976,12 +3749,6 @@ describe('ERC1400 Tests', () => {
             })
 
             it('GIVEN an account with adjustBalances role WHEN adjustBalances THEN ERC20 decreaseAllowance succeeds', async () => {
-                await deployAsset({
-                    multiPartition: false,
-                    factory,
-                    businessLogicResolverAddress: businessLogicResolver.address,
-                })
-
                 await setPreBalanceAdjustment(true)
 
                 erc20Facet = erc20Facet.connect(signer_A)
