@@ -401,7 +401,7 @@ abstract contract BondStorageWrapper is IBondStorageWrapper, Common {
         return true;
     }
 
-    function _checkMaturityDate(uint256 _maturityDate) private pure {
+    function _checkMaturityDate(uint256 _maturityDate) private view {
         if (_maturityDate <= _getMaturityDate()) revert BondMaturityDateWrong();
     }
 }

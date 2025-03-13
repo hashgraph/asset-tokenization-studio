@@ -205,76 +205,85 @@
 
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
-import { BigNumber } from 'ethers'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
 import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
-    ResolverProxy,
-    BondUSA,
-    AccessControl,
-    Pause,
+    type ResolverProxy,
+    type EquityUSA,
+    type Pause,
+    type AccessControl,
+    TimeTravel,
     Lock,
     Hold,
-    TimeTravel,
     ERC1410ScheduledTasks,
     IFactory,
     BusinessLogicResolver,
-    ERC1410ScheduledTasks__factory,
+    AccessControl__factory,
+    EquityUSATimeTravel__factory,
+    Pause__factory,
     Lock__factory,
     Hold__factory,
-    Pause__factory,
-    AccessControl__factory,
-    BondUSATimeTravel__factory,
+    ERC1410ScheduledTasks__factory,
     TimeTravel__factory,
     Kyc,
     SsiManagement,
 } from '@typechain'
 import {
     CORPORATE_ACTION_ROLE,
-    PAUSER_ROLE,
-    BOND_MANAGER_ROLE,
-    LOCKER_ROLE,
+    DEFAULT_PARTITION,
     ISSUER_ROLE,
+    LOCKER_ROLE,
+    PAUSER_ROLE,
     KYC_ROLE,
     SSI_MANAGER_ROLE,
-    DEFAULT_PARTITION,
+    deployEquityFromFactory,
     Rbac,
-    deployBondFromFactory,
     RegulationSubType,
     RegulationType,
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     ADDRESS_ZERO,
+    EMPTY_STRING,
     MAX_UINT256,
     ZERO,
-    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
 import { dateToUnixTimestamp } from '../../../dateFormatter'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
-const numberOfUnits = 1000
-let startingDate = 0
-const numberOfCoupons = 50
-const frequency = 7
-const rate = 1
-let maturityDate = 0
-let firstCouponDate = 0
+const DECIMALS = 7
+let dividendsRecordDateInSeconds = 0
+let dividendsExecutionDateInSeconds = 0
+const dividendsAmountPerEquity = 1
+
+let votingRecordDateInSeconds = 0
 const countriesControlListType = true
 const listOfCountries = 'ES,FR,CH'
 const info = 'info'
 
-let couponRecordDateInSeconds = 0
-let couponExecutionDateInSeconds = 0
-const couponRate = 5
+let balanceAdjustmentExecutionDateInSeconds = 0
+const balanceAdjustmentFactor = 356
+const balanceAdjustmentDecimals = 2
+
+const voteData = '0x'
+let votingData = {
+    recordDate: votingRecordDateInSeconds.toString(),
+    data: voteData,
+}
+let dividendData = {
+    recordDate: dividendsRecordDateInSeconds.toString(),
+    executionDate: dividendsExecutionDateInSeconds.toString(),
+    amount: dividendsAmountPerEquity,
+}
+let balanceAdjustmentData = {
+    executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
+    factor: balanceAdjustmentFactor,
+    decimals: balanceAdjustmentDecimals,
+}
+const number_Of_Shares = 100000n
 const EMPTY_VC_ID = EMPTY_STRING
 
-let couponData = {
-    recordDate: couponRecordDateInSeconds.toString(),
-    executionDate: couponExecutionDateInSeconds.toString(),
-    rate: couponRate,
-}
-
-describe('Bond Tests', () => {
+describe('Equity Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -286,7 +295,7 @@ describe('Bond Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let bondFacet: BondUSA
+    let equityFacet: EquityUSA
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
     let lockFacet: Lock
@@ -296,42 +305,7 @@ describe('Bond Tests', () => {
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
 
-    before(async () => {
-        // mute | mock console.log
-        console.log = () => {}
-        // eslint-disable-next-line @typescript-eslint/no-extra-semi
-        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
-        account_A = signer_A.address
-        account_B = signer_B.address
-        account_C = signer_C.address
-
-        const { deployer, ...deployedContracts } =
-            await deployAtsFullInfrastructure(
-                await DeployAtsFullInfrastructureCommand.newInstance({
-                    signer: signer_A,
-                    useDeployed: false,
-                    useEnvironment: true,
-                    timeTravelEnabled: true,
-                })
-            )
-
-        factory = deployedContracts.factory.contract
-        businessLogicResolver = deployedContracts.businessLogicResolver.contract
-    })
-
-    beforeEach(async () => {
-        startingDate = dateToUnixTimestamp(`2030-01-01T00:00:35Z`)
-        maturityDate = startingDate + numberOfCoupons * frequency
-        firstCouponDate = startingDate + 1
-        couponRecordDateInSeconds = dateToUnixTimestamp(`2030-01-01T00:01:00Z`)
-        couponExecutionDateInSeconds =
-            dateToUnixTimestamp(`2030-01-01T00:10:00Z`)
-        couponData = {
-            recordDate: couponRecordDateInSeconds.toString(),
-            executionDate: couponExecutionDateInSeconds.toString(),
-            rate: couponRate,
-        }
-
+    function set_initRbacs(): Rbac[] {
         const rbacPause: Rbac = {
             role: PAUSER_ROLE,
             members: [account_B],
@@ -344,45 +318,10 @@ describe('Bond Tests', () => {
             role: SSI_MANAGER_ROLE,
             members: [account_A],
         }
-        const init_rbacs: Rbac[] = [rbacPause, rbacKYC, rbacSSI]
+        return [rbacPause, rbacKYC, rbacSSI]
+    }
 
-        diamond = await deployBondFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            isMultiPartition: false,
-            name: 'TEST_AccessControl',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            currency: '0x455552',
-            numberOfUnits,
-            nominalValue: 100,
-            startingDate,
-            maturityDate,
-            couponFrequency: frequency,
-            couponRate: rate,
-            firstCouponDate,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_C,
-            countriesControlListType,
-            listOfCountries,
-            info,
-            init_rbacs,
-            factory,
-            businessLogicResolver: businessLogicResolver.address,
-        })
-
-        bondFacet = BondUSATimeTravel__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        accessControlFacet = AccessControl__factory.connect(
-            diamond.address,
-            signer_A
-        )
+    async function setFacets({ diamond }: { diamond: ResolverProxy }) {
         pauseFacet = Pause__factory.connect(diamond.address, signer_A)
         lockFacet = Lock__factory.connect(diamond.address, signer_A)
         holdFacet = Hold__factory.connect(diamond.address, signer_A)
@@ -391,6 +330,14 @@ describe('Bond Tests', () => {
             signer_A
         )
         timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        equityFacet = EquityUSATimeTravel__factory.connect(
+            diamond.address,
+            signer_A
+        )
         kycFacet = await ethers.getContractAt('Kyc', diamond.address, signer_B)
         ssiManagementFacet = await ethers.getContractAt(
             'SsiManagement',
@@ -406,24 +353,115 @@ describe('Bond Tests', () => {
             MAX_UINT256,
             account_A
         )
+    }
+
+    async function deploySecurityFixtureSinglePartition() {
+        let init_rbacs: Rbac[] = set_initRbacs()
+
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            clearingActive: false,
+            isMultiPartition: false,
+            name: 'TEST_AccessControl',
+            symbol: 'TAC',
+            decimals: DECIMALS,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: number_Of_Shares,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType,
+            listOfCountries,
+            info,
+            init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory,
+        })
+
+        await setFacets({ diamond })
+    }
+
+    before(async () => {
+        // mute | mock console.log
+        console.log = () => {}
+        // eslint-disable-next-line @typescript-eslint/no-extra-semi
+        ;[signer_A, signer_B, signer_C] = await ethers.getSigners()
+        account_A = signer_A.address
+        account_B = signer_B.address
+        account_C = signer_C.address
+
+        const { deployer, ...deployedContracts } =
+            await deployAtsFullInfrastructure(
+                await DeployAtsFullInfrastructureCommand.newInstance({
+                    signer: signer_A,
+                    useDeployed: false,
+                    useEnvironment: false,
+                    timeTravelEnabled: true,
+                })
+            )
+
+        factory = deployedContracts.factory.contract
+        businessLogicResolver = deployedContracts.businessLogicResolver.contract
+    })
+
+    beforeEach(async () => {
+        dividendsRecordDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:00:10Z'
+        )
+        dividendsExecutionDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:16:40Z'
+        )
+        votingRecordDateInSeconds = dateToUnixTimestamp('2030-01-01T00:00:10Z')
+        balanceAdjustmentExecutionDateInSeconds = dateToUnixTimestamp(
+            '2030-01-01T00:00:10Z'
+        )
+
+        votingData = {
+            recordDate: votingRecordDateInSeconds.toString(),
+            data: voteData,
+        }
+        dividendData = {
+            recordDate: dividendsRecordDateInSeconds.toString(),
+            executionDate: dividendsExecutionDateInSeconds.toString(),
+            amount: dividendsAmountPerEquity,
+        }
+        balanceAdjustmentData = {
+            executionDate: balanceAdjustmentExecutionDateInSeconds.toString(),
+            factor: balanceAdjustmentFactor,
+            decimals: balanceAdjustmentDecimals,
+        }
+
+        await loadFixture(deploySecurityFixtureSinglePartition)
     })
 
     afterEach(async () => {
-        timeTravelFacet.resetSystemTimestamp()
+        await timeTravelFacet.resetSystemTimestamp()
     })
 
-    describe('Coupons', () => {
-        it('GIVEN an account without corporateActions role WHEN setCoupon THEN transaction fails with AccountHasNoRole', async () => {
+    describe('Dividends', () => {
+        it('GIVEN an account without corporateActions role WHEN setDividends THEN transaction fails with AccountHasNoRole', async () => {
             // Using account C (non role)
-            bondFacet = bondFacet.connect(signer_C)
+            equityFacet = equityFacet.connect(signer_C)
 
-            // set coupon fails
-            await expect(bondFacet.setCoupon(couponData)).to.be.rejectedWith(
-                'AccountHasNoRole'
-            )
+            // set dividend fails
+            await expect(
+                equityFacet.setDividends(dividendData)
+            ).to.be.rejectedWith('AccountHasNoRole')
         })
 
-        it('GIVEN a paused Token WHEN setCoupon THEN transaction fails with TokenIsPaused', async () => {
+        it('GIVEN a paused Token WHEN setDividends THEN transaction fails with TokenIsPaused', async () => {
             // Granting Role to account C and Pause
             await grantRoleAndPauseToken(
                 accessControlFacet,
@@ -435,106 +473,111 @@ describe('Bond Tests', () => {
             )
 
             // Using account C (with role)
-            bondFacet = bondFacet.connect(signer_C)
+            equityFacet = equityFacet.connect(signer_C)
 
-            // set coupon fails
-            await expect(bondFacet.setCoupon(couponData)).to.be.rejectedWith(
-                'TokenIsPaused'
+            // set dividend fails
+            await expect(
+                equityFacet.setDividends(dividendData)
+            ).to.be.rejectedWith('TokenIsPaused')
+        })
+
+        it('GIVEN an account with corporateActions role WHEN setDividends with wrong dates THEN transaction fails', async () => {
+            await timeTravelFacet.changeSystemTimestamp(
+                dateToUnixTimestamp('2030-01-01T00:00:00Z')
             )
-        })
-
-        it('GIVEN an account with corporateActions role WHEN setCoupon with wrong dates THEN transaction fails', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
-            bondFacet = bondFacet.connect(signer_C)
+            equityFacet = equityFacet.connect(signer_C)
 
-            // set coupon
-            const wrongcouponData_1 = {
-                recordDate: couponExecutionDateInSeconds.toString(),
-                executionDate: couponRecordDateInSeconds.toString(),
-                rate: couponRate,
+            // set dividend
+            const wrongDividendData_1 = {
+                recordDate: dividendsExecutionDateInSeconds.toString(),
+                executionDate: dividendsRecordDateInSeconds.toString(),
+                amount: dividendsAmountPerEquity,
             }
 
             await expect(
-                bondFacet.setCoupon(wrongcouponData_1)
-            ).to.be.revertedWithCustomError(bondFacet, 'WrongDates')
+                equityFacet.setDividends(wrongDividendData_1)
+            ).to.be.revertedWithCustomError(equityFacet, 'WrongDates')
 
-            const wrongcouponData_2 = {
-                recordDate: (
-                    (await ethers.provider.getBlock('latest')).timestamp - 1
+            const wrongDividendData_2 = {
+                recordDate: dateToUnixTimestamp(
+                    '2029-12-31T23:59:59Z'
                 ).toString(),
-                executionDate: couponExecutionDateInSeconds.toString(),
-                rate: couponRate,
+                executionDate: dividendsExecutionDateInSeconds.toString(),
+                amount: dividendsAmountPerEquity,
             }
 
             await expect(
-                bondFacet.setCoupon(wrongcouponData_2)
-            ).to.be.revertedWithCustomError(bondFacet, 'WrongTimestamp')
+                equityFacet.setDividends(wrongDividendData_2)
+            ).to.be.revertedWithCustomError(equityFacet, 'WrongTimestamp')
         })
 
-        it('GIVEN an account with corporateActions role WHEN setCoupon THEN transaction succeeds', async () => {
+        it('GIVEN an account with corporateActions role WHEN setDividends THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             // Using account C (with role)
-            bondFacet = bondFacet.connect(signer_C)
+            equityFacet = equityFacet.connect(signer_C)
 
-            // set coupon
-            await expect(bondFacet.setCoupon(couponData))
-                .to.emit(bondFacet, 'CouponSet')
+            // set dividend
+            await expect(equityFacet.setDividends(dividendData))
+                .to.emit(equityFacet, 'DividendSet')
                 .withArgs(
-                    '0x0000000000000000000000000000000000000000000000000000000000000033',
-                    numberOfCoupons + 1,
+                    '0x0000000000000000000000000000000000000000000000000000000000000001',
+                    1,
                     account_C,
-                    couponRecordDateInSeconds,
-                    couponExecutionDateInSeconds,
-                    couponRate
+                    dividendsRecordDateInSeconds,
+                    dividendsExecutionDateInSeconds,
+                    dividendsAmountPerEquity
                 )
 
             // check list members
-            await expect(bondFacet.getCoupon(1000)).to.be.rejectedWith(
+            await expect(equityFacet.getDividends(1000)).to.be.rejectedWith(
                 'WrongIndexForAction'
             )
 
-            const listCount = await bondFacet.getCouponCount()
-            const coupon = await bondFacet.getCoupon(numberOfCoupons + 1)
-            const couponFor = await bondFacet.getCouponFor(
-                numberOfCoupons + 1,
-                account_A
-            )
+            const listCount = await equityFacet.getDividendsCount()
+            const dividend = await equityFacet.getDividends(1)
+            const dividendFor = await equityFacet.getDividendsFor(1, account_A)
 
-            expect(listCount).to.equal(numberOfCoupons + 1)
-            expect(coupon.snapshotId).to.equal(0)
-            expect(coupon.coupon.recordDate).to.equal(couponRecordDateInSeconds)
-            expect(coupon.coupon.executionDate).to.equal(
-                couponExecutionDateInSeconds
+            expect(listCount).to.equal(1)
+            expect(dividend.snapshotId).to.equal(0)
+            expect(dividend.dividend.recordDate).to.equal(
+                dividendsRecordDateInSeconds
             )
-            expect(coupon.coupon.rate).to.equal(couponRate)
-            expect(couponFor.recordDate).to.equal(couponRecordDateInSeconds)
-            expect(couponFor.executionDate).to.equal(
-                couponExecutionDateInSeconds
+            expect(dividend.dividend.executionDate).to.equal(
+                dividendsExecutionDateInSeconds
             )
-            expect(couponFor.rate).to.equal(couponRate)
-            expect(couponFor.tokenBalance).to.equal(0)
-            expect(couponFor.recordDateReached).to.equal(false)
+            expect(dividend.dividend.amount).to.equal(dividendsAmountPerEquity)
+            expect(dividendFor.recordDate).to.equal(
+                dividendsRecordDateInSeconds
+            )
+            expect(dividendFor.executionDate).to.equal(
+                dividendsExecutionDateInSeconds
+            )
+            expect(dividendFor.amount).to.equal(dividendsAmountPerEquity)
+            expect(dividendFor.tokenBalance).to.equal(0)
+            expect(dividendFor.recordDateReached).to.equal(false)
+            expect(dividendFor.decimals).to.equal(0)
         })
 
-        it('GIVEN an account with corporateActions role WHEN setCoupon and lock THEN transaction succeeds', async () => {
+        it('GIVEN an account with corporateActions role WHEN setDividends and lock THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             // Using account C (with role)
-            bondFacet = bondFacet.connect(signer_C)
+            equityFacet = equityFacet.connect(signer_C)
             lockFacet = lockFacet.connect(signer_C)
             erc1410Facet = erc1410Facet.connect(signer_C)
 
             // issue and lock
-            const TotalAmount = numberOfUnits
-            const LockedAmount = TotalAmount - 5
+            const TotalAmount = number_Of_Shares
+            const LockedAmount = TotalAmount - 5n
 
             await erc1410Facet.issueByPartition({
                 partition: DEFAULT_PARTITION,
@@ -543,47 +586,42 @@ describe('Bond Tests', () => {
                 data: '0x',
             })
 
-            await lockFacet.lock(LockedAmount, account_A, MAX_UINT256)
+            await lockFacet.lock(LockedAmount, account_A, 99999999999)
 
-            // set coupon
-            await expect(bondFacet.setCoupon(couponData))
-                .to.emit(bondFacet, 'CouponSet')
+            // set dividend
+            await expect(equityFacet.setDividends(dividendData))
+                .to.emit(equityFacet, 'DividendSet')
                 .withArgs(
-                    '0x0000000000000000000000000000000000000000000000000000000000000033',
-                    numberOfCoupons + 1,
+                    '0x0000000000000000000000000000000000000000000000000000000000000001',
+                    1,
                     account_C,
-                    couponRecordDateInSeconds,
-                    couponExecutionDateInSeconds,
-                    couponRate
+                    dividendsRecordDateInSeconds,
+                    dividendsExecutionDateInSeconds,
+                    dividendsAmountPerEquity
                 )
 
             // check list members
             await timeTravelFacet.changeSystemTimestamp(
-                couponRecordDateInSeconds + 1
+                dividendsRecordDateInSeconds + 1
             )
-            await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
+            const dividendFor = await equityFacet.getDividendsFor(1, account_A)
 
-            const couponFor = await bondFacet.getCouponFor(
-                numberOfCoupons + 1,
-                account_A
-            )
-
-            expect(couponFor.tokenBalance).to.equal(TotalAmount)
-            expect(couponFor.recordDateReached).to.equal(true)
+            expect(dividendFor.tokenBalance).to.equal(TotalAmount)
+            expect(dividendFor.recordDateReached).to.equal(true)
         })
 
-        it('GIVEN an account with corporateActions role WHEN setCoupon and hold THEN transaction succeeds', async () => {
+        it('GIVEN an account with corporateActions role WHEN setDividends and hold THEN transaction succeeds', async () => {
             // Granting Role to account C
             accessControlFacet = accessControlFacet.connect(signer_A)
             await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
             await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
             // Using account C (with role)
-            bondFacet = bondFacet.connect(signer_C)
+            equityFacet = equityFacet.connect(signer_C)
             erc1410Facet = erc1410Facet.connect(signer_C)
 
             // issue and hold
-            const TotalAmount = numberOfUnits
-            const HeldAmount = TotalAmount - 5
+            const TotalAmount = number_Of_Shares
+            const HeldAmount = TotalAmount - 5n
 
             await erc1410Facet.issueByPartition({
                 partition: DEFAULT_PARTITION,
@@ -594,7 +632,7 @@ describe('Bond Tests', () => {
 
             let hold = {
                 amount: HeldAmount,
-                expirationTimestamp: MAX_UINT256,
+                expirationTimestamp: 999999999999999,
                 escrow: account_B,
                 to: ADDRESS_ZERO,
                 data: '0x',
@@ -602,182 +640,206 @@ describe('Bond Tests', () => {
 
             await holdFacet.createHoldByPartition(DEFAULT_PARTITION, hold)
 
-            // set coupon
-            await expect(bondFacet.setCoupon(couponData))
-                .to.emit(bondFacet, 'CouponSet')
+            // set dividend
+            await expect(equityFacet.setDividends(dividendData))
+                .to.emit(equityFacet, 'DividendSet')
                 .withArgs(
-                    '0x0000000000000000000000000000000000000000000000000000000000000033',
-                    numberOfCoupons + 1,
+                    '0x0000000000000000000000000000000000000000000000000000000000000001',
+                    1,
                     account_C,
-                    couponRecordDateInSeconds,
-                    couponExecutionDateInSeconds,
-                    couponRate
+                    dividendsRecordDateInSeconds,
+                    dividendsExecutionDateInSeconds,
+                    dividendsAmountPerEquity
                 )
 
             // check list members
             await timeTravelFacet.changeSystemTimestamp(
-                couponRecordDateInSeconds + 1
+                dividendsRecordDateInSeconds + 1
             )
-            await accessControlFacet.revokeRole(ISSUER_ROLE, account_C)
+            const dividendFor = await equityFacet.getDividendsFor(1, account_A)
 
-            const couponFor = await bondFacet.getCouponFor(
-                numberOfCoupons + 1,
-                account_A
+            expect(dividendFor.tokenBalance).to.equal(TotalAmount)
+            expect(dividendFor.recordDateReached).to.equal(true)
+        })
+    })
+
+    describe('Voting rights', () => {
+        it('GIVEN an account without corporateActions role WHEN setVoting THEN transaction fails with AccountHasNoRole', async () => {
+            // Using account C (non role)
+            equityFacet = equityFacet.connect(signer_C)
+
+            // set dividend fails
+            await expect(equityFacet.setVoting(votingData)).to.be.rejectedWith(
+                'AccountHasNoRole'
             )
-
-            expect(couponFor.tokenBalance).to.equal(TotalAmount)
-            expect(couponFor.recordDateReached).to.equal(true)
         })
 
-        it('GIVEN an account with bondManager role WHEN setMaturityDate THEN transaction succeeds', async () => {
-            // * Arrange
-            // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(BOND_MANAGER_ROLE, account_C)
-            // Using account C (with role)
-            bondFacet = bondFacet.connect(signer_C)
-            // Get maturity date
-            const maturityDateBefore = (await bondFacet.getBondDetails())
-                .maturityDate
-            // New maturity date
-            const newMaturityDate = maturityDateBefore.add(
-                BigNumber.from(86400)
-            )
-
-            // * Act
-            // Set maturity date
-            const receipt = await bondFacet.updateMaturityDate(newMaturityDate)
-
-            // * Assert
-            await expect(receipt)
-                .to.emit(bondFacet, 'MaturityDateUpdated')
-                .withArgs(
-                    bondFacet.address,
-                    newMaturityDate,
-                    maturityDateBefore
-                )
-            // check date
-            const maturityDateAfter = (await bondFacet.getBondDetails())
-                .maturityDate
-            expect(maturityDateAfter).not.to.be.equal(maturityDateBefore)
-            expect(maturityDateAfter).to.be.equal(newMaturityDate)
-        })
-
-        it('GIVEN an account with bondManager role WHEN setMaturityDate to earlier date THEN transaction fails', async () => {
-            // * Arrange
-            // Granting Role to account C
-            accessControlFacet = accessControlFacet.connect(signer_A)
-            await accessControlFacet.grantRole(BOND_MANAGER_ROLE, account_C)
-            // Using account C (with role)
-            bondFacet = bondFacet.connect(signer_C)
-            // Get maturity date
-            const maturityDateBefore = (await bondFacet.getBondDetails())
-                .maturityDate
-            // New maturity date (earlier than current)
-            // New maturity date (earlier than current)
-            const dayBeforeCurrentMaturity = maturityDateBefore.sub(
-                BigNumber.from(86400)
-            )
-
-            // * Act & Assert
-            // Set maturity date
-            await expect(
-                bondFacet.updateMaturityDate(dayBeforeCurrentMaturity)
-            ).to.be.revertedWithCustomError(bondFacet, 'BondMaturityDateWrong')
-            // Ensure maturity date is not updated
-            const maturityDateAfter = (await bondFacet.getBondDetails())
-                .maturityDate
-            expect(maturityDateAfter).to.be.equal(maturityDateBefore)
-        })
-
-        it('GIVEN an account without bondManager role WHEN setMaturityDate THEN transaction fails with AccountHasNoRole', async () => {
-            // * Arrange
-            // Using account C (without role)
-            bondFacet = bondFacet.connect(signer_C)
-            // Get maturity date
-            const maturityDateBefore = (await bondFacet.getBondDetails())
-                .maturityDate
-            // New maturity date
-            const newMaturityDate = maturityDateBefore.add(
-                BigNumber.from(86400)
-            )
-
-            // * Act & Assert
-            // Set maturity date
-            await expect(
-                bondFacet.updateMaturityDate(newMaturityDate)
-            ).to.be.rejectedWith('AccountHasNoRole')
-            // Ensure maturity date is not updated
-            const maturityDateAfter = (await bondFacet.getBondDetails())
-                .maturityDate
-            expect(maturityDateAfter).to.be.equal(maturityDateBefore)
-        })
-
-        it('GIVEN a paused Token WHEN setMaturityDate THEN transaction fails with TokenIsPaused', async () => {
-            // * Arrange
+        it('GIVEN a paused Token WHEN setVoting THEN transaction fails with TokenIsPaused', async () => {
             // Granting Role to account C and Pause
             await grantRoleAndPauseToken(
                 accessControlFacet,
                 pauseFacet,
-                BOND_MANAGER_ROLE,
+                CORPORATE_ACTION_ROLE,
                 signer_A,
                 signer_B,
                 account_C
             )
+
             // Using account C (with role)
-            bondFacet = bondFacet.connect(signer_C)
-            // Get maturity date
-            const maturityDateBefore = (await bondFacet.getBondDetails())
-                .maturityDate
-            // New maturity date
-            const newMaturityDate = maturityDateBefore.add(
-                BigNumber.from(86400)
+            equityFacet = equityFacet.connect(signer_C)
+
+            // set dividend fails
+            await expect(equityFacet.setVoting(votingData)).to.be.rejectedWith(
+                'TokenIsPaused'
+            )
+        })
+
+        it('GIVEN an account with corporateActions role WHEN setVoting THEN transaction succeeds', async () => {
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            // Using account C (with role)
+            equityFacet = equityFacet.connect(signer_C)
+
+            // set dividend
+            await expect(equityFacet.setVoting(votingData))
+                .to.emit(equityFacet, 'VotingSet')
+                .withArgs(
+                    '0x0000000000000000000000000000000000000000000000000000000000000001',
+                    1,
+                    account_C,
+                    votingRecordDateInSeconds,
+                    voteData
+                )
+
+            // check list members
+            // await expect(equityFacet.getVoting(1000)).to.be.rejectedWith(
+            //     'WrongIndexForAction'
+            // )
+
+            const listCount = await equityFacet.getVotingCount()
+            const voting = await equityFacet.getVoting(1)
+            const votingFor = await equityFacet.getVotingFor(1, account_A)
+
+            expect(listCount).to.equal(1)
+            expect(voting.snapshotId).to.equal(0)
+            expect(voting.voting.recordDate).to.equal(votingRecordDateInSeconds)
+            expect(voting.voting.data).to.equal(voteData)
+            expect(votingFor.recordDate).to.equal(dividendsRecordDateInSeconds)
+            expect(votingFor.data).to.equal(voteData)
+            expect(votingFor.tokenBalance).to.equal(0)
+            expect(votingFor.recordDateReached).to.equal(false)
+        })
+
+        it('GIVEN an account with corporateActions role WHEN setVoting and lock THEN transaction succeeds', async () => {
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            await accessControlFacet.grantRole(LOCKER_ROLE, account_C)
+            await accessControlFacet.grantRole(ISSUER_ROLE, account_C)
+            // Using account C (with role)
+            equityFacet = equityFacet.connect(signer_C)
+            lockFacet = lockFacet.connect(signer_C)
+            erc1410Facet = erc1410Facet.connect(signer_C)
+
+            // issue and lock
+            const TotalAmount = number_Of_Shares
+            const LockedAmount = TotalAmount - 5n
+
+            await erc1410Facet.issueByPartition({
+                partition: DEFAULT_PARTITION,
+                tokenHolder: account_A,
+                value: TotalAmount,
+                data: '0x',
+            })
+            await lockFacet.lock(LockedAmount, account_A, 99999999999)
+
+            // set dividend
+            await expect(equityFacet.setVoting(votingData))
+                .to.emit(equityFacet, 'VotingSet')
+                .withArgs(
+                    '0x0000000000000000000000000000000000000000000000000000000000000001',
+                    1,
+                    account_C,
+                    votingRecordDateInSeconds,
+                    voteData
+                )
+
+            await timeTravelFacet.changeSystemTimestamp(
+                votingRecordDateInSeconds + 1
+            )
+            const votingFor = await equityFacet.getVotingFor(1, account_A)
+
+            expect(votingFor.tokenBalance).to.equal(TotalAmount)
+            expect(votingFor.recordDateReached).to.equal(true)
+        })
+    })
+
+    describe('Balance adjustments', () => {
+        it('GIVEN an account without corporateActions role WHEN setBalanceAdjustment THEN transaction fails with AccountHasNoRole', async () => {
+            // Using account C (non role)
+            equityFacet = equityFacet.connect(signer_C)
+
+            // set dividend fails
+            await expect(
+                equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
+            ).to.be.rejectedWith('AccountHasNoRole')
+        })
+
+        it('GIVEN a paused Token WHEN setBalanceAdjustment THEN transaction fails with TokenIsPaused', async () => {
+            // Granting Role to account C and Pause
+            await grantRoleAndPauseToken(
+                accessControlFacet,
+                pauseFacet,
+                CORPORATE_ACTION_ROLE,
+                signer_A,
+                signer_B,
+                account_C
             )
 
-            // * Act & Assert
-            // Set maturity date
+            // Using account C (with role)
+            equityFacet = equityFacet.connect(signer_C)
+
+            // set dividend fails
             await expect(
-                bondFacet.updateMaturityDate(newMaturityDate)
+                equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
             ).to.be.rejectedWith('TokenIsPaused')
-            // Ensure maturity date is not updated
-            const maturityDateAfter = (await bondFacet.getBondDetails())
-                .maturityDate
-            expect(maturityDateAfter).to.be.equal(maturityDateBefore)
         })
 
-        it('Check number of created Coupon', async () => {
-            bondFacet = bondFacet.connect(signer_C)
+        it('GIVEN an account with corporateActions role WHEN setBalanceAdjustment THEN transaction succeeds', async () => {
+            // Granting Role to account C
+            accessControlFacet = accessControlFacet.connect(signer_A)
+            await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+            // Using account C (with role)
+            equityFacet = equityFacet.connect(signer_C)
 
-            const couponCount = await bondFacet.getCouponCount()
-
-            expect(couponCount).to.equal(numberOfCoupons)
-        })
-
-        it('Check Coupon', async () => {
-            bondFacet = bondFacet.connect(signer_C)
-
-            for (let i = 1; i <= numberOfCoupons; i++) {
-                const coupon = await bondFacet.getCoupon(i)
-                const couponFor = await bondFacet.getCouponFor(i, account_A)
-
-                expect(coupon.coupon.recordDate).to.equal(
-                    firstCouponDate + (i - 1) * frequency
+            // set dividend
+            await expect(
+                equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData)
+            )
+                .to.emit(equityFacet, 'ScheduledBalanceAdjustmentSet')
+                .withArgs(
+                    '0x0000000000000000000000000000000000000000000000000000000000000001',
+                    1,
+                    account_C,
+                    balanceAdjustmentExecutionDateInSeconds,
+                    balanceAdjustmentFactor,
+                    balanceAdjustmentDecimals
                 )
-                expect(coupon.coupon.executionDate).to.equal(
-                    firstCouponDate + (i - 1) * frequency
-                )
-                expect(coupon.coupon.rate).to.equal(rate)
-                expect(coupon.snapshotId).to.equal(0)
-                expect(couponFor.recordDate).to.equal(
-                    firstCouponDate + (i - 1) * frequency
-                )
-                expect(couponFor.executionDate).to.equal(
-                    firstCouponDate + (i - 1) * frequency
-                )
-                expect(couponFor.tokenBalance).to.equal(0)
-                expect(couponFor.rate).to.equal(rate)
-                expect(couponFor.recordDateReached).to.equal(false)
-            }
+
+            const listCount =
+                await equityFacet.getScheduledBalanceAdjustmentCount()
+            const balanceAdjustment =
+                await equityFacet.getScheduledBalanceAdjustment(1)
+
+            expect(listCount).to.equal(1)
+            expect(balanceAdjustment.executionDate).to.equal(
+                balanceAdjustmentExecutionDateInSeconds
+            )
+            expect(balanceAdjustment.factor).to.equal(balanceAdjustmentFactor)
+            expect(balanceAdjustment.decimals).to.equal(
+                balanceAdjustmentDecimals
+            )
         })
     })
 })

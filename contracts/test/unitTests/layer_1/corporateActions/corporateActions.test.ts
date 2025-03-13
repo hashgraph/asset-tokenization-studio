@@ -206,27 +206,21 @@
 import { expect } from 'chai'
 import { ethers } from 'hardhat'
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers.js'
+import { isinGenerator } from '@thomaschaplin/isin-generator'
 import {
     type ResolverProxy,
-    type AdjustBalances,
+    type CorporateActions,
     type Pause,
-    type ERC1410ScheduledTasks,
     type AccessControl,
-    Equity,
-    ScheduledTasks,
-    BusinessLogicResolver,
     IFactory,
-    TimeTravel,
-    Kyc,
-    SsiManagement,
+    BusinessLogicResolver,
+    AccessControlFacet__factory,
+    CorporateActions__factory,
+    PauseFacet__factory,
 } from '@typechain'
 import {
-    ADJUSTMENT_BALANCE_ROLE,
-    PAUSER_ROLE,
-    ISSUER_ROLE,
-    KYC_ROLE,
-    SSI_MANAGER_ROLE,
     CORPORATE_ACTION_ROLE,
+    PAUSER_ROLE,
     deployEquityFromFactory,
     Rbac,
     RegulationSubType,
@@ -234,23 +228,17 @@ import {
     deployAtsFullInfrastructure,
     DeployAtsFullInfrastructureCommand,
     MAX_UINT256,
-    ZERO,
-    EMPTY_STRING,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../common'
-import { dateToUnixTimestamp } from '../../../dateFormatter'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
-const amount = 1
-const balanceOf_B_Original = [20 * amount, 200 * amount]
-const _PARTITION_ID_2 =
-    '0x0000000000000000000000000000000000000000000000000000000000000002'
-const adjustFactor = 253
-const adjustDecimals = 2
-const decimals_Original = 6
-const maxSupply_Original = 1000000 * amount
-const EMPTY_VC_ID = EMPTY_STRING
+const actionType =
+    '0x000000000000000000000000000000000000000000000000000000000000aa23'
+const actionData = '0x1234'
+const corporateActionId_1 =
+    '0x0000000000000000000000000000000000000000000000000000000000000001'
 
-describe('Adjust Balances Tests', () => {
+describe('Corporate Actions Tests', () => {
     let diamond: ResolverProxy
     let signer_A: SignerWithAddress
     let signer_B: SignerWithAddress
@@ -262,26 +250,12 @@ describe('Adjust Balances Tests', () => {
 
     let factory: IFactory
     let businessLogicResolver: BusinessLogicResolver
-    let erc1410Facet: ERC1410ScheduledTasks
-    let adjustBalancesFacet: AdjustBalances
+    let corporateActionsFacet: CorporateActions
     let accessControlFacet: AccessControl
     let pauseFacet: Pause
-    let equityFacet: Equity
-    let scheduledTasksFacet: ScheduledTasks
-    let timeTravelFacet: TimeTravel
-    let kycFacet: Kyc
-    let ssiManagementFacet: SsiManagement
 
-    async function deployAsset({
-        multiPartition,
-        factory,
-        businessLogicResolver,
-    }: {
-        multiPartition: boolean
-        factory: IFactory
-        businessLogicResolver: BusinessLogicResolver
-    }) {
-        const init_rbacs: Rbac[] = set_initRbacs()
+    async function deploySecurityFixtureSinglePartition() {
+        let init_rbacs: Rbac[] = set_initRbacs()
 
         diamond = await deployEquityFromFactory({
             adminAccount: account_A,
@@ -289,11 +263,11 @@ describe('Adjust Balances Tests', () => {
             isControllable: true,
             arePartitionsProtected: false,
             clearingActive: false,
-            isMultiPartition: multiPartition,
+            isMultiPartition: false,
             name: 'TEST_AccessControl',
             symbol: 'TAC',
-            decimals: decimals_Original,
-            isin: 'RO3682287482',
+            decimals: 6,
+            isin: isinGenerator(),
             votingRight: false,
             informationRight: false,
             liquidationRight: false,
@@ -303,56 +277,31 @@ describe('Adjust Balances Tests', () => {
             putRight: false,
             dividendRight: 1,
             currency: '0x345678',
-            numberOfShares: BigInt(maxSupply_Original),
+            numberOfShares: MAX_UINT256,
             nominalValue: 100,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_B,
+            regulationType: RegulationType.REG_S,
+            regulationSubType: RegulationSubType.NONE,
             countriesControlListType: true,
             listOfCountries: 'ES,FR,CH',
             info: 'nothing',
             init_rbacs,
-            factory,
             businessLogicResolver: businessLogicResolver.address,
+            factory,
         })
 
         await setFacets(diamond)
     }
 
     async function setFacets(diamond: ResolverProxy) {
-        accessControlFacet = await ethers.getContractAt(
-            'AccessControl',
-            diamond.address
+        accessControlFacet = AccessControlFacet__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        erc1410Facet = await ethers.getContractAt(
-            'ERC1410ScheduledTasks',
-            diamond.address
+        corporateActionsFacet = CorporateActions__factory.connect(
+            diamond.address,
+            signer_A
         )
-
-        adjustBalancesFacet = await ethers.getContractAt(
-            'AdjustBalances',
-            diamond.address
-        )
-
-        pauseFacet = await ethers.getContractAt('Pause', diamond.address)
-
-        equityFacet = await ethers.getContractAt('Equity', diamond.address)
-
-        scheduledTasksFacet = await ethers.getContractAt(
-            'ScheduledTasksTimeTravel',
-            diamond.address
-        )
-
-        timeTravelFacet = await ethers.getContractAt(
-            'TimeTravel',
-            diamond.address
-        )
-
-        kycFacet = await ethers.getContractAt('Kyc', diamond.address)
-        ssiManagementFacet = await ethers.getContractAt(
-            'SsiManagement',
-            diamond.address
-        )
+        pauseFacet = PauseFacet__factory.connect(diamond.address, signer_A)
     }
 
     function set_initRbacs(): Rbac[] {
@@ -360,15 +309,7 @@ describe('Adjust Balances Tests', () => {
             role: PAUSER_ROLE,
             members: [account_B],
         }
-        const rbacKYC: Rbac = {
-            role: KYC_ROLE,
-            members: [account_B],
-        }
-        const rbacSSI: Rbac = {
-            role: SSI_MANAGER_ROLE,
-            members: [account_A],
-        }
-        return [rbacPause, rbacKYC, rbacSSI]
+        return [rbacPause]
     }
 
     before(async () => {
@@ -386,7 +327,6 @@ describe('Adjust Balances Tests', () => {
                     signer: signer_A,
                     useDeployed: false,
                     useEnvironment: true,
-                    timeTravelEnabled: true,
                 })
             )
 
@@ -394,125 +334,81 @@ describe('Adjust Balances Tests', () => {
         businessLogicResolver = deployedContracts.businessLogicResolver.contract
     })
 
-    afterEach(async () => {
-        await timeTravelFacet.resetSystemTimestamp()
-    })
-
     beforeEach(async () => {
-        await deployAsset({
-            multiPartition: true,
-            factory,
-            businessLogicResolver,
-        })
+        await loadFixture(deploySecurityFixtureSinglePartition)
     })
 
-    it('GIVEN an account without adjustBalances role WHEN adjustBalances THEN transaction fails with AccountHasNoRole', async () => {
+    it('GIVEN an account without corporateActions role WHEN addCorporateAction THEN transaction fails with AccountHasNoRole', async () => {
         // Using account C (non role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+        corporateActionsFacet = corporateActionsFacet.connect(signer_C)
 
-        // adjustBalances fails
+        // add to list fails
         await expect(
-            adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
+            corporateActionsFacet.addCorporateAction(actionType, actionData)
         ).to.be.rejectedWith('AccountHasNoRole')
     })
 
-    it('GIVEN a paused Token WHEN adjustBalances THEN transaction fails with TokenIsPaused', async () => {
+    it('GIVEN a paused Token WHEN addCorporateAction THEN transaction fails with TokenIsPaused', async () => {
         // Granting Role to account C and Pause
         await grantRoleAndPauseToken(
             accessControlFacet,
             pauseFacet,
-            ADJUSTMENT_BALANCE_ROLE,
+            CORPORATE_ACTION_ROLE,
             signer_A,
             signer_B,
             account_C
         )
 
         // Using account C (with role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
+        corporateActionsFacet = corporateActionsFacet.connect(signer_C)
 
-        // adjustBalances fails
+        // add to list fails
         await expect(
-            adjustBalancesFacet.adjustBalances(adjustFactor, adjustDecimals)
+            corporateActionsFacet.addCorporateAction(actionType, actionData)
         ).to.be.rejectedWith('TokenIsPaused')
     })
 
-    it('GIVEN a Token WHEN adjustBalances with factor set at 0 THEN transaction fails with FactorIsZero', async () => {
-        // Granting Role to account C and Pause
-        accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_C)
-
-        // Using account C (with role)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_C)
-
-        // adjustBalances fails
-        await expect(
-            adjustBalancesFacet.adjustBalances(0, adjustDecimals)
-        ).to.be.revertedWithCustomError(adjustBalancesFacet, 'FactorIsZero')
-    })
-
-    it('GIVEN an account with adjustBalance role WHEN adjustBalances THEN scheduled tasks get executed succeeds', async () => {
+    it('GIVEN an account with corporateActions role WHEN addCorporateAction THEN transaction succeeds', async () => {
         // Granting Role to account C
         accessControlFacet = accessControlFacet.connect(signer_A)
-        await accessControlFacet.grantRole(ADJUSTMENT_BALANCE_ROLE, account_A)
-        await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
-        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_A)
+        await accessControlFacet.grantRole(CORPORATE_ACTION_ROLE, account_C)
+        // Using account C (with role)
+        corporateActionsFacet = corporateActionsFacet.connect(signer_C)
 
-        await ssiManagementFacet.connect(signer_A).addIssuer(account_A)
-        await kycFacet
-            .connect(signer_B)
-            .grantKyc(account_B, EMPTY_VC_ID, ZERO, MAX_UINT256, account_A)
+        // add to list
+        await corporateActionsFacet.addCorporateAction(actionType, actionData)
 
-        erc1410Facet = erc1410Facet.connect(signer_A)
-        equityFacet = equityFacet.connect(signer_A)
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
-
-        await erc1410Facet.issueByPartition({
-            partition: _PARTITION_ID_2,
-            tokenHolder: account_B,
-            value: balanceOf_B_Original,
-            data: '0x',
-        })
-
-        // schedule tasks
-        const dividendsRecordDateInSeconds_1 =
-            dateToUnixTimestamp(`2030-01-01T00:00:06Z`)
-        const dividendsExecutionDateInSeconds =
-            dateToUnixTimestamp(`2030-01-01T00:01:00Z`)
-        const dividendsAmountPerEquity = 1
-        const dividendData_1 = {
-            recordDate: dividendsRecordDateInSeconds_1.toString(),
-            executionDate: dividendsExecutionDateInSeconds.toString(),
-            amount: dividendsAmountPerEquity,
-        }
-
-        await equityFacet.setDividends(dividendData_1)
-
-        const balanceAdjustmentExecutionDateInSeconds_1 =
-            dateToUnixTimestamp(`2030-01-01T00:00:07Z`)
-
-        const balanceAdjustmentData_1 = {
-            executionDate: balanceAdjustmentExecutionDateInSeconds_1.toString(),
-            factor: adjustFactor,
-            decimals: adjustDecimals,
-        }
-
-        await equityFacet.setScheduledBalanceAdjustment(balanceAdjustmentData_1)
-
-        const tasks_count_Before =
-            await scheduledTasksFacet.scheduledTaskCount()
-
-        //-------------------------
-        await timeTravelFacet.changeSystemTimestamp(
-            balanceAdjustmentExecutionDateInSeconds_1 + 1
+        // check list members
+        const listCount = await corporateActionsFacet.getCorporateActionCount()
+        const listMembers = await corporateActionsFacet.getCorporateActionIds(
+            0,
+            listCount
+        )
+        const listCountByType =
+            await corporateActionsFacet.getCorporateActionCountByType(
+                actionType
+            )
+        const listMembersByType =
+            await corporateActionsFacet.getCorporateActionIdsByType(
+                actionType,
+                0,
+                listCount
+            )
+        const corporateAction = await corporateActionsFacet.getCorporateAction(
+            corporateActionId_1
         )
 
-        // balance adjustment
-        adjustBalancesFacet = adjustBalancesFacet.connect(signer_A)
-        await adjustBalancesFacet.adjustBalances(1, 0)
-
-        const tasks_count_After = await scheduledTasksFacet.scheduledTaskCount()
-
-        expect(tasks_count_Before).to.be.equal(2)
-        expect(tasks_count_After).to.be.equal(0)
+        expect(listCount).to.equal(1)
+        expect(listMembers.length).to.equal(listCount)
+        expect(listMembers[0]).to.equal(corporateActionId_1)
+        expect(listCountByType).to.equal(1)
+        expect(listMembersByType.length).to.equal(listCountByType)
+        expect(listMembersByType[0]).to.equal(corporateActionId_1)
+        expect(corporateAction[0].toUpperCase()).to.equal(
+            actionType.toUpperCase()
+        )
+        expect(corporateAction[1].toUpperCase()).to.equal(
+            actionData.toUpperCase()
+        )
     })
 })

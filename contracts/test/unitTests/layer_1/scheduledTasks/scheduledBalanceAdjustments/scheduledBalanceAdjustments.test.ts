@@ -234,6 +234,7 @@ import {
     MAX_UINT256,
 } from '@scripts'
 import { dateToUnixTimestamp } from '../../../../dateFormatter'
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
 
 describe('Scheduled BalanceAdjustments Tests', () => {
     let diamond: ResolverProxy
@@ -252,6 +253,70 @@ describe('Scheduled BalanceAdjustments Tests', () => {
     let scheduledTasksFacet: ScheduledTasks
     let accessControlFacet: AccessControl
     let timeTravelFacet: TimeTravel
+
+    async function deploySecurityFixtureSinglePartition() {
+        const init_rbacs: Rbac[] = set_initRbacs()
+
+        diamond = await deployEquityFromFactory({
+            adminAccount: account_A,
+            isWhiteList: false,
+            isControllable: true,
+            arePartitionsProtected: false,
+            clearingActive: false,
+            isMultiPartition: false,
+            name: 'TestScheduledBalanceAdjustments',
+            symbol: 'TAC',
+            decimals: 6,
+            isin: isinGenerator(),
+            votingRight: false,
+            informationRight: false,
+            liquidationRight: false,
+            subscriptionRight: true,
+            conversionRight: true,
+            redemptionRight: true,
+            putRight: false,
+            dividendRight: 1,
+            currency: '0x345678',
+            numberOfShares: MAX_UINT256,
+            nominalValue: 100,
+            regulationType: RegulationType.REG_D,
+            regulationSubType: RegulationSubType.REG_D_506_B,
+            countriesControlListType: true,
+            listOfCountries: 'ES,FR,CH',
+            info: 'nothing',
+            init_rbacs,
+            businessLogicResolver: businessLogicResolver.address,
+            factory,
+        })
+
+        await setFacets(diamond)
+    }
+
+    async function setFacets(diamond: ResolverProxy) {
+        accessControlFacet = AccessControl__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        equityFacet = Equity__factory.connect(diamond.address, signer_A)
+        scheduledBalanceAdjustmentsFacet =
+            ScheduledBalanceAdjustments__factory.connect(
+                diamond.address,
+                signer_A
+            )
+        scheduledTasksFacet = ScheduledTasks__factory.connect(
+            diamond.address,
+            signer_A
+        )
+        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+    }
+
+    function set_initRbacs(): Rbac[] {
+        const rbacPause: Rbac = {
+            role: PAUSER_ROLE,
+            members: [account_B],
+        }
+        return [rbacPause]
+    }
 
     before(async () => {
         // mute | mock console.log
@@ -277,59 +342,7 @@ describe('Scheduled BalanceAdjustments Tests', () => {
     })
 
     beforeEach(async () => {
-        const rbacPause: Rbac = {
-            role: PAUSER_ROLE,
-            members: [account_B],
-        }
-        const init_rbacs: Rbac[] = [rbacPause]
-
-        diamond = await deployEquityFromFactory({
-            adminAccount: account_A,
-            isWhiteList: false,
-            isControllable: true,
-            arePartitionsProtected: false,
-            clearingActive: false,
-            isMultiPartition: false,
-            name: 'TEST_AccessControl',
-            symbol: 'TAC',
-            decimals: 6,
-            isin: isinGenerator(),
-            votingRight: false,
-            informationRight: false,
-            liquidationRight: false,
-            subscriptionRight: true,
-            conversionRight: true,
-            redemptionRight: true,
-            putRight: false,
-            dividendRight: 1,
-            currency: '0x345678',
-            numberOfShares: MAX_UINT256,
-            nominalValue: 100,
-            regulationType: RegulationType.REG_D,
-            regulationSubType: RegulationSubType.REG_D_506_B,
-            countriesControlListType: true,
-            listOfCountries: 'ES,FR,CH',
-            info: 'nothing',
-            init_rbacs,
-            businessLogicResolver: businessLogicResolver.address,
-            factory,
-        })
-
-        accessControlFacet = AccessControl__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        equityFacet = Equity__factory.connect(diamond.address, signer_A)
-        scheduledBalanceAdjustmentsFacet =
-            ScheduledBalanceAdjustments__factory.connect(
-                diamond.address,
-                signer_A
-            )
-        scheduledTasksFacet = ScheduledTasks__factory.connect(
-            diamond.address,
-            signer_A
-        )
-        timeTravelFacet = TimeTravel__factory.connect(diamond.address, signer_A)
+        await loadFixture(deploySecurityFixtureSinglePartition)
     })
 
     afterEach(async () => {

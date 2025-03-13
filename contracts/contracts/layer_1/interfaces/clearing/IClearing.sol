@@ -223,7 +223,6 @@ interface IClearing {
         Cancel,
         Reclaim
     }
-
     struct ClearingOperation {
         bytes32 partition;
         uint256 expirationTimestamp;
@@ -271,7 +270,7 @@ interface IClearing {
         mapping(address => mapping(bytes32 => mapping(uint256 => ClearingData))) clearingByAccountPartitionAndId;
         mapping(address => mapping(bytes32 => EnumerableSet.UintSet)) clearingIdsByAccountAndPartition;
         mapping(address => mapping(bytes32 => uint256)) nextClearingIdByAccountAndPartition;
-        // solhint-disable max-line-length
+        // solhint-disable-next-line max-line-length
         mapping(address => mapping(bytes32 => mapping(ClearingOperationType => EnumerableSet.UintSet))) clearingIdsByAccountAndPartitionAndTypes;
     }
 
@@ -309,7 +308,7 @@ interface IClearing {
         ClearingOperationType systemType
     );
 
-    // solhint-disable func-name-mixedcase
+    // solhint-disable-next-line func-name-mixedcase
     function initialize_Clearing(bool _activateClearing) external;
 
     function activateClearing() external returns (bool success_);
@@ -414,35 +413,11 @@ interface IClearing {
             IHold.Hold memory hold_
         );
 
-    function getClearingForByPartitionAdjusted(
-        ClearingOperationIdentifier calldata _clearingIdentifier
-    )
-        external
-        view
-        returns (
-            uint256 amount_,
-            uint256 expirationTimestamp_,
-            address destination_,
-            ClearingOperationType clearingOperationType_,
-            bytes memory data_,
-            bytes memory operatorData_,
-            IHold.Hold memory hold_
-        );
-
     function getClearedAmountFor(
         address _tokenHolder
     ) external view returns (uint256 amount_);
 
-    function getClearedAmountForAdjusted(
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
-
     function getClearedAmountForByPartition(
-        bytes32 _partition,
-        address _tokenHolder
-    ) external view returns (uint256 amount_);
-
-    function getClearedAmountForByPartitionAdjusted(
         bytes32 _partition,
         address _tokenHolder
     ) external view returns (uint256 amount_);
