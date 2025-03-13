@@ -210,18 +210,18 @@ import {_CLEARING_STORAGE_POSITION} from '../constants/storagePositions.sol';
 import {HoldStorageWrapper1} from '../hold/HoldStorageWrapper1.sol';
 import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 import {
-    IClearingActions
-} from '../../layer_1/interfaces/clearing/IClearingActions.sol';
-import {
     IClearingTransfer
 } from '../../layer_1/interfaces/clearing/IClearingTransfer.sol';
 import {
     IClearingRedeem
 } from '../../layer_1/interfaces/clearing/IClearingRedeem.sol';
+import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
+import {
+    IClearingActions
+} from '../../layer_1/interfaces/clearing/IClearingActions.sol';
 import {
     IClearingHoldCreation
 } from '../../layer_1/interfaces/clearing/IClearingHoldCreation.sol';
-import {IClearing} from '../../layer_1/interfaces/clearing/IClearing.sol';
 import {IHold} from '../../layer_1/interfaces/hold/IHold.sol';
 import {LibCommon} from '../common/LibCommon.sol';
 import {
@@ -464,6 +464,44 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
             });
     }
 
+    function _buildClearingRedeemData(
+        uint256 _amount,
+        uint256 _expirationTimestamp,
+        bytes memory _data,
+        bytes memory _operatorData
+    ) internal pure returns (IClearing.ClearingRedeemData memory) {
+        return
+            IClearing.ClearingRedeemData({
+                amount: _amount,
+                expirationTimestamp: _expirationTimestamp,
+                data: _data,
+                operatorData: _operatorData
+            });
+    }
+
+    function _buildClearingHoldCreationData(
+        uint256 _amount,
+        uint256 _expirationTimestamp,
+        uint256 _holdExpirationTimestamp,
+        bytes memory _data,
+        bytes memory _holdData,
+        address _escrow,
+        address _to,
+        bytes memory _operatorData
+    ) internal pure returns (IClearing.ClearingHoldCreationData memory) {
+        return
+            IClearing.ClearingHoldCreationData({
+                amount: _amount,
+                expirationTimestamp: _expirationTimestamp,
+                data: _data,
+                operatorData: _operatorData,
+                holdEscrow: _escrow,
+                holdExpirationTimestamp: _holdExpirationTimestamp,
+                holdTo: _to,
+                holdData: _holdData
+            });
+    }
+
     function _buildClearingOperationBasicInfo(
         uint256 _expirationTimestamp,
         uint256 _amount,
@@ -474,6 +512,21 @@ abstract contract ClearingStorageWrapper1 is HoldStorageWrapper1 {
                 expirationTimestamp: _expirationTimestamp,
                 amount: _amount,
                 destination: _destination
+            });
+    }
+
+    function _buildClearingOperationIdentifier(
+        address _from,
+        bytes32 _partition,
+        uint256 _clearingId,
+        IClearing.ClearingOperationType _operationType
+    ) internal pure returns (IClearing.ClearingOperationIdentifier memory) {
+        return
+            IClearing.ClearingOperationIdentifier({
+                tokenHolder: _from,
+                partition: _partition,
+                clearingId: _clearingId,
+                clearingOperationType: _operationType
             });
     }
 
