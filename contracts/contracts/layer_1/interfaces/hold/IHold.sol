@@ -274,6 +274,7 @@ interface IHold {
         uint256 id;
         Hold hold;
         bytes operatorData;
+        address operator;
     }
 
     struct HoldDataStorage {

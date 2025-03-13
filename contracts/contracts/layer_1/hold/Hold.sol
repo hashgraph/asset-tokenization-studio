@@ -235,7 +235,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _partition,
             _msgSender(),
             _hold,
-            ''
+            '',
+            false
         );
 
         emit HeldByPartition(
@@ -304,7 +305,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _partition,
             _from,
             _hold,
-            _operatorData
+            _operatorData,
+            false
         );
 
         emit HeldByPartition(
@@ -338,7 +340,8 @@ contract Hold is IHold, IStaticFunctionSelectors, Common {
             _partition,
             _from,
             _hold,
-            _operatorData
+            _operatorData,
+            false
         );
 
         emit HeldByPartition(

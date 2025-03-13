@@ -771,9 +771,14 @@ describe('ERC1400 Tests', () => {
             }
             const rbacClearingRole = {
                 role: CLEARING_ROLE,
-                members: [account_A]
+                members: [account_A],
             }
-            const init_rbacs: Rbac[] = [rbacPause, rbacKyc, rbacSsi,rbacClearingRole]
+            const init_rbacs: Rbac[] = [
+                rbacPause,
+                rbacKyc,
+                rbacSsi,
+                rbacClearingRole,
+            ]
 
             diamond = await deployEquityFromFactory({
                 adminAccount: account_A,
