@@ -395,7 +395,7 @@ export default class Configuration {
         name: string
         indexChar?: string
     }): string[] {
-        let resultList: string[] = []
+        const resultList: string[] = []
         let index = 0
         do {
             const env = Configuration._getEnvironmentVariable({
