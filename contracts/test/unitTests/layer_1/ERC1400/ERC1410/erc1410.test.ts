@@ -232,7 +232,7 @@ import {
     ERC1410ScheduledTasks__factory,
     Pause__factory,
     TimeTravel__factory,
-    ClearingFacet,
+    ClearingActionsFacet,
 } from '@typechain'
 import {
     ADJUSTMENT_BALANCE_ROLE,
@@ -339,7 +339,7 @@ describe('ERC1400 Tests', () => {
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
-    let clearingFacet: ClearingFacet
+    let clearingActionsFacet: ClearingActionsFacet
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
         await grantRolesToAccounts()
@@ -836,8 +836,8 @@ describe('ERC1400 Tests', () => {
                 diamond.address,
                 signer_A
             )
-            clearingFacet = await ethers.getContractAt(
-                'ClearingFacet',
+            clearingActionsFacet = await ethers.getContractAt(
+                'ClearingActionsFacet',
                 diamond.address,
                 signer_A
             )
@@ -1021,7 +1021,7 @@ describe('ERC1400 Tests', () => {
         })
 
         it('GIVEN a token with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
-            await clearingFacet.activateClearing()
+            await clearingActionsFacet.activateClearing()
 
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
@@ -1153,7 +1153,7 @@ describe('ERC1400 Tests', () => {
         })
 
         it('GIVEN a token with clearing active WHEN redeem THEN transaction fails with ClearingIsActivated', async () => {
-            await clearingFacet.activateClearing()
+            await clearingActionsFacet.activateClearing()
 
             // Using account C (with role)
             erc1410Facet = erc1410Facet.connect(signer_C)
