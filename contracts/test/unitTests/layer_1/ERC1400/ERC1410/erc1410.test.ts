@@ -265,10 +265,13 @@ import {
     TO_ACCOUNT_KYC_ERROR_ID,
     ZERO,
     EMPTY_STRING,
+    CLEARING_ACTIVE_ERROR_ID,
+    CLEARING_ROLE,
 } from '@scripts'
 import { grantRoleAndPauseToken } from '../../../../common'
 import { dateToUnixTimestamp } from '../../../../dateFormatter'
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers'
+import { ClearingFacet } from '@typechain'
 
 const amount = 1
 const balanceOf_C_Original = 2 * amount
@@ -337,6 +340,7 @@ describe('ERC1410 Tests', () => {
     let timeTravelFacet: TimeTravel
     let kycFacet: Kyc
     let ssiManagementFacet: SsiManagement
+    let clearingFacet: ClearingFacet
 
     async function setPreBalanceAdjustment(singlePartition?: boolean) {
         await grantRolesToAccounts()
@@ -731,6 +735,11 @@ describe('ERC1410 Tests', () => {
             diamond.address,
             signer_A
         )
+        clearingFacet = await ethers.getContractAt(
+            'ClearingFacet',
+            diamond.address,
+            signer_A
+        )
 
         await accessControlFacet.grantRole(ISSUER_ROLE, account_A)
         await ssiManagementFacet.addIssuer(account_E)
@@ -789,7 +798,11 @@ describe('ERC1410 Tests', () => {
             role: SSI_MANAGER_ROLE,
             members: [account_A],
         }
-        return [rbacPause, corporateActionPause, rbacKyc, rbacSsi]
+        const rbacClearingRole = {
+            role: CLEARING_ROLE,
+            members: [account_A]
+        }
+        return [rbacPause, corporateActionPause, rbacKyc, rbacSsi, rbacClearingRole]
     }
 
     describe('Multi partition ', () => {
@@ -963,6 +976,47 @@ describe('ERC1410 Tests', () => {
             expect(canTransfer_2[1]).to.be.equal(IS_PAUSED_ERROR_ID)
         })
 
+        it('GIVEN a token with clearing active WHEN transfer THEN transaction fails with ClearingIsActivated', async () => {
+            await clearingFacet.activateClearing()
+
+            // Using account C (with role)
+            erc1410Facet = erc1410Facet.connect(signer_C)
+            const canTransfer = await erc1410Facet.canTransferByPartition(
+                account_C,
+                account_D,
+                _PARTITION_ID_1,
+                amount,
+                data,
+                operatorData
+            )
+            const canTransfer_2 = await erc1410Facet.canTransferByPartition(
+                account_E,
+                account_D,
+                _PARTITION_ID_1,
+                amount,
+                data,
+                operatorData
+            )
+
+            // transfer with data fails
+            await expect(
+                erc1410Facet.transferByPartition(
+                    _PARTITION_ID_1,
+                    basicTransferInfo,
+                    data
+                )
+            ).to.be.rejectedWith('ClearingIsActivated')
+            expect(canTransfer[0]).to.be.equal(false)
+            expect(canTransfer[1]).to.be.equal(CLEARING_ACTIVE_ERROR_ID)
+
+            // transfer from with data fails
+            await expect(
+                erc1410Facet.operatorTransferByPartition(operatorTransferData)
+            ).to.be.rejectedWith('ClearingIsActivated')
+            expect(canTransfer[0]).to.be.equal(false)
+            expect(canTransfer_2[1]).to.be.equal(CLEARING_ACTIVE_ERROR_ID)
+        })
+
         it('GIVEN a paused Token WHEN issue THEN transaction fails with TokenIsPaused', async () => {
             // Pausing the token
             pauseFacet = pauseFacet.connect(signer_B)
@@ -1052,6 +1106,45 @@ describe('ERC1410 Tests', () => {
             ).to.be.rejectedWith('TokenIsPaused')
             expect(canRedeem_2[0]).to.be.equal(false)
             expect(canRedeem_2[1]).to.be.equal(IS_PAUSED_ERROR_ID)
+        })
+
+        it('GIVEN a token with clearing active WHEN redeem THEN transaction fails with ClearingIsActivated', async () => {
+            await clearingFacet.activateClearing()
+
+            // Using account C (with role)
+            erc1410Facet = erc1410Facet.connect(signer_C)
+            const canRedeem = await erc1410Facet.canRedeemByPartition(
+                account_C,
+                _PARTITION_ID_1,
+                amount,
+                data,
+                operatorData
+            )
+            const canRedeem_2 = await erc1410Facet.canRedeemByPartition(
+                account_E,
+                _PARTITION_ID_1,
+                amount,
+                data,
+                operatorData
+            )
+
+            await expect(
+                erc1410Facet.redeemByPartition(_PARTITION_ID_1, amount, data)
+            ).to.be.rejectedWith('ClearingIsActivated')
+            expect(canRedeem[0]).to.be.equal(false)
+            expect(canRedeem[1]).to.be.equal(CLEARING_ACTIVE_ERROR_ID)
+
+            await expect(
+                erc1410Facet.operatorRedeemByPartition(
+                    _PARTITION_ID_1,
+                    account_E,
+                    amount,
+                    data,
+                    operatorData
+                )
+            ).to.be.rejectedWith('ClearingIsActivated')
+            expect(canRedeem_2[0]).to.be.equal(false)
+            expect(canRedeem_2[1]).to.be.equal(CLEARING_ACTIVE_ERROR_ID)
         })
 
         it('GIVEN blocked accounts (sender, to, from) WHEN transfer THEN transaction fails with AccountIsBlocked', async () => {
