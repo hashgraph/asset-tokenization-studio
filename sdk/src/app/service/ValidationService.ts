@@ -214,6 +214,9 @@ import { GetKYCStatusForQuery } from '../usecase/query/security/kyc/getKycStatus
 import { IsClearingActivatedQuery } from '../usecase/query/security/clearing/isClearingActivated/IsClearingActivatedQuery.js';
 import { ClearingDeactivated } from '../usecase/command/security/error/ClearingDeactivated.js';
 import { ClearingActivated } from '../usecase/command/security/error/ClearingActivated.js';
+import { IsOperatorForPartitionQuery } from '../usecase/query/security/operator/isOperatorForPartition/IsOperatorForPartitionQuery.js';
+import { IsOperatorQuery } from '../usecase/query/security/operator/isOperator/IsOperatorQuery.js';
+import { AccountIsNotOperator } from '../usecase/command/security/error/AccountIsNotOperator.js';
 
 @singleton()
 export default class ValidationService extends Service {
@@ -273,5 +276,36 @@ export default class ValidationService extends Service {
       throw new ClearingActivated();
     }
     return result;
+  }
+
+  async validateOperator(
+    securityId: string,
+    partitionId: string,
+    operatorId: string,
+    targetId: string,
+  ): Promise<boolean> {
+    this.queryBus = Injectable.resolve<QueryBus>(QueryBus);
+
+    if (
+      (
+        await this.queryBus.execute(
+          new IsOperatorQuery(securityId, operatorId, targetId),
+        )
+      ).payload ||
+      (
+        await this.queryBus.execute(
+          new IsOperatorForPartitionQuery(
+            securityId,
+            partitionId,
+            operatorId,
+            targetId,
+          ),
+        )
+      ).payload
+    ) {
+      return true;
+    }
+
+    throw new AccountIsNotOperator(operatorId, targetId);
   }
 }

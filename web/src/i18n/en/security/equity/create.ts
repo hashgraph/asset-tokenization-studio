@@ -237,6 +237,10 @@ export default {
       "Enable access control to the security using a list of blocked accounts",
     permissionApprovalListTooltip:
       "Enable access control to the security using a list of allowed accounts",
+    configuration: "Digital security configuration",
+    clearingMode: "Clearing mode",
+    isClearing: "Clearing mode enabled",
+    isClearingTooltip: "Enable or disable clearing mode",
   },
 
   stepNewSerie: {
